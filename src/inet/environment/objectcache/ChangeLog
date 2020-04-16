@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Added support for OpenMP in order to allow parallel computation for medium visualization.
+
+2019-12-05  Levente Mészáros
+
+	Fixed parameter types in GridObjectCache.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-27  Levente Mészáros

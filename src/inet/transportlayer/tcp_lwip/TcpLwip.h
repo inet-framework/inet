@@ -153,9 +153,6 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     // network interface:
     struct netif netIf;
 
-  public:
-    bool recordStatisticsM;    // output vectors on/off
-
   protected:
     LwipTcpLayer *pLwipTcpLayerM;
     bool isAliveM;

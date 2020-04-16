@@ -1,5 +1,88 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Added a bunch of new parameters to MediumVisualizerBase.
+
+2019-12-05  Levente Mészáros
+
+	Added visualization support for spectograms and power density maps.
+	Also added a ton of new parameters to control the new visualizations.
+
+2019-11-25  Zoltan Bojthe
+
+	InterfaceTableVisualizer: detects interface state and carrier changes.
+	Fixed the Gate::getDisplayString() channel creation side effect.
+
+2019-11-13  Levente Mészáros
+
+	Added %t to display string format to display interface state.
+
+2019-11-12  Zoltan Bojthe
+
+	Fixed looking up InterfaceEntry.
+
+2019-11-07  Levente Mészáros
+
+	Fixed crash during destruction of InterfaceTableCanvasVisualizer.
+
+2019-11-05  Levente Mészáros
+
+	Fixed concurrent update while iterating a vector during removing all visualizations.
+	Fixed memory leaks caused by not cleaning up after destruction.
+
+2019-10-07  Levente Mészáros
+
+	Fixed disabled radio feature.
+
+2019-09-24  Levente Mészáros
+
+	Added basic documentation to spectrum figures.
+	Added guard around mediumPowerFunction initialization.
+
+2019-09-23  Levente Mészáros
+
+	Renamed carrierFrequency to centerFrequency.
+
+	This confusion was spread all around the code. In most places we don't
+	know what kind of modulation is used (e.g. OFDM has several subcarriers),
+	so it doesn't really make sense.
+
+2019-09-20  Levente Mészáros
+
+	Added spectrumFigureInterpolationSize parameter to interpolate for the
+	logarithmic scale of spectrum figures.
+
+2019-09-16  Levente Mészáros
+
+	Added support for transmitting signals without an attached packet.
+
+2019-09-11  Levente Mészáros
+
+	Added background noise visualization to MediumCanvasVisualizer.
+
+2019-08-27  Levente Mészáros
+
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-06-07  Levente Mészáros
+
+	Added transmission medium signal power spectral density visualization.
+
+2019-06-05  Levente Mészáros
+
+	Implemented the creation and deletion of network node visualizations for dynamic modules.
+
+2019-03-18  Gyorgy Szaszko
+
+	Changed InfoVisualizer to visualize display string by default.
+
+2019-01-04  Levente Mészáros
+
+	Adapted queue visualizers to the new queueing API.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-10  Zoltan Bojthe

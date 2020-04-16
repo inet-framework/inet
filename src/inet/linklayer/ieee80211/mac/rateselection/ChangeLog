@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-02-04  Levente Mészáros
+
+	Cleaned up Enter_Method and Enter_Method_Silent calls.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-27  Levente Mészáros

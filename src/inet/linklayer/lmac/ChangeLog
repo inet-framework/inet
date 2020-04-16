@@ -1,5 +1,53 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-08  Levente Mészáros
+
+	Fixed memory leak detected by Valgrind.
+
+2019-11-15  Zoltan Bojthe
+
+	Redesigned LMacHeader, added ctrlFrameLength NED parameter.
+
+	Removed the base header MacHeaderBase, added LMacHeaderBase, LMacHeader.
+	Replaced to LMacControlFrame or LMacDataFrameHeader, added
+	ctrlFrameLength NED parameter for define length of LMacControlFrame.
+
+2019-10-18  Zoltan Bojthe
+
+	Added message kind infos (name of used cEnum).
+	Changed to use msg constructor to set message name and message kind.
+
+2019-10-14  Levente Mészáros
+
+	Dropped queue length related parameters from MAC modules.
+
+	The queue packet capacity and data capacity can already be set on the
+	queue. If the queue module is more complicated then these parameters are
+	meaningless anyway, because there may be way more parameters than one.
+
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+
+2019-06-03  Zoltan Bojthe
+
+	Removed unneeded clearQueue() and flushQueue() functions already implemented in MacProtocolBase.
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-05-27  Zoltan Bojthe
+
+	Removed pk0 local variable.
+
+2019-05-22  Zoltan Bojthe
+
+	Use popPacket() instead of getPacket(0).
+
+2019-03-14  Levente Mészáros
+
+	Replaced internal queue with IPacketQueue submodule.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-08  Zoltan Bojthe

@@ -1,0 +1,14 @@
+<config>
+	<interface hosts="area1lan1*" address="10.1.1.x" netmask="255.255.255.x"/>
+	<interface hosts="area1lan2*" address="10.1.2.x" netmask="255.255.255.x"/>
+	<interface hosts="area1lan3*" address="10.1.3.x" netmask="255.255.255.x"/>
+	<interface hosts="area2lan1*" address="10.2.1.x" netmask="255.255.255.x"/>
+	<interface hosts="area2lan2*" address="10.2.2.x" netmask="255.255.255.x"/>
+	<interface hosts="area3lan1*" address="10.3.1.x" netmask="255.255.255.x"/>
+	<interface hosts="area3lan2*" address="10.3.2.x" netmask="255.255.255.x"/>
+	<interface hosts="area3lan3*" address="10.3.3.x" netmask="255.255.255.x"/>
+	<interface hosts="backbonerouter" towards="area1router" address="10.1.3.x" netmask="255.255.255.x"/>
+	<interface hosts="backbonerouter" towards="area2router" address="10.2.3.x" netmask="255.255.255.x"/>
+	<interface hosts="backbonerouter" towards="area3router" address="10.3.3.x" netmask="255.255.255.x"/>
+	<interface hosts="*" address="10.x.x.x" netmask="255.255.255.x"/>
+</config>

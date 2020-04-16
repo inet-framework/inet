@@ -3,7 +3,8 @@
 // @author Anna Foerster
 
 import inet.common.INETDefs;
-import inet.linklayer.base.MacHeaderBase;
+import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
@@ -22,9 +23,32 @@ enum LMacType
     LMAC_SEND_CONTROL = 176;
 };
 
-class LMacHeader extends MacHeaderBase
+//
+// Base class for ~LMac headers.
+//
+class LMacHeaderBase extends FieldsChunk
 {
+    MacAddress srcAddr;
+    MacAddress destAddr;
     LMacType   type;
     int        mySlot; // the node's current slot number
     MacAddress occupiedSlots[]; // currently known occupied slots
 }
+
+//
+// Control Frame for ~LMac. Frame size is configurable
+// in the MAC layer. 
+//
+class LMacControlFrame extends LMacHeaderBase
+{
+}
+
+//
+// Dataframe header for ~LMac. Frame size is configurable
+// in the MAC layer. 
+//
+class LMacDataFrameHeader extends LMacHeaderBase
+{
+    int        networkProtocol = -1;
+}
+

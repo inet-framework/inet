@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/qos/results/Qos-*.vec"/>
+    <inputs name="/inet/showcases/wireless/qos/results/Qos-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="endToEndDelay:vector">
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[0]) AND name(endToEndDelay:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[1]) AND name(endToEndDelay:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[2]) AND name(endToEndDelay:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[3]) AND name(endToEndDelay:vector)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="endToEndDelay:vector" lineNameFormat="">
+        <properties name="Graph.Title" value="End-to-end delay, realistic bitrate qos"/>
+        <properties name="X.Axis.Title" value="Time [s]"/>
+        <properties name="Y.Axis.Title" value="End-to-end delay [s]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Min" value="0.5"/>
+        <properties name="Line.Name/QosThroughput.server.app[0]" value="background"/>
+        <properties name="Line.Name/QosThroughput.server.app[1]" value="best effort"/>
+        <properties name="Line.Name/QosThroughput.server.app[2]" value="video"/>
+        <properties name="Line.Name/QosThroughput.server.app[3]" value="voice"/>
+        <properties name="Line.Name/QosShowcase.server.app[0]" value="background"/>
+        <properties name="Line.Name/QosShowcase.server.app[1]" value="best effort"/>
+        <properties name="Line.Name/QosShowcase.server.app[2]" value="video"/>
+        <properties name="Line.Name/QosShowcase.server.app[3]" value="voice"/>
+      </items>
+      <items xsi:type="scave:Apply" operation="difference"/>
+      <items xsi:type="scave:LineChart" name="Instantaneous Packet Delay Variation" lineNameFormat="">
+        <properties name="Graph.Title" value="Instantaneous packet delay variation, realistic bitrate qos"/>
+        <properties name="X.Axis.Title" value="Time [s]"/>
+        <properties name="Y.Axis.Title" value="Instantaneous packet delay variation [s]"/>
+        <properties name="Y.Axis.Min" value="-0.25"/>
+        <properties name="Y.Axis.Max" value="0.25"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Min" value="0.5"/>
+        <properties name="Line.Name/QosThroughput.server.app[0]" value="background"/>
+        <properties name="Line.Name/QosThroughput.server.app[1]" value="best effort"/>
+        <properties name="Line.Name/QosThroughput.server.app[2]" value="video"/>
+        <properties name="Line.Name/QosThroughput.server.app[3]" value="voice"/>
+        <properties name="Line.Name/QosShowcase.server.app[0]" value="background"/>
+        <properties name="Line.Name/QosShowcase.server.app[1]" value="best effort"/>
+        <properties name="Line.Name/QosShowcase.server.app[2]" value="video"/>
+        <properties name="Line.Name/QosShowcase.server.app[3]" value="voice"/>
+      </items>
+    </datasets>
+    <datasets name="throughput:vector">
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[3]) AND name(throughput:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[2]) AND name(throughput:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[1]) AND name(throughput:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[0]) AND name(throughput:vector)" type="VECTOR"/>
+      <items xsi:type="scave:Apply" operation="divide-by">
+        <params name="a" value="1000000"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="throughput:vector" lineNameFormat="">
+        <properties name="Graph.Title" value="Throughput, realistic bitrate qos"/>
+        <properties name="X.Axis.Title" value="Time [s]"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Min" value="0.5"/>
+        <properties name="X.Axis.Max" value="8.0"/>
+        <properties name="Line.Name/QosThroughput.server.app[0]" value="background"/>
+        <properties name="Line.Name/QosThroughput.server.app[1]" value="best effort"/>
+        <properties name="Line.Name/QosThroughput.server.app[2]" value="video"/>
+        <properties name="Line.Name/QosThroughput.server.app[3]" value="voice"/>
+        <properties name="Line.Name/QosShowcase.server.app[0]" value="background"/>
+        <properties name="Line.Name/QosShowcase.server.app[1]" value="best effort"/>
+        <properties name="Line.Name/QosShowcase.server.app[2]" value="video"/>
+        <properties name="Line.Name/QosShowcase.server.app[3]" value="voice"/>
+        <properties name="Symbols.Type/QosShowcase.server.app[0]" value="Square"/>
+        <properties name="Line.Color/QosShowcase.server.app[0]" value="darkblue"/>
+        <properties name="Symbols.Type/QosShowcase.server.app[1]" value="Dot"/>
+        <properties name="Line.Color/QosShowcase.server.app[1]" value="red"/>
+        <properties name="Symbols.Type/QosShowcase.server.app[2]" value="Triangle"/>
+        <properties name="Line.Color/QosShowcase.server.app[2]" value="darkgreen"/>
+        <properties name="Symbols.Type/QosShowcase.server.app[3]" value="Diamond"/>
+        <properties name="Line.Color/QosShowcase.server.app[3]" value="orange"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.4 //@datasets/@datasets.0/@items.6 //@datasets/@datasets.1/@items.5"/>
+  </chartSheets>
+</scave:Analysis>

@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "inet/common/INETDefs.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -37,13 +37,13 @@ class MacPkt;
 
 /**
  * @brief Implementation of X-MAC.
- * 
+ *
  * This implementation was created for the MiXiM framework by Joaquim Oller.
  * It was ported to the INET framework by Jan Peter Drees.
  *
  * A paper describing the X-MAC protocol can be found at:
  * http://www.cs.cmu.edu/~andersoe/papers/xmac-sensys.pdf
- * 
+ *
  * A paper analyzing this MiXiM implementation can be found at:
  * http://ieeexplore.ieee.org/document/7024195/
  *
@@ -65,7 +65,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
   public:
     XMac()
         : MacProtocolBase()
-        , macQueue()
         , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
         , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
         , macState(INIT)
@@ -75,7 +74,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
         , lastDataPktSrcAddr()
         , lastDataPktDestAddr()
         , txAttempts(0)
-        , queueLength(0)
         , animation(false)
         , slotDuration(0), bitrate(0), checkInterval(0), txPower(0)
         , useMacAcks(0)
@@ -99,26 +97,13 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     /** @brief Handle self messages such as timers */
     virtual void handleSelfMessage(cMessage *) override;
 
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
-
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
   protected:
-    typedef std::list<Packet *> MacQueue;
-
     /** implements MacBase functions */
     //@{
-    virtual void flushQueue();
-    virtual void clearQueue();
     virtual void configureInterfaceEntry() override;
     //@}
-
-    /** @brief A queue to store packets from upper layer in case another
-    packet is still waiting for transmission.*/
-    MacQueue macQueue;
 
     /** @name Different tracked statistics.*/
     /*@{*/
@@ -189,7 +174,8 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     MacAddress lastDataPktSrcAddr;
     MacAddress lastDataPktDestAddr;
     MacAddress lastPreamblePktSrcAddr;
-    int headerLength = 0;    // XMacFrame header length in bytes
+    b headerLength = b(0);    // XMacDataFrameHeader header length
+    b ctrlFrameLength = b(0);    // XMacControlFrame frame length
 
     /** @brief The radio. */
     physicallayer::IRadio *radio;
@@ -198,8 +184,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     int              txAttempts;
     /*@}*/
 
-    /** @brief The maximum length of the queue */
-    unsigned int queueLength;
     /** @brief Animate (colorize) the nodes.
      *
      * The color of the node reflects its basic status (not the exact state!)
@@ -247,9 +231,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *packet, simtime_t_cref startTime);
-
-    /** @brief Internal function to add a new packet from upper to the queue */
-    bool addToQueue(Packet *packet);
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);

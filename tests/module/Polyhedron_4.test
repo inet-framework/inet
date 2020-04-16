@@ -4,6 +4,8 @@ Test for one host pinging another.
 
 %file: test.ned
 
+import inet.test.moduletest.lib.PolyhedronTest;
+
 network Test
 {
     submodules:

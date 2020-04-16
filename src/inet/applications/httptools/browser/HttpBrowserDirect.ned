@@ -21,15 +21,12 @@ import inet.applications.httptools.common.IHttpDirectApp;
 
 //
 // This component is the direct message passing version of the browser simulation
-// component. It is derived from HttpBrowserBase. Use this component with the
-// HttpDirectHost container module.
+// component. Use this component with the ~HttpDirectHost container module.
 //
 // Direct message passing is used for transmission, thus bypassing the normal links and
 // interfaces. A linkSpeed parameter is hence needed to model transmission delays.
 //
-// @see HttpDirectHost
-// @see HttpBrowserBase
-// @see HttpBrowser
+// @see ~HttpDirectHost, ~HttpBrowser
 //
 // @author  Kristjan V. Jonsson
 //

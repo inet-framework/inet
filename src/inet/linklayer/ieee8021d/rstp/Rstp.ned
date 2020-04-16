@@ -37,7 +37,7 @@ import inet.linklayer.contract.ISpanningTree;
 // They can be set using ~L2NetworkConfigurator. Port state is kept in the switch's
 // ~InterfaceTable.
 //
-// @see L2NetworkConfigurator, InterfaceTable
+// @see ~L2NetworkConfigurator, ~InterfaceTable
 //
 simple Rstp like ISpanningTree
 {

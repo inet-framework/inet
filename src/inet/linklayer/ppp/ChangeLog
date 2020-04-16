@@ -1,5 +1,44 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+	Replaced txQueueLimit with queue.frameCapacity.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized tag usage.
+
+2019-06-03  Zoltan Bojthe
+
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-05-28  Zoltan Bojthe
+
+	Moved flushQueue() and clearQueue() implementation to MacProtocolBase.
+
+2019-05-17  Zoltan Bojthe
+
+	Don't push the deleted packet to queue.
+
+2019-04-08  Zoltan Bojthe
+
+	Don't throw error in dissectors when ETH/PPP protocol field contains unknown protocol ID.
+
+2019-02-22  Levente Mészáros
+
+	Added displayStringTextFormat parameter to Ppp module.
+
+2019-02-14  Levente Mészáros
+
+	Ported to the new queueing API.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-08  Zoltan Bojthe

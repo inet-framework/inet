@@ -26,6 +26,7 @@ namespace inet;
 //
 class SimpleVoipPacket extends FieldsChunk
 {
+    uint16_t totalLengthField;         // length of total SimpleVoipPacket in bytes
     unsigned int talkspurtID;          // identifies the talkspurt
     unsigned int talkspurtNumPackets;  // number of all packets of current talkspurt
     unsigned int packetID;             // 0..talkspurtNumPackets-1

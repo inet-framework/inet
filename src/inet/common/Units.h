@@ -154,7 +154,8 @@ class value
         return value<Value, compose<Units, OtherUnits> >(get() * other.get());
     }
 
-    value operator*(const value_type& v) const
+    template<typename OtherValue>
+    value operator*(OtherValue v) const
     {
         return value(get() * v);
     }
@@ -916,6 +917,7 @@ typedef compose<m, compose<kg, pow<s, -2> > > N;
 typedef compose<N, pow<m, -2> > Pa;
 typedef compose<N, m> J;
 typedef compose<J, pow<s, -1> > W;
+typedef compose<W, pow<Hz, -1> > WpHz;
 typedef compose<s, A> C;
 typedef compose<W, pow<A, -1> > V;
 typedef compose<C, pow<V, -1> > F;
@@ -944,6 +946,7 @@ UNIT_DISPLAY_NAME(units::N, "N");
 UNIT_DISPLAY_NAME(units::Pa, "Pa");
 UNIT_DISPLAY_NAME(units::J, "J");
 UNIT_DISPLAY_NAME(units::W, "W");
+UNIT_DISPLAY_NAME(units::WpHz, "WpHz");
 UNIT_DISPLAY_NAME(units::C, "C");
 UNIT_DISPLAY_NAME(units::V, "V");
 UNIT_DISPLAY_NAME(units::F, "F");
@@ -1204,6 +1207,7 @@ typedef value<double, units::unit> unit;
 typedef value<double, units::m> m;
 typedef value<double, units::kg> kg;
 typedef value<double, units::s> s;
+typedef value<simtime_t, units::s> simsec;
 typedef value<double, units::K> K;
 typedef value<double, units::A> A;
 typedef value<double, units::mol> mol;
@@ -1219,6 +1223,7 @@ typedef value<double, units::N> N;
 typedef value<double, units::Pa> Pa;
 typedef value<double, units::J> J;
 typedef value<double, units::W> W;
+typedef value<double, units::WpHz> WpHz;
 typedef value<double, units::C> C;
 typedef value<double, units::V> V;
 typedef value<double, units::F> F;
@@ -1340,7 +1345,9 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
 {
-    if (values::pW(value) < values::pW(1000.0))
+    if (value == values::W(0))
+        os << "0 W";
+    else if (values::pW(value) < values::pW(1000.0))
         os << values::pW(value);
     else if (values::nW(value) < values::nW(1000.0))
         os << values::nW(value);
@@ -1385,6 +1392,22 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value
     else {
         os << value.get() << ' ';
         output_unit<units::bps>::fn(os);
+    }
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::s>& value)
+{
+    // TODO: KLUDGE: there's no direct infinity support in simtime_t
+    static auto positiveInfinity = SimTime::getMaxTime() / 2;
+    static auto negativeInfinity = -SimTime::getMaxTime() / 2;
+    if (value.get() == positiveInfinity)
+        os << "inf s";
+    else if (value.get() == negativeInfinity)
+        os << "-inf s";
+    else {
+        os << value.get() << ' ';
+        output_unit<units::s>::fn(os);
     }
     return os;
 }

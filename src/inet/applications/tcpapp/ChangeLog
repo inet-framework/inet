@@ -1,5 +1,77 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-20  Zoltan Bojthe
+
+	Simplified packet API usage in TcpGenericServerThread.
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support (added 'tos' NED parameter).
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService parameter to dscp.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+	Fixed use after delete.
+
+2019-10-26  Levente Mészáros
+
+	Added NED documentations to new applications with composable traffic source and sink modules.
+
+2019-10-25  Levente Mészáros
+
+	Renamed to TelnetServerConnection, and added a separate TelnetServerApp.
+
+2019-10-18  Zoltan Bojthe
+
+	Changed to use msg constructor to set message name and message kind.
+
+2019-10-17  Levente Mészáros
+
+	Added queueing based TelnetClientApp and TelnetServerApp.
+	Added removing SocketInd tag when a packet is processed in SocketIo modules.
+
+2019-10-09  Levente Mészáros
+
+	Fixed TcpSessionApp to throw runtime error on unimplemented listening.
+
+2019-10-07  TÖRÖK Attila
+
+	Fixed crash in ~TcpServerHostApp.
+
+2019-09-22  Mani Amoozadeh
+
+	Updated TCP apps to use the new TTL/TOS options.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-04-25  Levente Mészáros
+
+	Added Tcp applications using the new queueing API.
+
+2019-02-13  Andras Varga
+
+	Fixed TcpServerHostApp, modules need to be deleted with deleteModule().
+
+2019-01-28  Levente Mészáros
+
+	Added weightedHistogram recorder to TCP applications.
+
+2019-01-22  Levente Mészáros
+
+	Added missing CreationTimeTag to application packets for end-to-end delay measurements.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-19  Zoltan Bojthe

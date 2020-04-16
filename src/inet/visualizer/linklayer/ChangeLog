@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-25  Zoltan Bojthe
+
+	InterfaceTableVisualizer detects interface state and carrier changes.
+	Fixed the Gate::getDisplayString() channel creation side effect.
+
+2019-11-07  Levente Mészáros
+
+	Fixed crash during destruction of InterfaceTableCanvasVisualizer.
+
+2019-11-05  Levente Mészáros
+
+	Fixed memory leaks caused by not cleaning up after destruction.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-16  TÖRÖK Attila

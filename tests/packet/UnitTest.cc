@@ -384,7 +384,7 @@ static void testEmpty()
     // 1. peeking an empty packet is an error
     Packet packet1;
     ASSERT_ERROR(packet1.peekAtFront<IpHeader>(), "empty chunk is not allowed");
-    ASSERT_ERROR(packet1.peekAtBack<IpHeader>(), "empty chunk is not allowed");
+    ASSERT_ERROR(packet1.peekAtBack<IpHeader>(B(0)), "empty chunk is not allowed");
 
     // 2. inserting an empty chunk is an error
     Packet packet2;
@@ -458,17 +458,17 @@ static void testTrailer()
     // 1. packet contains trailer after chunk is inserted
     Packet packet1;
     packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
-    const auto& chunk1 = packet1.peekAtBack();
+    const auto& chunk1 = packet1.peekAtBack(B(10));
     ASSERT(chunk1 != nullptr);
     ASSERT(chunk1->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
-    const auto& chunk2 = packet1.peekAtBack<ByteCountChunk>();
+    const auto& chunk2 = packet1.peekAtBack<ByteCountChunk>(B(10));
     ASSERT(chunk2 != nullptr);
     ASSERT(chunk2->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
     // 2. packet moves trailer pointer after pop
-    const auto& chunk3 = packet1.popAtBack<ByteCountChunk>();
+    const auto& chunk3 = packet1.popAtBack<ByteCountChunk>(B(10));
     ASSERT(chunk3 != nullptr);
     ASSERT(chunk3->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
@@ -481,8 +481,8 @@ static void testTrailer()
     Packet packet2;
     packet2.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
     packet2.insertAtBack(makeImmutableByteCountChunk(B(10)));
-    const auto& chunk4 = packet2.popAtBack<ByteCountChunk>();
-    const auto& chunk5 = packet2.popAtBack<BytesChunk>();
+    const auto& chunk4 = packet2.popAtBack<ByteCountChunk>(B(10));
+    const auto& chunk5 = packet2.popAtBack<BytesChunk>(B(10));
     ASSERT(chunk4 != nullptr);
     ASSERT(chunk4->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
@@ -505,7 +505,7 @@ static void testTrailer()
     // 5. packet provides mutable trailers without duplication if possible
     Packet packet4;
     packet4.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
-    const auto& chunk6 = packet4.peekAtBack<BytesChunk>().get();
+    const auto& chunk6 = packet4.peekAtBack<BytesChunk>(B(10)).get();
     const auto& chunk7 = packet4.removeAtBack<BytesChunk>(B(10));
     ASSERT(chunk7.get() == chunk6);
     ASSERT(chunk7->isMutable());
@@ -548,19 +548,20 @@ static void testBackPopOffset()
     packet1.insertAtBack(makeImmutableApplicationHeader(42));
     packet1.insertAtBack(makeImmutableIpHeader());
     packet1.setBackOffset(B(50));
-    const auto& chunk1 = packet1.peekAtBack();
+    const auto& chunk1 = packet1.peekAtBack(B(20));
     ASSERT(dynamicPtrCast<const IpHeader>(chunk1));
     packet1.setBackOffset(B(30));
-    const auto& chunk2 = packet1.peekAtBack();
+    const auto& chunk2 = packet1.peekAtBack(B(10));
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2));
     packet1.setBackOffset(B(20));
-    const auto& chunk3 = packet1.peekAtBack();
+    const auto& chunk3 = packet1.peekAtBack(B(10));
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk3));
     packet1.setBackOffset(B(10));
-    const auto& chunk4 = packet1.peekAtBack();
+    const auto& chunk4 = packet1.peekAtBack(B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4));
     packet1.setBackOffset(B(0));
-    ASSERT_ERROR(packet1.peekAtBack(), "empty chunk is not allowed");
+    ASSERT_ERROR(packet1.peekAtBack(B(0)), "empty chunk is not allowed");
+    ASSERT_ERROR(packet1.peekAtBack(B(1)), "length is invalid");
 }
 
 static void testEncapsulation()
@@ -574,7 +575,7 @@ static void testEncapsulation()
     packet2.insertAtFront(makeImmutableEthernetHeader());
     packet2.insertAtBack(makeImmutableEthernetTrailer());
     const auto& ethernetHeader1 = packet2.popAtFront<EthernetHeader>();
-    const auto& ethernetTrailer1 = packet2.popAtBack<EthernetTrailer>();
+    const auto& ethernetTrailer1 = packet2.popAtBack<EthernetTrailer>(B(2));
     const auto& byteCountChunk1 = packet2.peekDataAt(B(0), B(10));
     const auto& bytesChunk1 = packet2.peekDataAt(B(10), B(10));
     const auto& dataChunk1 = packet2.peekDataAsBytes();
@@ -906,7 +907,7 @@ static void testIteration()
         index2++;
         if (chunk2 != nullptr)
             sequenceChunk1->moveIterator(iterator2, chunk2->getChunkLength());
-        chunk2 = sequenceChunk1->peek(iterator2, b(-1), Chunk::PF_ALLOW_NULLPTR);
+        chunk2 = sequenceChunk1->peek(iterator2, Chunk::unspecifiedLength, Chunk::PF_ALLOW_NULLPTR);
     }
     ASSERT(index2 == 3);
 
@@ -928,7 +929,7 @@ static void testIteration()
         index3++;
         if (chunk3 != nullptr)
             sequenceChunk1->moveIterator(iterator3, chunk3->getChunkLength());
-        chunk3 = sequenceChunk1->peek(iterator3, b(-1), Chunk::PF_ALLOW_NULLPTR);
+        chunk3 = sequenceChunk1->peek(iterator3, Chunk::unspecifiedLength, Chunk::PF_ALLOW_NULLPTR);
     }
     ASSERT(index2 == 3);
 }
@@ -1059,7 +1060,7 @@ static void testSlicing()
     ASSERT(chunk2->getChunkLength() == B(5));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
-    // 2. BytesChunk always returns BytesChunk
+    // 2. BytesChunk returns BytesChunk
     auto bytesChunk1 = makeImmutableBytesChunk(makeVector(10));
     const auto& chunk3 = bytesChunk1->peek(B(0), B(10));
     const auto& chunk4 = bytesChunk1->peek(B(0), B(5));
@@ -1073,6 +1074,17 @@ static void testSlicing()
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
     const auto& bytesChunk3 = staticPtrCast<const BytesChunk>(chunk4);
     ASSERT(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(5).begin()));
+
+    // 2b. BytesChunk sometimes returns SliceChunk because the position or offset is not aligned to byte boundary
+    auto bytesChunk2b = makeImmutableBytesChunk(makeVector(10));
+    const auto& chunk2b1 = bytesChunk2b->peek(B(0), b(20));
+    ASSERT(chunk2b1 != nullptr);
+    ASSERT(chunk2b1->getChunkLength() == b(20));
+    ASSERT(dynamicPtrCast<const SliceChunk>(chunk2b1) != nullptr);
+    const auto& chunk2b2 = bytesChunk2b->peek(b(20), b(60));
+    ASSERT(chunk2b2 != nullptr);
+    ASSERT(chunk2b2->getChunkLength() == b(60));
+    ASSERT(dynamicPtrCast<const SliceChunk>(chunk2b2) != nullptr);
 
     // 3a. SliceChunk returns a SliceChunk containing the requested slice of the chunk that is used by the original SliceChunk
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
@@ -1194,6 +1206,45 @@ static void testPeeking()
     ASSERT(chunk4 != nullptr);
     ASSERT(chunk4->getChunkLength() == B(15));
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
+}
+
+static void testSequenceSerialization()
+{
+    { // 1. test sequence doesn't serializes front if not necessary
+    Packet packet;
+    auto header = makeShared<HeaderWithoutSerializer>();
+    packet.insertAtFront(header);
+    packet.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet.popAtFront<HeaderWithoutSerializer>();
+    const auto& bytesChunk = packet.peekDataAsBytes();
+    ASSERT(bytesChunk != nullptr);
+    ASSERT(bytesChunk->getChunkLength() == B(20));
+    }
+
+    { // 2. test sequence doesn't serializes back if not necessary
+    Packet packet;
+    auto header = makeShared<HeaderWithoutSerializer>();
+    packet.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet.insertAtBack(header);
+    packet.popAtBack<HeaderWithoutSerializer>(B(8));
+    const auto& bytesChunk = packet.peekDataAsBytes();
+    ASSERT(bytesChunk != nullptr);
+    ASSERT(bytesChunk->getChunkLength() == B(20));
+    }
+
+    { // 3. test sequence serialization fails if no serializer is present
+    Packet packet;
+    auto header = makeShared<HeaderWithoutSerializer>();
+    packet.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet.insertAtBack(header);
+    packet.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    const auto& dataChunk = packet.peekData();
+    ASSERT(dataChunk != nullptr);
+    ASSERT(dataChunk->getChunkLength() == B(28));
+    ASSERT_ERROR(packet.peekDataAsBytes(), "Cannot find serializer");
+    }
 }
 
 static void testSequence()
@@ -1881,6 +1932,7 @@ void UnitTest::initialize()
     testNesting();
     testPeeking();
     testSequence();
+    testSequenceSerialization();
     testChunkQueue();
     testChunkBuffer(getRNG(0));
     testReassemblyBuffer();

@@ -18,12 +18,12 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
 import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
-import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 
 //
 // IEEE 802.11 Enhanced Distributed Channel Access Function
@@ -50,7 +50,7 @@ module Edcaf
         @statistic[packetSentToPeerWithoutRetry](title="packets sent: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[channelOwnershipChanged](title="channel ownership"; record=count,vector?; interpolationmode=sample-hold);
     submodules:
-        pendingQueue: PendingQueue {
+        pendingQueue: <default("PendingQueue")> like IPacketQueue {
             parameters:
                 @display("p=100,100");
         }

@@ -1,0 +1,81 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets are consumed by a passive packet sink (PassivePacketSink).
+Packets are passed through from the source to the sink by a filter (PacketFilter).
+Every second packet is dropped.
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.filter.PacketFilter;
+import inet.queueing.source.ActivePacketSource;
+
+network TestFilter
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        filter: PacketFilter {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> filter.in;
+        filter.out --> consumer.in;
+}
+
+%file: Test.cc
+#include "inet/queueing/function/PacketFilterFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet; 
+
+static bool testFilter(Packet *packet)
+{
+    return packet->getId() % 2 == 0;
+}
+
+Register_Packet_Filter_Function(TestFilter, testFilter);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestFilter
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.filter.filterClass = "TestFilter"
+
+%contains: stdout
+Producing packet producer-0.
+Passing through packet producer-0.
+Consuming packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Filtering out packet producer-1.
+Producing packet producer-2.
+Passing through packet producer-2.
+Consuming packet producer-2.
+Producing packet producer-3.
+Filtering out packet producer-3.
+Producing packet producer-4.
+Passing through packet producer-4.
+Consuming packet producer-4.
+Producing packet producer-5.
+Filtering out packet producer-5.
+Producing packet producer-6.
+Passing through packet producer-6.
+Consuming packet producer-6.
+Producing packet producer-7.
+Filtering out packet producer-7.
+Producing packet producer-8.
+Passing through packet producer-8.
+Consuming packet producer-8.
+Producing packet producer-9.
+Filtering out packet producer-9.

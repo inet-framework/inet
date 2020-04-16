@@ -27,13 +27,13 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 // This model provides sensible default values for the radio medium parameters
 // to be used in IEEE 802.11 simulations.
 //
-// See also ~Ieee80211ScalarRadioMedium, and ~Ieee80211DimensionalRadioMedium.
+// @see ~Ieee80211ScalarRadioMedium, ~Ieee80211DimensionalRadioMedium.
 //
 module Ieee80211RadioMedium extends RadioMedium
 {
     parameters:
         backgroundNoise.power = default(-110dBm);
-        mediumLimitCache.carrierFrequency = default(2.4GHz);
+        mediumLimitCache.centerFrequency = default(2.4GHz);
         mediumLimitCache.minReceptionPower = default(-85dBm);
         mediumLimitCache.minInterferencePower = default(-110dBm);
 }

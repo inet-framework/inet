@@ -47,6 +47,9 @@ class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
     virtual void removePacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
     virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const override;
 
+  public:
+    virtual ~PacketDropOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:

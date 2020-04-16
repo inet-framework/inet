@@ -44,8 +44,11 @@ void HttpBrowserDirect::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleSelfMessages(msg);
-    else
-        handleDataMessage(check_and_cast<Packet *>(msg));
+    else {
+        const auto& appmsg = check_and_cast<Packet *>(msg)->peekAtFront<HttpReplyMessage>();
+        handleDataMessage(appmsg);
+        delete msg;
+    }
 }
 
 void HttpBrowserDirect::sendRequestToServer(BrowseEvent be)

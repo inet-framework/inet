@@ -1,6 +1,100 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-16  Zoltan Bojthe
+
+	Fixed sending local broadcast packets only on designated interfaces.
+
+2019-12-05  Zoltan Bojthe
+
+	Added OMNeT++ 6.0 custom fields as comment.
+
+2019-11-28  Zoltan Bojthe
+
+	Routing table and configurator detects when an interface connecting/disconnecting.
+
+2019-11-18  Zoltan Bojthe
+
+	Renamed fields: diffServCodePoint to dscp, explicitCongestionNotification to ecn.
+	Redesigned how TOS is stored, DSCP and ECN calculated.
+	Added TOS (type of service) support (TosReq, TosInd tags).
+
+2019-11-13  Levente Mészáros
+
+	Added IIpv4NodeConfigurator module interface.
+
+2019-11-11  Zoltan Bojthe
+
+	Added  notifications about changing the InterfaceProtocolData set in InterfaceEntry.
+
+2019-11-11  Levente Mészáros
+
+	Added @packetData annotation to non-Chunk based packet parts.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
+2019-10-21  Zoltan Bojthe
+
+	Fixed types, reordered fields in IPv4 header, added missing reserved bit.
+
+2019-09-25  Zoltan Bojthe
+
+	Changed Ipv4RoutingTable to initialize routerId in INITSTAGE_ROUTER_ID_ASSIGNMENT.
+
+2019-09-17  Zoltan Bojthe
+
+	Simplified serializing empty data part.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-08-26  Marcell Juhász
+
+	Added auxData[], removed additionalData[].
+
+2019-08-26  Zoltan Bojthe
+
+	Fixed CRC calculation for empty payload.
+
+2019-07-24  Zoltan Bojthe
+
+	igmp: crcMode, crc calculation, crc verification added
+
+2019-07-16  Zoltan Bojthe
+
+	Set Router Alert option and TOS value in Igmp.
+	Added option Ipv4OptionRouterAlert.
+	Allow Ipv4OptionsReq tag: transport layer can set Ipv4 header options on outgoing packets.
+	Emit PacketDroppedSignal when received packet has incorrect CRC.
+
+2019-07-15  Zoltan Bojthe
+
+	Replaced Igmpv3::AddressVector with inet::AddressVector.
+	Changed maxRespTime to be stored in RFC-specified format.
+	Use parseCrcMode().
+
+2019-07-01  Marcell Juhász
+
+	Allow nonlocal src address if enabled in L3AddressReq in Ipv4.
+
+2019-05-06  Zoltan Bojthe
+
+	Fixed length field check in Ipv4ProtocolDissector.
+
+2019-03-20  Zoltan Bojthe
+
+	Added insertCrc().
+
 2019-01-28  ------ inet-4.1.0 released ------
+
+2019-01-23  Levente Mészáros
+
+	Extracted a separate updateDisplayString() method.
+	Added display string text to Ipv4NatTable and Ipv4NetworkLayer.
 
 2019-01-07  Zoltan Bojthe
 

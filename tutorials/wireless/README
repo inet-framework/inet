@@ -1,0 +1,114 @@
+INET Wireless Tutorial ======================
+
+The INET Wireless Tutorial contains a series of simulation models numbered  1
+through 19. The models are of increasing complexity -- they start from the
+basics and introduce new INET features and concepts related to wireless
+communication networks.
+
+Each model is self-contained, with its number in the file names, so e.g.
+Wireless03.ned contains all the necessary NED definitions. (The omnetpp.ini
+file is shared among all simulation steps). It is recommended read the  comments
+of the corresponding NED file first to understand what the given step is
+supposed to demonstrate.
+
+
+Script for the tutorial (work in progress)
+========================================== 
+
+The INET Wireless Tutorial contains a series of simulation models numbered. 1
+through 16. The models are of increasing complexity -- they start from the
+basics and introduce new INET features and concepts related to wireless
+communication networks.
+
+Each model is self-contained, with its number in the file names, so e.g.
+Wireless03.ned contains all the necessary NED definitions. (The omnetpp.ini file
+is shared among all simulation steps). It is recommended to read the comments of
+the corresponding NED file first to understand what the given step is supposed
+to demonstrate.
+
+1) In the first step we set up a very basic network containing two nodes in
+communication range that exchange data. We demonstrate how to configure nodes
+with applications, place them in the physical environment, assign IP address to
+them, configure the wireless interface and set up statistics to measure the
+traffic. (constant bitrate UDP traffic) At the moment we are not interested
+whether the actual wireless exchange is realistic or not, we just want the data
+to get from one host to the other (i.e. we assume a certain well defined
+transmission range and no collisions, attenuation or other physical effects).
+
+2) In this step we add a neat transmission animation so in the future we will
+have a much better view what is actually happening in the network.
+
+3) We will add some more hosts and reconfigure (decrease) the transmission
+range. We will find that the communication is no longer possible between the
+original hosts as they are now out of range, but it would be possible if we
+could use the newly added hosts as a relay.
+
+4) To establish the communication again we have to enable static routing between
+the nodes and add routes manually to some of the nodes.
+
+5) In this step we will check the throuput of the network. We expect that the
+communication bandwidth between the original nodes dropping because of the extra
+hop required to bridge the distance between the hosts. Collisions should happen
+becuase of the intermediate node. Let’s enable interfence detection to model
+also collisions.
+
+6) Now we see that the trhuhput dramatically drops as collisions happen, but the
+radios do not care whether there is a transmission on the channel (as the mac
+protocol in ideal mac does not care). After setting up a more realistic MAC
+protocol (CSMA) we will see that the effects of the collisions are not so
+dramatic as the mac protocol now checks the medium before transmission.
+
+7) Life is not static. Configure the relay nodes to actually move around. We are
+seeing that static routes are no longer valid and the communication breaks down.
+
+8) Let’s forget the static routing as it is no longer useful in a dynamic
+environment. We will use a MANET protocol (AODV) to deal with the changing
+topology. We can check how a valid route breaks down and how the routing
+protocol reconfigures the nodes to route around the broken links.
+
+9) The nodes are moving around so they are obviously not plugged to the mains.
+We can model a node’s energy consumption by adding energy store and consumption
+devices. To model sensor networks where energy is expensive this is a must...
+
+10) In the real world nodes are rarely moving in the free space. They can be
+covered by obstacles etc. We add some obstacles into the physical environment to
+block some of the communication. Unfortunately we are not seeing the effect
+because of the simplified physical model we are using with the IdealRadio.
+
+11) Let’s switch to a more realistic radio model that models the transmission on
+packet level and takes into account the obstacles, attenuation etc. We have to
+configure several physical parameters and the actual transmission range is now
+calculated from these values. Now we are seeing the effects from the obstacles
+introduced in the previous step.
+
+12) As we are no longer in free space, let’s make the model even more accurate
+by configuring a better propagation model instead of free space:
+TwoRayGroundReflection
+
+13) Some nodes are out of range, but not by much. Setting up directional
+antennas with better gain would allow them to communicate directly.
+
+14) Let’s add some more reality. We are introducing heavy radio noise on an
+adjacent communication channel (on a neighboring frequency channel). We would
+expect this to limit the traffic, but we are not seeing the effect because the
+current radio model handles each radio channel independently.
+
+15) To support the modeling of the cross-talk effect we will switch to
+dimensional analog radio model. This model requires much more processing power,
+but allows much more accurate modelling of each packets as they travel through
+space.
+
+16) Now we are introducing some very short burst radio signals (1ns?) that can
+corrupt a single bit/symbol during the packet transmission. In real life this
+would not affect the throughput too much as low level error correction would fix
+these errors without introducing packet errors.
+
+17) We are now switching to bit precise radio model. This complex radio model
+properly models all the layers of a real radio and allows us to see the positive
+effect of the error correction.
+
+18) Add forward error correction, scrambling, interleaving
+
+19) Optimize the simulation by adding MAC address and range filters (or
+additionally radio state and listening mode filter (i.e. 802.11b and 802.11g
+radios cannot communicate)

@@ -33,15 +33,18 @@ double MqamModulationBase::calculateSER(double snir, Hz bandwidth, bps bitrate) 
     double EsN0 = EbN0 * log2(constellationSize);
     // http://en.wikipedia.org/wiki/Quadrature_amplitude_modulation#Rectangular_QAM
     double Psc = 2 * (1 - 1 / sqrt(constellationSize)) * 0.5 * erfc(1 / sqrt(2) * sqrt(3.0 / (constellationSize - 1) * EsN0));
-    return 1 - (1 - Psc) * (1 - Psc);
+    double ser = 1 - (1 - Psc) * (1 - Psc);
+    ASSERT(0.0 <= ser && ser <= 1.0);
+    return ser;
 }
 
 double MqamModulationBase::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     double EbN0 = snir * bandwidth.get() / bitrate.get();
     // http://en.wikipedia.org/wiki/Quadrature_amplitude_modulation#Rectangular_QAM
-    double Pbc = 4.0 / codeWordSize * (1 - 1 / sqrt(constellationSize)) * 0.5 * erfc(1 / sqrt(2) * sqrt(3.0 * codeWordSize / (constellationSize - 1) * EbN0));
-    return Pbc;
+    double ber = 4.0 / codeWordSize * (1 - 1 / sqrt(constellationSize)) * 0.5 * erfc(1 / sqrt(2) * sqrt(3.0 * codeWordSize / (constellationSize - 1) * EbN0));
+    ASSERT(0.0 <= ber && ber <= 1.0);
+    return ber;
 }
 
 } // namespace physicallayer

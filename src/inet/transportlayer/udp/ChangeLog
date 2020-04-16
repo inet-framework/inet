@@ -1,5 +1,60 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Zoltan Bojthe
+
+	Switched to using UdpSetOptionCommand.optionCode value instead of dynamic_cast if-ladder.
+	Fixed copy-paste bug.
+
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support.
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService to dscp, Udp already uses this value to send DscpReq to IP layer.
+
+2019-10-31  Zoltan Bojthe
+
+	Moved kind enums to MSG files.
+
+2019-10-18  Zoltan Bojthe
+
+	Added message kind properties.
+
+2019-09-24  Zoltan Bojthe
+
+	Changed base class to TransportProtocolBase.
+
+2019-09-21  Mani Amoozadeh
+
+	Added check for total udp message size.
+	Added unblockMulticastSources.
+	Re-organized code to better reflect the execution flow.
+
+2019-09-17  Zoltan Bojthe
+
+	Simplified serializing empty data part.
+
+2019-09-02  Zoltan Bojthe
+
+	Removed socketId and clear msg kind before send down packets.
+	Removed PacketProtocolTag(udp) before send up packets.
+	Optimized Tag usage.
+
+2019-08-26  Zoltan Bojthe
+
+	Fixed CRC calculation for empty payload.
+
+2019-07-16  Zoltan Bojthe
+
+	Emit PacketDroppedSignal when received packet has incorrect CRC.
+
+2019-05-06  Zoltan Bojthe
+
+	Fixed isCorrectPacket().
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-10  Zoltan Bojthe

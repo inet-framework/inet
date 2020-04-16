@@ -51,13 +51,17 @@ std::ostream& MpskModulation::printToStream(std::ostream& stream, int level) con
 double MpskModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     // http://www.dsplog.com/2008/05/18/bit-error-rate-for-16psk-modulation-using-gray-mapping/
-    return erfc(sqrt(snir) * sin(M_PI / constellationSize)) / codeWordSize;
+    double ber = erfc(sqrt(snir) * sin(M_PI / constellationSize)) / codeWordSize;
+    ASSERT(0.0 <= ber && ber <= 1.0);
+    return ber;
 }
 
 double MpskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
     // http://www.dsplog.com/2008/03/18/symbol-error-rate-for-16psk/
-    return erfc(sqrt(snir) * sin(M_PI / constellationSize));
+    double ser = erfc(sqrt(snir) * sin(M_PI / constellationSize));
+    ASSERT(0.0 <= ser && ser <= 1.0);
+    return ser;
 }
 
 } // namespace physicallayer

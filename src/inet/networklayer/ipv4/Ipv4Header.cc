@@ -55,17 +55,25 @@ B Ipv4Header::calculateHeaderByteLength() const
     return B(length);
 }
 
-short Ipv4Header::getTypeOfService() const
+short Ipv4Header::getDscp() const
 {
-    return ((getExplicitCongestionNotification() << 6) & 0xc0) | (getDiffServCodePoint() & 0x3f);
+    return (typeOfService & 0xfc) >> 2;
 }
 
-void Ipv4Header::setTypeOfService(short trafficClass)
+void Ipv4Header::setDscp(short dscp)
 {
-    setDiffServCodePoint(trafficClass & 0x3f);
-    setExplicitCongestionNotification((trafficClass >> 6) & 0x03);
+    setTypeOfService(((dscp & 0x3f) << 2) | (typeOfService & 0x03));
 }
 
+short Ipv4Header::getEcn() const
+{
+    return typeOfService & 0x03;
+}
+
+void Ipv4Header::setEcn(short ecn)
+{
+    setTypeOfService((typeOfService & 0xfc) | (ecn & 0x03));
+}
 
 } // namespace inet
 

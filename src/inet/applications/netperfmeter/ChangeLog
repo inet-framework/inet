@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-20  Levente Mészáros
+
+	Fixed memory leaks detected by Valgrind.
+
+2019-10-18  Zoltan Bojthe
+
+	Changed to use msg constructor to set message name and message kind.
+
+2019-05-17  Zoltan Bojthe
+
+	Removed NetPerfMeterHost, fingerprints changed.
+
+2019-05-15  Zoltan Bojthe
+
+	Switched to addTag instead of addTagIfAbsent.
+	Redesigned to implement IApp using socketIn and socketOut gates.
+	Added processing for TCP_I_AVAILABLE.
+	Added processing for SCTP_I_AVAILABLE.
+	Fixed initialize() stages.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

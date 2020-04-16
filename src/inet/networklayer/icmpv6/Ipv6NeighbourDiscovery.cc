@@ -90,12 +90,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
-            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *node = findContainingNode(this);
@@ -975,7 +970,6 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(InterfaceEntry *ie)
 
     Ipv6Address destAddr = Ipv6Address::ALL_ROUTERS_2;    //all_routers multicast
     auto rs = makeShared<Ipv6RouterSolicitation>();
-    rs->setChunkLength(ICMPv6_HEADER_BYTES);
 
     //The Source Link-Layer Address option SHOULD be set to the host's link-layer
     //address, if the IP source address is not the unspecified address.
@@ -1068,8 +1062,8 @@ void Ipv6NeighbourDiscovery::processRdTimeout(cMessage *msg)
            appear on the link.*/
         bubble("Max number of RS messages sent");
         EV_INFO << "No RA messages were received. Assume no routers are on-link";
-        delete rdEntry;
         rdList.erase(rdEntry);
+        delete rdEntry;
         delete msg;
     }
 }
@@ -1238,13 +1232,13 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         auto sla = new Ipv6NdSourceLinkLayerAddress();
         sla->setLinkLayerAddress(ie->getMacAddress());
         ra->getOptionsForUpdate().insertOption(sla);
-        ra->setChunkLength(ra->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+        ra->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
 
         // set MTU option
         auto mtu = new Ipv6NdMtu();
         mtu->setMtu(ie->getProtocolData<Ipv6InterfaceData>()->getAdvLinkMtu());
         ra->getOptionsForUpdate().insertOption(mtu);
-        ra->setChunkLength(ra->getChunkLength() + IPv6ND_MTU_OPTION_LENGTH);
+        ra->addChunkLength(IPv6ND_MTU_OPTION_LENGTH);
 
         //Add all Advertising Prefixes to the RA
         int numAdvPrefixes = ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes();
@@ -1292,9 +1286,8 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
             prefixInfo->setPreferredLifetime(SIMTIME_DBL(advPrefix.advPreferredLifetime));
             //Now we pop the prefix info into the RA.
             ra->getOptionsForUpdate().insertOption(prefixInfo);
+            ra->addChunkLength(IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH);
         }
-
-        ra->setChunkLength(ra->getChunkLength() + IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH * numAdvPrefixes);
 
         auto packet = new Packet("RApacket");
         Icmpv6::insertCrc(crcMode, ra, packet);
@@ -1843,7 +1836,6 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
 
     //Neighbour Solicitation Specific Information
     ns->setTargetAddress(nsTargetAddr);
-    ns->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE));      // RFC 2461, Section 4.3.
 
     /*If the solicitation is being sent to a solicited-node multicast
        address, the sender MUST include its link-layer address (if it has
@@ -1853,7 +1845,7 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
         auto sla = new Ipv6NdSourceLinkLayerAddress();
         sla->setLinkLayerAddress(myMacAddr);
         ns->getOptionsForUpdate().insertOption(sla);
-        ns->setChunkLength(ns->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+        ns->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
     auto packet = new Packet("NSpacket");
     Icmpv6::insertCrc(crcMode, ns, packet);
@@ -2027,7 +2019,6 @@ void Ipv6NeighbourDiscovery::processNsWithSpecifiedSrcAddr(Packet *packet, const
 void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
-    na->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE));      // FIXME set correct length
 
     //RFC 2461: Section 7.2.4
     /*A node sends a Neighbor Advertisement in response to a valid Neighbor
@@ -2044,7 +2035,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     auto tla = new Ipv6NdTargetLinkLayerAddress();
     tla->setLinkLayerAddress(ie->getMacAddress());
     na->getOptionsForUpdate().insertOption(tla);
-    na->setChunkLength(na->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+    na->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
 
     /*Furthermore, if the node is a router, it MUST set the Router flag to one;
        otherwise it MUST set the flag to zero.*/
@@ -2131,7 +2122,6 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(InterfaceEntry *ie)
 #else /* WITH_xMIPv6 */
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
     Ipv6Address myIPv6Addr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
-    na->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE));
 #endif /* WITH_xMIPv6 */
 
     // The Target Address field in the unsolicited advertisement is set to
@@ -2142,7 +2132,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(InterfaceEntry *ie)
     auto sla = new Ipv6NdTargetLinkLayerAddress();
     sla->setLinkLayerAddress(ie->getMacAddress());
     na->getOptionsForUpdate().insertOption(sla);
-    na->setChunkLength(na->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+    na->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
 #endif /* WITH_xMIPv6 */
 
     // The Solicited flag MUST be set to zero, in order to avoid confusing
@@ -2431,7 +2421,6 @@ void Ipv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
 {
     //Construct a Redirect message
     auto redirect = makeShared<Ipv6Redirect>(); // TODO: "redirectMsg");
-    redirect->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE) * 2);   // RFC 2461, Section 4.5
 
 //FIXME incomplete code
 #if 0

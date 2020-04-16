@@ -1,0 +1,89 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The produced packets are randomly either duplicated or not
+(PacketDuplicator). Finally, the packets are all sent into a passive packet
+sink (PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketDuplicator;
+import inet.queueing.source.ActivePacketSource;
+
+network TestDuplicator
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        duplicator: PacketDuplicator {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> duplicator.in;
+        duplicator.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestDuplicator
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.duplicator.numDuplicates = intuniform(0, 1)
+
+%contains: stdout
+Producing packet producer-0.
+Forwarding original packet producer-0.
+Consuming packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Forwarding duplicate packet producer-1.
+Consuming packet producer-1.
+Forwarding original packet producer-1.
+Consuming packet producer-1.
+Producing packet producer-2.
+Forwarding duplicate packet producer-2.
+Consuming packet producer-2.
+Forwarding original packet producer-2.
+Consuming packet producer-2.
+Producing packet producer-3.
+Forwarding original packet producer-3.
+Consuming packet producer-3.
+Producing packet producer-4.
+Forwarding duplicate packet producer-4.
+Consuming packet producer-4.
+Forwarding original packet producer-4.
+Consuming packet producer-4.
+Producing packet producer-5.
+Forwarding duplicate packet producer-5.
+Consuming packet producer-5.
+Forwarding original packet producer-5.
+Consuming packet producer-5.
+Producing packet producer-6.
+Forwarding duplicate packet producer-6.
+Consuming packet producer-6.
+Forwarding original packet producer-6.
+Consuming packet producer-6.
+Producing packet producer-7.
+Forwarding duplicate packet producer-7.
+Consuming packet producer-7.
+Forwarding original packet producer-7.
+Consuming packet producer-7.
+Producing packet producer-8.
+Forwarding duplicate packet producer-8.
+Consuming packet producer-8.
+Forwarding original packet producer-8.
+Consuming packet producer-8.
+Producing packet producer-9.
+Forwarding duplicate packet producer-9.
+Consuming packet producer-9.
+Forwarding original packet producer-9.
+Consuming packet producer-9.

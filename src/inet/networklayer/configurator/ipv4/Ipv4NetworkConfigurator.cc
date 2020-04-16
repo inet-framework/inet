@@ -68,6 +68,7 @@ void Ipv4NetworkConfigurator::initialize(int stage)
     NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         assignAddressesParameter = par("assignAddresses");
+        assignUniqueAddresses = par("assignUniqueAddresses");
         assignDisjunctSubnetAddressesParameter = par("assignDisjunctSubnetAddresses");
         addStaticRoutesParameter = par("addStaticRoutes");
         addSubnetRoutesParameter = par("addSubnetRoutes");
@@ -156,7 +157,7 @@ void Ipv4NetworkConfigurator::configureAllInterfaces()
 void Ipv4NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
 {
     ensureConfigurationComputed(topology);
-    auto it = topology.interfaceInfos.find(interfaceEntry);
+    auto it = topology.interfaceInfos.find(interfaceEntry->getId());
     if (it != topology.interfaceInfos.end()) {
         InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(it->second);
         if (interfaceInfo->configure)
@@ -585,7 +586,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                 uint32 completeNetmask = networkNetmask;
 
                 // check if we could really find a unique IP address
-                if (assignedAddressToInterfaceEntryMap.find(completeAddress) != assignedAddressToInterfaceEntryMap.end())
+                if (assignUniqueAddresses && assignedAddressToInterfaceEntryMap.find(completeAddress) != assignedAddressToInterfaceEntryMap.end())
                     throw cRuntimeError("Failed to configure unique address for %s. Please refine your parameters and try again!", interfaceEntry->getInterfaceFullPath().c_str());
                 assignedAddressToInterfaceEntryMap[completeAddress] = compatibleInterface->interfaceEntry;
                 assignedInterfaceAddresses.push_back(completeAddress);
@@ -623,7 +624,7 @@ Ipv4NetworkConfigurator::InterfaceInfo *Ipv4NetworkConfigurator::createInterface
         }
     }
     node->interfaceInfos.push_back(interfaceInfo);
-    topology.interfaceInfos[ie] = interfaceInfo;
+    topology.interfaceInfos[ie->getId()] = interfaceInfo;
     return interfaceInfo;
 }
 
@@ -669,8 +670,14 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
             uint32_t address, addressSpecifiedBits, netmask, netmaskSpecifiedBits;
             if (haveAddressConstraint)
                 parseAddressAndSpecifiedBits(addressAttr, address, addressSpecifiedBits);
-            if (haveNetmaskConstraint)
-                parseAddressAndSpecifiedBits(netmaskAttr, netmask, netmaskSpecifiedBits);
+            if (haveNetmaskConstraint) {
+                if (netmaskAttr[0] == '/') {
+                    netmask = Ipv4Address::makeNetmask(atoi(netmaskAttr + 1)).getInt();
+                    netmaskSpecifiedBits = 0xffffffffLU;
+                }
+                else
+                    parseAddressAndSpecifiedBits(netmaskAttr, netmask, netmaskSpecifiedBits);
+            }
 
             // configure address/netmask constraints on matching interfaces
             for (auto & linkInfo : topology.linkInfos) {
@@ -1120,7 +1127,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                     if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str())) {
                         InterfaceEntry *parent = nullptr;
                         if (!isEmpty(parentAttr)) {
-                            parent = node->interfaceTable->getInterfaceByName(parentAttr);
+                            parent = node->interfaceTable->findInterfaceByName(parentAttr);
                             if (!parent)
                                 throw cRuntimeError("Parent interface '%s' not found.", parentAttr);
                             if (!parent->isMulticast())
@@ -1167,7 +1174,7 @@ void Ipv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
         outIE = nullptr;
     }
     else {
-        outIE = node->interfaceTable->getInterfaceByName(interfaceAttr);
+        outIE = node->interfaceTable->findInterfaceByName(interfaceAttr);
         if (!outIE)
             throw cRuntimeError("Host/router %s has no interface named \"%s\"",
                     node->module->getFullPath().c_str(), interfaceAttr);
@@ -1440,6 +1447,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                             if (addSubnetRoutesParameter && destinationNode->interfaceInfos.size() == 1 && destinationNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo
                                 && destinationNode->interfaceInfos[0]->addSubnetRoute)
                             {
+                                ASSERT(!destinationAddress.doAnd(destinationNetmask).isUnspecified());
                                 route->setDestination(destinationAddress.doAnd(destinationNetmask));
                                 route->setNetmask(destinationNetmask);
                             }
@@ -1788,7 +1796,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
 bool Ipv4NetworkConfigurator::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
 {
-    auto it = topology.interfaceInfos.find(interfaceEntry);
+    auto it = topology.interfaceInfos.find(interfaceEntry->getId());
     if (it == topology.interfaceInfos.end())
         return false;
     else {

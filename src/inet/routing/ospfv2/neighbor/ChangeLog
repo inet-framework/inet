@@ -1,5 +1,24 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-18  Zoltan Bojthe
+
+	Moved the enum Ospfv2TimerType to MSG file to generate cEnum.
+	Changed to use msg constructor to set message name and message kind.
+
+2019-07-22  Marcell Juhász
+
+	Added calculating CRC for lsa headers.
+
+2019-07-17  Zoltan Bojthe
+
+	Added CRC calculator functions.
+
+2019-07-02  Zoltan Bojthe
+
+	Follow redesigned packet format.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-08-22  Mani Amoozadeh

@@ -43,12 +43,11 @@ class INET_API InfoVisualizerBase : public VisualizerBase
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const cModule *module = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(const cModule *module) : module(module) { }
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
   protected:

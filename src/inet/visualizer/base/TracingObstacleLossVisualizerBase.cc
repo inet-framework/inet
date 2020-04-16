@@ -116,6 +116,18 @@ void TracingObstacleLossVisualizerBase::removeObstacleLossVisualization(const Ob
     obstacleLossVisualizations.erase(std::remove(obstacleLossVisualizations.begin(), obstacleLossVisualizations.end(), obstacleLossVisualization), obstacleLossVisualizations.end());
 }
 
+void TracingObstacleLossVisualizerBase::removeAllObstacleLossVisualizations()
+{
+    std::vector<const ObstacleLossVisualization *> removedObstacleLossVisualizations;
+    for (auto it : obstacleLossVisualizations)
+        removedObstacleLossVisualizations.push_back(it);
+    for (auto it : removedObstacleLossVisualizations) {
+        removeObstacleLossVisualization(it);
+        delete it;
+    }
+}
+
+
 } // namespace visualizer
 
 }// namespace inet

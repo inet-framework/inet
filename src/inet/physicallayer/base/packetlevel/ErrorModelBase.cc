@@ -36,7 +36,24 @@ void ErrorModelBase::initialize(int stage)
             corruptionMode = CorruptionMode::CM_BIT;
         else
             throw cRuntimeError("Unknown corruption mode");
+        const char *snirModeString = par("snirMode");
+        if (!strcmp("min", snirModeString))
+            snirMode = SnirMode::SM_MIN;
+        else if (!strcmp("mean", snirModeString))
+            snirMode = SnirMode::SM_MEAN;
+        else
+            throw cRuntimeError("Unknown SNIR mode: '%s'", snirModeString);
     }
+}
+
+double ErrorModelBase::getScalarSnir(const ISnir *snir) const
+{
+    if (snirMode == SnirMode::SM_MIN)
+        return snir->getMin();
+    else if (snirMode == SnirMode::SM_MEAN)
+        return snir->getMean();
+    else
+        throw cRuntimeError("Unknown SNIR mode");
 }
 
 bool ErrorModelBase::hasProbabilisticError(b length, double ber) const

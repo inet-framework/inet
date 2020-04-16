@@ -58,7 +58,7 @@ bool ModulePathAddress::tryParse(const char *addr)
         IInterfaceTable *ift = L3AddressResolver().findInterfaceTableOf(findContainingNode(module));
         if (ift == nullptr)
             return false;
-        if (ift->getInterfaceByInterfaceModule(module) == nullptr)
+        if (ift->findInterfaceByInterfaceModule(module) == nullptr)
             return false;
         id = module->getId();
         return true;

@@ -1,0 +1,216 @@
+%description:
+
+This test contains basic checks for various multi-dimensional mathematical functions.
+
+%includes:
+#include "inet/common/math/FunctionChecker.h"
+#include "inet/common/math/Functions.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::math;
+using namespace inet::units::values;
+
+class FunctionTest
+{
+  public:
+    void test1();
+};
+
+void FunctionTest::test1()
+{
+    auto backgroundNoise = makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(W(10) / MHz(200))));
+    FunctionChecker<WpHz, Domain<simsec, Hz>>(backgroundNoise).check();
+    std::cout << "Background noise: " << *backgroundNoise << std::endl;
+
+    auto transmission = makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(10), simsec(30), GHz(0.9), GHz(1.1), W(100) / MHz(200))));
+    FunctionChecker<WpHz, Domain<simsec, Hz>>(transmission).check();
+    std::cout << "Transmission: " << *transmission << std::endl;
+
+    auto propagation = Point<simsec, Hz> (simsec(10), Hz(0));
+    std::cout << "Propagation: " << propagation << std::endl;
+
+    auto attenuation = makeShared<ConstantFunction<double, Domain<simsec, Hz>>>(0.5);
+    FunctionChecker<double, Domain<simsec, Hz>>(attenuation).check();
+    std::cout << "Attenuation: " << *attenuation << std::endl;
+
+    auto propagatedTransmission = makeShared<DomainShiftedFunction<WpHz, Domain<simsec, Hz>>>(transmission, propagation);
+    FunctionChecker<WpHz, Domain<simsec, Hz>>(propagatedTransmission).check();
+
+    auto reception = propagatedTransmission->multiply(attenuation);
+    FunctionChecker<WpHz, Domain<simsec, Hz>>(reception).check();
+    std::cout << "Reception: " << *reception << std::endl;
+
+    auto snir1 = reception->divide(backgroundNoise);
+    FunctionChecker<double, Domain<simsec, Hz>>(snir1).check();
+    std::cout << "SNIR over time and frequency: " << *snir1 << std::endl;
+    
+    auto bandpassFilter = makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<double, Domain<simsec, Hz>>>(makeShared<Boxcar2DFunction<double, simsec, Hz>>(simsec(20), simsec(40), MHz(900), MHz(1100), 1)));
+    FunctionChecker<double, Domain<simsec, Hz>>(bandpassFilter).check();
+    std::cout << "Bandpass filter: " << *bandpassFilter << std::endl;
+
+    auto filteredReception = reception->multiply(bandpassFilter);
+    auto filteredBackgroundNoise = backgroundNoise->multiply(bandpassFilter);
+    FunctionChecker<WpHz, Domain<simsec, Hz>>(filteredReception).check();
+    FunctionChecker<WpHz, Domain<simsec, Hz>>(filteredBackgroundNoise).check();
+    auto snir2 = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(filteredReception)->divide(integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(filteredBackgroundNoise));
+    FunctionChecker<double, Domain<simsec>>(snir2).check();
+    std::cout << "SNIR over time: " << *snir2 << std::endl;
+}
+
+%activity:
+FunctionTest tester;
+tester.test1();
+
+%contains: stdout
+Background noise: function(s, Hz) → WpHz {
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [5e-08 WpHz]
+  structure =
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+      Constant 5e-08 WpHz)
+  partitioning = {
+    constant over [0 s … inf s) x [0 Hz … inf GHz)
+      → 5e-08 WpHz
+  } min = 5e-08 WpHz, max = 5e-08 WpHz, mean = 5e-08 WpHz
+}
+
+Transmission: function(s, Hz) → WpHz {
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 WpHz … 5e-07 WpHz]
+  structure =
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+      (Boxcar2D, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz))
+  partitioning = {
+    constant over [0 s … 10 s) x [0 Hz … 900 MHz)
+      → 0 WpHz
+    constant over [10 s … 30 s) x [0 Hz … 900 MHz)
+      → 0 WpHz
+    constant over [30 s … inf s) x [0 Hz … 900 MHz)
+      → 0 WpHz
+    constant over [0 s … 10 s) x [900 MHz … 1.1 GHz)
+      → 0 WpHz
+    constant over [10 s … 30 s) x [900 MHz … 1.1 GHz)
+      → 5e-07 WpHz
+    constant over [30 s … inf s) x [900 MHz … 1.1 GHz)
+      → 0 WpHz
+    constant over [0 s … 10 s) x [1.1 GHz … inf GHz)
+      → 0 WpHz
+    constant over [10 s … 30 s) x [1.1 GHz … inf GHz)
+      → 0 WpHz
+    constant over [30 s … inf s) x [1.1 GHz … inf GHz)
+      → 0 WpHz
+  } min = 0 WpHz, max = 5e-07 WpHz, mean = 0 WpHz
+}
+
+Propagation: (10 s, 0 Hz)
+Attenuation: function(s, Hz) → unit {
+  domain = (-inf s … inf s) x (-inf Hz … inf GHz) → range = [0.5]
+  structure =
+    Constant 0.5
+  partitioning = {
+    constant over (-inf s … inf s) x (-inf Hz … inf GHz)
+      → 0.5
+  } min = 0.5, max = 0.5, mean = 0.5
+}
+
+Reception: function(s, Hz) → WpHz {
+  domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf WpHz … inf WpHz]
+  structure =
+    (* (DomainShifted, shift = (10 s, 0 Hz)
+         (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+           (Boxcar2D, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
+       Constant 0.5)
+  partitioning = {
+    constant over [10 s … 20 s) x [0 Hz … 900 MHz)
+      → 0 WpHz
+    constant over [20 s … 40 s) x [0 Hz … 900 MHz)
+      → 0 WpHz
+    constant over [40 s … inf s) x [0 Hz … 900 MHz)
+      → 0 WpHz
+    constant over [10 s … 20 s) x [900 MHz … 1.1 GHz)
+      → 0 WpHz
+    constant over [20 s … 40 s) x [900 MHz … 1.1 GHz)
+      → 2.5e-07 WpHz
+    constant over [40 s … inf s) x [900 MHz … 1.1 GHz)
+      → 0 WpHz
+    constant over [10 s … 20 s) x [1.1 GHz … inf GHz)
+      → 0 WpHz
+    constant over [20 s … 40 s) x [1.1 GHz … inf GHz)
+      → 0 WpHz
+    constant over [40 s … inf s) x [1.1 GHz … inf GHz)
+      → 0 WpHz
+  } min = 0 WpHz, max = 2.5e-07 WpHz, mean = 0 WpHz
+}
+
+SNIR over time and frequency: function(s, Hz) → unit {
+  domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf … inf]
+  structure =
+    (/ (* (DomainShifted, shift = (10 s, 0 Hz)
+            (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+              (Boxcar2D, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
+          Constant 0.5)
+       (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+         Constant 5e-08 WpHz))
+  partitioning = {
+    constant over [10 s … 20 s) x [0 Hz … 900 MHz)
+      → 0
+    constant over [20 s … 40 s) x [0 Hz … 900 MHz)
+      → 0
+    constant over [40 s … inf s) x [0 Hz … 900 MHz)
+      → 0
+    constant over [10 s … 20 s) x [900 MHz … 1.1 GHz)
+      → 0
+    constant over [20 s … 40 s) x [900 MHz … 1.1 GHz)
+      → 5
+    constant over [40 s … inf s) x [900 MHz … 1.1 GHz)
+      → 0
+    constant over [10 s … 20 s) x [1.1 GHz … inf GHz)
+      → 0
+    constant over [20 s … 40 s) x [1.1 GHz … inf GHz)
+      → 0
+    constant over [40 s … inf s) x [1.1 GHz … inf GHz)
+      → 0
+  } min = 0, max = 5, mean = 0
+}
+
+Bandpass filter: function(s, Hz) → unit {
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 … 1]
+  structure =
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+      (Boxcar2D, [20 s … 40 s] x [900 MHz … 1.1 GHz] → 1))
+  partitioning = {
+    constant over [0 s … 20 s) x [0 Hz … 900 MHz)
+      → 0
+    constant over [20 s … 40 s) x [0 Hz … 900 MHz)
+      → 0
+    constant over [40 s … inf s) x [0 Hz … 900 MHz)
+      → 0
+    constant over [0 s … 20 s) x [900 MHz … 1.1 GHz)
+      → 0
+    constant over [20 s … 40 s) x [900 MHz … 1.1 GHz)
+      → 1
+    constant over [40 s … inf s) x [900 MHz … 1.1 GHz)
+      → 0
+    constant over [0 s … 20 s) x [1.1 GHz … inf GHz)
+      → 0
+    constant over [20 s … 40 s) x [1.1 GHz … inf GHz)
+      → 0
+    constant over [40 s … inf s) x [1.1 GHz … inf GHz)
+      → 0
+  } min = 0, max = 1, mean = 0
+}
+
+SNIR over time: function(s) → unit {
+  domain = (-inf s … inf s) → range = [-inf … inf]
+  structure =
+    (/ IntegratedFunction
+       IntegratedFunction)
+  partitioning = {
+    constant over [10 s … 20 s)
+      → -nan
+    constant over [20 s … 40 s)
+      → 5
+    constant over [40 s … inf s)
+      → -nan
+  } min = -nan, max = -nan, mean = -nan
+}

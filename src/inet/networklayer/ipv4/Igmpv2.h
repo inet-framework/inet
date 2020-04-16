@@ -186,6 +186,9 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     int numLeavesSent = 0;
     int numLeavesRecv = 0;
 
+    //crcMode
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
+
     typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
     typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
 
@@ -225,7 +228,7 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual void startTimer(cMessage *timer, double interval);
     virtual void startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime);
 
-    virtual void processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp);
+    virtual void processIgmpMessage(Packet *packet);
     virtual void processQuery(InterfaceEntry *ie, Packet *packet);
     virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime);
     //virtual void processV1Report(InterfaceEntry *ie, IgmpMessage *msg);
@@ -248,6 +251,11 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual RouterInterfaceData *createRouterInterfaceData();
     virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
     virtual HostInterfaceData *createHostInterfaceData();
+
+  public:
+    static void insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
+    void insertCrc(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertCrc(crcMode, igmpMsg, payload); }
+    bool verifyCrc(const Packet *packet);
 };
 
 }    // namespace inet

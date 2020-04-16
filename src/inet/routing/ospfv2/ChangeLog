@@ -1,5 +1,56 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Fixed shared pointer type.
+
+2019-11-28  Zoltan Bojthe
+
+	Optimized interfaceStateChangedSignal usage.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
+2019-09-26  Zoltan Bojthe
+
+	Renamed Ospf module to Ospfv2 and also renamed the folder to distinguish from Ospfv3.
+
+2019-07-22  Marcell Juhász
+
+	Added setLsaHeaderCrc().
+
+2019-07-17  Zoltan Bojthe
+
+	Fixed crcMode parameter.
+
+2019-07-16  Zoltan Bojthe
+
+	Fixed crcMode in OspfConfigReader for interfaces.
+
+2019-07-15  Zoltan Bojthe
+
+	Use parseCrcMode().
+
+2019-07-08  Zoltan Bojthe
+
+	Fixed OspfPacket field types.
+
+2019-07-03  Zoltan Bojthe
+
+	Added OspfPacketSerializer.
+	Fixed OspfPacket TosData.
+
+2019-07-02  Zoltan Bojthe
+
+	Redesigned packet format.
+
+2019-03-20  Levente Mészáros
+
+	Fixed serializer CRC mode field.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-11  Zoltan Bojthe

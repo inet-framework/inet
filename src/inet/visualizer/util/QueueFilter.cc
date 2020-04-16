@@ -26,9 +26,9 @@ void QueueFilter::setPattern(const char* pattern)
     matchExpression.setPattern(pattern, true, true, true);
 }
 
-bool QueueFilter::matches(const PacketQueue *queue) const
+bool QueueFilter::matches(const queueing::IPacketQueue *queue) const
 {
-    MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLPATH, queue);
+    MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLPATH, check_and_cast<const cObject *>(queue));
     // TODO: eliminate const_cast when cMatchExpression::matches becomes const
     return const_cast<QueueFilter *>(this)->matchExpression.matches(&matchableObject);
 }

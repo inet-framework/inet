@@ -17,17 +17,15 @@
  */
 
 #include <algorithm>
-#include <stdexcept>
-
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/configurator/ipv4/HostAutoConfigurator.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
@@ -36,6 +34,13 @@ Define_Module(HostAutoConfigurator);
 void HostAutoConfigurator::initialize(int stage)
 {
     OperationalBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
+            interfaceTable->getInterface(i)->addProtocolData<Ipv4InterfaceData>();
+    }
 }
 
 void HostAutoConfigurator::finish()
@@ -69,16 +74,11 @@ void HostAutoConfigurator::setupNetworkLayer()
     if (!routingTable)
         throw cRuntimeError("No routing table found");
 
-    // get our interface table
-    IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(host);
-    if (!ift)
-        throw cRuntimeError("No interface table found");
-
     // look at all interface table entries
     cStringTokenizer interfaceTokenizer(interfaces.c_str());
     const char *ifname;
     while ((ifname = interfaceTokenizer.nextToken()) != nullptr) {
-        InterfaceEntry *ie = ift->getInterfaceByName(ifname);
+        InterfaceEntry *ie = interfaceTable->findInterfaceByName(ifname);
         if (!ie)
             throw cRuntimeError("No such interface '%s'", ifname);
 

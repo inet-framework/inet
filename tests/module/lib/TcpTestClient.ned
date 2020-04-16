@@ -16,11 +16,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-// package module_.lib;
+package inet.test.moduletest.lib;
 
 import inet.applications.contract.IApp;
-
 
 //
 // \TCP client application for testing the TCP model.

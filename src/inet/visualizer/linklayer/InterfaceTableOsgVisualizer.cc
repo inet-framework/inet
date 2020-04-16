@@ -27,11 +27,17 @@ Define_Module(InterfaceTableOsgVisualizer);
 
 #ifdef WITH_OSG
 
-InterfaceTableOsgVisualizer::InterfaceOsgVisualization::InterfaceOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int networkNodeId, int interfaceId) :
-    InterfaceVisualization(networkNodeId, interfaceId),
+InterfaceTableOsgVisualizer::InterfaceOsgVisualization::InterfaceOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int networkNodeId, int networkNodeGateId, int interfaceId) :
+    InterfaceVisualization(networkNodeId, networkNodeGateId, interfaceId),
     networkNodeVisualization(networkNodeVisualization),
     node(node)
 {
+}
+
+InterfaceTableOsgVisualizer::~InterfaceTableOsgVisualizer()
+{
+    if (displayInterfaceTables)
+        removeAllInterfaceVisualizations();
 }
 
 void InterfaceTableOsgVisualizer::initialize(int stage)
@@ -45,6 +51,7 @@ void InterfaceTableOsgVisualizer::initialize(int stage)
 
 InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableOsgVisualizer::createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry)
 {
+    auto gate = getOutputGate(networkNode, interfaceEntry);
     auto label = new osgText::Text();
     label->setCharacterSize(18);
     label->setBoundingBoxColor(osg::Vec4(backgroundColor.red / 255.0, backgroundColor.green / 255.0, backgroundColor.blue / 255.0, opacity));
@@ -60,7 +67,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableOsgVisualize
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
         throw cRuntimeError("Cannot create interface visualization for '%s', because network node visualization is not found for '%s'", interfaceEntry->getInterfaceName(), networkNode->getFullPath().c_str());
-    return new InterfaceOsgVisualization(networkNodeVisualization, geode, networkNode->getId(), interfaceEntry->getInterfaceId());
+    return new InterfaceOsgVisualization(networkNodeVisualization, geode, networkNode->getId(), gate == nullptr ? -1 : gate->getId(), interfaceEntry->getInterfaceId());
 }
 
 void InterfaceTableOsgVisualizer::addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization)

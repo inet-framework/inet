@@ -7,7 +7,7 @@ Testing PR-SCTP: prMethod=PR_RTX prValue=1
 %inifile: omnetpp.ini
 
 [General]
-network=SctpFeatureTest
+network = inet.test.moduletest.lib.SctpFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib

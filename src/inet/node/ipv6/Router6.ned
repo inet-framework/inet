@@ -20,9 +20,9 @@ package inet.node.ipv6;
 import inet.node.inet.Router;
 
 //
-// Ipv6 router.
+// IPv6 router.
 //
-// see ~Router for configuration options
+// See ~Router for configuration options.
 //
 module Router6 extends Router
 {

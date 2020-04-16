@@ -1,0 +1,73 @@
+%description:
+
+Test the <disconnect> command
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+
+module Node
+{
+    gates:
+        input in;
+        input inv[];
+        output out;
+        output outv[];
+        inout gate;
+        inout gatev[];
+    connections allowunconnected:
+}
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        src: Node;
+        sink: Node;
+        peer1: Node;
+        peer2: Node;
+        msrc: Node;
+        msink: Node;
+        mpeer1: Node;
+        mpeer2: Node;
+
+    connections allowunconnected:
+        src.out --> sink.in;
+        peer1.gate <--> peer2.gate;
+        msrc.outv++ --> msink.inv++;
+        mpeer1.gatev++ <--> mpeer2.gatev++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="1.0">
+        <disconnect src-module="src" dest-module="sink"/>
+        <disconnect src-module="peer1" dest-module="peer2"/>
+        <disconnect src-module="msrc" dest-module="msink"/>
+        <disconnect src-module="mpeer1" dest-module="mpeer2"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Running simulation...
+** Event #1  t=1   Test.scenarioManager (ScenarioManager, id=2)
+processing <at> command...
+processing <disconnect> command...
+Disconnecting Test.src.out --> Test.sink.in
+processing <disconnect> command...
+Disconnecting Test.peer1.gate$o --> Test.peer2.gate$i and its reverse connection
+processing <disconnect> command...
+Disconnecting Test.msrc.outv[0] --> Test.msink.inv[0]
+processing <disconnect> command...
+Disconnecting Test.mpeer1.gatev$o[0] --> Test.mpeer2.gatev$i[0] and its reverse connection

@@ -409,18 +409,16 @@ PacketDrillBytes::PacketDrillBytes()
     listLength = 0;
 }
 
-PacketDrillBytes::PacketDrillBytes(uint8 byte)
+PacketDrillBytes::PacketDrillBytes(uint8_t byte)
 {
     listLength = 0;
-    byteList.setDataArraySize(listLength + 1);
-    byteList.setData(listLength, (0x00FF & byte));
-    listLength++;
+    appendByte(0x00FF & byte);
 }
 
-void PacketDrillBytes::appendByte(uint8 byte)
+void PacketDrillBytes::appendByte(uint8_t byte)
 {
-    byteList.setDataArraySize(listLength + 1);
-    byteList.setData(listLength, byte);
+    byteList.resize(listLength + 1);
+    byteList.at(listLength) = byte;
     listLength++;
 }
 

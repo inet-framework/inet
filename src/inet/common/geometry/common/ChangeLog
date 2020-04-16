@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-05  Levente Mészáros
+
+	Added several utility functions to Coord.
+
+2019-06-07  Levente Mészáros
+
+	Added equality operators to Quaternion.
+	Added conjugated() and getSwingAndTwist() to Quaternion.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-19  Zoltan Bojthe

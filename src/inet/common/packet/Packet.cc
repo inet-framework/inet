@@ -13,10 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -53,9 +55,40 @@ Packet::Packet(const Packet& other) :
     CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
 }
 
+const ChunkTemporarySharedPtr *Packet::getDissection() const
+{
+    auto packetProtocolTag = findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    PacketDissector::ChunkBuilder builder;
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, builder);
+    packetDissector.dissectPacket(const_cast<Packet *>(this), protocol);
+    return new ChunkTemporarySharedPtr(builder.getContent());
+}
+
+const ChunkTemporarySharedPtr *Packet::getFront() const
+{
+    const auto& chunk = peekAt(b(0), getFrontOffset(), Chunk::PF_ALLOW_ALL);
+    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+}
+
+const ChunkTemporarySharedPtr *Packet::getData() const
+{
+    const auto& chunk = peekData(Chunk::PF_ALLOW_ALL);
+    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+}
+
+const ChunkTemporarySharedPtr *Packet::getBack() const
+{
+    const auto& chunk = peekAt(getBackOffset(), backIterator.getPosition(), Chunk::PF_ALLOW_ALL);
+    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+}
+
 void Packet::forEachChild(cVisitor *v)
 {
+    cPacket::forEachChild(v);
     v->visit(const_cast<Chunk *>(content.get()));
+    for (int i = 0; i < tags.getNumTags(); i++)
+        v->visit(tags.getTag(i));
 }
 
 void Packet::setFrontOffset(b offset)
@@ -69,11 +102,9 @@ const Ptr<const Chunk> Packet::peekAtFront(b length, int flags) const
 {
     auto dataLength = getDataLength();
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-    const auto& chunk = content->peek(frontIterator, length, flags);
-    if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
-        return chunk;
-    else
-        return content->peek(frontIterator, dataLength, flags);
+    const auto& chunk = content->peek(frontIterator, length == b(-1) ? -dataLength : length, flags);
+    CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+    return chunk;
 }
 
 const Ptr<const Chunk> Packet::popAtFront(b length, int flags)
@@ -98,11 +129,9 @@ const Ptr<const Chunk> Packet::peekAtBack(b length, int flags) const
 {
     auto dataLength = getDataLength();
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-    const auto& chunk = content->peek(backIterator, length, flags);
-    if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
-        return chunk;
-    else
-        return content->peek(backIterator, dataLength, flags);
+    const auto& chunk = content->peek(backIterator, length == b(-1) ? -dataLength : length, flags);
+    CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+    return chunk;
 }
 
 const Ptr<const Chunk> Packet::popAtBack(b length, int flags)
@@ -118,17 +147,19 @@ const Ptr<const Chunk> Packet::popAtBack(b length, int flags)
 
 const Ptr<const Chunk> Packet::peekDataAt(b offset, b length, int flags) const
 {
-    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
-    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
+    auto dataLength = getDataLength();
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
+    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
     b peekOffset = frontIterator.getPosition() + offset;
-    return content->peek(Chunk::Iterator(true, peekOffset, -1), length, flags);
+    return content->peek(Chunk::Iterator(true, peekOffset, -1), length == b(-1) ? -(dataLength - offset) : length, flags);
 }
 
 const Ptr<const Chunk> Packet::peekAt(b offset, b length, int flags) const
 {
-    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
-    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
-    return content->peek(Chunk::Iterator(true, offset, -1), length, flags);
+    auto totalLength = getTotalLength();
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+    return content->peek(Chunk::Iterator(true, offset, -1), length == b(-1) ? -(totalLength - offset) : length, flags);
 }
 
 void Packet::insertAtBack(const Ptr<const Chunk>& chunk)
@@ -279,15 +310,16 @@ const Ptr<Chunk> Packet::removeAtBack(b length, int flags)
 const Ptr<Chunk> Packet::removeAll()
 {
     const auto& oldContent = content;
+    const auto result = makeExclusivelyOwnedMutableChunk(oldContent);
     eraseAll();
-    return makeExclusivelyOwnedMutableChunk(oldContent);
+    return result;
 }
 
-//(inet::Packet)UdpBasicAppData-0 (5000 bytes)
+//(inet::Packet)UdpBasicAppData-0 (5000 B) [content]
 std::string Packet::str() const
 {
     std::ostringstream out;
-    out << "(" << getClassName() << ")" << getName() << " (" << getByteLength() << " bytes) [" << content->str() << "]";
+    out << "(" << getClassName() << ")" << getName() << " (" << getDataLength() << ") [" << content->str() << "]";
     return out.str();
 }
 

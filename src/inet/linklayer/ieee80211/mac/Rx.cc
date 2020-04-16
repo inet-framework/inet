@@ -78,7 +78,7 @@ bool Rx::lowerFrameReceived(Packet *packet)
         EV_INFO << "Received frame from PHY: " << packet << endl;
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
         if (header->getReceiverAddress() != address)
-            setOrExtendNav(header->getDuration());
+            setOrExtendNav(header->getDurationField());
         return true;
     }
     else {

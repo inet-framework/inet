@@ -1,0 +1,39 @@
+====== inet-4.x ======
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2018-12-13  Zoltan Bojthe
+
+	Changed removeSocket() to return nullptr when socket is not found in map.
+
+2018-12-04  Zoltan Bojthe
+
+	Added isOpen() function.
+
+2018-11-14  Zoltan Bojthe
+
+	Added functions getMap() and getSocketById() to SocketMap.
+
+2018-11-14  Zoltan Bojthe
+
+	Added close().
+
+2018-11-05  Zoltan Bojthe
+
+	Added destroy() function.
+
+2018-10-24  Mani Amoozadeh
+
+	Added print socket map content.
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-25  Zoltan Bojthe
+
+	Renamed getConnectionId() to getSocketId().
+
+2018-04-23  Zoltan Bojthe
+
+	Added SocketMap and ISocket.

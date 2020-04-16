@@ -54,7 +54,7 @@ void Sctp::printInfoAssocMap()
             assoc = elem.second;
             key = elem.first;
 
-            EV_DETAIL << "assocId: " << assoc->assocId << "  assoc: " << assoc << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << " fd: " << assoc->fd <<"\n";
+            EV_DETAIL << "assocId: " << assoc->assocId << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << " fd: " << assoc->fd <<"\n";
         }
 
         EV_DETAIL << "\n";
@@ -85,7 +85,7 @@ void Sctp::bindPortForUDP()
     EV_INFO << "Binding to UDP port " << SCTP_UDP_PORT << endl;
 
     udpSocket.setOutputGate(gate("ipOut"));
-    udpSockId = udpSocket.generateSocketId();
+    udpSockId = getEnvir()->getUniqueNumber();
     EV_INFO << "UDP socket Id is " << udpSocket.getSocketId() << endl;
   //  udpSocket.bind(SCTP_UDP_PORT);
 }
@@ -111,12 +111,7 @@ void Sctp::initialize(int stage)
             testTimeout = netw->par("testTimeout");
         }
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
-            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
         crcInsertion.setCrcMode(crcMode);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
@@ -271,12 +266,11 @@ void Sctp::handleMessage(cMessage *msg)
         if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {
             auto controlInfo = tags.getTag<SctpSendReq>();
             Indication* cmsg = new Indication("SendSocketOptions", SCTP_I_SENDSOCKETOPTIONS);
-            auto& indtags = getTags(cmsg);
-            auto indication = indtags.addTagIfAbsent<SctpCommandReq>();
+            auto indication = cmsg->addTag<SctpCommandReq>();
             indication->setSocketId(controlInfo->getSocketId());
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void*) socketOptions);
-            cmsg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
+            cmsg->addTag<SocketInd>()->setSocketId(assocId);
             send(cmsg, "appOut");
             delete msg;
         } else {
@@ -402,11 +396,11 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
     msg->insertSctpChunks(abortChunk);
     Packet *pkt = new Packet("ABORT");
 
-    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+    auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
     IL3AddressType *addressType = toAddr.getAddressType();
-    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    pkt->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
     send_to_ip(pkt);
 }
@@ -433,11 +427,11 @@ void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address from
     msg->insertSctpChunks(scChunk);
 
     Packet *pkt = new Packet("SHUTDOWN_COMPLETE");
-    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+    auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
     IL3AddressType *addressType = toAddr.getAddressType();
-    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    pkt->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
     send_to_ip(pkt);
 }
@@ -671,7 +665,7 @@ void Sctp::updateSockPair(SctpAssociation *assoc, L3Address localAddr, L3Address
         }
     }
 
-    EV_INFO << "updateSockPair assoc=" << assoc << "    localAddr=" << key.localAddr << "            remoteAddr=" << key.remoteAddr << "     localPort=" << key.localPort << "  remotePort=" << remotePort << "\n";
+    EV_INFO << "updateSockPair assoc=" << assoc->assocId << "    localAddr=" << key.localAddr << "            remoteAddr=" << key.remoteAddr << "     localPort=" << key.localPort << "  remotePort=" << remotePort << "\n";
 
     sctpAssocMap[key] = assoc;
     sizeAssocMap = sctpAssocMap.size();

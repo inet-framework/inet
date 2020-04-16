@@ -128,7 +128,7 @@ setup_gh_pages: init_gh_pages
 	@cd $(DEPLOY_DIR);\
 		git fetch origin;\
 		git reset --hard origin/$(DEPLOY_BRANCH_GITHUB);\
-		git branch --set-upstream $(DEPLOY_BRANCH_GITHUB) origin/$(DEPLOY_BRANCH_GITHUB)
+		git branch --track $(DEPLOY_BRANCH_GITHUB) origin/$(DEPLOY_BRANCH_GITHUB)
 	@echo "Now you can deploy to Github Pages with 'make generate' and then 'make deploy_gh_pages'"
 
 init_heroku:
@@ -150,10 +150,10 @@ setup_heroku: init_heroku
 	@cd $(DEPLOY_DIR_HEROKU);\
 		git fetch origin;\
 		git reset --hard origin/master;\
-		git branch --set-upstream master origin/master
+		git branch --track master origin/master
 	@echo "Now you can deploy to Heroku with 'make generate' and then 'make deploy_heroku'"
 
-generate: html
+generate: html pdf
 
 prepare_rsync_deployment:
 	@echo "Preparing rsync deployment..."
@@ -168,14 +168,16 @@ deploy_rsync: prepare_rsync_deployment
 prepare_gh_pages_deployment:
 	@echo "Preparing gh_pages deployment..."
 	@echo "Pulling any updates from Github Pages..."
-	@cd $(DEPLOY_DIR); git pull;
+	@cd $(DEPLOY_DIR) && git reset --hard && git pull && find . -not -path './.git*' -delete
 	@mkdir -p $(DEPLOY_DIR)/$(DEPLOY_HTML_DIR)
 	@echo "Copying files from '$(BUILDDIR)/html/.' to '$(DEPLOY_DIR)/$(DEPLOY_HTML_DIR)'"
 	@cp -r $(BUILDDIR)/html/. $(DEPLOY_DIR)/$(DEPLOY_HTML_DIR)
+	@echo "Copying files from '$(BUILDDIR)/latex/ *.pdf' to '$(DEPLOY_DIR)/$(DEPLOY_HTML_DIR)'"
+	@cp -r $(BUILDDIR)/latex/*.pdf $(DEPLOY_DIR)/$(DEPLOY_HTML_DIR)
 
 deploy_gh_pages: prepare_gh_pages_deployment
 	@echo "Deploying on github pages now..."
-	@cd $(DEPLOY_DIR); git add -A; git commit -m "docs updated at `date -u`"; git push origin $(DEPLOY_BRANCH) --quiet
+	@cd $(DEPLOY_DIR) && git add -A && git commit -m "docs updated at `date -u`" # git push origin $(DEPLOY_BRANCH) --quiet
 	@echo "Github Pages deploy was completed at `date -u`"
 
 prepare_heroku_deployment:

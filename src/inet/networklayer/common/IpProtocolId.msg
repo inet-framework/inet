@@ -43,6 +43,7 @@ enum IpProtocolId
     IP_PROT_NONE = 59;
     IP_PROT_EIGRP = 88;
     IP_PROT_OSPF = 89;
+    IP_PROT_OSPFv3 = 90;
     IP_PROT_PIM = 103;
     IP_PROT_VRRP = 112;
     IP_PROT_SCTP = 132;

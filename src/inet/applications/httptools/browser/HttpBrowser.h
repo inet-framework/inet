@@ -46,7 +46,7 @@ namespace httptools {
  * @see HttpBrowserBase
  * @see HttpBrowserDirect
  */
-class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
+class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ReceiveQueueBasedCallback
 {
   protected:
     /*
@@ -61,7 +61,6 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
         HttpRequestQueue messageQueue;    // Queue of pending messages.
         TcpSocket *socket = nullptr;    // A reference to the socket object.
         int pending = 0;    // A counter for the number of outstanding replies.
-        ChunkQueue queue;       // incoming queue for slices
     };
 
     SocketMap sockCollection;    // List of active sockets
@@ -95,7 +94,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) override;
 
     // TcpSocket::ICallback callback methods
-    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketDataArrived(TcpSocket *socket) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;

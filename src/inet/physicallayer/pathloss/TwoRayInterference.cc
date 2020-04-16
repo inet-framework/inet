@@ -49,8 +49,8 @@ double TwoRayInterference::computePathLoss(const ITransmission* transmission, co
     auto radioMedium = transmission->getMedium();
     auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz carrierFrequency = Hz(narrowbandSignalAnalogModel->getCarrierFrequency());
-    const m waveLength = propagationSpeed / carrierFrequency;
+    Hz centerFrequency = Hz(narrowbandSignalAnalogModel->getCenterFrequency());
+    const m waveLength = propagationSpeed / centerFrequency;
 
     return computeTwoRayInterference(transmission->getStartPosition(), arrival->getStartPosition(), waveLength);
 }

@@ -41,15 +41,15 @@ class INET_API SignalAnalogModel : public virtual ISignalAnalogModel
 class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public virtual INarrowbandSignal
 {
   protected:
-    const Hz carrierFrequency;
+    const Hz centerFrequency;
     const Hz bandwidth;
 
   public:
-    NarrowbandSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth);
+    NarrowbandSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual Hz getCarrierFrequency() const override { return carrierFrequency; }
+    virtual Hz getCenterFrequency() const override { return centerFrequency; }
     virtual Hz getBandwidth() const override { return bandwidth; }
 };
 

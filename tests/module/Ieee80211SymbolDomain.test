@@ -17,7 +17,7 @@ of SIGNAL field with pilots inserted.
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import ieee80211.Ieee80211SymbolDomainTest;
+import inet.test.moduletest.lib.ieee80211.Ieee80211SymbolDomainTest;
 import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDecoder;
 import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDemodulator;
 import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmEncoder;

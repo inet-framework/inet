@@ -131,7 +131,10 @@ void HttpController::registerServer(HttpServerBase *serverAppModule, const char 
     if (webSiteList.find(wwwName) != webSiteList.end())
         EV_ERROR << "Server " << wwwName << " is already registered\n";
 
-    WebServerEntry *en = new WebServerEntry;
+    if (serverAppModule == nullptr)
+        throw cRuntimeError("Server %s does not have a WWW module", wwwName);
+
+    WebServerEntry *en = new WebServerEntry();
 
     en->name = serverName;
     en->host = objectName;
@@ -143,9 +146,6 @@ void HttpController::registerServer(HttpServerBase *serverAppModule, const char 
     en->pvalue = 0.0;
     en->pamortize = 0.0;
     en->accessCount = 0;
-
-    if (en->module == nullptr)
-        throw cRuntimeError("Server %s does not have a WWW module", wwwName);
 
     webSiteList[en->name] = en;
 

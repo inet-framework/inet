@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -26,44 +26,60 @@ namespace physicallayer {
 class INET_API MapCommunicationCache : public CommunicationCacheBase
 {
   protected:
+    class MapTransmissionCacheEntry : public TransmissionCacheEntry
+    {
+      public:
+        /**
+         * The map of intermediate reception computation results.
+         */
+        std::map<int, ReceptionCacheEntry> *receptionCacheEntries = nullptr;
+    };
+
+  protected:
     /** @name Cache */
     //@{
     /**
      * Caches intermediate computation results for radios.
      */
-    std::map<const IRadio *, RadioCacheEntry> radioCache;
+    std::map<int, RadioCacheEntry> radioCache;
     /**
      * Caches intermediate computation results for transmissions.
      */
-    std::map<const ITransmission *, TransmissionCacheEntry> transmissionCache;
+    std::map<int, MapTransmissionCacheEntry> transmissionCache;
     //@}
 
   protected:
     /** @name Cache data structures */
     //@{
     virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) override;
-    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
+    virtual MapTransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
     virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) override;
     //@}
 
   public:
-    MapCommunicationCache();
     virtual ~MapCommunicationCache();
 
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "MapCommunicationCache"; }
 
-    /** @name Medium state change notifications */
+    /** @name Radio cache */
     //@{
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
+    virtual const IRadio *getRadio(int id) const override;
+    virtual void mapRadios(std::function<void (const IRadio *)> f) const override;
+    //@}
 
+    /** @name Transmission cache */
+    //@{
     virtual void addTransmission(const ITransmission *transmission) override;
     virtual void removeTransmission(const ITransmission *transmission) override;
+    virtual const ITransmission *getTransmission(int id) const override;
+    virtual void mapTransmissions(std::function<void (const ITransmission *)> f) const override;
     //@}
 
     /** @name Interference cache */
     //@{
-    virtual void removeNonInterferingTransmissions() override;
+    virtual void removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f) override;
     //@}
 };
 

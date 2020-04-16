@@ -26,7 +26,7 @@
 #include "inet/routing/bgpv4/BgpRoutingTableEntry.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
-#include "inet/routing/ospfv2/Ospf.h"
+#include "inet/routing/ospfv2/Ospfv2.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -35,13 +35,13 @@ namespace bgp {
 
 class BgpSession;
 
-class INET_API BgpRouter : public TcpSocket::ICallback
+class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
 {
 private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
-    ospf::Ospf *ospfModule = nullptr;
+    ospfv2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
     bool redistributeInternal = false;
     bool redistributeRip = false;
@@ -112,7 +112,8 @@ private:
   protected:
     /** @name TcpSocket::ICallback callback methods */
     //@{
-    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketDataArrived(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }      //TODO
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override {}

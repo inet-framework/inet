@@ -78,6 +78,14 @@ std::string TcpHeader::str() const
     static const char *flagEnd = "]";
     stream << getSrcPort() << "->" << getDestPort();
     const char *separ = flagStart;
+    if (getCwrBit()) {
+        stream << separ << "Cwr";
+        separ = flagSepar;
+    }
+    if (getEceBit()) {
+        stream << separ << "Ece";
+        separ = flagSepar;
+    }
     if (getUrgBit()) {
         stream << separ << "Urg=" << getUrgentPointer();
         separ = flagSepar;

@@ -42,18 +42,14 @@ void ApskProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
     }
     // end of KLUDGE
 
-    //FIXME KLUDGE: remove ApskTrailer if exists
-    auto trailer = dynamicPtrCast<const BitCountChunk>(packet->peekAtBack());
-    if (trailer != nullptr)
-        packet->popAtBack<BitCountChunk>(trailer->getChunkLength());
-    // end of KLUDGE
-
-
     auto payloadProtocol = header->getPayloadProtocol();
     callback.dissectPacket(packet, payloadProtocol);
-    ASSERT(packet->getDataLength() == B(0));
-    if (trailer != nullptr)
-        callback.visitChunk(trailer, &Protocol::apskPhy);
+
+    auto paddingLength = packet->getDataLength();
+    if (paddingLength > b(0)) {
+        const auto& padding = packet->popAtFront(paddingLength);        // remove padding
+        callback.visitChunk(padding, &Protocol::apskPhy);
+    }
     callback.endProtocolDataUnit(&Protocol::apskPhy);
 }
 

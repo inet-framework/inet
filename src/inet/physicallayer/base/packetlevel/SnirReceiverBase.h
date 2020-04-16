@@ -28,14 +28,19 @@ namespace physicallayer {
 class INET_API SnirReceiverBase : public ReceiverBase
 {
   protected:
-    double snirThreshold;
+    enum class SnirThresholdMode {
+        STM_UNDEFINED = -1,
+        STM_MIN,
+        STM_MEAN
+    };
+
+    double snirThreshold = NaN;
+    SnirThresholdMode snirThresholdMode = SnirThresholdMode::STM_UNDEFINED;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    SnirReceiverBase();
-
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double getSNIRThreshold() const { return snirThreshold; }

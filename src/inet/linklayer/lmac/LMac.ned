@@ -12,16 +12,17 @@
 
 package inet.linklayer.lmac;
 
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
 //
 // Implementation of L-MAC (Lightweight Medium Access Protocol for
-// Wireless Sensor Networks)
+// Wireless Sensor Networks).
 //
-// See C++ documentation for details
+// See C++ documentation for details.
 //
-simple LMac extends MacProtocolBase like IMacProtocol
+module LMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -30,9 +31,8 @@ simple LMac extends MacProtocolBase like IMacProtocol
         // how long is a slot?
         double slotDuration @unit(s) = default(100ms);
         int headerLength @unit(b) = default(10b);
+        int ctrlFrameLength @unit(b) = default(headerLength);
         int mtu @unit(B) = default(0B);
-        // length of MAC header
-        int queueLength = default(10);
         // default channel
         double defaultChannel = default(0);
         // bit rate
@@ -47,5 +47,12 @@ simple LMac extends MacProtocolBase like IMacProtocol
         @class(LMac);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @selfMessageKinds(inet::LMacType);
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                packetCapacity = default(10);
+                @display("p=100,100;q=l2queue");
+        }
 }
 

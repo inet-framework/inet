@@ -19,8 +19,8 @@
 package inet.networklayer.ipv4;
 
 import inet.common.MessageDispatcher;
+import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 import inet.networklayer.contract.IArp;
-import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
 
 //
@@ -50,7 +50,7 @@ module Ipv4NetworkLayer like INetworkLayer
         output transportOut @labels(Ipv4ControlInfo/up);
 
     submodules:
-        configurator: Ipv4NodeConfigurator {
+        configurator: <default("Ipv4NodeConfigurator")> like IIpv4NodeConfigurator if typename != "" {
             parameters:
                 @display("p=100,100;is=s");
         }

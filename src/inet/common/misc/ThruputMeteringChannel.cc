@@ -163,7 +163,9 @@ void ThruputMeteringChannel::refreshDisplay() const
     *p = '\0';
 
     // display label
-    getSourceGate()->getDisplayString().setTagArg(displayAsTooltip ? "tt" : "t", 0, buf);
+    auto srcGate = getSourceGate();
+    if (srcGate && srcGate->getChannel())
+        srcGate->getDisplayString().setTagArg(displayAsTooltip ? "tt" : "t", 0, buf);
 }
 
 } // namespace inet

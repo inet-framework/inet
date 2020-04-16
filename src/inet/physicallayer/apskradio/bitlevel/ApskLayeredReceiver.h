@@ -54,7 +54,7 @@ class INET_API ApskLayeredReceiver : public SnirReceiverBase
     const IAnalogDigitalConverter *analogDigitalConverter;
     W energyDetection;
     W sensitivity;
-    Hz carrierFrequency;
+    Hz centerFrequency;
     Hz bandwidth;
     double snirThreshold;
 

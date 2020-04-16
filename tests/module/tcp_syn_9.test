@@ -3,9 +3,8 @@ Test connection setup: A does active open, B does passive open. Both SYN and
 SYN+ACK get duplicated, and pop up several times -- this should cause no
 problem for TCP.
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -14,11 +13,9 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 #cmdenv-event-banners=false
 cmdenv-express-mode=false
 
-#[Parameters]
 *.testing=true
 cmdenv-log-prefix="[%c]: "
 

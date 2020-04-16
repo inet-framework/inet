@@ -43,7 +43,7 @@ class INET_API RealTimeScheduler : public cScheduler
         Entry(int fd, ICallback *callback) : fd(fd), callback(callback) {}
     };
 
-    int64_t baseTime; // in nanoseconds, as returned by opp_get_monotonic_clock_nsecs()
+    int64_t baseTime = 0; // in nanoseconds, as returned by opp_get_monotonic_clock_nsecs()
 
   protected:
     class BeginSimulationEvent : public cEvent

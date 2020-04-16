@@ -1,5 +1,40 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support (added 'tos' NED parameter).
+
+2019-11-13  Zoltan Bojthe
+
+	Added timeToLive and dscp parameters to UdpVideoStreamServer.
+	Added timeToLive, dontFragment, dscp parameters to UdpBasicBurst.
+
+2019-10-26  Levente Mészáros
+
+	Added NED documentations to new applications with composable traffic source and sink modules.
+
+2019-10-17  Levente Mészáros
+
+	Added removing SocketInd tag when a packet is processed in SocketIo modules.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-04-17  Levente Mészáros
+
+	Added Udp applications using the new queueing API.
+
+2019-01-22  Levente Mészáros
+
+	Added missing CreationTimeTag to application packets for end-to-end delay measurements.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-11  Mani Amoozadeh

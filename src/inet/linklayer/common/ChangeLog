@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-05  Zoltan Bojthe
+
+	Added isLocal() function to MacAddress for testing U/L bit (fix for #94).
+	Moved VlanTag.msg to common folder.
+
+2019-02-20  Levente Mészáros
+
+	Added UserPriorityPacketComparatorFunction needed to restore original CsmaCaMac functionality.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-12  Levente Mészáros

@@ -500,6 +500,10 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * Returns ith address of the interface.
      */
     const Ipv6Address& getAddress(int i) const;
+    /*
+     * Returns Global address of the interface.
+     * */
+    const Ipv6Address& getGlblAddress() const;
 
     /**
      * Returns true if the ith address of the interface is tentative.

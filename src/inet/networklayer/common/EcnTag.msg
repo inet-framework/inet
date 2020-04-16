@@ -7,6 +7,12 @@ import inet.common.TagBase;
 
 namespace inet;
 
+enum IpEcnCode {
+  IP_ECN_NOT_ECT = 0;
+  IP_ECN_ECT_1 = 1;
+  IP_ECN_ECT_0 = 2;
+  IP_ECN_CE = 3;
+}
 //
 // This is an abstract base class that should not be directly added as a tag.
 //

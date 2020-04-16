@@ -1,0 +1,134 @@
+<Devices>
+	<Router id="Router1">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.10.10.1</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:100/64</IPv6Address>
+				<IPv6Address>2001:db8:a::1/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:110/64</IPv6Address>
+				<IPv6Address>2001:db8:1::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	
+	<Router id="Router2">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.10.10.2</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:200/64</IPv6Address>
+				<IPv6Address>2001:db8:a::2/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:210/64</IPv6Address>
+				<IPv6Address>2001:db8:2::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	
+	<Router id="Router3">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.10.10.3</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:300/64</IPv6Address>
+				<IPv6Address>2001:db8:a::3/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:310/64</IPv6Address>
+				<IPv6Address>2001:db8:3::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	
+	<Router id="Router4">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.10.10.4</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:400/64</IPv6Address>
+				<IPv6Address>2001:db8:a::4/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:410/64</IPv6Address>
+				<IPv6Address>2001:db8:4::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+</Devices>
+

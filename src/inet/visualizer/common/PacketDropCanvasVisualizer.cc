@@ -36,6 +36,12 @@ PacketDropCanvasVisualizer::PacketDropCanvasVisualization::~PacketDropCanvasVisu
         delete figure;
 }
 
+PacketDropCanvasVisualizer::~PacketDropCanvasVisualizer()
+{
+    if (displayPacketDrops)
+        removeAllPacketDropVisualizations();
+}
+
 void PacketDropCanvasVisualizer::initialize(int stage)
 {
     PacketDropVisualizerBase::initialize(stage);

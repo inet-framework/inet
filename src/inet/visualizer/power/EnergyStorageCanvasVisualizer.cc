@@ -38,6 +38,12 @@ EnergyStorageCanvasVisualizer::EnergyStorageCanvasVisualization::~EnergyStorageC
     delete figure;
 }
 
+EnergyStorageCanvasVisualizer::~EnergyStorageCanvasVisualizer()
+{
+    if (displayEnergyStorages)
+        removeAllEnergyStorageVisualizations();
+}
+
 void EnergyStorageCanvasVisualizer::initialize(int stage)
 {
     EnergyStorageVisualizerBase::initialize(stage);

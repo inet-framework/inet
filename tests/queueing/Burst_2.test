@@ -1,0 +1,82 @@
+%description:
+
+In this test, packets are periodically (randomly) collected by two active sinks
+(ActivePacketSinks). One sink collects packets with a slower rate while the other
+sink uses a faster rate. The two packet sinks are combined using a markov
+chain with random transition matrix and random wait intervals. The packets are
+provided by a single passive source (PassivePacketSource).
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.classifier.MarkovClassifier;
+import inet.queueing.source.PassivePacketSource;
+
+network TestBurst
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        classifier: MarkovClassifier {
+            @display("p=200,100");
+        }
+        collector1: ActivePacketSink {
+            @display("p=300,100");
+        }
+        collector2: ActivePacketSink {
+            @display("p=300,200");
+        }
+    connections allowunconnected:
+        provider.out --> classifier.in;
+        classifier.out++ --> collector1.in;
+        classifier.out++ --> collector2.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestBurst
+sim-time-limit = 100s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.collector1.collectionInterval = uniform(0s, 20s)
+*.collector2.collectionInterval = uniform(0s, 2s)
+*.classifier.transitionProbabilities = "0 1 1 0"
+*.classifier.waitIntervals = "40 4"
+
+%contains: stdout
+Providing packet provider-0.
+Collecting packet provider-0.
+
+Running simulation...
+Providing packet provider-1.
+Collecting packet provider-1.
+Providing packet provider-2.
+Collecting packet provider-2.
+Providing packet provider-3.
+Collecting packet provider-3.
+Providing packet provider-4.
+Collecting packet provider-4.
+Providing packet provider-5.
+Collecting packet provider-5.
+Providing packet provider-6.
+Collecting packet provider-6.
+Providing packet provider-7.
+Collecting packet provider-7.
+Providing packet provider-8.
+Collecting packet provider-8.
+Providing packet provider-9.
+Collecting packet provider-9.
+Providing packet provider-10.
+Collecting packet provider-10.
+Providing packet provider-11.
+Collecting packet provider-11.
+Providing packet provider-12.
+Collecting packet provider-12.
+Providing packet provider-13.
+Collecting packet provider-13.
+Providing packet provider-14.
+Collecting packet provider-14.
+Providing packet provider-15.
+Collecting packet provider-15.

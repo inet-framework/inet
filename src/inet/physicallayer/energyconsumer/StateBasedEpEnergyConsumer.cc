@@ -59,7 +59,7 @@ void StateBasedEpEnergyConsumer::initialize(int stage)
         energySource->addEnergyConsumer(this);
 }
 
-void StateBasedEpEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void StateBasedEpEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal ||
         signal == IRadio::receptionStateChangedSignal ||
@@ -87,49 +87,73 @@ W StateBasedEpEnergyConsumer::computePowerConsumption() const
     IRadio::ReceptionState receptionState = radio->getReceptionState();
     IRadio::TransmissionState transmissionState = radio->getTransmissionState();
     if (radioMode == IRadio::RADIO_MODE_RECEIVER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
-        if (receptionState == IRadio::RECEPTION_STATE_IDLE)
-            powerConsumption += receiverIdlePowerConsumption;
-        else if (receptionState == IRadio::RECEPTION_STATE_BUSY)
-            powerConsumption += receiverBusyPowerConsumption;
-        else if (receptionState == IRadio::RECEPTION_STATE_RECEIVING) {
-            auto part = radio->getReceivedSignalPart();
-            if (part == IRadioSignal::SIGNAL_PART_NONE)
-                ;
-            else if (part == IRadioSignal::SIGNAL_PART_WHOLE)
-                powerConsumption += receiverReceivingPowerConsumption;
-            else if (part == IRadioSignal::SIGNAL_PART_PREAMBLE)
-                powerConsumption += receiverReceivingPreamblePowerConsumption;
-            else if (part == IRadioSignal::SIGNAL_PART_HEADER)
-                powerConsumption += receiverReceivingHeaderPowerConsumption;
-            else if (part == IRadioSignal::SIGNAL_PART_DATA)
-                powerConsumption += receiverReceivingDataPowerConsumption;
-            else
-                throw cRuntimeError("Unknown received signal part");
+        switch (receptionState) {
+            case IRadio::RECEPTION_STATE_IDLE:
+                powerConsumption += receiverIdlePowerConsumption;
+                break;
+            case IRadio::RECEPTION_STATE_BUSY:
+                powerConsumption += receiverBusyPowerConsumption;
+                break;
+            case IRadio::RECEPTION_STATE_RECEIVING: {
+                auto part = radio->getReceivedSignalPart();
+                switch (part) {
+                    case IRadioSignal::SIGNAL_PART_NONE:
+                        break;
+                    case IRadioSignal::SIGNAL_PART_WHOLE:
+                        powerConsumption += receiverReceivingPowerConsumption;
+                        break;
+                    case IRadioSignal::SIGNAL_PART_PREAMBLE:
+                        powerConsumption += receiverReceivingPreamblePowerConsumption;
+                        break;
+                    case IRadioSignal::SIGNAL_PART_HEADER:
+                        powerConsumption += receiverReceivingHeaderPowerConsumption;
+                        break;
+                    case IRadioSignal::SIGNAL_PART_DATA:
+                        powerConsumption += receiverReceivingDataPowerConsumption;
+                        break;
+                    default:
+                        throw cRuntimeError("Unknown received signal part");
+                }
+                break;
+            }
+            case IRadio::RECEPTION_STATE_UNDEFINED:
+                break;
+            default:
+                throw cRuntimeError("Unknown radio reception state");
         }
-        else if (receptionState != IRadio::RECEPTION_STATE_UNDEFINED)
-            throw cRuntimeError("Unknown radio reception state");
     }
     if (radioMode == IRadio::RADIO_MODE_TRANSMITTER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
-        if (transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
-            powerConsumption += transmitterIdlePowerConsumption;
-        else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
-            // TODO: add transmission power?
-            auto part = radio->getTransmittedSignalPart();
-            if (part == IRadioSignal::SIGNAL_PART_NONE)
-                ;
-            else if (part == IRadioSignal::SIGNAL_PART_WHOLE)
-                powerConsumption += transmitterTransmittingPowerConsumption;
-            else if (part == IRadioSignal::SIGNAL_PART_PREAMBLE)
-                powerConsumption += transmitterTransmittingPreamblePowerConsumption;
-            else if (part == IRadioSignal::SIGNAL_PART_HEADER)
-                powerConsumption += transmitterTransmittingHeaderPowerConsumption;
-            else if (part == IRadioSignal::SIGNAL_PART_DATA)
-                powerConsumption += transmitterTransmittingDataPowerConsumption;
-            else
-                throw cRuntimeError("Unknown transmitted signal part");
+        switch (transmissionState) {
+            case IRadio::TRANSMISSION_STATE_IDLE:
+                powerConsumption += transmitterIdlePowerConsumption;
+                break;
+            case IRadio::TRANSMISSION_STATE_TRANSMITTING: {
+                auto part = radio->getTransmittedSignalPart();
+                switch (part) {
+                    case IRadioSignal::SIGNAL_PART_NONE:
+                        break;
+                    case IRadioSignal::SIGNAL_PART_WHOLE:
+                        powerConsumption += transmitterTransmittingPowerConsumption;
+                        break;
+                    case IRadioSignal::SIGNAL_PART_PREAMBLE:
+                        powerConsumption += transmitterTransmittingPreamblePowerConsumption;
+                        break;
+                    case IRadioSignal::SIGNAL_PART_HEADER:
+                        powerConsumption += transmitterTransmittingHeaderPowerConsumption;
+                        break;
+                    case IRadioSignal::SIGNAL_PART_DATA:
+                        powerConsumption += transmitterTransmittingDataPowerConsumption;
+                        break;
+                    default:
+                        throw cRuntimeError("Unknown transmitted signal part");
+                }
+                break;
+            }
+            case IRadio::TRANSMISSION_STATE_UNDEFINED:
+                break;
+            default:
+                throw cRuntimeError("Unknown radio transmission state");
         }
-        else if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED)
-            throw cRuntimeError("Unknown radio transmission state");
     }
     return powerConsumption;
 }

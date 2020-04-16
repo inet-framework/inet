@@ -95,7 +95,7 @@ class INET_API Sctp : public cSimpleModule
         int32 appGateIndex;
         int32 assocId;
 
-        inline bool operator<(const AppAssocKey& b) const
+        bool operator<(const AppAssocKey& b) const
         {
             if (appGateIndex != b.appGateIndex)
                 return appGateIndex < b.appGateIndex;
@@ -103,6 +103,7 @@ class INET_API Sctp : public cSimpleModule
                 return assocId < b.assocId;
         }
     };
+
     struct SockPair
     {
         L3Address localAddr;
@@ -110,7 +111,7 @@ class INET_API Sctp : public cSimpleModule
         uint16 localPort;
         uint16 remotePort;
 
-        inline bool operator<(const SockPair& b) const
+        bool operator<(const SockPair& b) const
         {
             if (remoteAddr != b.remoteAddr)
                 return remoteAddr < b.remoteAddr;
@@ -122,6 +123,7 @@ class INET_API Sctp : public cSimpleModule
                 return localPort < b.localPort;
         }
     };
+
     struct VTagPair
     {
         uint32 peerVTag;
@@ -129,7 +131,8 @@ class INET_API Sctp : public cSimpleModule
         uint16 localPort;
         uint16 remotePort;
     };
-    typedef struct
+
+    struct AssocStat
     {
         int32 assocId;
         simtime_t start;
@@ -165,7 +168,7 @@ class INET_API Sctp : public cSimpleModule
         SimTime cumEndToEndDelay;
         uint64 startEndToEndDelay;
         uint64 stopEndToEndDelay;
-    } AssocStat;
+    };
 
     typedef std::map<int32, AssocStat> AssocStatMap;
     AssocStatMap assocStatMap;
@@ -227,7 +230,7 @@ class INET_API Sctp : public cSimpleModule
     virtual void send_to_ip(Packet *msg);
 
 
-    inline AssocStat *getAssocStat(uint32 assocId)
+    AssocStat *getAssocStat(uint32 assocId)
     {
         auto found = assocStatMap.find(assocId);
         if (found != assocStatMap.end()) {

@@ -93,3 +93,10 @@ class TlvHeaderInt extends TlvHeader
     chunkLength = B(4);
     int16_t int16Value = -1;
 }
+
+class HeaderWithoutSerializer extends FieldsChunk
+{
+    @str;
+    chunkLength = B(8);
+    int64_t int64Value  = -1;
+}

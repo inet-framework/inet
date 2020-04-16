@@ -69,8 +69,11 @@ void RealTimeScheduler::removeCallback(int fd, ICallback *callback)
 void RealTimeScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_nsecs();
+    // TODO: delete eventually
+#if OMNETPP_VERSION <= 0x0505 && OMNETPP_BUILDNUM <= 1022
     // this event prevents Qtenv fast forwarding to the first event
     sim->getFES()->insert(new BeginSimulationEvent("BeginSimulation"));
+#endif
 }
 
 void RealTimeScheduler::endRun()
@@ -88,8 +91,9 @@ void RealTimeScheduler::advanceSimTime()
 {
     int64_t curTime = opp_get_monotonic_clock_nsecs();
     simtime_t t(curTime - baseTime, SIMTIME_NS);
-    if (sim->getFES()->isEmpty() || t < sim->getFES()->peekFirst()->getArrivalTime())
-        getSimulation()->setSimTime(t);
+    if (!sim->getFES()->isEmpty())
+        t = std::min(t, sim->getFES()->peekFirst()->getArrivalTime());
+    sim->setSimTime(t);
 }
 
 bool RealTimeScheduler::receiveWithTimeout(long usec)
@@ -125,7 +129,7 @@ bool RealTimeScheduler::receiveWithTimeout(long usec)
     timeval timeout;
     timeout.tv_sec = 0;
     timeout.tv_usec = usec;
-
+    advanceSimTime();
     for (uint16 i = 0; i < callbackEntries.size(); i++) {
         if (callbackEntries.at(i).callback->notify(callbackEntries.at(i).fd))
             found = true;
@@ -171,11 +175,9 @@ cEvent *RealTimeScheduler::takeNextEvent()
 
     // calculate target time
     cEvent *event = sim->getFES()->peekFirst();
-    if (!event) {
-        // This way targetTime will always be "as far in the future as possible", considering
-        // how integer overflows work in conjunction with comparisons in C++ (in practice...)
-        targetTime = baseTime + INT64_MAX;
-    }
+    if (!event)
+        // as far into the future as reasonable (hoping we will never overflow - it is unlikely)
+        targetTime = INT64_MAX;
     else {
         // use time of next event
         simtime_t eventSimtime = event->getArrivalTime();

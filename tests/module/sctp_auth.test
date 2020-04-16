@@ -11,7 +11,7 @@ The number of rejected AUTH chunks should be equal to 0.
 %inifile: omnetpp.ini
 
 [General]
-network=SctpFeatureTest
+network = inet.test.moduletest.lib.SctpFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib

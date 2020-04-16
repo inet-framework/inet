@@ -1,0 +1,12 @@
+About INET Showcases
+====================
+
+This folder contains the INET showcase simulations and the source code of their
+associated web pages. Media files (images and videos) for the pages are
+in a separate repository (https://github.com/inet-framework/media)
+to keep the core  INET repository small; that repo needs to be checked out
+under $INET/media if you want to build the web pages.
+
+See $INET/doc/src/README for more information on building the documentation.
+
+

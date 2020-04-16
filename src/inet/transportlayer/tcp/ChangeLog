@@ -1,5 +1,147 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Marcel Marek
+
+	Removed TODO; Updated comment.
+
+2019-12-11  Zoltan Bojthe
+
+	Switched to using IpEcnCode enums from EcnTag.msg.
+
+2019-10-28  Mohammad HabibAllah
+
+	Implemented Explicit Congestion Notification (ECN) in TCPReno.
+
+2019-11-27  Zoltan Bojthe
+
+	Fixed module deletion
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService to dscp, Tcp already uses this value to send DscpReq to IP layer.
+	Fixed "TCPNoCongestionControl does not implement an infinite window", issue #179.
+
+2019-11-12  Zoltan Bojthe
+
+	Fixed calculation of sendable bytes in one segment.
+
+2019-11-11  Zoltan Bojthe
+
+	Removed unused code guarded with "ifdef TCP_SENDFRAGMENTS"
+	Added missing TCP connection state when building TCP header options.
+
+2019-11-06  Zoltan Bojthe
+
+	Using scaled window limit when scaled window enabled (fix for #274).
+
+2019-10-31  Zoltan Bojthe
+
+	Fixed messageKinds in NED
+
+2019-10-24  Zoltan Bojthe
+
+	Fixed "TcpConnection is a submodule" bug.
+
+2019-10-18  Zoltan Bojthe
+
+	Added message kind infos (name of used cEnum).
+
+2019-09-30  Marcel Marek
+
+	Added simplified version of TCP/IP ECN mechanism.
+
+	The mechanism is activated by setting ecnEnabled = true in .ini file. It
+	uses normal ECN-setup SYN and SYN-ACK  to establish a TCP flow. Sets
+	ECT(0) only on non-ACK packets.
+
+	Adds ECE and CWR flags to TCP header. Each packet marked with IP ECN CE
+	is echoed back with TCP ECE set.
+	(allowing multiple packets be echoed back within the same window).
+
+2019-09-24  Zoltan Bojthe
+
+	Changed base class to TransportProtocolBase.
+
+2019-09-23  Zoltan Bojthe
+
+	Removed unused TcpConnection(Tcp *mod) constructor.
+	Fixed temporary connection creating, fixed connection deleting.
+
+2019-09-22  Mani Amoozadeh
+
+	Fixed segmentation fault when SYN is received on a device with no TCP process running.
+	Added TCP socket options (TTL and TOS) -- note that tcp option is
+	per-connection. Setting an option affects all segments exchanged in that
+	connection.
+	Removed AppConnKey.
+	Reorganized TCP main class to better reflect the execution flow.
+
+2019-09-16  Zoltan Bojthe
+
+	Renamed processSegmentInListenFoo() to processSynInListen().
+
+2019-09-11  Zoltan Bojthe
+
+	Changed base class to LayeredProtocolBase.
+
+2019-09-09  Zoltan Bojthe
+
+	Changed interpolationmode to sample-hold in TcpConnection statistics.
+
+2019-09-06  Zoltan Bojthe
+
+	Removed recordStats NED parameter, TcpAlgorithm vectors converted to signals, statistics.
+	forked connections: new connection created for communication, old
+	conn stay listener
+
+2019-09-02  Zoltan Bojthe
+
+	Moved code of processing SYN by forked socket to new processSegmentInListenFoo().
+	Optimized Tag usage.
+
+2019-08-30  Zoltan Bojthe
+
+	Manually recorded vectors replaced to signals.
+
+2019-07-16  Zoltan Bojthe
+
+	Emit PacketDroppedSignal when received packet has incorrect CRC.
+
+2019-03-07  Zoltan Bojthe
+
+	bugfix for 'TCP SACK rexmit queue inconsitency fixed. Added test case for
+	TCP connection closure with SACK enbled'
+
+	'enqueueSentData(startSeqNo, endSeqNo)' instead of
+	'enqueueSentData(startSeqNo, length)' the 'bytes_sent' is unnecessary.
+
+2019-03-05  Luca Giacomoni
+
+	Fixed TCP SACK rexmit queue inconsitency.
+	Added test case for TCP connection closure with SACK enbled.
+
+2019-02-14  Luca Giacomoni
+
+	Fixed TCP SACK related bug.
+
+2019-02-11  Zoltan Bojthe
+
+	Removed static variables.
+
+2019-01-29  Zoltan Bojthe
+
+	Converted TcpConnection to cSimpleModule.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-27  Zoltan Bojthe

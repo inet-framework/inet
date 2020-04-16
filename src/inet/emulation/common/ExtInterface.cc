@@ -101,11 +101,11 @@ void ExtInterface::copyNetworkAddressFromExt()
 
     //get the IPv4 address
     ioctl(fd, SIOCGIFADDR, &ifr);
-    Ipv4Address ipv4Address = Ipv4Address(ntohl(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr));
+    Ipv4Address ipv4Address(ntohl(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr));
 
     //get the IPv4 netmask
     ioctl(fd, SIOCGIFNETMASK, &ifr);
-    Ipv4Address ipv4Netmask = Ipv4Address(ntohl(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr));
+    Ipv4Address ipv4Netmask(ntohl(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr));
 
     //TODO get IPv4 multicast addresses
 
@@ -113,10 +113,17 @@ void ExtInterface::copyNetworkAddressFromExt()
 
     close(fd);
 
-    auto interfaceData = findProtocolData<Ipv4InterfaceData>();
-    if (interfaceData != nullptr) {
-        interfaceData->setIPAddress(Ipv4Address(ipv4Address));
-        interfaceData->setNetmask(Ipv4Address(ipv4Netmask));
+    if (ipv4Address.isUnspecified() && ipv4Netmask.isUnspecified()) {
+        auto interfaceData = findProtocolData<Ipv4InterfaceData>();
+        if (interfaceData != nullptr) {
+            interfaceData->setIPAddress(Ipv4Address());
+            interfaceData->setNetmask(Ipv4Address());
+        }
+    }
+    else {
+        auto interfaceData = addProtocolDataIfAbsent<Ipv4InterfaceData>();
+        interfaceData->setIPAddress(ipv4Address);
+        interfaceData->setNetmask(ipv4Netmask);
     }
 }
 

@@ -30,8 +30,9 @@ LinkVisualizerBase::LinkVisualization::LinkVisualization(int sourceModuleId, int
 {
 }
 
-const char *LinkVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *LinkVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'n':
             result = packet->getName();

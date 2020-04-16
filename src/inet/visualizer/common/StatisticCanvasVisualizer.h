@@ -49,6 +49,9 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
     virtual void addStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
     virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
+
+  public:
+    virtual ~StatisticCanvasVisualizer();
 };
 
 } // namespace visualizer

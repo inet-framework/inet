@@ -1,0 +1,52 @@
+%description:
+
+Test the <disconnect> command
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv4NetworkConfigurator;
+        hostA: StandardHost;
+        hostB: StandardHost;
+        hostC: StandardHost;
+    connections:
+        hostA.pppg++ <--> {datarate=1Gbps;} <--> hostB.pppg++;
+        hostA.pppg++ <--> {datarate=1Gbps;} <--> hostC.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="1.0">
+        <disconnect src-module="hostA" src-gate="pppg[0]"/>
+        <disconnect src-module="hostA" dest-module="hostC"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /\*\* Signal at.*\n+//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Running simulation...
+** Event #1  t=1   Test.scenarioManager (ScenarioManager, id=2)
+processing <at> command...
+processing <disconnect> command...
+Disconnecting Test.hostA.pppg$o[0] --> Test.hostB.pppg$i[0] and its reverse connection
+processing <disconnect> command...
+Disconnecting Test.hostA.pppg$o[1] --> Test.hostC.pppg$i[0] and its reverse connection

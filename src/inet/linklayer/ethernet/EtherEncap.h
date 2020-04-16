@@ -46,20 +46,20 @@ class INET_API EtherEncap : public Ieee8022Llc
 
     struct Socket
     {
-      int socketId = -1;
-      MacAddress sourceAddress;
-      MacAddress destinationAddress;
-      const Protocol *protocol = nullptr;
-      int vlanId = -1;
+        int socketId = -1;
+        MacAddress sourceAddress;
+        MacAddress destinationAddress;
+        const Protocol *protocol = nullptr;
+        int vlanId = -1;
 
-      Socket(int socketId) : socketId(socketId) {}
-
-      bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
+        Socket(int socketId) : socketId(socketId) {}
+        bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
     };
 
     std::map<int, Socket *> socketIdToSocketMap;
 
   protected:
+    virtual ~EtherEncap();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
@@ -71,9 +71,9 @@ class INET_API EtherEncap : public Ieee8022Llc
     virtual void refreshDisplay() const override;
 
   public:
-    static void addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
-    static void addFcs(Packet *packet, FcsMode fcsMode);
-
+    /**
+     * Inserts the FCS chunk to end of packet. Fill the fcsMode and set fcs to 0.
+     */
     static const Ptr<const EthernetMacHeader> decapsulateMacHeader(Packet *packet);
 };
 

@@ -43,6 +43,12 @@ LinkBreakOsgVisualizer::LinkBreakOsgVisualization::~LinkBreakOsgVisualization()
     // TODO: delete node;
 }
 
+LinkBreakOsgVisualizer::~LinkBreakOsgVisualizer()
+{
+    if (displayLinkBreaks)
+        removeAllLinkBreakVisualizations();
+}
+
 void LinkBreakOsgVisualizer::refreshDisplay() const
 {
     LinkBreakVisualizerBase::refreshDisplay();

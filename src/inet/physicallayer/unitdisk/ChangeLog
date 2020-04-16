@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-07-08  Levente Mészáros
+
+	Added getMean to ISnir interface implementation.
+
+2019-03-19  Levente Mészáros
+
+	Added PHY header serializer.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-27  Levente Mészáros

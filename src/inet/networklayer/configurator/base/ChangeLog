@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-17  Zoltan Bojthe
+
+	Fixed feature dependency: interfaceModule local variable needed only when ieee802.11 or radio feature enabled.
+
+2019-12-12  Levente Mészáros
+
+	Fixed simulation trajectory instability caused by InterfaceEntry pointers in std::map.
+
+2019-11-07  Levente Mészáros
+
+	Switchted to use SSID instead of BSSID if MiB is available.
+
+2019-10-30  Levente Mészáros
+
+	Fixed address assignment with simplified mgmt.
+
+2019-02-07  Levente Mészáros
+
+	Fixed bug #65 in Ipv4NetworkConfigurator.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-14  Zoltan Bojthe

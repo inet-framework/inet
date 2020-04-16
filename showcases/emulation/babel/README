@@ -1,0 +1,8 @@
+Without starting the simulation which opens the TAP interfaces,
+they don't have IPv6 link local addresses and babel daemons don't work.
+
+You can check that the babeld deamons work by looking for UDP packets
+send to port 6696.
+
+sudo setcap cap_sys_admin+ep opp_run_release
+

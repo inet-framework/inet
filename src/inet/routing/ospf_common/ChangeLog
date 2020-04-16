@@ -1,0 +1,7 @@
+====== inet-4.x ======
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-11  Zoltan Bojthe
+
+	Renamed OspfPacket to OspfPacketBase.

@@ -21,9 +21,9 @@
 package inet.networklayer.contract;
 
 //
-// \Ipv6 Tunnel Manager
+// IPv6 Tunnel Manager
 //
-// @see Ipv6, Ipv6NeighbourDiscovery, Icmpv6
+// @see ~Ipv6, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
 moduleinterface IIpv6Tunneling
 {

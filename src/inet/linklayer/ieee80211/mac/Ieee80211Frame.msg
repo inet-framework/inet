@@ -48,6 +48,8 @@ const b LENGTH_CTS = b(112);    //bits
 const b LENGTH_ACK = b(112);    //bits
 const b LENGTH_MGMT = B(28);    //bits
 const b LENGTH_ADDBAREQ = LENGTH_MGMT + B(9); // mgmt length + action body length
+const b LENGTH_ADDBARESP = LENGTH_MGMT + B(9); // mgmt length + action body length
+const b LENGTH_DELBA = LENGTH_MGMT + B(6); // mgmt length + action body length
 const b LENGTH_BASIC_BLOCKACK = B(16 + 2 + (2 + 128) + 4); // header + ba control + ba information + fcs
 const b DATAFRAME_HEADER_MINLENGTH = B(2 + 2 + 3 * 6 + 2);    //bits without QoS, without Address4: 2 + 2 + 3*6(addresses) + 2
 const b QOSCONTROL_PART_LENGTH = b(2 * 8);    // QoS Control field length (bits)
@@ -125,14 +127,26 @@ class Ieee80211MacHeader extends FieldsChunk
     Ieee80211FrameType type; // type and subtype
     bool toDS;
     bool fromDS;
-    bool retry;
     bool moreFragments;
-    // TODO: rename to durationField (levy)
-    simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
+    bool retry;
+    bool powerMgmt = false; // unused
+    bool moreData = false; // unused
+    bool protectedFrame = false; // unused
+    bool order = false; // unused
+    simtime_t durationField = -1; // "duration" in the Duration/ID field (-1=no duration)
     short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
-    MacAddress receiverAddress; // aka address1
+    MacAddress receiverAddress; // aka address1 (RA)
     simtime_t MACArrive;    // FIXME remove it, technical data, used inside of MAC module
 }
+
+cplusplus(Ieee80211MacHeader) {{
+    virtual uint8_t getProtocolVersion() const { return ((getType() & 0b11000000) >> 6); }
+    virtual uint8_t getFrameType() const { return ((getType() & 0b00110000) >> 4); }
+    virtual uint8_t getSubType() const { return (getType() & 0b00001111); }
+    virtual void setType(uint8_t protocolVersion, uint8_t frameType, uint8_t subType) {
+        setType(static_cast<inet::ieee80211::Ieee80211FrameType>((protocolVersion << 6) | (frameType << 4) | subType));
+    }
+}}
 
 //
 // Format of a 802.11 frame with address1 present, like ACK and CTS
@@ -156,7 +170,7 @@ class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 {
     chunkLength = LENGTH_RTS - B(4);
-    MacAddress transmitterAddress; // aka address2
+    MacAddress transmitterAddress; // aka address2 (TA)
 }
 
 //
@@ -230,6 +244,7 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
 {
     type = ST_ACTION;
     short category;
+    uint8_t blockAckAction;
     // TODO: subclasses will add action subfield contents
     //WirelessNetworkManagementAction action; // action TODO: remove it
 }
@@ -249,53 +264,55 @@ class Ieee80211MpduSubframeHeader extends FieldsChunk
 }
 
 //
-// Table 8-203—ADDBA Request frame Action field format -- 736p.
+// 8.5.5.2 ADDBA Request frame format
 //
 class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 {
     chunkLength = LENGTH_ADDBAREQ - B(4);
-    category = 3; // representing Block Ack
-    int blockAckAction = 0; // representing ADDBA request
-    int dialogToken = 1; // nonzero, arbitrary
+    category = 3; // category field set to 3 (representing Block Ack). (1 byte)
+    blockAckAction = 0; // Block Ack Action field is set to 0 (representing ADDBA request). (1 byte)
+    uint8_t dialogToken = 1; // Dialog Token field is set to a nonzero value chosen by the STA. (1 byte)
 
-    // Block Ack Parameter Set field
-    bool aMsduSupported; // The A-MSDU Supported subfield determines whether an A-MSDU may be carried in a QoS data MPDU sent under this Block Ack agreement.
-    bool blockAckPolicy; // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
-    int tid; // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested.
-    int bufferSize; // The Buffer Size subfield indicates the number of buffers available for this particular TID
+    // Block Ack Parameter Set field (2 bytes)
+    bool aMsduSupported; // The A-MSDU Supported subfield determines whether an A-MSDU may be carried in a QoS data MPDU sent under this Block Ack agreement. (1 bit)
+    bool blockAckPolicy; // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack. (1 bit)
+    uint8_t tid; // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested. (4 bits)
+    uint16_t bufferSize; // The Buffer Size subfield indicates the number of buffers available for this particular TID. (10 bits)
 
-    // Block Ack Timeout Value field
+    // Block Ack Timeout Value field (2 bytes)
     // The Block Ack Timeout Value field contains the duration, in TUs, after which the Block Ack setup is
     // terminated, if there are no frame exchanges (see 10.5.4) within this duration using this Block Ack
-    //  agreement. A value of 0 disables the timeout.
+    // agreement. A value of 0 disables the timeout.
     simtime_t blockAckTimeoutValue;
 
-    // Block Ack Starting Sequence Control
+    // Block Ack Starting Sequence Control (2 bytes)
     // The Starting Sequence Number subfield of the Block Ack Starting Sequence Control subfield contains the sequence number of the first MSDU for which this Basic
     // BlockAckReq frame is sent. The Fragment Number subfield is set to 0.
-    int _fragmentNumber = 0; // FIXME: DataOrMgmtFreme has a fragmentNumber
-    SequenceNumber startingSequenceNumber; // the sequence number of the first MSDU
-
+    uint8_t _fragmentNumber = 0; // FIXME: DataOrMgmtFreme has a fragmentNumber (4 bits)
+    SequenceNumber startingSequenceNumber; // the sequence number of the first MSDU (12 bits)
 }
 
+//
+// 8.5.5.3 ADDBA Response frame format
+//
 class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 {
-    // chunkLength TODO
-    category = 3; // representing Block Ack
-    int blockAckAction = 1; // representing ADDBA response
-    int dialogToken = 1; // The Dialog Token field value is copied from the corresponding received ADDBA Request frame.
-    int statusCode; // The Status Code field is used in a response management frame to indicate the success or failure of a requested operation.
+    chunkLength = LENGTH_ADDBARESP - B(4);
+    category = 3; // Category field is set to 3 (representing Block Ack). (1 byte)
+    blockAckAction = 1; // Block Ack Action field is set to 1 (representing ADDBA response). (1 byte)
+    uint8_t dialogToken = 1; // The Dialog Token field value is copied from the corresponding received ADDBA Request frame. (1 byte)
+    uint16_t statusCode; // The Status Code field is used in a response management frame to indicate the success or failure of a requested operation. (2 bytes)
 
-    // Block Ack Parameter Set field
-    bool aMsduSupported; // The A-MSDU Supported subfield determines whether an A-MSDU may be carried in a QoS data MPDU sent under this Block Ack agreement.
-    bool blockAckPolicy; // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
-    int tid; // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested.
-    int bufferSize; // The Buffer Size subfield indicates the number of buffers available for this particular TID
+    // Block Ack Parameter Set field (2 bytes)
+    bool aMsduSupported; // The A-MSDU Supported subfield determines whether an A-MSDU may be carried in a QoS data MPDU sent under this Block Ack agreement. (1 bit)
+    bool blockAckPolicy; // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack. (1 bit)
+    uint8_t tid; // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested. (4 bits)
+    uint16_t bufferSize; // The Buffer Size subfield indicates the number of buffers available for this particular TID. (10 bits)
 
-    // Block Ack Timeout Value field
+    // Block Ack Timeout Value field (2 bytes)
     // The Block Ack Timeout Value field contains the duration, in TUs, after which the Block Ack setup is
     // terminated, if there are no frame exchanges (see 10.5.4) within this duration using this Block Ack
-    //  agreement. A value of 0 disables the timeout.
+    // agreement. A value of 0 disables the timeout.
     simtime_t blockAckTimeoutValue;
 }
 
@@ -304,22 +321,20 @@ class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 //
 class Ieee80211Delba extends Ieee80211ActionFrame
 {
-    // chunkLength TODO
-    category = 3;
-    int blockAckAction = 2; // representing DELBA
+    chunkLength = LENGTH_DELBA;
+    category = 3; // Category field is set to 3 (representing DELBA). (1 byte)
+    blockAckAction = 2; // Block Ack Action field is set to 2 (representing DELBA). (1 byte)
 
-    // DELBA Parameter Set
-    // It is set to 1 to indicate the originator and is set to 0 to indicate the recipient.
-    // The Initiator subfield indicates if the originator or the recipient of the data is sending this frame.
-    bool initiator;
-
-    // The TID subfield indicates the TSID or the UP for which the Block Ack has been originally set up.
-    int tid;
+    // DELBA Parameter Set (2 bytes)
+    uint16_t reserved = 0; // Reserved. (11 bits)
+    bool initiator; // It is set to 1 to indicate the originator and is set to 0 to indicate the recipient.
+    				// The Initiator subfield indicates if the originator or the recipient of the data is sending this frame. (1 bit)
+    uint8_t tid; // The TID subfield indicates the TSID or the UP for which the Block Ack has been originally set up. (4 bits)
 
     // This Reason Code field is used to indicate the reason that an unsolicited notification management frame of
     // type Disassociation, Deauthentication, DELTS, DELBA, DLS Teardown, or Mesh Peering Close was
-    // generated.
-    int reasonCode;
+    // generated. (2 bytes)
+    uint16_t reasonCode;
 }
 
 //
@@ -327,7 +342,6 @@ class Ieee80211Delba extends Ieee80211ActionFrame
 //
 class Ieee80211BlockAckReq extends Ieee80211TwoAddressHeader
 {
-    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK_REQ;
@@ -335,11 +349,12 @@ class Ieee80211BlockAckReq extends Ieee80211TwoAddressHeader
     bool multiTid;
     bool compressedBitmap;
     bool barAckPolicy; // 0-Normal Acknowledgment, 1-No Acknowledgment.
+    uint16_t reserved = 0;
 }
 
 class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 {
-    // chunkLength TODO
+    chunkLength = B(38);
 
     int tidInfo; //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
 
@@ -356,13 +371,9 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 
 class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
-    // chunkLength TODO
+    chunkLength = B(38);
 
     int tidInfo; // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
-
-    // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
-    // The TA field is the address of the STA transmitting the BlockAck frame.
-    type = ST_BLOCKACK_REQ;
     // The BAR Information field of the Compressed BlockAckReq frame contains the Block Ack Starting
     // Sequence Control subfield, as shown in Figure 8-21. The Starting Sequence Number subfield of the Block
     // Ack Starting Sequence Control subfield contains the sequence number of the first MSDU or A-MSDU for
@@ -379,9 +390,6 @@ class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 class Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
 {
     // chunkLength TODO
-    // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
-    // The TA field is the address of the STA transmitting the BlockAck frame.
-    type = ST_BLOCKACK_REQ;
     // The BAR Information field of the Compressed BlockAckReq frame contains the Block Ack Starting
     // Sequence Control subfield, as shown in Figure 8-21. The Starting Sequence Number subfield of the Block
     // Ack Starting Sequence Control subfield contains the sequence number of the first MSDU or A-MSDU for
@@ -399,7 +407,6 @@ class Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
 //
 class Ieee80211BlockAck extends Ieee80211TwoAddressHeader
 {
-    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK;
@@ -410,6 +417,7 @@ class Ieee80211BlockAck extends Ieee80211TwoAddressHeader
     // Table 8-18—BlockAck frame variant encoding
     bool multiTid;
     bool compressedBitmap;
+    uint16_t reserved = 0;
 }
 
 //
@@ -472,3 +480,4 @@ class Ieee80211MultiTidBlockAck extends Ieee80211BlockAck
 
     // TODO: unimplemented
 }
+

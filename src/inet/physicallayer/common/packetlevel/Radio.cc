@@ -20,7 +20,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 #ifdef NS3_VALIDATION
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -399,6 +399,7 @@ Signal *Radio::createSignal(Packet *packet) const
 {
     encapsulate(packet);
     if (sendRawBytes) {
+        // TODO: this doesn't always work, because the packet length may not be divisible by 8
         auto rawPacket = new Packet(packet->getName(), packet->peekAllAsBytes());
         rawPacket->copyTags(*packet);
         delete packet;
@@ -451,6 +452,7 @@ void Radio::continueReception(cMessage *timer)
         EV_INFO << "Reception started: " << (isReceptionAttempted ? "\x1b[1mattempting\x1b[0m" : "\x1b[1mnot attempting\x1b[0m") << " " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
         if (!isReceptionAttempted)
             receptionTimer = nullptr;
+        // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
     }
     else {
         EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
@@ -474,6 +476,8 @@ void Radio::endReception(cMessage *timer)
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
+        take(macFrame);
+        // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;

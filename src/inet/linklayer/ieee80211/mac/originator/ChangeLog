@@ -1,5 +1,63 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-21  Levente Mészáros
+
+	Fixed taking packet ownership from TX queue after popping a packet.
+
+2019-02-15  Levente Mészáros
+
+	Ported to the new queueing API.
+
+2019-02-14  Levente Mészáros
+
+	Fixed problem caused by using NO_ACK_REQUIRED in ack handlers.
+
+2019-02-13  Levente Mészáros
+
+	Dropped unsused getNumberOfFramesWithStatus function.
+	Fixed memory leak in QosAckHandler when block ack is used.
+	Added missing dropFrames to QoSAckHandler.
+	Revived to minimally working state printAckStatuses debug support in QosAckHandler.
+	Removed FRAME_NOT_YET_TRANSMITTED from ack status maps if the frame is not in progress yet.
+	Fixed stored ack status for NO_ACK and management frames.
+	Fixed printing Tid in WATCH.
+
+2019-02-12  Levente Mészáros
+
+	Renamed method to TxopProcedure::endTxop and signal to txopEnded.
+	Added txopActive statistic.
+
+2019-02-07  Levente Mészáros
+
+	Changed AckHandler and QosAckHandler classes into a module.
+	Added watches for ack statuses.
+
+2019-02-04  Levente Mészáros
+
+	Added and updated several log statements to better inform the user about what is going on.
+	Added several missing WATCHes to the modules.
+	Cleaned up Enter_Method and Enter_Method_Silent calls.
+
+2019-01-31  Levente Mészáros
+
+	Added basic signals and statistics to TxopProcedure.
+	Added txopStarted and txopStopped signals. Added txop and txopDuration statistics.
+	Moved emit statements because packets are destroyed.
+
+2019-01-30  Levente Mészáros
+
+	Added basic signals and statistics to MAC data services.
+	Added packetFragmented, packetDefragmented, packetAggregated, packetDeaggregated signals.
+	Added packetFragmentation, packetDefragmentation, packetAggregation, packetDeaggregation statistics.
+
+2019-01-29  Levente Mészáros
+
+	Added basic signals and statistics to recovery procedure implementations.
+	Added contentionWindowChanged and retryLimitReached signals.
+	Added contentionWindow vector and retryLimitReach scalar statistics.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-20  Levente Mészáros

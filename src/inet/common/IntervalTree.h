@@ -44,84 +44,86 @@
 
 namespace inet {
 
-/// @brief Interval trees implemented using red-black-trees as described in
-/// the book Introduction_To_Algorithms_ by Cormen, Leisserson, and Rivest.
-/// Can be replaced in part by boost::icl::interval_set, which is only supported after boost 1.46 and does not support delete node routine.
-struct Interval
-{
-  public:
-    Interval(simtime_t low, simtime_t high, void *value) :
-        low(low), high(high), value(value) {}
-
-    virtual ~Interval()
-    {
-    }
-
-    virtual void print() const
-    {
-        std::cout << value;
-    }
-
-    /// @brief interval is defined as [low, high]
-    simtime_t low, high;
-    void *value;
-};
-
-/// @brief The node for interval tree
-class INET_API IntervalTreeNode
-{
-    friend class IntervalTree;
-    friend class IntervalTreeTest;
-
-  public:
-    /// @brief Print the interval node information: set left = nil and right = root
-    void print(IntervalTreeNode* left, IntervalTreeNode* right) const;
-
-    /// @brief Create an empty node
-    IntervalTreeNode();
-
-    /// @brief Create an node storing the interval
-    IntervalTreeNode(const Interval* new_interval);
-
-    ~IntervalTreeNode();
-
-  protected:
-    /// @brief interval stored in the node
-    const Interval* stored_interval = nullptr;
-
-    simtime_t key;
-
-    simtime_t high;
-
-    simtime_t max_high;
-
-    /// @brief red or black node: if red = false then the node is black
-    bool red = false;
-
-    IntervalTreeNode* left = nullptr;
-
-    IntervalTreeNode* right = nullptr;
-
-    IntervalTreeNode* parent = nullptr;
-};
-
-/// @brief Class describes the information needed when we take the
-/// right branch in searching for intervals but possibly come back
-/// and check the left branch as well.
-struct it_recursion_node
-{
-  public:
-    IntervalTreeNode* start_node = nullptr;
-
-    unsigned int parent_index = 0;
-
-    bool try_right_branch = false;
-};
-
 /// @brief Interval tree
 class INET_API IntervalTree
 {
     friend class IntervalTreeTest;
+
+  public:
+    /// @brief Interval trees implemented using red-black-trees as described in
+    /// the book Introduction_To_Algorithms_ by Cormen, Leisserson, and Rivest.
+    /// Can be replaced in part by boost::icl::interval_set, which is only supported after boost 1.46 and does not support delete node routine.
+    struct Interval
+    {
+      public:
+        Interval(simtime_t low, simtime_t high, void *value) :
+            low(low), high(high), value(value) {}
+
+        virtual ~Interval()
+        {
+        }
+
+        virtual void print() const
+        {
+            std::cout << value;
+        }
+
+        /// @brief interval is defined as [low, high]
+        simtime_t low, high;
+        void *value;
+    };
+
+  protected:
+    /// @brief The node for interval tree
+    class INET_API Node
+    {
+        friend class IntervalTree;
+        friend class IntervalTreeTest;
+
+      public:
+        /// @brief Print the interval node information: set left = nil and right = root
+        void print(Node* left, Node* right) const;
+
+        /// @brief Create an empty node
+        Node();
+
+        /// @brief Create an node storing the interval
+        Node(const Interval* new_interval);
+
+        ~Node();
+
+      protected:
+        /// @brief interval stored in the node
+        const Interval* stored_interval = nullptr;
+
+        simtime_t key;
+
+        simtime_t high;
+
+        simtime_t max_high;
+
+        /// @brief red or black node: if red = false then the node is black
+        bool red = false;
+
+        Node* left = nullptr;
+
+        Node* right = nullptr;
+
+        Node* parent = nullptr;
+    };
+
+    /// @brief Class describes the information needed when we take the
+    /// right branch in searching for intervals but possibly come back
+    /// and check the left branch as well.
+    struct it_recursion_node
+    {
+      public:
+        Node* start_node = nullptr;
+
+        unsigned int parent_index = 0;
+
+        bool try_right_branch = false;
+    };
 
   public:
     IntervalTree();
@@ -131,52 +133,51 @@ class INET_API IntervalTree
     void print() const;
 
     /// @brief Delete one node of the interval tree
-    const Interval* deleteNode(IntervalTreeNode* node);
+    const Interval* deleteNode(Node* node);
 
     /// @brief delete node stored a given interval
     void deleteNode(const Interval* ivl);
 
     /// @brief Insert one node of the interval tree
-    IntervalTreeNode* insert(const Interval* new_interval);
+    Node* insert(const Interval* new_interval);
 
-    IntervalTreeNode* getMinimum(IntervalTreeNode *node) const;
+    Node* getMinimum(Node *node) const;
 
-    IntervalTreeNode* getMaximum(IntervalTreeNode *node) const;
+    Node* getMaximum(Node *node) const;
 
     /// @brief get the predecessor of a given node
-    IntervalTreeNode* getPredecessor(IntervalTreeNode* node) const;
+    Node* getPredecessor(Node* node) const;
 
     /// @brief Get the successor of a given node
-    IntervalTreeNode* getSuccessor(IntervalTreeNode* node) const;
+    Node* getSuccessor(Node* node) const;
 
     /// @brief Return result for a given query
     std::deque<const Interval*> query(simtime_t low, simtime_t high);
 
   protected:
+    Node* root = nullptr;
 
-    IntervalTreeNode* root = nullptr;
-
-    IntervalTreeNode* nil = nullptr;
+    Node* nil = nullptr;
 
     /// @brief left rotation of tree node
-    void leftRotate(IntervalTreeNode* node);
+    void leftRotate(Node* node);
 
     /// @brief right rotation of tree node
-    void rightRotate(IntervalTreeNode* node);
+    void rightRotate(Node* node);
 
     /// @brief recursively insert a node
-    void recursiveInsert(IntervalTreeNode* node);
+    void recursiveInsert(Node* node);
 
     /// @brief recursively print a subtree
-    void recursivePrint(IntervalTreeNode* node) const;
+    void recursivePrint(Node* node) const;
 
     /// @brief recursively find the node corresponding to the interval
-    IntervalTreeNode* recursiveSearch(IntervalTreeNode* node, const Interval* ivl) const;
+    Node* recursiveSearch(Node* node, const Interval* ivl) const;
 
     /// @brief Travels up to the root fixing the max_high fields after an insertion or deletion
-    void fixupMaxHigh(IntervalTreeNode* node);
+    void fixupMaxHigh(Node* node);
 
-    void deleteFixup(IntervalTreeNode* node);
+    void deleteFixup(Node* node);
 
   private:
     unsigned int recursion_node_stack_size = 0;
@@ -187,5 +188,5 @@ class INET_API IntervalTree
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERVAL_TREE_H
+#endif // ifndef __INET_INTERVALTREE_H
 

@@ -11,10 +11,12 @@ src/inet/features.h
 src/inet/opp_defines.h
 precompiled_*.h.*
 /3rdparty
+/media
 **/MoBAN_Pattern*.txt
 
 # output and result files
 .settings/
+.ccls-cache/
 /doc/doxy/
 /doc/neddoc/
 /doc/src/manual/figures/*.pdf
@@ -27,7 +29,6 @@ precompiled_*.h.*
 /examples/*/*/cache/
 /tutorials/*/cache/
 /tutorials/*/data/
-/tutorials/wireless/html/
 /tests/*/work/
 /tests/*/*/work/
 /tests/*/results*/
@@ -48,6 +49,7 @@ precompiled_*.h.*
 *.ind
 *.synctex.gz
 .buildlog*
+compile_commands.json
 
 # ignore binary files
 out/

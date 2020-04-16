@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-12  Levente Mészáros
+
+	Fixed simulation trajectory instability caused by InterfaceEntry pointers in std::map.
+
+2019-11-28  Zoltan Bojthe
+
+	Routing table and configurator detects when an interface connecting/disconnecting.
+
+2019-11-13  Zoltan Bojthe
+
+	Added slash notation support for interface netmask, issue #303.
+	Copied necessary parts from Ipv4NodeConfigurator to HostAutoConfigurator to allow replacing, feature #447.
+	Added IIpv4NodeConfigurator module interface.
+
+2019-11-08  Levente Mészáros
+
+	Added assignUniqueAddresses parameter to Ipv4NetworkConfigurator.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-07  Zoltan Bojthe

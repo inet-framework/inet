@@ -31,7 +31,7 @@ class INET_API ScalarReception : public FlatReceptionBase, public virtual IScala
     const W power;
 
   public:
-    ScalarReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz carrierFrequency, Hz bandwidth, W power);
+    ScalarReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz centerFrequency, Hz bandwidth, W power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual W getPower() const override { return power; }

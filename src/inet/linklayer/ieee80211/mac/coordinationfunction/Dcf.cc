@@ -101,18 +101,11 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 {
     Enter_Method_Silent("processUpperFrame(%s)", packet->getName());
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
-    if (channelAccess->getPendingQueue()->insert(packet)) {
-        EV_INFO << "Frame " << packet->getName() << " has been inserted into the PendingQueue." << endl;
+    auto pendingQueue = channelAccess->getPendingQueue();
+    pendingQueue->pushPacket(packet);
+    if (!pendingQueue->isEmpty()) {
         EV_DETAIL << "Requesting channel" << endl;
         channelAccess->requestChannel(this);
-    }
-    else {
-        EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
-        PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(channelAccess->getPendingQueue()->getMaxQueueSize());
-        emit(packetDroppedSignal, packet, &details);
-        delete packet;
     }
 }
 
@@ -197,7 +190,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     auto pendingPacket = channelAccess->getInProgressFrames()->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
-    updatedHeader->setDuration(duration);
+    updatedHeader->setDurationField(duration);
     EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
     packet->insertAtFront(updatedHeader);
     tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);

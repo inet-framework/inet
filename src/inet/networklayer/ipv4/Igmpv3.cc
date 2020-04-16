@@ -26,11 +26,14 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/Igmpv3.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
@@ -41,7 +44,7 @@ Define_Module(Igmpv3);
 
 static bool isEmptyRecord(const GroupRecord& record)
 {
-    return record.sourceList.empty();
+    return record.getSourceList().empty();
 }
 
 static bool isSorted(const Ipv4AddressVector& v)
@@ -85,6 +88,8 @@ void Igmpv3::initialize(int stage)
         lastMemberQueryCount = par("lastMemberQueryCount");
         lastMemberQueryTime = lastMemberQueryInterval * lastMemberQueryCount;    //todo checknut ci je to takto..
         unsolicitedReportInterval = par("unsolicitedReportInterval");
+        const char *crcModeString = par("crcMode");
+        crcMode = parseCrcMode(crcModeString, false);
 
         addWatches();
     }
@@ -186,12 +191,12 @@ void Igmpv3::multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, c
         if (groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != sourceList.sources) {
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
             vector<GroupRecord> records(2);
-            records[0].groupAddress = group;
-            records[0].recordType = IGMPV3_RT_ALLOW;
-            records[0].sourceList = set_complement(sourceList.sources, groupData->sourceAddressList);
-            records[1].groupAddress = group;
-            records[1].recordType = IGMPV3_RT_BLOCK;
-            records[1].sourceList = set_complement(groupData->sourceAddressList, sourceList.sources);
+            records[0].setGroupAddress(group);
+            records[0].setRecordType(IGMPV3_RT_ALLOW);
+            records[0].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
+            records[1].setGroupAddress(group);
+            records[1].setRecordType(IGMPV3_RT_BLOCK);
+            records[1].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
             records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
             if (!records.empty())
                 sendGroupReport(ie, records);
@@ -200,12 +205,12 @@ void Igmpv3::multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, c
         else if (groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != sourceList.sources) {
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
             vector<GroupRecord> records(2);
-            records[0].groupAddress = group;
-            records[0].recordType = IGMPV3_RT_ALLOW;
-            records[0].sourceList = set_complement(groupData->sourceAddressList, sourceList.sources);
-            records[1].groupAddress = group;
-            records[1].recordType = IGMPV3_RT_BLOCK;
-            records[1].sourceList = set_complement(sourceList.sources, groupData->sourceAddressList);
+            records[0].setGroupAddress(group);
+            records[0].setRecordType(IGMPV3_RT_ALLOW);
+            records[0].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
+            records[1].setGroupAddress(group);
+            records[1].setRecordType(IGMPV3_RT_BLOCK);
+            records[1].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
             records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
             if (!records.empty())
                 sendGroupReport(ie, records);
@@ -214,18 +219,18 @@ void Igmpv3::multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, c
         else if (groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_EXCLUDE) {
             EV_DETAIL << "Sending TO_EX report.\n";
             vector<GroupRecord> records(1);
-            records[0].groupAddress = group;
-            records[0].recordType = IGMPV3_RT_TO_EX;
-            records[0].sourceList = sourceList.sources;
+            records[0].setGroupAddress(group);
+            records[0].setRecordType(IGMPV3_RT_TO_EX);
+            records[0].setSourceList(sourceList.sources);
             sendGroupReport(ie, records);
         }
         // EXCLUDE(A) -> INCLUDE(B): Send TO_IN(B)
         else if (groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_INCLUDE) {
             EV_DETAIL << "Sending TO_IN report.\n";
             vector<GroupRecord> records(1);
-            records[0].groupAddress = group;
-            records[0].recordType = IGMPV3_RT_TO_IN;
-            records[0].sourceList = sourceList.sources;
+            records[0].setGroupAddress(group);
+            records[0].setRecordType(IGMPV3_RT_TO_IN);
+            records[0].setSourceList(sourceList.sources);
             sendGroupReport(ie, records);
         }
 
@@ -426,20 +431,21 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
     for (auto & elem : interfaceData->groups) {
         GroupRecord gr;
         if (elem.second->filter == IGMPV3_FM_INCLUDE) {
-            gr.recordType = IGMPV3_RT_IS_IN;
+            gr.setRecordType(IGMPV3_RT_IS_IN);
         }
         else if (elem.second->filter == IGMPV3_FM_EXCLUDE) {
-            gr.recordType = IGMPV3_RT_IS_EX;
+            gr.setRecordType(IGMPV3_RT_IS_EX);
         }
-        gr.groupAddress = elem.second->groupAddr;
-        gr.sourceList = elem.second->sourceAddressList;
+        gr.setGroupAddress(elem.second->groupAddr);
+        gr.setSourceList(elem.second->sourceAddressList);
         report->setGroupRecord(counter++, gr);
-        byteLength += 8 + gr.sourceList.size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
+        byteLength += 8 + gr.getSourceList().size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
     }
     report->setChunkLength(B(byteLength));
 
     if (counter != 0) {    //if no record created, dont need to send report
         EV_INFO << "Sending response to a General Query on interface '" << ie->getInterfaceName() << "'.\n";
+        insertCrc(report, outPacket);
         outPacket->insertAtFront(report);
         sendReportToIP(outPacket, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
         numReportsSent++;
@@ -463,19 +469,19 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
         // Send report for a Group-Specific Query
         EV_INFO << "Response timer for a Group-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getInterfaceName() << "'\n";
 
-        records[0].groupAddress = group->groupAddr;
-        records[0].recordType = group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_IS_IN : IGMPV3_RT_IS_EX;
-        records[0].sourceList = group->sourceAddressList;
+        records[0].setGroupAddress(group->groupAddr);
+        records[0].setRecordType(group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_IS_IN : IGMPV3_RT_IS_EX);
+        records[0].setSourceList(group->sourceAddressList);
         sendGroupReport(ie, records);
     }
     else {
         // Send report for a Group-and-Source-Specific Query
         EV_INFO << "Response timer for a Group-and-Source-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getInterfaceName() << "'\n";
 
-        records[0].groupAddress = group->groupAddr;
-        records[0].recordType = IGMPV3_RT_IS_IN;
-        records[0].sourceList = group->filter == IGMPV3_FM_INCLUDE ? set_intersection(group->sourceAddressList, group->queriedSources) :
-            set_complement(group->queriedSources, group->sourceAddressList);
+        records[0].setGroupAddress(group->groupAddr);
+        records[0].setRecordType(IGMPV3_RT_IS_IN);
+        records[0].setSourceList(group->filter == IGMPV3_FM_INCLUDE ? set_intersection(group->sourceAddressList, group->queriedSources) :
+            set_complement(group->queriedSources, group->sourceAddressList));
         sendGroupReport(ie, records);
     }
 
@@ -493,6 +499,16 @@ void Igmpv3::startTimer(cMessage *timer, double interval)
 
 void Igmpv3::processIgmpMessage(Packet *packet)
 {
+    if (!verifyCrc(packet)) {
+        EV_WARN << "incoming IGMP packet has wrong CRC, dropped\n";
+        // drop packet
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
+
     const auto& msg = packet->peekAtFront<IgmpMessage>();
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
@@ -518,7 +534,7 @@ void Igmpv3::processQuery(Packet *packet)
 
     Ipv4Address groupAddr = msg->getGroupAddress();
     Ipv4AddressVector queriedSources = msg->getSourceList();
-    double maxRespTime = msg->getMaxRespTime().dbl();
+    double maxRespTime = 0.1 * decodeTime(msg->getMaxRespTimeCode());
 
     ASSERT(ie->isMulticast());
 
@@ -636,13 +652,13 @@ void Igmpv3::processReport(Packet *packet)
 
         for (unsigned int i = 0; i < msg->getGroupRecordArraySize(); i++) {
             GroupRecord gr = msg->getGroupRecord(i);
-            EV_DETAIL << "Found a record for group '" << gr.groupAddress << "'.\n";
+            EV_DETAIL << "Found a record for group '" << gr.getGroupAddress() << "'.\n";
 
             // ensure that the received sources are sorted
-            sort(gr.sourceList.begin(), gr.sourceList.end());
-            Ipv4AddressVector& receivedSources = gr.sourceList;    // sorted
+            sort(gr.getSourceListForUpdate().begin(), gr.getSourceListForUpdate().end());
+            Ipv4AddressVector& receivedSources = gr.getSourceListForUpdate();    // sorted
 
-            RouterGroupData *groupData = interfaceData->getOrCreateGroupData(gr.groupAddress);
+            RouterGroupData *groupData = interfaceData->getOrCreateGroupData(gr.getGroupAddress());
 
             Ipv4MulticastSourceList oldSourceList;
             groupData->collectForwardedSources(oldSourceList);
@@ -650,7 +666,7 @@ void Igmpv3::processReport(Packet *packet)
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
 
             // RFC 3376 6.4.1: Reception of Current State Record
-            if (gr.recordType == IGMPV3_RT_IS_IN) {
+            if (gr.getRecordType() == IGMPV3_RT_IS_IN) {
                 EV_DETAIL << "Received IS_IN" << receivedSources << " report.\n";
                 // INCLUDE(A)   -> IS_IN(B) -> INCLUDE(A+B)    : (B) = GMI
                 // EXCLUDE(X,Y) -> IS_IN(A) -> EXCLUDE(X+A,Y-A): (A) = GMI
@@ -660,7 +676,7 @@ void Igmpv3::processReport(Packet *packet)
                     startTimer(record->sourceTimer, groupMembershipInterval);
                 }
             }
-            else if (gr.recordType == IGMPV3_RT_IS_EX) {
+            else if (gr.getRecordType() == IGMPV3_RT_IS_EX) {
                 EV_DETAIL << "Received IS_EX" << receivedSources << " report.\n";
 
                 // Group Timer = GMI
@@ -691,7 +707,7 @@ void Igmpv3::processReport(Packet *packet)
                 groupData->filter = IGMPV3_FM_EXCLUDE;
             }
             // RFC 3376 6.4.2: Reception of Filter-Mode-Change and Source-List-Change Records
-            else if (gr.recordType == IGMPV3_RT_ALLOW) {
+            else if (gr.getRecordType() == IGMPV3_RT_ALLOW) {
                 EV_DETAIL << "Received ALLOW" << receivedSources << " report.\n";
 
                 // INCLUDE(A)   -> ALLOW(B) -> INCLUDE(A+B):     (B) = GMI
@@ -702,7 +718,7 @@ void Igmpv3::processReport(Packet *packet)
                     startTimer(record->sourceTimer, groupMembershipInterval);
                 }
             }
-            else if (gr.recordType == IGMPV3_RT_BLOCK) {
+            else if (gr.getRecordType() == IGMPV3_RT_BLOCK) {
                 EV_DETAIL << "Received BLOCK" << receivedSources << " report.\n";
 
                 if (groupData->filter == IGMPV3_FM_INCLUDE) {
@@ -743,7 +759,7 @@ void Igmpv3::processReport(Packet *packet)
                     }
                 }
             }
-            else if (gr.recordType == IGMPV3_RT_TO_IN) {
+            else if (gr.getRecordType() == IGMPV3_RT_TO_IN) {
                 EV_DETAIL << "Received TO_IN" << receivedSources << " report.\n";
 
                 if (groupData->filter == IGMPV3_FM_INCLUDE) {
@@ -793,7 +809,7 @@ void Igmpv3::processReport(Packet *packet)
                     sendGroupSpecificQuery(groupData);
                 }
             }
-            else if (gr.recordType == IGMPV3_RT_TO_EX) {
+            else if (gr.getRecordType() == IGMPV3_RT_TO_EX) {
                 EV_DETAIL << "Received TO_EX" << receivedSources << " report.\n";
 
                 if (groupData->filter == IGMPV3_FM_INCLUDE) {
@@ -897,8 +913,9 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
-        msg->setMaxRespTime(maxRespTime);
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(maxRespTime*10.0)));
         msg->setChunkLength(B(12));
+        insertCrc(msg, packet);
         packet->insertAtFront(msg);
         sendQueryToIP(packet, interfaceData->ie, Ipv4Address::ALL_HOSTS_MCAST);
 
@@ -925,9 +942,10 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
-        msg->setMaxRespTime(lastMemberQueryInterval);
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0*lastMemberQueryInterval)));
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(12));
+        insertCrc(msg, packet);
         packet->insertAtFront(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
 
@@ -947,12 +965,13 @@ void Igmpv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
     msg->setType(IGMPV3_MEMBERSHIP_REPORT);
     msg->setGroupRecordArraySize(records.size());
     for (size_t i = 0; i < records.size(); ++i) {
-        Ipv4Address group = records[i].groupAddress;
+        Ipv4Address group = records[i].getGroupAddress();
         ASSERT(group.isMulticast() && !group.isLinkLocalMulticast());
         msg->setGroupRecord(i, records[i]);
-        byteLength += 8 + records[i].sourceList.size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
+        byteLength += 8 + records[i].getSourceList().size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
     }
     msg->setChunkLength(B(byteLength));
+    insertCrc(msg, packet);
     packet->insertAtFront(msg);
     sendReportToIP(packet, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
     numReportsSent++;
@@ -970,9 +989,10 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
-        msg->setMaxRespTime(lastMemberQueryInterval);
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
+        insertCrc(msg, packet);
         packet->insertAtFront(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
 
@@ -981,7 +1001,6 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
     }
 }
 
-// TODO add Router Alert option, set Type of Service to 0xc0
 void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
@@ -993,6 +1012,11 @@ void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    msg->addTag<Ipv4OptionsReq>()->insertOption(raOption);
+    // TODO set Type of Service to 0xc0
+    //msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");
 }
 
@@ -1006,6 +1030,12 @@ void Igmpv3::sendQueryToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    msg->addTag<Ipv4OptionsReq>()->insertOption(raOption);
+    // set Type of Service to 0xc0
+    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");
 }
 
@@ -1326,18 +1356,40 @@ Ipv4AddressVector Igmpv3::set_union(const Ipv4AddressVector& first, const Ipv4Ad
 
 // Miscellaneous
 
-double Igmpv3::decodeTime(unsigned char code)
+uint16_t Igmpv3::decodeTime(uint8_t code)
 {
-    unsigned time;
+    uint16_t time;
     if (code < 128)
         time = code;
     else {
-        unsigned mantis = code & 0x15;
+        unsigned mantis = code & 0x0f;
         unsigned exp = (code >> 4) & 0x07;
         time = (mantis | 0x10) << (exp + 3);
     }
 
-    return (double)time / 10.0;
+    return time;
+}
+
+uint8_t Igmpv3::codeTime(uint16_t time)
+{
+    uint8_t code;
+    if (time < 128)
+        code = (uint8_t)time;
+    else if (time >= (0x1f << 10))
+        code = 0xff;
+    else {
+        unsigned exp = 0;
+        time >>= 3;
+        while (time > 0x1f) {
+            time >>= 1;
+            exp++;
+        }
+        ASSERT(exp <= 7);
+        ASSERT(time <= 15);
+        code = 0x80 | ((exp << 4) & 0x70) | (time & 0x0f);
+    }
+
+    return code;
 }
 
 const std::string Igmpv3::getRouterStateString(Igmpv3::RouterState rs)
@@ -1384,6 +1436,56 @@ const std::string Igmpv3::getFilterModeString(Igmpv3::FilterMode fm)
         return "EXCLUDE";
 
     return "UNKNOWN";
+}
+
+void Igmpv3::insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *packet)
+{
+    igmpMsg->setCrcMode(crcMode);
+    switch (crcMode) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+            igmpMsg->setCrc(0xC00D);
+            break;
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+            igmpMsg->setCrc(0xBAAD);
+            break;
+        case CRC_COMPUTED: {
+            // if the CRC mode is computed, then compute the CRC and set it
+            igmpMsg->setCrc(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
+            MemoryOutputStream igmpStream;
+            Chunk::serialize(igmpStream, igmpMsg);
+            if (packet->getDataLength() > b(0))
+                Chunk::serialize(igmpStream, packet->peekDataAsBytes());
+            uint16_t crc = TcpIpChecksum::checksum(igmpStream.getData());
+            igmpMsg->setCrc(crc);
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
+    }
+}
+
+bool Igmpv3::verifyCrc(const Packet *packet)
+{
+    const auto& igmpMsg = packet->peekAtFront<IgmpMessage>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    switch (igmpMsg->getCrcMode()) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
+            return igmpMsg->isCorrect();
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then the check fails
+            return false;
+        case CRC_COMPUTED: {
+            // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
+            auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
+            uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
+            // TODO: delete these isCorrect calls, rely on CRC only
+            return crc == 0 && igmpMsg->isCorrect();
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
+    }
 }
 
 }    // namespace inet

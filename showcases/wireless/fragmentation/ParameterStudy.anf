@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/OnlyPacketSize*.*"/>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/Threshold*.*"/>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/PacketSize*.*"/>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/TxPower*.*"/>
+  </inputs>
+  <datasets>
+    <datasets name="OnlyPacketSize">
+      <items xsi:type="scave:Add" filterPattern="module(*.wifiHost2.app[0]) AND name(throughput:vector) AND file(*OnlyPacketSize*) " type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="packetSize AND file(*OnlyPacketSize*) "/>
+      <items xsi:type="scave:ComputeScalar" scalarName="avgthroughput" valueExpr="mean('throughput:vector')/1048576" moduleExpr="FragmentationShowcase.wifiHost2.app[0]" groupByExpr=""/>
+      <items xsi:type="scave:ScatterChart" name="Throughput vs packet size (fixed 250B frag threshold)" xDataPattern="module(_runattrs_) AND name(packetSize)">
+        <filters xsi:type="scave:Select"/>
+        <properties name="Graph.Title" value="Throughput vs. packet size with a 250-byte fragmentation threshold"/>
+        <properties name="X.Axis.Title" value="Packet size [byte]"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Legend.Anchoring" value="NorthEast"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeDCFfrag" value="Dot"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeDCFfrag" value="red"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeDCFfrag" value="DCFfrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeDCFnofrag" value="Triangle"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeDCFnofrag" value="darkgreen"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeDCFnofrag" value="DCFnofrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeHCFfrag" value="Square"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeHCFfrag" value="darkblue"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeHCFfrag" value="HCFfrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeHCFfragblockack" value="Diamond"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeHCFfragblockack" value="orange"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=OnlyPacketSizeHCFfragblockack" value="HCFfragblockack"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+    <datasets name="FragmentationThreshold">
+      <items xsi:type="scave:Add" filterPattern="module(*.wifiHost2.app[0]) AND name(throughput:vector) AND attr:experiment(*Threshold*) AND NOT attr:experiment(ThresholdDCFnofrag)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="threshold AND file(*Threshold*)"/>
+      <items xsi:type="scave:ComputeScalar" scalarName="avgthroughput" valueExpr="mean('throughput:vector')/1048576" moduleExpr="FragmentationShowcase.wifiHost2.app[0]" groupByExpr=""/>
+      <items xsi:type="scave:ScatterChart" name="Throughput vs fragmentation threshold" xDataPattern="module(_runattrs_) AND name(threshold)">
+        <filters xsi:type="scave:Select"/>
+        <properties name="Graph.Title" value="Throughput vs. fragmentation threshold, 1000-byte packets"/>
+        <properties name="X.Axis.Title" value="Fragmentation threshold [byte]"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Legend.Anchoring" value="NorthEast"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdDCFfrag" value="Dot"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdDCFfrag" value="red"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdDCFfrag" value="DCFfrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdDCFnofrag" value="Triangle"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdDCFnofrag" value="darkgreen"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdDCFnofrag" value="DCFnofrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdHCFfrag" value="Square"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdHCFfrag" value="darkblue"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdHCFfrag" value="HCFfrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdHCFfragblockack" value="Diamond"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdHCFfragblockack" value="orange"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=ThresholdHCFfragblockack" value="HCFfragblockack"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+    <datasets name="PacketSize">
+      <items xsi:type="scave:Add" filterPattern="module(*.wifiHost2.app[0]) AND name(throughput:vector) AND file(*results/PacketSize*) " type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="packetSize AND file(*results/PacketSize*)"/>
+      <items xsi:type="scave:ComputeScalar" scalarName="avgthroughput" valueExpr="mean('throughput:vector')/1048576" moduleExpr="FragmentationShowcase.wifiHost2.app[0]" groupByExpr=""/>
+      <items xsi:type="scave:ScatterChart" name="Throughput vs packet size (16 fragments)" xDataPattern="module(_runattrs_) AND name(packetSize)">
+        <filters xsi:type="scave:Select"/>
+        <properties name="Graph.Title" value="Throughput vs. packet size, with all frames fragmented to 16 fragments"/>
+        <properties name="X.Axis.Title" value="Packet size [byte]"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Legend.Anchoring" value="NorthEast"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeDCFfrag" value="Dot"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeDCFfrag" value="red"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeDCFfrag" value="DCFfrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeDCFnofrag" value="Triangle"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeDCFnofrag" value="darkgreen"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeDCFnofrag" value="DCFnofrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeHCFfrag" value="Square"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeHCFfrag" value="darkblue"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeHCFfrag" value="HCFfrag"/>
+        <properties name="Symbols.Type/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeHCFfragblockack" value="Diamond"/>
+        <properties name="Line.Color/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeHCFfragblockack" value="orange"/>
+        <properties name="Line.Name/FragmentationShowcase.wifiHost2.app[0] avgthroughput - configname=PacketSizeHCFfragblockack" value="HCFfragblockack"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+    <datasets name="Snir">
+      <items xsi:type="scave:Add" filterPattern="module(*.wifiHost2.app[0]) AND name(throughput:vector) AND file(*TxPower*) " type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="txPower AND file(*TxPower*)"/>
+      <items xsi:type="scave:Add" filterPattern="name(minSnir:histogram:mean) AND module(*.wifiHost2.*) AND file(*TxPower*) "/>
+      <items xsi:type="scave:ComputeScalar" scalarName="avgthroughput" valueExpr="mean('throughput:vector')/1048576" moduleExpr="*.wifiHost2.app[0]" groupByExpr=""/>
+      <items xsi:type="scave:ScatterChart" name="Throughput vs SNIR" xDataPattern="module(FragmentationShowcase.wifiHost2.wlan[0].radio) AND name(minSnir:histogram:mean)">
+        <filters xsi:type="scave:Select"/>
+        <properties name="Graph.Title" value="Throughput vs. SNIR in the case of 2000-byte packet size and 250-byte fragmentation threshold"/>
+        <properties name="X.Axis.Title" value="SNIR"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Legend.Anchoring" value="NorthEast"/>
+        <properties name="X.Axis.Min" value="14.0"/>
+        <properties name="X.Axis.Max" value="28.0"/>
+        <properties name="Line.Display/_runattrs_ txPower - configname=TxPowerDCFfrag" value="false"/>
+        <properties name="Line.Display/_runattrs_ txPower - configname=TxPowerDCFnofrag" value="false"/>
+        <properties name="Line.Display/_runattrs_ txPower - configname=TxPowerHCFfrag" value="false"/>
+        <properties name="Line.Display/_runattrs_ txPower - configname=TxPowerHCFfragblockack" value="false"/>
+        <properties name="Line.Name/*.wifiHost2.app[0] avgthroughput - configname=TxPowerDCFfrag" value="DCFfrag"/>
+        <properties name="Line.Name/*.wifiHost2.app[0] avgthroughput - configname=TxPowerDCFnofrag" value="DCFnofrag"/>
+        <properties name="Line.Name/*.wifiHost2.app[0] avgthroughput - configname=TxPowerHCFfrag" value="HCFfrag"/>
+        <properties name="Line.Name/*.wifiHost2.app[0] avgthroughput - configname=TxPowerHCFfragblockack" value="HCFfragblockack"/>
+        <properties name="Symbols.Type/*.wifiHost2.app[0] avgthroughput - configname=TxPowerDCFfrag" value="Dot"/>
+        <properties name="Line.Color/*.wifiHost2.app[0] avgthroughput - configname=TxPowerDCFfrag" value="red"/>
+        <properties name="Symbols.Type/*.wifiHost2.app[0] avgthroughput - configname=TxPowerDCFnofrag" value="Triangle"/>
+        <properties name="Line.Color/*.wifiHost2.app[0] avgthroughput - configname=TxPowerDCFnofrag" value="darkgreen"/>
+        <properties name="Symbols.Type/*.wifiHost2.app[0] avgthroughput - configname=TxPowerHCFfrag" value="Square"/>
+        <properties name="Line.Color/*.wifiHost2.app[0] avgthroughput - configname=TxPowerHCFfrag" value="darkblue"/>
+        <properties name="Symbols.Type/*.wifiHost2.app[0] avgthroughput - configname=TxPowerHCFfragblockack" value="Diamond"/>
+        <properties name="Line.Color/*.wifiHost2.app[0] avgthroughput - configname=TxPowerHCFfragblockack" value="orange"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.3 //@datasets/@datasets.1/@items.3 //@datasets/@datasets.2/@items.3 //@datasets/@datasets.3/@items.4"/>
+  </chartSheets>
+</scave:Analysis>

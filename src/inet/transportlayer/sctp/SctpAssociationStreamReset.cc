@@ -903,7 +903,7 @@ uint32 SctpAssociation::getExpectedSsnOfStream(uint16 id)
 uint32 SctpAssociation::getSsnOfStream(uint16 id)
 {
     auto iterator = sendStreams.find(id);
-    return (iterator->second->getNextStreamSeqNum());
+    return iterator->second->getNextStreamSeqNum();
 }
 
 

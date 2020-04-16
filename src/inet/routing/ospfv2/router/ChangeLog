@@ -1,5 +1,32 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-11  Marcel Marek
+
+	Fixed adding next hop only if it doesn't already exist.
+
+2019-10-18  Zoltan Bojthe
+
+	Changed to use msg constructor to set message name and message kind.
+
+2019-07-17  Zoltan Bojthe
+
+	Added LSA CRC calculation in OspfArea.
+
+2019-07-08  Zoltan Bojthe
+
+	Added ASSERTs for error detection.
+	Fixed lsaLength.
+
+2019-07-03  Zoltan Bojthe
+
+	Re-added type-specific functions for calculateLsaSize.
+
+2019-07-02  Zoltan Bojthe
+
+	Follow redesigned packet format.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-20  Mani Amoozadeh

@@ -23,9 +23,7 @@
 #ifndef __INET_STATICCONCENTRICMOBILITY_H
 #define __INET_STATICCONCENTRICMOBILITY_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/mobility/static/StationaryMobility.h"
-
+#include "inet/mobility/base/StationaryMobilityBase.h"
 
 namespace inet {
 
@@ -35,7 +33,7 @@ namespace inet {
  * @ingroup mobility
  * @author Florian Meier
  */
-class INET_API StaticConcentricMobility : public inet::StationaryMobility
+class INET_API StaticConcentricMobility : public StationaryMobilityBase
 {
   protected:
     /** @brief Initializes the position according to the mobility model. */

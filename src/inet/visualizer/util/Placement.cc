@@ -43,6 +43,8 @@ Placement parsePlacement(const char *s)
             placement |= PLACEMENT_TOP_RIGHT;
         else if (!strcmp("centerLeft", token))
             placement |= PLACEMENT_CENTER_LEFT;
+        else if (!strcmp("centerCenter", token))
+            placement |= PLACEMENT_CENTER_CENTER;
         else if (!strcmp("centerRight", token))
             placement |= PLACEMENT_CENTER_RIGHT;
         else if (!strcmp("bottomLeft", token))

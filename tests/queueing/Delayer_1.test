@@ -1,0 +1,71 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The produced packets are delayed (PacketDelayer) for a random
+amount of time. Finally, the packets are sent into a passive packet sink (PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketDelayer;
+import inet.queueing.source.ActivePacketSource;
+
+network TestDelayer
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        delayer: PacketDelayer {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> delayer.in;
+        delayer.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestDelayer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.delayer.delay = uniform(0s, 2s)
+
+%contains: stdout
+Producing packet producer-0.
+Delaying packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Delaying packet producer-1.
+Consuming packet producer-0.
+Producing packet producer-2.
+Delaying packet producer-2.
+Consuming packet producer-1.
+Producing packet producer-3.
+Delaying packet producer-3.
+Consuming packet producer-2.
+Producing packet producer-4.
+Delaying packet producer-4.
+Consuming packet producer-3.
+Producing packet producer-5.
+Delaying packet producer-5.
+Consuming packet producer-4.
+Producing packet producer-6.
+Delaying packet producer-6.
+Consuming packet producer-5.
+Producing packet producer-7.
+Delaying packet producer-7.
+Consuming packet producer-6.
+Producing packet producer-8.
+Delaying packet producer-8.
+Consuming packet producer-7.
+Consuming packet producer-8.
+Producing packet producer-9.
+Delaying packet producer-9.

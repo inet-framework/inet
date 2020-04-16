@@ -31,6 +31,12 @@ TransportConnectionCanvasVisualizer::TransportConnectionCanvasVisualization::Tra
 {
 }
 
+TransportConnectionCanvasVisualizer::~TransportConnectionCanvasVisualizer()
+{
+    if (displayTransportConnections)
+        removeAllConnectionVisualizations();
+}
+
 void TransportConnectionCanvasVisualizer::initialize(int stage)
 {
     TransportConnectionVisualizerBase::initialize(stage);
@@ -92,11 +98,15 @@ void TransportConnectionCanvasVisualizer::addConnectionVisualization(const Trans
     TransportConnectionVisualizerBase::addConnectionVisualization(connectionVisualization);
     auto connectionCanvasVisualization = static_cast<const TransportConnectionCanvasVisualization *>(connectionVisualization);
     auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
-    auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(sourceModule));
-    sourceVisualization->addAnnotation(connectionCanvasVisualization->sourceFigure, connectionCanvasVisualization->sourceFigure->getBounds().getSize(), placementHint, placementPriority);
+    if (sourceModule != nullptr) {
+        auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(sourceModule));
+        sourceVisualization->addAnnotation(connectionCanvasVisualization->sourceFigure, connectionCanvasVisualization->sourceFigure->getBounds().getSize(), placementHint, placementPriority);
+    }
     auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
-    auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
-    destinationVisualization->addAnnotation(connectionCanvasVisualization->destinationFigure, connectionCanvasVisualization->destinationFigure->getBounds().getSize(), placementHint, placementPriority);
+    if (destinationModule != nullptr) {
+        auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
+        destinationVisualization->addAnnotation(connectionCanvasVisualization->destinationFigure, connectionCanvasVisualization->destinationFigure->getBounds().getSize(), placementHint, placementPriority);
+    }
     setConnectionLabelsVisible(connectionVisualizations.size() > iconColorSet.getSize());
 }
 
@@ -105,11 +115,15 @@ void TransportConnectionCanvasVisualizer::removeConnectionVisualization(const Tr
     TransportConnectionVisualizerBase::removeConnectionVisualization(connectionVisualization);
     auto connectionCanvasVisualization = static_cast<const TransportConnectionCanvasVisualization *>(connectionVisualization);
     auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
-    auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(sourceModule));
-    sourceVisualization->removeAnnotation(connectionCanvasVisualization->sourceFigure);
+    if (sourceModule != nullptr) {
+        auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(sourceModule));
+        sourceVisualization->removeAnnotation(connectionCanvasVisualization->sourceFigure);
+    }
     auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
-    auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
-    destinationVisualization->removeAnnotation(connectionCanvasVisualization->destinationFigure);
+    if (destinationModule != nullptr) {
+        auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
+        destinationVisualization->removeAnnotation(connectionCanvasVisualization->destinationFigure);
+    }
     setConnectionLabelsVisible(connectionVisualizations.size() > iconColorSet.getSize());
 }
 

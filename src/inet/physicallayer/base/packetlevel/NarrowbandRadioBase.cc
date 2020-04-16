@@ -38,9 +38,9 @@ void NarrowbandRadioBase::handleUpperCommand(cMessage *message)
         const IModulation *newModulation = configureCommand->getModulation();
         if (newModulation != nullptr)
             setModulation(newModulation);
-        Hz newCarrierFrequency = configureCommand->getCarrierFrequency();
-        if (!std::isnan(newCarrierFrequency.get()))
-            setCarrierFrequency(newCarrierFrequency);
+        Hz newCenterFrequency = configureCommand->getCenterFrequency();
+        if (!std::isnan(newCenterFrequency.get()))
+            setCenterFrequency(newCenterFrequency);
         Hz newBandwidth = configureCommand->getBandwidth();
         if (!std::isnan(newBandwidth.get()))
             setBandwidth(newBandwidth);
@@ -56,12 +56,12 @@ void NarrowbandRadioBase::setModulation(const IModulation *newModulation)
     narrowbandReceiver->setModulation(newModulation);
 }
 
-void NarrowbandRadioBase::setCarrierFrequency(Hz newCarrierFrequency)
+void NarrowbandRadioBase::setCenterFrequency(Hz newCenterFrequency)
 {
     NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-    narrowbandTransmitter->setCarrierFrequency(newCarrierFrequency);
+    narrowbandTransmitter->setCenterFrequency(newCenterFrequency);
     NarrowbandReceiverBase *narrowbandReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
-    narrowbandReceiver->setCarrierFrequency(newCarrierFrequency);
+    narrowbandReceiver->setCenterFrequency(newCenterFrequency);
 }
 
 void NarrowbandRadioBase::setBandwidth(Hz newBandwidth)

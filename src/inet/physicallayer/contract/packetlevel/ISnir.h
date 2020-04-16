@@ -34,6 +34,7 @@ class INET_API ISnir : public IPrintableObject
 
     virtual double getMin() const = 0;
     virtual double getMax() const = 0;
+    virtual double getMean() const = 0;
 };
 
 } // namespace physicallayer

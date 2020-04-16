@@ -1,0 +1,146 @@
+%description:
+This test checks the correctness of the dimensional transmission medium.
+
+%includes:
+#include "inet/common/math/Functions.h"
+#include "inet/physicallayer/common/packetlevel/PowerFunctions.h"
+#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
+#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/antenna/IsotropicAntenna.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::math;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+class DimensionalMediumTest : public DimensionalTransmitterBase
+{
+  public:
+    void test1();
+};
+
+void DimensionalMediumTest::test1()
+{
+    gainFunctionCacheLimit = 0;
+    timeGainsNormalization = "";
+    frequencyGainsNormalization = "integral";
+    mps propagationSpeed(299792458);
+    auto pathLoss = new FreeSpacePathLoss();
+    auto pathLossFunction = makeShared<PathLossFunction>(pathLoss);
+    auto antenna = new IsotropicAntenna();
+    auto transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(antenna->getGain().get());
+    auto obstacleLossFunction = makeShared<ConstantFunction<double, Domain<m, m, m, m, m, m, Hz>>>(1);
+
+    parseTimeGains("left s 0dB either e 0dB right");
+
+    auto domain = Interval<m, m, m, simsec, Hz>(Point<m, m, m, simsec, Hz>(getLowerBound<m>(), getLowerBound<m>(), getLowerBound<m>(), simsec(0), Hz(0)), Point<m, m, m, simsec, Hz>::getUpperBounds(), 0b00011, 0b00000, 0b00000);
+    auto backgroundNoise = makeShared<DomainLimitedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(makeShared<ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(pW(1) / MHz(20)), domain);
+    std::cout << "Background noise: " << *backgroundNoise << std::endl;
+
+    auto transmissionFunction1 = createPowerFunction(0, 20, GHz(1), MHz(20), mW(100));
+    std::cout << "Transmission 1: " << *transmissionFunction1 << std::endl;
+    auto propagatedTransmissionFunction1 = makeShared<PropagatedTransmissionPowerFunction>(transmissionFunction1, Point<m, m, m>(m(10), m(0), m(0)), propagationSpeed);
+    auto attenuationFunction1 = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, Point<m, m, m>(m(10), m(0), m(0)), Quaternion(), propagationSpeed);
+    auto approximatedAttenuationFunction1 = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(MHz(990), MHz(1100), MHz(1), &AverageInterpolator<Hz, double>::singleton, attenuationFunction1);
+    auto receptionFunction1 = propagatedTransmissionFunction1->multiply(approximatedAttenuationFunction1);
+    //std::cout << "Reception 1: " << *receptionFunction1 << std::endl;
+
+    auto transmissionFunction2 = createPowerFunction(0, 20, GHz(1), MHz(20), mW(10));
+    std::cout << "Transmission 2: " << *transmissionFunction2 << std::endl;
+    auto propagatedTransmissionFunction2 = makeShared<PropagatedTransmissionPowerFunction>(transmissionFunction2, Point<m, m, m>(m(-10), m(0), m(0)), propagationSpeed);
+    auto attenuationFunction2 = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, Point<m, m, m>(m(-10), m(0), m(0)), Quaternion(), propagationSpeed);
+    auto approximatedAttenuationFunction2 = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(MHz(990), MHz(1100), MHz(1), &AverageInterpolator<Hz, double>::singleton, attenuationFunction2);
+    auto receptionFunction2 = propagatedTransmissionFunction2->multiply(approximatedAttenuationFunction2);
+    //std::cout << "Reception 2: " << *receptionFunction2 << std::endl;
+
+    auto interferenceFunction = makeShared<SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(std::vector<Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>>({backgroundNoise, receptionFunction2}));
+
+    auto snirFunction = receptionFunction1->divide(interferenceFunction);
+    //std::cout << "SNIR: " << *snirFunction << std::endl;
+
+    Point<m, m, m> position(m(0), m(0), m(0));
+    simtime_t startTime = 10 / propagationSpeed.get();
+    simtime_t endTime = startTime + 20;
+    simtime_t symbolTime = 10;
+    Hz startFrequency = MHz(990);
+    Hz endFrequency = MHz(1010);
+    Hz subcarrierBandwidth = MHz(10);
+    std::cout << "SNIR:" << std::endl;
+    for (simtime_t time = startTime; time < endTime; time += symbolTime) {
+        for (Hz frequency = startFrequency; frequency < endFrequency; frequency += subcarrierBandwidth) {
+            Point<m, m, m, simsec, Hz> lower(std::get<0>(position), std::get<1>(position), std::get<2>(position), simsec(time), frequency);
+            Point<m, m, m, simsec, Hz> upper(std::get<0>(position), std::get<1>(position), std::get<2>(position), simsec(time + symbolTime), frequency + subcarrierBandwidth);
+            Interval<m, m, m, simsec, Hz> interval(lower, upper, 0b11111, 0b11100, 0b11100);
+            double snirMean = snirFunction->getMean(interval);
+            std::cout << "  interval = " << interval << ", SNIR mean = " << snirMean << std::endl;
+        }
+    }
+    delete antenna;
+    delete pathLoss;
+}
+
+%activity:
+DimensionalMediumTest tester;
+tester.test1();
+
+%contains: stdout
+Background noise: function(m, m, m, s, Hz) → WpHz {
+  domain = (-inf m … inf m) x (-inf m … inf m) x (-inf m … inf m) x [0 s … inf s) x [0 Hz … inf GHz) → range = [5e-20 WpHz]
+  structure =
+    (DomainLimited, domain = (-inf m … inf m) x (-inf m … inf m) x (-inf m … inf m) x [0 s … inf s) x [0 Hz … inf GHz)
+      Constant 5e-20 WpHz)
+  partitioning = {
+    constant over (-inf m … inf m) x (-inf m … inf m) x (-inf m … inf m) x [0 s … inf s) x [0 Hz … inf GHz)
+      → 5e-20 WpHz
+  } min = 5e-20 WpHz, max = 5e-20 WpHz, mean = 5e-20 WpHz
+}
+
+Transmission 1: function(s, Hz) → WpHz {
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 WpHz … 5e-09 WpHz]
+  structure =
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+      (Boxcar2D, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-09 WpHz))
+  partitioning = {
+    constant over [0 s … 20 s) x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [20 s … inf s) x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [990 MHz … 1.01 GHz)
+      → 5e-09 WpHz
+    constant over [20 s … inf s) x [990 MHz … 1.01 GHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [1.01 GHz … inf GHz)
+      → 0 WpHz
+    constant over [20 s … inf s) x [1.01 GHz … inf GHz)
+      → 0 WpHz
+  } min = 0 WpHz, max = 5e-09 WpHz, mean = 0 WpHz
+}
+
+Transmission 2: function(s, Hz) → WpHz {
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 WpHz … 5e-10 WpHz]
+  structure =
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
+      (Boxcar2D, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-10 WpHz))
+  partitioning = {
+    constant over [0 s … 20 s) x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [20 s … inf s) x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [990 MHz … 1.01 GHz)
+      → 5e-10 WpHz
+    constant over [20 s … inf s) x [990 MHz … 1.01 GHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [1.01 GHz … inf GHz)
+      → 0 WpHz
+    constant over [20 s … inf s) x [1.01 GHz … inf GHz)
+      → 0 WpHz
+  } min = 0 WpHz, max = 5e-10 WpHz, mean = 0 WpHz
+}
+
+SNIR:
+  interval = 0 m x 0 m x 0 m x [0.000000033356 s … 10.000000033356 s) x [990 MHz … 1 GHz), SNIR mean = 9.99983
+  interval = 0 m x 0 m x 0 m x [0.000000033356 s … 10.000000033356 s) x [1 GHz … 1.01 GHz), SNIR mean = 9.99982
+  interval = 0 m x 0 m x 0 m x [10.000000033356 s … 20.000000033356 s) x [990 MHz … 1 GHz), SNIR mean = 9.99983
+  interval = 0 m x 0 m x 0 m x [10.000000033356 s … 20.000000033356 s) x [1 GHz … 1.01 GHz), SNIR mean = 9.99982

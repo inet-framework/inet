@@ -1,0 +1,97 @@
+%description:
+
+In this test, packets are collected periodically by an active packet sink
+(ActivePacketSink). The packets are produced by two passive packet sources
+(PassivePacketSources). The single sink is connected to the two sources using a
+scheduler (PacketScheduler). The scheduler forwards packets alternately from
+one or the other source.
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.scheduler.PacketScheduler;
+import inet.queueing.source.PassivePacketSource;
+
+network TestScheduler
+{
+    submodules:
+        provider1: PassivePacketSource {
+            @display("p=100,100");
+        }
+        provider2: PassivePacketSource {
+            @display("p=100,200");
+        }
+        scheduler: PacketScheduler {
+            @display("p=200,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        provider1.out --> scheduler.in++;
+        provider2.out --> scheduler.in++;
+        scheduler.out --> collector.in;
+}
+
+%file: Test.cc
+#include <vector>
+#include "inet/queueing/function/PacketSchedulerFunction.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
+
+using namespace inet; 
+
+static int testSchedule(const std::vector<queueing::IPassivePacketSource *>& providers)
+{
+    static int i = 0;
+    return i++ % 2;
+}
+
+Register_Packet_Scheduler_Function(TestScheduler, testSchedule);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestScheduler
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider*.packetLength = 1B
+*.collector.collectionInterval = 1s
+*.scheduler.schedulerClass = "TestScheduler"
+
+%contains: stdout
+Providing packet provider1-0.
+Scheduling packet provider1-0.
+Collecting packet provider1-0.
+
+Running simulation...
+Providing packet provider2-0.
+Scheduling packet provider2-0.
+Collecting packet provider2-0.
+Providing packet provider1-1.
+Scheduling packet provider1-1.
+Collecting packet provider1-1.
+Providing packet provider2-1.
+Scheduling packet provider2-1.
+Collecting packet provider2-1.
+Providing packet provider1-2.
+Scheduling packet provider1-2.
+Collecting packet provider1-2.
+Providing packet provider2-2.
+Scheduling packet provider2-2.
+Collecting packet provider2-2.
+Providing packet provider1-3.
+Scheduling packet provider1-3.
+Collecting packet provider1-3.
+Providing packet provider2-3.
+Scheduling packet provider2-3.
+Collecting packet provider2-3.
+Providing packet provider1-4.
+Scheduling packet provider1-4.
+Collecting packet provider1-4.
+Providing packet provider2-4.
+Scheduling packet provider2-4.
+Collecting packet provider2-4.
+Providing packet provider1-5.
+Scheduling packet provider1-5.
+Collecting packet provider1-5.

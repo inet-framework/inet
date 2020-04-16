@@ -1,0 +1,210 @@
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithoutQoS -r 0,        50s,         3c0e-4bec/tND, PASS,
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicing -r 0,      50s,         383f-baa8/tND, PASS,
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0, 50s,   6b26-74a7/tND, PASS,
+
+/showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         022f-76e9/tND, PASS,
+
+/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         2a12-bc3f/tND, PASS,
+
+/showcases/mobility/basic/,          -f omnetpp.ini -c LinearMobility -r 0,         100s,         0000-0000/tND, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c CircleMobility -r 0,         100s,         0000-0000/tND, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c TurtleMobility -r 0,         100s,         0000-0000/tND, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c FacingMobility -r 0,         100s,         0000-0000/tND, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c GaussMarkovMobility -r 0,    100s,         0000-0000/tND, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c StaticGridMobility -r 0,     100s,         0000-0000/tND, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c StationaryMobility -r 0,     100s,         0000-0000/tND, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c BonnMotionMobility -r 0,     100s,         0000-0000/tND, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Attached1 -r 0,              100s,         0000-0000/tND, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Attached2 -r 0,              100s,         0000-0000/tND, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Superpositioning1 -r 0,      100s,         0000-0000/tND, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Superpositioning2 -r 0,      100s,         0000-0000/tND, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c AntennaOrientation -r 0,     100s,         0000-0000/tND, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Attached3D -r 0,             100s,         0000-0000/tND, PASS,
+/showcases/mobility/spatial/,        -f omnetpp.ini -c Spiral -r 0,                 100s,         0000-0000/tND, PASS,
+/showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         0000-0000/tND, PASS,
+
+# /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tND, PASS,   # MobileNodesBase extended
+/showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         4b33-b7f2/tND, PASS,
+/showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         838c-e88d/tND, PASS,
+/showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         73e8-b4d6/tND, PASS,
+
+/showcases/visualizer/advanced/,     -f omnetpp.ini -c IncludingMultipleVisualizerModules -r 0, 100s, 26b4-9f1b/tND, PASS,
+/showcases/visualizer/advanced/,     -f omnetpp.ini -c Wireless -r 0,               5s,         3eca-62e2/tND, PASS,
+
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWired -r 0,                     500s,            5cf1-f86d/tND, PASS,
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWireless -r 0,                  500s,            a44e-ef19/tND, PASS,
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                      500s,            e0c1-c448/tND, PASS,
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c ActivityLevel -r 0,      100s,         48a8-e59a/tND, PASS,
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Dynamic -r 0,                                        500s,            717f-ae78/tND, PASS,
+
+# /showcases/visualizer/earth/,        -f omnetpp.ini -c DefaultSettings -r 0,                                    500s,            0000-0000/tND, PASS,   # Osg doesn't work in command line DefaultSettings extended
+# /showcases/visualizer/earth/,        -f omnetpp.ini -c TempConfig -r 0,                                         500s,            0000-0000/tND, PASS,
+# /showcases/visualizer/earth/,        -f omnetpp.ini -c PhysicalObjects -r 0,                                    500s,            0000-0000/tND, PASS,   # PhysicalObjects extended
+# /showcases/visualizer/earth/,        -f omnetpp.ini -c NetworkNodes -r 0,                                       500s,            0000-0000/tND, PASS,
+
+/showcases/visualizer/environment/,  -f omnetpp.ini -c DefaultView -r 0,                                        500s,            0000-0000/tND, PASS,   # DefaultView extended
+/showcases/visualizer/environment/,  -f omnetpp.ini -c IsometricView -r 0,                                      500s,            0000-0000/tND, PASS,
+
+/showcases/visualizer/ieee80211/, -f omnetpp.ini -c OneNetwork -r 0,                                  5s,            1000-54a2/tND, PASS,
+/showcases/visualizer/ieee80211/, -f omnetpp.ini -c MultipleNetworks -r 0,                            5s,            6fc8-d56b/tND, PASS,
+/showcases/visualizer/ieee80211/, -f omnetpp.ini -c VisualizingHandover -r 0,                         250s,            1467-d884/tND, PASS,
+/showcases/visualizer/ieee80211/,    -f omnetpp.ini -c SignalLevels -r 0,           100s,         9fde-5ddd/tND, PASS,
+
+/showcases/visualizer/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            5598-31fa/tND, PASS,   # VisualizingSubmoduleInformation extended
+/showcases/visualizer/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            5598-31fa/tND, PASS,
+
+/showcases/visualizer/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              cc26-d8e9/tND, PASS,
+
+/showcases/visualizer/interfacetable/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            0000-0000/tND, PASS,
+/showcases/visualizer/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            cb71-ccd3/tND, PASS,
+
+/showcases/visualizer/mobility/,     -f omnetpp.ini -c VisualizingFeatures -r 0,                                500s,            0000-0000/tND, PASS,
+
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c Canvas -r 0,                 1s,         0000-0000/tND, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c Basic3D -r 0,                1s,         0000-0000/tND, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c Using3DModels -r 0,          1s,         0000-0000/tND, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c AddingMovement -r 0,         1s,         0000-0000/tND, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c BoxmanRotated -r 0,          1s,         0000-0000/tND, PASS,
+
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            1b76-9a17/tND, PASS,
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0,                          500s,            194e-414e/tND, PASS,
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            cd60-7798/tND, PASS,
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0,                               250s,            5977-9426/tND, PASS,
+
+/showcases/visualizer/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0,                              250s,            098c-b2f4/tND, PASS,
+/showcases/visualizer/obstacleloss/, -f omnetpp.ini -c MultipleObstacles -r 0,                                  500s,            472b-6d9d/tND, PASS,
+
+/showcases/visualizer/osgdemo/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tND, ERROR,
+
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c QueueOverflow -r 0,                                      2002ms,            b240-32cd/tND, PASS,
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c ArpResolutionFailed -r 0,                                500s,            0000-0000/tND, PASS,
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c MACRetryLimitReached -r 0,                               500s,            9ebb-1bfe/tND, PASS,
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c InterfaceNotConnected -r 0,                              500s,            0000-0000/tND, PASS,
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c NoRouteToDestination -r 0,                               500s,            0000-0000/tND, PASS,
+
+/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                      500s,            b07e-1bf5/tND, PASS,
+/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                  250s,            0eca-8c99/tND, PASS,
+/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c Mobile -r 0,                                     500s,            91f9-b337/tND, PASS,
+
+# /showcases/visualizer/radiomediumactivity/,  -f omnetpp.ini -c DisplayingSignalsTransmissionsReceptions -r 0,       500s,            f98f-dd46/tND, PASS, # unfinished
+# /showcases/visualizer/radiomediumactivity/,  -f omnetpp.ini -c DisplayingPropagationTransmissionsReceptionsV2 -r 0,       500s,            f98f-dd46/tND, PASS,
+# /showcases/visualizer/radiomediumactivity/,  -f omnetpp.ini -c MultipleNodes -r 0,                                      500s,            2654-40b2/tND, PASS,
+# /showcases/visualizer/radiomediumactivity/,  -f omnetpp.ini -c InterferingSignals -r 0,                                 500s,            1dc2-eb9c/tND, PASS,
+# /showcases/visualizer/radiomediumactivity/, -f omnetpp.ini -c Propagation4 -r 0,    100s,         3601-6e71/tND, PASS,
+# /showcases/visualizer/radiomediumactivity/, -f omnetpp.ini -c Propagation5 -r 0,    100s,         1b6b-74c0/tND, PASS,
+
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c DisplayingAll -r 0,                            500s,            0000-0000/tND, PASS,
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c Unfiltered -r 0,                               500s,            0000-0000/tND, PASS,
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c Filtered -r 0,                                 500s,            0000-0000/tND, PASS,
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            2369-6dd6/tND, PASS,
+
+/showcases/visualizer/statistic/,    -f omnetpp.ini -c PingRtt -r 0,                                            500s,            e90f-074a/tND, PASS,
+/showcases/visualizer/statistic/,    -f omnetpp.ini -c PacketErrorRate -r 0,                                    25s,            dc2a-18bd/tND, PASS,
+
+/showcases/visualizer/styling/,      -f omnetpp.ini -c Line -r 0,                   25s,         6610-c12c/tND, PASS,
+/showcases/visualizer/styling/,      -f omnetpp.ini -c Font -r 0,                   25s,         6610-c12c/tND, PASS,
+/showcases/visualizer/styling/,      -f omnetpp.ini -c Icon -r 0,                   25s,         6079-5ea3/tND, PASS,
+/showcases/visualizer/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         38be-2979/tND, PASS,
+
+/showcases/visualizer/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0,                       2s,            b2d4-0aff/tND, PASS,
+/showcases/visualizer/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0,                         2s,            ad99-a0c1/tND, PASS,
+
+/showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWired -r 0,            500s,            f34f-f329/tND, PASS,
+/showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0,         500s,            426b-74b1/tND, PASS,
+/showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c Filtering -r 0,     100s,         5140-5372/tND, PASS,
+
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==6 && $distance==50',               500s,            994e-f1b5/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==9 && $distance==50',               500s,            2ffd-66fc/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==12 && $distance==50',              500s,            444d-66ff/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==18 && $distance==50',              500s,            4c59-2699/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==24 && $distance==50',              500s,            267e-6463/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==36 && $distance==50',              500s,            af11-8e54/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==48 && $distance==50',              500s,            fd0d-9271/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==54 && $distance==50',              500s,            0617-1a88/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==6 && $distance==200',              500s,            ee57-19fd/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==9 && $distance==200',              500s,            cfb6-c888/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==12 && $distance==200',             500s,            b3e5-e3c0/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==18 && $distance==200',             500s,            fe9f-c948/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==24 && $distance==200',             500s,            eb08-3350/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==36 && $distance==200',             500s,            068a-f3dc/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==48 && $distance==200',             500s,            8df5-f75e/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==54 && $distance==200',             500s,            2892-91df/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==6 && $distance==350',              500s,            a565-1d8d/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==9 && $distance==350',              500s,            651f-8d78/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==12 && $distance==350',             500s,            c3b5-6ac3/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==18 && $distance==350',             500s,            551b-303b/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==24 && $distance==350',             500s,            d508-6733/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==36 && $distance==350',             500s,            6c47-d5ec/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==48 && $distance==350',             500s,            8356-dc8b/tND, PASS,
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==54 && $distance==350',             500s,            8d6f-763e/tND, PASS,
+
+/showcases/wireless/handover/,       -f omnetpp.ini -c General -r 0,                                            250s,            51db-ca4f/tND, PASS,
+
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRtsOff -r 0,                                       5s,            14ea-9378/tND, PASS,
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRtsOn -r 0,                                        5s,            2941-67b9/tND, PASS,
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOffRtsOff -r 0,                                      5s,            ba98-2535/tND, PASS,
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOffRtsOn -r 0,                                      5s,            16f3-a276/tND, PASS,
+
+# /showcases/wireless/ieee802154/,     -f omnetpp.ini -c Ieee802154 -r 0,             100s,         0000-0000/tND, PASS,   # Ieee802154 extended
+/showcases/wireless/ieee802154/,     -f omnetpp.ini -c Ieee802154Power -r 0,        100s,         ac97-bafc/tND, PASS,
+
+/showcases/wireless/infrastructure/, -f omnetpp.ini -c Infrastructure -r 0,         100s,         be5e-9a56/tND, PASS,
+/showcases/wireless/infrastructure/, -f omnetpp.ini -c Adhoc -r 0,                  100s,         5963-36e8/tND, PASS,
+
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==150',   100s,            3d74-1239/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==200',      100s,            155a-98ac/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==250',   100s,            fb00-b86c/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="BPSK" && $fecType=="" && $distance==300',                     100s,            d573-74a3/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="BPSK" && $fecType=="" && $distance==350',                        100s,            5f01-7afe/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="BPSK" && $fecType=="" && $distance==450',                     100s,            25a3-8348/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==500',   100s,            ddc4-fa5a/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==600',      100s,            155c-9284/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==500',   100s,            e6fe-c521/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QPSK" && $fecType=="" && $distance==400',                     100s,            83d4-f5e2/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QPSK" && $fecType=="" && $distance==300',                        100s,            4834-7dd9/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QPSK" && $fecType=="" && $distance==200',                     100s,            fbdc-9133/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==150', 100s,            a239-b969/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==250',    100s,            8d8d-8c03/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==350', 100s,            34b3-3073/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-16" && $fecType=="" && $distance==425',                   100s,            5a58-d16e/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-16" && $fecType=="" && $distance==500',                      100s,            9055-4227/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-16" && $fecType=="" && $distance==610',                   100s,            2438-7cc0/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==110', 100s,            9b91-d97c/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==250',    100s,            c9be-0191/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==400', 100s,            a2bf-8c68/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-64" && $fecType=="" && $distance==550',                   100s,            1089-aa9d/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="" && $distance==225',                      100s,            ee93-4ec0/tND, PASS,
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="" && $distance==125',                   100s,            2736-0cad/tND, PASS,
+
+/showcases/wireless/multiradio/,     -f omnetpp.ini -c General -r 0,      100s,         b4fb-d4ca/tND, PASS,
+
+/showcases/wireless/pathloss/,       -f omnetpp.ini -c General -r 0,                100s,         b1ac-80bf/tND, PASS,
+
+/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            6cd3-305c/tND, PASS,
+
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl==""',                           25s,            03ee-1604/tND, PASS,
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl=="AarfRateControl"',            25s,            dfc9-e3e7/tND, PASS,
+
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c PingBase -r 0,               100s,         0000-0000/tND, PASS,   # PingBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c UDPBase -r 0,                100s,         0000-0000/tND, PASS,   # UDPBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioMediumBase -r 0,   100s,         0000-0000/tND, PASS,   # IdealRadioMediumBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c ScalarRadioMediumBase -r 0,  100s,         0000-0000/tND, PASS,   # ScalarRadioMediumBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Base -r 0,          100s,         0000-0000/tND, PASS,   # Ieee80211Base extended
+/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Ping -r 0,                                      500s,            6ccd-0539/tND, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Udp -r 0,                                       500s,            a7f9-f252/tND, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioPing -r 0,                                      500s,            6b64-2977/tND, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioUdp -r 0,                                       500s,            1ba9-232a/tND, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            ff65-5cd4/tND, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            b45a-7846/tND, PASS,
+
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   100s,         5802-2546/tND, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   100s,         8d33-9a06/tND, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c LMac -r 0,                   100s,         cd7c-5f8e/tND, PASS,
+# /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBase -r 0,          100s,         0000-0000/tND, PASS,   # StatisticBase extended
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          100s,         01ed-aa93/tND, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          100s,         e688-95a9/tND, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          100s,         111c-5b9b/tND, PASS,
+
+/showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0,                1s,         188b-51e3/tND, PASS,
+

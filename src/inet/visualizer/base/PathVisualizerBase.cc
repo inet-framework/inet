@@ -30,8 +30,9 @@ PathVisualizerBase::PathVisualization::PathVisualization(const std::vector<int>&
 {
 }
 
-const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'n':
             result = packet->getName();

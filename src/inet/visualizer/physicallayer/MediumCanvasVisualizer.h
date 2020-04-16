@@ -19,14 +19,19 @@
 #define __INET_MEDIUMCANVASVISUALIZER_H
 
 #include "inet/common/figures/HeatMapFigure.h"
+#include "inet/common/figures/PlotFigure.h"
 #include "inet/common/figures/TrailFigure.h"
+#include "inet/common/figures/HeatMapPlotFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 #include "inet/visualizer/util/AnimationSpeedInterpolator.h"
+
+#ifdef WITH_RADIO
+#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#endif // WITH_RADIO
 
 namespace inet {
 
@@ -34,6 +39,7 @@ namespace visualizer {
 
 class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 {
+#ifdef WITH_RADIO
   protected:
     /** @name Parameters */
     //@{
@@ -55,6 +61,8 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 
     /** @name Internal state */
     //@{
+    mutable bool invalidDisplay = true;
+    mutable simtime_t lastRefreshDisplay;
     enum SignalInProgress {
         SIP_NONE,
         SIP_PROPAGATION,
@@ -79,10 +87,22 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
      * The propagating signal figures.
      */
     std::map<const physicallayer::ITransmission *, cFigure *> signalFigures;
-    //@}
-
-    /** @name Figures */
-    //@{
+    /**
+     * The main power density figure.
+     */
+    HeatMapPlotFigure *mainPowerDensityMapFigure = nullptr;
+    /**
+     * The list of power density figures.
+     */
+    std::map<const cModule *, HeatMapPlotFigure *> powerDensityMapFigures;
+    /**
+     * The list of spectrum figures.
+     */
+    std::map<const cModule *, PlotFigure *> spectrumFigures;
+    /**
+     * The list of spectrum flow figures.
+     */
+    std::map<const cModule *, HeatMapPlotFigure *> spectrogramFigures;
     /**
      * The layer figure that contains the figures representing the ongoing communications.
      */
@@ -97,6 +117,19 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
     virtual void setAnimationSpeed();
+
+    virtual void refreshMainPowerDensityMapFigure() const;
+    virtual void refreshPowerDensityMapFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const;
+    virtual void refreshPowerDensityMapFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerDensityFunction, HeatMapPlotFigure *figure, int channel) const;
+
+    virtual void refreshSpectrumFigure(const cModule *networkNode, PlotFigure *figure) const;
+    virtual std::tuple<const physicallayer::ITransmission *, const physicallayer::ITransmission *, const physicallayer::IAntenna *, IMobility *> extractSpectrumFigureParameters(const cModule *networkNode) const;
+    virtual void refreshSpectrumFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const physicallayer::IAntenna *antenna, const Coord& position, PlotFigure *figure, int series) const;
+    virtual std::pair<WpHz, WpHz> computePowerForPartitionBounds(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>> *partitonPowerFunction, const physicallayer::IAntenna *antenna, const Coord& position) const;
+    virtual std::pair<WpHz, WpHz> computePowerForDirectionalAntenna(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const physicallayer::IAntenna *antenna, const Coord& position) const;
+
+    virtual void refreshSpectrogramFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const;
+    virtual void refreshSpectrogramFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const Coord& position, SimTimeUnit signalTimeUnit, HeatMapPlotFigure *figure, int channel) const;
 
     virtual cFigure *getSignalDepartureFigure(const physicallayer::IRadio *radio) const;
     virtual void setSignalDepartureFigure(const physicallayer::IRadio *radio, cFigure *figure);
@@ -123,6 +156,9 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) override;
     virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) override;
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+#endif // WITH_RADIO
 };
 
 } // namespace visualizer

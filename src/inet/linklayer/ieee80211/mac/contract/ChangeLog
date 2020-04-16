@@ -1,5 +1,54 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-02-15  Levente Mészáros
+
+	Ported to the new queueing API.
+
+2019-02-13  Levente Mészáros
+
+	Changed icons of Dcf and Hcf to be different than the icon of Rx.
+	Dropped obsolete IStatistics and BasicStatistics.
+	These have been replaced with individual signals and statistics in several modules.
+
+2019-02-07  Levente Mészáros
+
+	Renamed files to PendingQueue.cc/PendingQueue.h.
+
+2019-02-06  Levente Mészáros
+
+	Added EDCA specific components from Hcf to Edcaf.
+
+2019-02-04  Levente Mészáros
+
+	Added channelOwningChangedSignal signal and statistic to channel access functions.
+
+2019-01-31  Levente Mészáros
+
+	Added datarateSelected signal and datarate statistic.
+
+2019-01-31  Levente Mészáros
+
+	Added basic signals and statistics for frame sequences.
+	Added frameSequenceStarted and frameSequenceFinished signals.
+	Added frameSequence, frameSequenceDuration, and frameSequenceNumPackets statistics.
+
+2019-01-30  Levente Mészáros
+
+	Added basic signals and statistics to MAC data services.
+	Added packetFragmented, packetDefragmented, packetAggregated, packetDeaggregated signals.
+	Added packetFragmentation, packetDefragmentation, packetAggregation, packetDeaggregation statistics.
+
+2019-01-29  Levente Mészáros
+
+	Added basic signals and statistics to recovery procedure interface.
+	Added contentionWindowChanged and retryLimitReached signals.
+	Added contentionWindow vector and retryLimitReach scalar statistics.
+	Added two basic signals and statistics to contention interface.
+	Added contentionPeriodGenerated and channelAccessGranted signals.
+	Added contentionPeriod vector and channelAccessGrant scalar statistics.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-19  Levente Mészáros

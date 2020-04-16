@@ -1,5 +1,55 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-14  Zoltan Bojthe
+
+	Removed the base MacHeaderBase from Ieee802154MacHeader.
+
+2019-10-14  Levente Mészáros
+
+	Dropped queue length related parameters from MAC modules.
+
+	The queue packet capacity and data capacity can already be set on the
+	queue. If the queue module is more complicated then these parameters are
+	meaningless anyway, because there may be way more parameters than one.
+
+2019-10-10  Levente Mészáros
+
+	Fixed statistic names reported by Edward Longman.
+
+2019-06-03  Zoltan Bojthe
+
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-05-29  Zoltan Bojthe
+
+	Conditional push to transmit queue replaced with always push.
+
+2019-05-27  Zoltan Bojthe
+
+	Removed currentTransmission deleting from flushQueue()/clearQueue().
+
+2019-05-24  Zoltan Bojthe
+
+	Use popPacket() instead of getPacket(0).
+
+2019-05-23  Zoltan Bojthe
+
+	Switched to use the currentTransmission member variable.
+
+2019-05-22  Zoltan Bojthe
+
+	Simplified queue usage.
+
+2019-03-14  Levente Mészáros
+
+	Replaced internal queue with IPacketQueue submodule.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-08  Zoltan Bojthe

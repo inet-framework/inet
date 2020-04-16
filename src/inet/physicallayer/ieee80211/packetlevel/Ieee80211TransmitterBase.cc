@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211TransmitterBase::Ieee80211TransmitterBase() :
@@ -124,7 +123,7 @@ void Ieee80211TransmitterBase::setChannel(const Ieee80211Channel *channel)
     if (this->channel != channel) {
         delete this->channel;
         this->channel = channel;
-        setCarrierFrequency(channel->getCenterFrequency());
+        setCenterFrequency(channel->getCenterFrequency());
     }
 }
 
@@ -135,6 +134,5 @@ void Ieee80211TransmitterBase::setChannelNumber(int channelNumber)
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

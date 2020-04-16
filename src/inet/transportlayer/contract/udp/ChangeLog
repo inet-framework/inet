@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Zoltan Bojthe
+
+	Added subcode enum for UdpSetOptionCommand.
+
+2019-11-18  Zoltan Bojthe
+
+	Added setTos() function and UdpSetTosCommand to UdpSocket.
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService to dscp, Udp already uses this value to send DscpReq to IP layer.
+
+2019-09-21  Mani Amoozadeh
+
+	Reorganized code to better reflect the execution flow.
+
+2019-04-17  Levente Mészáros
+
+	Added guard for the case when there's no SocketInd on the packet.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-03  Zoltan Bojthe

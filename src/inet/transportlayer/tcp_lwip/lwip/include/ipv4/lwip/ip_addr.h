@@ -46,17 +46,9 @@ namespace tcp {
 //extern "C" {
 #endif
 
-#ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
-#endif
-PACK_STRUCT_BEGIN
 struct ip_addr {
-  PACK_STRUCT_FIELD(L3Address addr);
-} PACK_STRUCT_STRUCT;
-PACK_STRUCT_END
-#ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
-#endif
+  L3Address addr;
+};
 
 /*
  * struct ipaddr2 is used in the definition of the ARP packet format in

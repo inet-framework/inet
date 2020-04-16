@@ -1,0 +1,1267 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<analysis version="2">
+    <inputs>
+        <input pattern="results/NonQos-#0.vec"/>
+        <input pattern="results/NonQos-#0.sca"/>
+        <input pattern="results/Qos-#0.vec"/>
+        <input pattern="results/Qos-#0.sca"/>
+    </inputs>
+    <charts>
+        <chart icon="icons/full/obj/linechart.png" id="15" name="End-to-end delay, Non-QoS" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+import getAc as ac
+import numpy as np
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+
+print(df)
+
+print("average delay:")
+for i in df.vecvalue:
+    print(np.mean(i))
+
+df.sort_values("module", inplace=True)
+
+plt.figure(figsize=(7.5,4))
+
+for t in df.itertuples(index=False):
+    style = dict()
+    style['linestyle'] = ' '
+    style['marker'] = '.'
+    style['markersize'] = 2
+
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), **style)
+
+plt.grid(linestyle='--')
+plt.tight_layout(1.5)
+
+ymin, ymax = plt.ylim()
+xmin, xmax = plt.xlim()
+
+plt.ylim(0, 0.2)
+plt.xlim(0.5,xmax)
+
+plt.xlabel('Time [s]')
+plt.ylabel('End-to-end delay [s]')
+plt.title('End-to-end delay, non-QoS')
+
+plt.legend(markerscale=4, loc=2)
+
+plt.savefig('delay_nonqos.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(endToEndDelay:vector) AND (runattr:experiment(NonQos))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="29" name="End-to-end delay, QoS" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+import getAc as ac
+import numpy as np
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df.sort_values("module", inplace=True)
+
+print(df)
+
+print("average delay:")
+for i in df.vecvalue:
+    print(np.mean(i))
+
+plt.figure(figsize=(7.5,4))
+
+for t in df.itertuples(index=False):
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), linestyle=" ", markersize=2, marker=".")
+
+plt.grid(linestyle='--')
+plt.tight_layout(1.5)
+
+ymin, ymax = plt.ylim()
+plt.ylim(ymin, 2)
+
+plt.yticks([0, 0.5, 1, 1.5, 2])
+
+plt.xlabel('Time [s]')
+plt.ylabel('End-to-end delay [s]')
+plt.title('End-to-end delay, QoS')
+
+plt.legend(markerscale=4, loc=2)
+
+plt.savefig('delay_qos.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(endToEndDelay:vector) AND (runattr:experiment(Qos))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="180" name="Instantaneous packet delay variation, non-QoS" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+import numpy as np
+import getAc as ac
+import solid_x_axis as sxa
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+print("------------------------------------------------------------")
+print("average jitter [ms]:")
+for i in df['vecvalue']:
+    print(np.std(i))
+print("------------------------------------------------------------")
+
+# Calculate difference - TODO remove when the built-in
+# Difference is available
+for i in range(0,df['vecvalue'].shape[0]):
+    vals = df['vecvalue'][i]
+        
+    difference = [vals[x] - vals[x-1] for x in range(0,len(vals))]
+    difference[0] = vals[0]
+    
+    df['vecvalue'][i] = difference
+
+for t in df.itertuples(index=False):
+    style = dict()
+    style['linestyle'] = ' '
+    style['marker'] = '.'
+    style['markersize'] = 2
+
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), **style)
+
+plt.grid(linestyle='--')
+
+plt.tight_layout(1.5)
+
+plt.xlabel('Time [s]')
+plt.ylabel('Instantaneous packet delay variation [ms]')
+plt.title('Instantaneous packet delay variation, non-QoS')
+
+xmin, xmax = plt.xlim()
+
+#-----------------------------------
+ZOOMED = False
+
+if ZOOMED:
+    y = 15
+else:
+    ymin, ymax = plt.ylim()
+    y = max(abs(ymin),abs(ymax))
+
+plt.ylim(-y,y)
+plt.xlim(0.5,xmax)
+#-----------------------------------
+
+plt.legend(loc=1, markerscale=4)
+
+ax = plt.gca()
+
+a = ax.get_ygridlines()
+
+# get default grid color
+ygridlines = ax.get_ygridlines()
+default_grid_color = ygridlines[2].get_color()
+
+sxa.solid_x_axis(ax,default_grid_color)
+
+# zoom level change event handling
+def on_xlims_change(axes):
+    print("plt.xlim" + str(ax.get_xlim()))
+    sxa.solid_x_axis(ax,default_grid_color)
+
+def on_ylims_change(axes):
+    print("plt.ylim" + str(ax.get_ylim()))
+    sxa.solid_x_axis(ax,default_grid_color)
+    
+ax.callbacks.connect('xlim_changed', on_xlims_change)
+ax.callbacks.connect('ylim_changed', on_ylims_change)
+
+plt.savefig('jitter_nonqos.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(endToEndDelay:vector) AND (runattr:experiment(NonQos))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="188" name="Instantaneous packet delay variation, QoS" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+import numpy as np
+import getAc as ac
+import solid_x_axis as sxa
+
+# For saving zoomed-in image
+zoom = False
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+df.sort_values('module', inplace=True)
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+print("------------------------------------------------------------")
+print("average jitter [ms]:")
+for i in df['vecvalue']:
+    print(np.std(i))
+print("------------------------------------------------------------")
+
+# Calculate difference - TODO remove when the built-in
+# Difference is available
+for i in range(0,df['vecvalue'].shape[0]):
+    vals = df['vecvalue'][i]
+        
+    difference = [vals[x] - vals[x-1] for x in range(0,len(vals))]
+    difference[0] = vals[0]
+    
+    df['vecvalue'][i] = difference
+
+for t in df.itertuples(index=False):
+    style = dict()
+    style['linestyle'] = ' '
+    style['marker'] = '.'
+    style['markersize'] = 2
+
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), **style)
+
+plt.grid(linestyle='--')
+
+plt.tight_layout(1.5)
+
+xmin, xmax = plt.xlim()
+
+#-----------------------------------
+ZOOMED = False
+
+if ZOOMED:
+    y = 15
+else:
+    ymin, ymax = plt.ylim()
+    y = max(abs(ymin),abs(ymax))
+
+plt.ylim(-y,y)
+plt.xlim(0.5,xmax)
+#-----------------------------------
+
+plt.legend(loc=1, markerscale=4)
+
+ax = plt.gca()
+
+a = ax.get_ygridlines()
+
+# get default grid color
+ygridlines = ax.get_ygridlines()
+default_grid_color = ygridlines[2].get_color()
+
+sxa.solid_x_axis(ax,default_grid_color)
+
+# zoom level change event handling
+def on_xlims_change(axes):
+    print("plt.xlim" + str(ax.get_xlim()))
+    sxa.solid_x_axis(ax,default_grid_color)
+
+def on_ylims_change(axes):
+    print("plt.ylim" + str(ax.get_ylim()))
+    sxa.solid_x_axis(ax,default_grid_color)
+    
+ax.callbacks.connect('xlim_changed', on_xlims_change)
+ax.callbacks.connect('ylim_changed', on_ylims_change)
+
+# set xlim/ylim here to get a specific zoom level image
+if zoom:
+    plt.xlim(1, 1.84)
+    plt.ylim(-2.3, 4.18)
+    plt.tight_layout(2.5)
+
+plt.xlabel('Time [s]')
+plt.ylabel('Instantaneous packet delay variation [ms]')
+plt.title('Instantaneous packet delay variation, QoS')
+
+if zoom:
+    plt.savefig('jitter_qos_zoomed.png', dpi=150, transparent=True)
+else:
+    plt.savefig('jitter_qos.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(endToEndDelay:vector) AND (runattr:experiment(Qos))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="473" name="Instantaneous packet delay variation, non-QoS and QoS" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+import numpy as np
+import getAc as ac
+import solid_x_axis as sxa
+
+filter_string_nonqos = """((module(*.server.app[0]) AND name(endToEndDelay:vector) AND file(*results/NonQos-*))
+  OR (module(*.server.app[1]) AND name(endToEndDelay:vector) AND file(*results/NonQos-*))
+  OR (module(*.server.app[2]) AND name(endToEndDelay:vector) AND file(*results/NonQos-*))
+  OR (module(*.server.app[3]) AND name(endToEndDelay:vector) AND file(*results/NonQos-*)))"""
+  
+filter_string_qos = """((module(*.server.app[0]) AND name(endToEndDelay:vector) AND file(*results/Qos-*))
+  OR (module(*.server.app[1]) AND name(endToEndDelay:vector) AND file(*results/Qos-*))
+  OR (module(*.server.app[2]) AND name(endToEndDelay:vector) AND file(*results/Qos-*))
+  OR (module(*.server.app[3]) AND name(endToEndDelay:vector) AND file(*results/Qos-*)))"""
+
+df_nonqos = results.get_vectors(filter_string_nonqos, include_attrs=True, include_itervars=True)
+df_nonqos['vecvalue'] *= 1000
+
+df_qos = results.get_vectors(filter_string_qos, include_attrs=True, include_itervars=True)
+df_qos['vecvalue'] *= 1000
+
+# Calculate difference - TODO remove when the built-in
+# Difference is available
+for i in range(0,df_nonqos['vecvalue'].shape[0]):
+    vals = df_nonqos['vecvalue'][i]
+        
+    difference = [vals[x] - vals[x-1] for x in range(0,len(vals))]
+    difference[0] = vals[0]
+    
+    df_nonqos['vecvalue'][i] = difference
+
+for i in range(0,df_qos['vecvalue'].shape[0]):
+    vals = df_qos['vecvalue'][i]
+        
+    difference = [vals[x] - vals[x-1] for x in range(0,len(vals))]
+    difference[0] = vals[0]
+    
+    df_qos['vecvalue'][i] = difference
+
+df_qos.sort_values('module', inplace=True)
+    
+print(df_qos)
+
+plt.figure(figsize=(10,4))
+
+ax1 = plt.subplot(121)
+for t in df_nonqos.itertuples(index=False):
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), marker='.', markersize=2, linestyle=' ')
+
+plt.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=4)
+plt.tight_layout(1.5)
+
+xmin, xmax = plt.xlim()
+
+plt.xlabel('Time [s]')
+plt.ylabel('Instantaneous packet delay variation [ms]')
+plt.title('Non-QoS')
+
+#-----------------------------------
+ZOOMED = True
+
+if ZOOMED:
+    y = 15
+else:
+    ymin, ymax = plt.ylim()
+    y = max(abs(ymin),abs(ymax))
+
+plt.ylim(-y,y)
+plt.xlim(0.5,xmax)
+#-----------------------------------
+
+plt.grid(linestyle='--')
+
+ax2 = plt.subplot(122)
+for t in df_qos.itertuples(index=False):
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), marker='.', markersize=2, linestyle=' ')
+
+plt.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=4)
+plt.tight_layout(1.5)
+
+xmin, xmax = plt.xlim()
+
+#-----------------------------------
+
+if ZOOMED:
+    y = 15
+else:
+    ymin, ymax = plt.ylim()
+    y = max(abs(ymin),abs(ymax))
+
+plt.ylim(-y,y)
+plt.xlim(0.5,xmax)
+#-----------------------------------
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+ax = plt.gca()
+
+a = ax.get_ygridlines()
+
+# get default grid color
+ygridlines = ax1.get_ygridlines()
+default_grid_color = ygridlines[0].get_color()
+
+sxa.solid_x_axis(ax1,default_grid_color)
+sxa.solid_x_axis(ax2,default_grid_color)
+
+# zoom level change event handling
+def on_xlims_change(axes):
+    print("plt.xlim" + str(ax.get_xlim()))
+
+def on_ylims_change(axes):
+    print("plt.ylim" + str(ax.get_ylim()))
+    
+ax1.callbacks.connect('xlim_changed', on_xlims_change)
+ax1.callbacks.connect('ylim_changed', on_ylims_change)
+ax2.callbacks.connect('xlim_changed', on_xlims_change)
+ax2.callbacks.connect('ylim_changed', on_ylims_change)
+
+plt.xlabel('Time [s]')
+plt.title('QoS')
+plt.suptitle('Instantaneous packet delay variation',y=1, size=14)
+
+plt.savefig('jitter.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value=""/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="196" name="Throughput, non-QoS" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+import getAc as ac
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] /= 1000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+for t in df.itertuples(index=False):
+
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), linewidth=1, marker='s', markersize=1)
+
+plt.grid(linestyle='--')
+plt.tight_layout(1.5)
+
+plt.title('Throughput, non-QoS')
+plt.xlabel('Time [s]')
+plt.ylabel('Application-level throughput [Mbps]')
+
+plt.ylim(-0.1,6)
+plt.xlim(0.5,8)
+
+plt.legend(markerscale=4)
+
+plt.savefig('throughput_nonqos_.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(throughput:vector) AND (runattr:experiment(NonQos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(NonQos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[1]&quot;) AND name(throughput:vector) &#10;runattr:experiment(NonQos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[2]&quot;) AND name(throughput:vector) &#10;runattr:experiment(NonQos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[3]&quot;) AND name(throughput:vector) &#10;)"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="568" name="Throughput, QoS" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+import getAc as ac
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df.sort_values('module', inplace=True)
+df['vecvalue'] /= 1000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+for t in df.itertuples(index=False):
+    plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), linewidth=1, marker='s', markersize=1)
+
+plt.grid(linestyle='--')
+plt.tight_layout(1.5)
+
+plt.title('Throughput, QoS')
+plt.xlabel('Time [s]')
+plt.ylabel('Application-level throughput [Mbps]')
+
+plt.ylim(-0.1,6)
+plt.xlim(0.5,8)
+
+plt.legend(markerscale=4)
+
+plt.savefig('throughput_qos_.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(throughput:vector) AND (runattr:experiment(Qos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[2]&quot;) AND name(throughput:vector) &#10;runattr:experiment(Qos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[3]&quot;) AND name(throughput:vector) &#10;runattr:experiment(Qos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[1]&quot;) AND name(throughput:vector) &#10;runattr:experiment(Qos) AND runattr:replication(&quot;#0&quot;) AND module(&quot;QosShowcase.server.app[0]&quot;) AND name(throughput:vector) &#10;)"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+    </charts>
+</analysis>

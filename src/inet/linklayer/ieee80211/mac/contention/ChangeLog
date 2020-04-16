@@ -1,5 +1,24 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-02-04  Levente Mészáros
+
+	Added and updated several log statements to better inform the user about what is going on.
+	Added several missing WATCHes to the modules.
+	Cleaned up Enter_Method and Enter_Method_Silent calls.
+
+2019-02-01  Levente Mészáros
+
+	Changed stateChanged statistic default recording options.
+	Changed statistic names to be more like the corresponding signal or filter name.
+
+2019-01-29  Levente Mészáros
+
+	Added two basic signals and statistics to contention implementation.
+	Added contentionPeriodGenerated and channelAccessGranted signals.
+	Added contentionPeriod vector and channelAccessGrant scalar statistics.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------
@@ -9,4 +28,3 @@
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-11-16  ------ inet-3.99.1 released ------
-

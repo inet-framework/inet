@@ -19,7 +19,7 @@ package inet.physicallayer.ieee80211.bitlevel;
 
 import inet.physicallayer.contract.bitlevel.IInterleaver;
 
-// The Ieee80211OfdmInterleaver is defined by a two-step permutation.
+// The ~Ieee80211OfdmInterleaver is defined by a two-step permutation.
 // The first permutation ensures that adjacent coded bits are mapped
 // onto nonadjacent subcarriers. The second ensures that adjacent coded
 // bits are mapped alternately onto less and more significant bits of the

@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 // Implements a simple VoIP source. It is a constant bitrate source, with 
 // talkspurt support added. Packets do not contain actual voice data.
 // Connection setup/teardown is not modelled. The peer must be a 
-// SimpleVoipReceiver.
+// ~SimpleVoipReceiver.
 //
 // The source alternates between two states: talk and silence. The length
 // the module spends in each state are controlled by the talkspurtDuration and
@@ -42,7 +42,7 @@ import inet.applications.contract.IApp;
 // The destination address/port, the local port, start and stop times can be
 // set via parameters.
 //
-// @authors: Adriano, Zoltan Bojthe
+// @author: Adriano, Zoltan Bojthe
 //
 simple SimpleVoipSender like IApp
 {

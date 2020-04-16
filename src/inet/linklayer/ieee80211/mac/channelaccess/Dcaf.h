@@ -34,7 +34,7 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         IContention *contention = nullptr;
         IChannelAccess::ICallback *callback = nullptr;
 
-        PendingQueue *pendingQueue = nullptr;
+        queueing::IPacketQueue *pendingQueue = nullptr;
         InProgressFrames *inProgressFrames = nullptr;
 
         bool owning = false;
@@ -57,7 +57,7 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details) override;
 
     public:
-        virtual PendingQueue *getPendingQueue() const { return pendingQueue; }
+        virtual queueing::IPacketQueue *getPendingQueue() const { return pendingQueue; }
         virtual InProgressFrames *getInProgressFrames() const { return inProgressFrames; }
 
         // IChannelAccess::ICallback

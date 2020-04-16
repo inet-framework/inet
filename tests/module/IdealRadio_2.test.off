@@ -17,9 +17,6 @@ network = NetIdealRadios
 num-rngs = 3
 **.mobility.rng-0 = 1
 **.wlan[*].mac.rng-0 = 2
-#debug-on-errors = true
-
-tkenv-plugin-path = ../../../etc/plugins
 
 **.constraintAreaMinX = 0m
 **.constraintAreaMinY = 0m

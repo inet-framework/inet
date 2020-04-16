@@ -1,5 +1,54 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Added getPlotSize() to PlotFigure.
+
+2019-12-07  Andras Varga
+
+	cLabelFigure::setAngle() not yet available, bumped buildnum threshold.
+
+2019-12-05  Levente Mészáros
+
+	Removed various relative font size tricks.
+	Changed default tick count to zero in PlotFigure.
+	Replaced cTextFigure with cLabelFigure in PlotFigure.
+
+2019-11-26  Levente Mészáros
+
+	Added HeatMapPlotFigure.
+	Refactored PlotFigure layouting to be lazy for performance reasons.
+
+2019-09-20  Levente Mészáros
+
+	Removed unnecessary resetting of the transformation matrix from PlotFigure.
+	This affected the spectral power density figures which have an offset set via the
+	transformation matrix.
+
+2019-07-24  Levente Mészáros
+
+	Added separate setPlotSize and fixed bounds calculation of PlotFigure.
+
+2019-06-18  Levente Mészáros
+
+	Extended PlotFigure to support arbitrary X axis instead of time based only.
+	Added minX, maxX and renamed various time related functions and members
+	to be more general.
+	Added axes labels and value formats to PlotFigure.
+
+2019-06-07  Levente Mészáros
+
+	Implemented multiple series in PlotFigure.
+	Added clearValues() to PlotFigure.
+	Removed unnecessary refresh() calls from PlotFigure.
+	Refresh is called from refreshDisplay anyway.
+
+2019-02-08  Levente Mészáros
+
+	Added getSize() to indicator figures.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-12  Gyorgy Szaszko

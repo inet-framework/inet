@@ -9,7 +9,7 @@ retransmissions, but still the expected amount of data.
 %inifile: omnetpp.ini
 
 [General]
-network=failover
+network = inet.test.moduletest.lib.failover
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib

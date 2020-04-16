@@ -67,15 +67,13 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     // The last change channel message received and not yet sent to the physical layer, or NULL.
     cMessage *pendingRadioConfigMsg = nullptr;
 
-    static simsignal_t stateSignal;
-    static simsignal_t radioStateSignal;
-
   protected:
     virtual int numInitStages() const override {return NUM_INIT_STAGES;}
     virtual void initialize(int) override;
     virtual void initializeRadioMode();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    using MacProtocolBase::receiveSignal;
     virtual void configureRadioMode(physicallayer::IRadio::RadioMode radioMode);
     virtual void configureInterfaceEntry() override;
     virtual const MacAddress& isInterfaceRegistered();
@@ -117,6 +115,10 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+
+    void deleteCurrentTxFrame() override { throw cRuntimeError("model error"); }
+    void dropCurrentTxFrame(PacketDropDetails& details) override { throw cRuntimeError("model error"); }
+    void popTxQueue() override { throw cRuntimeError("model error"); }
 };
 
 } // namespace ieee80211

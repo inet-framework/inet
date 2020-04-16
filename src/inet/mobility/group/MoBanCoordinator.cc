@@ -325,12 +325,14 @@ bool MoBanCoordinator::readMobilityPatternFile()
     while (fscanf(fp, "%49s %d", posture_name, &id) != -1) {
         mobilityPattern[i].postureID = id;
         if (postureList[id]->isMobile()) {
-            assert(fscanf(fp, "%le %le %le %le", &x, &y, &z, &s) != -1);
+            if (fscanf(fp, "%le %le %le %le", &x, &y, &z, &s) == -1)
+                throw cRuntimeError("Couldn't parse parameters");
             mobilityPattern[i].targetPos = Coord(x, y, z);
             mobilityPattern[i].speed = s;
         }
         else {
-            assert(fscanf(fp, "%le", &x) != -1);
+            if (fscanf(fp, "%le", &x) == -1)
+                throw cRuntimeError("Couldn't parse parameters");
             mobilityPattern[i].duration = x;
         }
         ++i;

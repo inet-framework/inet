@@ -72,6 +72,7 @@ class INET_API TxopDurationFilter : public cObjectResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    using cObjectResultFilter::receiveSignal;
 };
 
 } /* namespace ieee80211 */

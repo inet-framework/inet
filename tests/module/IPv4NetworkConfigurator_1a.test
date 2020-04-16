@@ -9,6 +9,7 @@ Same as IPv4NetworkConfigurator_1.test, except order of modules in NED
 
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherSwitch;

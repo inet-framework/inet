@@ -25,7 +25,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // "flat" meaning that all hosts and routers will have the same
 // network address and will only differ in the host part.
 //
-// FIXME: add documentation!
+//# FIXME: add documentation!
 //
 // @see ~Ipv4FlatNetworkConfigurator
 //

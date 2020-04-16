@@ -23,9 +23,9 @@
 package inet.networklayer.xmipv6;
 
 //
-// xMIPv6 Data structure for the Mobile Node
+// ~xMIPv6 Data structure for the Mobile Node
 //
-// @see  xMIPv6.
+// @see  ~xMIPv6.
 //
 simple BindingUpdateList
 {

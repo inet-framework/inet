@@ -35,6 +35,12 @@ EnergyStorageOsgVisualizer::EnergyStorageOsgVisualization::EnergyStorageOsgVisua
 {
 }
 
+EnergyStorageOsgVisualizer::~EnergyStorageOsgVisualizer()
+{
+    if (displayEnergyStorages)
+        removeAllEnergyStorageVisualizations();
+}
+
 void EnergyStorageOsgVisualizer::initialize(int stage)
 {
     EnergyStorageVisualizerBase::initialize(stage);

@@ -36,7 +36,7 @@ class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerB
         BoxedLabelFigure *figure = nullptr;
 
       public:
-        InterfaceCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BoxedLabelFigure *figure, int networkNodeId, int interfaceId);
+        InterfaceCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BoxedLabelFigure *figure, int networkNodeId, int networkNodeGateId, int interfaceId);
         virtual ~InterfaceCanvasVisualization();
     };
 
@@ -47,14 +47,14 @@ class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerB
   protected:
     virtual void initialize(int stage) override;
 
-    virtual cModule *getNetworkNode(const InterfaceVisualization *interfaceVisualization);
     virtual InterfaceEntry *getInterfaceEntry(const InterfaceVisualization *interfaceVisualization);
-    virtual cGate *getOutputGate(cModule *networkNode, InterfaceEntry *interfaceEntry);
-    virtual cGate *getOutputGate(const InterfaceVisualization *interfaceVisualization);
     virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry) override;
     virtual void addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry) override;
+
+  public:
+    virtual ~InterfaceTableCanvasVisualizer();
 };
 
 } // namespace visualizer

@@ -1,5 +1,46 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-13  Levente Mészáros
+
+	Added data field to ByteCountChunk and BitCountChunk shift operator.
+
+2019-12-05  Gyorgy Szaszko
+
+	Added displaying attached tags of Chunks in Qtenv.
+
+2019-11-19  Levente Mészáros
+
+	Added inspector support for packet data part, front part, back part, and dissection result.
+
+2019-09-09  Levente Mészáros
+
+	Changed the interpretation of Chunk::peek() length parameter for negative values.
+
+	The old version interpreted -1 as up to any length. The new version interprets
+	negative values as up to the absolute value of length.
+
+2019-09-09  Levente Mészáros
+
+	Added PF_ALLOW_EMPTY flag to Chunk API to support returning Empty chunks.
+
+	This feature makes certain algorithms easier to write, because the user
+	doesn't have to check for nullptr all over the place.
+
+2019-08-05  Zoltan Bojthe
+
+	Added support for non-byte offset and length in BytesChunk::peek().
+
+2019-07-17  Zoltan Bojthe
+
+	Added BitCountChunk, ByteCountChunk descriptors.
+	Added data field for BitsChunk, BytesChunk descriptor.
+
+2019-07-09  Zoltan Bojthe
+
+	Added FieldsChunk::addChunkLength() function.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-08-29  Christoph Sommer

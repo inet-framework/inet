@@ -52,12 +52,11 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const cPacket *packet = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(const cPacket *packet) : packet(packet) { }
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
   protected:

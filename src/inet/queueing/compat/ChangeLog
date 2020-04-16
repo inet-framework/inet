@@ -1,0 +1,10 @@
+====== inet-4.x ======
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-05-10  Levente Mészáros
+
+	Copied cqueue and cpacketqueue from OMNET to INET for forward compatibility.
+
+	This change allows using the Comparator interface which is not supported
+	in omnet 5.4.1.

@@ -201,12 +201,10 @@ void HttpServerBase::handleMessage(cMessage *msg)
 Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 {
     const auto& request = msg->peekAtFront<HttpRequestMessage>();
-    if (request == nullptr)
-        throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
     EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->getTargetUrl() << endl;
 
-    logRequest(msg);
+    logRequest(request);
 
     if (extractServerName(request->getTargetUrl()) != hostName) {
         // This should never happen but lets check
@@ -222,7 +220,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
     if (res.size() != 3) {
         EV_ERROR << "Invalid request string: " << request->getHeading() << endl;
         replymsg = generateErrorReply(request, 400);
-        logResponse(replymsg);
+        logResponse(replymsg->peekAtFront<HttpReplyMessage>());
         return replymsg;
     }
 
@@ -240,7 +238,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
     }
 
     if (replymsg != nullptr)
-        logResponse(replymsg);
+        logResponse(replymsg->peekAtFront<HttpReplyMessage>());
 
     return replymsg;
 }
@@ -298,7 +296,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
-    Packet *replyPk = new Packet(szReply);
+    Packet *replyPk = new Packet(szReply, HTTPT_RESPONSE_MESSAGE);
     const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
@@ -307,7 +305,6 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
     replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
     replymsg->setContentType(CT_HTML);    // Emulates the content-type header field
-    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     if (scriptedMode) {
         replymsg->setPayload(htmlPages[resource].body.c_str());
@@ -374,7 +371,7 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
-    Packet *replyPk = new Packet(szErrStr);
+    Packet *replyPk = new Packet(szErrStr, HTTPT_RESPONSE_MESSAGE);
     const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
@@ -384,7 +381,6 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     replymsg->setResult(code);
     replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
     replyPk->insertAtBack(replymsg);
-    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     badRequests++;
     return replyPk;

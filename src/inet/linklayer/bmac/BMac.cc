@@ -34,11 +34,11 @@ void BMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        queueLength = par("queueLength");
         animation = par("animation");
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");
         headerLength = b(par("headerLength"));
+        ctrlFrameLength = b(par("ctrlFrameLength"));
         checkInterval = par("checkInterval");
         useMacAcks = par("useMACAcks");
         maxTxAttempts = par("maxTxAttempts");
@@ -58,6 +58,7 @@ void BMac::initialize(int stage)
         lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
 
         macState = INIT;
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -68,43 +69,32 @@ void BMac::initialize(int stage)
         // init the dropped packet info
         WATCH(macState);
 
-        wakeup = new cMessage("wakeup");
-        wakeup->setKind(BMAC_WAKE_UP);
+        wakeup = new cMessage("wakeup", BMAC_WAKE_UP);
 
-        data_timeout = new cMessage("data_timeout");
-        data_timeout->setKind(BMAC_DATA_TIMEOUT);
+        data_timeout = new cMessage("data_timeout", BMAC_DATA_TIMEOUT);
         data_timeout->setSchedulingPriority(100);
 
-        data_tx_over = new cMessage("data_tx_over");
-        data_tx_over->setKind(BMAC_DATA_TX_OVER);
+        data_tx_over = new cMessage("data_tx_over", BMAC_DATA_TX_OVER);
 
-        stop_preambles = new cMessage("stop_preambles");
-        stop_preambles->setKind(BMAC_STOP_PREAMBLES);
+        stop_preambles = new cMessage("stop_preambles", BMAC_STOP_PREAMBLES);
 
-        send_preamble = new cMessage("send_preamble");
-        send_preamble->setKind(BMAC_SEND_PREAMBLE);
+        send_preamble = new cMessage("send_preamble", BMAC_SEND_PREAMBLE);
 
-        ack_tx_over = new cMessage("ack_tx_over");
-        ack_tx_over->setKind(BMAC_ACK_TX_OVER);
+        ack_tx_over = new cMessage("ack_tx_over", BMAC_ACK_TX_OVER);
 
-        cca_timeout = new cMessage("cca_timeout");
-        cca_timeout->setKind(BMAC_CCA_TIMEOUT);
+        cca_timeout = new cMessage("cca_timeout", BMAC_CCA_TIMEOUT);
         cca_timeout->setSchedulingPriority(100);
 
-        send_ack = new cMessage("send_ack");
-        send_ack->setKind(BMAC_SEND_ACK);
+        send_ack = new cMessage("send_ack", BMAC_SEND_ACK);
 
-        start_bmac = new cMessage("start_bmac");
-        start_bmac->setKind(BMAC_START_BMAC);
+        start_bmac = new cMessage("start_bmac", BMAC_START_BMAC);
 
-        ack_timeout = new cMessage("ack_timeout");
-        ack_timeout->setKind(BMAC_ACK_TIMEOUT);
+        ack_timeout = new cMessage("ack_timeout", BMAC_ACK_TIMEOUT);
 
-        resend_data = new cMessage("resend_data");
-        resend_data->setKind(BMAC_RESEND_DATA);
+        resend_data = new cMessage("resend_data", BMAC_RESEND_DATA);
         resend_data->setSchedulingPriority(100);
 
-        scheduleAt(0.0, start_bmac);
+        scheduleAt(simTime(), start_bmac);
     }
 }
 
@@ -121,11 +111,6 @@ BMac::~BMac()
     cancelAndDelete(start_bmac);
     cancelAndDelete(ack_timeout);
     cancelAndDelete(resend_data);
-
-    for (auto & elem : macQueue) {
-        delete (elem);
-    }
-    macQueue.clear();
 }
 
 void BMac::finish()
@@ -167,11 +152,12 @@ void BMac::configureInterfaceEntry()
  */
 void BMac::handleUpperPacket(Packet *packet)
 {
-    bool pktAdded = addToQueue(packet);
-    if (!pktAdded)
-        return;
+    encapsulate(packet);
+    txQueue->pushPacket(packet);
+    EV_DETAIL << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue\n"
+              << "  queue size: " << txQueue->getNumPackets() << " macState: " << macState << endl;
     // force wakeup now
-    if (wakeup->isScheduled() && (macState == SLEEP)) {
+    if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
         cancelEvent(wakeup);
         scheduleAt(simTime() + dblrand() * 0.1f, wakeup);
     }
@@ -182,16 +168,16 @@ void BMac::handleUpperPacket(Packet *packet)
  */
 void BMac::sendPreamble()
 {
-    auto preamble = makeShared<BMacHeader>();
+    auto preamble = makeShared<BMacControlFrame>();
     preamble->setSrcAddr(interfaceEntry->getMacAddress());
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
-    preamble->setChunkLength(headerLength);
+    preamble->setChunkLength(ctrlFrameLength);
 
     //attach signal and send down
     auto packet = new Packet("Preamble");
     preamble->setType(BMAC_PREAMBLE);
     packet->insertAtFront(preamble);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxPreambles++;
@@ -202,16 +188,16 @@ void BMac::sendPreamble()
  */
 void BMac::sendMacAck()
 {
-    auto ack = makeShared<BMacHeader>();
+    auto ack = makeShared<BMacControlFrame>();
     ack->setSrcAddr(interfaceEntry->getMacAddress());
     ack->setDestAddr(lastDataPktSrcAddr);
-    ack->setChunkLength(headerLength);
+    ack->setChunkLength(ctrlFrameLength);
 
     //attach signal and send down
     auto packet = new Packet("BMacAck");
     ack->setType(BMAC_ACK);
     packet->insertAtFront(ack);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxAcks++;
@@ -257,7 +243,7 @@ void BMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_CCA_TIMEOUT) {
                 // channel is clear
                 // something waiting in eth queue?
-                if (macQueue.size() > 0) {
+                if (!txQueue->isEmpty()) {
                     EV_DETAIL << "State CCA, message CCA_TIMEOUT, new state"
                                  " SEND_PREAMBLE" << endl;
                     macState = SEND_PREAMBLE;
@@ -335,6 +321,10 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State SEND_DATA, message BMAC_SEND_PREAMBLE or"
                              " BMAC_RESEND_DATA, new state WAIT_TX_DATA_OVER" << endl;
                 // send the data packet
+                if (msg->getKind() == BMAC_SEND_PREAMBLE) {
+                    popTxQueue();
+                }
+                ASSERT(currentTxFrame != nullptr);
                 sendDataPacket();
                 macState = WAIT_TX_DATA_OVER;
                 return;
@@ -353,10 +343,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                 else {
                     EV_DETAIL << "State WAIT_TX_DATA_OVER, message BMAC_DATA_TX_OVER,"
                                  " new state  SLEEP" << endl;
-                    delete macQueue.front();
-                    macQueue.pop_front();
+                    deleteCurrentTxFrame();
                     // if something in the queue, wakeup soon.
-                    if (macQueue.size() > 0)
+                    if (!txQueue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -382,13 +371,13 @@ void BMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "State WAIT_ACK, message BMAC_ACK_TIMEOUT, new state"
                                  " SLEEP" << endl;
                     //drop the packet
-                    cMessage *mac = macQueue.front();
-                    macQueue.pop_front();
-                    emit(linkBrokenSignal, mac);
-                    delete mac;
+                    emit(linkBrokenSignal, currentTxFrame);
+                    PacketDropDetails details;
+                    details.setReason(OTHER_PACKET_DROP);
+                    dropCurrentTxFrame(details);
 
                     // if something in the queue, wakeup soon.
-                    if (macQueue.size() > 0)
+                    if (!txQueue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -408,7 +397,7 @@ void BMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
                 auto packet = check_and_cast<Packet *>(msg);
-                const MacAddress src = packet->peekAtFront<BMacHeader>()->getSrcAddr();
+                const MacAddress src = packet->peekAtFront<BMacControlFrame>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
@@ -417,10 +406,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                     nbRecvdAcks++;
                     lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
                     cancelEvent(ack_timeout);
-                    delete macQueue.front();
-                    macQueue.pop_front();
+                    deleteCurrentTxFrame();
                     // if something in the queue, wakeup soon.
-                    if (macQueue.size() > 0)
+                    if (!txQueue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -453,7 +441,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 MacAddress address = interfaceEntry->getMacAddress();
                 nbRxDataPackets++;
                 auto packet = check_and_cast<Packet *>(msg);
-                const auto bmacHeader = packet->peekAtFront<BMacHeader>();
+                const auto bmacHeader = packet->peekAtFront<BMacDataFrameHeader>();
                 const MacAddress& dest = bmacHeader->getDestAddr();
                 const MacAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
@@ -483,7 +471,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "State WAIT_DATA, message BMAC_DATA, new state SLEEP"
                               << endl;
                     // if something in the queue, wakeup soon.
-                    if (macQueue.size() > 0)
+                    if (!txQueue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -496,7 +484,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State WAIT_DATA, message BMAC_DATA_TIMEOUT, new state"
                              " SLEEP" << endl;
                 // if something in the queue, wakeup soon.
-                if (macQueue.size() > 0)
+                if (!txQueue->isEmpty())
                     scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                 else
                     scheduleAt(simTime() + slotDuration, wakeup);
@@ -523,7 +511,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                              " SLEEP" << endl;
                 // ack sent, go to sleep now.
                 // if something in the queue, wakeup soon.
-                if (macQueue.size() > 0)
+                if (!txQueue->isEmpty())
                     scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                 else
                     scheduleAt(simTime() + slotDuration, wakeup);
@@ -552,9 +540,9 @@ void BMac::handleLowerPacket(Packet *packet)
         return;
     }
     else {
-        const auto& hdr = packet->peekAtFront<BMacHeader>();
+        const auto& hdr = packet->peekAtFront<BMacHeaderBase>();
         packet->setKind(hdr->getType());
-        // simply pass the massage as self message, to be processed by the FSM.
+        // simply pass the message as self message, to be processed by the FSM.
         handleSelfMessage(packet);
     }
 }
@@ -562,15 +550,16 @@ void BMac::handleLowerPacket(Packet *packet)
 void BMac::sendDataPacket()
 {
     nbTxDataPackets++;
-    Packet *pkt = macQueue.front()->dup();
+
+    Packet *pkt = currentTxFrame->dup();
     attachSignal(pkt);
-    const auto& hdr = pkt->peekAtFront<BMacHeader>();
+    const auto& hdr = pkt->peekAtFront<BMacDataFrameHeader>();
     lastDataPktDestAddr = hdr->getDestAddr();
     ASSERT(hdr->getType() == BMAC_DATA);
     sendDown(pkt);
 }
 
-void BMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void BMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::radioModeChangedSignal) {
@@ -599,44 +588,6 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
         }
         transmissionState = newRadioTransmissionState;
     }
-}
-
-/**
- * Encapsulates the received network-layer packet into a BMacHeader and set all
- * needed header fields.
- */
-bool BMac::addToQueue(cMessage *msg)
-{
-    if (macQueue.size() >= queueLength) {
-        // queue is full, message has to be deleted
-        EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is"
-                     " deleted\n";
-        PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(queueLength);
-        emit(packetDroppedSignal, msg, &details);
-        nbDroppedDataPackets++;
-        return false;
-    }
-
-    auto packet = check_and_cast<Packet *>(msg);
-    encapsulate(packet);
-    macQueue.push_back(packet);
-    EV_DETAIL << "Max queue length: " << queueLength << ", packet put in queue"
-                                                        "\n  queue size: " << macQueue.size() << " macState: "
-              << macState << endl;
-    return true;
-}
-
-void BMac::flushQueue()
-{
-    // TODO:
-    macQueue.clear();
-}
-
-void BMac::clearQueue()
-{
-    macQueue.clear();
 }
 
 void BMac::attachSignal(Packet *macPkt)
@@ -727,7 +678,7 @@ void BMac::refreshDisplay() const
 
 void BMac::decapsulate(Packet *packet)
 {
-    const auto& bmacHeader = packet->popAtFront<BMacHeader>();
+    const auto& bmacHeader = packet->popAtFront<BMacDataFrameHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
@@ -738,7 +689,7 @@ void BMac::decapsulate(Packet *packet)
 
 void BMac::encapsulate(Packet *packet)
 {
-    auto pkt = makeShared<BMacHeader>();
+    auto pkt = makeShared<BMacDataFrameHeader>();
     pkt->setChunkLength(headerLength);
 
     pkt->setType(BMAC_DATA);

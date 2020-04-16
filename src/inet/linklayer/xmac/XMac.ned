@@ -18,6 +18,7 @@
 
 package inet.linklayer.xmac;
 
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
@@ -25,7 +26,7 @@ import inet.linklayer.contract.IMacProtocol;
 // Implementation of X-MAC.
 // See C++ documentation for details.
 //
-simple XMac extends MacProtocolBase like IMacProtocol
+module XMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -44,9 +45,6 @@ simple XMac extends MacProtocolBase like IMacProtocol
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
 
-        // size of the MAC queue (maximum number of packets in Tx buffer)
-        int queueLength = default(20);
-
         // should we animate the nodes with colors depending on their state or 
         // not?
         bool animation = default(true);
@@ -64,8 +62,11 @@ simple XMac extends MacProtocolBase like IMacProtocol
         // only used when usage of MAC acks is enabled
         int macMaxFrameRetries = default(3);
 
-        // length of MAC header
+        // length of MAC headers
         int headerLength @unit(b) = default(80b);
+        int ctrlFrameLength @unit(b) = default(headerLength);
+
+        // mtu
         int mtu @unit(B) = default(0B);
 
         // Maximum transmission attempts per data packet, when ACKs are used
@@ -75,5 +76,13 @@ simple XMac extends MacProtocolBase like IMacProtocol
 
         @class(XMac);
         @signal[packetDropped](type=inet::Packet);
+        @selfMessageKinds(inet::XMacType);
+
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                packetCapacity = default(20);
+                @display("p=100,100;q=l2queue");
+        }
 }
 

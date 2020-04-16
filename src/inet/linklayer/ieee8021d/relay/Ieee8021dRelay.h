@@ -106,7 +106,7 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
 
     void sendUp(Packet *packet);
 
-    // For lifecycle
+    //@{ For lifecycle
     virtual void start();
     virtual void stop();
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
@@ -118,6 +118,7 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    //@}
 
     /*
      * Gets port data from the InterfaceTable

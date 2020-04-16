@@ -50,11 +50,11 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
     auto transmitterPosition = transmission->getStartPosition();
     auto recepiverPosition = arrival->getStartPosition();
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz carrierFrequency = narrowbandSignalAnalogModel->getCarrierFrequency();
+    Hz centerFrequency = narrowbandSignalAnalogModel->getCenterFrequency();
     m distance = m(recepiverPosition.distance(transmitterPosition));
     m transmitterAltitude = m(transmitterPosition.distance(physicalEnvironment->getGround()->computeGroundProjection(transmitterPosition)));
     m receiverAltitude = m(recepiverPosition.distance(physicalEnvironment->getGround()->computeGroundProjection(recepiverPosition)));
-    m waveLength = propagationSpeed / carrierFrequency;
+    m waveLength = propagationSpeed / centerFrequency;
     /**
      * At the cross over distance two ray model and free space model predict the same power
      *

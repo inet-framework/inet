@@ -19,9 +19,9 @@
 
 namespace inet {
 
-namespace ospf {
+namespace ospfv2 {
 
-bool RouterLsa::update(const OspfRouterLsa *lsa)
+bool RouterLsa::update(const Ospfv2RouterLsa *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -35,10 +35,10 @@ bool RouterLsa::update(const OspfRouterLsa *lsa)
     }
 }
 
-bool RouterLsa::differsFrom(const OspfRouterLsa *routerLSA) const
+bool RouterLsa::differsFrom(const Ospfv2RouterLsa *routerLSA) const
 {
-    const OspfLsaHeader& thisHeader = getHeader();
-    const OspfLsaHeader& lsaHeader = routerLSA->getHeader();
+    const Ospfv2LsaHeader& thisHeader = getHeader();
+    const Ospfv2LsaHeader& lsaHeader = routerLSA->getHeader();
     bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
                             ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
                             ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
@@ -68,9 +68,7 @@ bool RouterLsa::differsFrom(const OspfRouterLsa *routerLSA) const
                     unsigned int tosCount = thisLink.getTosDataArraySize();
                     for (unsigned int j = 0; j < tosCount; j++) {
                         bool differentTOS = ((thisLink.getTosData(j).tos != lsaLink.getTosData(j).tos) ||
-                                             (thisLink.getTosData(j).tosMetric[0] != lsaLink.getTosData(j).tosMetric[0]) ||
-                                             (thisLink.getTosData(j).tosMetric[1] != lsaLink.getTosData(j).tosMetric[1]) ||
-                                             (thisLink.getTosData(j).tosMetric[2] != lsaLink.getTosData(j).tosMetric[2]));
+                                             (thisLink.getTosData(j).tosMetric != lsaLink.getTosData(j).tosMetric));
 
                         if (differentTOS) {
                             differentLink = true;
@@ -90,7 +88,7 @@ bool RouterLsa::differsFrom(const OspfRouterLsa *routerLSA) const
     return differentHeader || differentBody;
 }
 
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

@@ -1,5 +1,51 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-14  Levente Mészáros
+
+	Dropped queue length related parameters from MAC modules.
+
+	The queue packet capacity and data capacity can already be set on the
+	queue. If the queue module is more complicated then these parameters are
+	meaningless anyway, because there may be way more parameters than one.
+
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+
+2019-09-23  Levente Mészáros
+
+	The length field is not optional at the moment.
+	Renamed file to CsmaCaMacHeaderSerializer.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized tag usage.
+
+2019-08-27  Zoltan Bojthe
+
+	Redesigned header, type and variable header length were missing.
+	Modified header length values.
+
+2019-06-03  Zoltan Bojthe
+
+	Fixed popping tx frame, pop only if it exists.
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-05-27  Zoltan Bojthe
+
+	Simplified code state==IDLE and currentTransmission!=nullptr is an invalid state.
+
+2019-05-22  Zoltan Bojthe
+
+	Use popPacket() instead of getPacket(0).
+	Set currentTransmission member.
+
+2019-02-19  Levente Mészáros
+
+	Replaced old PacketQueue with the new IPacketQueue interface.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-08  Zoltan Bojthe

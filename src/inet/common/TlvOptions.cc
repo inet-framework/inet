@@ -60,7 +60,7 @@ void TlvOptions::deleteOptionByType(int type, bool firstOnly)
 
 int TlvOptions::findByType(short int type, int firstPos) const
 {
-    for (size_t i = firstPos; i < tlvOption_arraysize; )
+    for (size_t i = firstPos; i < tlvOption_arraysize; i++)
         if (tlvOption[i] && tlvOption[i]->getType() == type)
             return i;
     return -1;

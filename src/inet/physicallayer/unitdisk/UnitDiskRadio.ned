@@ -32,7 +32,7 @@ import inet.physicallayer.common.packetlevel.Radio;
 // also supports an ideal communication channel where all transmissions are
 // received sucessfully independent of distance and interfering transmissions.
 //
-// See also ~UnitDiskRadioMedium, ~UnitDiskAnalogModel, ~UnitDiskTransmitter, and
+// @see ~UnitDiskRadioMedium, ~UnitDiskAnalogModel, ~UnitDiskTransmitter,
 // ~UnitDiskReceiver.
 //
 module UnitDiskRadio extends Radio

@@ -9,5 +9,5 @@
 # start the debugger, there are other scripts for that purpose.
 #
 
-inet --debug "$@"
+MODE=debug inet "$@"
 

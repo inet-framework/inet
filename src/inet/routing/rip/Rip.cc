@@ -65,7 +65,7 @@ std::ostream& operator<<(std::ostream& os, const RipInterfaceEntry& e)
             os << "SplitHorizon";
             break;
 
-        case SPLIT_HORIZON_POISONED_REVERSE:
+        case SPLIT_HORIZON_POISON_REVERSE:
             os << "SplitHorizonPoisonedReverse";
             break;
 
@@ -329,7 +329,8 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     }
     else if (signalID == interfaceStateChangedSignal) {
         change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
-        if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
+        auto fieldId = change->getFieldId();
+        if (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER) {
             ie = change->getInterfaceEntry();
             if (!ie->isUp()) {
                 for (auto & elem : ripRoutingTable)
@@ -578,7 +579,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
         if (ripRoute->getInterface() == ripInterface.ie) {
             if (ripInterface.mode == SPLIT_HORIZON)
                 continue;
-            else if (ripInterface.mode == SPLIT_HORIZON_POISONED_REVERSE)
+            else if (ripInterface.mode == SPLIT_HORIZON_POISON_REVERSE)
                 metric = RIP_INFINITE_METRIC;
         }
 
@@ -1067,12 +1068,13 @@ void Rip::addRipInterface(const InterfaceEntry *ie, cXMLElement *config)
         }
 
         const char *ripModeAttr = config->getAttribute("mode");
-        RipMode mode = !ripModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
+        RipMode mode = !ripModeAttr ? SPLIT_HORIZON_POISON_REVERSE :
             strcmp(ripModeAttr, "NoRIP") == 0 ? NO_RIP :
             strcmp(ripModeAttr, "PASSIVE") == 0 ? PASSIVE :
             strcmp(ripModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
             strcmp(ripModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
-            strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
+            strcmp(ripModeAttr, "SplitHorizonPoisonReverse") == 0 ? SPLIT_HORIZON_POISON_REVERSE :
+            strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISON_REVERSE : // TODO: left here for backward compatibility, delete this line eventually
                     static_cast<RipMode>(-1);
 
         if (mode == static_cast<RipMode>(-1))

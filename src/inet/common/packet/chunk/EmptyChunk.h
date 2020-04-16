@@ -52,6 +52,15 @@ class INET_API EmptyChunk : public Chunk
 
     virtual std::string str() const override;
     //@}
+
+    static const Ptr<Chunk> getEmptyChunk(int flags) {
+        if (flags & PF_ALLOW_NULLPTR)
+            return nullptr;
+        else if (flags & PF_ALLOW_EMPTY)
+            return EmptyChunk::singleton;
+        else
+            throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
+    }
 };
 
 } // namespace

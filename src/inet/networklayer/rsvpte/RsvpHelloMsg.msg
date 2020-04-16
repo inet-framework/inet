@@ -14,7 +14,6 @@
 //
 
 import inet.common.INETDefs;
-import inet.linklayer.base.MacHeaderBase;
 import inet.networklayer.rsvpte.RsvpPacket;
 
 namespace inet;

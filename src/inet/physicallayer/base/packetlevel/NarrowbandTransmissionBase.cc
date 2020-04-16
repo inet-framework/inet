@@ -21,10 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth) :
+NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, Hz centerFrequency, Hz bandwidth) :
     TransmissionBase(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation),
     modulation(modulation),
-    carrierFrequency(carrierFrequency),
+    centerFrequency(centerFrequency),
     bandwidth(bandwidth)
 {
 }
@@ -32,7 +32,7 @@ NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter
 std::ostream& NarrowbandTransmissionBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", carrierFrequency = " << carrierFrequency;
+        stream << ", centerFrequency = " << centerFrequency;
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", bandwidth = " << bandwidth
                << ", modulation = " << printObjectToString(modulation, level + 1) ;

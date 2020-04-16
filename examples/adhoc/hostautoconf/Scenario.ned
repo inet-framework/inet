@@ -18,6 +18,7 @@
 
 package inet.examples.adhoc.hostautoconf;
 
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
@@ -35,7 +36,7 @@ network Scenario
             parameters:
                 @display("p=100,100;is=s");
         }
-        host[hosts]: Host {
+        host[hosts]: AdhocHost {
             @display("p=300,150");
         }
 }

@@ -36,9 +36,7 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
             auto networkNode = *it;
             if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
                 auto visualization = createNetworkNodeVisualization(networkNode);
-                visualization->setZIndex(zIndex);
-                setNetworkNodeVisualization(networkNode, visualization);
-                visualizationTargetModule->getCanvas()->addFigure(visualization);
+                addNetworkNodeVisualization(visualization);
             }
         }
     }
@@ -57,7 +55,9 @@ void NetworkNodeCanvasVisualizer::refreshDisplay() const
 
 NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::createNetworkNodeVisualization(cModule *networkNode) const
 {
-    return new NetworkNodeCanvasVisualization(networkNode, annotationSpacing, placementPenalty);
+    auto visualization = new NetworkNodeCanvasVisualization(networkNode, annotationSpacing, placementPenalty);
+    visualization->setZIndex(zIndex);
+    return visualization;
 }
 
 NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const
@@ -66,9 +66,18 @@ NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::getNetworkNodeVisua
     return it == networkNodeVisualizations.end() ? nullptr : it->second;
 }
 
-void NetworkNodeCanvasVisualizer::setNetworkNodeVisualization(const cModule *networkNode, NetworkNodeCanvasVisualization *networkNodeVisualization)
+void NetworkNodeCanvasVisualizer::addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
 {
-    networkNodeVisualizations[networkNode] = networkNodeVisualization;
+    auto networkNodeCanvasVisualization = check_and_cast<NetworkNodeCanvasVisualization *>(networkNodeVisualization);
+    networkNodeVisualizations[networkNodeCanvasVisualization->networkNode] = networkNodeCanvasVisualization;
+    visualizationTargetModule->getCanvas()->addFigure(networkNodeCanvasVisualization);
+}
+
+void NetworkNodeCanvasVisualizer::removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
+{
+    auto networkNodeCanvasVisualization = check_and_cast<NetworkNodeCanvasVisualization *>(networkNodeVisualization);
+    networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeCanvasVisualization->networkNode));
+    visualizationTargetModule->getCanvas()->removeFigure(networkNodeCanvasVisualization);
 }
 
 } // namespace visualizer

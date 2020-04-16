@@ -31,12 +31,12 @@
       {%- for title, href, isExternal, icon in theme_header_links %}
           {% if isExternal %}
               <a  class="mdl-navigation__link" href="{{ href }}">
-                  {% if icon %}<i class="material-icons navigation-link-icon">{{ icon }}</i>{% endif %}
+                  {% if icon %}<i class="{{ icon }}"></i>{% endif %}
                   {{ title }}
               </a>
           {%- else -%}
               <a  class="mdl-navigation__link" href="{{ pathto(href) }}">
-                  {% if icon %}<i class="material-icons navigation-link-icon">{{ icon }}</i>{% endif %}
+                  {% if icon %}<i class="{{ icon }}"></i>{% endif %}
                   {{ title }}
               </a>
           {%- endif -%}

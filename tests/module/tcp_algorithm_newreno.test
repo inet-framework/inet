@@ -14,16 +14,14 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 cmdenv-event-banners=false
 cmdenv-express-mode=true
 
-#[Parameters]
 *.testing=true
 
 ###################################################################
 
-network = ClientServer
+network = inet.test.moduletest.lib.ClientServer
 total-stack = 7MiB
 #**.server.numPcapRecorders = 1
 #**.server.pcapRecorder[0].pcapFile = "results/server.pcap"
@@ -58,8 +56,8 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 **.server.app[0].localPort = 1000
 
 # NIC configuration
-**.ppp[*].queue.typename = "DropTailQueue"
-**.ppp[*].queue.frameCapacity = 10
+**.ppp[*].ppp.queue.typename = "DropTailQueue"
+**.ppp[*].ppp.queue.packetCapacity = 10
 
 *.configurator.config=xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
 

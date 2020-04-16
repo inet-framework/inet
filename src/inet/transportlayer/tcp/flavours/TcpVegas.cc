@@ -92,8 +92,7 @@ void TcpVegas::recalculateSlowStartThreshold()
     uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
     // uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
-    if (ssthreshVector)
-        ssthreshVector->record(state->ssthresh);
+    conn->emit(ssthreshSignal, state->ssthresh);
 }
 
 //Process rexmit timer
@@ -108,8 +107,7 @@ void TcpVegas::processRexmitTimer(TcpEventCode& event)
     // Vegas: when rtx timeout: cwnd = 2*smss, instead of 1*smss (Reno)
     state->snd_cwnd = 2 * state->snd_mss;
 
-    if (cwndVector)
-        cwndVector->record(state->snd_cwnd);
+    conn->emit(cwndSignal, state->snd_cwnd);
     EV_DETAIL << "RXT Timeout in Vegas: resetting cwnd to " << state->snd_cwnd << "\n"
               << ", ssthresh=" << state->ssthresh << "\n";
 
@@ -200,8 +198,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
 
                             state->v_incr = 0;
 
-                            if (cwndVector)
-                                cwndVector->record(state->snd_cwnd);
+                            conn->emit(cwndSignal, state->snd_cwnd);
                         }
                         else {
                             state->v_incr = state->snd_mss;    //incr 1 segment
@@ -238,8 +235,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
         if (state->v_incr > 0) {
             state->snd_cwnd += state->v_incr;
 
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
             EV_DETAIL << "Vegas: incr cwnd linearly, to " << state->snd_cwnd << "\n";
         }
         else if (state->v_incr < 0) {
@@ -247,8 +243,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
             if (state->snd_cwnd < 2 * state->snd_mss)
                 state->snd_cwnd = 2 * state->snd_mss;
 
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
             EV_DETAIL << "Vegas: decr cwnd linearly, to " << state->snd_cwnd << "\n";
         }
 
@@ -339,8 +334,7 @@ void TcpVegas::receivedDuplicateAck()
                 state->snd_cwnd = win * state->snd_mss + 3 * state->snd_mss;
                 state->v_cwnd_changed = currentTime;
 
-                if (cwndVector)
-                    cwndVector->record(state->snd_cwnd);
+                conn->emit(cwndSignal, state->snd_cwnd);
 
                 // reset rtx. timer
                 restartRexmitTimer();
@@ -356,8 +350,7 @@ void TcpVegas::receivedDuplicateAck()
     //else if dupacks > duphtresh, cwnd+1
     else if (state->dupacks > DUPTHRESH) {    // DUPTHRESH = 3
         state->snd_cwnd += state->snd_mss;
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
     }
 
     // try to send more data

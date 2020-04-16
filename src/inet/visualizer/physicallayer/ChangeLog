@@ -1,5 +1,69 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Added support for OpenMP in order to allow parallel computation for
+	medium visualization.
+	Changed power density map figures to display the background noise too.
+	Changed the annotation size to ignore the labels.
+	Shifted power density maps in Z order to have the node specific over the main one.
+	Added support for new medium visualizer parameters to MediumCanvasVisualizer.
+
+2019-12-17  Zoltan Bojthe
+
+	Fixed MediumCanvasVisualizer, it should always define the module.
+
+2019-12-05  Levente Mészáros
+
+	Added visualization support for spectograms and power density maps.
+	Also added a ton of new parameters to control the new visualizations.
+
+2019-11-05  Levente Mészáros
+
+	Fixed memory leaks caused by not cleaning up after destruction.
+
+2019-10-07  Levente Mészáros
+
+	Fixed disabled radio feature.
+
+2019-10-03  Levente Mészáros
+
+	Renamed a few functions in MediumCanvasVisualizer.
+
+	computePowerForPartitionBoundaries -> computePowerForPartitionBounds
+	updateSpectrumFigureFrequencyLimits -> updateSpectrumFigureFrequencyBounds
+	updateSpectrumFigurePowerLimits -> updateSpectrumFigurePowerBounds
+
+2019-09-25  Zoltan Bojthe
+
+	Feature dependent code marked with #ifdef/endif.
+
+2019-09-16  Levente Mészáros
+
+	Added support for transmitting signals without an attached packet.
+
+2019-09-11  Levente Mészáros
+
+	Added background noise visualization to MediumCanvasVisualizer.
+
+2019-08-27  Levente Mészáros
+
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-06-17  Levente Mészáros
+
+	Implemented various display flags in RadioCanvasVisualizer.
+
+2019-06-07  Levente Mészáros
+
+	Added transmission medium signal power spectral density visualization.
+
+2019-02-20  Levente Mészáros
+
+	Draw circle for 0 dB gain and max gain.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-19  Levente Mészáros

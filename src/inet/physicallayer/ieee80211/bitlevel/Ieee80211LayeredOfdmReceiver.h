@@ -57,7 +57,7 @@ class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
 
     W energyDetection;
     W sensitivity;
-    Hz carrierFrequency;
+    Hz centerFrequency;
     Hz bandwidth;
     Hz channelSpacing;
     double snirThreshold;

@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-08  Levente Mészáros
+
+	Fixed use after delete.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-08-26  Zoltan Bojthe
+
+	Fixed CRC calculation for empty payload.
+
+2019-07-16  Zoltan Bojthe
+
+	Emit PacketDroppedSignal when received packet has incorrect CRC.
+	Use parseCrcMode().
+
+2019-05-07  Zoltan Bojthe
+
+	Fixed IPv6 Neighbour Discovery packet length.
+	Fixed compiler warnings (compare signed vs. unsigned).
+	Added 'reserved' field to Ipv6NeighbourSolicitation.
+
+2019-03-26  Levente Mészáros
+
+	Completed header serializer for echo request and echo response.
+
+2019-03-25  Zoltan Bojthe
+
+	Added flags and reserved values to Ipv6NdMessage serializer.
+	Added 'reserved' to Ipv6NdMessage.
+	Fixed chunk length of Ipv6NeighbourDiscovery, length of SourceLinkLayerAddress
+	and MTU options was ignored.
+
+2019-03-22  Zoltan Bojthe
+
+	Added Ipv6NdOption to Ipv6NdMessage.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-25  Zoltan Bojthe

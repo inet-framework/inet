@@ -20,8 +20,8 @@ import inet.physicallayer.contract.packetlevel.ICommunicationCache;
 //
 // This communication cache model stores radio, transmission and reception
 // related intermediate computation results in vector data structures. It's
-// primarily useful for simulations with *either* static *or* short lived dynamic
-// radios, and with only short transmission durations.
+// primarily useful for simulations with <b>either</b> static <b>or</b> short
+// lived dynamic radios, and with only short transmission durations.
 //
 module VectorCommunicationCache like ICommunicationCache
 {

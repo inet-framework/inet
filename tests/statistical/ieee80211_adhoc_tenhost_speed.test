@@ -8,7 +8,7 @@ Testing TCP communication speed
 %file: test.ned
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.common.queue.Sink;
+import inet.queueing.Sink;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
@@ -143,7 +143,7 @@ sim-time-limit = 50s
 **.mobility.updateInterval = 100ms
 
 # channel physical parameters
-*.radioMedium.mediumLimitCache.carrierFrequency = 2.4GHz
+*.radioMedium.mediumLimitCache.centerFrequency = 2.4GHz
 *.radioMedium.mediumLimitCache.maxTransmissionPower = 20mW
 
 # access point
@@ -156,11 +156,8 @@ sim-time-limit = 50s
 **.wlan*.*.controlBitrate = 11Mbps
 #for validation
 **.mac.address = "auto"
-**.mac.maxQueueSize = 14
+**.mac.queue.packetCapacity = 14
 **.mac.rtsThresholdBytes = 3000B
-**.wlan*.mac.retryLimit = 7
-**.wlan*.mac.cwMinData = 31
-**.wlan*.mac.cwMinBroadcast = 31
 
 **.radio.transmitterPower = 20.0mW
 **.radio.thermalNoise = -110dBm

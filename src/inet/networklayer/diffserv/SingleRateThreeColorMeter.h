@@ -21,6 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
+#include "inet/networklayer/diffserv/PacketMeterBase.h"
 
 namespace inet {
 
@@ -32,7 +33,7 @@ namespace inet {
  *
  * See RFC 2697.
  */
-class INET_API SingleRateThreeColorMeter : public cSimpleModule
+class INET_API SingleRateThreeColorMeter : public PacketMeterBase
 {
   protected:
     double CIR = NaN;    // Commited Information Rate (bits/sec)
@@ -54,10 +55,10 @@ class INET_API SingleRateThreeColorMeter : public cSimpleModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
     virtual void refreshDisplay() const override;
 
-    virtual int meterPacket(cPacket *packet);
+    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
+    virtual int meterPacket(Packet *packet) override;
 };
 
 } // namespace inet

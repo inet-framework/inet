@@ -18,27 +18,23 @@
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
+namespace ospfv2 {
 
-namespace ospf {
-
-bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
+bool AsExternalLsa::update(const Ospfv2AsExternalLsa *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
     resetInstallTime();
     if (different) {
         clearNextHops();
-        return true;
     }
-    else {
-        return false;
-    }
+    return different;
 }
 
-bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
+bool AsExternalLsa::differsFrom(const Ospfv2AsExternalLsa *asExternalLSA) const
 {
-    const OspfLsaHeader& thisHeader = getHeader();
-    const OspfLsaHeader& lsaHeader = asExternalLSA->getHeader();
+    const Ospfv2LsaHeader& thisHeader = getHeader();
+    const Ospfv2LsaHeader& lsaHeader = asExternalLSA->getHeader();
     bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
                             ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
                             ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
@@ -46,31 +42,26 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
     bool differentBody = false;
 
     if (!differentHeader) {
-        const OspfAsExternalLsaContents& thisContents = getContents();
-        const OspfAsExternalLsaContents& lsaContents = asExternalLSA->getContents();
+        const Ospfv2AsExternalLsaContents& thisContents = getContents();
+        const Ospfv2AsExternalLsaContents& lsaContents = asExternalLSA->getContents();
 
         unsigned int thisTosInfoCount = thisContents.getExternalTOSInfoArraySize();
 
         differentBody = ((thisContents.getNetworkMask() != lsaContents.getNetworkMask()) ||
-                         (thisContents.getE_ExternalMetricType() != lsaContents.getE_ExternalMetricType()) ||
-                         (thisContents.getRouteCost() != lsaContents.getRouteCost()) ||
-                         (thisContents.getForwardingAddress() != lsaContents.getForwardingAddress()) ||
-                         (thisContents.getExternalRouteTag() != lsaContents.getExternalRouteTag()) ||
                          (thisTosInfoCount != lsaContents.getExternalTOSInfoArraySize()));
 
         if (!differentBody) {
             for (unsigned int i = 0; i < thisTosInfoCount; i++) {
-                const ExternalTosInfo& thisTOSInfo = thisContents.getExternalTOSInfo(i);
-                const ExternalTosInfo& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
+                const auto& thisTOSInfo = thisContents.getExternalTOSInfo(i);
+                const auto& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
 
-                if ((thisTOSInfo.tosData.tos != lsaTOSInfo.tosData.tos) ||
-                    (thisTOSInfo.tosData.tosMetric[0] != lsaTOSInfo.tosData.tosMetric[0]) ||
-                    (thisTOSInfo.tosData.tosMetric[1] != lsaTOSInfo.tosData.tosMetric[1]) ||
-                    (thisTOSInfo.tosData.tosMetric[2] != lsaTOSInfo.tosData.tosMetric[2]) ||
-                    (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
-                    (thisTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
-                    (thisTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag))
-                {
+                if (
+                        (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
+                        (thisTOSInfo.routeCost != lsaTOSInfo.routeCost) ||
+                        (thisTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
+                        (thisTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag) ||
+                        (thisTOSInfo.tos != lsaTOSInfo.tos)
+                        ) {
                     differentBody = true;
                     break;
                 }
@@ -81,7 +72,6 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
     return differentHeader || differentBody;
 }
 
-} // namespace ospf
-
+} // namespace ospfv2
 } // namespace inet
 

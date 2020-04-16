@@ -156,7 +156,7 @@ void HttpBrowserBase::initialize(int stage)
         else {
             double activationTime = par("activationTime");    // This is the activation delay. Optional
             if (rdActivityLength != nullptr)
-                activationTime += (86400.0 - rdActivityLength->draw()) / 2; // First activate after half the sleep period
+                activationTime += std::max(0.0, 86400.0 - rdActivityLength->draw()) / 2.0; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             scheduleAt(simTime() + activationTime, eventTimer);
@@ -216,9 +216,9 @@ void HttpBrowserBase::handleSelfActivityStart()
     eventTimer->setKind(MSGKIND_START_SESSION);
     messagesInCurrentSession = 0;
     reqNoInCurSession = 0;
-    double activityPeriodLength = rdActivityLength->draw();    // Get the length of the activity period
+    double activityPeriodLength = (rdActivityLength != nullptr) ? rdActivityLength->draw() : 0.0;    // Get the length of the activity period
     acitivityPeriodEnd = simTime() + activityPeriodLength;    // The end of the activity period
-    EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << activityPeriodLength / 3600 << " hours." << endl;
+    EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << (activityPeriodLength / 3600.0) << " hours." << endl;
     scheduleAt(simTime() + simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
 }
 
@@ -275,50 +275,46 @@ void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
     sendRequestToServer(reqmsg);
 }
 
-void HttpBrowserBase::handleDataMessage(Packet *pk)
+void HttpBrowserBase::handleDataMessage(Ptr<const HttpReplyMessage> appmsg)
 {
-    const auto& appmsg = pk->peekAtFront<HttpReplyMessage>();
-    if (appmsg == nullptr)
-        throw cRuntimeError("Message (%s)%s is not a valid reply message", pk->getClassName(), pk->getName());
-
-    logResponse(pk);
+    logResponse(appmsg);
 
     messagesInCurrentSession++;
 
     int serial = appmsg->getSerial();
+    const char *pkName = "REPLY";  //TODO it's was the pk->getName()
 
     std::string senderWWW = appmsg->getOriginatorUrl();
-    EV_DEBUG << "Handling received message from " << senderWWW << ": " << pk->getName() << ". Received @T=" << simTime() << endl;
+    EV_DEBUG << "Handling received message from " << senderWWW << ": " << pkName << ". Received @T=" << simTime() << endl;
 
     if (appmsg->getResult() != 200 || appmsg->getContentType() == CT_UNKNOWN) {
-        EV_INFO << "Result for " << pk->getName() << " was other than OK. Code: " << appmsg->getResult() << endl;
+        EV_INFO << "Result for " << pkName << " was other than OK. Code: " << appmsg->getResult() << endl;
         htmlErrorsReceived++;
-        delete pk;
         return;
     }
     else {
         switch (appmsg->getContentType()) {
             case CT_HTML:
-                EV_INFO << "HTML Document received: " << pk->getName() << "'. Size is " << pk->getByteLength() << " bytes and serial " << serial << endl;
+                EV_INFO << "HTML Document received: " << pkName << "'. Size is " << appmsg->getChunkLength() << " and serial " << serial << endl;
                 if (strlen(appmsg->getPayload()) != 0)
-                    EV_DEBUG << "Payload of " << pk->getName() << " is: " << endl << appmsg->getPayload()
+                    EV_DEBUG << "Payload of " << pkName << " is: " << endl << appmsg->getPayload()
                              << ", " << strlen(appmsg->getPayload()) << " bytes" << endl;
                 else
-                    EV_DEBUG << pk->getName() << " has no referenced resources. No GETs will be issued in parsing" << endl;
+                    EV_DEBUG << pkName << " has no referenced resources. No GETs will be issued in parsing" << endl;
                 htmlReceived++;
                 if (hasGUI())
                     bubble("Received a HTML document");
                 break;
 
             case CT_TEXT:
-                EV_INFO << "Text resource received: " << pk->getName() << "'. Size is " << pk->getByteLength() << " bytes and serial " << serial << endl;
+                EV_INFO << "Text resource received: " << pkName << "'. Size is " << appmsg->getChunkLength() << " and serial " << serial << endl;
                 textResourcesReceived++;
                 if (hasGUI())
                     bubble("Received a text resource");
                 break;
 
             case CT_IMAGE:
-                EV_INFO << "Image resource received: " << pk->getName() << "'. Size is " << pk->getByteLength() << " bytes and serial " << serial << endl;
+                EV_INFO << "Image resource received: " << pkName << "'. Size is " << appmsg->getChunkLength() << " and serial " << serial << endl;
                 imgResourcesReceived++;
                 if (hasGUI())
                     bubble("Received an image resource");
@@ -383,8 +379,6 @@ void HttpBrowserBase::handleDataMessage(Packet *pk)
                 sendRequestsToServer((*i).first, (*i).second);
         }
     }
-
-    delete pk;
 }
 
 Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageName, bool bad, int size)
@@ -405,7 +399,7 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
 
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", pageName.c_str());
-    Packet *outPk = new Packet(szReq);
+    Packet *outPk = new Packet(szReq, HTTPT_REQUEST_MESSAGE);
     const auto& msg = makeShared<HttpRequestMessage>();
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
@@ -415,9 +409,8 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     outPk->insertAtBack(msg);
-    outPk->setKind(HTTPT_REQUEST_MESSAGE);
 
-    logRequest(outPk);
+    logRequest(msg);
     htmlRequested++;
 
     return outPk;
@@ -457,7 +450,7 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
 
-    Packet *outPk = new Packet(szReq);
+    Packet *outPk = new Packet(szReq, HTTPT_REQUEST_MESSAGE);
     const auto& msg = makeShared<HttpRequestMessage>();
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
@@ -467,9 +460,8 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     outPk->insertAtBack(msg);
-    outPk->setKind(HTTPT_REQUEST_MESSAGE);
 
-    logRequest(outPk);
+    logRequest(msg);
 
     return outPk;
 }
@@ -493,7 +485,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             // Schedule the next activity period start. This corresponds to to a working day or home time, ie. time
             // when the user is near his workstation and periodically browsing the web. Inactivity periods then
             // correspond to sleep time or time away from the office
-            simtime_t activationTime = simTime() + (86400.0 - rdActivityLength->draw());    // Sleep for a while
+            simtime_t activationTime = simTime() + std::max(0.0, 86400.0 - rdActivityLength->draw());    // Sleep for a while
             EV_INFO << "Terminating current activity @ T=" << simTime() << ". Next activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             scheduleAt(activationTime, eventTimer);

@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# before running this script: 
+# 1. build the INET documentation from the IDE:
+#    * be sure to switch off auto linking (i.e. enable tilde linking)
+#    * enable ALL features in the project properties dialog
+#    * be sure to have a 72DPI screen when generating the sources
+#    * after building the documentation grep for 'class="error"' in the neddoc 
+#      folder to be sure that there are no broken tilde links
+# 2. build the inet manual and copy the generated PDF file to the doc directory.
+
+cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+INET_ROOT=`pwd`
+
+VERSION=`$INET_ROOT/_scripts/get_version` || exit 1
+
+echo "INET Version: $VERSION"
+
+if [ "$BUILDID" = "" ]; then
+  # generate our own build identifier
+  export BUILDDATE=`date +%Y%m%d`
+  export BUILDHASH=`git describe --tags --long | awk -F '-g' '{print $2;}'`
+  export BUILDID="$VERSION-$BUILDHASH"
+fi
+
+FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
+DIRNAME=inet4
+
+rm -rf $INET_ROOT/out/$DIRNAME
+mkdir -p $INET_ROOT/out/$DIRNAME
+
+git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error copying repo ---; exit 1;}
+
+echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
+
+# copying documentation
+#cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+(cd doc/src && make)
+cp -r doc/src/_build/latex/*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+
+# switch to the destination dir
+cd $INET_ROOT/out/$DIRNAME
+# patching files
+perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
+perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
+
+# cleanup
+rm -rf _scripts doc/src .gitattributes .gitignore .gitmodules .circleci .travis.yml .oppfeaturestate
+
+todofiles=`find . -name '__*'`
+if [ "$todofiles" != "" ]; then
+    echo "Removing underscore files: $todofiles"
+    rm -rf $todofiles
+fi
+
+# clean up the showcase and tutorial dir and remove the website text and videos to reduce package size
+(cd showcases && rm -rf _config.yml _docs */*/doc __TODO)
+(cd tutorials && rm -rf _config.yml _docs */doc __TODO _wireless-packetcounts)
+
+# pack and create tar.gz archives
+echo Creating $FILENAME.
+cd $INET_ROOT/out
+rm -f $FILENAME
+tar cfz $FILENAME $DIRNAME || { echo --- error creating INET-....tgz ---; exit 1;}
+rm -rf $INET_ROOT/out/$DIRNAME

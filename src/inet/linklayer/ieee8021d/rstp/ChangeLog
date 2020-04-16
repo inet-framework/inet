@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-31  Zoltan Bojthe
+
+	Redesigned BPDU packets.
+	Fixed padding (do not change the BPDU length, add a padding chunk).
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-17  Zoltan Bojthe

@@ -28,16 +28,6 @@ namespace inet {
 
 Define_Module(TunLoopbackApp);
 
-TunLoopbackApp::TunLoopbackApp() :
-    packetsSent(0),
-    packetsReceived(0)
-{
-}
-
-TunLoopbackApp::~TunLoopbackApp()
-{
-}
-
 void TunLoopbackApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -48,7 +38,7 @@ void TunLoopbackApp::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(tunInterface);
+        InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByName(tunInterface);
         if (interfaceEntry == nullptr)
             throw cRuntimeError("TUN interface not found: %s", tunInterface);
         tunSocket.setOutputGate(gate("socketOut"));

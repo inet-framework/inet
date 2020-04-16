@@ -28,15 +28,15 @@ namespace physicallayer {
 class INET_API NarrowbandReceptionBase : public ReceptionBase, public virtual INarrowbandSignal
 {
   protected:
-    const Hz carrierFrequency;
+    const Hz centerFrequency;
     const Hz bandwidth;
 
   public:
-    NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz carrierFrequency, Hz bandwidth);
+    NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz centerFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual Hz getCarrierFrequency() const override { return carrierFrequency; }
+    virtual Hz getCenterFrequency() const override { return centerFrequency; }
     virtual Hz getBandwidth() const override { return bandwidth; }
 };
 

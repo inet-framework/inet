@@ -1,5 +1,46 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-23  Levente Mészáros
+
+	Renamed carrierFrequency to centerFrequency.
+
+	This confusion was spread all around the code. In most places we don't
+	know what kind of modulation is used (e.g. OFDM has several subcarriers),
+	so it doesn't really make sense.
+
+2019-09-20  Levente Mészáros
+
+	Added missing cases for erroneous packets in decapsulate.
+
+2019-08-27  Levente Mészáros
+
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-08-02  Zoltan Bojthe
+
+	Set bit error on Packet in decapsulate() when needed.
+
+2019-07-26  Zoltan Bojthe
+
+	Added model error checks
+	Fixed headerLength usage - fingerprints changed.
+
+2019-07-25  Zoltan Bojthe
+
+	Changed ApskPhyHeader: added headerLengthField and lengthField, and change
+	payloadLengthField type to b.
+
+2019-06-17  Levente Mészáros
+
+	Implemented new syntax and added expressions to timeGains and frequencyGains parameters.
+
+2019-06-07  Levente Mészáros
+
+	Replaced old multidimensional mappings (MiXiM) with new multidimensional functions.
+	This patch affects member variables, arguments and returns values.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-26  Levente Mészáros

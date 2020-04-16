@@ -63,20 +63,20 @@ void ChunkQueue::moveIteratorOrRemove(b length)
 const Ptr<const Chunk> ChunkQueue::peek(b length, int flags) const
 {
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getLength(), "length is invalid");
-    return content->peek(iterator, length, flags);
+    return content->peek(iterator, length == b(-1) ? Chunk::unspecifiedLength : length, flags);
 }
 
 const Ptr<const Chunk> ChunkQueue::peekAt(b offset, b length, int flags) const
 {
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getLength(), "length is invalid");
-    return content->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
+    return content->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length == b(-1) ? Chunk::unspecifiedLength : length, flags);
 }
 
 const Ptr<const Chunk> ChunkQueue::pop(b length, int flags)
 {
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getLength(), "length is invalid");
-    const auto& chunk = peek(length, flags);
+    const auto& chunk = peek(length == b(-1) ? Chunk::unspecifiedLength : length, flags);
     if (chunk != nullptr)
         moveIteratorOrRemove(chunk->getChunkLength());
     return chunk;

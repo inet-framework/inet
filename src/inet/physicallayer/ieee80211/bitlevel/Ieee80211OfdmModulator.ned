@@ -26,10 +26,10 @@ import inet.physicallayer.contract.bitlevel.IModulator;
 // It has only one parameter: the subcarrier modulation,
 // in compliant mode, is one of the following constellation
 // mappings (Table 18-7.):
-//         - BPSK
-//         - QPSK
-//         - 16-QAM
-//         - 64-QAM
+// - BPSK
+// - QPSK
+// - 16-QAM
+// - 64-QAM
 //
 // However, it can be used with an arbitrary OFDM compatible
 // constellation mapping.

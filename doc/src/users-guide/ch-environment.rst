@@ -65,8 +65,8 @@ and an object cache (for efficient queries):
 
 .. code-block:: ned
 
-   ground: <groundType> like IGround if groundType != "";
-   objectCache: <objectCacheType> like IObjectCache if objectCacheType != "";
+   ground: <default("")> like IGround if typename != "";
+   objectCache: <default("")> like IObjectCache if typename != "";
 
 .. _ug:sec:environment:physical-objects:
 

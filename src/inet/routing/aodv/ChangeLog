@@ -1,5 +1,66 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-07-15  Zoltan Bojthe
+
+	Removed crcMode.
+
+2019-06-21  Zoltan Bojthe
+
+	Change type of 'packetType' field.
+	Added PacketHolderMessage for delayed send.
+	Eliminated undisposed object error when simulation stopped during the delay.
+
+2019-06-20  Zoltan Bojthe
+
+	Added 'interface' NED parameter.
+	Add ipv6 specific code to serializer.
+
+2019-06-20  Marcell Juhász
+
+	Set chunkLength in AodvControlPackets.
+	Added 'reserved' fields to AodvControlPackets.
+
+2019-06-19  Zoltan Bojthe
+
+	UDP socket should accept incoming broadcast packets. Fixed IPv6 support.
+
+	Using IPv6 specific packet type values, fixed IPv6 aodv packet length
+	values, verify incoming packet type compatibility with network layer protocol.
+
+2019-06-17  Andras Varga
+
+	Changed to work over the normal UDP protocol.
+
+2019-06-14  Marcell Juhász
+
+	Added crcMode variable, protocol set to UDO, sockets needed.
+
+2019-06-13  Marcell Juhász
+
+	Fixed lifeTime and totalLengthField.
+
+2019-06-12  Zoltan Bojthe
+
+	Removed nonexisting field from RREP: originatorSeqNum.
+	Removed redundant field from RREP: destCount - value is equal to size of
+	unreachableNodes array.
+	Fixed field types, added missing 'reserved' fields, added documentation.
+
+2019-06-03  Marcell Juhász
+
+	Added AodvControlPacketSerializer.
+
+2019-03-19  Levente Mészáros
+
+	Added code to set UdpHeader CRC mode field to disabled.
+	The default value is intentionally undefined and must be changed.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-05  Zoltan Bojthe

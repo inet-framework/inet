@@ -26,17 +26,13 @@ package inet.applications.httptools.server;
 // Delays are specified to simulate hiding the attack from the browser user by use of JavaScript timeouts or similar mechanisms.
 // The generateBody virtual function is redefined to create a page containing the attack code.
 //
-// This module definition has two additional parameters to the standard HttpServerDirect definition:
-// * minBadRequests specifies the lower bound on bad requests caused to be sent to the victim by the browser.
-// * maxBadRequests specifies the upper bound on bad requests caused to be sent to the victim by the browser.
-//
 // @author  Kristjan V. Jonsson
 //
 simple HttpServerEvilB extends HttpServer
 {
     parameters:
         @class(HttpServerEvilB);
-        int minBadRequests;     // The lower bound of bad requests.
-        int maxBadRequests;     // The upper bound of bad requests
+        int minBadRequests;     // Specifies the lower bound of bad requests to be sent to the victim by the browser.
+        int maxBadRequests;     // Specifies the upper bound of bad requests to be sent to the victim by the browser.
 }
 

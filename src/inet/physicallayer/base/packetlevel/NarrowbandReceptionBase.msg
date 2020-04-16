@@ -27,6 +27,6 @@ class NarrowbandReceptionBase extends ReceptionBase
 {
     @existingClass;
     @descriptor(readonly);
-    Hz carrierFrequency;
+    Hz centerFrequency;
     Hz bandwidth;
 }

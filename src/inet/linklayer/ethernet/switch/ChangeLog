@@ -1,5 +1,32 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized tag usage.
+
+2019-08-07  Zoltan Bojthe
+
+	Redesigned file format for 'addressTableFile' parameter
+
+2019-07-31  Zoltan Bojthe
+
+	Renamed port to interfaceId in MacAddressTable.
+
+2019-07-26  Zoltan Bojthe
+
+	Added support for lifecycle interface to MacAddressTable.
+
+2019-07-25  Rudolf Hornig
+
+	MacAddressTable now initializes correctly from a file.
+
+2019-01-23  Levente Mészáros
+
+	Extracted a separate updateDisplayString() method.
+	Added display string texts to MacAddressTable and MacRelayUnit.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-10  Zoltan Bojthe

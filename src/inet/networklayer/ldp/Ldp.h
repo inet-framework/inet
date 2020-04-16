@@ -51,7 +51,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
+class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ReceiveQueueBasedCallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
 {
   public:
 
@@ -194,17 +194,17 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ICallback, pu
 
     virtual void processLDPHello(Packet *msg);
     virtual void processHelloTimeout(cMessage *msg);
-    virtual void processLDPPacketFromTCP(Packet *packet);
+    virtual void processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket);
 
-    virtual void processLABEL_MAPPING(Packet *packet);
-    virtual void processLABEL_REQUEST(Packet *packet);
-    virtual void processLABEL_RELEASE(Packet *packet);
-    virtual void processLABEL_WITHDRAW(Packet *packet);
-    virtual void processNOTIFICATION(Packet *packet);
+    virtual void processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket);
+    virtual void processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket);
+    virtual void processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket);
+    virtual void processLABEL_WITHDRAW(Ptr<const LdpPacket>& ldpPacket);
+    virtual void processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled);
 
     /** @name TcpSocket::ICallback callback methods */
     //@{
-    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketDataArrived(TcpSocket *socket) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;

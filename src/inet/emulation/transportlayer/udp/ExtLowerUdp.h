@@ -17,6 +17,7 @@
 #define __INET_EXTLOWERUDP_H
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 #include "inet/networklayer/common/L3Address.h"
 
@@ -35,6 +36,8 @@ class INET_API ExtLowerUdp : public cSimpleModule, public ILifecycle, public Rea
         Socket(int socketId) : socketId(socketId) {}
     };
 
+    const char *packetNameFormat = nullptr;
+    PacketPrinter packetPrinter;
     RealTimeScheduler *rtScheduler = nullptr;
     std::map<int, Socket *> socketIdToSocketMap;
     std::map<int, Socket *> fdToSocketMap;

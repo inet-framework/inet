@@ -1,0 +1,5 @@
+#! /bin/sh
+
+# remove the namespaces
+ip netns del net0
+ip netns del net1

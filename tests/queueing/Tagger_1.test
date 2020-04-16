@@ -1,0 +1,80 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets pass through a packet tagger which attaches
+a HopLimitReq tag. The packets are consumed by a passive packet sink (PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.marker.PacketTagger;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestProducerConsumer
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        tagger: PacketTagger {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections:
+        producer.out --> tagger.in;
+        tagger.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProducerConsumer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.tagger.hopLimit = 1
+
+%contains: stdout
+Producing packet producer-1.
+Marking packet producer-1.
+Attaching HopLimitReq to producer-1 with hopLimit = 1
+Consuming packet producer-1.
+Producing packet producer-2.
+Marking packet producer-2.
+Attaching HopLimitReq to producer-2 with hopLimit = 1
+Consuming packet producer-2.
+Producing packet producer-3.
+Marking packet producer-3.
+Attaching HopLimitReq to producer-3 with hopLimit = 1
+Consuming packet producer-3.
+Producing packet producer-4.
+Marking packet producer-4.
+Attaching HopLimitReq to producer-4 with hopLimit = 1
+Consuming packet producer-4.
+Producing packet producer-5.
+Marking packet producer-5.
+Attaching HopLimitReq to producer-5 with hopLimit = 1
+Consuming packet producer-5.
+Producing packet producer-6.
+Marking packet producer-6.
+Attaching HopLimitReq to producer-6 with hopLimit = 1
+Consuming packet producer-6.
+Producing packet producer-7.
+Marking packet producer-7.
+Attaching HopLimitReq to producer-7 with hopLimit = 1
+Consuming packet producer-7.
+Producing packet producer-8.
+Marking packet producer-8.
+Attaching HopLimitReq to producer-8 with hopLimit = 1
+Consuming packet producer-8.
+Producing packet producer-9.
+Marking packet producer-9.
+Attaching HopLimitReq to producer-9 with hopLimit = 1
+Consuming packet producer-9.
+Producing packet producer-10.
+Marking packet producer-10.
+Attaching HopLimitReq to producer-10 with hopLimit = 1
+Consuming packet producer-10.

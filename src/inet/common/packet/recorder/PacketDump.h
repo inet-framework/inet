@@ -86,7 +86,7 @@ class INET_API PacketDump
      * Dumps info about the given packet. It dispatches to the more specific
      * dump functions. The l2r parameter denotes the direction of the packet.
      */
-    void dumpPacket(bool l2r, cPacket *packet);
+    void dumpPacket(bool l2r, const cPacket *packet);
 
 #ifdef WITH_IPv4
     /**

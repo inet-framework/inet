@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-30  Levente Mészáros
+
+	Removed self message if scheduled at current time and refreshDisplay() calls.
+
+2019-10-30  Andras Varga
+
+	Turn off Hcf submodule in non-QoS mode.
+	Removed unnecessary refreshDisplay() calls.
+
+2019-10-21  Zoltan Bojthe
+
+	Fixed chunklengths, fingerprints changed.
+	Fixed fragmentNumber and sequenceNumber fields Ieee80211MacHeaderSerializer.
+
+2019-02-11  Levente Mészáros
+
+	Added a heuristic approach for determining the LLC protcol inside a MAC frame.
+	This is a fix for bug #412.
+
+2019-01-31  Levente Mészáros
+
+	Added linkBroken signal back to Ieee80211Mac, needed for statistic.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-22  Levente Mészáros

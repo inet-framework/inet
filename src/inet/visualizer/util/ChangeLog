@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Visualizer: Extended Placement enumeration with center/center.
+
+2019-01-04  Levente Mészáros
+
+	Adapted queue visualizers to the new queueing API.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

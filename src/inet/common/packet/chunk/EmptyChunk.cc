@@ -34,10 +34,10 @@ EmptyChunk::EmptyChunk(const EmptyChunk& other) :
 const Ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
     CHUNK_CHECK_USAGE(iterator.getPosition() == b(0), "iterator is out of range");
-    CHUNK_CHECK_USAGE(length == b(0) || length == b(-1), "length is invalid");
+    CHUNK_CHECK_USAGE(length <= b(0), "length is invalid");
     // 1. peeking returns nullptr
     if (predicate == nullptr || predicate(nullptr))
-        return nullptr;
+        return EmptyChunk::getEmptyChunk(flags);
     // 2. peeking returns this chunk
     auto result = const_cast<EmptyChunk *>(this)->shared_from_this();
     if (predicate == nullptr || predicate(result))
@@ -48,6 +48,7 @@ const Ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
 
 const Ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
+    CHUNK_CHECK_IMPLEMENTATION(offset == b(0));
     CHUNK_CHECK_IMPLEMENTATION(length == b(0));
     return makeShared<EmptyChunk>();
 }

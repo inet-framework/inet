@@ -4,9 +4,8 @@ B must retransmit.
 
 Result not entirely OK, both A and B rexmit simulataneously...
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -15,11 +14,9 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 #cmdenv-event-banners=false
 cmdenv-express-mode=false
 
-#[Parameters]
 *.testing=true
 cmdenv-log-prefix="[%c]: "
 

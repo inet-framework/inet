@@ -24,6 +24,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
@@ -73,6 +74,7 @@ void UdpBasicBurst::initialize(int stage)
         nextSleep = startTime;
         nextBurst = startTime;
         nextPkt = startTime;
+        dontFragment = par("dontFragment");
 
         destAddrRNG = par("destAddrRNG");
         const char *addrModeStr = par("chooseDestAddrMode");
@@ -109,9 +111,9 @@ Packet *UdpBasicBurst::createPacket()
     long msgByteLength = *messageLengthPar;
     Packet *pk = new Packet(msgName);
     const auto& payload = makeShared<ApplicationPacket>();
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     pk->insertAtBack(payload);
     pk->addPar("sourceId") = getId();
     pk->addPar("msgId") = numSent;
@@ -122,8 +124,20 @@ Packet *UdpBasicBurst::createPacket()
 void UdpBasicBurst::processStart()
 {
     socket.setOutputGate(gate("socketOut"));
-    socket.bind(localPort);
     socket.setCallback(this);
+    socket.bind(localPort);
+
+    int timeToLive = par("timeToLive");
+    if (timeToLive != -1)
+        socket.setTimeToLive(timeToLive);
+
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
+
+    int tos = par("tos");
+    if (tos != -1)
+        socket.setTos(tos);
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -307,6 +321,8 @@ void UdpBasicBurst::generateBurst()
         destAddr = chooseDestAddr();
 
     Packet *payload = createPacket();
+    if(dontFragment)
+        payload->addTag<FragmentationReq>()->setDontFragment(true);
     payload->setTimestamp();
     emit(packetSentSignal, payload);
     socket.sendTo(payload, destAddr, destPort);

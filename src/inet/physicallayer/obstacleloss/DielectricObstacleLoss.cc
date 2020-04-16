@@ -40,6 +40,8 @@ DielectricObstacleLoss::DielectricObstacleLoss() :
 void DielectricObstacleLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        enableDielectricLoss = par("enableDielectricLoss");
+        enableReflectionLoss = par("enableReflectionLoss");
         medium = check_and_cast<IRadioMedium *>(getParentModule());
         physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
     }
@@ -102,16 +104,18 @@ double DielectricObstacleLoss::computeObjectLoss(const IPhysicalObject *object, 
     if (hasIntersections && (intersection1 != intersection2))
     {
         intersectionCount++;
-        double intersectionDistance = intersection2.distance(intersection1);
         const IMaterial *material = object->getMaterial();
-        totalLoss *= computeDielectricLoss(material, frequency, m(intersectionDistance));
-        if (!normal1.isUnspecified()) {
+        if (enableDielectricLoss) {
+            double intersectionDistance = intersection2.distance(intersection1);
+            totalLoss *= computeDielectricLoss(material, frequency, m(intersectionDistance));
+        }
+        if (enableReflectionLoss && !normal1.isUnspecified()) {
             double angle1 = (intersection1 - intersection2).angle(normal1);
             if (!std::isnan(angle1))
                 totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
         }
         // TODO: this returns NaN because n1 > n2
-//        if (!normal2.isUnspecified()) {
+//        if (enableReflectionLoss && !normal2.isUnspecified()) {
 //            double angle2 = (intersection2 - intersection1).angle(normal2);
 //            if (!std::isnan(angle2))
 //                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);

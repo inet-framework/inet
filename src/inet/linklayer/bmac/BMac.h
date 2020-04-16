@@ -16,6 +16,7 @@
 #ifndef __INET_BMAC_H
 #define __INET_BMAC_H
 
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -84,20 +85,9 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     virtual void handleSelfMessage(cMessage *) override;
 
     /** @brief Handle control messages from lower layer */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
-
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
   protected:
-    typedef std::list<Packet *> MacQueue;
-
-    /** @brief A queue to store packets from upper layer in case another
-       packet is still waiting for transmission.*/
-    MacQueue macQueue;
-
     /** @brief The radio. */
     physicallayer::IRadio *radio = nullptr;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
@@ -169,8 +159,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     int txAttempts = 0;
     /*@}*/
 
-    /** @brief The maximum length of the queue */
-    unsigned int queueLength = 0;
     /** @brief Animate (colorize) the nodes.
      *
      * The color of the node reflects its basic status (not the exact state!)
@@ -183,6 +171,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     double slotDuration = 0;
     /** @brief Length of the header*/
     b headerLength = b(0);
+    b ctrlFrameLength = b(0);
     /** @brief The bitrate of transmission */
     double bitrate = 0;
     /** @brief The duration of CCA */
@@ -210,13 +199,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *macPkt);
-
-    /** @brief Internal function to add a new packet from upper to the queue */
-    bool addToQueue(cMessage *msg);
-
-    virtual void flushQueue();
-
-    virtual void clearQueue();
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);

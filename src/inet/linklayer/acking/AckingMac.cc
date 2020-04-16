@@ -25,7 +25,6 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/acking/AckingMac.h"
 #include "inet/linklayer/acking/AckingMacHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -44,35 +43,13 @@ AckingMac::AckingMac()
 
 AckingMac::~AckingMac()
 {
-    delete lastSentPk;
     cancelAndDelete(ackTimeoutMsg);
-}
-
-void AckingMac::flushQueue()
-{
-    ASSERT(queueModule);
-    while (!queueModule->isEmpty()) {
-        cMessage *msg = queueModule->pop();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, msg, &details);
-        delete msg;
-    }
-    queueModule->clear();    // clear request count
-}
-
-void AckingMac::clearQueue()
-{
-    ASSERT(queueModule);
-    queueModule->clear();
 }
 
 void AckingMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        outStandingRequests = 0;
-
         bitrate = par("bitrate");
         headerLength = par("headerLength");
         promiscuous = par("promiscuous");
@@ -85,18 +62,16 @@ void AckingMac::initialize(int stage)
         radio = check_and_cast<IRadio *>(radioModule);
         transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-        // find queueModule
-        cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
-        queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
-        if (queueModule == nullptr)
-            throw cRuntimeError("External queue required for AckingMac module");
-
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        getNextMsgFromHL();
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
+            startTransmitting();
+        }
     }
 }
 
@@ -120,34 +95,35 @@ void AckingMac::configureInterfaceEntry()
     interfaceEntry->setBroadcast(true);
 }
 
-void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
-            if (!lastSentPk)
-                getNextMsgFromHL();
+            if (!currentTxFrame && !txQueue->isEmpty()) {
+                popTxQueue();
+                startTransmitting();
+            }
         }
         transmissionState = newRadioTransmissionState;
     }
 }
 
-void AckingMac::startTransmitting(Packet *msg)
+void AckingMac::startTransmitting()
 {
     // if there's any control info, remove it; then encapsulate the packet
-    if (lastSentPk)
-        throw cRuntimeError("Model error: unacked send");
-    MacAddress dest = msg->getTag<MacAddressReq>()->getDestAddress();
-    encapsulate(check_and_cast<Packet *>(msg));
-
-    if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
-        if (useAck) {
-            lastSentPk = msg->dup();
-            scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
-        }
+    MacAddress dest = currentTxFrame->getTag<MacAddressReq>()->getDestAddress();
+    Packet *msg = currentTxFrame;
+    if (useAck && !dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
+        msg = currentTxFrame->dup();
+        scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
     }
+    else
+        currentTxFrame = nullptr;
+
+    encapsulate(msg);
 
     // send
     EV << "Starting transmission of " << msg << endl;
@@ -155,27 +131,15 @@ void AckingMac::startTransmitting(Packet *msg)
     sendDown(msg);
 }
 
-void AckingMac::getNextMsgFromHL()
-{
-    ASSERT(outStandingRequests >= queueModule->getNumPendingRequests());
-    if (outStandingRequests == 0) {
-        queueModule->requestPacket();
-        outStandingRequests++;
-    }
-    ASSERT(outStandingRequests <= 1);
-}
-
 void AckingMac::handleUpperPacket(Packet *packet)
 {
-    outStandingRequests--;
-    if (radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
-        // Logic error: we do not request packet from the external queue when radio is transmitting
-        throw cRuntimeError("Received msg for transmission but transmitter is busy");
-    }
-    else {
-        // We are idle, so we can start transmitting right away.
-        EV << "Received " << packet << " for transmission\n";
-        startTransmitting(packet);
+    EV << "Received " << packet << " for transmission\n";
+    txQueue->pushPacket(packet);
+    if (currentTxFrame || radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
+        EV << "Delaying transmission of " << packet << ".\n";
+    else if (!txQueue->isEmpty()){
+        popTxQueue();
+        startTransmitting();
     }
 }
 
@@ -192,11 +156,16 @@ void AckingMac::handleLowerPacket(Packet *packet)
     }
 
     if (!dropFrameNotForUs(packet)) {
-        int senderModuleId = macHeader->getSrcModuleId();
-        AckingMac *senderMac = dynamic_cast<AckingMac *>(getSimulation()->getModule(senderModuleId));
-        // TODO: this whole out of bounds ack mechanism is fishy
-        if (senderMac && senderMac->useAck)
-            senderMac->acked(packet);
+        // send Ack if needed
+        auto dest = macHeader->getDest();
+        bool needsAck = !(dest.isBroadcast() || dest.isMulticast() || dest.isUnspecified()); // same condition as in sender
+        if (needsAck) {
+            int senderModuleId = macHeader->getSrcModuleId();
+            AckingMac *senderMac = check_and_cast<AckingMac *>(getSimulation()->getModule(senderModuleId));
+            if (senderMac->useAck)
+                senderMac->acked(packet);
+        }
+
         // decapsulate and attach control info
         decapsulate(packet);
         EV << "Passing up contained packet '" << packet->getName() << "' to higher layer\n";
@@ -207,14 +176,16 @@ void AckingMac::handleLowerPacket(Packet *packet)
 void AckingMac::handleSelfMessage(cMessage *message)
 {
     if (message == ackTimeoutMsg) {
-        EV_DETAIL << "AckingMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
-        auto macHeader = lastSentPk->popAtFront<AckingMacHeader>();
-        lastSentPk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+        EV_DETAIL << "AckingMac: timeout: " << currentTxFrame->getFullName() << " is lost\n";
         // packet lost
-        emit(linkBrokenSignal, lastSentPk);
-        delete lastSentPk;
-        lastSentPk = nullptr;
-        getNextMsgFromHL();
+        emit(linkBrokenSignal, currentTxFrame);
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        dropCurrentTxFrame(details);
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
+            startTransmitting();
+        }
     }
     else {
         MacProtocolBase::handleSelfMessage(message);
@@ -226,17 +197,16 @@ void AckingMac::acked(Packet *frame)
     Enter_Method_Silent();
     ASSERT(useAck);
 
-    EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is ";
+    if (currentTxFrame == nullptr)
+        throw cRuntimeError("Unexpected ACK received");
 
-    if (lastSentPk && lastSentPk->getTreeId() == frame->getTreeId()) {
-        EV_DEBUG << "accepted\n";
-        cancelEvent(ackTimeoutMsg);
-        delete lastSentPk;
-        lastSentPk = nullptr;
-        getNextMsgFromHL();
-    }
-    else
-        EV_DEBUG << "unaccepted\n";
+    EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
+    cancelEvent(ackTimeoutMsg);
+        deleteCurrentTxFrame();
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
+            startTransmitting();
+        }
 }
 
 void AckingMac::encapsulate(Packet *packet)

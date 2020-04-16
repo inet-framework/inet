@@ -43,6 +43,12 @@ PathOsgVisualizerBase::PathOsgVisualization::~PathOsgVisualization()
     // TODO: delete node;
 }
 
+PathOsgVisualizerBase::~PathOsgVisualizerBase()
+{
+    if (displayRoutes)
+        removeAllPathVisualizations();
+}
+
 void PathOsgVisualizerBase::initialize(int stage)
 {
     PathVisualizerBase::initialize(stage);

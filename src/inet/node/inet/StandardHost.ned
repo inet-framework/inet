@@ -31,8 +31,8 @@ import inet.node.base.ApplicationLayerNodeBase;
 //   **.wlan[*].typename parameter. see:  inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessInterface
 // - Also external interfaces can be configured for HW in the loop simulation
-//   using the numExtInterfaces parameter and setting the type using
-//   **.ext[*].typename in the INI file. see: ~ExtInterface and ~IExternalInterface
+//   using the numEthInterfaces parameter and setting the interface type using
+//   **.eth[*].typename in the INI file. see: ~ExtInterface derived modules and ~IExternalInterface
 // - If wireless card is present, node mobility can be set using *.*.mobility.typename
 //   see: inet.mobility and ~IMobility
 //

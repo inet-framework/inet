@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-02-15  Levente Mészáros
+
+	Ported to the new queueing API.
+
+2019-02-04  Levente Mészáros
+
+	Added several missing WATCHes to the modules.
+	Cleaned up Enter_Method and Enter_Method_Silent calls.
+
+2019-02-01  Levente Mészáros
+
+	Added packet retry related result filters and statistics.
+	Added result filters for unicast, multicast and broadcast packets.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-20  Levente Mészáros

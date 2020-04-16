@@ -19,9 +19,9 @@
 
 namespace inet {
 
-namespace ospf {
+namespace ospfv2 {
 
-bool SummaryLsa::update(const OspfSummaryLsa *lsa)
+bool SummaryLsa::update(const Ospfv2SummaryLsa *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -35,10 +35,10 @@ bool SummaryLsa::update(const OspfSummaryLsa *lsa)
     }
 }
 
-bool SummaryLsa::differsFrom(const OspfSummaryLsa *summaryLSA) const
+bool SummaryLsa::differsFrom(const Ospfv2SummaryLsa *summaryLSA) const
 {
-    const OspfLsaHeader& thisHeader = getHeader();
-    const OspfLsaHeader& lsaHeader = summaryLSA->getHeader();
+    const Ospfv2LsaHeader& thisHeader = getHeader();
+    const Ospfv2LsaHeader& lsaHeader = summaryLSA->getHeader();
     bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
                             ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
                             ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
@@ -56,9 +56,7 @@ bool SummaryLsa::differsFrom(const OspfSummaryLsa *summaryLSA) const
                 auto thisTosData = getTosData(i);
                 auto lsaTosData = summaryLSA->getTosData(i);
                 if ((thisTosData.tos != summaryLSA->getTosData(i).tos) ||
-                    (thisTosData.tosMetric[0] != lsaTosData.tosMetric[0]) ||
-                    (thisTosData.tosMetric[1] != lsaTosData.tosMetric[1]) ||
-                    (thisTosData.tosMetric[2] != lsaTosData.tosMetric[2]))
+                        (thisTosData.tosMetric != lsaTosData.tosMetric))
                 {
                     differentBody = true;
                     break;
@@ -70,7 +68,7 @@ bool SummaryLsa::differsFrom(const OspfSummaryLsa *summaryLSA) const
     return differentHeader || differentBody;
 }
 
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

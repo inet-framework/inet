@@ -37,11 +37,12 @@ class INET_API NetworkNodeCanvasVisualizer : public NetworkNodeVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual NetworkNodeCanvasVisualization *createNetworkNodeVisualization(cModule *networkNode) const;
-    virtual void setNetworkNodeVisualization(const cModule *networkNode, NetworkNodeCanvasVisualization *networkNodeVisualization);
+    virtual NetworkNodeCanvasVisualization *createNetworkNodeVisualization(cModule *networkNode) const override;
+    virtual void addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override;
+    virtual void removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override;
 
   public:
-    virtual NetworkNodeCanvasVisualization *getNetworkNodeVisualization(const cModule *networkNode) const;
+    virtual NetworkNodeCanvasVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override;
 };
 
 } // namespace visualizer

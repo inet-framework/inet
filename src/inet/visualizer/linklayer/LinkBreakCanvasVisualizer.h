@@ -50,6 +50,9 @@ class INET_API LinkBreakCanvasVisualizer : public LinkBreakVisualizerBase
     virtual void addLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization) override;
     virtual void removeLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization) override;
     virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const override;
+
+  public:
+    virtual ~LinkBreakCanvasVisualizer();
 };
 
 } // namespace visualizer

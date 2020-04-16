@@ -39,6 +39,12 @@ PacketDropOsgVisualizer::PacketDropOsgVisualization::~PacketDropOsgVisualization
     // TODO: delete node;
 }
 
+PacketDropOsgVisualizer::~PacketDropOsgVisualizer()
+{
+    if (displayPacketDrops)
+        removeAllPacketDropVisualizations();
+}
+
 void PacketDropOsgVisualizer::refreshDisplay() const
 {
     PacketDropVisualizerBase::refreshDisplay();

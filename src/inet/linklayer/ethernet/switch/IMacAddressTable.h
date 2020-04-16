@@ -30,12 +30,12 @@ class INET_API IMacAddressTable
 {
   public:
     /**
-     * @brief For a known arriving port, V-TAG and destination MAC. It finds out the port where relay component should deliver the message
+     * @brief For a known arriving port, V-TAG and destination MAC. It finds out the interface Id where relay component should deliver the message
      * @param address MAC destination
      * @param vid VLAN ID
-     * @return Output port for address, or -1 if unknown.
+     * @return Output interface Id for address, or -1 if unknown.
      */
-    virtual int getPortForAddress(const MacAddress& address, unsigned int vid = 0) = 0;
+    virtual int getInterfaceIdForAddress(const MacAddress& address, unsigned int vid = 0) = 0;
 
     /**
      * @brief Register a new MAC address at AddressTable.
@@ -77,6 +77,11 @@ class INET_API IMacAddressTable
      * Pre-reads in entries for Address Table during initialization.
      */
     virtual void readAddressTable(const char *fileName) = 0;
+
+    /**
+     * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
+     */
+    virtual void initializeTable() = 0;
 
     /**
      * For lifecycle: clears all entries from the vlanAddressTable.

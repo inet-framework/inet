@@ -16,7 +16,8 @@
 //
 
 import inet.common.INETDefs;
-import inet.linklayer.base.MacHeaderBase;
+import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
@@ -44,12 +45,30 @@ enum XMacTypes {
 };
 
 //
-// Frame for ~XMac. Frame size is configurable
+// Base class for ~XMac headers.
+//
+class XMacHeaderBase extends FieldsChunk
+{
+    MacAddress srcAddr;
+    MacAddress destAddr;
+    XMacTypes type;
+}
+
+//
+// Control Frame for ~XMac. Frame size is configurable
 // in the MAC layer. 
 //
-class XMacHeader extends MacHeaderBase
+class XMacControlFrame extends XMacHeaderBase
 {
-    XMacTypes type;
+}
+
+//
+// Dataframe header for ~XMac. Frame size is configurable
+// in the MAC layer. 
+//
+class XMacDataFrameHeader extends XMacHeaderBase
+{
     long sequenceId; // Sequence Number to detect duplicate messages
+    int networkProtocol = -1;
 }
 

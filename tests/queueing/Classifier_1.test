@@ -1,0 +1,91 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets are consumed by two passive packet sinks
+(PassivePacketSinks). The single source is connected to the two sinks using a
+classifier (PacketClassifier). The classifier forwards packets alternately to
+one or the other sink.
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.source.ActivePacketSource;
+
+network TestClassifier
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        classifier: PacketClassifier {
+            @display("p=200,100");
+        }
+        consumer1: PassivePacketSink {
+            @display("p=300,100");
+        }
+        consumer2: PassivePacketSink {
+            @display("p=300,200");
+        }
+    connections allowunconnected:
+        producer.out --> classifier.in;
+        classifier.out++ --> consumer1.in;
+        classifier.out++ --> consumer2.in;
+}
+
+%file: Test.cc
+#include "inet/queueing/function/PacketClassifierFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet; 
+
+static int testClassify(Packet *packet)
+{
+    return packet->getId() % 2;
+}
+
+Register_Packet_Classifier_Function(TestClassifier, testClassify);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestClassifier
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.classifier.classifierClass = "TestClassifier"
+
+%contains: stdout
+Producing packet producer-0.
+Classifying packet producer-0.
+Consuming packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Classifying packet producer-1.
+Consuming packet producer-1.
+Producing packet producer-2.
+Classifying packet producer-2.
+Consuming packet producer-2.
+Producing packet producer-3.
+Classifying packet producer-3.
+Consuming packet producer-3.
+Producing packet producer-4.
+Classifying packet producer-4.
+Consuming packet producer-4.
+Producing packet producer-5.
+Classifying packet producer-5.
+Consuming packet producer-5.
+Producing packet producer-6.
+Classifying packet producer-6.
+Consuming packet producer-6.
+Producing packet producer-7.
+Classifying packet producer-7.
+Consuming packet producer-7.
+Producing packet producer-8.
+Classifying packet producer-8.
+Consuming packet producer-8.
+Producing packet producer-9.
+Classifying packet producer-9.
+Consuming packet producer-9.

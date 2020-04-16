@@ -35,7 +35,7 @@ class INET_API QueueCanvasVisualizer : public QueueVisualizerBase
         QueueFigure *figure = nullptr;
 
       public:
-        QueueCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, QueueFigure *figure, PacketQueue *queue);
+        QueueCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, QueueFigure *figure, queueing::IPacketQueue *queue);
         virtual ~QueueCanvasVisualization();
     };
 
@@ -47,10 +47,13 @@ class INET_API QueueCanvasVisualizer : public QueueVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual QueueVisualization *createQueueVisualization(PacketQueue *queue) const override;
+    virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const override;
     virtual void addQueueVisualization(const QueueVisualization *queueVisualization) override;
     virtual void removeQueueVisualization(const QueueVisualization *queueVisualization) override;
     virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override;
+
+  public:
+    virtual ~QueueCanvasVisualizer();
 };
 
 } // namespace visualizer

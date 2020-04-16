@@ -29,11 +29,10 @@
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ApskLayeredReceiver);
@@ -47,7 +46,7 @@ ApskLayeredReceiver::ApskLayeredReceiver() :
     analogDigitalConverter(nullptr),
     energyDetection(W(NaN)),
     sensitivity(W(NaN)),
-    carrierFrequency(Hz(NaN)),
+    centerFrequency(Hz(NaN)),
     bandwidth(Hz(NaN)),
     snirThreshold(NaN)
 {
@@ -55,18 +54,18 @@ ApskLayeredReceiver::ApskLayeredReceiver() :
 
 void ApskLayeredReceiver::initialize(int stage)
 {
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<ILayeredErrorModel *>(getSubmodule("errorModel"));
         decoder = dynamic_cast<IDecoder *>(getSubmodule("decoder"));
         demodulator = dynamic_cast<IDemodulator *>(getSubmodule("demodulator"));
         pulseFilter = dynamic_cast<IPulseFilter *>(getSubmodule("pulseFilter"));
         analogDigitalConverter = dynamic_cast<IAnalogDigitalConverter *>(getSubmodule("analogDigitalConverter"));
-        energyDetection = mW(math::dBm2mW(par("energyDetection")));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
         // TODO: temporary parameters
-        sensitivity = mW(math::dBm2mW(par("sensitivity")));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
+        centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        snirThreshold = math::dB2fraction(par("snirThreshold"));
         const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("packet", levelOfDetailStr) == 0)
             levelOfDetail = PACKET_DOMAIN;
@@ -98,7 +97,7 @@ std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level
     stream << "ApskLayeredReceiver";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", levelOfDetail = " << levelOfDetail
-               << ", carrierFrequency = " << carrierFrequency;
+               << ", centerFrequency = " << centerFrequency;
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", errorModel = " << printObjectToString(errorModel, level + 1)
                << ", decoder = " << printObjectToString(decoder, level + 1)
@@ -165,12 +164,13 @@ const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListe
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
+    snirInd->setAverageSnir(snir->getMean());
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
 const IListening *ApskLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
-    return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, bandwidth);
+    return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth);
 }
 
 // TODO: copy
@@ -196,7 +196,7 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
     // TODO: scalar
     const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
-    if (bandListening->getCarrierFrequency() != analogModel->getCarrierFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
+    if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }
@@ -210,6 +210,5 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -104,7 +104,6 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         TxopProcedure *hccaTxop = nullptr;
 
         // Queues
-        PendingQueue *hccaPendingQueue = nullptr;
         InProgressFrames *hccaInProgressFrame = nullptr;
 
         // Frame sequence handler

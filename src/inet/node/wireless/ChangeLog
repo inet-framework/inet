@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-06-07  Levente Mészáros
+
+	Added a new Probe network node for visualizing the signal power spectral
+	density of the transmission medium at any position.
+
+	The probe can be dragged and rotated with shift left and right click in Qtenv.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-14  Zoltan Bojthe

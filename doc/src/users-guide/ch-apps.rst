@@ -8,9 +8,22 @@ Applications
 Overview
 --------
 
-This chapter describes application models and traffic generators. All
-applications implement the :ned:`IApp` module interface to ease
-configuring the :ned:`StandardHost` module.
+This chapter describes application models and traffic generators. All applications
+implement the :ned:`IApp` module interface to ease configuration. For example,
+:ned:`StandardHost` contains an application submodule vector that can be filled
+in with specific applications from the INI file.
+
+INET applications fall into two categories. In the first category, applications
+implement very specific behaviors, and generate corresponding traffic patterns
+based on their specific parameters. These applications are implemented as simple
+modules.
+
+In the second category, applications are more generic. They separate traffic
+generation from the usage of the protocol, :ned:`Udp` or :ned:`Tcp` for example.
+These applications are implemented as compound modules. They contain separate
+configurable traffic source, traffic sink, and protocol input/output submodules.
+This approach allows building complex traffic patterns by composing queueing
+model elements.
 
 .. _ug:sec:apps:tcp-applications:
 
@@ -205,6 +218,24 @@ and launches a new “thread” object for each incoming connection.
 Server threads can be implemented in C++. An example server thread class
 is :cpp:`TcpGenericServerThread`.
 
+Applications composing TCP traffic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following TCP modules are provided to allow composing applications with more
+complex traffic without implementing new C++ modules:
+
+-  :ned:`TcpClientApp`: generic TCP client application with composable traffic source and traffic sink
+-  :ned:`TcpServerApp`: generic TCP server application with a TCP server listener to create TCP server connections
+-  :ned:`TcpServerConnection`: generic TCP server connection with composable traffic source and traffic sink
+-  :ned:`TcpServerListener`: generic TCP server listener for accepting/rejecting TCP connections and for creating TCP server connections
+-  :ned:`TcpRequestResponseApp`: generic request-response based TCP server application with configurable pre-composed traffic source and traffic sink
+
+There are some applications which model the traffic of the telnet protocol:
+
+-  :ned:`TelnetClientApp`: telnet client application with configurable pre-composed telnet traffic source and traffic sink
+-  :ned:`TelnetServerApp`: telnet server application with pre-configured TCP server listener to create telnet server connections
+-  :ned:`TelnetServerConnection`: telnet server connection with configurable pre-composed telnet traffic source and traffic sink
+
 .. _ug:sec:apps:udp-applications:
 
 UDP applications
@@ -362,6 +393,18 @@ Operation as sink
 
 When :par:`destAddresses` parameter is empty, the module receives
 packets and makes statistics only.
+
+Applications composing UDP traffic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following UDP modules are provided to allow composing applications with more
+complex traffic without implementing new C++ modules:
+
+-  :ned:`UdpApp`: generic UDP application with composable traffic source and traffic sink
+-  :ned:`UdpClientApp`: generic UDP client application with composable traffic source and traffic sink
+-  :ned:`UdpServerApp`: generic UDP server application with a UDP session handler to create UDP server sessions
+-  :ned:`UdpServerSession`: generic UDP server session with composable traffic source and traffic sink
+-  :ned:`UdpRequestResponseApp`: generic request-response based UDP server application with configurable pre-composed traffic source and traffic sink
 
 .. _ug:sec:apps:ipv4/ipv6-traffic-generators:
 

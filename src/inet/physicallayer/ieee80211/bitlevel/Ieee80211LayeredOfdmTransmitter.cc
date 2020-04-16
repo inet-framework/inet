@@ -55,7 +55,7 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
         digitalAnalogConverter = dynamic_cast<const IDigitalAnalogConverter *>(getSubmodule("digitalAnalogConverter"));
         channelSpacing = Hz(par("channelSpacing"));
         power = W(par("power"));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
         if (isCompliant && (dataEncoder || signalEncoder || dataModulator || signalModulator
                             || pulseShaper || digitalAnalogConverter || !std::isnan(channelSpacing.get()))) // TODO: check modulations
@@ -95,7 +95,7 @@ std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& strea
                << ", isCompliant = " << isCompliant
                << ", bandwidth = " << bandwidth
                << ", channelSpacing = " << channelSpacing
-               << ", carrierFrequency = " << carrierFrequency
+               << ", centerFrequency = " << centerFrequency
                << ", power = " << power;
     return stream;
 }
@@ -140,7 +140,7 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createScalarAna
     unsigned int numberOfDataOFDMSymbols = numberOfDataApskSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     simtime_t dataDuration = numberOfDataOFDMSymbols * mode->getSymbolInterval();
     simtime_t duration = preambleDuration + headerDuration + dataDuration;
-    return new ScalarTransmissionSignalAnalogModel(duration, carrierFrequency, mode->getDataMode()->getBandwidth(), power);
+    return new ScalarTransmissionSignalAnalogModel(duration, centerFrequency, mode->getDataMode()->getBandwidth(), power);
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const

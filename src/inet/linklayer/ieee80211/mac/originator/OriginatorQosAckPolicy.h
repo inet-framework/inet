@@ -31,7 +31,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     protected:
         IQosRateSelection *rateSelection = nullptr;
         int maxBlockAckPolicyFrameLength = -1;
-        int blockAckReqTreshold = -1;
+        int blockAckReqThreshold = -1;
 
         simtime_t blockAckTimeout = -1;
         simtime_t ackTimeout = -1;

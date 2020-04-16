@@ -22,8 +22,8 @@ package inet.physicallayer.ieee80211.packetlevel;
 // representation. It must be used in conjunction with the
 // ~Ieee80211ScalarRadio model.
 //
-// See also ~Ieee80211ScalarRadio, ~Ieee80211ScalarTransmitter,
-// ~Ieee80211ScalarReceiver, and ~ScalarAnalogModel.
+// @see ~Ieee80211ScalarRadio, ~Ieee80211ScalarTransmitter,
+// ~Ieee80211ScalarReceiver, ~ScalarAnalogModel.
 //
 module Ieee80211ScalarRadioMedium extends Ieee80211RadioMedium
 {

@@ -1,5 +1,59 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+
+2019-03-04  Zoltan Bojthe
+
+	Fixed deletion of a module, use deleteModule().
+
+2019-02-15  Levente Mészáros
+
+	Ported to the new queueing API.
+
+2019-02-08  Levente Mészáros
+
+	Moved PendingQueue and InProgressFrames from Dcf to Dcaf similarly how Hcf and Edcaf is separated.
+	Dropped unused Dcaf and Edcaf parameters.
+	Moved remaining EDCA specific components from Hcf to Edca.
+	Renamed Edcaf fields to stationRetryCounters and txopProcedure.
+
+2019-02-07  Levente Mészáros
+
+	Replaced InProgressFrames and AckHandler classes with submodules.
+	Replaced PendingQueue class with submodule in Edcaf and Dcf.
+	Renamed Edcaf inProgressFrame to inProgressFrames.
+
+2019-02-06  Levente Mészáros
+
+	Added EDCA specific components from Hcf to Edcaf.
+
+2019-02-05  Levente Mészáros
+
+	Renamed dataRecoveryProcedure submodule to recoveryProcedure.
+	Moved EDCA specific default parameters from Hcf to Edca.
+
+2019-02-04  Levente Mészáros
+
+	Added channelOwningChangedSignal signal and statistic to channel access functions.
+	Added and updated several log statements to better inform the user about what is going on.
+	Added several missing WATCHes to the modules.
+	Cleaned up Enter_Method and Enter_Method_Silent calls.
+	Dropped obsolete contentionInProgress member field.
+
+2019-02-01  Levente Mészáros
+
+	Moved packetSentToPeer signal down the Edcaf where applicable.
+
+2019-01-29  Levente Mészáros
+
+	Added basic signals and statistics to recovery procedure implementations.
+	Added contentionWindowChanged and retryLimitReached signals.
+	Added contentionWindow vector and retryLimitReach scalar statistics.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-07-11  Raphael Riebl

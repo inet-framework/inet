@@ -1,0 +1,27 @@
+- Ieee80211LevelOfDetail: packet level: Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag to peek) -- in module (inet::ieee80211::Rx) Ieee80211LevelofDetailShowcase.host[0].wlan[0].mac.rx (id=60), at t=0.374724514587s, event #15
+- Ieee80211LevelOfDetail: bit level when out of communication range: The calculated data field length = 4032 is greater then the actual bitvector length = 1392 -- in module (inet::physicallayer::Ieee80211OFDMRadio) Ieee80211LevelofDetailShowcase.host[0].wlan[0].
+- Netmask routes default metric should be higher than the metric of routes added by the configurator ? need some sensible default
+- End-to-end-delay: needs byte-tags in the packet API. Fragmentation and packet timestamps are conflicting
+- Crosstalk: partially overlapping config: channels 1-2 doesn't cause interference between packets being transmitted at the same time
+- Ieee80211Visualizer doesn't work with simplified mgmt
+- RadioMedium: When signal power is 0, the medium shouldn't send the signal (for example when behind a wall + simple obstacle loss)
+- PcapRecorder: The timestamp in the pcap file (in wireshark) is not the same as the timestamp in the GUI
+- Ieee80211Visualizer should indicate channel number
+- Manetprotocols: f5f1406 ("manetprotocols", 2018-02-13): StatisticAodv3Uniform, runs 109, 122, 154, 153, 192, 225, 325, 360:
+check_and_cast(): Cannot cast (inet::Packet*)ICMP-error-#1-type11-code0 to type 'inet::IcmpHeader *' -- in module (inet::aodv::Aodv) ManetprotocolsShowcaseMoreNodes.node11.routing (id=1130), at t=36.108710008528s, event #1718648
+- Sensornetwork and Ieee802154 showcase: communication ranges not displayed
+- ManetProtocols showcase: 2375584 ("manetprotocols", 2018-02-16): StatisticDymo config: 
+Cannot serialize Udp header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp -- in module (inet::ieee80211::Tx) ManetprotocolsShowcaseMoreNodes.source.wlan[0].mac.tx (id=47), at t=0.010319113618s, event #24
+(It doesn't throw error in Qtenv)
+- apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses GNP which results in a weird error in MessageDispatcher
+- XMac / sensornetwork showcase: at some slotTime values, the number of successfully sent packets drop. 
+A sensor sends preambles -> the gateway wakes up and sends ack -> the sensor node would send the data but another sensor node 
+starts sending preambles and the original sensor node's mac is stuck in SEND mode and doesnt do anything from this point. 
+Eventually all sensor nodes get into this state and the number of successfully sent packets is low ~5 packets
+- Ieee802154 showcase / StatisticVisualizer: 7594a70 ("sensornetwork", 2018-02-28): the statistic visualizer displays '-' as the number of received packets when there is one received packet
+- Ieee802154NarrowbandScalarRadio: the packet don't have PHY header (according to the inspector)
+- InfoVisualizer (and probably other visualizers): when DisplayHint = "bottom", the figure is on top of the module's name
+- Sensornetwork: mac headerLength is set to 8b, but by default it's 10b (BMac, LMac) and 80b (XMac). This setting seems to be required for the macs to work correctly.
+- SuperpositioningMobility should have faceForward (maybe all mobilities should?)
+- SuperpositioningMobility: support for enabling orientation and position separatelly
+- EntangledMobility vs AttachedMobility: support for enabling orientation and position separatelly

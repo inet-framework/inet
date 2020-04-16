@@ -21,7 +21,7 @@ void RtcpReceiverReportPacket::addReceptionReport(ReceptionReport *report)
     receptionReports.add(report);
     count++;
     // an rtcp receiver report is 24 bytes long
-    setChunkLength(getChunkLength() + B(24));
+    addChunkLength(B(24));
 };
 
 void RtcpSdesPacket::addSDESChunk(SdesChunk *sdesChunk)
@@ -31,7 +31,7 @@ void RtcpSdesPacket::addSDESChunk(SdesChunk *sdesChunk)
     count++;
     // the size of the rtcp packet increases by the
     // size of the sdes chunk (including ssrc)
-    setChunkLength(getChunkLength() + B(sdesChunk->getLength()));
+    addChunkLength(B(sdesChunk->getLength()));
 };
 
 } // namespace rtp

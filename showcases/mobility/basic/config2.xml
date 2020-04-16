@@ -1,0 +1,8 @@
+<movement>
+    <!-- MassMobility -->
+    <repeat>
+        <set speed="uniform(35,45)"/>
+        <turn angle="uniform(-30,30)"/>
+        <forward t="uniform(0.1,1)"/>
+    </repeat>
+</movement>

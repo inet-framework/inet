@@ -26,13 +26,12 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 using namespace physicallayer;
@@ -236,8 +235,8 @@ void Ieee80211MgmtSta::beaconLost()
 void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& address)
 {
     auto packet = new Packet(name);
-    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
-    packet->addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
+    packet->addTag<MacAddressReq>()->setDestAddress(address);
+    packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
     sendDown(packet);
 }
@@ -295,7 +294,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     scheduleAt(simTime() + timeout, assocTimeoutMsg);
 }
 
-void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     // Note that we are only subscribed during scanning!
@@ -662,6 +661,7 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
         EV << "Association successful, AP address=" << ap->address << "\n";
 
         // change our state to "associated"
+        mib->bssData.ssid = ap->ssid;
         mib->bssData.bssid = ap->address;
         mib->bssStationData.isAssociated = true;
         (ApInfo&)assocAP = (*ap);
@@ -769,6 +769,5 @@ void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

@@ -143,7 +143,6 @@ cplusplus(Ipv6NdOptions) {{
 //
 class Ipv6NdMessage extends Icmpv6Header
 {
-    //customize(true);
     int code = 0;
 }
 
@@ -153,7 +152,9 @@ class Ipv6NdMessage extends Icmpv6Header
 //
 class Ipv6RouterSolicitation extends Ipv6NdMessage
 {
+    chunkLength = B(8);    // without options
     type = ICMPv6_ROUTER_SOL;
+    //Additional ICMP fields
     uint32_t reserved = 0;
     Ipv6NdOptions options;
 }
@@ -165,15 +166,19 @@ class Ipv6RouterSolicitation extends Ipv6NdMessage
 //
 class Ipv6RouterAdvertisement extends Ipv6NdMessage
 {
+    chunkLength = B(16);    // without options
     type = ICMPv6_ROUTER_AD;
     //Additional ICMP fields
     unsigned short curHopLimit;
+
     bool managedAddrConfFlag;    //M-bit
     bool otherStatefulConfFlag;    //O-bit
     bool homeAgentFlag = false;        //H-bit
-    unsigned short routerLifetime;  // 0 indicates router is not a default router
-    unsigned int reachableTime;
-    unsigned int retransTimer;
+    uint8_t reserved = 0;
+
+    unsigned short routerLifetime;  // [s] 0 indicates router is not a default router
+    unsigned int reachableTime;     // [ms]
+    unsigned int retransTimer;      // [ms]
     Ipv6NdOptions options;
 }
 
@@ -183,8 +188,10 @@ class Ipv6RouterAdvertisement extends Ipv6NdMessage
 //
 class Ipv6NeighbourSolicitation extends Ipv6NdMessage
 {
+    chunkLength = B(24);    // without options
     type = ICMPv6_NEIGHBOUR_SOL;
     //Additional ICMP fields
+    uint32_t reserved = 0;
     Ipv6Address targetAddress;// MUST NOT be a multicast address.
     Ipv6NdOptions options;
 }
@@ -195,6 +202,7 @@ class Ipv6NeighbourSolicitation extends Ipv6NdMessage
 //
 class Ipv6NeighbourAdvertisement extends Ipv6NdMessage
 {
+    chunkLength = B(24);    // without options
     type = ICMPv6_NEIGHBOUR_AD;
     //Additional ICMP fields
     bool routerFlag;    //R-flag
@@ -211,6 +219,7 @@ class Ipv6NeighbourAdvertisement extends Ipv6NdMessage
 //
 class Ipv6Redirect extends Ipv6NdMessage
 {
+    chunkLength = B(40);    // without options
     type = ICMPv6_REDIRECT;
     //Additional ICMP fields
     Ipv6Address targetAddress;

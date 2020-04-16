@@ -119,15 +119,13 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
         }
         state->rcv_sacks += n;    // total counter, no current number
 
-        if (rcvSacksVector)
-            rcvSacksVector->record(state->rcv_sacks);
+        emit(rcvSacksSignal, state->rcv_sacks);
 
         // update scoreboard
         state->sackedBytes_old = state->sackedBytes;    // needed for RFC 3042 to check if last dupAck contained new sack information
         state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
 
-        if (sackedBytesVector)
-            sackedBytesVector->record(state->sackedBytes);
+        emit(sackedBytesSignal, state->sackedBytes);
     }
     return true;
 }
@@ -214,8 +212,7 @@ void TcpConnection::setPipe()
         }
     }
 
-    if (pipeVector)
-        pipeVector->record(state->pipe);
+    emit(pipeSignal, state->pipe);
 }
 
 bool TcpConnection::nextSeg(uint32& seqNum)
@@ -389,7 +386,7 @@ void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 
     if(state->send_fin && sentSeqNum == state->snd_fin_seq)
         sentSeqNum = sentSeqNum + 1;
-    
+
     ASSERT(seqLE(state->snd_nxt, sentSeqNum));
 
     // RFC 3517 page 8: "(C.2) If any of the data octets sent in (C.1) are below HighData,
@@ -405,8 +402,7 @@ void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
     if (seqGreater(sentSeqNum, state->snd_max)) // HighData = snd_max
         state->snd_max = sentSeqNum;
 
-    if (unackedVector)
-        unackedVector->record(state->snd_max - state->snd_una);
+    emit(unackedSignal, state->snd_max - state->snd_una);
 
     // RFC 3517, page 9: "6   Managing the RTO Timer
     //
@@ -618,8 +614,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
     // update number of sent sacks
     state->snd_sacks += n;
 
-    if (sndSacksVector)
-        sndSacksVector->record(state->snd_sacks);
+    emit(sndSacksSignal, state->snd_sacks);
 
     EV_INFO << n << " SACK(s) added to header:\n";
 

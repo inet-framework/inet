@@ -1,5 +1,46 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+
+2019-08-05  Marcell Juhász
+
+	Removed setting chunkLength from MSG.
+
+2019-07-30  Marcell Juhász
+
+	Fixed AckingMacHeaderSerializer.
+
+2019-06-17  Zoltan Bojthe
+
+	Added AckingMacToEthernetPcapRecorderHelper.
+	Fixed ACK: treeId cannot be used for identifying packet when serialization is used.
+
+2019-06-14  Andras Varga
+
+	Make sure senderModuleId is valid when sending ack.
+
+2019-06-03  Zoltan Bojthe
+
+	Fixed pop tx frame, pop only if exists.
+	Removed unneeded clearQueue() and flushQueue() functions already implemented in MacProtocolBase.
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-03-26  Levente Mészáros
+
+	Increased default headerLength to the default serialized header length.
+
+2019-02-18  Levente Mészáros
+
+	Replaced IPassiveQueue with the new IPacketQueue interface.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-13  Zoltan Bojthe

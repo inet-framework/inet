@@ -33,14 +33,14 @@ import inet.power.contract.IEnergyConsumer;
 // via ~ConfigureRadioCommand, or with direct C++ function calls.
 //
 // switchingTimes parameter should be regarded as a 5x5 matrix:
-//
+// <pre>
 //               OFF SLEEP RECEIVER TRANSMITTER TRANSCEIVER
 // OFF           0 0 0 0 0
 // SLEEP         0 0 0 0 0
 // RECEIVER      0 0 0 0 0
 // TRANSMITTER   0 0 0 0 0
 // TRANSCEIVER   0 0 0 0 0
-//
+// </pre>
 // The corresponding RadioMode pairs contain the time needed to
 // switch from one state to another.
 // For example: the 6th number identifies the time needed to switch

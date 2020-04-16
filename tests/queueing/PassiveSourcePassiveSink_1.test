@@ -1,0 +1,35 @@
+%description:
+
+In this test, an passive packet source is connected to an passive packet sink,
+which causes the simulation to fail.
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+
+network TestProducerConsumer
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=200,100");
+        }
+    connections:
+        provider.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProducerConsumer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+
+%exitcode: 1
+
+%contains: stderr
+doesn't support pop on gate

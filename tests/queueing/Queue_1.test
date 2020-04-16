@@ -1,0 +1,77 @@
+%description:
+
+In this test, packets are produced periodically (randomly) by an active packet
+source (ActivePacketSource). The packets are collected periodically (randomly) by
+an active packet sink (ActivePacketSink). The source and the sink is connected
+by a FIFO queue (PacketQueue) where packets are stored temporarily.
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.queue.PacketQueue;
+
+network TestPacketQueue
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        queue: PacketQueue {
+            @display("p=200,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> queue.in;
+        queue.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestPacketQueue
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = uniform(0s, 2s)
+*.collector.collectionInterval = uniform(0s, 2s)
+
+%contains: stdout
+Producing packet producer-0.
+Pushing packet producer-0 into the queue.
+Popping packet producer-0 from the queue.
+Collecting packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Pushing packet producer-1 into the queue.
+Popping packet producer-1 from the queue.
+Collecting packet producer-1.
+Producing packet producer-2.
+Pushing packet producer-2 into the queue.
+Popping packet producer-2 from the queue.
+Collecting packet producer-2.
+Producing packet producer-3.
+Pushing packet producer-3 into the queue.
+Popping packet producer-3 from the queue.
+Collecting packet producer-3.
+Producing packet producer-4.
+Pushing packet producer-4 into the queue.
+Producing packet producer-5.
+Pushing packet producer-5 into the queue.
+Popping packet producer-4 from the queue.
+Collecting packet producer-4.
+Producing packet producer-6.
+Pushing packet producer-6 into the queue.
+Popping packet producer-5 from the queue.
+Collecting packet producer-5.
+Producing packet producer-7.
+Pushing packet producer-7 into the queue.
+Producing packet producer-8.
+Pushing packet producer-8 into the queue.
+Popping packet producer-6 from the queue.
+Collecting packet producer-6.
+Popping packet producer-7 from the queue.
+Collecting packet producer-7.

@@ -47,6 +47,9 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
     virtual void removePathVisualization(const PathVisualization *pathVisualization) override;
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override;
 
+  public:
+    virtual ~PathOsgVisualizerBase();
+
 #else // ifdef WITH_OSG
 
   protected:

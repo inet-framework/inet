@@ -25,7 +25,7 @@ import inet.routing.contract.IBgp;
 // The bgpConfig parameter can specify an XML file describing the
 // configuration of all BGP routers and their interfaces in the network.
 //
-// TODO config file!
+//# TODO config file!
 //
 simple Bgp like IBgp
 {

@@ -407,19 +407,19 @@ void Dymo::sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
     auto className = packet->getClassName();
     Packet *udpPacket = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
     auto udpHeader = makeShared<UdpHeader>();
-    udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     // In its default mode of operation, AODVv2 uses the Udp port 269 [RFC5498] to carry protocol packets.
     udpHeader->setSourcePort(DYMO_UDP_PORT);
     udpHeader->setDestinationPort(DYMO_UDP_PORT);
     udpHeader->setCrcMode(CRC_DISABLED);
-    udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     if (interfaceEntry)
-        udpPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    auto addresses = udpPacket->addTagIfAbsent<L3AddressReq>();
+        udpPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    auto addresses = udpPacket->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(nextHop);
     // The Ipv4 TTL (Ipv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
-    udpPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
+    udpPacket->addTag<HopLimitReq>()->setHopLimit(255);
     udpPacket->insertAtFront(udpHeader);
     udpPacket->insertAtBack(packet);
     sendUdpPacket(udpPacket, delay);

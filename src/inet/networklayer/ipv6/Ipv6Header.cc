@@ -171,15 +171,24 @@ Ipv6ExtensionHeader *Ipv6Header::removeExtensionHeader(IpProtocolId extensionTyp
     return nullptr;
 }
 
-short Ipv6Header::getTrafficClass() const
+short Ipv6Header::getDscp() const
 {
-    return (getExplicitCongestionNotification() & 0xc0) | (getDiffServCodePoint() & 0x3f);
+    return (trafficClass & 0xfc) >> 2;
 }
 
-void Ipv6Header::setTrafficClass(short trafficClass)
+void Ipv6Header::setDscp(short dscp)
 {
-    setDiffServCodePoint(trafficClass & 0x3f);
-    setExplicitCongestionNotification((trafficClass >> 6) & 0x03);
+    setTrafficClass(((dscp & 0x3f) << 2) | (trafficClass & 0x03));
+}
+
+short Ipv6Header::getEcn() const
+{
+    return trafficClass & 0x03;
+}
+
+void Ipv6Header::setEcn(short ecn)
+{
+    setTrafficClass((trafficClass & 0xfc) | (ecn & 0x03));
 }
 
 std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader& h)

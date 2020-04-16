@@ -1,0 +1,673 @@
+%description:
+
+This test contains basic checks for various multi-dimensional partitioning of mathematical functions.
+
+%includes:
+#include "inet/common/math/FunctionChecker.h"
+#include "inet/common/math/Functions.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::math;
+using namespace inet::units::values;
+
+class FunctionTest
+{
+  protected:
+    template<typename R, typename D>
+    void printPartitioning(const typename D::I& i, const Ptr<const IFunction<R, D>>& f) {
+    	FunctionChecker<R, D>(f).check();
+        std::cout << "\nPartitioning " << i << std::endl;
+	    f->printPartitioning(std::cout, i);
+    }
+
+  public:
+    void test1();
+};
+
+void FunctionTest::test1()
+{
+    std::cout << "\nConstantFunction\n";
+    auto f1 = makeShared<ConstantFunction<double, Domain<double>>>(10.0);
+    printPartitioning<double, Domain<double>>(f1->getDomain(), f1);
+
+    std::cout << "\nBoxcar1DFunction\n";
+    auto f2 = makeShared<Boxcar1DFunction<double, double>>(-1.0, 1.0, 10.0);
+    printPartitioning<double, Domain<double>>(f2->getDomain(), f2);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f2);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0b1, 0b0, 0b0), f2);
+
+    std::cout << "\nAddedFunction\n";
+    auto f3 = makeShared<Boxcar1DFunction<double, double>>(0.0, 2.0, 1.0);
+    auto f4 = f2->add(f3);
+    printPartitioning<double, Domain<double>>(f3->getDomain(), f4);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f4);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0b1, 0b0, 0b0), f4);
+
+    std::cout << "\nMultipliedFunction\n";
+    auto f5 = f2->multiply(f3);
+    printPartitioning<double, Domain<double>>(f3->getDomain(), f5);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f5);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0b1, 0b0, 0b0), f5);
+
+    std::cout << "\nInterpolated1DFunction\n";
+    std::map<double, double> rs;
+    rs[-INFINITY] = 0.0;
+    rs[-1.0] = 0.0;
+    rs[0.0] = 10.0;
+    rs[1.0] = 0.0;
+    rs[INFINITY] = 0.0;
+    auto f6 = makeShared<Interpolated1DFunction<double, double>>(rs, &LinearInterpolator<double, double>::singleton);
+    printPartitioning<double, Domain<double>>(f6->getDomain(), f6);
+
+    std::cout << "\nMultipliedFunction optimization\n";
+    auto f7 = makeShared<ConstantFunction<double, Domain<double>>>(0.0)->multiply(f6);
+    printPartitioning<double, Domain<double>>(f7->getDomain(), f7);
+
+    std::cout << "\nCombined2DFunction\n";
+    auto f8 = makeShared<Combined2DFunction<double, double, double>>(f2, f3);
+    printPartitioning<double, Domain<double, double>>(f8->getDomain(), f8);
+
+    std::cout << "\nBoxcar2DFunction\n";
+    auto f9 = makeShared<Boxcar2DFunction<double, double, double>>(-1.0, 1.0, 0.0, 2.0, 10.0);
+    printPartitioning<double, Domain<double, double>>(f9->getDomain(), f9);
+
+    std::cout << "\nDividedFunction\n";
+    auto f10 = f8->divide(f9);
+    printPartitioning<double, Domain<double, double>>(f10->getDomain(), f10);
+
+    std::cout << "\nGaussFunction\n";
+    auto f11 = makeShared<GaussFunction<double, double>>(0, 10);
+    auto f12 = makeShared<ApproximatedFunction<double, Domain<double>, 0, double>>(-10, 10, 1, &AverageInterpolator<double, double>::singleton, f11);
+    printPartitioning<double, Domain<double>>(f12->getDomain(), f12);
+
+    std::cout << "\nGaussFunction x BoxcarFunction\n";
+    auto f13 = makeShared<Combined2DFunction<double, double, double>>(f11, f2);
+    auto f14 = makeShared<ApproximatedFunction<double, Domain<double, double>, 0, double>>(-10, 10, 1, &AverageInterpolator<double, double>::singleton, f13);
+    auto f15 = makeShared<ApproximatedFunction<double, Domain<double, double>, 1, double>>(-1, 1, 0.5, &LeftInterpolator<double, double>::singleton, f14);
+    printPartitioning<double, Domain<double, double>>(f15->getDomain(), f15);
+
+    std::cout << "\nSawtoothFunction\n";
+    auto f16 = makeShared<SawtoothFunction<double, double>>(0, 8, 4, 4);
+    auto f17 = makeShared<ApproximatedFunction<double, Domain<double>, 0, double>>(0, 8, 1, &LeftInterpolator<double, double>::singleton, f16);
+    printPartitioning<double, Domain<double>>(f17->getDomain(), f17);
+
+    std::cout << "\nDomainModulated2DFunction\n";
+    auto f18 = makeShared<Boxcar2DFunction<double, double, double>>(0, 8, 0, 1, 1);
+    auto f19 = makeShared<DomainModulated2DFunction<double, double, double>>(f18, f17);
+    printPartitioning<double, Domain<double, double>>(f19->getDomain(), f19);
+}
+
+%activity:
+FunctionTest tester;
+tester.test1();
+
+%contains: stdout
+ConstantFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … inf)
+  → 10
+
+Boxcar1DFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … -1)
+  → 0
+constant over [-1 … 1)
+  → 10
+constant over [1 … inf)
+  → 0
+
+Partitioning [-10 … 0)
+constant over [-10 … -1)
+  → 0
+constant over [-1 … 0)
+  → 10
+
+Partitioning [0 … 10)
+constant over [0 … 1)
+  → 10
+constant over [1 … 10)
+  → 0
+
+AddedFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … -1)
+  → 0
+constant over [-1 … 0)
+  → 10
+constant over [0 … 1)
+  → 11
+constant over [1 … 2)
+  → 1
+constant over [2 … inf)
+  → 0
+
+Partitioning [-10 … 0)
+constant over [-10 … -1)
+  → 0
+constant over [-1 … 0)
+  → 10
+
+Partitioning [0 … 10)
+constant over [0 … 1)
+  → 11
+constant over [1 … 2)
+  → 1
+constant over [2 … 10)
+  → 0
+
+MultipliedFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … -1)
+  → 0
+constant over [-1 … 0)
+  → 0
+constant over [0 … 1)
+  → 10
+constant over [1 … inf)
+  → 0
+
+Partitioning [-10 … 0)
+constant over [-10 … -1)
+  → 0
+constant over [-1 … 0)
+  → 0
+
+Partitioning [0 … 10)
+constant over [0 … 1)
+  → 10
+constant over [1 … 10)
+  → 0
+
+Interpolated1DFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … -1)
+  → 0
+linear in dim. 0 over [-1 … 0)
+  → 0 … 10
+linear in dim. 0 over [0 … 1)
+  → 10 … 0
+constant over [1 … inf)
+  → 0
+
+MultipliedFunction optimization
+
+Partitioning (-inf … inf)
+constant over (-inf … inf)
+  → 0
+
+Combined2DFunction
+
+Partitioning (-inf … inf) x (-inf … inf)
+constant over (-inf … -1) x (-inf … 0)
+  → 0
+constant over (-inf … -1) x [0 … 2)
+  → 0
+constant over (-inf … -1) x [2 … inf)
+  → 0
+constant over [-1 … 1) x (-inf … 0)
+  → 0
+constant over [-1 … 1) x [0 … 2)
+  → 10
+constant over [-1 … 1) x [2 … inf)
+  → 0
+constant over [1 … inf) x (-inf … 0)
+  → 0
+constant over [1 … inf) x [0 … 2)
+  → 0
+constant over [1 … inf) x [2 … inf)
+  → 0
+
+Boxcar2DFunction
+
+Partitioning (-inf … inf) x (-inf … inf)
+constant over (-inf … -1) x (-inf … 0)
+  → 0
+constant over [-1 … 1) x (-inf … 0)
+  → 0
+constant over [1 … inf) x (-inf … 0)
+  → 0
+constant over (-inf … -1) x [0 … 2)
+  → 0
+constant over [-1 … 1) x [0 … 2)
+  → 10
+constant over [1 … inf) x [0 … 2)
+  → 0
+constant over (-inf … -1) x [2 … inf)
+  → 0
+constant over [-1 … 1) x [2 … inf)
+  → 0
+constant over [1 … inf) x [2 … inf)
+  → 0
+
+DividedFunction
+
+Partitioning (-inf … inf) x (-inf … inf)
+constant over (-inf … -1) x (-inf … 0)
+  → -nan
+constant over (-inf … -1) x [0 … 2)
+  → -nan
+constant over (-inf … -1) x [2 … inf)
+  → -nan
+constant over [-1 … 1) x (-inf … 0)
+  → -nan
+constant over [-1 … 1) x [0 … 2)
+  → 1
+constant over [-1 … 1) x [2 … inf)
+  → -nan
+constant over [1 … inf) x (-inf … 0)
+  → -nan
+constant over [1 … inf) x [0 … 2)
+  → -nan
+constant over [1 … inf) x [2 … inf)
+  → -nan
+
+GaussFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … -10)
+  → 0.0241971
+constant over [-10 … -9)
+  → 0.0254028
+constant over [-9 … -8)
+  → 0.0277888
+constant over [-8 … -7)
+  → 0.0300973
+constant over [-7 … -6)
+  → 0.0322739
+constant over [-6 … -5)
+  → 0.0342645
+constant over [-5 … -4)
+  → 0.0360168
+constant over [-4 … -3)
+  → 0.0374829
+constant over [-3 … -2)
+  → 0.0386215
+constant over [-2 … -1)
+  → 0.0393998
+constant over [-1 … 0)
+  → 0.0397947
+constant over [0 … 1)
+  → 0.0397947
+constant over [1 … 2)
+  → 0.0393998
+constant over [2 … 3)
+  → 0.0386215
+constant over [3 … 4)
+  → 0.0374829
+constant over [4 … 5)
+  → 0.0360168
+constant over [5 … 6)
+  → 0.0342645
+constant over [6 … 7)
+  → 0.0322739
+constant over [7 … 8)
+  → 0.0300973
+constant over [8 … 9)
+  → 0.0277888
+constant over [9 … 10)
+  → 0.0254028
+constant over [10 … inf)
+  → 0.0241971
+
+GaussFunction x BoxcarFunction
+
+Partitioning (-inf … inf) x (-inf … inf)
+constant over (-inf … -10) x (-inf … -1)
+  → 0.241971
+constant over (-10 … -9) x (-inf … -1)
+  → 0.254028
+constant over (-9 … -8) x (-inf … -1)
+  → 0.277888
+constant over (-8 … -7) x (-inf … -1)
+  → 0.300973
+constant over (-7 … -6) x (-inf … -1)
+  → 0.322739
+constant over (-6 … -5) x (-inf … -1)
+  → 0.342645
+constant over (-5 … -4) x (-inf … -1)
+  → 0.360168
+constant over (-4 … -3) x (-inf … -1)
+  → 0.374829
+constant over (-3 … -2) x (-inf … -1)
+  → 0.386215
+constant over (-2 … -1) x (-inf … -1)
+  → 0.393998
+constant over (-1 … 0) x (-inf … -1)
+  → 0.397947
+constant over (0 … 1) x (-inf … -1)
+  → 0.397947
+constant over (1 … 2) x (-inf … -1)
+  → 0.393998
+constant over (2 … 3) x (-inf … -1)
+  → 0.386215
+constant over (3 … 4) x (-inf … -1)
+  → 0.374829
+constant over (4 … 5) x (-inf … -1)
+  → 0.360168
+constant over (5 … 6) x (-inf … -1)
+  → 0.342645
+constant over (6 … 7) x (-inf … -1)
+  → 0.322739
+constant over (7 … 8) x (-inf … -1)
+  → 0.300973
+constant over (8 … 9) x (-inf … -1)
+  → 0.277888
+constant over (9 … 10) x (-inf … -1)
+  → 0.254028
+constant over (10 … inf) x (-inf … -1)
+  → 0.241971
+constant over (-inf … -10) x [-1 … -0.5)
+  → 0.241971
+constant over [-10 … -9) x [-1 … -0.5)
+  → 0.254028
+constant over [-9 … -8) x [-1 … -0.5)
+  → 0.277888
+constant over [-8 … -7) x [-1 … -0.5)
+  → 0.300973
+constant over [-7 … -6) x [-1 … -0.5)
+  → 0.322739
+constant over [-6 … -5) x [-1 … -0.5)
+  → 0.342645
+constant over [-5 … -4) x [-1 … -0.5)
+  → 0.360168
+constant over [-4 … -3) x [-1 … -0.5)
+  → 0.374829
+constant over [-3 … -2) x [-1 … -0.5)
+  → 0.386215
+constant over [-2 … -1) x [-1 … -0.5)
+  → 0.393998
+constant over [-1 … 0) x [-1 … -0.5)
+  → 0.397947
+constant over [0 … 1) x [-1 … -0.5)
+  → 0.397947
+constant over [1 … 2) x [-1 … -0.5)
+  → 0.393998
+constant over [2 … 3) x [-1 … -0.5)
+  → 0.386215
+constant over [3 … 4) x [-1 … -0.5)
+  → 0.374829
+constant over [4 … 5) x [-1 … -0.5)
+  → 0.360168
+constant over [5 … 6) x [-1 … -0.5)
+  → 0.342645
+constant over [6 … 7) x [-1 … -0.5)
+  → 0.322739
+constant over [7 … 8) x [-1 … -0.5)
+  → 0.300973
+constant over [8 … 9) x [-1 … -0.5)
+  → 0.277888
+constant over [9 … 10) x [-1 … -0.5)
+  → 0.254028
+constant over [10 … inf) x [-1 … -0.5)
+  → 0.241971
+constant over (-inf … -10) x [-0.5 … 0)
+  → 0.241971
+constant over [-10 … -9) x [-0.5 … 0)
+  → 0.254028
+constant over [-9 … -8) x [-0.5 … 0)
+  → 0.277888
+constant over [-8 … -7) x [-0.5 … 0)
+  → 0.300973
+constant over [-7 … -6) x [-0.5 … 0)
+  → 0.322739
+constant over [-6 … -5) x [-0.5 … 0)
+  → 0.342645
+constant over [-5 … -4) x [-0.5 … 0)
+  → 0.360168
+constant over [-4 … -3) x [-0.5 … 0)
+  → 0.374829
+constant over [-3 … -2) x [-0.5 … 0)
+  → 0.386215
+constant over [-2 … -1) x [-0.5 … 0)
+  → 0.393998
+constant over [-1 … 0) x [-0.5 … 0)
+  → 0.397947
+constant over [0 … 1) x [-0.5 … 0)
+  → 0.397947
+constant over [1 … 2) x [-0.5 … 0)
+  → 0.393998
+constant over [2 … 3) x [-0.5 … 0)
+  → 0.386215
+constant over [3 … 4) x [-0.5 … 0)
+  → 0.374829
+constant over [4 … 5) x [-0.5 … 0)
+  → 0.360168
+constant over [5 … 6) x [-0.5 … 0)
+  → 0.342645
+constant over [6 … 7) x [-0.5 … 0)
+  → 0.322739
+constant over [7 … 8) x [-0.5 … 0)
+  → 0.300973
+constant over [8 … 9) x [-0.5 … 0)
+  → 0.277888
+constant over [9 … 10) x [-0.5 … 0)
+  → 0.254028
+constant over [10 … inf) x [-0.5 … 0)
+  → 0.241971
+constant over (-inf … -10) x [0 … 0.5)
+  → 0.241971
+constant over [-10 … -9) x [0 … 0.5)
+  → 0.254028
+constant over [-9 … -8) x [0 … 0.5)
+  → 0.277888
+constant over [-8 … -7) x [0 … 0.5)
+  → 0.300973
+constant over [-7 … -6) x [0 … 0.5)
+  → 0.322739
+constant over [-6 … -5) x [0 … 0.5)
+  → 0.342645
+constant over [-5 … -4) x [0 … 0.5)
+  → 0.360168
+constant over [-4 … -3) x [0 … 0.5)
+  → 0.374829
+constant over [-3 … -2) x [0 … 0.5)
+  → 0.386215
+constant over [-2 … -1) x [0 … 0.5)
+  → 0.393998
+constant over [-1 … 0) x [0 … 0.5)
+  → 0.397947
+constant over [0 … 1) x [0 … 0.5)
+  → 0.397947
+constant over [1 … 2) x [0 … 0.5)
+  → 0.393998
+constant over [2 … 3) x [0 … 0.5)
+  → 0.386215
+constant over [3 … 4) x [0 … 0.5)
+  → 0.374829
+constant over [4 … 5) x [0 … 0.5)
+  → 0.360168
+constant over [5 … 6) x [0 … 0.5)
+  → 0.342645
+constant over [6 … 7) x [0 … 0.5)
+  → 0.322739
+constant over [7 … 8) x [0 … 0.5)
+  → 0.300973
+constant over [8 … 9) x [0 … 0.5)
+  → 0.277888
+constant over [9 … 10) x [0 … 0.5)
+  → 0.254028
+constant over [10 … inf) x [0 … 0.5)
+  → 0.241971
+constant over (-inf … -10) x [0.5 … 1)
+  → 0.241971
+constant over [-10 … -9) x [0.5 … 1)
+  → 0.254028
+constant over [-9 … -8) x [0.5 … 1)
+  → 0.277888
+constant over [-8 … -7) x [0.5 … 1)
+  → 0.300973
+constant over [-7 … -6) x [0.5 … 1)
+  → 0.322739
+constant over [-6 … -5) x [0.5 … 1)
+  → 0.342645
+constant over [-5 … -4) x [0.5 … 1)
+  → 0.360168
+constant over [-4 … -3) x [0.5 … 1)
+  → 0.374829
+constant over [-3 … -2) x [0.5 … 1)
+  → 0.386215
+constant over [-2 … -1) x [0.5 … 1)
+  → 0.393998
+constant over [-1 … 0) x [0.5 … 1)
+  → 0.397947
+constant over [0 … 1) x [0.5 … 1)
+  → 0.397947
+constant over [1 … 2) x [0.5 … 1)
+  → 0.393998
+constant over [2 … 3) x [0.5 … 1)
+  → 0.386215
+constant over [3 … 4) x [0.5 … 1)
+  → 0.374829
+constant over [4 … 5) x [0.5 … 1)
+  → 0.360168
+constant over [5 … 6) x [0.5 … 1)
+  → 0.342645
+constant over [6 … 7) x [0.5 … 1)
+  → 0.322739
+constant over [7 … 8) x [0.5 … 1)
+  → 0.300973
+constant over [8 … 9) x [0.5 … 1)
+  → 0.277888
+constant over [9 … 10) x [0.5 … 1)
+  → 0.254028
+constant over [10 … inf) x [0.5 … 1)
+  → 0.241971
+constant over (-inf … -10) x [1 … inf)
+  → 0
+constant over (-10 … -9) x [1 … inf)
+  → 0
+constant over (-9 … -8) x [1 … inf)
+  → 0
+constant over (-8 … -7) x [1 … inf)
+  → 0
+constant over (-7 … -6) x [1 … inf)
+  → 0
+constant over (-6 … -5) x [1 … inf)
+  → 0
+constant over (-5 … -4) x [1 … inf)
+  → 0
+constant over (-4 … -3) x [1 … inf)
+  → 0
+constant over (-3 … -2) x [1 … inf)
+  → 0
+constant over (-2 … -1) x [1 … inf)
+  → 0
+constant over (-1 … 0) x [1 … inf)
+  → 0
+constant over (0 … 1) x [1 … inf)
+  → 0
+constant over (1 … 2) x [1 … inf)
+  → 0
+constant over (2 … 3) x [1 … inf)
+  → 0
+constant over (3 … 4) x [1 … inf)
+  → 0
+constant over (4 … 5) x [1 … inf)
+  → 0
+constant over (5 … 6) x [1 … inf)
+  → 0
+constant over (6 … 7) x [1 … inf)
+  → 0
+constant over (7 … 8) x [1 … inf)
+  → 0
+constant over (8 … 9) x [1 … inf)
+  → 0
+constant over (9 … 10) x [1 … inf)
+  → 0
+constant over (10 … inf) x [1 … inf)
+  → 0
+
+SawtoothFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … 0)
+  → 0
+constant over [0 … 1)
+  → 0
+constant over [1 … 2)
+  → 1
+constant over [2 … 3)
+  → 2
+constant over [3 … 4)
+  → 3
+constant over [4 … 5)
+  → 0
+constant over [5 … 6)
+  → 1
+constant over [6 … 7)
+  → 2
+constant over [7 … 8)
+  → 3
+constant over [8 … inf)
+  → 0
+
+DomainModulated2DFunction
+
+Partitioning (-inf … inf) x (-inf … inf)
+constant over (-inf … 0) x (-inf … 0)
+  → 0
+constant over (-inf … 0) x [0 … 1)
+  → 0
+constant over (-inf … 0) x [1 … inf)
+  → 0
+constant over [0 … 1) x (-inf … 0)
+  → 0
+constant over [0 … 1) x [0 … 1)
+  → 1
+constant over [0 … 1) x [1 … inf)
+  → 0
+constant over [1 … 2) x (-inf … 1)
+  → 0
+constant over [1 … 2) x [1 … 2)
+  → 1
+constant over [1 … 2) x [2 … inf)
+  → 0
+constant over [2 … 3) x (-inf … 2)
+  → 0
+constant over [2 … 3) x [2 … 3)
+  → 1
+constant over [2 … 3) x [3 … inf)
+  → 0
+constant over [3 … 4) x (-inf … 3)
+  → 0
+constant over [3 … 4) x [3 … 4)
+  → 1
+constant over [3 … 4) x [4 … inf)
+  → 0
+constant over [4 … 5) x (-inf … 0)
+  → 0
+constant over [4 … 5) x [0 … 1)
+  → 1
+constant over [4 … 5) x [1 … inf)
+  → 0
+constant over [5 … 6) x (-inf … 1)
+  → 0
+constant over [5 … 6) x [1 … 2)
+  → 1
+constant over [5 … 6) x [2 … inf)
+  → 0
+constant over [6 … 7) x (-inf … 2)
+  → 0
+constant over [6 … 7) x [2 … 3)
+  → 1
+constant over [6 … 7) x [3 … inf)
+  → 0
+constant over [7 … 8) x (-inf … 3)
+  → 0
+constant over [7 … 8) x [3 … 4)
+  → 1
+constant over [7 … 8) x [4 … inf)
+  → 0
+constant over [8 … inf) x (-inf … 0)
+  → 0
+constant over [8 … inf) x [0 … 1)
+  → 0
+constant over [8 … inf) x [1 … inf)
+  → 0

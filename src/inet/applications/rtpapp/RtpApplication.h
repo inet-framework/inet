@@ -26,13 +26,6 @@ namespace inet {
 class INET_API RtpApplication : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
-    enum SelfMsgKind {
-        ENTER_SESSION,
-        START_TRANSMISSION,
-        STOP_TRANSMISSION,
-        LEAVE_SESSION
-    };
-
     // parameters
     const char *fileName = nullptr;    // the name of the file to be transmitted
     const char *commonName = nullptr;    // the CNAME of this participant.

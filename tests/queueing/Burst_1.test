@@ -1,0 +1,82 @@
+%description:
+
+In this test, packets are periodically (randomly) produced by two active sources
+(ActivePacketSources). One source produces packets with a slower rate while the other
+source uses a faster rate. The two packet sources are combined using a markov
+chain with random transition matrix and random wait intervals. The packets are
+consumed by a single passive sink (PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.scheduler.MarkovScheduler;
+import inet.queueing.source.ActivePacketSource;
+
+network TestBurst
+{
+    submodules:
+        producer1: ActivePacketSource {
+            @display("p=100,100");
+        }
+        producer2: ActivePacketSource {
+            @display("p=100,200");
+        }
+        scheduler: MarkovScheduler {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer1.out --> scheduler.in++;
+        producer2.out --> scheduler.in++;
+        scheduler.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestBurst
+sim-time-limit = 100s
+cmdenv-event-banners = false
+*.producer*.packetLength = 1B
+*.producer1.productionInterval = uniform(0s, 20s)
+*.producer2.productionInterval = uniform(0s, 2s)
+*.scheduler.transitionProbabilities = "0 1 1 0"
+*.scheduler.waitIntervals = "40 4"
+
+%contains: stdout
+Producing packet producer1-0.
+Consuming packet producer1-0.
+
+Running simulation...
+Producing packet producer1-1.
+Consuming packet producer1-1.
+Producing packet producer1-2.
+Consuming packet producer1-2.
+Producing packet producer1-3.
+Consuming packet producer1-3.
+Producing packet producer2-0.
+Consuming packet producer2-0.
+Producing packet producer2-1.
+Consuming packet producer2-1.
+Producing packet producer2-2.
+Consuming packet producer2-2.
+Producing packet producer1-4.
+Consuming packet producer1-4.
+Producing packet producer1-5.
+Consuming packet producer1-5.
+Producing packet producer1-6.
+Consuming packet producer1-6.
+Producing packet producer2-3.
+Consuming packet producer2-3.
+Producing packet producer2-4.
+Consuming packet producer2-4.
+Producing packet producer2-5.
+Consuming packet producer2-5.
+Producing packet producer2-6.
+Consuming packet producer2-6.
+Producing packet producer1-7.
+Consuming packet producer1-7.
+Producing packet producer1-8.
+Consuming packet producer1-8.

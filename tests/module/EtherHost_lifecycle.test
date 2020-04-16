@@ -37,6 +37,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 import inet.common.scenario.ScenarioManager;

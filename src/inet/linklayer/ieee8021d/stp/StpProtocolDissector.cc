@@ -27,7 +27,7 @@ Register_Protocol_Dissector(&Protocol::stp, StpProtocolDissector);
 
 void StpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    auto stpPacket = packet->popAtFront<Bpdu>();
+    auto stpPacket = packet->popAtFront<BpduBase>();
     callback.startProtocolDataUnit(&Protocol::stp);
     callback.visitChunk(stpPacket, &Protocol::stp);
     callback.endProtocolDataUnit(&Protocol::stp);

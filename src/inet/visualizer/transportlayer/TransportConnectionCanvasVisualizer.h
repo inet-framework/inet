@@ -52,6 +52,9 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void setConnectionLabelsVisible(bool visible);
+
+  public:
+    virtual ~TransportConnectionCanvasVisualizer();
 };
 
 } // namespace visualizer

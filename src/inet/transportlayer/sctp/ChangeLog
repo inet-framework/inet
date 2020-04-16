@@ -1,5 +1,65 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Fixed chunk allocation.
+
+2019-11-20  Levente Mészáros
+
+	Fixed uninitialized read detected by Valgrind.
+
+2019-11-12  Zoltan Bojthe
+
+	Fixed input interface detection in SctpNatHook.
+
+2019-11-08  Zoltan Bojthe
+
+	Fixed using size... field instead of sizeof(...)
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+	Fixed throwing exceptions with a pointer.
+
+2019-10-18  Zoltan Bojthe
+
+	Added message kind infos (name of used cEnum).
+	Changed to use msg constructor to set message name and message kind.
+
+2019-09-18  Zoltan Bojthe
+
+	Fixed memory leak.
+
+2019-09-17  Zoltan Bojthe
+
+	Simplified serializing empty data part.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-07-15  Zoltan Bojthe
+
+	Use parseCrcMode().
+
+2019-05-15  Zoltan Bojthe
+
+	Fixed added missing SocketInd tag.
+
+2019-05-09  Levente Mészáros
+
+	Fixed serialization of SACK chunks.
+
+	The flags field was unfilled and caused fingerprint instability with
+	packet data. Updated fingerprints from master version with backported
+	fix.
+
+2019-03-20  Levente Mészáros
+
+	Followed recent netfilter hook API changes.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-10  Zoltan Bojthe

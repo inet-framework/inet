@@ -25,7 +25,6 @@
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ApskRadio);
@@ -73,37 +72,56 @@ void ApskRadio::encapsulate(Packet *packet) const
     auto phyHeader = makeShared<ApskPhyHeader>();
     phyHeader->setCrc(0);
     phyHeader->setCrcMode(CRC_DISABLED);
-    phyHeader->setLengthField(packet->getByteLength());
+    phyHeader->setPayloadLengthField(packet->getDataLength());
     phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     b headerLength = phyHeader->getChunkLength();
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();
-        if (headerLength > phyHeader->getChunkLength())
-            packet->insertAtFront(makeShared<BitCountChunk>(headerLength - phyHeader->getChunkLength()));
+        phyHeader->setChunkLength(headerLength);
     }
+    phyHeader->setHeaderLengthField(headerLength);
     packet->insertAtFront(phyHeader);
-    auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
+
+    auto paddingLength = computePaddingLength(headerLength + phyHeader->getPayloadLengthField(), nullptr, getModulation());
     if (paddingLength != b(0))
         packet->insertAtBack(makeShared<BitCountChunk>(paddingLength));
+    EV_DEBUG << "ApskRadio::encapsulate: packetLength=" << packet->getDataLength() << ", headerLength=" << headerLength << ", paddingLength=" << paddingLength << endl;
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 }
 
 void ApskRadio::decapsulate(Packet *packet) const
 {
-    const auto& phyHeader = packet->popAtFront<ApskPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    const auto& phyHeader = packet->popAtFront<ApskPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented())
+        packet->setBitError(true);
     b headerLength = phyHeader->getChunkLength();
+
+#if 0
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
-        headerLength = flatTransmitter->getHeaderLength();
-        if (headerLength > phyHeader->getChunkLength())
-            packet->popAtFront(headerLength - phyHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
+        b definedHeaderLength = flatTransmitter->getHeaderLength();
+        if (headerLength != definedHeaderLength)
+            throw cRuntimeError("Incoming header length is incorrect");
     }
-    auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
-    if (paddingLength != b(0))
-        packet->popAtBack(paddingLength, Chunk::PF_ALLOW_INCORRECT);
+#endif
+
+    auto paddingLength = computePaddingLength(headerLength + phyHeader->getPayloadLengthField(), nullptr, getModulation());
+    if (paddingLength > b(0)) {
+        if (paddingLength <= packet->getDataLength())
+            packet->popAtBack(paddingLength, Chunk::PF_ALLOW_INCORRECT);
+        else
+            packet->setBitError(true);
+    }
+
+    //FIXME KLUDGE? higher layers accepts only byte length packets started on byte position
+    if (packet->getBitLength() % 8 != 0 || headerLength.get() % 8 != 0)
+        packet->setBitError(true);
+
+    if (phyHeader->getPayloadLengthField() > packet->getDataLength())
+        packet->setBitError(true);
+
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

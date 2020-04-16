@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-05  Zoltan Bojthe
+
+	Added OMNeT++ 6.0 custom fields as comment.
+
+2019-11-18  Zoltan Bojthe
+
+	Rename fields: diffServCodePoint to dscp, explicitCongestionNotification to ecn.
+	Redesigned how TC (TrafficClass) is stored, DSCP and ECN calculated.
+	Optimized Tag settings.
+	Added TOS (type of service) support (TosReq, TosInd tags).
+
+2019-11-11  Zoltan Bojthe
+
+	Added notifications about changing the InterfaceProtocolData set in InterfaceEntry.
+
+2019-11-11  Levente Mészáros
+
+	Added @packetData annotation to non-Chunk based packet parts.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-14  Zoltan Bojthe

@@ -29,7 +29,7 @@ void ManetProtocolDissector::dissect(Packet *packet, const Protocol *protocol, I
 {
     callback.startProtocolDataUnit(&Protocol::manet);
 //    callback.visitChunk(header, &Protocol::manet);
-//    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());
+//    auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getNetworkProtocol());
 //    callback.dissectPacket(packet, payloadProtocol);
 //    ASSERT(packet->getDataLength() == B(0));
 

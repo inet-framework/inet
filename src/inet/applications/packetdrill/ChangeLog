@@ -1,5 +1,32 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-12  Zoltan Bojthe
+
+	Re-generated lexer.cc for suppress warning (signed/unsigned comparison)
+
+2019-11-08  Zoltan Bojthe
+
+	Added checking result value of syscal...() functions in PacketDrillApp.
+
+2019-10-18  Zoltan Bojthe
+
+	Changed to use msg constructor to set message name and message kind.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-07-15  Zoltan Bojthe
+
+	Use parseCrcMode().
+
+2019-03-19  Levente Mészáros
+
+	Added code to set UdpHeader CRC mode field to disabled.
+	The default value is intentionally undefined and must be changed.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-11  Zoltan Bojthe

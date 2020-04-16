@@ -43,7 +43,8 @@ NetworkNodeOsgVisualization::Annotation::Annotation(osg::Node *node, osg::Vec3d 
 {
 }
 
-NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, bool displayModuleName)
+NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, bool displayModuleName) :
+    NetworkNodeVisualizerBase::NetworkNodeVisualization(networkNode)
 {
     double spacing = 4;
     osgText::Text *label = nullptr;

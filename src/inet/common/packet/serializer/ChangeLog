@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-18  Levente Mészáros
+
+	Fixed SequenceChunk serialization for negative length.
+	Due to this bug the chunk may serialized more data than actually requested.
+
+2019-05-07  Zoltan Bojthe
+
+	Added EmptyChunkSerializer.
+	Added more verbose error messages to serializer/deserializer.
+
+2019-03-22  Levente Mészáros
+
+	Added checks for detecting incorrectly serialized field chunks.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

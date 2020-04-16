@@ -24,9 +24,8 @@ TCP SACK test
              8000         5000     5500       8500
              8500         5000     5500       9000" [RFC2018]
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -35,14 +34,12 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-network = TcpTestNet1
+network = inet.test.moduletest.lib.TcpTestNet1
 
-#[Cmdenv]
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 cmdenv-log-prefix="[%c]: "
 
-#[Parameters]
 *.testing=false
 
 # for scriptabletester

@@ -36,7 +36,12 @@ network PacketDrillSctp
                 addDefaultRoutes = false;
                 addStaticRoutes = false;
                 addSubnetRoutes = false;
-                config = xmldoc("../../lib/Ipv4Config.xml");
+                config = xml(
+                    "<config>"+"\n"+
+                    "  <interface hosts='pdhost' names='tun0' address='192.168.0.1' netmask='255.255.255.0' mtu='1500' metric='1'/>"+"\n"+
+                    "  <route hosts='pdhost' destination='192.168.0.2' netmask='255.255.255.255' interface='tun0'/>"+"\n"+
+                    "</config>"
+                );
                 @display("p=185,50");
         }
     connections:

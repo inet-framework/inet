@@ -149,6 +149,16 @@ class Ipv4OptionStreamId extends Ipv4Option
     short streamId;
 }
 
+//
+// Option Structure: Stream ID
+//
+class Ipv4OptionRouterAlert extends Ipv4Option
+{
+    type = IPOPTION_ROUTER_ALERT;
+    length = 4;
+    uint16_t routerAlert = 0;
+}
+
 class Ipv4OptionUnknown extends Ipv4Option
 {
     // type = any
@@ -174,32 +184,39 @@ class Ipv4Header extends NetworkHeaderBase
 {
     chunkLength = IPv4_MIN_HEADER_LENGTH;
 
-    short version = 4;
-    B headerLength = IPv4_MIN_HEADER_LENGTH;         // bytes, must be multiple of 4
+    short version = 4;      // @bit(4)
+    B headerLength = IPv4_MIN_HEADER_LENGTH;         // @bit(4), bytes, must be multiple of 4
+    short typeOfService;    // @bit(8)
+    // OMNeT++ 6.0:
+    // short __dscp @custom @getter(getDscp) @setter(setDscp);  // @bit(6), maps to bits 0-5 of ToS, stored in typeOfService
+    // short __ecn @custom @getter(getEcn) @setter(setEcn);  // @bit(2),  maps to bits 6-7 of ToS, stored in typeOfService
 
-    Ipv4Address srcAddress;
-    Ipv4Address destAddress;
+    B totalLengthField;    // @byte(2)
 
-    uint16_t crc = 0;
+    uint16_t identification;    // @byte(2)
+    bool reservedBit = false;    // @bit(1)
+    bool moreFragments;    // @bit(1)
+    bool dontFragment;    // @bit(1)
+    uint16_t fragmentOffset;         // @bit(13), must be multiple of 8
+
+    short timeToLive;    // @byte(1)
+    IpProtocolId protocolId = IP_PROT_NONE;    // @byte(1)
+    uint16_t crc = 0;    // @byte(2)
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
-    IpProtocolId protocolId = IP_PROT_NONE;
-    short timeToLive;
-    int identification;
-    bool moreFragments;
-    bool dontFragment;
-    int fragmentOffset;         // bytes, must be multiple of 8
-    B totalLengthField;
-    short diffServCodePoint;  // maps to bits 0-5 of ToS
-    short explicitCongestionNotification;  // maps to bits 6-7 of ToS
+    Ipv4Address srcAddress;
+
+    Ipv4Address destAddress;
 
     TlvOptions options; // array of option pointers, option pointers owned by datagram
 }
 
 cplusplus(Ipv4Header) {{
   public:
-    virtual short getTypeOfService() const;
-    virtual void setTypeOfService(short typeOfService);
+    virtual short getDscp() const;
+    virtual void setDscp(short dscp);
+    virtual short getEcn() const;
+    virtual void setEcn(short ecn);
 
     /**
      * Returns the number of extension headers in this datagram
@@ -209,8 +226,8 @@ cplusplus(Ipv4Header) {{
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { handleChange(); return *check_and_cast<TlvOptionBase *>((options.getTlvOptionForUpdate(k))); }
-    virtual const TlvOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TlvOptionBase *>((options.getTlvOption(k))); }
+    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { handleChange(); return *CHK((options.getTlvOptionForUpdate(k))); }
+    virtual const TlvOptionBase& getOption(unsigned int k) const { return *CHK((options.getTlvOption(k))); }
 
     /**
      * Returns the TlvOptionBase of the specified type,

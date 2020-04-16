@@ -1,0 +1,56 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets pass through a packet gate if it's open,
+otherwise packets are not generated. The packets are consumed by a passive
+packet sink (PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.common.PacketGate;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestProducerConsumer
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        gate: PacketGate {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections:
+        producer.out --> gate.in;
+        gate.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProducerConsumer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.gate.openTime = 3s
+*.gate.closeTime = 7s
+
+%contains: stdout
+Opening gate.
+Producing packet producer-0.
+Passing packet producer-0.
+Consuming packet producer-0.
+Producing packet producer-1.
+Passing packet producer-1.
+Consuming packet producer-1.
+Producing packet producer-2.
+Passing packet producer-2.
+Consuming packet producer-2.
+Producing packet producer-3.
+Passing packet producer-3.
+Consuming packet producer-3.
+Closing gate.

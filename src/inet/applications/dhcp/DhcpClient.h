@@ -36,10 +36,6 @@ namespace inet {
 class INET_API DhcpClient : public ApplicationBase, public cListener, public UdpSocket::ICallback
 {
   protected:
-    // DHCP timer types (RFC 2131 4.4.5)
-    enum TimerType {
-        WAIT_OFFER, WAIT_ACK, T1, T2, LEASE_TIMEOUT, START_DHCP
-    };
 
     // DHCP client states (RFC 2131, Figure 5: state transition diagram)
     enum ClientState {
@@ -77,7 +73,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     virtual void initialize(int stage) override;
     virtual void finish() override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual void scheduleTimerTO(TimerType type);
+    virtual void scheduleTimerTO(DhcpTimerType type);
     virtual void scheduleTimerT1();
     virtual void scheduleTimerT2();
     static const char *getStateName(ClientState state);

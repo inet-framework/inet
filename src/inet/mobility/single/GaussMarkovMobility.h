@@ -31,13 +31,14 @@ namespace inet {
 class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
 {
   protected:
-    double speed;    ///< speed of the host
-    rad angle;    ///< angle of linear motion
-    double alpha;    ///< alpha parameter
-    double margin;    ///< margin at which the host gets repelled from the border
-    double speedMean;    ///< speed mean
-    rad angleMean;    ///< angle mean
-    double variance;    ///< variance
+    double speed = 0.0;    ///< speed of the host
+    double speedMean = 0.0;    ///< speed mean
+    double speedStdDev = 0.0;    ///< speed standard deviation
+    rad angle = rad(0.0);    ///< angle of linear motion
+    rad angleMean = rad(0.0);    ///< angle mean
+    rad angleStdDev = rad(0.0);    ///< angle standard deviation
+    double alpha = 0.0;    ///< alpha parameter in [0;1] interval
+    double margin = 0.0;    ///< margin at which the host gets repelled from the border
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

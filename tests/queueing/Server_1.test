@@ -1,0 +1,68 @@
+%description:
+
+In this test, packets are passed through from the source to the sink periodically
+(randomly) by an active packet processor (PacketServer). The packets are generated
+by a passive packet source (PassivePacketSource) and consumed by a passive packet sink
+(PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+import inet.queueing.server.PacketServer;
+
+network TestServer
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        server: PacketServer {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        provider.out --> server.in;
+        server.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestServer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.server.processingTime = uniform(0s, 2s)
+
+%contains: stdout
+Providing packet provider-0.
+Processing packet provider-0 started.
+
+Running simulation...
+Processing packet provider-0 ended.
+Consuming packet provider-0.
+Providing packet provider-1.
+Processing packet provider-1 started.
+Processing packet provider-1 ended.
+Consuming packet provider-1.
+Providing packet provider-2.
+Processing packet provider-2 started.
+Processing packet provider-2 ended.
+Consuming packet provider-2.
+Providing packet provider-3.
+Processing packet provider-3 started.
+Processing packet provider-3 ended.
+Consuming packet provider-3.
+Providing packet provider-4.
+Processing packet provider-4 started.
+Processing packet provider-4 ended.
+Consuming packet provider-4.
+Providing packet provider-5.
+Processing packet provider-5 started.
+Processing packet provider-5 ended.
+Consuming packet provider-5.
+Providing packet provider-6.
+Processing packet provider-6 started.

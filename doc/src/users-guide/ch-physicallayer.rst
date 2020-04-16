@@ -46,11 +46,11 @@ consumer models as submodules with parametric types:
 
 .. code-block:: ned
 
-   antenna: <antennaType> like IAntenna;
-   transmitter: <transmitterType> like ITransmitter;
-   receiver: <receiverType> like IReceiver;
-   energyConsumer: <energyConsumerType> like IEnergyConsumer
-       if energyConsumerType != "";
+   antenna: <default("IsotropicAntenna")> like IAntenna;
+   transmitter: <> like ITransmitter;
+   receiver: <> like IReceiver;
+   energyConsumer: <default("")> like IEnergyConsumer
+       if typename != "";
 
 The following sections describe the parts of the radio model.
 
@@ -274,11 +274,12 @@ it, where certain submodule types and parameters are set to fixed
 values. This section describes some of the frequently used ones.
 
 The radio can be replaced in wireless network interfaces by setting the
-:par:`radioType` parameter, like in the following ini file fragment.
+:par:`typename` parameter of the radio submodule, like in the following ini
+file fragment.
 
 .. code-block:: ini
 
-   **.wlan[*].radioType = "UnitDiskRadio"
+   **.wlan[*].radio.typename = "UnitDiskRadio"
 
 However, be aware that not all MAC protocols can be used with all radio
 models, and that some radio models require a matching transmission
@@ -309,8 +310,8 @@ The following ini file fragment shows an example configuration.
 
 .. code-block:: ini
 
-   *.radioMediumType = "UnitDiskRadioMedium"
-   *.host[*].wlan[*].radioType = "UnitDiskRadio"
+   *.radioMedium.typename = "UnitDiskRadioMedium"
+   *.host[*].wlan[*].radio.typename = "UnitDiskRadio"
    *.host[*].wlan[*].radio.transmitter.bitrate = 2Mbps
    *.host[*].wlan[*].radio.transmitter.preambleDuration = 0s
    *.host[*].wlan[*].radio.transmitter.headerLength = 96b

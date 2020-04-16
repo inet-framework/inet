@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# This script is intended to run nemiver to debug the INET debug version simulations.
+# This is a shorthand to simplify the usage of 'inet_dbg' along with the other inet scripts.
+#
+
+TOOL=nemiver inet_dbg "$@"
+

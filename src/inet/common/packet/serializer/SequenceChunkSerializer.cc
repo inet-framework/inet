@@ -25,7 +25,8 @@ void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 {
     b currentOffset = b(0);
     b serializeBegin = offset;
-    b serializeEnd = offset + (length == b(-1) ? chunk->getChunkLength() : length);
+    b serializeEnd = length == b(-1) ? chunk->getChunkLength() : offset + length;
+
     const auto& sequenceChunk = staticPtrCast<const SequenceChunk>(chunk);
     for (auto& chunk : sequenceChunk->getChunks()) {
         b chunkLength = chunk->getChunkLength();

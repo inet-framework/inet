@@ -1,5 +1,48 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-27  Zoltan Bojthe
+
+	Fixed gate name.
+
+2019-11-18  Zoltan Bojthe
+
+	Rename fields: diffServCodePoint to dscp, explicitCongestionNotification to ecn.
+	Fixed MultiFieldClassifier: set dscp and tos filtering to disabled in filter constructor.
+
+2019-11-15  Zoltan Bojthe
+
+	Fixed the portmin <= portmax checks in MultiFieldClassifier
+
+2019-11-14  Zoltan Bojthe
+
+	Added dscp parameter to MultiFieldClassifier.
+
+2019-10-07  Zoltan Bojthe
+
+	Fixed port check in MultiFieldClassifier.
+
+2019-04-12  Levente Mészáros
+
+	Adapted to the new queueing API.
+
+2019-03-27  Zoltan Bojthe
+
+	Fixed using 'dissect' flag for optimisation in BehaviorAggregateClassifier.
+
+2019-03-20  Zoltan Bojthe
+
+	Removed obsolete findIPDatagramInPacket() from DiffservUtil.
+	Recalculate IPv4 CRC in DscpMarker.
+	Find IPvX header with PacketDissector to check dscp value in BehaviorAggregateClassifier.
+
+2019-03-20  Zoltan Bojthe
+
+	Optimized packet dissecting in MultiFieldClassifier.
+	Find IPvX and transport headers with PacketDissector to check addresses and ports in MultiFieldClassifier.
+	Fixed #424.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-27  Levente Mészáros

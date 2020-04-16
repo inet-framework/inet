@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-09-10  Levente Mészáros
+
+	Added ASSERTs for SER and BER values to fall into [0, 1].
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

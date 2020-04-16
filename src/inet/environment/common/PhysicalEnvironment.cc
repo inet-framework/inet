@@ -97,6 +97,8 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         int id = -1;
         if (idAttribute)
             id = atoi(idAttribute);
+        if (idToShapeMap.find(id) != idToShapeMap.end())
+            throw cRuntimeError("Shape already exists with the same id: '%d'", id);
         // type
         const char *typeAttribute = element->getAttribute("type");
         if (!typeAttribute)
@@ -182,8 +184,6 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         else
             throw cRuntimeError("Unknown shape type '%s'", typeAttribute);
         // insert
-        if (idToShapeMap.find(id) != idToShapeMap.end())
-            throw cRuntimeError("Shape already exists with the same id: '%d'", id);
         idToShapeMap.insert(std::pair<int, const ShapeBase *>(id, shape));
     }
 }

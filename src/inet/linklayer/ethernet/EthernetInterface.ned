@@ -18,7 +18,7 @@
 
 package inet.linklayer.ethernet;
 
-import inet.common.queue.IOutputQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
@@ -38,11 +38,13 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
                                             // "auto". "auto" values will be replaced by
                                             // a generated MAC address in init stage 0.
-        bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
+        bool duplexMode = default(true);      // selects full-duplex (true) or half-duplex (false) operation
+        bool csmacdSupport = default(!duplexMode);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
+        *.duplexMode = duplexMode;
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -54,15 +56,10 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=100,100");
         }
-        queue: <default("")> like IOutputQueue if typename != "" {
-            parameters:
-                @display("p=150,400;q=l2queue");
-        }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
-                queueModule = (exists(queue) ? "^.queue" : "");
-                txQueueLimit = (exists(queue) ? 1 : 10000); // queue sends one packet at a time
-                @display("p=250,500");
+                queue.packetCapacity = default(10000);
+                @display("p=250,400");
         }
         encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
@@ -76,15 +73,11 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         mac.upperLayerOut --> qEncap.lowerLayerIn if exists(qEncap);
         mac.upperLayerOut --> encap.lowerLayerIn if !exists(qEncap);
 
-        mac.upperLayerIn <-- queue.out if exists(queue);
-        mac.upperLayerIn <-- qEncap.lowerLayerOut if !exists(queue) && exists(qEncap);
-        mac.upperLayerIn <-- encap.lowerLayerOut if !exists(queue) && !exists(qEncap);
+        mac.upperLayerIn <-- qEncap.lowerLayerOut if exists(qEncap);
+        mac.upperLayerIn <-- encap.lowerLayerOut if !exists(qEncap);
 
         encap.lowerLayerOut --> qEncap.upperLayerIn if exists(qEncap);
         encap.lowerLayerIn <-- qEncap.upperLayerOut if exists(qEncap);
-
-        qEncap.lowerLayerOut --> queue.in if exists(qEncap) && exists(queue);
-        encap.lowerLayerOut --> queue.in if !exists(qEncap) && exists(queue);
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 

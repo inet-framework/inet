@@ -2,10 +2,10 @@
 package inet.examples.rip.simpletest;
 
 import inet.common.misc.ThruputMeteringChannel;
-import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;
 
@@ -31,7 +31,7 @@ network SimpleTest
             gates:
                 ethg[1];
         }
-        N1: EtherHub {
+        N1: EtherSwitch {
             parameters:
                 @display("p=400,200");
             gates:
@@ -49,7 +49,7 @@ network SimpleTest
             gates:
                 ethg[2];
         }
-        N2: EtherHub {
+        N2: EtherSwitch {
             parameters:
                 @display("p=850,200");
             gates:

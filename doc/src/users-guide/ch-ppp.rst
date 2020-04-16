@@ -50,14 +50,14 @@ layer immediately through the :gate:`netwOut` gate.
 
 Incoming datagrams are waiting in a queue if the line is currently busy.
 In routers, PPP relies on an external queue module (implementing
-:ned:`IOutputQueue`) to model finite buffer, implement QoS and/or RED,
+:ned:`IPacketQueue`) to model finite buffer, implement QoS and/or RED,
 and requests packets from this external queue one-by-one. The name of
 this queue is given as the :par:`queueModule` parameter.
 
 In hosts, no such queue is used, so :ned:`Ppp` contains an internal
-queue named txQueue to queue up packets wainting for transmission.
-Conceptually txQueue is of inifinite size, but for better diagnostics
-one can specify a hard limit in the :par:`txQueueLimit` parameter – if
+queue to store packets wainting for transmission.
+Conceptually the queue is of inifinite size, but for better diagnostics
+one can specify a hard limit in the :par:`packetCapacity` parameter – if
 this is exceeded, the simulation stops with an error.
 
 The module can be used in simulations where the nodes are connected and
@@ -80,9 +80,9 @@ PppInterface
 :ned:`IWiredInterface` interface. It contains a :ned:`Ppp` module and a
 passive queue for the messages received from the network layer.
 
-The queue type is specified by the :par:`queueType` parameter. It can be
-set to ``NoQueue`` or to a module type implementing the
-:ned:`IOutputQueue` interface. There are implementations with QoS and
+The queue type is specified by the :par:`typename` parameter of the queue
+submodule. It can be set to ``PacketQueue`` or to a module type implementing
+the :ned:`IPacketQueue` interface. There are implementations with QoS and
 RED support.
 
 In typical use of the :ned:`Ppp` module it is augmented with other nodes

@@ -495,24 +495,26 @@ void PimDm::processJoinPrunePacket(Packet *pk)
         return;
     }
 
-    Ipv4Address upstreamNeighborAddress = pkt->getUpstreamNeighborAddress();
+    Ipv4Address upstreamNeighborAddress = pkt->getUpstreamNeighborAddress().unicastAddress.toIpv4();
     int numRpfNeighbors = pimNbt->getNumNeighbors(incomingInterface->getInterfaceId());
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         JoinPruneGroup group = pkt->getJoinPruneGroups(i);
-        Ipv4Address groupAddr = group.getGroupAddress();
+        Ipv4Address groupAddr = group.getGroupAddress().groupAddress.toIpv4();
 
         // go through list of joined sources
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getJoinedSourceAddress(j);
-            Route *route = findRoute(source.IPaddress, groupAddr);
+            const auto& source = group.getJoinedSourceAddress(j);
+            Route *route = findRoute(source.sourceAddress.toIpv4(), groupAddr);
+            ASSERT(route);
             processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
         }
 
         // go through list of pruned sources
         for (unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getPrunedSourceAddress(j);
-            Route *route = findRoute(source.IPaddress, groupAddr);
+            const auto& source = group.getPrunedSourceAddress(j);
+            Route *route = findRoute(source.sourceAddress.toIpv4(), groupAddr);
+            ASSERT(route);
             processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
         }
     }
@@ -656,8 +658,8 @@ void PimDm::processAssertPacket(Packet *pk)
     const auto& pkt = pk->peekAtFront<PimAssert>();
     int incomingInterfaceId = pk->getTag<InterfaceInd>()->getInterfaceId();
     Ipv4Address srcAddrFromTag = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
-    Ipv4Address source = pkt->getSourceAddress();
-    Ipv4Address group = pkt->getGroupAddress();
+    Ipv4Address source = pkt->getSourceAddress().unicastAddress.toIpv4();
+    Ipv4Address group = pkt->getGroupAddress().groupAddress.toIpv4();
     AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
     Route *route = findRoute(source, group);
     ASSERT(route);    // XXX create S,G state?
@@ -687,18 +689,18 @@ void PimDm::processGraftPacket(Packet *pk)
     InterfaceEntry *incomingInterface = ift->getInterfaceById(pk->getTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
-    if (pkt->getUpstreamNeighborAddress() != incomingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
+    if (pkt->getUpstreamNeighborAddress().unicastAddress != incomingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
         delete pk;
         return;
     }
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         const JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
-        Ipv4Address groupAddr = group.getGroupAddress();
+        Ipv4Address groupAddr = group.getGroupAddress().groupAddress.toIpv4();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getJoinedSourceAddress(j);
-            processGraft(source.IPaddress, groupAddr, sender, incomingInterface->getInterfaceId());
+            const auto& source = group.getJoinedSourceAddress(j);
+            processGraft(source.sourceAddress.toIpv4(), groupAddr, sender, incomingInterface->getInterfaceId());
         }
     }
 
@@ -719,6 +721,7 @@ void PimDm::processGraft(Ipv4Address source, Ipv4Address group, Ipv4Address send
     EV_DEBUG << "Processing Graft(S=" << source << ", G=" << group << "), sender=" << sender << "incoming if=" << incomingInterfaceId << endl;
 
     Route *route = findRoute(source, group);
+    ASSERT(route);
 
     UpstreamInterface *upstream = route->upstreamInterface;
 
@@ -783,11 +786,12 @@ void PimDm::processGraftAckPacket(Packet *pk)
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         const JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
-        Ipv4Address groupAddr = group.getGroupAddress();
+        Ipv4Address groupAddr = group.getGroupAddress().groupAddress.toIpv4();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getJoinedSourceAddress(j);
-            Route *route = findRoute(source.IPaddress, groupAddr);
+            const auto& source = group.getJoinedSourceAddress(j);
+            Route *route = findRoute(source.sourceAddress.toIpv4(), groupAddr);
+            ASSERT(route);
             UpstreamInterface *upstream = route->upstreamInterface;
 
             // If the destination address of the GraftAck packet is not
@@ -828,7 +832,7 @@ void PimDm::processStateRefreshPacket(Packet *pk)
     emit(rcvdStateRefreshPkSignal, pk);
 
     // first check if there is route for given group address and source
-    Route *route = findRoute(pkt->getSourceAddress(), pkt->getGroupAddress());
+    Route *route = findRoute(pkt->getSourceAddress().unicastAddress.toIpv4(), pkt->getGroupAddress().groupAddress.toIpv4());
     if (route == nullptr) {
         delete pk;
         return;
@@ -898,7 +902,7 @@ void PimDm::processStateRefreshPacket(Packet *pk)
             // reset PT
             restartTimer(downstream->pruneTimer, pruneInterval);
         }
-        sendStateRefreshPacket(pkt->getOriginatorAddress(), route, downstream, pkt->getTtl() - 1);
+        sendStateRefreshPacket(pkt->getOriginatorAddress().unicastAddress.toIpv4(), route, downstream, pkt->getTtl() - 1);
 
         //
         // Assert State Machine; event: Send State Refresh
@@ -1200,6 +1204,7 @@ void PimDm::multicastReceiverRemoved(InterfaceEntry *ie, Ipv4Address group)
         Ipv4MulticastRoute *ipv4Route = rt->getMulticastRoute(i);
         if (ipv4Route->getSource() == this && ipv4Route->getMulticastGroup() == group) {
             Route *route = findRoute(ipv4Route->getOrigin(), group);
+            ASSERT(route);
 
             // remove pimInt from the list of outgoing interfaces
             DownstreamInterface *downstream = route->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
@@ -1445,18 +1450,20 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
 
     Packet *packet = new Packet("PIMPrune");
     const auto& msg = makeShared<PimJoinPrune>();
-    msg->setUpstreamNeighborAddress(nextHop);
+    msg->getUpstreamNeighborAddressForUpdate().unicastAddress = nextHop;
     msg->setHoldTime(holdTime);
 
     // set multicast groups
     msg->setJoinPruneGroupsArraySize(1);
     JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
-    group.setGroupAddress(grp);
+    group.getGroupAddressForUpdate().groupAddress = grp;
     group.setPrunedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getPrunedSourceAddressForUpdate(0);
-    address.IPaddress = src;
+    auto& address = group.getPrunedSourceAddressForUpdate(0);
+    address.sourceAddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
@@ -1473,18 +1480,20 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
 
     Packet *packet = new Packet("PIMJoin");
     const auto& msg = makeShared<PimJoinPrune>();
-    msg->setUpstreamNeighborAddress(nextHop);
+    msg->getUpstreamNeighborAddressForUpdate().unicastAddress = nextHop;
     msg->setHoldTime(0);    // ignored by the receiver
 
     // set multicast groups
     msg->setJoinPruneGroupsArraySize(1);
     JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
-    group.setGroupAddress(grp);
+    group.getGroupAddressForUpdate().groupAddress = grp;
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
-    address.IPaddress = src;
+    auto& address = group.getJoinedSourceAddressForUpdate(0);
+    address.sourceAddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
@@ -1505,16 +1514,18 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     Packet *packet = new Packet("PimGraft");
     const auto& msg = makeShared<PimGraft>();
     msg->setHoldTime(0);
-    msg->setUpstreamNeighborAddress(nextHop);
+    msg->getUpstreamNeighborAddressForUpdate().unicastAddress = nextHop;
 
     msg->setJoinPruneGroupsArraySize(1);
     JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
-    group.setGroupAddress(grp);
+    group.getGroupAddressForUpdate().groupAddress = grp;
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
-    address.IPaddress = src;
+    auto& address = group.getJoinedSourceAddressForUpdate(0);
+    address.sourceAddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentGraftPkSignal, packet);
@@ -1541,6 +1552,8 @@ void PimDm::sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacke
     Packet *packet = new Packet("PIMGraftAck");
     auto msg = dynamicPtrCast<PimGraft>(graftPacket->dupShared());
     msg->setType(GraftAck);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentGraftAckPkSignal, packet);
@@ -1555,9 +1568,9 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
 
     Packet *packet = new Packet("PimStateRefresh");
     const auto& msg = makeShared<PimStateRefresh>();
-    msg->setGroupAddress(route->group);
-    msg->setSourceAddress(route->source);
-    msg->setOriginatorAddress(originator);
+    msg->getGroupAddressForUpdate().groupAddress = route->group;
+    msg->getSourceAddressForUpdate().unicastAddress = route->source;
+    msg->getOriginatorAddressForUpdate().unicastAddress = originator;
     msg->setInterval(stateRefreshInterval);
     msg->setTtl(ttl);
     msg->setP(downstream->pruneState == DownstreamInterface::PRUNED);
@@ -1568,6 +1581,8 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + B(12));
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentStateRefreshPkSignal, packet);
@@ -1581,8 +1596,8 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
 
     Packet *packet = new Packet("PimAssert");
     const auto& pkt = makeShared<PimAssert>();
-    pkt->setGroupAddress(group);
-    pkt->setSourceAddress(source);
+    pkt->getGroupAddressForUpdate().groupAddress = group;
+    pkt->getSourceAddressForUpdate().unicastAddress = source;
     pkt->setR(false);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
@@ -1591,6 +1606,8 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + B(8));
+    pkt->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(pkt);
     packet->insertAtFront(pkt);
 
     emit(sentAssertPkSignal, packet);

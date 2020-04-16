@@ -48,19 +48,27 @@ module SmallLAN
     gates:
         inout ethg;
     submodules:
+        switch: EtherSwitch {
+            parameters:
+                numEthInterfaces = 2;
+                eth[1].duplexMode = false;
+                @display("p=625,100");
+        }
         hub: EtherHub {
             @display("p=400,100");
         }
         host[h]: EtherHost {
-            @display("p=100,200,row,150");
+            parameters:
+                eth.duplexMode = false;
+                @display("p=100,200,row,150");
         }
     connections:
+        switch.ethg[0] <--> ethg;
+        hub.ethg++ <--> cable <--> switch.ethg[1];
         for i=0..h-1 {
             hub.ethg++ <--> cable <--> host[i].ethg;
         }
-        hub.ethg++ <--> ethg;
 }
-
 
 //
 // Several hosts and an Ethernet hub on a switch; part of ~LargeNet.
@@ -75,7 +83,10 @@ module MediumLAN
         inout ethg;
     submodules:
         switch: EtherSwitch {
-            @display("p=625,100");
+            parameters:
+                numEthInterfaces = n+2;
+                eth[0].duplexMode = false;
+                @display("p=625,100");
         }
         host[n]: EtherHost {
             @display("p=100,200,row,150");
@@ -84,21 +95,23 @@ module MediumLAN
             @display("p=625,300");
         }
         hhost[h]: EtherHost {
-            @display("p=325,400,row,150");
+            parameters:
+                eth.duplexMode = false;
+                @display("p=325,400,row,150");
         }
     connections:
-        for i=0..n-1 {
-            switch.ethg++ <--> cable <--> host[i].ethg;
-        }
-
-        switch.ethg++ <--> ethg;
+        // half-duplex:
+        switch.ethg[0] <--> cable <--> hub.ethg++;
 
         for i=0..h-1 {
             hub.ethg++ <--> cable <--> hhost[i].ethg;
         }
 
-        switch.ethg++ <--> cable <--> hub.ethg++;
-
+        // full-duplex:
+        switch.ethg[1] <--> ethg;
+        for i=0..n-1 {
+            switch.ethg[i+2] <--> cable <--> host[i].ethg;
+        }
 }
 
 
@@ -124,7 +137,9 @@ module LargeLAN
         }
     submodules:
         switch: EtherSwitch {
-            @display("p=450,100");
+            parameters:
+                eth[0].duplexMode = false;
+                @display("p=450,100");
         }
         host[n]: EtherHost {
             @display("p=100,200,row,100");
@@ -133,7 +148,9 @@ module LargeLAN
             @display("p=900,100");
         }
         hhost[h]: EtherHost {
-            @display("p=1050,100,col,100");
+            parameters:
+                eth.duplexMode = false;
+                @display("p=1050,100,col,100");
         }
         bus: EtherBus {
             parameters:
@@ -143,9 +160,12 @@ module LargeLAN
         }
         bhost[b]: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=100,400,row,100");
         }
     connections:
+        switch.ethg++ <--> cabletobus <--> hub.ethg++;
+
         for i=0..n-1 {
             switch.ethg++ <--> cable <--> host[i].ethg;
         }
@@ -155,8 +175,6 @@ module LargeLAN
         for i=0..h-1 {
             hub.ethg++ <--> cabletobus <--> hhost[i].ethg;
         }
-
-        switch.ethg++ <--> cabletobus <--> hub.ethg++;
 
         for i=0..b-1 {
             bus.ethg++ <--> cabletobus <--> bhost[i].ethg;
@@ -336,7 +354,5 @@ network LargeNet
         switchB.ethg++ <--> cable <--> switchC.ethg++;
         switchC.ethg++ <--> cable <--> switchD.ethg++;
         switchB.ethg++ <--> cable <--> switchBB[4].ethg++;
-
 }
-
 

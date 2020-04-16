@@ -1,5 +1,96 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-11  Zoltan Bojthe
+
+	Added EtherQosRedQueue with early detection (RED) and ECN support for ethernet interfaces.
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-11  Levente Mészáros
+
+	Fixed packetCapacity default value, should not be hard-coded.
+
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+	Replaced txQueueLimit with queue.frameCapacity.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized tag usage.
+
+2019-08-06  Zoltan Bojthe
+
+	Added 25GB Ethernet mode.
+
+2019-07-24  Zoltan Bojthe
+
+	Removed frameMinBytes field: it's always 64 byte.
+	Add padding and set FCS before insert frame into the queue.
+
+2019-06-17  Zoltan Bojthe
+
+	Full-duplex meta-info moved from EthernetPhyHeader to EthernetSignal.
+
+2019-06-03  Zoltan Bojthe
+
+	Removed getNextFrameFromQueue() function.
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-05-28  Zoltan Bojthe
+
+	Moved flushQueue() and clearQueue() implementation to MacProtocolBase.
+
+2019-05-24  Zoltan Bojthe
+
+	Always use getNextFrameFromQueue() to get packet from queue in EtherMacFullDuplex.
+
+2019-05-13  Zoltan Bojthe
+
+	Removed addFcs() function from EtherEncap.
+	Added constructor with fcsMode argument to EthernetFcs.
+	Moved addPaddingAndSetFcs() to EtherMacBase.
+
+2019-05-06  Zoltan Bojthe
+
+	Use constants instead of numeric values for length.
+	Fixed gigabit ethernet: frame extended to 512 bytes with extensionbytes behind the FCS.
+
+2019-04-29  Zoltan Bojthe
+
+	Redesigned addFcs() and addPaddingAndFcs(), addFcs() only adds an unfilled FCS
+	(set the fcs mode only) and addPaddingAndSetFcs(): uses existing FCS chunk with
+	fcsMode for calculate FCS.
+
+2019-04-12  Zoltan Bojthe
+
+	Moved padding insertion, and FCS calculation to MAC modules.
+
+2019-04-08  Zoltan Bojthe
+
+	Allow unknown protocol in etherType field and drop packet in EtherEncap.
+	Don't throw error in dissectors when ETH/PPP protocol field contains unknown protocol ID.
+
+2019-02-22  Levente Mészáros
+
+	Added displayStringTextFormat parameter to ethernet MAC modules.
+
+2019-02-18  Levente Mészáros
+
+	Ported to the new queueing API.
+
+2019-01-23  Levente Mészáros
+
+	Extracted a separate updateDisplayString() method.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-08  Zoltan Bojthe

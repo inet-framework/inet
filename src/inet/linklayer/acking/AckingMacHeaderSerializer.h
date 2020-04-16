@@ -18,6 +18,7 @@
 #ifndef __INET_ACKINGMACHEADERSERIALIZER_H
 #define __INET_ACKINGMACHEADERSERIALIZER_H
 
+#include "inet/common/packet/recorder/PcapRecorder.h"
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/linklayer/acking/AckingMacHeader_m.h"
 
@@ -36,6 +37,14 @@ class INET_API AckingMacHeaderSerializer : public FieldsChunkSerializer
     AckingMacHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
+class INET_API AckingMacToEthernetPcapRecorderHelper : public cObject, public PcapRecorder::IHelper
+{
+    virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
+    virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
+    virtual Packet *tryConvertToLinkType(const Packet* packet, PcapLinkType pcapLinkType, const Protocol *protocol) const;
+};
+
 } // namespace inet
 
 #endif // ifndef __INET_ACKINGMACHEADERSERIALIZER_H
+

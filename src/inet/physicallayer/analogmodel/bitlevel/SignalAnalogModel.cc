@@ -33,9 +33,9 @@ std::ostream& SignalAnalogModel::printToStream(std::ostream& stream, int level) 
     return stream;
 }
 
-NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth) :
+NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth) :
     SignalAnalogModel(duration),
-    carrierFrequency(carrierFrequency),
+    centerFrequency(centerFrequency),
     bandwidth(bandwidth)
 {
 }
@@ -43,7 +43,7 @@ NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duratio
 std::ostream& NarrowbandSignalAnalogModel::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_DEBUG)
-       stream << ", carrierFrequency = " << carrierFrequency;
+       stream << ", centerFrequency = " << centerFrequency;
     if (level <= PRINT_LEVEL_TRACE)
        stream << ", bandwidth = " << bandwidth;
     return stream;

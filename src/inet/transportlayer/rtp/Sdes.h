@@ -99,10 +99,15 @@ class INET_API SdesItem : public cObject
     virtual const char *getContent() const;
 
     /**
+     * This method returns the length of Value part.
+     */
+    virtual int getLengthField() const;
+
+    /**
      * This method returns the size of this SdesItem in bytes as it
      * would be in the real world.
      */
-    virtual int getLength() const;
+    virtual int getSdesTotalLength() const;
 
   private:
     void copy(const SdesItem& other);

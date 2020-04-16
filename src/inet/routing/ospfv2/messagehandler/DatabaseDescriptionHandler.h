@@ -23,20 +23,20 @@
 
 namespace inet {
 
-namespace ospf {
+namespace ospfv2 {
 
 class INET_API DatabaseDescriptionHandler : public IMessageHandler
 {
   private:
-    bool processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, OspfInterface *intf, Neighbor *neighbor, bool inExchangeStart);
+    bool processDDPacket(const Ospfv2DatabaseDescriptionPacket *ddPacket, Ospfv2Interface *intf, Neighbor *neighbor, bool inExchangeStart);
 
   public:
     DatabaseDescriptionHandler(Router *containingRouter);
 
-    void processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor) override;
+    void processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *neighbor) override;
 };
 
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

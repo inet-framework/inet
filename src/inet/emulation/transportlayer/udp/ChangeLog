@@ -1,5 +1,28 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-12  Levente Mészáros
+
+	Changed parameter name to packetNameFormat according to naming convention.
+
+2019-10-01  Levente Mészáros
+
+	Added packetNameFormat parameter to ExtLowerUdp.
+
+2019-09-17  TÖRÖK Attila
+
+	Set the "reuse address" option on the host UDP socket in ExtLowerUdp.
+
+2019-08-26  Levente Mészáros
+
+	Fixed protocol registration in ExtLowerUdp.
+	Lower gates are loose, they are not really used.
+
+2019-07-30  Gyorgy Szaszko
+
+	Added missing protocol registration.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-17  Levente Mészáros

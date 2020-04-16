@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-03-19  Levente Mészáros
+
+	Added EtherAppPacketSerializer.
+
+2019-01-22  Levente Mészáros
+
+	Added missing CreationTimeTag to application packets for end-to-end delay measurements.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-14  Zoltan Bojthe

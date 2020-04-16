@@ -40,7 +40,7 @@ void InterfaceOperationBase::initialize(cModule *module, StringMap& params)
     params.erase("interfacename");  //TODO implement "towards=..."
     if (interfaceName.empty())
         throw cRuntimeError("interfacename attribute missing, required for operation %s", getClassName());
-    InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
+    InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
     if (!ie)
         throw cRuntimeError("No interface named '%s', required for operation %s", interfaceName.c_str(), getClassName());
 }

@@ -1,0 +1,56 @@
+%description:
+
+In this test, packets are collected periodically by an active packet sink
+(ActivePacketSink). The packets pass through a packet gate if it's open,
+otherwise packets are not generated. The packets are provided by a passive
+packet source (PassivePacketSource).
+
+%file: test.ned
+
+import inet.queueing.common.PacketGate;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+
+network TestProviderCollector
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        gate: PacketGate {
+            @display("p=200,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=200,100");
+        }
+    connections:
+        provider.out --> gate.in;
+        gate.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProviderCollector
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.collector.collectionInterval = 1s
+*.gate.openTime = 3s
+*.gate.closeTime = 7s
+
+%contains: stdout
+Opening gate.
+Providing packet provider-0.
+Passing packet provider-0.
+Collecting packet provider-0.
+Providing packet provider-1.
+Passing packet provider-1.
+Collecting packet provider-1.
+Providing packet provider-2.
+Passing packet provider-2.
+Collecting packet provider-2.
+Providing packet provider-3.
+Passing packet provider-3.
+Collecting packet provider-3.
+Closing gate.

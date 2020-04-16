@@ -24,7 +24,7 @@ module Ieee802154UwbIrRadioMedium extends ApskDimensionalRadioMedium
     parameters:
         backgroundNoise.power = default(-110dBm);
         backgroundNoise.dimensions = default("time");
-        mediumLimitCache.carrierFrequency = default(2.4GHz);
+        mediumLimitCache.centerFrequency = default(2.4GHz);
         mediumLimitCache.minReceptionPower = default(-85dBm);
         mediumLimitCache.minInterferencePower = default(-110dBm);
 }

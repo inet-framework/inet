@@ -22,6 +22,8 @@
  * @detail Class representing a CLNS Address. It should be probably called NSAPAddress or something similar.
  */
 
+#include <iomanip>
+
 #include "inet/networklayer/contract/clns/ClnsAddress.h"
 
 namespace inet{
@@ -126,9 +128,15 @@ std::string ClnsAddress::str(bool printUnspec    /* = true */) const
     if (printUnspec && isUnspecified())
         return std::string("<unspec>");
 
-    char buf[100];
-    sprintf(buf, "%02lX.%04lX.%04lX.%04lX.%04lX.%02X", (areaID >> 16) & (0xFF), areaID & (0xFFFF), (systemID >> 32) & (0xFFFF), (systemID >> 16) & (0xFFFF), systemID & (0xFFFF), nsel & 255);
-    return std::string(buf);
+    std::ostringstream buf;
+    buf << std::hex << std::setfill('0')
+        << std::setw(2) << ((areaID >> 16) & (0xFF)) << "."
+        << std::setw(4) << (areaID & 0xFFFF) << "."
+        << std::setw(4) << ((systemID >> 32) & 0xFFFF) << "."
+        << std::setw(4) << ((systemID >> 16) & 0xFFFF) << "."
+        << std::setw(4) << (systemID & 0xFFFF) << "."
+        << std::setw(2) << (nsel & 0xFF);
+    return buf.str();
 }
 
 uint64 ClnsAddress::getAreaId() const

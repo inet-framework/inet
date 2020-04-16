@@ -14,6 +14,8 @@
 //
 
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
 
@@ -39,22 +41,30 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     b chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length < b(0))) {
         if (predicate == nullptr || predicate(nullptr))
-            return nullptr;
+            return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (-length >= chunkLength || length == chunkLength)) {
         auto result = const_cast<BytesChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
     }
-    // 3. peeking without conversion returns a BytesChunk
+    // 3. peeking without conversion returns a BytesChunk or SliceChunk
     if (converter == nullptr) {
-        auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(iterator.getPosition()).get(), length == b(-1) ? bytes.end() : bytes.begin() + B(iterator.getPosition() + length).get()));
-        chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
-        chunk->markImmutable();
-        return chunk;
+        // 3. peeking complete bytes without conversion returns a BytesChunk or SliceChunk
+        if (b(iterator.getPosition()).get() % 8 == 0 && (length < b(0) || length.get() % 8 == 0)) {
+            B startOffset = iterator.getPosition();
+            B endOffset = iterator.getPosition() + (length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
+            auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(startOffset).get(), bytes.begin() + B(endOffset).get()));
+            chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
+            chunk->markImmutable();
+            return chunk;
+        }
+        else
+            // 4. peeking incomplete bytes without conversion returns a SliceChunk
+            return peekConverted<SliceChunk>(iterator, length, flags);
     }
     // 4. peeking with conversion
     return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length, flags);
@@ -62,8 +72,14 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
 
 const Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
-    MemoryOutputStream outputStream(chunk->getChunkLength());
-    Chunk::serialize(outputStream, chunk, offset, length);
+    b chunkLength = chunk->getChunkLength();
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= offset && offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(length <= chunkLength - offset);
+    b resultLength = length < b(0) ? std::min(-length, chunkLength - offset) : length;
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
+    MemoryOutputStream outputStream(chunkLength);
+    Chunk::serialize(outputStream, chunk, offset, resultLength);
+    // TODO: this can return data which is contains garbage because the data length is not divisible by 8
     return makeShared<BytesChunk>(outputStream.getData());
 }
 

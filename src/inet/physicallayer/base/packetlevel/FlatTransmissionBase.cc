@@ -21,8 +21,8 @@ namespace inet {
 
 namespace physicallayer {
 
-FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, b headerLength, b dataLength, bps bitrate, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth) :
-    NarrowbandTransmissionBase(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, carrierFrequency, bandwidth),
+FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, b headerLength, b dataLength, bps bitrate, const IModulation *modulation, Hz centerFrequency, Hz bandwidth) :
+    NarrowbandTransmissionBase(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, centerFrequency, bandwidth),
     headerLength(headerLength),
     dataLength(dataLength),
     bitrate(bitrate)

@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-12  Zoltan Bojthe
+
+	Rename functions for getFoo()/findFoo() convention in InterfaceTable.
+
+2019-11-08  Zoltan Bojthe
+
+	Converted sprintf to streamout in clns.
+
+2019-11-07  Zoltan Bojthe
+
+	Added getFirstNonLoopbackInterface() to InterfaceTable.
+
+2019-06-17  Andras Varga
+
+	Changed getInterfaceById() to raise an error on invalid IDs.
+	Added findInterfaceById() with old behavior.
+
+2019-03-20  Levente Mészáros
+
+	Changed hooks to maintain a list of netfilters to allow registering to
+	multiple simulatenously.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-18  Zoltan Bojthe

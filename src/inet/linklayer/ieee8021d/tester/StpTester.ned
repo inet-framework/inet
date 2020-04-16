@@ -16,8 +16,8 @@
 package inet.linklayer.ieee8021d.tester;
 
 //
-// Network tester module
-// Show if a network topology is loopfree, all nodes are connected or it has tree topology
+// Network tester module.
+// Shows if a network topology is loopfree, all nodes are connected or it has tree topology.
 //
 simple StpTester
 {

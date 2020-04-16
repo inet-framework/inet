@@ -151,8 +151,10 @@ double toDouble(const char *s, double defaultValue)
 void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)
 {
     // choose some defaults
-    x = 600 * dblrand();
-    y = 400 * dblrand();
+
+    // the standard C++ random generator is used to not modify the result of the simulation:
+    x = 600 * (double)rand() / RAND_MAX;
+    y = 400 * (double)rand() / RAND_MAX;
 
     // and be content with them if there is no "p" tag in the display string
     cDisplayString& ds = submod->getDisplayString();

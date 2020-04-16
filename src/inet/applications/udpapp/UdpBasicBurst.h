@@ -71,6 +71,7 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     bool isSource = false;
     bool activeBurst = false;
     bool haveSleepDuration = false;
+    bool dontFragment = false;
 
     // statistics:
     static int counter;    // counter for generating a global number for each packet

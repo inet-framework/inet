@@ -8,7 +8,7 @@ namespace inet {
 class IntervalTreeTest
 {
   protected:
-    std::vector<Interval *> intervals;
+    std::vector<IntervalTree::Interval *> intervals;
     IntervalTree tree;
 
   protected:
@@ -17,7 +17,7 @@ class IntervalTreeTest
 
     void checkTree();
     void checkNil();
-    int checkNode(IntervalTreeNode* n);
+    int checkNode(IntervalTree::Node* n);
 
   public:
     void run(int nodeCount);

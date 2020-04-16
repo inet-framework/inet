@@ -50,6 +50,9 @@ class INET_API InfoOsgVisualizer : public InfoVisualizerBase
     virtual InfoVisualization *createInfoVisualization(cModule *module) const override;
     virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override;
 
+  public:
+    virtual ~InfoOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:

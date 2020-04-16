@@ -25,6 +25,12 @@
 
 namespace inet {
 
+#if defined(__clang__)
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits)
 {
     AVStream *st = avformat_new_stream(oc, nullptr);
@@ -97,7 +103,9 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     }
 
     // write the stream header
-    avformat_write_header(oc, nullptr);
+    auto err = avformat_write_header(oc, nullptr);
+    if (err < 0)
+        throw cRuntimeError("Could not write header to '%s'", resultFile);
 }
 
 void AudioOutFile::write(void *decBuf, int pktBytes)

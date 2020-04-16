@@ -22,7 +22,7 @@ namespace physicallayer {
 
 ScalarAnalogDigitalConverter::ScalarAnalogDigitalConverter() :
     power(W(NaN)),
-    carrierFrequency(Hz(NaN)),
+    centerFrequency(Hz(NaN)),
     bandwidth(Hz(NaN)),
     sampleRate(NaN)
 {}

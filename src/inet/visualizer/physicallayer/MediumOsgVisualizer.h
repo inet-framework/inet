@@ -18,11 +18,14 @@
 #ifndef __INET_MEDIUMOSGVISUALIZER_H
 #define __INET_MEDIUMOSGVISUALIZER_H
 
+#include "inet/visualizer/base/MediumVisualizerBase.h"
+#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
+
+#ifdef WITH_RADIO
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
-#include "inet/visualizer/base/MediumVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
+#endif // WITH_RADIO
 
 namespace inet {
 
@@ -30,6 +33,7 @@ namespace visualizer {
 
 class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 {
+#ifdef WITH_RADIO
 #ifdef WITH_OSG
 
   protected:
@@ -111,6 +115,7 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override {}
 
 #endif // ifdef WITH_OSG
+#endif // ifdef WITH_RADIO
 };
 
 } // namespace visualizer

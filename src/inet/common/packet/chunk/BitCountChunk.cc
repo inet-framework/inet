@@ -14,6 +14,7 @@
 //
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
 
 namespace inet {
 
@@ -44,19 +45,19 @@ const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     b chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length < b(0))) {
         if (predicate == nullptr || predicate(nullptr))
-            return nullptr;
+            return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (-length >= chunkLength || length == chunkLength)) {
         auto result = const_cast<BitCountChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
     }
     // 3. peeking without conversion returns a BitCountChunk
     if (converter == nullptr) {
-        auto result = makeShared<BitCountChunk>(length == b(-1) ? chunkLength - iterator.getPosition() : length);
+        auto result = makeShared<BitCountChunk>(length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
         result->tags.copyTags(tags, iterator.getPosition(), b(0), result->getChunkLength());
         result->markImmutable();
         return result;
@@ -68,7 +69,9 @@ const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConve
 const Ptr<Chunk> BitCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     b chunkLength = chunk->getChunkLength();
-    b resultLength = length == b(-1) ? chunkLength - offset : length;
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= offset && offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(length <= chunkLength - offset);
+    b resultLength = length < b(0) ? std::min(-length, chunkLength - offset) : length;
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
     return makeShared<BitCountChunk>(resultLength);
 }
@@ -121,7 +124,7 @@ void BitCountChunk::doRemoveAtBack(b length)
 std::string BitCountChunk::str() const
 {
     std::ostringstream os;
-    os << "BitCountChunk, length = " << length;
+    os << "BitCountChunk, length = " << length << ", data = " << (int)data;
     return os.str();
 }
 

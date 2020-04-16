@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-08-21  Levente Mészáros
+
+	Changed copyFromExt to actually add the IPv4 protocol data if missing.
+
+	The user expects the external and simulated interfaces to have the same
+	configuration indepentently of whether an IPv4 protocol component is
+	present or not. Ideally, we could have separate configuration options
+	what to copy but now we copy all at once.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-18  Zoltan Bojthe

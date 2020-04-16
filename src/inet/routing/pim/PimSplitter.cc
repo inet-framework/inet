@@ -17,7 +17,6 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -44,10 +43,6 @@ void PimSplitter::initialize(int stage)
         pimDMOut = gate("pimDMOut");
         pimSMIn = gate("pimSMIn");
         pimSMOut = gate("pimSMOut");
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::pim, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::pim, gate("ipOut"), nullptr);
     }
 }
 

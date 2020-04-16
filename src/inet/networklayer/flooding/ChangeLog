@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-07  Zoltan Bojthe
+
+	Fixed bug #477.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-27  Levente Mészáros

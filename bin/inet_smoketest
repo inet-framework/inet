@@ -39,6 +39,7 @@ cpuTimeLimit = "6s"
 logFile = "test.out"
 extraOppRunArgs = ""
 debug=False
+release=False
 exitCode = 0
 memcheck = False
 memcheckFailedErrorCode = 66
@@ -288,7 +289,7 @@ class SmokeTestCase(SimulationTestCase):
         self.storeExitcodeCallback = storeExitcodeCallback
 
     def runTest(self):
-        global rootDir, executable, debug, cpuTimeLimit, extraOppRunArgs, memcheck
+        global rootDir, executable, debug, release, cpuTimeLimit, extraOppRunArgs, memcheck
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), rootDir + "/" + self.wd, self.wd)
@@ -296,20 +297,20 @@ class SmokeTestCase(SimulationTestCase):
         ensure_dir(resultdir)
         memcheckPrefix = ""
         if memcheck:
-            memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + rootDir + "/tests/smoke/valgrind.supp "
+            memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + rootDir + "/tests/fingerprint/valgrind.supp "
 
         # Check if the command line does not contain executable name (starts with an option i.e. - char)
         # and use the executable name from the command line.
         # Otherwise, assume the first word as the name of the executable.
         (exeName, progArgs) = (executable, self.cmdLine) if (self.cmdLine.startswith("-")) else self.cmdLine.split(maxsplit=1)
 
-        command = memcheckPrefix + (exeName+"_dbg" if debug else exeName) + " -u Cmdenv " + progArgs + \
+        command = memcheckPrefix + (exeName + "_dbg" if debug else exeName + "_release" if release else exeName) + " -u Cmdenv " + progArgs + \
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false" + \
             " --result-dir=" + resultdir + \
             " " + extraOppRunArgs
 
-        # print("COMMAND: " + command + '\n')
+        print("COMMAND: " + command + '\n')
         result = self.runSimulation(self.title, command, workingdir)
 
         # process the result
@@ -596,12 +597,13 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--match', action='append', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-c', '--memcheck', default=False, dest='memcheck', action='store_true', help='run using valgrind memcheck (default: false)')
-    parser.add_argument('-s', '--cpu-time-limit', default='6s', dest='cpuTimeLimit', help='cpu time limit (default: 6s)')
+    parser.add_argument('-T', '--cpu-time-limit', default='6s', dest='cpuTimeLimit', help='cpu time limit (default: 6s)')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
     parser.add_argument('-l', '--logfile', default='test.out', dest='logFile', help='name of logfile (default: test.out)')
-    parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release)')
+    parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release) if the command column in the CSV file does not specify one.')
     parser.add_argument('-C', '--directory', help='Change to DIRECTORY before executing the tests. Working dirs in the CSV files are relative to this.')
     parser.add_argument('-d', '--debug', action='store_true', help='Run debug executables: use the debug version of the executable (appends _dbg to the executable name)')
+    parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
     args = parser.parse_args()
     memcheck = args.memcheck
@@ -627,6 +629,7 @@ if __name__ == "__main__":
         rootDir = os.path.abspath(args.directory)
 
     debug = args.debug
+    release = args.release
 
     generator = SmokeTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, 1)

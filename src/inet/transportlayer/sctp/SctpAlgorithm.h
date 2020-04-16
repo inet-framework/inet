@@ -49,7 +49,7 @@ class INET_API SctpAlgorithm : public cObject
      */
     virtual ~SctpAlgorithm() {}
 
-    inline void setAssociation(SctpAssociation *_assoc)
+    void setAssociation(SctpAssociation *_assoc)
     {
         assoc = _assoc;
         transmissionQ = assoc->getTransmissionQueue();

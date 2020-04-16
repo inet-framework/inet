@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/ieee802154/results/Ieee802154Power-*.vec"/>
+    <inputs name="/inet/showcases/wireless/ieee802154/results/Ieee802154Power-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="residualEnergyCapacity:last">
+      <items xsi:type="scave:Add" filterPattern="name(residualEnergyCapacity:last)"/>
+      <items xsi:type="scave:BarChart" name="residualEnergyCapacity:last"/>
+      <items xsi:type="scave:ComputeScalar" scalarName="energyConsumption" valueExpr="-1*'residualEnergyCapacity:last'" moduleExpr="" groupByExpr=""/>
+      <items xsi:type="scave:BarChart">
+        <filters xsi:type="scave:Select" filterPattern="name(energyConsumption) "/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.3"/>
+  </chartSheets>
+</scave:Analysis>

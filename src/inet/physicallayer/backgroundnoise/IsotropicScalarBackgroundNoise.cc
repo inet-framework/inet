@@ -25,24 +25,22 @@ namespace physicallayer {
 
 Define_Module(IsotropicScalarBackgroundNoise);
 
-IsotropicScalarBackgroundNoise::IsotropicScalarBackgroundNoise() :
-    power(W(NaN))
-{
-}
-
 void IsotropicScalarBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        power = mW(math::dBm2mW(par("power")));
+        power = mW(math::dBmW2mW(par("power")));
+        bandwidth = Hz(par("bandwidth"));
     }
 }
 
 std::ostream& IsotropicScalarBackgroundNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "IsotropicScalarBackgroundNoise";
-    if (level <= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL) {
         stream << ", power = " << power;
+        stream << ", bandwidth = " << bandwidth;
+    }
     return stream;
 }
 
@@ -51,10 +49,16 @@ const INoise *IsotropicScalarBackgroundNoise::computeNoise(const IListening *lis
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     simtime_t startTime = listening->getStartTime();
     simtime_t endTime = listening->getEndTime();
+    Hz centerFrequency = bandListening->getCenterFrequency();
+    Hz listeningBandwidth = bandListening->getBandwidth();
+    if (std::isnan(bandwidth.get()))
+        bandwidth = listeningBandwidth;
+    else if (bandwidth != listeningBandwidth)
+        throw cRuntimeError("Background noise bandwidth doesn't match listening bandwidth");
     std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
     powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
     powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
-    return new ScalarNoise(startTime, endTime, bandListening->getCarrierFrequency(), bandListening->getBandwidth(), powerChanges);
+    return new ScalarNoise(startTime, endTime, centerFrequency, bandwidth, powerChanges);
 }
 
 } // namespace physicallayer

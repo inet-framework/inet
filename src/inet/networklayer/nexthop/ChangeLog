@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-11  Zoltan Bojthe
+
+	Added notifications about changing the InterfaceProtocolData set to InterfaceEntry.
+
+2019-11-08  Levente Mészáros
+
+	Fixed minor issues found by static analysis.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-26  Zoltan Bojthe

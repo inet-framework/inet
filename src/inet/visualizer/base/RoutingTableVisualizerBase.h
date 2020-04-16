@@ -47,12 +47,11 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const Ipv4Route *route = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(const Ipv4Route *route) : route(route) { }
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
   protected:

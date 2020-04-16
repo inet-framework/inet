@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-14  Levente Mészáros
+
+	Replaced txQueueLimit with queue.frameCapacity.
+
+2019-02-18  Levente Mészáros
+
+	Ported to the new queueing API.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-17  Zoltan Bojthe

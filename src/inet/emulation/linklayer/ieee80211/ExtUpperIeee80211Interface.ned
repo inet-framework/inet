@@ -36,7 +36,6 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
 {
     parameters:
-        @class(::inet::ExtInterface);
         string energySourceModule = default("");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
         double bitrate @unit(bps) = default(-1bps);

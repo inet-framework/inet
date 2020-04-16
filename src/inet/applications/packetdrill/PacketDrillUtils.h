@@ -23,7 +23,6 @@
 #include "omnetpp/platdep/sockets.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/common/ByteArray_m.h"
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
  #include <sys/socket.h>
 #endif
@@ -663,6 +662,8 @@ class INET_API PacketDrillOption: public cObject
         char *value;
 };
 
+typedef std::vector<uint8_t> ByteVector;
+
 class INET_API PacketDrillBytes: public cObject
 {
     public:
@@ -671,10 +672,10 @@ class INET_API PacketDrillBytes: public cObject
 
         void appendByte(uint8 byte);
         uint32 getListLength() const { return listLength; };
-        ByteArray* getByteList() { return &byteList; };
+        ByteVector* getByteList() { return &byteList; };
 
     private:
-        ByteArray byteList;
+        std::vector<uint8_t> byteList;
         uint32 listLength;
 };
 
@@ -738,7 +739,7 @@ class INET_API PacketDrillSctpParameter : public cObject
         int32 parameterValue;
         cQueue* parameterList;
         int16 parameterLength;
-        ByteArray *bytearray;
+        ByteVector *bytearray;
         uint32 flags;
         uint16 type;
         void *content;
@@ -750,8 +751,8 @@ class INET_API PacketDrillSctpParameter : public cObject
         void setFlags(uint32 flgs_) { flags = flgs_; };
         int16 getLength() const { return parameterLength; };
         uint16 getType() const { return type; };
-        ByteArray* getByteList() { return bytearray; };
-        void setByteArrayPointer(ByteArray *ptr) { bytearray = ptr; };
+        ByteVector *getByteList() { return bytearray; };
+        void setByteArrayPointer(ByteVector *ptr) { bytearray = ptr; };
         void *getContent() { return content; };
 };
 

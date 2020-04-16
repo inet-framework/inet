@@ -1,0 +1,21 @@
+====== inet-4.x ======
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-11  Zoltan Bojthe
+
+	Fixed memory leak in assignment and move operators of RegionTag.
+	Fixed operator= checking foo1 == foo1 in RegionTagSet, and RegionTag.
+
+2017-12-14  Levente Mészáros
+
+	Fixed finding tag index when the region doesn't match exactly.
+	Fixed addTagIfAbsent when the tag was actually absent.
+
+2017-12-07  Levente Mészáros
+
+	Added new TagSet for packet tags and RegionTagSet for chunk data tags.

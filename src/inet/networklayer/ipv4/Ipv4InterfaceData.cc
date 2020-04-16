@@ -154,6 +154,7 @@ std::string Ipv4InterfaceData::RouterMulticastData::detailedInfo()
 }
 
 Ipv4InterfaceData::Ipv4InterfaceData()
+    : InterfaceProtocolData(InterfaceEntry::F_IPV4_DATA)
 {
     netmask = Ipv4Address::ALLONES_ADDRESS;
     metric = 0;

@@ -50,7 +50,7 @@ import inet.mobility.base.MovingMobilityBase;
 //     </movement>
 // </nohtml></pre>
 //
-// Random Waypoint:
+// ~RandomWaypointMobility:
 //
 // <pre><nohtml>
 //     <movement>

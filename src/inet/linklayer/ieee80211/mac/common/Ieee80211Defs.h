@@ -42,7 +42,7 @@ struct SequenceNumber
 
     int16_t getRaw() const { ASSERT(value != -1); return value; }
 
-    SequenceNumber& operator=(const SequenceNumber& other) { ASSERT(other.value != -1); value = other.value; return *this; }
+    SequenceNumber& operator=(const SequenceNumber& other) { ASSERT(other.value != -1 || value == other.value); value = other.value; return *this; }
     bool operator==(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1); return value == other.value; }
     bool operator!=(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1); return value != other.value; }
 

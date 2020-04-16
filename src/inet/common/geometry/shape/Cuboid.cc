@@ -29,99 +29,42 @@ Cuboid::Cuboid(const Coord& size) :
 
 bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
-    // TODO: heavily used function, optimize
-    Coord minPoint = size / -2;
-    Coord maxPoint = size / 2;
-    intersection1 = intersection2 = normal1 = normal2 = Coord::NIL;
-    const Coord& point1 = lineSegment.getPoint1();
-    const Coord& point2 = lineSegment.getPoint2();
-    bool isInside1 = isInsideX(point1) && isInsideY(point1) && isInsideZ(point1);
-    bool isInside2 = isInsideX(point2) && isInsideY(point2) && isInsideZ(point2);
-    if (isInside1)
-        intersection1 = point1;
-    if (isInside2)
-        intersection2 = point2;
-    if (isInside1 && isInside2)
+    // NOTE: based on https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
+    const auto p1 = lineSegment.getPoint1();
+    const auto p2 = lineSegment.getPoint2();
+    Coord direction = p1 == p2 ? Coord::ZERO : (p2 - p1).getNormalized();
+    Coord m = Coord::ONE.getDividedElementwise(direction);
+    m.clamp(-1E+100, 1E+100); // fix axis algined direction
+    Coord n = m.getMultipliedElementwise(p1);
+    Coord k = m.getAbs().getMultipliedElementwise(size / 2);
+    Coord t1 = -n - k;
+    Coord t2 = -n + k;
+    double tN = std::max(std::max(t1.x, t1.y), t1.z);
+    double tF = std::min(std::min(t2.x, t2.y), t2.z);
+    double l = lineSegment.length();
+    if (tN > tF || tF < 0.0 || tN > l) {
+        intersection1 = intersection2 = normal1 = normal2 = Coord::NIL;
+        return false;
+    }
+    else {
+        if (tN < 0) {
+            intersection1 = p1;
+            normal1 = Coord::NIL;
+        }
+        else {
+            intersection1 = p1 + direction * tN;
+            normal1 = -direction.getSign().getMultipliedElementwise(t1.getYzx().getStep(t1).getMultipliedElementwise(t1.getZxy().getStep(t1)));
+        }
+        if (l < tF) {
+            intersection2 = p2;
+            normal2 = Coord::NIL;
+        }
+        else {
+            intersection2 = p1 + direction * tF;
+            normal2 = -direction.getSign().getMultipliedElementwise(t2.getYzx().getStep(t2).getMultipliedElementwise(t2.getZxy().getStep(t2)));
+        }
         return true;
-    // x min
-    Coord xMinNormal(-1, 0, 0);
-    Coord xMinIntersecion = Plane(minPoint, xMinNormal).computeIntersection(lineSegment);
-    if (!xMinIntersecion.isNil() && isInsideY(xMinIntersecion) && isInsideZ(xMinIntersecion)) {
-        if (point1.x < minPoint.x) {
-            intersection1 = xMinIntersecion;
-            normal1 = xMinNormal;
-        }
-        else {
-            intersection2 = xMinIntersecion;
-            normal2 = xMinNormal;
-        }
     }
-    // x max
-    Coord xMaxNormal(1, 0, 0);
-    Coord xMaxIntersection = Plane(maxPoint, xMaxNormal).computeIntersection(lineSegment);
-    if (!xMaxIntersection.isNil() && isInsideY(xMaxIntersection) && isInsideZ(xMaxIntersection)) {
-        if (point1.x > maxPoint.x) {
-            intersection1 = xMaxIntersection;
-            normal1 = xMaxNormal;
-        }
-        else {
-            intersection2 = xMaxIntersection;
-            normal2 = xMaxNormal;
-        }
-    }
-    // y min
-    Coord yMinNormal(0, -1, 0);
-    Coord yMinIntersection = Plane(minPoint, yMinNormal).computeIntersection(lineSegment);
-    if (!yMinIntersection.isNil() && isInsideX(yMinIntersection) && isInsideZ(yMinIntersection)) {
-        if (point1.y < minPoint.y) {
-            intersection1 = yMinIntersection;
-            normal1 = yMinNormal;
-        }
-        else {
-            intersection2 = yMinIntersection;
-            normal2 = yMinNormal;
-        }
-    }
-    // y max
-    Coord yMaxNormal(0, 1, 0);
-    Coord yMaxIntersection = Plane(maxPoint, yMaxNormal).computeIntersection(lineSegment);
-    if (!yMaxIntersection.isNil() && isInsideX(yMaxIntersection) && isInsideZ(yMaxIntersection)) {
-        if (point1.y > maxPoint.y) {
-            intersection1 = yMaxIntersection;
-            normal1 = yMaxNormal;
-        }
-        else {
-            intersection2 = yMaxIntersection;
-            normal2 = yMaxNormal;
-        }
-    }
-    // z min
-    Coord zMinNormal(0, 0, -1);
-    Coord zMinIntersection = Plane(minPoint, zMinNormal).computeIntersection(lineSegment);
-    if (!zMinIntersection.isNil() && isInsideX(zMinIntersection) && isInsideY(zMinIntersection)) {
-        if (point1.z < minPoint.z) {
-            intersection1 = zMinIntersection;
-            normal1 = zMinNormal;
-        }
-        else {
-            intersection2 = zMinIntersection;
-            normal2 = zMinNormal;
-        }
-    }
-    // z max
-    Coord zMaxNormal(0, 0, 1);
-    Coord zMaxIntersection = Plane(maxPoint, zMaxNormal).computeIntersection(lineSegment);
-    if (!zMaxIntersection.isNil() && isInsideX(zMaxIntersection) && isInsideY(zMaxIntersection)) {
-        if (point1.z > maxPoint.z) {
-            intersection1 = zMaxIntersection;
-            normal1 = zMaxNormal;
-        }
-        else {
-            intersection2 = zMaxIntersection;
-            normal2 = zMaxNormal;
-        }
-    }
-    return !intersection1.isUnspecified() && !intersection2.isUnspecified();
 }
 
 void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const

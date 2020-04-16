@@ -108,33 +108,20 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
         EV_WARN << "no mapping exists for this packet" << endl;
         return false;
     }
-    int outInterfaceId = CHK(ift->getInterfaceByName(outInterface.c_str()))->getInterfaceId();
+    int outInterfaceId = CHK(ift->findInterfaceByName(outInterface.c_str()))->getInterfaceId();
 
     ASSERT(outLabel.size() > 0);
 
-    const auto& mplsHeader = makeShared<MplsHeader>();
-    doStackOps(mplsHeader.get(), outLabel);
+    doStackOps(packet, outLabel);
 
     EV_INFO << "forwarding packet to " << outInterface << endl;
 
     packet->addPar("color") = color;
 
-    if (!mplsHeader->hasLabel()) {
-        // yes, this may happen - if we'are both ingress and egress
-        packet->trim();
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
-        sendToL2(packet);
-    }
-    else {
-        packet->trim();
-        packet->insertAtFront(mplsHeader);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
-        sendToL2(packet);
-    }
+    packet->trim();
+    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    sendToL2(packet);
 
     return true;
 }
@@ -152,7 +139,33 @@ void Mpls::labelAndForwardIpv4Datagram(Packet *ipdatagram)
     sendToL2(ipdatagram);
 }
 
-void Mpls::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
+void Mpls::pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
+{
+    packet->trimFront();
+    newMplsHeader->setS(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() != Protocol::mpls.getId());
+    packet->insertAtFront(newMplsHeader);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
+}
+
+void Mpls::swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
+{
+    ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
+    packet->trimFront();
+    auto oldMplsHeader = packet->removeAtFront<MplsHeader>();
+    newMplsHeader->setS(oldMplsHeader->getS());
+    packet->insertAtFront(newMplsHeader);
+}
+
+void Mpls::popLabel(Packet *packet)
+{
+    ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
+    auto oldMplsHeader = packet->popAtFront<MplsHeader>();
+    if(oldMplsHeader->getS()) {
+        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+    }
+}
+
+void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel)
 {
     unsigned int n = outLabel.size();
 
@@ -161,21 +174,19 @@ void Mpls::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
     for (unsigned int i = 0; i < n; i++) {
         switch (outLabel[i].optcode) {
             case PUSH_OPER: {
-                MplsLabel label;
-                label.setLabel(outLabel[i].label);
-                mplsHeader->pushLabel(label);
+                auto mplsHeader = makeShared<MplsHeader>();
+                mplsHeader->setLabel(outLabel[i].label);
+                pushLabel(packet, mplsHeader);
                 break;
             }
             case SWAP_OPER: {
-                ASSERT(mplsHeader->hasLabel());
-                MplsLabel label = mplsHeader->getTopLabel();
-                label.setLabel(outLabel[i].label);
-                mplsHeader->swapLabel(label);
+                auto mplsHeader = makeShared<MplsHeader>();
+                mplsHeader->setLabel(outLabel[i].label);
+                swapLabel(packet, mplsHeader);
                 break;
             }
             case POP_OPER:
-                ASSERT(mplsHeader->hasLabel());
-                mplsHeader->popLabel();
+                popLabel(packet);
                 break;
 
             default:
@@ -187,11 +198,11 @@ void Mpls::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
 
 void Mpls::processPacketFromL2(Packet *packet)
 {
-    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &Protocol::mpls) {
+    int protocolId = packet->getTag<PacketProtocolTag>()->getProtocol()->getId();
+    if (protocolId == Protocol::mpls.getId()) {
         processMplsPacketFromL2(packet);
     }
-    else if (protocol == &Protocol::ipv4) {
+    else if (protocolId == Protocol::ipv4.getId()) {
         // Ipv4 datagram arrives at Ingress router. We'll try to classify it
         // and add an MPLS header
 
@@ -211,16 +222,16 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
     int incomingInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
     std::string incomingInterfaceName = ie->getInterfaceName();
-    const auto& mplsHeader = dynamicPtrCast<MplsHeader>(packet->popAtFront<MplsHeader>()->dupShared());
-    ASSERT(mplsHeader->hasLabel());
-    MplsLabel oldLabel = mplsHeader->getTopLabel();
+    const auto& mplsHeader = packet->peekAtFront<MplsHeader>();
 
-    EV_INFO << "Received " << packet << " from L2, label=" << oldLabel.getLabel() << " inInterface=" << incomingInterfaceName << endl;
+    EV_INFO << "Received " << packet << " from L2, label=" << mplsHeader->getLabel() << " inInterface=" << incomingInterfaceName << endl;
 
-    if (oldLabel.getLabel() == -1) {
+    if (mplsHeader->getLabel() == (uint32_t)-1) {   //FIXME
         // This is a Ipv4 native packet (RSVP/TED traffic)
         // Decapsulate the message and pass up to L3
         EV_INFO << ": decapsulating and sending up\n";
+        packet->popAtFront<MplsHeader>();
+        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         sendToL3(packet);
         return;
     }
@@ -229,7 +240,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
     std::string outInterface;
     int color;
 
-    bool found = lt->resolveLabel(incomingInterfaceName, oldLabel.getLabel(), outLabel, outInterface, color);
+    bool found = lt->resolveLabel(incomingInterfaceName, mplsHeader->getLabel(), outLabel, outInterface, color);
     if (!found) {
         EV_INFO << "discarding packet, incoming label not resolved" << endl;
 
@@ -237,15 +248,12 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         return;
     }
 
-    InterfaceEntry *outgoingInterface = ift->getInterfaceByName(outInterface.c_str());
+    InterfaceEntry *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
 
-    doStackOps(mplsHeader.get(), outLabel);
+    doStackOps(packet, outLabel);
 
-    if (mplsHeader->hasLabel()) {
+    if ((packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())) {
         // forward labeled packet
-        packet->trim();
-        packet->insertAtFront(mplsHeader);
-
         EV_INFO << "forwarding packet to " << outInterface << endl;
 
         if (packet->hasPar("color")) {
@@ -258,19 +266,19 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         //ASSERT(labelIf[outgoingPort]);
         delete packet->removeTagIfPresent<DispatchProtocolReq>();
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
+        packet->trim();
         sendToL2(packet);
     }
     else {
         // last label popped, decapsulate and send out Ipv4 datagram
 
         EV_INFO << "decapsulating Ipv4 datagram" << endl;
+        ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::ipv4.getId());
 
         if (outgoingInterface) {
             packet->trim();
             delete packet->removeTagIfPresent<DispatchProtocolReq>();
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
             sendToL2(packet);
         }
         else {

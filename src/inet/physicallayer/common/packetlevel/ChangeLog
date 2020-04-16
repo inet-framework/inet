@@ -1,5 +1,64 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-06  Levente Mészáros
+
+	Optimized attenuation functions for isotropic transmitter antennas.
+
+2019-11-28  Levente Mészáros
+
+	Renamed local variables for easier understanding.
+
+2019-11-15  Levente Mészáros
+
+	Added check for duration being greater than maxTransmissionDuration.
+
+2019-11-05  Zoltan Bojthe
+
+	Moved SignalTag.msg to contract folder.
+
+2019-09-24  Levente Mészáros
+
+	Moved the storage of radios and transmissions from the medium into the communication cache.
+
+	There was some duplication between the medium and the communication
+	cache. This change also allows having different ways of storing the
+	radios. For example, a dynamic network may require a different storage
+	than a static one.
+
+2019-09-23  Levente Mészáros
+
+	Renamed carrierFrequency to centerFrequency.
+
+	This confusion was spread all around the code. In most places we don't
+	know what kind of modulation is used (e.g. OFDM has several subcarriers),
+	so it doesn't really make sense.
+
+2019-09-16  Levente Mészáros
+
+	Added new NoiseDimensionalTransmitter as a generic noise signal transmitter.
+	Added a new NoiseSource network node type. This node is capable of producing
+	noise signals with arbitrary spectrum and random time parameters.
+	Changed to allow transmitting signals without an attached packet.
+	Renamed some power functions and implemented new printing API.
+
+	FrequencyAttenuationFunction -> FrequencyDependentAttenuationFunction.
+	SpaceAndFrequencyAttenuationFunction -> SpaceAndFrequencyDependentAttenuationFunction.
+
+2019-09-11  Levente Mészáros
+
+	Added BackgroundNoisePowerFunction with 5 dimensions.
+
+2019-08-27  Levente Mészáros
+
+	Renamed LinearInterpolatedFunction to LinearFunction and BilinearInterpolatedFunction to BilinearFunction.
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-07-25  Levente Mészáros
+
+	Added composable mathematical function implementations for path loss, obstacle loss, antenna gain, and attenuation.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-17  Levente Mészáros

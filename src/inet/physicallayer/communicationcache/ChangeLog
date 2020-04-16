@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-14  Levente Mészáros
+
+	Fixed memory leak in VectorCommunicationCache as suggeted in #482.
+
+2019-10-08  Levente Mészáros
+
+	Simplified VectorCommunicationCache::removeNonInterferingTransmissions().
+	Fixed crash caused by copy-pasted code in MapCommunicationCache::removeNonInterferingTransmissions().
+
+2019-09-24  Levente Mészáros
+
+	Moved the storage of radios and transmissions from the medium into the communication cache.
+
+	There was some duplication between the medium and the communication
+	cache. This change also allows having different ways of storing the
+	radios. For example, a dynamic network may require a different storage
+	than a static one.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

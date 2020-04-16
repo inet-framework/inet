@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-11  Levente Mészáros
+
+	Added @packetData annotation to non-Chunk based packet parts.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
+2019-07-24  Zoltan Bojthe
+
+	Fixed c++17 namespaces; eliminate 'unused variable' warnings.
+
+2019-07-22  Marcell Juhász
+
+	Added checks to serializer.
+	Removed value field of atomic aggregate.
+
+2019-07-19  Zoltan Bojthe
+
+	Fixed totalLength fields in MSG file.
+
+2019-07-10  Zoltan Bojthe
+
+	Fixed packet length, fixed length field values.
+
+2019-07-08  Zoltan Bojthe
+
+	Fixed chunkLength for NLRI: only the 'length' bit stored of the 'prefix'.
+	Fixed chunkLength setting in setNLRI().
+
+2019-07-03  Zoltan Bojthe
+
+	Redesigned BgpHeader.
+
+2019-06-25  Marcell Juhász
+
+	Add BgpHeaderSerializer.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

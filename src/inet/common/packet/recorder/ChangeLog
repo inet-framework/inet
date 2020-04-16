@@ -1,5 +1,49 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-11  Levente Mészáros
+
+	Added missing error handling to PcapReader.
+
+2019-08-26  Levente Mészáros
+
+	Renamed pcapFrameRecorded signal to packetRecorded.
+	PcapRecorder can output packets at any level not only at L2.
+
+2019-06-17  Zoltan Bojthe
+
+	Added AckingMacToEthernetPcapRecorderHelper.
+
+2019-06-14  Zoltan Bojthe
+
+	Added possibility to convert packet to format compatible with pcapLinkType.
+	Added autodetection of pcapLinkType when parameter set to -1.
+	Added IHelper for extendable functionality.
+
+2019-06-12  Zoltan Bojthe
+
+	Renamed the pcapNetwork parameter to pcapLinkType.
+	Added PcapLinkType constants, added matchesLinkType() to check compatibility
+	of recordable Packet and the pcapLinkType parameter.
+
+2019-05-06  Levente Mészáros
+
+	Renamed PcapDump to PcapWriter for naming consistency. PcapReader and PcapWriter
+	are two similarly simple classes which can read and write PCAP files.
+
+2019-04-26  Levente Mészáros
+
+	Added PcapReader which allows reading PCAP files.
+
+2019-03-18  Gyorgy Szaszko
+
+	Added signal for number of packets recorded.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-11  Zoltan Bojthe

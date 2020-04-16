@@ -20,19 +20,17 @@
 #ifndef __INET_TUNINTERFACE_H
 #define __INET_TUNINTERFACE_H
 
-#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 
 namespace inet {
 
-class INET_API Tun : public MacBase
+class INET_API Tun : public MacProtocolBase
 {
     protected:
         std::vector<int> socketIds;
 
     protected:
         virtual void configureInterfaceEntry() override;
-        virtual void flushQueue() override;
-        virtual void clearQueue() override;
 
     public:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

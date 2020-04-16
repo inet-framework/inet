@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/queueing/queue/PacketQueue.h"
 #include "inet/visualizer/common/QueueCanvasVisualizer.h"
 
 namespace inet {
@@ -24,7 +25,7 @@ namespace visualizer {
 
 Define_Module(QueueCanvasVisualizer);
 
-QueueCanvasVisualizer::QueueCanvasVisualization::QueueCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, QueueFigure *figure, PacketQueue *queue) :
+QueueCanvasVisualizer::QueueCanvasVisualization::QueueCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, QueueFigure *figure, queueing::IPacketQueue *queue) :
     QueueVisualization(queue),
     networkNodeVisualization(networkNodeVisualization),
     figure(figure)
@@ -34,6 +35,12 @@ QueueCanvasVisualizer::QueueCanvasVisualization::QueueCanvasVisualization(Networ
 QueueCanvasVisualizer::QueueCanvasVisualization::~QueueCanvasVisualization()
 {
     delete figure;
+}
+
+QueueCanvasVisualizer::~QueueCanvasVisualizer()
+{
+    if (displayQueues)
+        removeAllQueueVisualizations();
 }
 
 void QueueCanvasVisualizer::initialize(int stage)
@@ -46,21 +53,23 @@ void QueueCanvasVisualizer::initialize(int stage)
     }
 }
 
-QueueVisualizerBase::QueueVisualization *QueueCanvasVisualizer::createQueueVisualization(PacketQueue *queue) const
+QueueVisualizerBase::QueueVisualization *QueueCanvasVisualizer::createQueueVisualization(queueing::IPacketQueue *queue) const
 {
-    auto module = check_and_cast<cModule *>(queue->getOwner());
+    auto ownedObject = check_and_cast<cOwnedObject *>(queue);
+    auto module = check_and_cast<cModule *>(ownedObject->getOwner());
     auto figure = new QueueFigure("queue");
     figure->setTags((std::string("queue ") + tags).c_str());
     figure->setTooltip("This figure represents a queue");
-    figure->setAssociatedObject(queue);
+    figure->setAssociatedObject(ownedObject);
     figure->setColor(color);
     figure->setSpacing(spacing);
     figure->setBounds(cFigure::Rectangle(0, 0, width, height));
-    figure->setMaxElementCount(queue->getMaxPacketLength());
+    if (auto packetQueue = dynamic_cast<queueing::PacketQueue *>(queue))
+        figure->setMaxElementCount(packetQueue->getMaxNumPackets());
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
-        throw cRuntimeError("Cannot create queue visualization for '%s', because network node visualization is not found for '%s'", queue->getFullPath().c_str(), networkNode->getFullPath().c_str());
+        throw cRuntimeError("Cannot create queue visualization for '%s', because network node visualization is not found for '%s'", ownedObject->getFullPath().c_str(), networkNode->getFullPath().c_str());
     return new QueueCanvasVisualization(networkNodeVisualization, figure, queue);
 }
 
@@ -85,7 +94,7 @@ void QueueCanvasVisualizer::refreshQueueVisualization(const QueueVisualization *
     auto queueCanvasVisualization = static_cast<const QueueCanvasVisualization *>(queueVisualization);
     auto queue = queueVisualization->queue;
     auto figure = queueCanvasVisualization->figure;
-    figure->setElementCount(queue->getLength());
+    figure->setElementCount(queue->getNumPackets());
 }
 
 } // namespace visualizer

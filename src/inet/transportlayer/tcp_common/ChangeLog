@@ -1,5 +1,31 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-11  Levente Mészáros
+
+	Added missing @packetData annotation to TcpOption.
+
+2019-09-30  Marcel Marek
+
+	Added simplified version of TCP/IP ECN mechanism.
+
+	The mechanism is activated by setting ecnEnabled = true in .ini file. It
+	uses normal ECN-setup SYN and SYN-ACK  to establish a TCP flow. Sets
+	ECT(0) only on non-ACK packets.
+
+	Adds ECE and CWR flags to TCP header. Each packet marked with IP ECN CE
+	is echoed back with TCP ECE set
+	(allowing multiple packets be echoed back within the same window).
+
+2019-09-17  Zoltan Bojthe
+
+	Simplified serializing empty data part.
+
+2019-08-26  Zoltan Bojthe
+
+	Fixed CRC calculation for empty payload.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-10  Zoltan Bojthe

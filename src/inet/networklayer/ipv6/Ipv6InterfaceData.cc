@@ -78,6 +78,7 @@ std::string Ipv6InterfaceData::RouterMulticastData::detailedInfo()
 }
 
 Ipv6InterfaceData::Ipv6InterfaceData()
+    : InterfaceProtocolData(InterfaceEntry::F_IPV6_DATA)
 {
 #ifdef WITH_xMIPv6
     // rt6 = IPv6RoutingTableAccess().get();
@@ -290,6 +291,15 @@ const Ipv6Address& Ipv6InterfaceData::getAddress(int i) const
 {
     ASSERT(i >= 0 && i < (int)addresses.size());
     return addresses[i].address;
+}
+
+const Ipv6Address& Ipv6InterfaceData::getGlblAddress() const
+{
+    for (const auto & elem : addresses)
+        if (elem.address.isGlobal())
+            return elem.address;
+
+    return Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
 bool Ipv6InterfaceData::isTentativeAddress(int i) const

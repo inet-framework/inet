@@ -20,9 +20,9 @@ package inet.applications.httptools.server;
 import inet.applications.contract.IApp;
 
 //
-// A Web server module for OMNeT++ simulations. This module is intended for use with the
-// INET StandardHost module and plugs in as a tcpApp. The INET TCP/IP stack modeling is
-// used for transport. See the INET documentation for more details.
+// A Web server module. This module is intended for use with the
+// INET StandardHost module and plugs in as an app. The INET TCP/IP stack modeling is
+// used for transport.
 //
 // The purpose of the HTTPServer component is to simulate a Web server operating on a single host.
 // It operates in conjunction with the browser component to provide a realistic simulation of Web
@@ -34,8 +34,8 @@ import inet.applications.contract.IApp;
 // A server receives a HTTP page request from a browser. If the browsers message is marked as bad,
 // the server will respond with a 404:Not found message. Otherwise, the server will respond with
 // a 200:OK HTML response. The body of the response is a list of resource references, as further
-// described in HTTPMessage. The receiving browser is expected to issue requests for those
-// resources, as discussed in HTTPBrowser. A server in responds to each resource request with a
+// described in ~HttpReplyMessage. The receiving browser is expected to issue requests for those
+// resources, as discussed in ~HttpBrowser. A server in responds to each resource request with a
 // message consistent with the object requested. The size of the HTML page or resource sent is
 // solely determined by the server receiving the corresponding request.
 //
@@ -96,22 +96,21 @@ import inet.applications.contract.IApp;
 // The server responds with a message containing the specified page or resource if the request
 // can be satisfied (a 200:OK reply). Otherwise, a 404:Not found reply is issued.
 //
-// @see HttpServerDirect
-// @see HttpDirectHost
+// @see ~HttpServerDirect, ~HttpDirectHost
 //
 // @author  Kristjan V. Jonsson
 //
 simple HttpServer like IApp
 {
     parameters:
-        string hostName = default("");                  // The domain name of the server
-        int port = default(80);                         // The listening port number
+        string hostName = default("");                  // The domain name of the server.
+        int port = default(80);                         // The listening port number.
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
         string logFile = default("");                   // Name of server log file. Events are appended, allowing sharing of file for multiple servers.
         string siteDefinition = default("");            // The site script file. Blank to disable.
         double activationTime @unit(s) = default(0s); // The initial activation delay. Zero to disable.
-        xml config;                                     // The XML configuration file for random sites
-        string httpControllerModule = default("httpController"); // ModulePath for HttpController module
+        xml config;                                     // The XML configuration file for random sites.
+        string httpControllerModule = default("httpController"); // ModulePath for ~HttpController module.
         @lifecycleSupport;
     gates:
         input socketIn;

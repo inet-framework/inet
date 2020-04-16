@@ -17,27 +17,24 @@
 package inet.networklayer.ipv6;
 
 //
-// Implements the Ipv6 protocol.
+// Implements the IPv6 protocol.
 //
-// An overview of the Ipv6 implementation in the INET Framework is
-// provided <a href="ipv6overview.html">here</a>.
-//
-// The Ipv6 protocol header is represented by the ~IPv6Datagram message class.
+// The IPv6 protocol header is represented by the ~Ipv6Header message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
-// To send a packet over Ipv6 from a higher layer protocol, the module should
+// To send a packet over IPv6 from a higher layer protocol, the module should
 // fill in an ~L3AddressReq object, attach it to the packet with Packet's
 // addTag() method, then send the packet to the ~Ipv6 module.
 //
 // When ~Ipv6 sends up a packet to a higher layer protocol, it will also attach
-// an ~L3AddressInd to the packet, with the source and destination Ipv6 addresses
-// of the Ipv6 datagram in which the packet arrived.
+// an ~L3AddressInd to the packet, with the source and destination IPv6 addresses
+// of the ~Ipv6Header in which the packet arrived.
 //
 // ~Ipv6 can serve several higher-layer protocols. The higher layer protocols
-// should call registerProtocol with their gate towards the Ipv6 module,
+// should call registerProtocol with their gate towards the IPv6 module,
 // for fill up the protocol-to-gateindex map. When delivering packets to them,
-// the output gate is determined from the Protocol field in the Ipv6 header.
+// the output gate is determined from the Protocol field in the IPv6 header.
 //
 // <b>Routing and interfacing with lower layers</b>
 //
@@ -54,8 +51,8 @@ package inet.networklayer.ipv6;
 //
 // <b>Performance model, QoS</b>
 //
-// In the current form, ~Ipv6 contains a FIFO which queues up Ipv6 datagrams;
-// datagrams are processed in order. The processing time is determined by the
+// In the current form, ~Ipv6 contains a FIFO which queues up IPv6 frames;
+// these are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
 // @see ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery, ~Icmpv6

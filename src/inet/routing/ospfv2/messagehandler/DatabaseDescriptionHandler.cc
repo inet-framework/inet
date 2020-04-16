@@ -15,25 +15,25 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
-#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
-#include "inet/routing/ospfv2/router/OspfArea.h"
-#include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-namespace ospf {
+namespace ospfv2 {
 
 DatabaseDescriptionHandler::DatabaseDescriptionHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
 {
 }
 
-void DatabaseDescriptionHandler::processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor)
+void DatabaseDescriptionHandler::processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Database Description packet received", intf, neighbor);
 
-    const auto& ddPacket = packet->peekAtFront<OspfDatabaseDescriptionPacket>();
+    const auto& ddPacket = packet->peekAtFront<Ospfv2DatabaseDescriptionPacket>();
 
     Neighbor::NeighborStateType neighborState = neighbor->getState();
 
@@ -49,7 +49,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, OspfInterface *in
                 break;
 
             case Neighbor::EXCHANGE_START_STATE: {
-                const OspfDdOptions& ddOptions = ddPacket->getDdOptions();
+                const Ospfv2DdOptions& ddOptions = ddPacket->getDdOptions();
 
                 if (ddOptions.I_Init && ddOptions.M_More && ddOptions.MS_MasterSlave &&
                     (ddPacket->getLsaHeadersArraySize() == 0))
@@ -186,7 +186,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, OspfInterface *in
     }
 }
 
-bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, OspfInterface *intf, Neighbor *neighbor, bool inExchangeStart)
+bool DatabaseDescriptionHandler::processDDPacket(const Ospfv2DatabaseDescriptionPacket *ddPacket, Ospfv2Interface *intf, Neighbor *neighbor, bool inExchangeStart)
 {
     EV_INFO << "  Processing packet contents(ddOptions="
             << ((ddPacket->getDdOptions().I_Init) ? "I " : "_ ")
@@ -199,8 +199,8 @@ bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPa
     unsigned int headerCount = ddPacket->getLsaHeadersArraySize();
 
     for (unsigned int i = 0; i < headerCount; i++) {
-        const OspfLsaHeader& currentHeader = ddPacket->getLsaHeaders(i);
-        LsaType lsaType = static_cast<LsaType>(currentHeader.getLsType());
+        const Ospfv2LsaHeader& currentHeader = ddPacket->getLsaHeaders(i);
+        Ospfv2LsaType lsaType = static_cast<Ospfv2LsaType>(currentHeader.getLsType());
 
         EV_DETAIL << "    " << currentHeader;
 
@@ -217,7 +217,7 @@ bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPa
             lsaKey.linkStateID = currentHeader.getLinkStateID();
             lsaKey.advertisingRouter = currentHeader.getAdvertisingRouter();
 
-            OspfLsa *lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
+            Ospfv2Lsa *lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
 
             // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
             if ((lsaInDatabase == nullptr) || (lsaInDatabase->getHeader() < currentHeader)) {
@@ -253,6 +253,6 @@ bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPa
     return true;
 }
 
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

@@ -1,5 +1,37 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-28  Zoltan Bojthe
+
+	Added timeToLive, dscp, tos NED parameters.
+
+2019-11-08  Zoltan Bojthe
+
+	Added missing return value checks.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+	Suppressed annoying deprecated warnings until they get fixed.
+
+2019-10-14  Andras Varga
+
+	Fix crash in VoipStreamSender if module is deleted without initialize() being called.
+
+2019-08-07  Zoltan Bojthe
+
+	Changed fingerprint calculation: for silence packets, add sample count
+	instead of data buffer content.
+
+2019-07-31  Marcell Juhász
+
+	Removed payload from SILENCE packets.
+
+2019-03-26  Zoltan Bojthe
+
+	Fixed serializer header length.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-13  Zoltan Bojthe

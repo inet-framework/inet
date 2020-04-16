@@ -27,8 +27,8 @@ import inet.networklayer.ted.Ted;
 //
 // An RSVP-TE capable router.
 //
-// RsvpTe occupies the Transport layer; however, it is not a transport protocol
-// itself. RsvpTe uses transport protocols to route packets. ~Ted is used
+// ~RsvpTe occupies the Transport layer; however, it is not a transport protocol
+// itself. ~RsvpTe uses transport protocols to route packets. ~Ted is used
 // to calculate shortest paths.
 //
 module RsvpMplsRouter

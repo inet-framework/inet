@@ -28,9 +28,11 @@ import inet.routing.pim.tables.PimNeighborTable;
 module Pim like IPim
 {
     parameters:
+        @class(Pim);
         @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;
+        string crcMode @enum("declared", "computed") = default("declared");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.routingTableModule = default(absPath(routingTableModule));
         *.pimInterfaceTableModule = default("^.pimInterfaceTable");
@@ -77,7 +79,7 @@ module Pim like IPim
         pimSplitter.pimSMIn <-- pimSM.ipOut;
 
         // splitter out
-        pimSplitter.ipOut --> networkLayerOut;
-        pimSplitter.ipIn <-- networkLayerIn;
+        pimSplitter.ipOut --> { @display("m=s"); } --> networkLayerOut;
+        pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
 

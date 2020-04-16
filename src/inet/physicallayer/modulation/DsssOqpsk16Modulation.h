@@ -27,6 +27,9 @@ namespace physicallayer {
 class INET_API DsssOqpsk16Modulation : public ApskModulationBase
 {
   public:
+    static const DsssOqpsk16Modulation singleton;
+
+  public:
     DsssOqpsk16Modulation();
     virtual ~DsssOqpsk16Modulation();
 

@@ -2,9 +2,8 @@
 Test Nagle's algorithm: small packets are only sent when there's no
 outstanding data (everything sent previously has been acked).
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -13,11 +12,9 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 
-#[Parameters]
 *.testing=true
 ####cmdenv-log-prefix="%c %C@"
 

@@ -28,7 +28,7 @@ void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee802
     if (ctsPolicy->isCtsNeeded(rtsFrame)) {
         auto ctsFrame = buildCts(rtsFrame);
         auto duration = ctsPolicy->computeCtsDurationField(rtsPacket, rtsFrame);
-        ctsFrame->setDuration(duration);
+        ctsFrame->setDurationField(duration);
         auto ctsPacket = new Packet("CTS", ctsFrame);
         EV_DEBUG << "Duration for " << ctsPacket->getName() << " is set to " << duration << " s.\n";
         callback->transmitControlResponseFrame(ctsPacket, ctsFrame, rtsPacket, rtsFrame);

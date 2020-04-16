@@ -19,13 +19,6 @@ package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
-//
-// Accepts any number of incoming TCP connections, and sends back the
-// messages that arrive on them, The lengths of the messages are
-// multiplied by echoFactor before sending them back (echoFactor=1 will
-// result in sending back the same message unmodified.) The reply can also be
-// delayed by a constant time (echoDelay parameter).
-//
 simple SctpNatPeer like IApp
 {
     parameters:
@@ -39,7 +32,7 @@ simple SctpNatPeer like IApp
         int requestLength = default(1452); // length of a request (bytes)
         double thinkTime @unit(s) = default(0s); // time gap between requests
         double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
-        //double reconnectInterval @unit(s) = default(0);  // if connection breaks, waits this much before trying to reconnect
+        //# double reconnectInterval @unit(s) = default(0);  // if connection breaks, waits this much before trying to reconnect
         int outboundStreams = default(1);
         int inboundStreams = default(1);
         bool echo = default(false);  // echoes received packages when true

@@ -63,6 +63,7 @@ class INET_API BytesChunk : public Chunk
     const std::vector<uint8_t>& getBytes() const { return bytes; }
     void setBytes(const std::vector<uint8_t>& bytes);
 
+    size_t getByteArraySize() const { return bytes.size(); }
     uint8_t getByte(int index) const { return bytes.at(index); }
     void setByte(int index, uint8_t byte);
     //@}

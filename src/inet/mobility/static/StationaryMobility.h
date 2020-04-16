@@ -18,8 +18,7 @@
 #ifndef __INET_STATIONARYMOBILITY_H
 #define __INET_STATIONARYMOBILITY_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/mobility/base/MobilityBase.h"
+#include "inet/mobility/base/StationaryMobilityBase.h"
 
 namespace inet {
 
@@ -29,24 +28,15 @@ namespace inet {
  * @ingroup mobility
  * @author Andras Varga
  */
-class INET_API StationaryMobility : public MobilityBase
+class INET_API StationaryMobility : public StationaryMobilityBase
 {
   protected:
-    virtual void handleSelfMessage(cMessage *message) override { throw cRuntimeError("Invalid operation"); }
+    bool updateFromDisplayString;
 
-  public:
-    virtual Quaternion getCurrentAngularPosition() override { return lastOrientation; }
-    virtual Quaternion getCurrentAngularVelocity() override { return Quaternion::IDENTITY; }
-    virtual Quaternion getCurrentAngularAcceleration() override { return Quaternion::IDENTITY; }
-
-    virtual Coord getCurrentPosition() override { return lastPosition; }
-    virtual Coord getCurrentVelocity() override { return Coord::ZERO; }
-    virtual Coord getCurrentAcceleration() override { return Coord::ZERO; }
-
-    virtual double getMaxSpeed() const override { return 0; }
-
-    virtual Coord getConstraintAreaMax() const override { return lastPosition; }
-    virtual Coord getConstraintAreaMin() const override { return lastPosition; }
+  protected:
+    virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
+    virtual void updateMobilityStateFromDisplayString();
 };
 
 } // namespace inet

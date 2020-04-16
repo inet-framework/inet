@@ -46,7 +46,7 @@ module TC1 like ITrafficConditioner
     connections:
         in --> classifier.in;
         for i=1..numClasses {
-            classifier.outs++ --> marker.in++;
+            classifier.out++ --> marker.in++;
         }
         classifier.defaultOut --> marker.in++;
         marker.out --> out;

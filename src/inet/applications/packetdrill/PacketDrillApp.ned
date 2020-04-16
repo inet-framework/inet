@@ -19,6 +19,17 @@ package inet.applications.packetdrill;
 
 import inet.applications.contract.IApp;
 
+//
+// This is a port of Google's Packetdrill testing tool into the INET Framework.
+//
+// Google released the script-based Packetdrill tool in 2013. It allows one
+// to test transport protocols like UDP and TCP on Linux and BSD-based
+// operating systems. Scripts define test cases that inject packets to the
+// protocol implementation under test, perform operations using the API
+// controlling the transport protocol, and verify the sending of packets, all
+// at specified times. The ported version provides a simple and powerful
+// method of testing transport protocols implemented in INET.
+//
 simple PacketDrillApp like IApp
 {
     parameters:

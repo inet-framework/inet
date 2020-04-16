@@ -46,7 +46,7 @@ examples how INET components react to a *crash* lifecycle event:
 -  :ned:`EtherMac` and other MAC protocols clear their queues and reset
    their state associated with the current transmission(s)
 
--  :ned:`Ospf` clears its full state
+-  :ned:`Ospfv2` clears its full state
 
 -  :ned:`UdpBasicApp`, :ned:`TcpSessionApp` and other applications reset
    their state and stop/restart their timers

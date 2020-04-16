@@ -195,4 +195,12 @@ Quaternion Quaternion::rotationFromTo(const Coord& from, const Coord& to)
     return Quaternion(s * 0.5, c.x, c.y, c.z).normalized();
 }
 
+void Quaternion::getSwingAndTwist(const Coord& direction, Quaternion& swing, Quaternion& twist) const
+{
+    Coord p = direction * (v * direction); // return projection v1 on to v2  (parallel component)
+    twist = Quaternion(s, p);
+    twist.normalize();
+    swing = *this * twist.conjugated();
+}
+
 } /* namespace inet */

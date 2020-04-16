@@ -21,8 +21,9 @@ namespace inet {
 
 Register_MessagePrinter(PacketPrinter);
 
-const char *PacketPrinter::DirectiveResolver::resolveDirective(char directive)
+const char *PacketPrinter::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 's':
             result = context.sourceColumn.str();

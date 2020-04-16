@@ -24,7 +24,7 @@ package inet.physicallayer.ieee80211.packetlevel;
 // error models to compute the error rate based on this value and the used
 // operation mode.
 //
-// See also ~Ieee80211DimensionalTransmitter, ~Ieee80211DimensionalRadio, and
+// @see ~Ieee80211DimensionalTransmitter, ~Ieee80211DimensionalRadio,
 // ~Ieee80211DimensionalRadioMedium.
 //
 module Ieee80211DimensionalReceiver extends Ieee80211ReceiverBase

@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized tag usage.
+
+2019-05-28  Zoltan Bojthe
+
+	Moved flushQueue() and clearQueue() implementation to MacProtocolBase.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-08  Zoltan Bojthe

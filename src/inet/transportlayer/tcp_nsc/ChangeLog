@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-10-31  Zoltan Bojthe
+
+	Fixed messageKinds in NED.
+
+2019-10-18  Zoltan Bojthe
+
+	Changed to use msg constructor to set message name and message kind.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-07-15  Zoltan Bojthe
+
+	Use parseCrcMode().
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-25  Zoltan Bojthe

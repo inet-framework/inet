@@ -51,8 +51,7 @@ void WiseRoute::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
         headerLength = par("headerLength");
-        rssiThreshold = par("rssiThreshold");
-        rssiThreshold = math::dBm2mW(rssiThreshold);
+        rssiThreshold = math::dBmW2mW(par("rssiThreshold"));
         routeFloodsInterval = par("routeFloodsInterval");
 
         floodSeqNumber = 0;
@@ -85,7 +84,11 @@ void WiseRoute::initialize(int stage)
         sinkAddress = addressResolver.resolve(par("sinkAddress"));
 
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
+        auto ie = interfaceTable->findFirstNonLoopbackInterface();
+        if (ie != nullptr)
+            myNetwAddr = ie->getNetworkAddress();
+        else
+            throw cRuntimeError("No non-loopback interface found!");
 
         // only schedule a flood of the node is a sink!!
         if (routeFloodsInterval > 0 && myNetwAddr == sinkAddress)

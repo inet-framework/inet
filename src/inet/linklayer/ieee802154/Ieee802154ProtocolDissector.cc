@@ -33,7 +33,7 @@ void Ieee802154ProtocolDissector::dissect(Packet *packet, const Protocol *protoc
     callback.startProtocolDataUnit(&Protocol::ieee802154);
     callback.visitChunk(header, &Protocol::ieee802154);
     if (header->getNetworkProtocol() != -1) {
-        auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());
+        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getNetworkProtocol());
         callback.dissectPacket(packet, payloadProtocol);
     }
 //    auto paddingLength = packet->getDataLength();

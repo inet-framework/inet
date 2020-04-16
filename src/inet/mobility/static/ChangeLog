@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-08-26  Levente Mészáros
+
+	Refactored updating subject module display string from mobility state and vice versa.
+
+2019-06-14  Levente Mészáros
+
+	Extracted a StationaryMobilityBase to prevent dragging and rotation in static group mobilities.
+
+2019-06-07  Levente Mészáros
+
+	Added support for dragging and rotating stationary nodes with the mouse from Qtenv.
+	Added updateFromDisplayString to StationaryMobility to control this behaviour.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-09-17  Levente Mészáros

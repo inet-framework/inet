@@ -34,10 +34,10 @@ void ScalarAnalogModelBase::initialize(int stage)
     }
 }
 
-bool ScalarAnalogModelBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const
+bool ScalarAnalogModelBase::areOverlappingBands(Hz centerFrequency1, Hz bandwidth1, Hz centerFrequency2, Hz bandwidth2) const
 {
-    return carrierFrequency1 + bandwidth1 / 2 >= carrierFrequency2 - bandwidth2 / 2 &&
-           carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
+    return centerFrequency1 + bandwidth1 / 2 >= centerFrequency2 - bandwidth2 / 2 &&
+           centerFrequency1 - bandwidth1 / 2 <= centerFrequency2 + bandwidth2 / 2;
 }
 
 W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
@@ -50,7 +50,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
-    double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCarrierFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
+    double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarSignalAnalogModel->getPower();
     return transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
 }
@@ -95,7 +95,7 @@ void ScalarAnalogModelBase::addNoise(const ScalarNoise *noise, simtime_t& noiseS
 const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    Hz commonCarrierFrequency = bandListening->getCarrierFrequency();
+    Hz commonCenterFrequency = bandListening->getCenterFrequency();
     Hz commonBandwidth = bandListening->getBandwidth();
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
@@ -104,18 +104,18 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     for (auto reception : *interferingReceptions) {
         const ISignalAnalogModel *signalAnalogModel = reception->getAnalogModel();
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(signalAnalogModel);
-        Hz signalCarrierFrequency = narrowbandSignalAnalogModel->getCarrierFrequency();
+        Hz signalCenterFrequency = narrowbandSignalAnalogModel->getCenterFrequency();
         Hz signalBandwidth = narrowbandSignalAnalogModel->getBandwidth();
-        if (commonCarrierFrequency == signalCarrierFrequency && commonBandwidth >= signalBandwidth)
+        if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)
             addReception(check_and_cast<const ScalarReception *>(reception), noiseStartTime, noiseEndTime, powerChanges);
-        else if (!ignorePartialInterference && areOverlappingBands(commonCarrierFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCarrierFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
+        else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCenterFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
             throw cRuntimeError("Partially interfering signals are not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     const ScalarNoise *scalarBackgroundNoise = dynamic_cast<const ScalarNoise *>(interference->getBackgroundNoise());
     if (scalarBackgroundNoise) {
-        if (commonCarrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && commonBandwidth >= scalarBackgroundNoise->getBandwidth())
+        if (commonCenterFrequency == scalarBackgroundNoise->getCenterFrequency() && commonBandwidth >= scalarBackgroundNoise->getBandwidth())
             addNoise(scalarBackgroundNoise, noiseStartTime, noiseEndTime, powerChanges);
-        else if (!ignorePartialInterference && areOverlappingBands(commonCarrierFrequency, commonBandwidth, scalarBackgroundNoise->getCarrierFrequency(), scalarBackgroundNoise->getBandwidth()))
+        else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, scalarBackgroundNoise->getCenterFrequency(), scalarBackgroundNoise->getBandwidth()))
             throw cRuntimeError("Partially interfering background noise is not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     EV_TRACE << "Noise power begin " << endl;
@@ -125,7 +125,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
         EV_TRACE << "Noise at " << it->first << " = " << noise << endl;
     }
     EV_TRACE << "Noise power end" << endl;
-    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerChanges);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCenterFrequency, commonBandwidth, powerChanges);
 }
 
 const INoise *ScalarAnalogModelBase::computeNoise(const IReception *reception, const INoise *noise) const
@@ -137,7 +137,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IReception *reception, c
     std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
     addReception(scalarReception, noiseStartTime, noiseEndTime, powerChanges);
     addNoise(scalarNoise, noiseStartTime, noiseEndTime, powerChanges);
-    return new ScalarNoise(noiseStartTime, noiseEndTime, scalarNoise->getCarrierFrequency(), scalarNoise->getBandwidth(), powerChanges);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, scalarNoise->getCenterFrequency(), scalarNoise->getBandwidth(), powerChanges);
 }
 
 const ISnir *ScalarAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const

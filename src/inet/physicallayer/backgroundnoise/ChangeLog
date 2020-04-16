@@ -1,5 +1,44 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-09  Levente Mészáros
+
+	Removed DomainLimitedFunction in release mode.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
+2019-09-23  Levente Mészáros
+
+	Added power spectral density parameter to IsotropicDimensionalBackgroundNoise.
+	Added checks for both isotropic background noises wrt. to bandwidth.
+	Renamed carrierFrequency to centerFrequency.
+
+	This confusion was spread all around the code. In most places we don't
+	know what kind of modulation is used (e.g. OFDM has several subcarriers),
+	so it doesn't really make sense.
+
+2019-09-11  Levente Mészáros
+
+	Added a generic DimensionalBackgroundNoise model which allows using arbitrary spectrum.
+
+2019-08-27  Levente Mészáros
+
+	Wrapped transmitted signal and background noise to limit the function domain.
+	The function domains should not extend into negative time and frequency.
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-06-17  Levente Mészáros
+
+	Implemented new syntax and added expressions to timeGains and frequencyGains parameters.
+
+2019-06-07  Levente Mészáros
+
+	Replaced old multidimensional mappings (MiXiM) with new multidimensional functions.
+	This patch affects member variables, arguments and returns values.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

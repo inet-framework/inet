@@ -37,10 +37,10 @@ void Ieee80211MgmtApBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         mib->mode = Ieee80211Mib::INFRASTRUCTURE;
         mib->bssStationData.stationType = Ieee80211Mib::ACCESS_POINT;
+        mib->bssData.ssid = par("ssid").stdstringValue();
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER)
         mib->bssData.bssid = mib->address;
-    }
 }
 
 } // namespace ieee80211

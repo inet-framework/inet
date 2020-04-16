@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/power/results/General-*.vec"/>
+    <inputs name="/inet/showcases/wireless/power/results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="ResidualEnergyCapacity">
+      <items xsi:type="scave:Add" filterPattern="module(*.energyStorage) AND (name(residualEnergyCapacity:vector) OR name(powerGeneration:vector))" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="All Hosts" lineNameFormat="">
+        <filters xsi:type="scave:Select" filterPattern="name(residualEnergyCapacity:vector) " type="VECTOR"/>
+        <properties name="Graph.Title" value="residualEnergyCapacity"/>
+        <properties name="X.Axis.Max" value="100.0"/>
+        <properties name="Symbols.Type" value="Dot"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="Host 12" lineNameFormat="">
+        <filters xsi:type="scave:Select" filterPattern="module(*.host[12].*) " type="VECTOR"/>
+        <properties name="Graph.Title" value="Host 12"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Max" value="100.0"/>
+        <properties name="Symbols.Type/residualEnergyCapacity:vector" value="Dot"/>
+        <properties name="Line.Color/residualEnergyCapacity:vector" value="#EF2929"/>
+        <properties name="Line.Color/powerGeneration:vector" value="#204A87"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="Host 0 and three other hosts" lineNameFormat="">
+        <filters xsi:type="scave:Select" filterPattern="name(residualEnergyCapacity:vector) AND (module(*.host[0].*) OR module(*.host[14].*) OR module(*.host[17].*) OR module(*.host[15].*))" type="VECTOR"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Max" value="100.0"/>
+        <properties name="Line.Name/PowerConsumptionExample.host[0].energyStorage" value="Host[0]"/>
+        <properties name="Line.Name/PowerConsumptionExample.host[14].energyStorage" value="Host[14]"/>
+        <properties name="Line.Name/PowerConsumptionExample.host[15].energyStorage" value="Host[15]"/>
+        <properties name="Line.Name/PowerConsumptionExample.host[17].energyStorage" value="Host[17]"/>
+        <properties name="Line.Name/PowerConsumptionShowcase.host[0].energyStorage" value="Host 0"/>
+        <properties name="Line.Name/PowerConsumptionShowcase.host[14].energyStorage" value="Host 14"/>
+        <properties name="Line.Name/PowerConsumptionShowcase.host[15].energyStorage" value="Host 15"/>
+        <properties name="Line.Name/PowerConsumptionShowcase.host[17].energyStorage" value="Host 17"/>
+        <properties name="Symbols.Type" value="Dot"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1 //@datasets/@datasets.0/@items.2 //@datasets/@datasets.0/@items.3"/>
+  </chartSheets>
+</scave:Analysis>

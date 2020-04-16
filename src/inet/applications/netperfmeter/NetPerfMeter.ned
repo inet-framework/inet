@@ -27,7 +27,8 @@
 
 package inet.applications.netperfmeter;
 
-import inet.applications.contract.INetPerfMeterApp;
+import inet.applications.contract.IApp;
+
 
 //
 // Application model for comparing the performance of various transport
@@ -40,13 +41,13 @@ import inet.applications.contract.INetPerfMeterApp;
 // protocols, e.g. TCP vs. SCTP.
 //
 // The model closely mimics the operation of the real-world NetPerfMeter
-// application (https://www.uni-due.de/~be0001/netperfmeter/), a tool for
+// application (https://www.uni-due.de/~~be0001/netperfmeter/), a tool for
 // measuring UDP, TCP, MPTCP, SCTP and DCCP performance over IPv4 and IPv6.
 // Since the parametrisation and features are similar to the real-world
 // application, the model also makes comparisons of simulation results and
 // real-world measurements easy.
 //
-simple NetPerfMeter like INetPerfMeterApp
+simple NetPerfMeter like IApp
 {
     parameters:
         bool            activeMode               = default(true);      // Server (false) or client (true)
@@ -81,11 +82,7 @@ simple NetPerfMeter like INetPerfMeterApp
         bool            decoupleSaturatedStreams = default(true);      // Apply buffer splitting when using multiple streams
 
     gates:
-        input  tcpIn;
-        output tcpOut;
-        input  sctpIn;
-        output sctpOut;
-        input  udpIn;
-        output udpOut;
+        input socketIn;
+        output socketOut;
 }
 

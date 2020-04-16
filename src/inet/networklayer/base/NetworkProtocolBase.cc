@@ -154,7 +154,7 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
             auto indication = new Indication("closed", L3_I_SOCKET_CLOSED);
             auto ctrl = new L3SocketClosedIndication();
             indication->setControlInfo(ctrl);
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             send(indication, "transportOut");
         }
         delete msg;

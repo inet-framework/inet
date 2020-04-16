@@ -38,13 +38,12 @@ namespace httptools {
  *
  * @author  Kristjan V. Jonsson
  */
-class INET_API HttpServer : public HttpServerBase, public TcpSocket::ICallback
+class INET_API HttpServer : public HttpServerBase, public TcpSocket::ReceiveQueueBasedCallback
 {
   protected:
     struct SockData
     {
         TcpSocket *socket = nullptr;    // A reference to the socket object.
-        ChunkQueue queue;       // incoming queue for slices
     };
 
     TcpSocket listensocket;
@@ -58,7 +57,7 @@ class INET_API HttpServer : public HttpServerBase, public TcpSocket::ICallback
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketDataArrived(TcpSocket *socket) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;

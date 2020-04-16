@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-08-21  Marcell Juhász
+
+	Renamed duration to durationField.
+
+2019-02-13  Levente Mészáros
+
+	Added log statements for setting the duration field.
+
+2019-02-04  Levente Mészáros
+
+	Added and updated several log statements to better inform the user about what is going on.
+
+2019-01-31  Levente Mészáros
+
+	Moved emit statements because packets are destroyed.
+
+2019-01-30  Levente Mészáros
+
+	Added duplicate detected packetDropped signals and statistics.
+	Added basic signals and statistics to MAC data services.
+	Added packetFragmented, packetDefragmented, packetAggregated, packetDeaggregated signals.
+	Added packetFragmentation, packetDefragmentation, packetAggregation, packetDeaggregation statistics.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-03  Levente Mészáros

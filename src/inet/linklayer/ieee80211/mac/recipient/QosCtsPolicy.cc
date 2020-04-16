@@ -45,7 +45,7 @@ simtime_t QosCtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<const Ie
 //
 simtime_t QosCtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
-    simtime_t duration = rtsFrame->getDuration() - modeSet->getSifsTime() - computeCtsDuration(rtsPacket, rtsFrame);
+    simtime_t duration = rtsFrame->getDurationField() - modeSet->getSifsTime() - computeCtsDuration(rtsPacket, rtsFrame);
     return duration < 0 ? 0 : duration;
 }
 

@@ -1,5 +1,164 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-17  Zoltan Bojthe
+
+	Removed ByteArray, ByteArrayBuffer.
+
+2019-12-10  Levente Mészáros
+
+	Added const qualifiers to StringFormat class where applicable.
+
+2019-12-05  Levente Mészáros
+
+	Added step() and clamp() functions to math namespace.
+	Fixed sign function.
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+	Added general inspector support for shared pointers.
+
+2019-10-25  Levente Mészáros
+
+	Added module type template parameters to findConnectedModule/getConnectedModule.
+
+2019-10-18  Levente Mészáros
+
+	Added writeString/readString to memory streams.
+
+2019-09-25  Zoltan Bojthe
+
+	Added INITSTAGE_ROUTER_ID_ASSIGNMENT.
+
+2019-09-23  Marcell Juhász
+
+	Added IEEE 802.11 physical protocols
+
+2019-08-07  Andras Varga
+
+	Updated for OMNeT++ 6 builds (STR became deprecated, STRING has existed for ages).
+
+2019-07-25  Levente Mészáros
+
+	Renamed dBm2mW -> dBmW2mW and mW2dBm -> mW2dBmW in math namespace.
+	Fixed fingerprint instability.
+
+2019-07-03  Zoltan Bojthe
+
+	Added 24 bit reader/writer functions to MemoryInputStream/MemoryOutputStream.
+
+2019-07-02  Levente Mészáros
+
+	Added dBmWpMHz2WpHz and wpHz2dBmWpMHz to math functions.
+	Added WpHz and WpHzpm3 units for radio communication support.
+
+2019-06-12  Andras Varga
+
+	Added ObjectPrinter based on similar class in OMNeT++'s envir lib.
+
+2019-06-07  Levente Mészáros
+
+	Added a template for index sequences similarly to how it's done in C++14.
+	Moved smaller classes into IntervalTree class.
+
+2019-06-06  Marcell Juhász
+
+	Added readNBitsToUint64Be(), writeNBitsOfUint64Be() to MemoryInputStream/MemoryOutputStream.
+
+2019-06-04  Levente Mészáros
+
+	Extended dynamic module creation with PRE and POST init signals.
+
+2019-05-26  Levente Mészáros
+
+	Dropped superfluous max function using doubles.
+	Changed printing 0 W (used to be 0 mW).
+
+2019-05-16  Levente Mészáros
+
+	Dropped obsolete multidimensional mapping inherited from MiXiM.
+	This code is replaced by an simpler and more generic API, see common/math.
+
+2019-05-06  Zoltan Bojthe
+
+	Fixed #441: Infinite loop in TlvOptions::findByType found by Ariza.
+
+2019-04-29  Levente Mészáros
+
+	Removed obsolete queue package replaced by new queueing API.
+
+2019-04-23  Levente Mészáros
+
+	Added new INITSTAGE for new queueing API.
+
+2019-04-12  Levente Mészáros
+
+	Added findConnectedModule and getConnectedModule to utility functions.
+
+2019-04-11  Levente Mészáros
+
+	Added localSignal result filter.
+
+2019-03-27  Zoltan Bojthe
+
+	Added SRP protocol identifier.
+
+2019-03-25  Levente Mészáros
+
+	Added a few generic packet related signals.
+	Tuned existing and added new asserts to memory streams.
+	Fixed bug #420.
+
+2019-03-24  Andras Varga
+
+	PacketQueue: make it compile with both OMNeT++ 5.x and 6.x
+
+2019-03-22  Levente Mészáros
+
+	Added a few asserts to in memory streams.
+
+2019-03-19  Levente Mészáros
+
+	Implemented non byte aligned writeByte/readByte in memory streams.
+
+2019-03-18  Zoltan Bojthe
+
+	Added TT-Ethernet protocol identifier/
+
+2019-03-14  Levente Mészáros
+
+	Added new special purpose fingerprint calculator.
+
+	This fingerprint calculator considers only events for sending packets
+	between network nodes. Additionally to the default ingredients, it can
+	also add to the fingerprint the source and destination network node
+	pathes, the network interface pathes, and the binary data representation
+	of packets.
+
+2019-03-13  Zoltan Bojthe
+
+	Added TSN protocol identifier with ethertype 0x22F0.
+
+2019-02-11  Levente Mészáros
+
+	Added queueingTime result filter as QueueingTimeFilter.
+
+2019-01-31  Levente Mészáros
+
+	Added missing result filter for other packet drop reason.
+
+2019-01-30  Levente Mészáros
+
+	Added duplicate detected to the list of packet drop reasons.
+
+2019-01-28  Levente Mészáros
+
+	Switched dataAge result filter to emit weighted values. This change allows
+	using the weightedHistogram record option in statistics.
+	Added WeightedHistogramRecorder which records histograms using weighted double values.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-16  Rudolf Hornig

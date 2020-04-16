@@ -67,8 +67,8 @@ class Ipv6RoutingHeader extends Ipv6ExtensionHeader
     extensionType = IP_PROT_IPv6EXT_ROUTING;
     byteLength = B(8);
     //byteLength = 8+16*getAddressArraySize() when routingType == 0
-    uint8 routingType;
-    uint8 segmentsLeft;
+    uint8_t routingType;
+    uint8_t segmentsLeft;
     Ipv6Address address[];
 }
 
@@ -81,9 +81,10 @@ class Ipv6FragmentHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_FRAGMENT;
     byteLength = IPv6_FRAGMENT_HEADER_LENGTH;
-    unsigned short fragmentOffset;
-    unsigned int identification;  // datagram ID: identifies which datagram this fragment belongs to.
+    uint16_t fragmentOffset;    // @bit(13), divided by 8
+    uint8_t reserved = 0;    // @bit(2)
     bool moreFragments; //Is this the last fragment?
+    uint32_t identification;  // datagram ID: identifies which datagram this fragment belongs to.
 }
 
 //
@@ -119,3 +120,4 @@ class Ipv6EncapsulatingSecurityPayloadHeader extends Ipv6ExtensionHeader
     extensionType = IP_PROT_IPv6EXT_ESP;
     byteLength = B(8); // FIXME verify
 }
+

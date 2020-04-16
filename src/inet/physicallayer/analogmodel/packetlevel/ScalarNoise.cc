@@ -21,8 +21,8 @@ namespace inet {
 
 namespace physicallayer {
 
-ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
-    NarrowbandNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
+ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
+    NarrowbandNoiseBase(startTime, endTime, centerFrequency, bandwidth),
     powerChanges(powerChanges)
 {
 }

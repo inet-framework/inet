@@ -86,8 +86,7 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(multicastForward);
         WATCH(routerId);
     }
-    // TODO: INITSTAGE
-    else if (stage == INITSTAGE_STATIC_ROUTING) {
+    else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
@@ -97,21 +96,16 @@ void Ipv4RoutingTable::initialize(int stage)
             const char *routerIdStr = par("routerId");
             if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
                 routerId = Ipv4Address(routerIdStr);
-        }
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        if (isNodeUp) {
             // read routing table file (and interface configuration)
             const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename) == -1)
                 throw cRuntimeError("Error reading routing table file %s", filename);
-        }
-
-        // routerID selection must be after network autoconfiguration assigned interface addresses
-        if (isNodeUp)
+            // routerID selection must be after network autoconfiguration assigned interface addresses
             configureRouterId();
-
+        }
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         // we don't use notifications during initialize(), so we do it manually.
         updateNetmaskRoutes();
     }
@@ -138,10 +132,10 @@ void Ipv4RoutingTable::configureRouterId()
               // if there is no interface with routerId yet, assign it to the loopback address;
               // TODO find out if this is a good practice, in which situations it is useful etc.
         if (getInterfaceByAddress(routerId) == nullptr) {
-            InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
-            ASSERT(lo0);
-            lo0->getProtocolData<Ipv4InterfaceData>()->setIPAddress(routerId);
-            lo0->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
+            InterfaceEntry *lo0 = CHK(ift->findFirstLoopbackInterface());
+            auto ipv4Data = lo0->getProtocolData<Ipv4InterfaceData>();
+            ipv4Data->setIPAddress(routerId);
+            ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         }
     }
 }
@@ -183,10 +177,11 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     else if (signalID == interfaceStateChangedSignal) {
         invalidateCache();
         const auto *ieChangeDetails = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
-        if (ieChangeDetails->getFieldId() == InterfaceEntry::F_STATE) {
+        auto fieldId = ieChangeDetails->getFieldId();
+        if (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER) {
             const auto *entry = ieChangeDetails->getInterfaceEntry();
             updateNetmaskRoutes();
-            if (entry->getState() != InterfaceEntry::State::UP)
+            if (!entry->isUp())
                 deleteInterfaceRoutes(entry);
             invalidateCache();
         }
@@ -746,7 +741,7 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->getState() == InterfaceEntry::State::UP && interfaceNameMatcher.matches(ie->getFullName())) {
+        if (ie->isUp() && interfaceNameMatcher.matches(ie->getFullName())) {
             auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
             if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS) {
                 Ipv4Route *route = createNewRoute();

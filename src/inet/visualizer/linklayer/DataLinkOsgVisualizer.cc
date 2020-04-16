@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/base/MacBase.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/visualizer/linklayer/DataLinkOsgVisualizer.h"
 
@@ -27,12 +26,12 @@ Define_Module(DataLinkOsgVisualizer);
 
 bool DataLinkOsgVisualizer::isLinkStart(cModule *module) const
 {
-    return dynamic_cast<MacProtocolBase *>(module) != nullptr || dynamic_cast<MacBase *>(module) != nullptr;
+    return dynamic_cast<MacProtocolBase *>(module) != nullptr;
 }
 
 bool DataLinkOsgVisualizer::isLinkEnd(cModule *module) const
 {
-    return dynamic_cast<MacProtocolBase *>(module) != nullptr || dynamic_cast<MacBase *>(module) != nullptr;
+    return dynamic_cast<MacProtocolBase *>(module) != nullptr;
 }
 
 } // namespace visualizer

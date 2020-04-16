@@ -122,11 +122,11 @@ composed to build a traffic conditioner as a compound module.
 Output Queues
 ~~~~~~~~~~~~~
 
-Queue components must implement the :ned:`IOutputQueue` module
+Queue components must implement the :ned:`IPacketQueue` module
 interface. In addition to having one input and one output gate, these
 components must implement a passive queue behaviour: they only deliver a
 packet when the module connected to their output explicitly requests it.
-(In C++ terms, the module must implement the :cpp:`IPassiveQueue`
+(In C++ terms, the module must implement the :cpp:`IPacketQueue`
 interface. The next module requests a packet by calling the
 :fun:`requestPacket()` method of that interface.)
 
@@ -187,10 +187,10 @@ FIFO Queue
 
 The :ned:`FifoQueue` module implements a passive FIFO queue with
 unlimited buffer space. It can be combined with algorithmic droppers and
-schedulers to form an IOutputQueue compound module.
+schedulers to form an IPacketQueue compound module.
 
 The C++ class implements the :cpp:`IQueueAccess` and
-:cpp:`IPassiveQueue` interfaces.
+:cpp:`IPacketQueue` interfaces.
 
 .. _ug:sec:diffserv:droptailqueue:
 
@@ -198,13 +198,13 @@ DropTailQueue
 ^^^^^^^^^^^^^
 
 The other primitive queue module is :ned:`DropTailQueue`. Its capacity
-can be specified by the :par:`frameCapacity` parameter. When the number
+can be specified by the :par:`packetCapacity` parameter. When the number
 of stored packet reached the capacity of the queue, further packets are
 dropped. Because this module contains a built-in dropping strategy, it
 cannot be combined with algorithmic droppers as :ned:`FifoQueue` can be.
 However its output can be connected to schedulers.
 
-This module implements the :ned:`IOutputQueue` interface, so it can be
+This module implements the :ned:`IPacketQueue` interface, so it can be
 used as the queue component of interface card per se.
 
 .. _ug:sec:diffserv:droppers:
@@ -298,9 +298,9 @@ interface is ready to transmit one. They have several input gates and
 one output gate.
 
 Modules that are connected to the inputs of a scheduler must implement
-the :cpp:`IPassiveQueue` C++ interface. Schedulers also implement
-:cpp:`IPassiveQueue`, so they can be cascaded to other schedulers, and
-can be used as the output module of :ned:`IOutputQueue`’s.
+the :cpp:`IPacketQueue` C++ interface. Schedulers also implement
+:cpp:`IPacketQueue`, so they can be cascaded to other schedulers, and
+can be used as the output module of :ned:`IPacketQueue`’s.
 
 There are several possible scheduling discipline (first come/first
 served, priority, weighted fair, weighted round-robin, deadline-based,

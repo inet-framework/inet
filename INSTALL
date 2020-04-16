@@ -22,19 +22,20 @@ General
 2. Extract the downloaded tarball into a directory of your choice (usually into your
    workspace directory, if you are using the IDE). NOTE: The built-in Windows
    archiver has bugs and cannot extract the file correctly. Use some other archiver
-   or do it from command line (tar xvfz inet-yyyymmdd-opp4-src.tgz)
+   or do it from command line (tar xvfz inet-x.y.z-src.tgz)
 
 
 If you are building from command line:
 --------------------------------------
-3. Change to the INET directory.
+3. Change to the INET directory and source the 'setenv' script.
+   $ . setenv
 
 4. Type "make makefiles". This should generate the makefiles for you automatically.
 
 5. Type "make" to build the inet executable (release version). Use "make MODE=debug"
    to build debug version.
 
-6. You can run specific examples by changing into the example's directory and executing "./run"
+6. You can run specific examples by changing into the example's directory and executing "inet"
 
 If you are using the IDE:
 -------------------------
@@ -45,22 +46,19 @@ If you are using the IDE:
    Then select the workspace dir as the root directory, and be sure NOT to check the
    "Copy projects into workspace" box. Click Finish.
 
-5. Open the project (if already not open) and wait until the indexer finishes.
+5. Open the project (if already not open).
    Now you can build the project by pressing CTRL-B (Project | Build all)
 
 6. To run an example from the IDE open the example's directory in the Project Explorer view,
    find the corresponding omnetpp.ini file. Right click on it and select Run As / Simulation.
    This should create a Launch Configuration for this example.
 
-If the build was successful, you may try running the demo simulations.
-Change into examples/ and type "./rundemo".
 
 Note:
 -----
 - by default INET is creating a shared library (libINET.dll, libINET.so etc.)
-  in the "src" directory. To use the shared library you can use the "opp_run"
-  command to load it dynamically. Open the "src/run_inet" script to see how
-  to do it.
+  in the "src" directory. To use the shared library you can use the "inet"
+  command to load it dynamically.
 - If you add/remove files/directories later in the src directory, you MUST
   re-create your makefile. Run "make makefiles" again if you are building
   from the command line. (The IDE does it for you automatically)
@@ -70,12 +68,7 @@ Note to GIT users:
 
 If you want to check out INET directly from the repository, we recommend using the
 
-    $ git clone --recursive git@github.com:inet-framework/inet.git
-
-command, because the INET repository contains git submodules. If you forget to specify
---recursive, you can initialize those submodules with:
-
-    $ git submodule update --init
+    $ git clone git@github.com:inet-framework/inet.git
 
 To make the installation simple, the GIT repo contains all IDE configuration files.
 If you make local changes in the IDE you may need to disable the change tracking on
@@ -84,7 +77,7 @@ You can use the _scripts/track-config-files-[on/off] scripts to enable/disable t
 change tracking.
 
 To further ease the merging/rebasing operation the .cproject .nedfolders .oppbuildspec .project
-files are configured to be resolved using the 'ours' merge strategy.  Depending on your 
+files are configured to be resolved using the 'ours' merge strategy.  Depending on your
 GIT version, you may need to enable the 'ours' merge driver for the project:
 
     $ git config merge.ours.driver true

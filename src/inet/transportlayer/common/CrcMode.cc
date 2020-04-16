@@ -24,10 +24,14 @@
 
 namespace inet {
 
-CrcMode parseCrcMode(const char *crcModeString)
+CrcMode parseCrcMode(const char *crcModeString, bool allowDisable)
 {
-    if (!strcmp(crcModeString, "disabled"))
-        return CRC_DISABLED;
+    if (!strcmp(crcModeString, "disabled")) {
+        if (allowDisable)
+            return CRC_DISABLED;
+        else
+            throw cRuntimeError("The 'disabled' CRC mode not allowed");
+    }
     else if (!strcmp(crcModeString, "declared"))
         return CRC_DECLARED_CORRECT;
     else if (!strcmp(crcModeString, "declaredCorrect"))

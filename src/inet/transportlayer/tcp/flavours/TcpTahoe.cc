@@ -38,8 +38,7 @@ void TcpTahoe::recalculateSlowStartThreshold()
     // uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
-    if (ssthreshVector)
-        ssthreshVector->record(state->ssthresh);
+    conn->emit(ssthreshSignal, state->ssthresh);
 }
 
 void TcpTahoe::processRexmitTimer(TcpEventCode& event)
@@ -53,8 +52,7 @@ void TcpTahoe::processRexmitTimer(TcpEventCode& event)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
 
-    if (cwndVector)
-        cwndVector->record(state->snd_cwnd);
+    conn->emit(cwndSignal, state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
             << ", ssthresh=" << state->ssthresh << "\n";
@@ -87,8 +85,7 @@ void TcpTahoe::receivedDataAck(uint32 firstSeqAcked)
         // int bytesAcked = state->snd_una - firstSeqAcked;
         // state->snd_cwnd += bytesAcked;
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
 
         EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
     }
@@ -101,8 +98,7 @@ void TcpTahoe::receivedDataAck(uint32 firstSeqAcked)
 
         state->snd_cwnd += incr;
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
 
         //
         // Note: some implementations use extra additive constant mss / 8 here
@@ -130,8 +126,7 @@ void TcpTahoe::receivedDuplicateAck()
         recalculateSlowStartThreshold();
         state->snd_cwnd = state->snd_mss;
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
 
         EV_DETAIL << "Set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 

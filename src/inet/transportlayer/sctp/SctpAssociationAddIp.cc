@@ -237,8 +237,8 @@ bool SctpAssociation::compareRandom()
 {
     int32 i, sizeKeyVector, sizePeerKeyVector, size = 0;
 
-    sizeKeyVector = sizeof(state->keyVector);
-    sizePeerKeyVector = sizeof(state->peerKeyVector);
+    sizeKeyVector = state->sizeKeyVector;
+    sizePeerKeyVector = state->sizePeerKeyVector;
 
     if (sizeKeyVector != sizePeerKeyVector) {
         if (sizePeerKeyVector > sizeKeyVector) {

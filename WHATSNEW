@@ -1,6 +1,312 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.2 (January 2020) - Stable
+--------------------------------
+
+This is a new minor stable release of the INET 4.x branch. This version includes
+a few important new features, some backward incompatible changes, a number of small
+improvements, and several bug fixes. This version requires OMNeT++ 5.5.1 or later.
+
+Notable backward incompatible changes are the following:
+
+1. Representation of radio signals
+
+   The multidimensional (in terms of space, time, and frequency) analog domain
+   representation of radio signals in the physical layer has been substantially
+   changed. The old multidimensional mathematical function implementation, which
+   was originally inherited from MiXiM, has been replaced with a completely new
+   implementation. The reason behind this change is that the old implementation
+   had several non-trivial open bugs, it was often 10+ times slower than the
+   equivalent scalar signal representation, and due to its iterator-based API
+   and its eager computational nature, it was less composable and extensible.
+
+   The new implementation is capable of representing all kinds of radio signals
+   such as OFDM, FHSS, UWB, etc. It also allows mixing these wireless technologies
+   arbitrarily. The new API is more flexible in terms of composition, and it
+   allows arbitrary extensions to be combined with existing representations.
+
+   The new implementation has better performance than the old one both in terms
+   of memory usage and execution speed. Thanks to the usage of shared pointers,
+   it scales well to large networks with a small memory footprint and is easy
+   to maintain and use. It also has comparable execution speed to the equivalent
+   scalar signal representation. Futhermore, it allows the visualization of the
+   power spectral desnsity of individual signals and the transmission medium in
+   Qtenv.
+
+   Simulation models which use the old C++ API will not compile, and need to be
+   updated.
+
+   The transmitter timeGains and frequencyGains NED parameters, which determine
+   the signal power over time and frequency, have been changed in the various
+   dimensional radio models. The new synax is more expressive and more user
+   friendly. The changed interpretation of these NED parameters will cause
+   an error in existing simultations that use it.
+
+   See the presentation from the OMNeT++ Community Summit 2019:
+   https://summit.omnetpp.org/2019/assets/pdf/math.pdf
+
+2. Queueing model
+
+   A new top-level source folder containing a new queueing model package has
+   been added. The new queueing model provides reusable modules for various
+   application areas. These modules can be used to build application traffic
+   generators, queueing models for MAC protocols, traffic conditioning models
+   for quality of service implementations, and so on.
+
+   The queueing model contains several different kinds of elements: sources,
+   sinks, queues, buffers, filters, servers, classifiers, schedulers, etc.
+   Some of the queueing elements were already present in INET, but most of them
+   are written from scratch. The most important change is that the queueing model
+   became synchronous by default, primarily in order to avoid event race conditions
+   in complex queueing models, and also to increase performance by eliminating
+   simulation events. The User's Guide has been extended with a relevant chapter.
+
+   This change results in compilation errors and NED errors in simulation models
+   which use the old queueing model. You may look at changes to existing MAC
+   protocols to see how to update your code.
+
+3. MAC protocols and DiffServ
+
+   All MAC protocols have been updated to use the new queueing model for their
+   transmission queues in a very similar way. All protocols have been extended
+   with a replaceable queue submodule, even in the default case, so there's no
+   internal queue anymore. Different queue length parameters have been removed
+   from MAC modules, because complex transmission queues may have all sorts of
+   parameters rendering the MAC queue length parameters useless.
+
+   The DiffServ implementation has also been updated to use the new queueing model.
+
+   These changes may cause existing models to silently produce different simulation
+   results, because some module parameters such as txQueueLimit and queueLength
+   MAC protocol parameters no longer exist.
+
+4. Packet API
+
+   The interpretation of the Chunk API length parameter for negative values has
+   been changed in the peek() and has() functions. The old version interpreted
+   the value -1 as any length. The new version interprets negative values as any
+   length up to the absolute value of the parameter. The change was required to
+   properly implement the Chunk serialization API for all edge cases.
+
+   This change may result in incorrect behavior silently if the -1 parameter
+   value was used explicitly. Generally, that is not expected to cause a problem
+   because these APIs are not normally used in models.
+
+   The non-template versions of peekAtBack(), popAtBack(), and removeAtBack()
+   in the Packet class has been changed to require the length parameter. The
+   reason being that deserialization is only supported forwards, so there's no
+   way of knowing the length when a raw packet is used.
+
+   This change may result in compilation errors in existing code.
+
+5. IEEE 802.11 (WiFi)
+
+   The IEEE 802.11 model has been changed to have explicit modules for both the
+   PendingQueue and the InProgressFrames. Futhermore, several submodules of the
+   Hcf module have been moved to the Edcaf module to better reflect their usage.
+
+   Throughout the 802.11 model has also been extended with several new signals
+   and statistics. The ACK handling mechanism in QoS mode has been fixed.
+
+   Several parts of the IEEE 802.11 frame have been renamed to be consistent with
+   the naming scheme:
+
+   Ieee80211DataFrame -> Ieee80211DataHeader
+   Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+   Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+   Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+   Ieee80211Frame -> Ieee80211MacHeader
+   Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+   Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+   Ieee80211ACKFrame -> Ieee80211AckFrame
+   Ieee80211RTSFrame -> Ieee80211RtsFrame
+   Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+   Most simulations are not affected, because the external interface of the
+   802.11 MAC has not been changed. Nevertheless, simulations which go deeper
+   in the direct parameterization of the 802.11 MAC submodules have to be
+   updated.
+
+6. Transmission medium
+
+   The storage mechanism of radios and transmissions has been moved from the
+   radio medium module to the communication cache submodule. This allows the
+   usage of different strategies for different kinds of networks. For example,
+   a dynamic network where radios are created and destroyed dynamically can
+   have better performance with a non-default mechanism.
+
+   This change results in compilation errors if the underlying C++ interfaces
+   were implemented in user code.
+
+7. Variuos renames
+
+   The carrierFrequency parameters have been renamed to centerFrequency in several
+   modules where they were named incorrectly.
+
+   With the addition of the new Ospfv3 implementation, the old OSPF implementation
+   has been renamed from Ospf to Ospfv2.
+
+   These changes may require updating the affected simulations.
+
+Notable backward compatible changes are the following:
+
+1. OSPF version 3
+
+   A new OSPF protocol implementation has been added which implements version 3
+   of the protocol.
+
+   This feature is a contribution of Lukáš Galbička and Marcel Marek.
+
+2. TCP/IP ECN
+
+   The TCP/IP model has been extended with partial support for Explicit
+   Congestion Notification (ECN).
+
+   This feature is a contribution of Marcel Marek and Mohammad HabibAllah.
+
+3. TTL and ToS in sockets
+
+   The UDP and TCP socket options have been extended with time-to-live and
+   type-of-service parameters.
+
+   This feature is a contribution of Mani Amoozadeh.
+
+4. Packet API
+
+   The Packet API has also been extended with a PF_ALLOW_EMPTY flag to support
+   returning Empty chunks. This feature makes certain algorithms easier to write,
+   because the user doesn't have to check for nullptr all over the place.
+
+   The PacketDissector::ICallback interface has been extended with a new callback
+   called shouldDissectProtocolDataUnit() for the possibility to stop dissection
+   for performance reasons.
+
+5. Physical layer components
+
+   The physical layer dimensional model has been extended with a new NoiseSource
+   and a new DimensionalBackgroundNoise module. The former is capable of generating
+   noise periodically as a point source with optional mobility. The latter can
+   be used to describe a non-isotropic background noise which changes over time
+   and frequency.
+
+6. Visualization of radio signals
+
+   The MediumCanvasVisualizer has been extended with the visualization of signal
+   power spectrums, signal power spectrograms, and signal power maps. Spectrum
+   figures display signal power density over frequency at a given position and
+   moment of time. Spectogram figures display signal power density over time and
+   frequency at a given position. Power map figures display signal power density
+   over space at a given frequency and moment of time.
+
+   All three kinds of figures can be used to display a particular signal or the
+   total power density of transmission medium. The new visualization is also
+   capable of displaying the above for the currently transmitted or received
+   signal automatically while simultaneously comparing it to the total interfering
+   signals and noise using color coding. The visualization takes into account the
+   directional selectivity of radio antennas.
+
+   A new "network node", called the Probe, allows the visualization of the total
+   transmission medium power spectral density at any given location. The latest
+   Qtenv supports dragging network nodes with Shift + left mouse click. This
+   feature effectively allows the user to explore power spectral density in space
+   by simply dragging a probe node.
+
+   See the following example videos:
+   https://www.youtube.com/watch?v=oyjX03MSi7s
+   https://www.youtube.com/watch?v=Oi1sq23IPYs
+   https://www.youtube.com/watch?v=TyYQ53hUrns
+
+7. Visualization of street maps
+
+   The new OpenStreetMapSceneCanvasVisualizer allows displaying an arbitrary
+   street map file created by OpenStreetMap as the background of a compound
+   module. The configuration is simple: the visualizer takes the map filename
+   parameter and the geographic coordinate system takes longitude/latitude
+   parameters to specify the origin of the scene.
+
+8. Applications parameterized with traffic generators
+
+   New generic TCP and UDP applications such as UdpApp, TcpClientApp, TcpServerApp
+   have been added with composable traffic source and traffic sink components.
+   One can implement new behavior by assembling queueing elements. For example,
+   new applications can be easily set up to simulate request-response based
+   client-server applications (see TcpRequestResponseApp), or a remote terminal
+   (see TelnetClientApp/TelnetServerApp).
+
+9. Module initialization
+
+   A new named initialization stage, called INITSTAGE_ROUTER_ID_ASSIGNMENT, has
+   been added. The configuration of the router ID has been moved to this stage.
+
+10. Packet serialization and emulation
+
+    New chunk serializers have been added for several protocols. Changed several
+    protocol field types and names in MSG files to be more correct. Fixed and
+    refactored CRC calculation, CRC mode parameters and handling, CRC insertion
+    and verification. Of course, the exact CRC calculation and verification are
+    still optional due to performance reasons.
+
+    These changes make the emulation support more feature complete. Most of the
+    example simulations are expected to work with serialized packets too. This
+    can be simply tested by running the fingerprint tests with the sendRawBytes
+    parameters of network interfaces set to true.
+
+11. Regression testing with fingerprint calculation
+
+    A special fingerprint calculator (NetworkCommunicationFingerprintCalculator)
+    has been added, which is capable of computing a simulation fingerprint using
+    the timing and binary contents of packets sent between network nodes. This
+    feature allows easier regression testing for some simulation models if the
+    exchanged packets are expected to stay the same. This kind of fingerprint
+    ignores all internal details of how the network nodes operate.
+
+12. Documentation
+
+    The User's Guide has been extended with a new chapter on the newly added
+    queueing package. It has also been updated with respect to the new generic
+    applications.
+
+    A new queueing model tutorial has been added. This tutorial contains very
+    minimal explanation, it is rather provided to give a quick glance.
+
+    The tutorial is available at:
+    https://inet.omnetpp.org/docs/tutorials/queueing/doc
+
+13. Other minor changes
+
+    Module shutdown operation has been refactored and extended in simulation
+    time to allow for graceful closing of TCP connections.
+
+    PCAP recording has been enhanced with automatic network type detection and
+    optional packet conversion.
+
+    New PRE and POST module initialization signals have been added for dynamic
+    module creation.
+
+    A new WeightedHistogramRecorder has been added which records histograms using
+    weighted double values.
+
+    The packet inspector has been enchanced to display the front, back, and data
+    parts of packets separately in Qtenv. Furthermore, packet tags and data tags
+    are also displayed in children mode.
+
+    All applications have been extended for CreationTimeTag to calculate end-to-end delay.
+    Several applications have been extended with ToS and DSCP parameters.
+    The ManetRouter has been extended with a parameterizable routingApp submodule.
+    The InterfaceEntry module base has been added to all interface modules.
+    The MAC protocol base classes have been merged into one.
+    Extended the <disconnect> and <set-channel-param> commands in ScenarioManager.
+    Added OpenMP support to allow parallel computation for physical signal visualization.
+    Added notifications about changing the InterfaceProtocolData set to InterfaceEntry.
+    Added TcpSocket::ReceiveQueueBasedCallback to make writing applications easier.
+
+    Fixed small packet and chunk length discrepancies in several protocols.
+    Fixed TCP SACK rexmit queue inconsistency by Luca Giacomoni.
+    Fixed several memory leaks.
+
+    Numerous other bug fixes and small improvements.
+
 INET-4.1 (January 2019) - Stable
 ---------------------------------
 
@@ -507,7 +813,7 @@ The highlights of this release are:
     - deleted early declarations
     - moved several properties from fields to types
     - removed many cplusplus blocks
-    - removed many unnecessary typedefs 
+    - removed many unnecessary typedefs
 
 2. Renamed camel case for abbreviations
 
@@ -574,7 +880,7 @@ The highlights of this release are:
 
    - ShortcutMac
      This module implements a simple shortcut to peer MAC protocol that completely
-     bypasses the physical layer. 
+     bypasses the physical layer.
 
    - ShortcutRadio
      This module implements a simple shortcut to peer radio protocol that completely
@@ -590,7 +896,7 @@ The highlights of this release are:
    Packet tags allow attaching meta information to a packet as a whole. They are
    used inside network nodes to pass information between protocols residing in
    different layers (cross-layer communication). Packet tags don't change when
-   new headers are inserted into packets, or when existing headers are removed. 
+   new headers are inserted into packets, or when existing headers are removed.
 
    As opposed to packet tags, region tags allow attaching meta information to a
    region of data designated by an offset and a length. The attached information
@@ -655,7 +961,7 @@ The highlights of this release are:
    of the names of all the aggregated packets. Fragment packets have a name that
    contains the name of the original packet plus the fragment index. In both cases,
    the restored packets (deaggregated or defragmented) at the other end have their
-   names restored. 
+   names restored.
 
 
 INET-3.99.1 (November 2017) - Development
@@ -676,7 +982,7 @@ The highlights of this release are:
    replaced by a setenv script in the INET installation and separate inet scripts
    in the bin folder. Run 'setenv' once from the shell to setup the environment
    variables, and run 'inet', 'inet_release' or 'inet_dbg' from the simulation
-   directory. 
+   directory.
  - Removed compatibility macros required for OMNeT++ 4.x builds. This new INET
    version doesn't build with OMNeT++ 4.x versions.
  - Renamed the byte and bit C++ units to B and b respectively. The new names

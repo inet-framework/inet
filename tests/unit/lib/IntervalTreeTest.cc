@@ -9,7 +9,7 @@ void IntervalTreeTest::insertNodes(int nodeCount)
         double high = low + (double) rand() / RAND_MAX;
         char *c = new char[16];
         sprintf(c, "%d", i);
-        Interval *interval = new Interval(low, high, c);
+        IntervalTree::Interval *interval = new IntervalTree::Interval(low, high, c);
         intervals.push_back(interval);
         tree.insert(interval);
     }
@@ -33,7 +33,7 @@ void IntervalTreeTest::checkTree()
 
 void IntervalTreeTest::checkNil()
 {
-    IntervalTreeNode *nil = tree.nil;
+    IntervalTree::Node *nil = tree.nil;
     if (nil->left != nil || nil->right != nil)
         throw std::runtime_error("Broken: nil left or right");
 //    if (nil->parent != nil)
@@ -45,7 +45,7 @@ void IntervalTreeTest::checkNil()
         throw std::runtime_error("Broken: nil key");
 }
 
-int IntervalTreeTest::checkNode(IntervalTreeNode *node)
+int IntervalTreeTest::checkNode(IntervalTree::Node *node)
 {
     int ld = 0, rd = 0; // black depths on each subtree
     if (node->left != tree.nil) {

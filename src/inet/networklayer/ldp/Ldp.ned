@@ -27,7 +27,7 @@ import inet.applications.contract.IApp;
 //
 // Operations
 //
-// All Ldp message types are subclassed from ~LdpPacket, and include
+// All LDP message types are subclassed from ~LdpPacket, and include
 // ~LdpHello, ~LdpNotify, ~LdpLabelRequest, ~LdpIni and ~LdpAddress.
 //
 // Message processing in the ~Ldp module is explained in

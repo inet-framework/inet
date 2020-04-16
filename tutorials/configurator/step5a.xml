@@ -1,0 +1,4 @@
+<config>
+	<interface hosts="**" address="10.x.x.x" netmask="255.x.x.x"/>
+	<route hosts="router0" destination="10.0.0.35" netmask="255.255.255.255" gateway="10.0.0.18" interface="eth1" metric="0"/>
+</config>

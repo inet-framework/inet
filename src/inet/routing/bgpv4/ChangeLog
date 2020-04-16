@@ -1,5 +1,36 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-20  Levente Mészáros
+
+	Fixed crash in BGP tutorial step 3.
+
+2019-11-11  Levente Mészáros
+
+	Added @packetData annotation to non-Chunk based packet parts.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
+2019-09-22  Mani Amoozadeh
+
+	Now that TCP socket has setTtl option value, all E-bgp connections
+	should have TTL value of 1, except when EbgpMultihop is enabled.
+
+2019-07-24  Zoltan Bojthe
+
+	BgpRouter::printUpdateMessage() AGGREGATOR and MULTI_EXIT_DISC was missing.
+
+2019-07-22  Marcell Juhász
+
+	Fixed BgpUpdate's totalLength field.
+
+2019-07-19  Zoltan Bojthe
+
+	Fixed incoming packet processing in BgpRouter.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-25  Zoltan Bojthe

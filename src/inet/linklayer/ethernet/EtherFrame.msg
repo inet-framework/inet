@@ -41,7 +41,7 @@ enum SapCode;
 //
 class EthernetMacHeader extends FieldsChunk
 {
-    chunkLength = B(14);
+    chunkLength = B(ETHER_MAC_HEADER_BYTES);
     MacAddress dest;
     MacAddress src;
     Ieee8021qHeader *cTag @owned;
@@ -69,7 +69,7 @@ class EthernetControlFrame extends FieldsChunk
 //
 class EthernetPauseFrame extends EthernetControlFrame
 {
-    chunkLength = B(4);
+    chunkLength = ETHER_PAUSE_COMMAND_BYTES;
     opCode = ETHERNET_CONTROL_PAUSE;
     int pauseTime; // in 512 bit-time units
 }
@@ -85,3 +85,6 @@ class EthernetFcs extends FieldsChunk
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
+cplusplus(EthernetFcs) {{
+    EthernetFcs(FcsMode _fcsMode) : EthernetFcs() { fcsMode = _fcsMode; }
+}}

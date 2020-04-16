@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-10-29  Zoltan Bojthe
+
+	Redesigned MPLS header: MPLS headers are independent chunks instead of one
+	chunk with a vector.
+
+2019-10-07  Marcell Juhász
+
+	Changed types of fields, removed getChunkLength.
+	Set chunkLength according to optcode.
+
+2019-06-05  Marcell Juhász
+
+	Added MplsPacketSerializer.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

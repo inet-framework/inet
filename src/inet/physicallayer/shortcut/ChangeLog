@@ -1,0 +1,28 @@
+====== inet-4.x ======
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2018-12-13  Zoltan Bojthe
+
+	Added emitting the transmissionStateChangedSignal.
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-03-02  Zoltan Bojthe
+
+	Added dedicated PHY header and PHY dissector.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-19  Levente Mészáros
+
+	Replaced handleLowerPacket with handleSignal in Radio.
+
+2016-08-10  Levente Mészáros
+
+	Added a new ShortcutRadio that directly communicates to the peer radio
+	completely bypassing the physical medium.

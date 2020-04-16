@@ -1,5 +1,66 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-20  Zoltan Bojthe
+
+	Added TosTag.
+
+2019-11-12  Zoltan Bojthe
+
+	Renamed functions for getFoo()/findFoo() convention in InterfaceTable.
+
+2019-11-11  Zoltan Bojthe
+
+	Added notifications about changing the InterfaceProtocolData set in InterfaceEntry.
+	Added ipv4Netmask field to InterfaceEntry.
+
+2019-11-07  Zoltan Bojthe
+
+	Added getFirstNonLoopbackInterface() to InterfaceTable.
+
+2019-09-07  Marcel Marek
+
+	Added ECN to .msg file.
+	Added defines of IP ECN two bit value for easier interpretation.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage
+
+2019-07-24  Marcell Juhász
+
+	Added EchoPacketSerializer.
+	Fixed chunkLength.
+
+2019-07-01  Marcell Juhász
+
+	Added nonLocalSrcAddress flag to L3AddressReq.
+
+2019-06-17  Andras Varga
+
+	Changed getInterfaceById() to raise an error on invalid IDs.
+	Added findInterfaceById() with the old behavior.
+
+2019-06-14  Andras Varga
+
+	Added L3AddressResolver::collectNetworkNodes()
+	Added L3AddressResolver::findInterfaceWithMacAddress() and findHostWithMacAddress().
+
+2019-02-08  Zoltan Bojthe
+
+	Added missing doParsimPacking/doParsimUnpacking to L3Address.
+
+2019-02-07  Levente Mészáros
+
+	Fixed bug #66 in L3AddressResolver.
+
+2019-01-22  Levente Mészáros
+
+	Added displayStringTextFormat parameter handling to InterfaceEntry.
+	Extracted a separate updateDisplayString() method in InterfaceEntry.
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-14  Zoltan Bojthe

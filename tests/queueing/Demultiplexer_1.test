@@ -1,0 +1,129 @@
+%description:
+
+In this test, packets are collected periodically (randomly) by several active
+packet sinks (ActivePacketSinks). The packets are provided by a single passive
+packet source upon request (PassivePacketSource). The single source is connected to
+the multiple sinks using an intermediary component (PacketDemultiplexer) which
+simply forwards packets.
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.common.PacketDemultiplexer;
+import inet.queueing.source.PassivePacketSource;
+
+network TestServer
+{
+    parameters:
+        int numCollectors;
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        demultiplexer: PacketDemultiplexer {
+            @display("p=200,100");
+        }
+        collector[numCollectors]: ActivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+    	provider.out --> demultiplexer.in;
+        for i=0..numCollectors-1 {
+	        demultiplexer.out++ --> collector[i].in;
+      	}
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestServer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.numCollectors = 3
+*.collector[*].collectionInterval = uniform(0s, 2s)
+
+%contains: stdout
+Providing packet provider-0.
+Forwarding popped packet provider-0.
+Collecting packet provider-0.
+
+Running simulation...
+Providing packet provider-1.
+Forwarding popped packet provider-1.
+Collecting packet provider-1.
+Providing packet provider-2.
+Forwarding popped packet provider-2.
+Collecting packet provider-2.
+Providing packet provider-3.
+Forwarding popped packet provider-3.
+Collecting packet provider-3.
+Providing packet provider-4.
+Forwarding popped packet provider-4.
+Collecting packet provider-4.
+Providing packet provider-5.
+Forwarding popped packet provider-5.
+Collecting packet provider-5.
+Providing packet provider-6.
+Forwarding popped packet provider-6.
+Collecting packet provider-6.
+Providing packet provider-7.
+Forwarding popped packet provider-7.
+Collecting packet provider-7.
+Providing packet provider-8.
+Forwarding popped packet provider-8.
+Collecting packet provider-8.
+Providing packet provider-9.
+Forwarding popped packet provider-9.
+Collecting packet provider-9.
+Providing packet provider-10.
+Forwarding popped packet provider-10.
+Collecting packet provider-10.
+Providing packet provider-11.
+Forwarding popped packet provider-11.
+Collecting packet provider-11.
+Providing packet provider-12.
+Forwarding popped packet provider-12.
+Collecting packet provider-12.
+Providing packet provider-13.
+Forwarding popped packet provider-13.
+Collecting packet provider-13.
+Providing packet provider-14.
+Forwarding popped packet provider-14.
+Collecting packet provider-14.
+Providing packet provider-15.
+Forwarding popped packet provider-15.
+Collecting packet provider-15.
+Providing packet provider-16.
+Forwarding popped packet provider-16.
+Collecting packet provider-16.
+Providing packet provider-17.
+Forwarding popped packet provider-17.
+Collecting packet provider-17.
+Providing packet provider-18.
+Forwarding popped packet provider-18.
+Collecting packet provider-18.
+Providing packet provider-19.
+Forwarding popped packet provider-19.
+Collecting packet provider-19.
+Providing packet provider-20.
+Forwarding popped packet provider-20.
+Collecting packet provider-20.
+Providing packet provider-21.
+Forwarding popped packet provider-21.
+Collecting packet provider-21.
+Providing packet provider-22.
+Forwarding popped packet provider-22.
+Collecting packet provider-22.
+Providing packet provider-23.
+Forwarding popped packet provider-23.
+Collecting packet provider-23.
+Providing packet provider-24.
+Forwarding popped packet provider-24.
+Collecting packet provider-24.
+Providing packet provider-25.
+Forwarding popped packet provider-25.
+Collecting packet provider-25.
+Providing packet provider-26.
+Forwarding popped packet provider-26.
+Collecting packet provider-26.

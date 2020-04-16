@@ -87,10 +87,10 @@ void TcpBasicClientApp::sendRequest()
 
     const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(B(replyLength));
     payload->setServerClose(false);
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
 
     EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"

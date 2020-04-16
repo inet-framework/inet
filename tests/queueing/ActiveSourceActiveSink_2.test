@@ -1,0 +1,37 @@
+%description:
+
+In this test, an active packet source is connected to an active packet sink,
+which causes the simulation to fail.
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestProducerConsumer
+{
+    submodules:
+        collector: ActivePacketSink {
+            @display("p=100,100");
+        }
+        producer: ActivePacketSource {
+            @display("p=200,100");
+        }
+    connections:
+        producer.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProducerConsumer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.collector.collectionInterval = 1s
+
+%exitcode: 1
+
+%contains: stderr
+doesn't support pop on gate

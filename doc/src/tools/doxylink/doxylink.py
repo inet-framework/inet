@@ -8,11 +8,50 @@ from collections import namedtuple
 from docutils import nodes, utils
 from sphinx.util.nodes import split_explicit_title
 from sphinx.util.console import bold, standout
+from sphinx import __version__ as sphinx_version
+
+if sphinx_version >= '1.6.0':
+    from sphinx.util.logging import getLogger
 
 from ..doxylink import __version__
 from .parsing import normalise, ParseException
 
 Entry = namedtuple('Entry', ['kind', 'file'])
+
+
+def report_info(env, msg, docname=None, lineno=None):
+    '''Convenience function for logging an informational
+
+    Args:
+        msg (str): Message of the warning
+        docname (str): Name of the document on which the error occured
+        lineno (str): Line number in the document on which the error occured
+    '''
+    if sphinx_version >= '1.6.0':
+        logger = getLogger(__name__)
+        if lineno is not None:
+            logger.info(msg, location=(docname, lineno))
+        else:
+            logger.info(msg, location=docname)
+    else:
+        env.info(docname, msg, lineno=lineno)
+
+def report_warning(env, msg, docname=None, lineno=None):
+    '''Convenience function for logging a warning
+
+    Args:
+        msg (str): Message of the warning
+        docname (str): Name of the document on which the error occured
+        lineno (str): Line number in the document on which the error occured
+    '''
+    if sphinx_version >= '1.6.0':
+        logger = getLogger(__name__)
+        if lineno is not None:
+            logger.warning(msg, location=(docname, lineno))
+        else:
+            logger.warning(msg, location=docname)
+    else:
+        env.warn(docname, msg, lineno=lineno)
 
 
 class FunctionList:
@@ -206,33 +245,33 @@ def create_role(app, tag_filename, rootdir):
 
         cache_name = os.path.basename(tag_filename)
 
-        app.info(bold('Checking tag file cache for %s: ' % cache_name), nonl=True)
+        report_info(app.env, bold('Checking tag file cache for %s: ' % cache_name))
         if not hasattr(app.env, 'doxylink_cache'):
             # no cache present at all, initialise it
-            app.info('No cache at all, rebuilding...')
+            report_info(app.env, 'No cache at all, rebuilding...')
             mapping = SymbolMap(tag_file)
             app.env.doxylink_cache = {cache_name: {'mapping': mapping, 'mtime': os.path.getmtime(tag_filename)}}
         elif not app.env.doxylink_cache.get(cache_name):
             # Main cache is there but the specific sub-cache for this tag file is not
-            app.info('Sub cache is missing, rebuilding...')
+            report_info(app.env, 'Sub cache is missing, rebuilding...')
             mapping = SymbolMap(tag_file)
             app.env.doxylink_cache[cache_name] = {'mapping': mapping, 'mtime': os.path.getmtime(tag_filename)}
         elif app.env.doxylink_cache[cache_name]['mtime'] < os.path.getmtime(tag_filename):
             # tag file has been modified since sub-cache creation
-            app.info('Sub-cache is out of date, rebuilding...')
+            report_info(app.env, 'Sub-cache is out of date, rebuilding...')
             mapping = SymbolMap(tag_file)
             app.env.doxylink_cache[cache_name] = {'mapping': mapping, 'mtime': os.path.getmtime(tag_filename)}
         elif not app.env.doxylink_cache[cache_name].get('version') or app.env.doxylink_cache[cache_name].get('version') != __version__:
             # sub-cache doesn't have a version or the version doesn't match
-            app.info('Sub-cache schema version doesn\'t match, rebuilding...')
+            report_info(app.env, 'Sub-cache schema version doesn\'t match, rebuilding...')
             mapping = SymbolMap(tag_file)
             app.env.doxylink_cache[cache_name] = {'mapping': mapping, 'mtime': os.path.getmtime(tag_filename)}
         else:
             # The cache is up to date
-            app.info('Sub-cache is up-to-date')
+            report_info(app.env, 'Sub-cache is up-to-date')
     except FileNotFoundError:
         tag_file = None
-        app.warn(standout('Could not find tag file %s. Make sure your `doxylink` config variable is set correctly.' % tag_filename))
+        report_warning(app.env, standout('Could not find tag file %s. Make sure your `doxylink` config variable is set correctly.' % tag_filename))
 
     def find_doxygen_link(name, rawtext, text, lineno, inliner, options={}, content=[]):
         # from :name:`title <part>`

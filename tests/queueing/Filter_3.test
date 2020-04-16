@@ -1,0 +1,62 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets are consumed by a passive packet sink (PassivePacketSink).
+Packets are passed through from the source to the sink by a packet data based
+filter (ContentBasedFilter). Every packet longer than 1B is dropped.
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.filter.ContentBasedFilter;
+import inet.queueing.source.ActivePacketSource;
+
+network TestFilter
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        filter: ContentBasedFilter {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> filter.in;
+        filter.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestFilter
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = intuniform(1B, 2B)
+*.producer.productionInterval = 1s
+*.filter.packetFilter = "totalLength(\"1 B\")"
+
+%contains: stdout
+Producing packet producer-1.
+Filtering out packet producer-1.
+Producing packet producer-2.
+Filtering out packet producer-2.
+Producing packet producer-3.
+Passing through packet producer-3.
+Consuming packet producer-3.
+Producing packet producer-4.
+Filtering out packet producer-4.
+Producing packet producer-5.
+Filtering out packet producer-5.
+Producing packet producer-6.
+Filtering out packet producer-6.
+Producing packet producer-7.
+Filtering out packet producer-7.
+Producing packet producer-8.
+Filtering out packet producer-8.
+Producing packet producer-9.
+Filtering out packet producer-9.
+Producing packet producer-10.
+Filtering out packet producer-10.

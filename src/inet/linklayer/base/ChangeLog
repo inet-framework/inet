@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-14  Zoltan Bojthe
+
+	Remove obsolete MacHeaderBase.msg
+
+2019-10-21  Levente Mészáros
+
+	Fixed taking packet ownership from TX queue after popping a packet.
+
+2019-06-03  Zoltan Bojthe
+
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-05-28  Zoltan Bojthe
+
+	Move code from MacBase to MacProtocolBase.
+	Deleted MacBase.
+	Moved flushQueue() and clearQueue() implementation to MacProtocolBase.
+
+2019-05-27  Zoltan Bojthe
+
+	Added PacketDropDetails argument to flushQueue().
+	Added currentTxFrame, transmissionQueue, and currentTxFrame manager functions to MacProtocolBase.
+
+2019-02-22  Zoltan Bojthe
+
+	Added signal unsubscription to destructor.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-08  Zoltan Bojthe

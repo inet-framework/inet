@@ -1,0 +1,23 @@
+====== inet-4.x ======
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2018-10-03  Levente Mészáros
+
+	Added a new queueing package which replaces the old queue package. This new
+	package comes with a different API and a lot of new components. All old queue
+	components were either ported or completely replaced with components of the new
+	queueing package.
+
+	Added new interfaces: IPacketBuffer, IPacketCollection, IActivePacketSink,
+	IPassivePacketSink, IPacketDuplicator, IPacketFilter, IActivePacketSource,
+	IPassivePacketSource, IPacketQueue, IPacketQueueingElement, IPacketSink,
+	and IPacketSource.
+
+	Added new functional extension support interfaces: IPacketClassifierFunction,
+	IPacketComparatorFunction, IPacketDropperFunction, IPacketFilterFunction,
+	and IPacketSchedulerFunction.
+
+	Added new NED module interfaces: IPacketBuffer, IPacketClassifier, IActivePacketSink,
+	IPassivePacketSink, IPacketFilter, IActivePacketSource, IPassivePacketSource, IPacketQueue,
+	IPacketScheduler, IPacketServer, IPacketSink, and IPacketSource.

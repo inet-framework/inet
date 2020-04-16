@@ -59,54 +59,68 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
 {
     auto module = check_and_cast<const cModule *>(radio);
     // TODO: use RadioFigure?
-    auto radioModeFigure = new IndexedImageFigure("radioMode");
-    radioModeFigure->setTags((std::string("radioMode ") + tags).c_str());
-    radioModeFigure->setTooltip("This figure represents the radio mode of a radio");
-    radioModeFigure->setAssociatedObject(const_cast<cModule *>(module));
-    radioModeFigure->setImages(radioModeImages);
-    radioModeFigure->setSize(cFigure::Point(width, height));
-    auto receptionStateFigure = new IndexedImageFigure("receptionState");
-    receptionStateFigure->setTags((std::string("receptionState ") + tags).c_str());
-    receptionStateFigure->setTooltip("This figure represents the reception state of a radio");
-    receptionStateFigure->setImages(receptionStateImages);
-    receptionStateFigure->setSize(cFigure::Point(width, height));
-    auto transmissionStateFigure = new IndexedImageFigure("transmissionState");
-    transmissionStateFigure->setTags((std::string("transmissionState ") + tags).c_str());
-    transmissionStateFigure->setTooltip("This figure represents the transmission state of a radio");
-    transmissionStateFigure->setImages(transmissionStateImages);
-    transmissionStateFigure->setSize(cFigure::Point(width, height));
-    auto antennaLobeFigure = new cPolygonFigure("antenna_lobe");
-    antennaLobeFigure->setTags("antennaLobe");
-    antennaLobeFigure->setTooltip("This figure represents the antenna lobe of a radio");
-    antennaLobeFigure->setZIndex(zIndex);
-    antennaLobeFigure->setOutlined(true);
-    antennaLobeFigure->setLineColor(antennaLobeLineColor);
-    antennaLobeFigure->setLineStyle(antennaLobeLineStyle);
-    antennaLobeFigure->setLineWidth(antennaLobeLineWidth);
-    antennaLobeFigure->setFilled(true);
-    antennaLobeFigure->setFillColor(antennaLobeFillColor);
-    antennaLobeFigure->setFillOpacity(antennaLobeOpacity);
-    antennaLobeFigure->setSmooth(antennaLobeLineSmooth);
-    auto antennaLobeUnitGainFigure = new cOvalFigure("antenna_lobe unit_gain");
-    antennaLobeUnitGainFigure->setTags("antennaLobe unitGain");
-    antennaLobeUnitGainFigure->setTooltip("This figure represents the 0dB gain of a radio antenna");
-    antennaLobeUnitGainFigure->setZIndex(zIndex);
-    antennaLobeUnitGainFigure->setOutlined(true);
-    antennaLobeUnitGainFigure->setLineColor(cFigure::GREY);
-    antennaLobeUnitGainFigure->setLineStyle(cFigure::LINE_DOTTED);
-    auto antennaLobeMaxGainFigure = new cOvalFigure("antenna_lobe max_gain");
-    antennaLobeMaxGainFigure->setTags("antennaLobe maxGain");
-    antennaLobeMaxGainFigure->setTooltip("This figure represents the maximum gain of a radio antenna");
-    antennaLobeMaxGainFigure->setZIndex(zIndex);
-    antennaLobeMaxGainFigure->setOutlined(true);
-    antennaLobeMaxGainFigure->setLineColor(cFigure::GREY);
-    antennaLobeMaxGainFigure->setLineStyle(cFigure::LINE_DOTTED);
+    IndexedImageFigure *radioModeFigure = nullptr;
+    if (displayRadioMode) {
+        radioModeFigure = new IndexedImageFigure("radioMode");
+        radioModeFigure->setTags((std::string("radioMode ") + tags).c_str());
+        radioModeFigure->setTooltip("This figure represents the radio mode of a radio");
+        radioModeFigure->setAssociatedObject(const_cast<cModule *>(module));
+        radioModeFigure->setImages(radioModeImages);
+        radioModeFigure->setSize(cFigure::Point(width, height));
+    }
+    IndexedImageFigure *receptionStateFigure = nullptr;
+    if (displayReceptionState) {
+        receptionStateFigure = new IndexedImageFigure("receptionState");
+        receptionStateFigure->setTags((std::string("receptionState ") + tags).c_str());
+        receptionStateFigure->setTooltip("This figure represents the reception state of a radio");
+        receptionStateFigure->setImages(receptionStateImages);
+        receptionStateFigure->setSize(cFigure::Point(width, height));
+    }
+    IndexedImageFigure *transmissionStateFigure = nullptr;
+    if (displayTransmissionState) {
+        transmissionStateFigure = new IndexedImageFigure("transmissionState");
+        transmissionStateFigure->setTags((std::string("transmissionState ") + tags).c_str());
+        transmissionStateFigure->setTooltip("This figure represents the transmission state of a radio");
+        transmissionStateFigure->setImages(transmissionStateImages);
+        transmissionStateFigure->setSize(cFigure::Point(width, height));
+    }
+    cPolygonFigure *antennaLobeFigure = nullptr;
+    cOvalFigure *antennaLobeUnitGainFigure = nullptr;
+    cOvalFigure *antennaLobeMaxGainFigure = nullptr;
+    if (displayAntennaLobes) {
+        antennaLobeFigure = new cPolygonFigure("antenna_lobe");
+        antennaLobeFigure->setTags("antennaLobe");
+        antennaLobeFigure->setTooltip("This figure represents the antenna lobe of a radio");
+        antennaLobeFigure->setZIndex(zIndex);
+        antennaLobeFigure->setOutlined(true);
+        antennaLobeFigure->setLineColor(antennaLobeLineColor);
+        antennaLobeFigure->setLineStyle(antennaLobeLineStyle);
+        antennaLobeFigure->setLineWidth(antennaLobeLineWidth);
+        antennaLobeFigure->setFilled(true);
+        antennaLobeFigure->setFillColor(antennaLobeFillColor);
+        antennaLobeFigure->setFillOpacity(antennaLobeOpacity);
+        antennaLobeFigure->setSmooth(antennaLobeLineSmooth);
+        antennaLobeUnitGainFigure = new cOvalFigure("antenna_lobe unit_gain");
+        antennaLobeUnitGainFigure->setTags("antennaLobe unitGain");
+        antennaLobeUnitGainFigure->setTooltip("This figure represents the 0dB gain of a radio antenna");
+        antennaLobeUnitGainFigure->setZIndex(zIndex);
+        antennaLobeUnitGainFigure->setOutlined(true);
+        antennaLobeUnitGainFigure->setLineColor(cFigure::GREY);
+        antennaLobeUnitGainFigure->setLineStyle(cFigure::LINE_DOTTED);
+        antennaLobeMaxGainFigure = new cOvalFigure("antenna_lobe max_gain");
+        antennaLobeMaxGainFigure->setTags("antennaLobe maxGain");
+        antennaLobeMaxGainFigure->setTooltip("This figure represents the maximum gain of a radio antenna");
+        antennaLobeMaxGainFigure->setZIndex(zIndex);
+        antennaLobeMaxGainFigure->setOutlined(true);
+        antennaLobeMaxGainFigure->setLineColor(cFigure::GREY);
+        antennaLobeMaxGainFigure->setLineStyle(cFigure::LINE_DOTTED);
+        auto antenna = radio->getAntenna();
+        refreshAntennaLobe(antenna, antennaLobeFigure, antennaLobeUnitGainFigure, antennaLobeMaxGainFigure);
+    }
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
         throw cRuntimeError("Cannot create radio visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
-    auto antenna = radio->getAntenna();
-    refreshAntennaLobe(antenna, antennaLobeFigure, antennaLobeUnitGainFigure, antennaLobeMaxGainFigure);
     return new RadioCanvasVisualization(networkNodeVisualization, radioModeFigure, receptionStateFigure, transmissionStateFigure, antennaLobeFigure, antennaLobeUnitGainFigure, antennaLobeMaxGainFigure, module->getId());
 }
 
@@ -114,24 +128,34 @@ void RadioCanvasVisualizer::addRadioVisualization(const RadioVisualization *radi
 {
     RadioVisualizerBase::addRadioVisualization(radioVisualization);
     auto radioCanvasVisualization = static_cast<const RadioCanvasVisualization *>(radioVisualization);
-    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->radioModeFigure, radioCanvasVisualization->radioModeFigure->getSize(), placementHint, placementPriority);
-    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->receptionStateFigure, radioCanvasVisualization->receptionStateFigure->getSize(), placementHint, placementPriority);
-    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->transmissionStateFigure, radioCanvasVisualization->transmissionStateFigure->getSize(), placementHint, placementPriority);
-    radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeFigure);
-    radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
-    radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
+    if (displayRadioMode)
+        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->radioModeFigure, radioCanvasVisualization->radioModeFigure->getSize(), placementHint, placementPriority);
+    if (displayReceptionState)
+        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->receptionStateFigure, radioCanvasVisualization->receptionStateFigure->getSize(), placementHint, placementPriority);
+    if (displayTransmissionState)
+        radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->transmissionStateFigure, radioCanvasVisualization->transmissionStateFigure->getSize(), placementHint, placementPriority);
+    if (displayAntennaLobes) {
+        radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeFigure);
+        radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
+        radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
+    }
 }
 
 void RadioCanvasVisualizer::removeRadioVisualization(const RadioVisualization *radioVisualization)
 {
     RadioVisualizerBase::removeRadioVisualization(radioVisualization);
     auto radioCanvasVisualization = static_cast<const RadioCanvasVisualization *>(radioVisualization);
-    radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->radioModeFigure);
-    radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->receptionStateFigure);
-    radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->transmissionStateFigure);
-    radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeFigure);
-    radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
-    radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
+    if (displayRadioMode)
+        radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->radioModeFigure);
+    if (displayReceptionState)
+        radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->receptionStateFigure);
+    if (displayTransmissionState)
+        radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->transmissionStateFigure);
+    if (displayAntennaLobes) {
+        radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeFigure);
+        radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
+        radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
+    }
 }
 
 void RadioCanvasVisualizer::refreshRadioVisualization(const RadioVisualization *radioVisualization) const
@@ -140,11 +164,16 @@ void RadioCanvasVisualizer::refreshRadioVisualization(const RadioVisualization *
     auto module = getSimulation()->getComponent(radioCanvasVisualization->radioModuleId);
     if (module != nullptr) {
         auto radio = check_and_cast<IRadio *>(module);
-        setImageIndex(radioCanvasVisualization->radioModeFigure, radio->getRadioMode());
-        setImageIndex(radioCanvasVisualization->receptionStateFigure, radio->getReceptionState());
-        setImageIndex(radioCanvasVisualization->transmissionStateFigure, radio->getTransmissionState());
-        radioCanvasVisualization->receptionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getReceptionInProgress())));
-        radioCanvasVisualization->transmissionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getTransmissionInProgress())));
+        if (displayRadioMode)
+            setImageIndex(radioCanvasVisualization->radioModeFigure, radio->getRadioMode());
+        if (displayReceptionState) {
+            setImageIndex(radioCanvasVisualization->receptionStateFigure, radio->getReceptionState());
+            radioCanvasVisualization->receptionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getReceptionInProgress())));
+        }
+        if (displayTransmissionState) {
+            setImageIndex(radioCanvasVisualization->transmissionStateFigure, radio->getTransmissionState());
+            radioCanvasVisualization->transmissionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getTransmissionInProgress())));
+        }
         if (displayAntennaLobes)
             refreshAntennaLobe(radio->getAntenna(), radioCanvasVisualization->antennaLobeFigure, radioCanvasVisualization->antennaLobeUnitGainFigure, radioCanvasVisualization->antennaLobeMaxGainFigure);
     }

@@ -1,4 +1,4 @@
-
+package inet.test.moduletest.lib;
 
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherQosQueue;

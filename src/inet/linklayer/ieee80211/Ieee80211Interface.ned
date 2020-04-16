@@ -31,8 +31,8 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 // It can be configured via the mgmt.typename parameter to act
 // as an AP or a STA, or for ad-hoc mode.
 //
-// Potential mgmType values: Ieee80211MgmtStaSimplified, Ieee80211MgmtSta
-// Ieee80211MgmtAp, Ieee80211MgmtApSimplified, Ieee80211MgmtAdhoc.
+// Potential mgmType values: ~Ieee80211MgmtStaSimplified, ~Ieee80211MgmtSta,
+// ~Ieee80211MgmtAp, ~Ieee80211MgmtApSimplified, ~Ieee80211MgmtAdhoc.
 //
 // A classifier is needed if you want to use QoS.
 //

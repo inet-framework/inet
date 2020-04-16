@@ -27,9 +27,9 @@ import inet.physicallayer.contract.packetlevel.IBackgroundNoise;
 module IsotropicDimensionalBackgroundNoise like IBackgroundNoise
 {
     parameters:
-        double power @unit(dBm); // noise power
-        string dimensions = default("time"); // dimensions of noise power: time and/or frequency
-        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
+        double powerSpectralDensity @unit(dBmWpMHz) = default(nan dBmWpMHz); // when specified, the power and bandwidth parameters are not used
+        double power @unit(dBm) = default(nan dBm); // when specified, the bandwidth can be determined automatically by matching the signal's bandwidth
+        double bandwidth @unit(Hz) = default(nan Hz); // determined automatically if the value is NaN, otherwise must match the signal's bandwidth
         @class(IsotropicDimensionalBackgroundNoise);
         @display("i=block/mac");
 }

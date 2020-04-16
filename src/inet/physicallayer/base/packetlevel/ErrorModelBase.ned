@@ -26,6 +26,7 @@ module ErrorModelBase like IErrorModel
 {
     parameters:
         string corruptionMode @enum("packet", "chunk", "byte", "bit") = default("packet");
+        string snirMode @unit("min", "mean") = default("min");
         @display("i=block/broadcast");
         @class(ErrorModelBase);
 }

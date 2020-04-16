@@ -111,6 +111,7 @@ cplusplus(Sack) {{
 // Header Options (optional):
 class TcpOption extends cObject
 {
+    @packetData;
     TcpOptionNumbers kind;            // option kind
     unsigned short length = 1;                    // option length
 }
@@ -207,6 +208,8 @@ class TcpHeader extends TransportHeaderBase
     // if header options are used the headerLength is greater than 20 bytes (default)
     B headerLength = TCP_MIN_HEADER_LENGTH; // TCP_MIN_HEADER_LENGTH = 20 bytes
 
+    bool cwrBit; // CWR: congestion window reduced bit (RFC 3168)
+    bool eceBit; // ECE: ECN-echo bit (RFC 3168)
     bool urgBit; // URG: urgent pointer field significant if set
     bool ackBit; // ACK: ackNo significant if set
     bool pshBit; // PSH: push function

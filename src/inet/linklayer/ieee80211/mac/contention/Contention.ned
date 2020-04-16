@@ -32,10 +32,11 @@ simple Contention like IContention
         @signal[backoffStarted](type=simtime_t);
         @signal[backoffStopped](type=simtime_t);
         @signal[channelAccessGranted];
-        @signal[stateChanged](type=long); // TODO: enum=inet::ieee80211::Contention::State
+        @signal[stateChanged](type=long; enum=inet::ieee80211::Contention::State);
         @statistic[backoffPeriodGenerated](title="backoff periods"; record=vector; interpolationmode=none);
         @statistic[backoffActive](title="backoff active"; source=count(backoffStarted)-count(backoffStopped); record=vector; interpolationmode=sample-hold);
         @statistic[channelAccessGranted](title="channel access granted"; record=count,vector?);
-        @statistic[stateChanged](title="contention state changed"; record=count,vector?; interpolationmode=none);
+        @statistic[stateChanged](title="contention state changed"; type=enum; enum=IDLE, DEFER, IFS_AND_BACKOFF; record=count,vector; interpolationmode=none);
+        @defaultStatistic(stateChanged:vector);
 }
 

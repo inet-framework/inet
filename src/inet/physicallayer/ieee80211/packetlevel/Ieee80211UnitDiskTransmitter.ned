@@ -18,7 +18,7 @@
 package inet.physicallayer.ieee80211.packetlevel;
 
 //
-// See also ~Ieee80211UnitDiskReceiver, ~Ieee80211UnitDiskRadio, and ~UnitDiskRadioMedium.
+// @see ~Ieee80211UnitDiskReceiver, ~Ieee80211UnitDiskRadio, ~UnitDiskRadioMedium.
 //
 module Ieee80211UnitDiskTransmitter extends Ieee80211TransmitterBase
 {

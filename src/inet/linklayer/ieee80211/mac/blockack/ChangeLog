@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-08-21  Marcell Juhász
+
+	Renamed duration to durationField.
+
+2019-02-13  Levente Mészáros
+
+	Added log statements for setting the duration field.
+
+2019-01-31  Levente Mészáros
+
+	Added basic signals and statistics for block ack agreements.
+	Added blockAckAgreementAdded and blockAckAgreementDeleted signals.
+	Added blockAckAgreement statistic.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-20  Levente Mészáros

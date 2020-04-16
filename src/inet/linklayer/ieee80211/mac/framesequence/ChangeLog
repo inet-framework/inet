@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-02-13  Levente Mészáros
+
+	Added frame sequence class desriptors to allow inspecting them in Qtenv.
+
+2019-02-04  Levente Mészáros
+
+	Added and updated several log statements to better inform the user about what is going on.
+
+2019-01-31  Levente Mészáros
+
+	Fixed the frameSequenceFinished callback, the context must not yet be deleted.
+	Added basic signals and statistics for frame sequences.
+	Added frameSequenceStarted and frameSequenceFinished signals.
+	Added frameSequence, frameSequenceDuration, and frameSequenceNumPackets statistics.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-05  Levente Mészáros

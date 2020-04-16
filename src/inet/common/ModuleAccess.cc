@@ -99,7 +99,7 @@ InterfaceEntry *getContainingNicModule(const cModule *from)
 {
     auto interfaceEntry = findContainingNicModule(from);
     if (!interfaceEntry)
-        throw cRuntimeError("getContainingNicModule(): nic module not found (it should have a property named nic) for module '%s'", from ? from->getFullPath().c_str() : "<nullptr>");
+        throw cRuntimeError("getContainingNicModule(): nic module not found (it should be an InterfaceEntry class) for module '%s'", from ? from->getFullPath().c_str() : "<nullptr>");
     return interfaceEntry;
 }
 

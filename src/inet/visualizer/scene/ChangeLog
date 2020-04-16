@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Levente Mészáros
+
+	Added support for center/center displacement to NetworkNodeCanvasVisualization.
+
+2019-12-09  Levente Mészáros
+
+	Added kludge for submodule name label in NetworkNodeCanvasVisualization.
+
+2019-08-24  Andras Varga
+
+	Added OpenStreetMapSceneCanvasVisualizer.
+
+2019-06-05  Levente Mészáros
+
+	Implemented the creation and deletion of network node visualizations for dynamic modules.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-16  TÖRÖK Attila

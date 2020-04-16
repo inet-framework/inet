@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,26 +22,40 @@ namespace inet {
 
 namespace physicallayer {
 
-CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry() :
-    receptionIntervals(nullptr),
-    stale(false)
+CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(const RadioCacheEntry &other) :
+    radio(other.radio),
+    receptionIntervals(other.receptionIntervals)
 {
+    // NOTE: only allow copying mostly empty ones for now
+    ASSERT(other.receptionIntervals == nullptr);
 }
 
-CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(RadioCacheEntry &&other) :
-    receptionIntervals(other.receptionIntervals),
-    stale(other.stale)
+CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(RadioCacheEntry &&other) noexcept :
+    radio(other.radio),
+    receptionIntervals(other.receptionIntervals)
 {
     other.receptionIntervals = nullptr;
 }
 
-CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry::operator=(RadioCacheEntry &&other)
+CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry::operator=(const RadioCacheEntry &other)
 {
     if (this != &other) {
+        // NOTE: only allow copying mostly empty ones for now
+        ASSERT(other.receptionIntervals == nullptr);
+        radio = other.radio;
+        delete receptionIntervals;
+        receptionIntervals = other.receptionIntervals;
+    }
+    return *this;
+}
+
+CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry::operator=(RadioCacheEntry &&other) noexcept
+{
+    if (this != &other) {
+        radio = other.radio;
         delete receptionIntervals;
         receptionIntervals = other.receptionIntervals;
         other.receptionIntervals = nullptr;
-        stale = other.stale;
     }
     return *this;
 }
@@ -51,27 +65,14 @@ CommunicationCacheBase::RadioCacheEntry::~RadioCacheEntry()
     delete receptionIntervals;
 }
 
-CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry() :
-    interferenceEndTime(NaN),
-    signal(nullptr),
-    receptionCacheEntries(nullptr)
+CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry()
 {
+    receptionDecisions.resize(static_cast<int>(IRadioSignal::SIGNAL_PART_DATA) + 1);
 }
 
-CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry() :
-    signal(nullptr),
-    arrival(nullptr),
-    interval(nullptr),
-    listening(nullptr),
-    reception(nullptr),
-    interference(nullptr),
-    noise(nullptr),
-    snir(nullptr),
-    receptionResult(nullptr)
-{
-}
-
-CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheEntry &&other) :
+CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(const ReceptionCacheEntry &other) :
+    transmission(other.transmission),
+    receiver(other.receiver),
     signal(other.signal),
     arrival(other.arrival),
     interval(other.interval),
@@ -83,6 +84,35 @@ CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheE
     receptionDecisions(other.receptionDecisions),
     receptionResult(other.receptionResult)
 {
+    // NOTE: only allow copying empty mostly ones for now
+    ASSERT(other.signal == nullptr);
+    ASSERT(other.arrival == nullptr);
+    ASSERT(other.interval == nullptr);
+    ASSERT(other.listening == nullptr);
+    ASSERT(other.reception == nullptr);
+    ASSERT(other.interference == nullptr);
+    ASSERT(other.noise == nullptr);
+    ASSERT(other.snir == nullptr);
+    ASSERT(other.receptionDecisions.size() == 0);
+    ASSERT(other.receptionResult == nullptr);
+}
+
+CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheEntry &&other) noexcept :
+    transmission(other.transmission),
+    receiver(other.receiver),
+    signal(other.signal),
+    arrival(other.arrival),
+    interval(other.interval),
+    listening(other.listening),
+    reception(other.reception),
+    interference(other.interference),
+    noise(other.noise),
+    snir(other.snir),
+    receptionDecisions(other.receptionDecisions),
+    receptionResult(other.receptionResult)
+{
+    other.transmission = nullptr;
+    other.receiver = nullptr;
     other.signal = nullptr;
     other.arrival = nullptr;
     other.interval = nullptr;
@@ -95,7 +125,39 @@ CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheE
     other.receptionResult = nullptr;
 }
 
-CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCacheEntry::operator=(ReceptionCacheEntry &&other)
+CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCacheEntry::operator=(const ReceptionCacheEntry &other)
+{
+    if (this != &other) {
+        // NOTE: only allow copying mostly empty ones for now
+        ASSERT(other.signal == nullptr);
+        ASSERT(other.arrival == nullptr);
+        ASSERT(other.interval == nullptr);
+        ASSERT(other.listening == nullptr);
+        ASSERT(other.reception == nullptr);
+        ASSERT(other.interference == nullptr);
+        ASSERT(other.noise == nullptr);
+        ASSERT(other.snir == nullptr);
+        ASSERT(other.receptionDecisions.size() == 0);
+        ASSERT(other.receptionResult == nullptr);
+        transmission = other.transmission;
+        receiver = other.receiver;
+        signal = other.signal;
+        arrival = other.arrival;
+        interval = other.interval;
+        listening = other.listening;
+        reception = other.reception;
+        interference = other.interference;
+        noise = other.noise;
+        snir = other.snir;
+        for (auto receptionDecision : receptionDecisions)
+            delete receptionDecision;
+        receptionDecisions = other.receptionDecisions;
+        receptionResult = other.receptionResult;
+    }
+    return *this;
+}
+
+CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCacheEntry::operator=(ReceptionCacheEntry &&other) noexcept
 {
     if (this != &other) {
         delete arrival;
@@ -107,6 +169,8 @@ CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCa
         for (auto receptionDecision : receptionDecisions)
             delete receptionDecision;
         delete receptionResult;
+        transmission = other.transmission;
+        receiver = other.receiver;
         signal = other.signal;
         arrival = other.arrival;
         interval = other.interval;
@@ -117,9 +181,11 @@ CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCa
         snir = other.snir;
         receptionDecisions = other.receptionDecisions;
         receptionResult = other.receptionResult;
+        other.transmission = nullptr;
+        other.receiver = nullptr;
         other.signal = nullptr;
         other.arrival = nullptr;
-        other.interval  = nullptr;
+        other.interval = nullptr;
         other.listening = nullptr;
         other.reception = nullptr;
         other.interference = nullptr;
@@ -144,12 +210,44 @@ CommunicationCacheBase::ReceptionCacheEntry::~ReceptionCacheEntry()
     delete receptionResult;
 }
 
-CommunicationCacheBase::CommunicationCacheBase()
+CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(const TransmissionCacheEntry &other) :
+    transmission(other.transmission),
+    interferenceEndTime(other.interferenceEndTime),
+    signal(other.signal)
 {
 }
 
-CommunicationCacheBase::~CommunicationCacheBase()
+CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(TransmissionCacheEntry &&other) noexcept :
+    transmission(other.transmission),
+    interferenceEndTime(other.interferenceEndTime),
+    signal(other.signal)
 {
+    other.transmission = nullptr;
+    other.interferenceEndTime = 0;
+    other.signal = nullptr;
+}
+
+CommunicationCacheBase::TransmissionCacheEntry &CommunicationCacheBase::TransmissionCacheEntry::operator=(const TransmissionCacheEntry &other)
+{
+    if (this != &other) {
+        transmission = other.transmission;
+        interferenceEndTime = other.interferenceEndTime;
+        signal = other.signal;
+    }
+    return *this;
+}
+
+CommunicationCacheBase::TransmissionCacheEntry &CommunicationCacheBase::TransmissionCacheEntry::operator=(TransmissionCacheEntry &&other) noexcept
+{
+    if (this != &other) {
+        transmission = other.transmission;
+        interferenceEndTime = other.interferenceEndTime;
+        signal = other.signal;
+        other.transmission = nullptr;
+        other.interferenceEndTime = 0;
+        other.signal = nullptr;
+    }
+    return *this;
 }
 
 std::vector<const ITransmission *> *CommunicationCacheBase::computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime)
@@ -157,7 +255,7 @@ std::vector<const ITransmission *> *CommunicationCacheBase::computeInterferingTr
     RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
     std::vector<const ITransmission *> *interferingTransmissions = new std::vector<const ITransmission *>();
     if (radioCacheEntry->receptionIntervals != nullptr) {
-        std::deque<const Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(startTime, endTime);
+        std::deque<const IntervalTree::Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(startTime, endTime);
         for (auto interferingInterval : interferingIntervals) {
             const ITransmission *interferingTransmission = (ITransmission *)interferingInterval->value;
             interferingTransmissions->push_back(interferingTransmission);
@@ -218,13 +316,13 @@ void CommunicationCacheBase::removeCachedArrival(const IRadio *receiver, const I
         cacheEntry->arrival = nullptr;
 }
 
-const Interval *CommunicationCacheBase::getCachedInterval(const IRadio *receiver, const ITransmission *transmission)
+const IntervalTree::Interval *CommunicationCacheBase::getCachedInterval(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->interval : nullptr;
 }
 
-void CommunicationCacheBase::setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const Interval *interval)
+void CommunicationCacheBase::setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const IntervalTree::Interval *interval)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
@@ -356,28 +454,29 @@ void CommunicationCacheBase::removeCachedSNIR(const IRadio *receiver, const ITra
 
 const IReceptionDecision *CommunicationCacheBase::getCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part)
 {
+    ASSERT(part != IRadioSignal::SIGNAL_PART_NONE);
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
-    if (cacheEntry != nullptr)
-        cacheEntry->receptionDecisions.resize(part + 1);
     return cacheEntry ? cacheEntry->receptionDecisions[part] : nullptr;
 }
 
 void CommunicationCacheBase::setCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision)
 {
+    ASSERT(part != IRadioSignal::SIGNAL_PART_NONE);
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else {
-        cacheEntry->receptionDecisions.resize(part + 1);
+        delete cacheEntry->receptionDecisions[part];
         cacheEntry->receptionDecisions[part] = receptionDecision;
     }
 }
 
 void CommunicationCacheBase::removeCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part)
 {
+    ASSERT(part != IRadioSignal::SIGNAL_PART_NONE);
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr) {
-        cacheEntry->receptionDecisions.resize(part + 1);
+        delete cacheEntry->receptionDecisions[part];
         cacheEntry->receptionDecisions[part] = nullptr;
     }
 }

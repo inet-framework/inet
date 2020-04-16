@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-06  Levente Mészáros
+
+	Removed numExtInterfaces parameter, ext[*] submodule vector.
+
+2019-06-19  Zoltan Bojthe
+
+	Added routingApp submodule to ManetRouter for Aodv or other manet routing over UDP/TCP protocol.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

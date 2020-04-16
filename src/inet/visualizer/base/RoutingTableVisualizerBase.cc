@@ -32,8 +32,9 @@ RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(const Ipv4Rou
 {
 }
 
-const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'm':
             result = route->getNetmask().isUnspecified() ? "*" : std::to_string(route->getNetmask().getNetmaskLength());

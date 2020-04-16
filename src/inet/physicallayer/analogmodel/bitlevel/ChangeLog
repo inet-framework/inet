@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-23  Levente Mészáros
+
+	Renamed carrierFrequency to centerFrequency.
+
+	This confusion was spread all around the code. In most places we don't
+	know what kind of modulation is used (e.g. OFDM has several subcarriers),
+	so it doesn't really make sense.
+
+2019-08-27  Levente Mészáros
+
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-06-07  Levente Mészáros
+
+	Replaced old multidimensional mappings (MiXiM) with new multidimensional functions.
+
+	This patch affects member variables, arguments and returns values.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-21  Levente Mészáros

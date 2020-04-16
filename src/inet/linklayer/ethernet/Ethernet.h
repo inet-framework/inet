@@ -39,6 +39,7 @@ const b INTERFRAME_GAP_BITS               = b(96);
 #define FAST_ETHERNET_TXRATE                100000000.0   /* 100 Mbit/sec (in bit/s) */
 #define GIGABIT_ETHERNET_TXRATE             1000000000.0   /* 1 Gbit/sec (in bit/s) */
 #define FAST_GIGABIT_ETHERNET_TXRATE        10000000000.0   /* 10 Gbit/sec (in bit/s) */
+#define TWENTYFIVE_GIGABIT_ETHERNET_TXRATE  25000000000.0   /* 25 Gbit/sec (in bit/s) */
 #define FOURTY_GIGABIT_ETHERNET_TXRATE      40000000000.0   /* 40 Gbit/sec (in bit/s) */
 #define HUNDRED_GIGABIT_ETHERNET_TXRATE     100000000000.0   /* 100 Gbit/sec (in bit/s) */
 #define TWOHUNDRED_GIGABIT_ETHERNET_TXRATE  200000000000.0   /* 200 Gbit/sec (in bit/s) */

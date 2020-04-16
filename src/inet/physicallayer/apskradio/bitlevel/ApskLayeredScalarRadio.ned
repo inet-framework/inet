@@ -25,8 +25,8 @@ import inet.physicallayer.apskradio.packetlevel.ApskRadio;
 // all simulated domains. It must be used in conjunction with the
 // ~ApskLayeredScalarRadioMedium model.
 //
-// See also ~ApskLayeredScalarRadioMedium, ~LayeredScalarAnalogModel,
-// ~ApskLayeredTransmitter, and ~ApskLayeredReceiver.
+// @see ~ApskLayeredScalarRadioMedium, ~LayeredScalarAnalogModel,
+// ~ApskLayeredTransmitter, ~ApskLayeredReceiver.
 //
 module ApskLayeredScalarRadio extends ApskRadio
 {

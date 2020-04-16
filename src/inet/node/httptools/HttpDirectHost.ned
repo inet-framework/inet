@@ -21,12 +21,10 @@ import inet.applications.httptools.common.IHttpDirectApp;
 
 
 //
-// Simple host for the HttpTools project. The node is a simple container for tcpApps.
-// Suitable apps are the HttpBrowserDirect and HttpServerDirect modules from HttpTools.
+// Simple host for the HttpTools project. The node is a simple container for apps.
+// Suitable apps are the ~HttpBrowserDirect and ~HttpServerDirect modules from HttpTools.
 //
-// @see IHttpDirectApp
-// @see HttpServerDirect
-// @see HttpBrowserDirect
+// @see ~IHttpDirectApp, ~HttpServerDirect, ~HttpBrowserDirect
 //
 // @author Kristjan V. Jonsson (kristjanvj@gmail.com)
 //

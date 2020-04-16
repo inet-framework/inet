@@ -38,7 +38,8 @@ ini file line:
 
 .. code-block:: ini
 
-   **.routingProtocolType = "Aodv"
+   **.routingApp.typename = "Aodv" # as an application
+   **.routing.typename = "Gpsr" # as a routing protocol module
 
 There are also NED types called :ned:`AodvRouter`, :ned:`DymoRouter`,
 :ned:`DsdvRouter`, :ned:`GpsrRouter`, which are all :ned:`ManetRouter`’s

@@ -16,10 +16,8 @@
 //
 
 #include <algorithm>
-
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 
@@ -72,8 +70,9 @@ PacketDropVisualizerBase::DirectiveResolver::DirectiveResolver(const PacketDrop*
 {
 }
 
-const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'n':
             result = packetDrop->getPacket_()->getName();
@@ -225,7 +224,7 @@ void PacketDropVisualizerBase::removePacketDropVisualization(const PacketDropVis
 
 void PacketDropVisualizerBase::removeAllPacketDropVisualizations()
 {
-    for (auto packetDropVisualization : packetDropVisualizations) {
+    for (auto packetDropVisualization : std::vector<const PacketDropVisualization *>(packetDropVisualizations)) {
         removePacketDropVisualization(packetDropVisualization);
         delete packetDropVisualization;
     }

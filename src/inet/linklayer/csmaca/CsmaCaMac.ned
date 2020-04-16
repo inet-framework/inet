@@ -17,6 +17,7 @@
 
 package inet.linklayer.csmaca;
 
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
@@ -55,21 +56,18 @@ import inet.linklayer.contract.IMacProtocol;
 // to keep its code simple and accessible, so lost ACKs will cause duplicates
 // in the stream of packets sent up to higher layers.
 //
-simple CsmaCaMac extends MacProtocolBase like IMacProtocol
+module CsmaCaMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string fcsMode @enum("declared", "computed") = default("declared");
-        string queueModule = default(""); // name of optional external queue module
-        int maxQueueSize = default(-1); // maximum queue length in frames; only used if queueModule==""
-        bool prioritizeByUP = default(false); // use priority queueing, based on IEEE 802.1d User Priority (UP)
+        string fcsMode @enum("declared","computed") = default("declared");
         bool useAck = default(true);
         double bitrate @unit(bps);
-        int headerLength @unit(B) = default(16B); // minimum 16B, see CsmaCaMacDataHeader
-        int ackLength @unit(B) = default(13B); // minimum 13B, see CsmaCaMacAckHeader
+        int headerLength @unit(B) = default(17B); // maximum 255 byte, minimum 17B for serializing, see CsmaCaMacDataHeader
+        int ackLength @unit(B) = default(14B); // maximum 255 byte, minimum 14B for serializing, see CsmaCaMacAckHeader
         double sifsTime @unit(s) = default(10us);
         double slotTime @unit(s) = default(20us);
         double difsTime @unit(s) = default(sifsTime + 2 * slotTime);
@@ -86,5 +84,11 @@ simple CsmaCaMac extends MacProtocolBase like IMacProtocol
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                packetCapacity = default(-1);
+                @display("p=100,100;q=l2queue");
+        }
 }
 

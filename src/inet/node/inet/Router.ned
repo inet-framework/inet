@@ -37,8 +37,8 @@ import inet.routing.contract.IPim;
 //   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessInterface
 // - Also external interfaces can be configured for HW in the loop simulation
-//   using the numExtInterfaces parameter and setting the type using
-//   **.ext.typename in the INI file. see: ~ExtInterface and ~IExternalInterface
+//   using the numEthInterfaces parameter and setting the type using
+//   **.ext.typename in the INI file. see: ~ExtInterface derived modules and ~IExternalInterface
 // - PPP queueing type can be set using **.ppp.queue.typename see: ~PppInterface
 // - If wireless card is present, node mobility can be set using **.mobility.typename
 //   see: inet.mobility and ~IMobility
@@ -62,7 +62,7 @@ module Router extends ApplicationLayerNodeBase
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
-        ospf: <"Ospf"> like IOspf if hasOspf {
+        ospf: <default("Ospfv2")> like IOspf if hasOspf {
             parameters:
                 @display("p=975,226");
         }

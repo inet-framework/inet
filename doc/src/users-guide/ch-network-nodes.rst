@@ -175,15 +175,15 @@ defined like this:
 
 .. code-block:: ned
 
-   tcp: <tcpType> like ITcp if hasTcp;
+   tcp: <default("Tcp")> like ITcp if hasTcp;
 
-The ``tcpType`` parameter defaults to the default implementation,
-:ned:`Tcp`. To use another implementation instead, add the following
-line to the ini file:
+The ``typename`` parameter of the tcp submodule defaults to the default
+implementation, :ned:`Tcp`. To use another implementation instead, add the
+following line to the ini file:
 
 .. code-block:: ini
 
-   **.host*.tcpType = "TcpLwip"  # use lwIP's TCP implementation
+   **.host*.tcp.typename = "TcpLwip"  # use lwIP's TCP implementation
 
 Submodule vectors with parametric types are defined without the use of a
 module parameter to allow elements have different types. An example is

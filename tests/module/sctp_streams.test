@@ -7,7 +7,7 @@ Testing SCTP: Use of several streams using the fair bandwidth scheduler
 %inifile: omnetpp.ini
 
 [General]
-network=SctpFeatureTest
+network = inet.test.moduletest.lib.SctpFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib
@@ -55,8 +55,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 #4=FAIR_BANDWITH 5=FAIR_BANDWITH_PACKET 6=PRIORITY 7=FCFS 8=PATH_MANUAL 9=PATH_MAP_TO_PATH       = 9
 
 # NIC configuration
-#**.ppp[*].queue.typename = "DropTailQueue" # in routers
-#**.ppp[*].queue.frameCapacity = 100  # in routers
+#**.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
+#**.ppp[*].ppp.queue.packetCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 
 #**.vector-recording = false

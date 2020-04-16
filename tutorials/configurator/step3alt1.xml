@@ -1,0 +1,6 @@
+<config>
+	<interface among="host{0-2} router0" address="10.0.0.x"/>
+	<interface among="host{3-5} router1" address="10.0.1.x"/>
+	<interface among="host{6-8} router2" address="10.0.2.x"/>
+	<interface hosts="router*" address="10.1.x.x"/>
+</config>

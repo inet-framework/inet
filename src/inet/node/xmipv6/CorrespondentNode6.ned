@@ -23,7 +23,7 @@ package inet.node.xmipv6;
 import inet.node.ipv6.StandardHost6;
 
 //
-// An Ipv6 host with MIPv6 support and contains a Binding Cache which gets updated with every BU received.
+// An IPv6 host with MIPv6 support and contains a Binding Cache which gets updated with every BU received.
 //
 module CorrespondentNode6 extends StandardHost6
 {

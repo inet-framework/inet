@@ -18,6 +18,7 @@
 #include "inet/routing/bgpv4/Bgp.h"
 #include "inet/routing/bgpv4/BgpFsm.h"
 #include "inet/routing/bgpv4/BgpSession.h"
+#include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
 
 namespace inet {
 namespace bgp {
@@ -48,6 +49,7 @@ void BgpSession::setInfo(SessionInfo info)
     _info.peerAddr = info.peerAddr;
     _info.sessionID = info.sessionID;
     _info.linkIntf = info.linkIntf;
+    _info.ebgpMultihop = info.ebgpMultihop;
     _info.socket = new TcpSocket();
 }
 
@@ -135,12 +137,25 @@ void BgpSession::sendOpenMessage()
     _openMsgSent++;
 }
 
-void BgpSession::sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdateNlri &NLRI)
+void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes*> &content, BgpUpdateNlri &NLRI)
 {
     const auto& updateMsg = makeShared<BgpUpdateMessage>();
-    updateMsg->setPathAttributeListArraySize(1);
-    updateMsg->setPathAttributeList(content);
-    updateMsg->setNLRI(NLRI);
+
+    updateMsg->setWithDrawnRoutesLength(0);
+
+    size_t attrLength = 0;
+    updateMsg->setPathAttributesArraySize(content.size());
+    for (size_t i = 0; i < content.size(); i++) {
+        attrLength += computePathAttributeBytes(*content[i]);
+        updateMsg->setPathAttributes(i, content[i]);
+    }
+    updateMsg->setTotalPathAttributeLength(attrLength);
+    updateMsg->addChunkLength(B(attrLength));
+
+    updateMsg->setNLRIArraySize(1);
+    updateMsg->setNLRI(0, NLRI);
+    updateMsg->addChunkLength(B(1 + (NLRI.length +7)/8));
+    updateMsg->setTotalLength(B(updateMsg->getChunkLength()).get());
 
     EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str(false) <<
             " on interface " << _info.linkIntf->getInterfaceName() <<

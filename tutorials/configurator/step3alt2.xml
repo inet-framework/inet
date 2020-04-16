@@ -1,0 +1,7 @@
+<config>
+	<interface hosts="host0" address="10.0.0.x"/>
+	<interface hosts="host3" address="10.0.1.x"/>
+	<interface hosts="host6" address="10.0.2.x"/>
+	<interface among="router*" address="10.1.x.x"/>
+	<interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>
+</config>

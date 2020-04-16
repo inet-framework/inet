@@ -40,7 +40,6 @@ class INET_API Stp : public StpBase
 {
   public:
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
-    enum BdpuType { CONFIG_BDPU = 0, TCN_BPDU = 1 };
 
   protected:
     static const double tickInterval;    // interval between two ticks
@@ -74,13 +73,13 @@ class INET_API Stp : public StpBase
     /*
      * Bridge Protocol Data Unit handling
      */
-    void handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu);
+    void handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu);
     virtual void initInterfacedata(unsigned int interfaceId);
 
     /**
      * Topology change handling
      */
-    void handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn);
+    void handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn);
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -91,10 +90,10 @@ class INET_API Stp : public StpBase
     void generateBPDU(int interfaceId, const MacAddress& address = MacAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
 
     /*
-     * Send hello BDPUs on all ports (only for root switches)
+     * Send hello BPDUs on all ports (only for root switches)
      * Invokes generateBPDU(i) where i goes through all ports
      */
-    void generateHelloBDPUs();
+    void generateHelloBPDUs();
 
     /*
      * Generate and send Topology Change Notification
@@ -112,8 +111,8 @@ class INET_API Stp : public StpBase
     /*
      * Check of the received BPDU is superior to port information from InterfaceTable
      */
-    bool isSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu);
-    void setSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu);
+    bool isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu);
+    void setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu);
 
     void handleTick();
 

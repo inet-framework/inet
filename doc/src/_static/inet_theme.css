@@ -1,4 +1,4 @@
-/* fixes for sphinx_materialdesign_theme */
+/* local fixes for the theme */
 
 body { font-family: "Helvetica","Arial",sans-serif }
 
@@ -28,6 +28,12 @@ body { font-family: "Helvetica","Arial",sans-serif }
     font-size: 1.1rem!important;
 }
 
+div.admonition {
+    padding: 12px 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 /* missing styles */
 .align-left { text-align: left; }
 .align-center { text-align: center; display: block; margin-left: auto; margin-right: auto; }
@@ -52,6 +58,13 @@ body { font-family: "Helvetica","Arial",sans-serif }
 .literal-msg, .reference-msg { color: purple; }
 .protocol { font-style: italic; }
 
+.page-content .code, .page-content code:not(.download) {
+    margin: 0 4px;
+    padding: 1px 4px;
+    background: rgba(0,0,0,.05);
+    border-radius: 3px;
+}
+
 .page-content code.literal {
     font-size: 0.95rem;
     margin-left: 0px;
@@ -66,3 +79,22 @@ body { font-family: "Helvetica","Arial",sans-serif }
 .highlight-ned .highlight { background-color: #eeffe4 }
 .highlight-msg .highlight { background-color: #fcf5ff }
 
+/* bottom navigation buttons */
+.pagenation #button-prev {
+    padding: 0 30px;
+    justify-content: left;
+}
+
+.pagenation #button-next {
+    padding: 0 30px;
+    justify-content: right;
+}
+
+a.download:before {
+    margin-right: -4px;
+}
+
+div.figure, video {
+    margin: 0.5em 0.5em 1em 0.5em;
+    padding: 0;
+}
