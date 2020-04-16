@@ -67,12 +67,6 @@ IPacketComparatorFunction *PacketQueue::createComparatorFunction(const char *com
         return check_and_cast<IPacketComparatorFunction *>(createOne(comparatorClass));
 }
 
-void PacketQueue::handleMessage(cMessage *message)
-{
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
-}
-
 bool PacketQueue::isOverloaded() const
 {
     return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||

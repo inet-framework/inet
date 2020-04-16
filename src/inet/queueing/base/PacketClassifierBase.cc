@@ -41,6 +41,12 @@ void PacketClassifierBase::initialize(int stage)
     }
 }
 
+void PacketClassifierBase::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
+}
+
 int PacketClassifierBase::callClassifyPacket(Packet *packet)
 {
     int index = classifyPacket(packet);
