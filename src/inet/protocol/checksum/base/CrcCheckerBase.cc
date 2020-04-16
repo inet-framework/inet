@@ -48,7 +48,9 @@ bool CrcCheckerBase::checkComputedCrc(const Packet *packet, uint16_t receivedCrc
         return true;
     else {
         const auto& data = packet->peekDataAsBytes();
-        uint16_t computedCrc = TcpIpChecksum::checksum(data->getBytes());
+        auto bytes = data->getBytes();
+        uint16_t computedCrc = TcpIpChecksum::checksum(bytes.data(), packet->getByteLength() - 2);
+        // NOTE: the correct bit must be checked, because the data may not be corrupted precisely depending on the corruption mode
         return receivedCrc == computedCrc && data->isCorrect() && !packet->hasBitError();
     }
 }
