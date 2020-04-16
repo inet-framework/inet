@@ -52,11 +52,16 @@ bool EthernetFragmentFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode,
     }
 }
 
-bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const
+void EthernetFragmentFcsChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtBack<EthernetFragmentFcs>(B(4));
     auto fragmentTag = packet->getTag<FragmentTag>();
     fragmentTag->setLastFragment(!header->getMCrc());
+}
+
+bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const
+{
+    const auto& header = packet->peekAtBack<EthernetFragmentFcs>(B(4));
     auto fcsMode = header->getFcsMode();
     auto fcs = header->getFcs();
     return checkFcs(packet, fcsMode, fcs);

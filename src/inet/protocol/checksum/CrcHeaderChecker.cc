@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "CrcHeaderChecker.h"
+#include "inet/protocol/checksum/CrcHeaderChecker.h"
 #include "inet/protocol/checksum/header/CrcHeader_m.h"
 #include "inet/protocol/contract/IProtocol.h"
 
@@ -34,9 +34,14 @@ void CrcHeaderChecker::initialize(int stage)
     }
 }
 
+void CrcHeaderChecker::processPacket(Packet *packet)
+{
+    popHeader<CrcHeader>(packet, headerPosition, B(2));
+}
+
 bool CrcHeaderChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& header = popHeader<CrcHeader>(packet, headerPosition, B(2));
+    const auto& header = peekHeader<CrcHeader>(packet, headerPosition, B(2));
     auto crcMode = header->getCrcMode();
     auto crc = header->getCrc();
     return checkCrc(packet, crcMode, crc);

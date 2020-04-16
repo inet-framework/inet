@@ -33,8 +33,11 @@ class INET_API EthernetAddressChecker : public PacketFilterBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual bool matchesPacket(const Packet *packet) const override;
+    virtual void processPacket(Packet *packet) override;
     virtual void dropPacket(Packet *packet) override;
+
+  public:
+    virtual bool matchesPacket(const Packet *packet) const override;
 };
 
 } // namespace inet

@@ -36,9 +36,14 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
     }
 }
 
+void EthernetFcsChecker::processPacket(Packet *packet)
+{
+    packet->popAtBack<EthernetFcs>(B(4));
+}
+
 bool EthernetFcsChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& header = packet->popAtBack<EthernetFcs>(B(4));
+    const auto& header = packet->peekAtBack<EthernetFcs>(B(4));
     auto fcsMode = header->getFcsMode();
     auto fcs = header->getFcs();
     return checkFcs(packet, fcsMode, fcs);

@@ -36,9 +36,14 @@ void ReceiveAtPort::initialize(int stage)
     }
 }
 
+void ReceiveAtPort::processPacket(Packet *packet)
+{
+    packet->popAtFront<DestinationPortHeader>();
+}
+
 bool ReceiveAtPort::matchesPacket(const Packet *packet) const
 {
-    auto header = packet->popAtFront<DestinationPortHeader>();
+    auto header = packet->peekAtFront<DestinationPortHeader>();
     return header->getDestinationPort() == port;
 }
 

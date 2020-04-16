@@ -48,21 +48,24 @@ void OrdinalBasedDropper::initialize(int stage)
 
 bool OrdinalBasedDropper::matchesPacket(const Packet *packet) const
 {
-    if (generateFurtherDrops) {
-        if (numPackets == dropsVector[0]) {
-            EV_DEBUG << "Dropping packet number " << numPackets << " " << packet << endl;
-            numDropped++;
-            dropsVector.erase(dropsVector.begin());
-            if (dropsVector.size() == 0) {
-                EV_DEBUG << "End of dropsVector reached." << endl;
-                generateFurtherDrops = false;
-            }
-            numPackets++;
-            return false;
-        }
-    }
+    return !generateFurtherDrops || numPackets != dropsVector[0];
+}
+
+void OrdinalBasedDropper::processPacket(Packet *packet)
+{
     numPackets++;
-    return true;
+}
+
+void OrdinalBasedDropper::dropPacket(Packet *packet)
+{
+    EV_DEBUG << "Dropping packet number " << numPackets << " " << packet << endl;
+    numPackets++;
+    numDropped++;
+    dropsVector.erase(dropsVector.begin());
+    if (dropsVector.size() == 0) {
+        EV_DEBUG << "End of dropsVector reached." << endl;
+        generateFurtherDrops = false;
+    }
 }
 
 void OrdinalBasedDropper::parseVector(const char *vector)

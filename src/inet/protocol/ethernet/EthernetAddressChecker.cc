@@ -33,14 +33,18 @@ void EthernetAddressChecker::initialize(int stage)
     }
 }
 
-bool EthernetAddressChecker::matchesPacket(const Packet *packet) const
+void EthernetAddressChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8023MacAddresses>();
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
-    auto destAddress = header->getDest();
     macAddressInd->setSrcAddress(header->getSrc());
-    macAddressInd->setDestAddress(destAddress);
-    return promiscuous || destAddress.isBroadcast() || interfaceEntry->matchesMacAddress(destAddress);
+    macAddressInd->setDestAddress(header->getDest());
+}
+
+bool EthernetAddressChecker::matchesPacket(const Packet *packet) const
+{
+    const auto& header = packet->peekAtFront<Ieee8023MacAddresses>();
+    return promiscuous || interfaceEntry->matchesMacAddress(header->getDest());
 }
 
 void EthernetAddressChecker::dropPacket(Packet *packet)

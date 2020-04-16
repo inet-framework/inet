@@ -26,16 +26,22 @@ namespace inet {
 
 Define_Module(EthernetTypeOrLengthChecker);
 
-bool EthernetTypeOrLengthChecker::matchesPacket(const Packet *packet) const
+void EthernetTypeOrLengthChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8023TypeOrLength>();
-    auto protocol = ProtocolGroup::ethertype.findProtocol(header->getTypeOrLength());
+    auto protocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     // TODO: move to interface entry
     auto interfaceEntry = check_and_cast<InterfaceEntry *>(getParentModule());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    return true;
+}
+
+bool EthernetTypeOrLengthChecker::matchesPacket(const Packet *packet) const
+{
+    const auto& header = packet->peekAtFront<Ieee8023TypeOrLength>();
+    auto protocol = ProtocolGroup::ethertype.findProtocol(header->getTypeOrLength());
+    return protocol != nullptr;
 }
 
 void EthernetTypeOrLengthChecker::dropPacket(Packet *packet)
