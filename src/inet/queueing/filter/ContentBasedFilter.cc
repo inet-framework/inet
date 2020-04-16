@@ -29,7 +29,7 @@ void ContentBasedFilter::initialize(int stage)
         filter.setPattern(par("packetFilter"), par("packetDataFilter"));
 }
 
-bool ContentBasedFilter::matchesPacket(Packet *packet)
+bool ContentBasedFilter::matchesPacket(const Packet *packet) const
 {
     return filter.matches(packet);
 }

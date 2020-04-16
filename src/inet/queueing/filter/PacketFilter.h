@@ -32,7 +32,7 @@ class INET_API PacketFilter : public PacketFilterBase
   protected:
     virtual void initialize(int stage) override;
     virtual IPacketFilterFunction *createFilterFunction(const char *filterClass) const;
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
 
   public:
     virtual ~PacketFilter() { delete packetFilterFunction; }

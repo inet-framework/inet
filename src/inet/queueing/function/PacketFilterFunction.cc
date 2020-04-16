@@ -20,7 +20,7 @@
 namespace inet {
 namespace queueing {
 
-static bool filterAnyPacket(Packet *packet)
+static bool filterAnyPacket(const Packet *packet)
 {
     return true;
 }

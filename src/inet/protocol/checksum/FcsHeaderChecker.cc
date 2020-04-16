@@ -34,7 +34,7 @@ void FcsHeaderChecker::initialize(int stage)
     }
 }
 
-bool FcsHeaderChecker::matchesPacket(Packet *packet)
+bool FcsHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = popHeader<FcsHeader>(packet, headerPosition, B(4));
     auto fcsMode = header->getFcsMode();

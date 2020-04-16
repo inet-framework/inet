@@ -46,7 +46,7 @@ void OrdinalBasedDropper::initialize(int stage)
     }
 }
 
-bool OrdinalBasedDropper::matchesPacket(Packet *packet)
+bool OrdinalBasedDropper::matchesPacket(const Packet *packet) const
 {
     if (generateFurtherDrops) {
         if (numPackets == dropsVector[0]) {

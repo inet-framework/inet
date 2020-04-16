@@ -27,7 +27,7 @@ using namespace inet::queueing;
 class INET_API EthernetTypeOrLengthChecker : public PacketFilterBase
 {
   protected:
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
     virtual void dropPacket(Packet *packet) override;
 };
 

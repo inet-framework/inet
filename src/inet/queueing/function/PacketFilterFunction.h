@@ -23,7 +23,7 @@
 namespace inet {
 namespace queueing {
 
-typedef bool (*PacketFilterFunction)(Packet *packet);
+typedef bool (*PacketFilterFunction)(const Packet *packet);
 
 class INET_API CPacketFilterFunction : public cObject, public virtual IPacketFilterFunction
 {
@@ -33,7 +33,7 @@ class INET_API CPacketFilterFunction : public cObject, public virtual IPacketFil
   public:
     CPacketFilterFunction(PacketFilterFunction packetFilterFunction) : packetFilterFunction(packetFilterFunction) { }
 
-    virtual bool matchesPacket(Packet *packet) const override { return packetFilterFunction(packet); }
+    virtual bool matchesPacket(const Packet *packet) const override { return packetFilterFunction(packet); }
 };
 
 #define Register_Packet_Filter_Function(name, function) \

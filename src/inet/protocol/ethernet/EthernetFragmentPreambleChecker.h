@@ -31,7 +31,7 @@ class INET_API EthernetFragmentPreambleChecker : public PacketFilterBase
     int fragmentNumber = 0;
 
   protected:
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
     virtual void dropPacket(Packet *packet) override;
 };
 

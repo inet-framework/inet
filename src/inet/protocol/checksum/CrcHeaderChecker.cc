@@ -34,7 +34,7 @@ void CrcHeaderChecker::initialize(int stage)
     }
 }
 
-bool CrcHeaderChecker::matchesPacket(Packet *packet)
+bool CrcHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = popHeader<CrcHeader>(packet, headerPosition, B(2));
     auto crcMode = header->getCrcMode();
