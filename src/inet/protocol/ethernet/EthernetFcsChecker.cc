@@ -36,7 +36,7 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
     }
 }
 
-bool EthernetFcsChecker::matchesPacket(Packet *packet)
+bool EthernetFcsChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->popAtBack<EthernetFcs>(B(4));
     auto fcsMode = header->getFcsMode();

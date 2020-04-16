@@ -34,7 +34,7 @@ void ReceiveWithHopLimit::initialize(int stage)
     }
 }
 
-bool ReceiveWithHopLimit::matchesPacket(Packet *packet)
+bool ReceiveWithHopLimit::matchesPacket(const Packet *packet) const
 {
     auto header = packet->popAtFront<HopLimitHeader>();
     if (header->getHopLimit() > 0) {

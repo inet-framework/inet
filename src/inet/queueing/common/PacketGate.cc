@@ -58,7 +58,7 @@ void PacketGate::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-bool PacketGate::matchesPacket(Packet *packet)
+bool PacketGate::matchesPacket(const Packet *packet) const
 {
     return isOpen_;
 }

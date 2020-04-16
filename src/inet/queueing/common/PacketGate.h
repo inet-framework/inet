@@ -37,7 +37,7 @@ class INET_API PacketGate : public PacketFilterBase, public virtual IPacketFlow
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
 
     virtual void scheduleChangeTimer();
     virtual void processChangeTimer();

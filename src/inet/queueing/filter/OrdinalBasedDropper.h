@@ -40,7 +40,7 @@ class INET_API OrdinalBasedDropper : public PacketFilterBase
     virtual void initialize(int stage) override;
     virtual void parseVector(const char *vector);
 
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
 };
 
 } // namespace queueing

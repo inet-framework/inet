@@ -101,7 +101,7 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(Packet *packet)
     return BELOW_MIN_LIMIT;
 }
 
-bool RedDropper::matchesPacket(Packet *packet)
+bool RedDropper::matchesPacket(const Packet *packet) const
 {
     auto redResult = doRandomEarlyDetection(packet);
     switch (redResult) {

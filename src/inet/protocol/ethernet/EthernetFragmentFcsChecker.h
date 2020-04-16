@@ -32,7 +32,7 @@ class INET_API EthernetFragmentFcsChecker : public FcsCheckerBase
   protected:
     virtual bool checkComputedFcs(const Packet *packet, uint32_t fcs) const override;
     virtual bool checkFcs(const Packet *packet, FcsMode fcsMode, uint32_t fcs) const override;
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
     virtual void dropPacket(Packet *packet) override;
 };
 

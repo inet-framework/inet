@@ -52,7 +52,7 @@ bool EthernetFragmentFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode,
     }
 }
 
-bool EthernetFragmentFcsChecker::matchesPacket(Packet *packet)
+bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->popAtBack<EthernetFragmentFcs>(B(4));
     auto fragmentTag = packet->getTag<FragmentTag>();

@@ -34,7 +34,7 @@ IPacketFilterFunction *PacketFilter::createFilterFunction(const char *filterClas
     return check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
 }
 
-bool PacketFilter::matchesPacket(Packet *packet)
+bool PacketFilter::matchesPacket(const Packet *packet) const
 {
     return packetFilterFunction->matchesPacket(packet);
 }

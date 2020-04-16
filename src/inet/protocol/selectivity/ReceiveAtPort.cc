@@ -36,7 +36,7 @@ void ReceiveAtPort::initialize(int stage)
     }
 }
 
-bool ReceiveAtPort::matchesPacket(Packet *packet)
+bool ReceiveAtPort::matchesPacket(const Packet *packet) const
 {
     auto header = packet->popAtFront<DestinationPortHeader>();
     return header->getDestinationPort() == port;

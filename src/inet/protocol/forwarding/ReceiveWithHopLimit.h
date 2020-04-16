@@ -28,7 +28,7 @@ class INET_API ReceiveWithHopLimit : public PacketFilterBase
 {
   protected:
     virtual void initialize(int stage) override;
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
 };
 
 } // namespace inet

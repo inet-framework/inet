@@ -34,7 +34,7 @@ class INET_API IPacketFilterFunction
     /**
      * Returns true if the filter matches the given packet.
      */
-    virtual bool matchesPacket(Packet *packet) const = 0;
+    virtual bool matchesPacket(const Packet *packet) const = 0;
 };
 
 } // namespace queueing

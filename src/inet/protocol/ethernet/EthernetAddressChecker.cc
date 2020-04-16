@@ -33,7 +33,7 @@ void EthernetAddressChecker::initialize(int stage)
     }
 }
 
-bool EthernetAddressChecker::matchesPacket(Packet *packet)
+bool EthernetAddressChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->popAtFront<Ieee8023MacAddresses>();
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();

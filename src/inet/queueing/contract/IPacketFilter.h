@@ -32,7 +32,7 @@ class INET_API IPacketFilter : public virtual IPacketFlow
     /**
      * Returns true if the filter matches the given packet.
      */
-    virtual bool matchesPacket(Packet *packet) = 0;
+    virtual bool matchesPacket(const Packet *packet) const = 0;
 };
 
 } // namespace queueing
