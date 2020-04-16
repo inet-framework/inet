@@ -83,6 +83,7 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     take(packet);
     emit(packetPushedSignal, packet);
     if (matchesPacket(packet)) {
+        processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         pushOrSendPacket(packet, outputGate, consumer);
     }
@@ -101,6 +102,7 @@ void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate)
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
     if (matchesPacket(packet)) {
+        processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         pushOrSendPacketStart(packet, outputGate, consumer);
     }
@@ -120,6 +122,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
     else
         checkPacketStreaming(packet);
     if (matchesPacket(packet)) {
+        processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         pushOrSendPacketEnd(packet, outputGate, consumer);
         endPacketStreaming(packet);
@@ -142,6 +145,7 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, b positio
     else
         checkPacketStreaming(packet);
     if (matchesPacket(packet)) {
+        processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         if (packet->getTotalLength() == position + extraProcessableLength)
             endPacketStreaming(packet);
@@ -204,6 +208,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
         take(packet);
         handlePacketProcessed(packet);
         if (matchesPacket(packet)) {
+            processPacket(packet);
             EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
             animateSend(packet, outputGate);
             updateDisplayString();
