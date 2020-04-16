@@ -23,7 +23,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
-
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
@@ -205,6 +204,12 @@ void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
 void InterfaceEntry::resetInterface()
 {
     protocolDataSet.clearTags();
+}
+
+bool InterfaceEntry::matchesMacAddress(const MacAddress& address) const
+{
+    // TODO: add real support for multicast MAC addresses
+    return address.isBroadcast() || address.isMulticast() || macAddr == address;
 }
 
 const L3Address InterfaceEntry::getNetworkAddress() const
