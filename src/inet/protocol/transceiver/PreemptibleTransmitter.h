@@ -23,6 +23,7 @@ namespace inet {
 class INET_API PreemptibleTransmitter : public PacketTransmitterBase
 {
   protected:
+    cPar *dataratePar = nullptr;
     bps datarate = bps(NaN);
 
     simtime_t txStartTime = -1;
