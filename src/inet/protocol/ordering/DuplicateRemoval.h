@@ -15,23 +15,28 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/protocol/fragmentation/FragmentTagBasedDefragmenter.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
+#ifndef __INET_DUPLICATEREMOVAL_H
+#define __INET_DUPLICATEREMOVAL_H
+
+#include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 
-Define_Module(FragmentTagBasedDefragmenter);
+using namespace inet::queueing;
 
-void FragmentTagBasedDefragmenter::pushPacket(Packet *fragmentPacket, cGate *gate)
+class INET_API DuplicateRemoval : public PacketPusherBase
 {
-    Enter_Method("pushPacket");
-    take(fragmentPacket);
-    auto fragmentTag = fragmentPacket->getTag<FragmentTag>();
-    bool firstFragment = fragmentTag->getFirstFragment();
-    bool lastFragment = fragmentTag->getLastFragment();
-    bool expectedFragment = fragmentTag->getFragmentNumber() == -1 || fragmentTag->getFragmentNumber() == expectedFragmentNumber;
-    defragmentPacket(fragmentPacket, firstFragment, lastFragment, expectedFragment);
-}
+  protected:
+    int lastSequenceNumber = -1;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+  public:
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
+};
 
 } // namespace inet
+
+#endif // ifndef __INET_DUPLICATEREMOVAL_H
 

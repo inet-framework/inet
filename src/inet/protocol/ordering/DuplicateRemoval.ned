@@ -19,9 +19,9 @@ package inet.protocol.ordering;
 
 import inet.queueing.base.PacketPusherBase;
 
-simple Reordering extends PacketPusherBase
+simple DuplicateRemoval extends PacketPusherBase
 {
     parameters:
-        @class(Reordering);
+        @class(DuplicateRemoval);
         @display("i=block/rx");
 }

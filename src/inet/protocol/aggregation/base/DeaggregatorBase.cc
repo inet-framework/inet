@@ -29,6 +29,7 @@ void DeaggregatorBase::initialize(int stage)
 void DeaggregatorBase::pushPacket(Packet *aggregatedPacket, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(aggregatedPacket);
     auto subpackets = deaggregatePacket(aggregatedPacket);
     for (auto subpacket : subpackets) {
         EV_INFO << "Deaggregating packet " << subpacket->getName() << " from packet " << aggregatedPacket->getName() << "." << endl;

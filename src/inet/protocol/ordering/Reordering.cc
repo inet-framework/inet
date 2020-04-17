@@ -36,6 +36,7 @@ void Reordering::initialize(int stage)
 void Reordering::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     auto header = packet->popAtFront<SequenceNumberHeader>();
     auto sequenceNumber = header->getSequenceNumber();
     packets[sequenceNumber] = packet;
@@ -44,7 +45,7 @@ void Reordering::pushPacket(Packet *packet, cGate *gate)
             auto it = packets.find(expectedSequenceNumber);
             if (it == packets.end())
                 break;
-            send(it->second, "out");
+            pushOrSendPacket(it->second, outputGate, consumer);
             packets.erase(it);
             expectedSequenceNumber++;
         }

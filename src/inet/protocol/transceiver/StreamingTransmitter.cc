@@ -34,8 +34,8 @@ void StreamingTransmitter::initialize(int stage)
 void StreamingTransmitter::handleMessage(cMessage *message)
 {
     if (message == txEndTimer) {
-        sendPacketEnd(signal, outputGate, signal->getDuration());
-        signal = nullptr;
+        sendPacketEnd(txSignal, outputGate, txSignal->getDuration());
+        txSignal = nullptr;
         producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
         producer->handleCanPushPacket(inputGate->getPathStartGate());
     }
@@ -46,15 +46,16 @@ void StreamingTransmitter::handleMessage(cMessage *message)
 void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    ASSERT(signal == nullptr);
+    take(packet);
+    ASSERT(txSignal == nullptr);
     txPacket = packet;
     take(txPacket);
 //    // TODO: new Signal
 //    auto s = new EthernetSignal(packet->getName());
 //    s->setBitrate(datarate.get());
-    signal = encodePacket(txPacket);
-    sendPacketStart(signal->dup(), outputGate, signal->getDuration());
-    scheduleTxEndTimer(signal);
+    txSignal = encodePacket(txPacket);
+    sendPacketStart(txSignal->dup(), outputGate, txSignal->getDuration());
+    scheduleTxEndTimer(txSignal);
 }
 
 simtime_t StreamingTransmitter::calculateDuration(const Packet *packet) const
@@ -71,6 +72,9 @@ void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
 
 void StreamingTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
 {
+    take(packet);
+    delete packet;
+    // TODO:
 }
 
 b StreamingTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)

@@ -156,6 +156,7 @@ void InterPacketGap::handleCanPushPacket(cGate *gate)
 void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketStart");
+    take(packet);
     auto now = simTime();
     lastPacket = packet;
     lastDelay = lastPacketEndTime + duration - now;
@@ -173,6 +174,7 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate)
 void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
+    take(packet);
     animateSend(packet, outputGate);
     pushOrSendPacketProgress(packet, outputGate->getPathEndGate(), consumer, position, extraProcessableLength);
 }
@@ -180,6 +182,7 @@ void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, b position,
 void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
+    take(packet);
     animateSend(packet, outputGate);
     pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
 }

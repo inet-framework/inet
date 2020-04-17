@@ -31,7 +31,7 @@ class INET_API StreamingTransmitter : public PacketTransmitterBase
     bps datarate = bps(NaN);
 
     cMessage *txEndTimer = nullptr;
-    Signal *signal = nullptr;
+    Signal *txSignal = nullptr;
     Packet *txPacket = nullptr;
 
   protected:
