@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rm -f /tmp/SelfDoc.txt
+./fingerprinttest -d -f tplx "$@" \
+    -a --generate-selfdoc=true --fingerprintcalculator-class='inet::SelfDocumenterFingerprintCalculator' \
+    --record-eventlog=false --vector-recording=false --scalar-recording=false
+
+grep '^=SelfDoc=' /tmp/SelfDoc.txt | cut -c 10- | sort -u  | ./fingerprinttest_selfdoc_txt2json >SelfDoc.json
+
+inet_selfdoc_json2xml <SelfDoc.json >SelfDoc.xml

@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+#
+# stdin: JSON formatted database containing observed data while running fingerprint tests
+# stdout: XML data to be fed to the neddoc generator to augment static INET NED documentation
+
+import sys
+import json
+import re
+
+def tildeize(t):
+    p = re.compile(r'\binet::(([a-z0-9]+::)*)')
+    t = p.sub(r'\1~', t)
+    p = re.compile(r'\b(inet\.([a-z0-9]+\.)*)')
+    t = p.sub(r'~\1', t)
+    return t
+
+# format a single table for a given action into a string
+def table(rows, title):
+    if rows == None:
+        return ''
+
+    s = '<h3 class="mdl-color-text--primary subtitle">{} (observed)</h3>\n'.format(title)
+    s += '<table class="behaviortable">\n'
+    s += '<tr style="text-transform: capitalize">'
+    for k in rows[0].keys():
+        s += '<th>{}</th>'.format(k)
+    s += '</tr>\n'
+    for entry in rows:
+        s +='<tr>'
+        for k, v in entry.items():
+            if type(v) is list:
+                s +='<td>'
+                sep = ''
+                for vv in v:
+                    s += sep + '{}'.format(tildeize(vv))
+                    sep = ', '
+                s +='</td>'
+            else:
+                s +='<td>{}</td>'.format(tildeize(v))
+        s += '</tr>\n'
+    s += '</table>\n'
+    return s
+
+def markOpt(t):
+    return '<i>{}?</i>'.format(t)
+
+# group the colName column of list of tuple
+def groupCol(rows, colName):
+    if rows == None:
+        return None
+    r = {}
+    for entry in rows:
+        e = entry.copy()
+        e.pop(colName, None)
+        g = set(entry[colName])
+        ekey = json.dumps(e)
+        if ekey in r:
+            r[ekey][1] = r[ekey][1] & g
+            r[ekey][2] = r[ekey][2] | g
+        else:
+            r[ekey] = [e,g,g]
+
+    rr = list()
+    for k,e in r.items():
+        x = e[0]
+        x[colName] = sorted(list(e[1]))
+        opt = sorted(list(e[2]-e[1]))
+        x[colName].extend(list(map(markOpt, opt)))
+        rr.append(x)
+    return rr
+
+db = json.load(sys.stdin)
+
+for nedtype, actions in db.items():
+    print('<nedfragment location="{}" anchor="after-statistics"><![CDATA[\n{}]]></nedfragment>\n\n'.format(
+        nedtype,
+        table(actions.get('SCHEDULE'), 'Scheduled messages') +
+        table(actions.get('CALL'), 'Direct method calls') +
+        table(groupCol(actions.get('INPUT'), 'tags'), 'Incoming messages') +
+        table(groupCol(actions.get('OUTPUT'), 'tags'), 'Outgoing messages') +
+        table(groupCol(actions.get('PULL_IN'), 'tags'), 'Pull in messages') +
+        table(groupCol(actions.get('PULLED_OUT'), 'tags'), 'Pulled out messages') +
+        table(groupCol(actions.get('PUSHED_IN'), 'tags'), 'Pushed in messages') +
+        table(groupCol(actions.get('PUSH_OUT'), 'tags'), 'Push out messages') +
+        table(actions.get('PACKET'), 'Packet operations') +
+        table(actions.get('STAG'), 'Shared Tagging operations') +
+        table(actions.get('RTAG'), 'Region Tagging operations') +
+        table(actions.get('TAG'), 'Tagging operations') +
+        '')
+    )

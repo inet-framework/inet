@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+#
+# convert the raw output of the selfdocumentation log into a structured JSON file
+#
+
+import sys
+import json
+
+content = "[" + sys.stdin.read() + '{} ]'  # make an array from the individual dictionary items in the raw txt file and add an empty entry at the end to avoid issues with the trailing comma
+database = json.loads(content)
+
+nedtypes = dict()
+
+for entry in database:
+    if entry : # skip empty entries (so you can add an empty entry at the end of the file)
+        nedtypes[entry["module"]] = actions = nedtypes.get(entry["module"], dict())
+        actions[entry["action"]] = details = actions.get(entry["action"], list())
+        details.append(entry["details"])
+
+print(json.dumps(nedtypes, indent=True))
