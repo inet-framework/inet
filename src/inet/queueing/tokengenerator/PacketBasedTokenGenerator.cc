@@ -46,6 +46,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
 void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     auto numTokens = numTokensPerPacketParameter->doubleValue() + numTokensPerBitParameter->doubleValue() * packet->getTotalLength().get();
     numTokensGenerated += numTokens;
     emit(TokenGeneratorBase::tokensCreatedSignal, numTokens);

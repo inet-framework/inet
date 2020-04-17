@@ -57,6 +57,7 @@ void PcapFilePacketConsumer::finish()
 void PcapFilePacketConsumer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     EV_INFO << "Writing packet " << packet->getName() << " to PCAP file." << endl;
     emit(packetPushedSignal, packet);
     pcapWriter.writePacket(simTime(), packet, direction, getContainingNicModule(this), networkType);

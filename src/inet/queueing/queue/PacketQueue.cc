@@ -88,6 +88,7 @@ Packet *PacketQueue::getPacket(int index) const
 void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
     queue.insert(packet);
     emit(packetPushedSignal, packet);
