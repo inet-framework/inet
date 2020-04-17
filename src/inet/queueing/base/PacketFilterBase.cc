@@ -79,8 +79,8 @@ bool PacketFilterBase::canPushPacket(Packet *packet, cGate *gate) const
 void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    checkPacketStreaming(nullptr);
     take(packet);
+    checkPacketStreaming(nullptr);
     emit(packetPushedSignal, packet);
     if (matchesPacket(packet)) {
         processPacket(packet);

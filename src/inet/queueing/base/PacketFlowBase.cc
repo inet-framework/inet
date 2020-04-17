@@ -75,8 +75,8 @@ bool PacketFlowBase::canPushPacket(Packet *packet, cGate *gate) const
 void PacketFlowBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    checkPacketStreaming(nullptr);
     take(packet);
+    checkPacketStreaming(nullptr);
     processPacket(packet);
     pushOrSendPacket(packet, outputGate, consumer);
     handlePacketProcessed(packet);
