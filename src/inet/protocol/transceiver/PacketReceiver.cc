@@ -36,8 +36,7 @@ void PacketReceiver::handleMessage(cMessage *message)
 
 void PacketReceiver::receiveSignal(Signal *signal)
 {
-    auto packet = check_and_cast<Packet *>(signal->decapsulate());
-    // TODO: check signal physical properties such as datarate, modulation, etc.
+    auto packet = decodePacket(signal);
     pushOrSendPacket(packet, outputGate, consumer);
     delete signal;
 }

@@ -30,4 +30,11 @@ void PacketReceiverBase::initialize(int stage)
         checkPacketOperationSupport(outputGate);
 }
 
+Packet *PacketReceiverBase::decodePacket(Signal *signal) const
+{
+    auto packet = check_and_cast<Packet *>(signal->decapsulate());
+    // TODO: check signal physical properties such as datarate, modulation, etc.
+    return packet;
+}
+
 } // namespace inet
