@@ -17,12 +17,12 @@
 
 package inet.protocol.acknowledgement;
 
-simple Resending
+import inet.queueing.base.PacketPusherBase;
+
+simple Resending extends PacketPusherBase
 {
     parameters:
         int numRetries;
+        @class(Resending);
         @display("i=block/tx");
-    gates:
-        input in;
-        output out;
 }

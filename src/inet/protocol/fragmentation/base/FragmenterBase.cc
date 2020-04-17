@@ -52,6 +52,7 @@ Packet *FragmenterBase::createFragmentPacket(Packet *packet, b fragmentOffset, b
 void FragmenterBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     auto fragmentLengths = fragmenterPolicy->computeFragmentLengths(packet);
     b fragmentOffset = b(0);
     int numFragments = fragmentLengths.size();

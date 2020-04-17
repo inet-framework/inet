@@ -47,11 +47,13 @@ void Resending::handleMessage(cMessage *message)
 void Resending::handlePushPacketProcessed(Packet *p, cGate *gate, bool successful)
 {
     if (successful || retry == numRetries) {
-        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+        if (producer != nullptr)
+            producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
         delete packet;
         packet = nullptr;
         retry = 0;
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        if (producer != nullptr)
+            producer->handleCanPushPacket(inputGate->getPathStartGate());
     }
     else {
         pushOrSendPacket(packet->dup(), outputGate, consumer);

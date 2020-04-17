@@ -16,35 +16,35 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/protocol/acknowledgement/AcknowledgeHeader_m.h"
-#include "inet/protocol/acknowledgement/ReceiveWithAcknowledge.h"
 #include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/ordering/DuplicateRemoval.h"
 #include "inet/protocol/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {
 
-Define_Module(ReceiveWithAcknowledge);
+Define_Module(DuplicateRemoval);
 
-void ReceiveWithAcknowledge::initialize(int stage)
+void DuplicateRemoval::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::withAcknowledge, inputGate, inputGate);
-        registerProtocol(IProtocol::withAcknowledge, outputGate, outputGate);
+        registerService(IProtocol::sequenceNumber, inputGate, inputGate);
+        registerProtocol(IProtocol::sequenceNumber, outputGate, outputGate);
     }
 }
 
-void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, cGate *gate)
+void DuplicateRemoval::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    take(dataPacket);
-    auto dataHeader = dataPacket->popAtFront<SequenceNumberHeader>();
-    send(dataPacket, "out");
-    auto ackHeader = makeShared<AcknowledgeHeader>();
-    ackHeader->setSequenceNumber(dataHeader->getSequenceNumber());
-    auto ackPacket = new Packet("Ack", ackHeader);
-    ackPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::acknowledge);
-    send(ackPacket, "ackOut");
+    take(packet);
+    auto header = packet->popAtFront<SequenceNumberHeader>();
+    auto sequenceNumber = header->getSequenceNumber();
+    if (lastSequenceNumber == sequenceNumber)
+        delete packet;
+    else {
+        lastSequenceNumber = sequenceNumber;
+        pushOrSendPacket(packet, outputGate, consumer);
+    }
 }
 
 } // namespace inet
