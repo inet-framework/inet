@@ -58,5 +58,5 @@ network Network1
             @display("p=200,100");
         }
     connections allowunconnected:
-        client.out --> {  delay = 1us; } --> server.in;
+        client.out --> { delay = 1us; } --> server.in;
 }

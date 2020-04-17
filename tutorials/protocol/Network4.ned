@@ -17,8 +17,8 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocol.checksum.CrcHeaderChecker;
-import inet.protocol.checksum.CrcHeaderInserter;
+import inet.protocol.checksum.FcsHeaderChecker;
+import inet.protocol.checksum.FcsHeaderInserter;
 import inet.protocol.transceiver.PacketReceiver;
 import inet.protocol.transceiver.PacketTransmitter;
 import inet.queueing.queue.PacketQueue;
@@ -43,7 +43,7 @@ module ClientHost4
         server: InstantServer {
             @display("p=150,300");
         }
-        crcInserter: CrcHeaderInserter {
+        fcsInserter: FcsHeaderInserter {
             @display("p=150,400");
         }
         transmitter: PacketTransmitter {
@@ -52,8 +52,8 @@ module ClientHost4
     connections:
         app.out --> queue.in;
         queue.out --> server.in;
-        server.out --> crcInserter.in;
-        crcInserter.out --> transmitter.in;
+        server.out --> fcsInserter.in;
+        fcsInserter.out --> transmitter.in;
         transmitter.out --> out;
 }
 
@@ -67,7 +67,7 @@ module ServerHost4
         app: PassivePacketSink {
             @display("p=150,100");
         }
-        crcChecker: CrcHeaderChecker {
+        fcsChecker: FcsHeaderChecker {
             @display("p=150,200");
         }
         receiver: PacketReceiver {
@@ -75,8 +75,8 @@ module ServerHost4
         }
     connections:
         in --> receiver.in;
-        receiver.out --> crcChecker.in;
-        crcChecker.out --> app.in;
+        receiver.out --> fcsChecker.in;
+        fcsChecker.out --> app.in;
 }
 
 network Network4
@@ -89,5 +89,5 @@ network Network4
             @display("p=200,100");
         }
     connections allowunconnected:
-        client.out --> {  delay = 1us; } --> server.in;
+        client.out --> { delay = 1us; ber = 1E-5; } --> server.in;
 }
