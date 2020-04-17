@@ -17,8 +17,8 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocol.checksum.CrcHeaderChecker;
-import inet.protocol.checksum.CrcHeaderInserter;
+import inet.protocol.checksum.FcsHeaderChecker;
+import inet.protocol.checksum.FcsHeaderInserter;
 import inet.protocol.classifier.DynamicClassifier;
 import inet.protocol.common.InterPacketGap;
 import inet.protocol.fragmentation.FragmentNumberHeaderBasedDefragmenter;
@@ -87,7 +87,7 @@ module SenderHost
         preemptingServer: PreemptingServer {
             @display("p=250,1000");
         }
-        crcInserter: CrcHeaderInserter {
+        fcsInserter: FcsHeaderInserter {
             @display("p=200,1100");
         }
         interPacketGap: InterPacketGap {
@@ -111,8 +111,8 @@ module SenderHost
         multiplexer2.out --> inProgressQueue.in;
         inProgressQueue.out --> preemptingServer.in;
         preemptingServer.preemptedOut --> multiplexer2.in++;
-        preemptingServer.out --> crcInserter.in;
-        crcInserter.out --> interPacketGap.in;
+        preemptingServer.out --> fcsInserter.in;
+        fcsInserter.out --> interPacketGap.in;
         interPacketGap.out --> transmitter.in;
         transmitter.out --> g;
 }
@@ -167,7 +167,7 @@ module ReceiverHost
         defragmenter: DynamicDefragmenter {
             @display("p=200,300");
         }
-        crcChecker: CrcHeaderChecker {
+        fcsChecker: FcsHeaderChecker {
             @display("p=200,400");
         }
         receiver: PacketReceiver {
@@ -175,8 +175,8 @@ module ReceiverHost
         }
     connections:
         g --> receiver.in;
-        receiver.out --> crcChecker.in;
-        crcChecker.out --> defragmenter.in;
+        receiver.out --> fcsChecker.in;
+        fcsChecker.out --> defragmenter.in;
         defragmenter.out --> classifier.in;
         classifier.out++ --> sinkA.in;
         classifier.out++ --> sinkB.in;
