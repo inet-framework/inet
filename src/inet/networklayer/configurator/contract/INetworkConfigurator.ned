@@ -19,5 +19,7 @@ package inet.networklayer.configurator.contract;
 
 moduleinterface INetworkConfigurator
 {
+    parameters:
+        @display("i=block/cogwheel");
 }
 
