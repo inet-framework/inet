@@ -25,8 +25,10 @@ Define_Module(InterPacketGap);
 void InterPacketGap::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         duration = par("duration");
+        lastPacketEndTime = par("initialChannelBusy") ? 0 : -duration;
+    }
 }
 
 void InterPacketGap::handleMessage(cMessage *message)
