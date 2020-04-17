@@ -37,8 +37,11 @@ class INET_API PacketTransmitter : public PacketTransmitterBase
     virtual simtime_t calculateDuration(const Packet *packet) const override;
     virtual void scheduleTxEndTimer(Signal *signal);
 
+    virtual void startTx(Packet *packet);
+    virtual void endTx();
+
   public:
-    virtual ~PacketTransmitter() { cancelAndDelete(txEndTimer); }
+    virtual ~PacketTransmitter();
 
     virtual bool canPushSomePacket(cGate *gate) const override { return !txEndTimer->isScheduled(); }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return canPushSomePacket(gate); }

@@ -52,7 +52,7 @@ void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
 //    // TODO: new Signal
 //    auto s = new EthernetSignal(packet->getName());
 //    s->setBitrate(datarate.get());
-    signal = createSignal(txPacket);
+    signal = encodePacket(txPacket);
     sendPacketStart(signal->dup(), outputGate, signal->getDuration());
     scheduleTxEndTimer(signal);
 }

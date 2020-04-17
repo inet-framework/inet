@@ -62,7 +62,7 @@ void StreamingReceiver::receivePacketEnd(cPacket *cpacket)
 {
     delete rxSignal;
     rxSignal = check_and_cast<Signal *>(cpacket);
-    auto packet = check_and_cast<Packet *>(rxSignal->decapsulate());
+    auto packet = decodePacket(rxSignal);
     sendToUpperLayer(packet);
     delete rxSignal;
     rxSignal = nullptr;

@@ -39,7 +39,7 @@ class INET_API PacketTransmitterBase : public PacketProcessorBase, public virtua
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual Signal *createSignal(const Packet *packet) const;
+    virtual Signal *encodePacket(const Packet *packet) const;
 
     virtual simtime_t calculateDuration(const Packet *packet) const = 0;
 
