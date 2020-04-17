@@ -17,12 +17,18 @@
 
 package inet.tutorials.protocol;
 
+import inet.protocol.acknowledgement.Resending;
+import inet.protocol.checksum.FcsHeaderChecker;
+import inet.protocol.checksum.FcsHeaderInserter;
+import inet.protocol.common.InterPacketGap;
 import inet.protocol.transceiver.PacketReceiver;
 import inet.protocol.transceiver.PacketTransmitter;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.server.InstantServer;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
-module ClientHost2
+module ClientHost6
 {
     parameters:
         @display("i=device/pc");
@@ -32,15 +38,35 @@ module ClientHost2
         app: ActivePacketSource {
             @display("p=150,100");
         }
-        transmitter: PacketTransmitter {
+        queue: PacketQueue {
             @display("p=150,200");
         }
+        server: InstantServer {
+            @display("p=150,300");
+        }
+        resending: Resending {
+            @display("p=150,400");
+        }
+        fcsInserter: FcsHeaderInserter {
+            @display("p=150,500");
+        }
+        interPacketGap: InterPacketGap {
+            @display("p=150,600");
+        }
+        transmitter: PacketTransmitter {
+            @display("p=150,700");
+        }
     connections:
-        app.out --> transmitter.in;
+        app.out --> queue.in;
+        queue.out --> server.in;
+        server.out --> resending.in;
+        resending.out --> fcsInserter.in;
+        fcsInserter.out --> interPacketGap.in;
+        interPacketGap.out --> transmitter.in;
         transmitter.out --> out;
 }
 
-module ServerHost2
+module ServerHost6
 {
     parameters:
         @display("i=device/pc");
@@ -50,23 +76,27 @@ module ServerHost2
         app: PassivePacketSink {
             @display("p=150,100");
         }
-        receiver: PacketReceiver {
+        fcsChecker: FcsHeaderChecker {
             @display("p=150,200");
+        }
+        receiver: PacketReceiver {
+            @display("p=150,300");
         }
     connections:
         in --> receiver.in;
-        receiver.out --> app.in;
+        receiver.out --> fcsChecker.in;
+        fcsChecker.out --> app.in;
 }
 
-network Network2
+network Network6
 {
     submodules:
-        client: ClientHost2 {
+        client: ClientHost6 {
             @display("p=100,100");
         }
-        server: ServerHost2 {
+        server: ServerHost6 {
             @display("p=200,100");
         }
     connections allowunconnected:
-        client.out --> { delay = 1us; } --> server.in;
+        client.out --> { delay = 1us; ber = 1E-5; } --> server.in;
 }

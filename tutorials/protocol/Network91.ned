@@ -25,8 +25,8 @@ import inet.protocol.acknowledgement.Resending;
 import inet.protocol.acknowledgement.SendWithAcknowledge;
 import inet.protocol.aggregation.SubpacketLengthHeaderBasedAggregator;
 import inet.protocol.aggregation.SubpacketLengthHeaderBasedDeaggregator;
-import inet.protocol.checksum.CrcHeaderChecker;
-import inet.protocol.checksum.CrcHeaderInserter;
+import inet.protocol.checksum.FcsHeaderChecker;
+import inet.protocol.checksum.FcsHeaderInserter;
 import inet.protocol.dispatching.ReceiveWithProtocol;
 import inet.protocol.dispatching.SendWithProtocol;
 import inet.protocol.forwarding.Forwarding;
@@ -47,7 +47,6 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 import inet.queueing.contract.IPassivePacketSink;
-
 
 moduleinterface IApp
 {
@@ -188,7 +187,7 @@ module Interface extends InterfaceEntry
 {
     parameters:
         string interfaceTableModule;
-        @class(inet::InterfaceEntry);
+        @class(InterfaceEntry);
         @display("i=block/ifcard");
     gates:
         input upperLayerIn @loose;
@@ -210,7 +209,7 @@ module Interface extends InterfaceEntry
         sendWithProtocol: SendWithProtocol {
             @display("p=150,500");
         }
-        crcInserter: CrcHeaderInserter {
+        fcsInserter: FcsHeaderInserter {
             @display("p=150,600");
         }
         transmitter: PacketTransmitter {
@@ -228,7 +227,7 @@ module Interface extends InterfaceEntry
         receiveWithProtocol: ReceiveWithProtocol {
             @display("p=450,400");
         }
-        crcChecker: CrcHeaderChecker {
+        fcsChecker: FcsHeaderChecker {
             @display("p=450,500");
         }
     connections:
@@ -237,11 +236,11 @@ module Interface extends InterfaceEntry
         resending.out --> sendWithAcknowledge.in;
         sendWithAcknowledge.out --> m1.in++;
         m1.out --> sendWithProtocol.in;
-        sendWithProtocol.out --> crcInserter.in;
-        crcInserter.out --> transmitter.in;
+        sendWithProtocol.out --> fcsInserter.in;
+        fcsInserter.out --> transmitter.in;
         transmitter.out --> { @display("m=s"); } --> g$o;
-        g$i --> { @display("m=s"); } --> crcChecker.in;
-        crcChecker.out --> receiveWithProtocol.in;
+        g$i --> { @display("m=s"); } --> fcsChecker.in;
+        fcsChecker.out --> receiveWithProtocol.in;
         receiveWithProtocol.out --> d1.in++;
         d1.out++ --> receiveWithAcknowledge.in;
         receiveWithAcknowledge.out --> receiveAtMacAddress.in;
