@@ -97,7 +97,6 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen)
 
     inet::utils::makePathForFile(filename);
     dumpfile = fopen(filename, "wb");
-    linkType = 0;
 
     if (!dumpfile)
         throw cRuntimeError("Cannot open pcap file [%s] for writing: %s", filename, strerror(errno));
@@ -121,12 +120,12 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen)
     fwrite(&sbt, sizeof(sbt), 1, dumpfile);
 }
 
-void PcapngWriter::writeInterface(InterfaceEntry *interfaceEntry)
+void PcapngWriter::writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType linkType)
 {
+    EV << "PcapngWriter::writeInterface()\n";
     if (!dumpfile)
         throw cRuntimeError("Cannot write interface: pcap output file is not open");
 
-    EV << "PcapngWriter::writeInterface()\n";
     std::string name = interfaceEntry->getInterfaceName();
     std::string fullPath = interfaceEntry->getInterfaceFullPath();
     fullPath = fullPath.substr(fullPath.find('.') + 1);
@@ -194,33 +193,15 @@ void PcapngWriter::writeInterface(InterfaceEntry *interfaceEntry)
 void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, InterfaceEntry *interfaceEntry, PcapLinkType linkType)
 {
     EV << "PcapngWriter::writePacket()\n";
-
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
-//    auto srcModule = check_and_cast<cModule *>(source);
-//    auto interfaceEntry = findContainingNicModule(srcModule);
-//    if (interfaceEntry == nullptr) {
-//        int ifaceId = -1;
-//        if (outbound) {
-//            if (auto ifaceTag = packet->findTag<InterfaceReq>())
-//                ifaceId = ifaceTag->getInterfaceId();
-//        }
-//        else {
-//            if (auto ifaceTag = packet->findTag<InterfaceInd>())
-//                ifaceId = ifaceTag->getInterfaceId();
-//        }
-//        if (ifaceId != -1) {
-//            auto ift = check_and_cast_nullable<InterfaceTable *>(getContainingNode(srcModule)->getSubmodule("interfaceTable"));
-//            interfaceEntry = ift->getInterfaceById(ifaceId);
-//        }
-//    }
     auto it = interfaceModuleIdToPcapngInterfaceId.find(interfaceEntry->getId());
     int pcapngInterfaceId;
     if (it != interfaceModuleIdToPcapngInterfaceId.end())
         pcapngInterfaceId = it->second;
     else {
-        writeInterface(interfaceEntry);
+        writeInterface(interfaceEntry, linkType);
         pcapngInterfaceId = nextPcapngInterfaceId++;
         interfaceModuleIdToPcapngInterfaceId[interfaceEntry->getId()] = pcapngInterfaceId;
     }
@@ -256,20 +237,6 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction 
     pcapng_option_header doh;
     doh.code = 0x0002;
     doh.length = 4;
-//    uint32_t flagsOptionValue = outbound ? 0b10 : 0b01;
-//    auto directionTag = packet->findTag<DirectionTag>();
-//    if (directionTag != nullptr) {
-//        switch (directionTag->getDirection()) {
-//            case DIRECTION_INBOUND:
-//                flagsOptionValue = 0b01;
-//                break;
-//            case DIRECTION_OUTBOUND:
-//                flagsOptionValue = 0b10;
-//                break;
-//            default:
-//                throw cRuntimeError("Unknown direction value");
-//        }
-//    }
     uint32_t flagsOptionValue = 0;
     switch (direction) {
         case DIRECTION_INBOUND:

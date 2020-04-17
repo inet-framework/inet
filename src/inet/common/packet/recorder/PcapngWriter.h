@@ -31,7 +31,6 @@ class INET_API PcapngWriter : public IPcapWriter
   protected:
     FILE *dumpfile = nullptr;    // pcap file
     bool flush = false;
-    uint32_t linkType = 0;
     int nextPcapngInterfaceId = 0;
     std::map<int, int> interfaceModuleIdToPcapngInterfaceId;
 
@@ -60,7 +59,7 @@ class INET_API PcapngWriter : public IPcapWriter
     /**
      * Records the interface into the output file.
      */
-    void writeInterface(InterfaceEntry *interfaceEntry);
+    void writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType linkType);
 
     /**
      * Records the given packet into the output file if it is open,
