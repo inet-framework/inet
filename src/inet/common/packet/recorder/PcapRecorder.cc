@@ -282,7 +282,9 @@ bool PcapRecorder::matchesLinkType(PcapLinkType pcapLinkType, const Protocol *pr
 
 PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
 {
-    if (*protocol == Protocol::ethernetMac)
+    if (*protocol == Protocol::ethernetPhy)
+        return LINKTYPE_ETHERNET_MPACKET;
+    else if (*protocol == Protocol::ethernetMac)
         return LINKTYPE_ETHERNET;
     else if (*protocol == Protocol::ppp)
         return LINKTYPE_PPP_WITH_DIR;
