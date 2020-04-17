@@ -60,6 +60,7 @@ void PreemptibleTransmitter::pushPacketStart(Packet *packet, cGate *gate)
 void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
+    take(packet);
     delete packet;
     // TODO:
 }
@@ -67,6 +68,7 @@ void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
 void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
+    take(packet);
     simtime_t timePosition = simTime() - txStartTime;
     int bitPosition = std::floor(datarate.get() * timePosition.dbl());
     delete txPacket;

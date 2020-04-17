@@ -26,6 +26,7 @@ Define_Module(ReceiveWithProtocol);
 void ReceiveWithProtocol::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     auto header = packet->popAtFront<ProtocolHeader>();
     auto protocol = Protocol::findProtocol(header->getProtocolId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);

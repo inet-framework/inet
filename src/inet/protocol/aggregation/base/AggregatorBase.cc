@@ -69,6 +69,7 @@ void AggregatorBase::endAggregation(Packet *packet)
 void AggregatorBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     if (!isAggregating())
         startAggregation(packet);
     else if (!aggregatorPolicy->isAggregatablePacket(aggregatedPacket, aggregatedSubpackets, packet)) {

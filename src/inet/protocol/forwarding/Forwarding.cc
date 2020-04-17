@@ -57,6 +57,7 @@ std::pair<L3Address, int> Forwarding::findNextHop(const L3Address& destinationAd
 void Forwarding::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     packet->removeTagIfPresent<DispatchProtocolReq>();
     auto header = packet->peekAtFront<DestinationL3AddressHeader>();
     auto nextHop = findNextHop(header->getDestinationAddress());
