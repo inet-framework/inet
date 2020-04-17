@@ -16,12 +16,14 @@
 #ifndef __INET_PACKETRECEIVERBASE_H
 #define __INET_PACKETRECEIVERBASE_H
 
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 
 using namespace inet::queueing;
+using namespace inet::physicallayer;
 
 class INET_API PacketReceiverBase : public PacketProcessorBase, public virtual IActivePacketSource
 {
@@ -32,6 +34,8 @@ class INET_API PacketReceiverBase : public PacketProcessorBase, public virtual I
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual Packet *decodePacket(Signal *signal) const;
 
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }

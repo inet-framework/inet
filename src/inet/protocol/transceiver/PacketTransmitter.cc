@@ -21,6 +21,12 @@ namespace inet {
 
 Define_Module(PacketTransmitter);
 
+PacketTransmitter::~PacketTransmitter()
+{
+    cancelAndDelete(txEndTimer);
+    delete txPacket;
+}
+
 void PacketTransmitter::initialize(int stage)
 {
     PacketTransmitterBase::initialize(stage);
@@ -33,7 +39,7 @@ void PacketTransmitter::initialize(int stage)
 void PacketTransmitter::handleMessage(cMessage *message)
 {
     if (message == txEndTimer)
-        producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
+        endTx();
     else
         PacketTransmitterBase::handleMessage(message);
 }
@@ -41,11 +47,24 @@ void PacketTransmitter::handleMessage(cMessage *message)
 void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
+    startTx(packet);
+}
+
+void PacketTransmitter::startTx(Packet *packet)
+{
+    ASSERT(txPacket == nullptr);
     txPacket = packet;
-    take(txPacket);
-    auto signal = createSignal(txPacket);
+    auto signal = encodePacket(txPacket);
     sendDelayed(signal, 0, outputGate, signal->getDuration());
     scheduleTxEndTimer(signal);
+}
+
+void PacketTransmitter::endTx()
+{
+    producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
+    delete txPacket;
+    txPacket = nullptr;
 }
 
 simtime_t PacketTransmitter::calculateDuration(const Packet *packet) const
@@ -55,8 +74,6 @@ simtime_t PacketTransmitter::calculateDuration(const Packet *packet) const
 
 void PacketTransmitter::scheduleTxEndTimer(Signal *signal)
 {
-    if (txEndTimer->isScheduled())
-        cancelEvent(txEndTimer);
     scheduleAt(simTime() + signal->getDuration(), txEndTimer);
 }
 

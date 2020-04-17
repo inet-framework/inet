@@ -42,7 +42,7 @@ void PacketTransmitterBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-Signal *PacketTransmitterBase::createSignal(const Packet *txPacket) const
+Signal *PacketTransmitterBase::encodePacket(const Packet *txPacket) const
 {
     auto packet = txPacket->dup();
     auto oldPacketProtocolTag = packet->removeTagIfPresent<PacketProtocolTag>();

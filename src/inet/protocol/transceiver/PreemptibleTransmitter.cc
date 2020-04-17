@@ -71,7 +71,7 @@ void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b p
     int bitPosition = std::floor(datarate.get() * timePosition.dbl());
     delete txPacket;
     txPacket = packet;
-    auto signal = createSignal(txPacket);
+    auto signal = encodePacket(txPacket);
     sendPacketProgress(signal, outputGate, signal->getDuration(), bitPosition, timePosition);
     scheduleTxEndTimer(signal, timePosition);
 }
@@ -81,7 +81,7 @@ void PreemptibleTransmitter::startTx(Packet *packet)
     ASSERT(txPacket == nullptr);
     txPacket = packet;
     txStartTime = simTime();
-    auto signal = createSignal(txPacket);
+    auto signal = encodePacket(txPacket);
     EV_INFO << "Starting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     scheduleTxEndTimer(signal, 0);
     sendPacketStart(signal, outputGate, signal->getDuration());
@@ -90,7 +90,7 @@ void PreemptibleTransmitter::startTx(Packet *packet)
 void PreemptibleTransmitter::endTx()
 {
     EV_INFO << "Ending transmission: packetName = " << txPacket->getName() << std::endl;
-    auto signal = createSignal(txPacket);
+    auto signal = encodePacket(txPacket);
     sendPacketEnd(signal, outputGate, signal->getDuration());
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
     delete txPacket;
@@ -104,7 +104,7 @@ void PreemptibleTransmitter::abortTx()
     cancelEvent(txEndTimer);
     b transmittedLength = getPushPacketProcessedLength(txPacket, inputGate);
     txPacket->eraseAtBack(txPacket->getTotalLength() - transmittedLength);
-    auto signal = createSignal(txPacket);
+    auto signal = encodePacket(txPacket);
     EV_INFO << "Aborting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     sendPacketEnd(signal, outputGate, signal->getDuration());
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
