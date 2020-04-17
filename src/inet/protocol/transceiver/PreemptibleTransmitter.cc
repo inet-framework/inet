@@ -23,7 +23,8 @@ void PreemptibleTransmitter::initialize(int stage)
 {
     PacketTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        datarate = bps(par("datarate"));
+        dataratePar = &par("datarate");
+        datarate = bps(*dataratePar);
         txEndTimer = new cMessage("TxEndTimer");
     }
 }
@@ -80,6 +81,7 @@ void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b p
 
 void PreemptibleTransmitter::startTx(Packet *packet)
 {
+    datarate = bps(*dataratePar);
     ASSERT(txPacket == nullptr);
     txPacket = packet;
     txStartTime = simTime();
