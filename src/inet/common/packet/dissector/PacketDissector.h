@@ -156,11 +156,16 @@ class INET_API PacketDissector
     PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ICallback& callback);
 
     /**
+     * Dissects the given packet according to the attached PacketProtocolTag.
+     */
+    void dissectPacket(Packet *packet) const;
+
+    /**
      * Dissects the given packet of the provided protocol. The packet dissection
      * algorithm calls the visitChunk() method of the provided callback for each
      * protocol specific chunk found in the packet.
      */
-    void dissectPacket(Packet *packet, const Protocol *protocol) const;
+    void dissectPacket(Packet *packet, const Protocol *protocol, b extraFrontOffset = b(0), b extraBackOffset = b(0)) const;
 };
 
 } // namespace
