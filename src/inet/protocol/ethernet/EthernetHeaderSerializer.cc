@@ -14,7 +14,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/protocol/ethernet/EthernetHeaders_m.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetHeaderSerializer.h"
 
 namespace inet {
