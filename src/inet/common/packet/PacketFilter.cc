@@ -53,12 +53,8 @@ PacketFilter::PacketDissectorCallback::PacketDissectorCallback(const PacketFilte
 
 bool PacketFilter::PacketDissectorCallback::matches(const Packet *packet)
 {
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
-    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
-    auto copy = packet->dup();
-    packetDissector.dissectPacket(copy, protocol);
-    delete copy;
+    packetDissector.dissectPacket(const_cast<Packet *>(packet));
     return matches_;
 }
 
