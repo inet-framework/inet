@@ -97,9 +97,11 @@ void PcapRecorder::initialize()
         if (isAllIndex)
             mname.replace(mname.length() - 3, 3, "");
 
-        if (mname[0] == '.')
+        if (mname[0] == '.') {
             for (auto & elem : signalList)
                 getParentModule()->subscribe(elem.first, this);
+            found = true;
+        }
         else {
             for (cModule::SubmoduleIterator i(getParentModule()); !i.end(); i++) {
                 cModule *submod = *i;
@@ -117,7 +119,7 @@ void PcapRecorder::initialize()
             }
         }
 
-        if (!found) {
+        if (!found && !isAllIndex) {
             EV << "The module " << mname << (isAllIndex ? "[*]" : "")
                << " not found for PcapRecorder " << getFullPath() << endl;
         }
