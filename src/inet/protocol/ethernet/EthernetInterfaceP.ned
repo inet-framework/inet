@@ -96,6 +96,7 @@ module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
             @display("p=300,1100");
         }
         outboundEmitter: PacketEmitter {
+            signalName = "packetSentToLower";
             direction = "outbound";
             protocolName = "ethernetphy";
             @display("p=300,1200");
@@ -137,6 +138,7 @@ module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
             @display("p=950,1200");
         }
         inboundEmitter: PacketEmitter {
+            signalName = "packetReceivedFromLower";
             direction = "inbound";
             protocolName = "ethernetphy";
             @display("p=950,1300");
