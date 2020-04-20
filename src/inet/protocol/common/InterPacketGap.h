@@ -27,7 +27,7 @@ using namespace inet::queueing;
 class INET_API InterPacketGap : public PacketPusherBase
 {
   protected:
-    simtime_t duration;
+    cPar *durationPar = nullptr;
 
     cPacket *lastPacket = nullptr;
     simtime_t lastDelay;

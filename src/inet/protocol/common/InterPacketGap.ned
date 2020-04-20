@@ -23,7 +23,7 @@ simple InterPacketGap extends PacketProcessorBase
 {
     parameters:
         bool initialChannelBusy = default(true); // assume that channel was busy before the simulation started
-        double duration @unit(s);
+        volatile double duration @unit(s);
         @display("i=block/timer");
         @class(InterPacketGap);
     gates:
