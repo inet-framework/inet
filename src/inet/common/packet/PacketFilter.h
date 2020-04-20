@@ -51,6 +51,7 @@ class INET_API PacketFilter
     };
 
   protected:
+    bool matchesAllChunks = false;
     cMatchExpression packetMatchExpression;
     cMatchExpression chunkMatchExpression;
 
