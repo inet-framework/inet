@@ -31,7 +31,7 @@ class INET_API EthernetMacDissector : public ProtocolDissector
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
-class INET_API EthernetPhyDissector : public ProtocolDissector
+class INET_API EthernetPhyDissector : public DefaultProtocolDissector
 {
   public:
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
