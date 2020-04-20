@@ -30,13 +30,15 @@ import inet.networklayer.common.InterfaceTable;
 module LinkLayerNodeBase extends NodeBase
 {
     parameters:
-        int numPcapRecorders = default(0);
+        bool recordPcap = default(false);
+        int numPcapRecorders = default(recordPcap ? 1 : 0);
         int numLoInterfaces = default(1);
         int numWlanInterfaces = default(0);
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         int numPppInterfaces = default(0);  // minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         int numVlanInterfaces = default(0);
+        pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");

@@ -17,9 +17,20 @@
 
 package inet.networklayer.common;
 
+import inet.common.packet.recorder.PcapRecorder;
+
 module InterfaceEntry
 {
     parameters:
+        bool recordPcap = default(false);
+        int numPcapRecorders = default(recordPcap ? 1 : 0);
         string displayStringTextFormat = default("%a (%i)\n%m");
+        pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
+    submodules:
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            parameters:
+                moduleNamePatterns = ".^";
+                @display("p=100,100;is=s");
+        }
 }
 

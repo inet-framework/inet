@@ -23,10 +23,10 @@ network WirelessNetworkBase extends NetworkBase
     submodules:
         radioMedium: <default("RadioMedium")> like IRadioMedium if typename != "" {
             parameters:
-                @display("p=100,300;is=s");
+                @display("p=100,400;is=s");
         }
         physicalEnvironment: <default("PhysicalEnvironment")> like IPhysicalEnvironment if typename != "" {
             parameters:
-                @display("p=100,400;is=s");
+                @display("p=100,500;is=s");
         }
 }
