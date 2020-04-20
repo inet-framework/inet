@@ -57,11 +57,9 @@ Packet::Packet(const Packet& other) :
 
 const ChunkTemporarySharedPtr *Packet::getDissection() const
 {
-    auto packetProtocolTag = findTag<PacketProtocolTag>();
-    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector::ChunkBuilder builder;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, builder);
-    packetDissector.dissectPacket(const_cast<Packet *>(this), protocol);
+    packetDissector.dissectPacket(const_cast<Packet *>(this));
     return new ChunkTemporarySharedPtr(builder.getContent());
 }
 
