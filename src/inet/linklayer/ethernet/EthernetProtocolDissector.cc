@@ -23,6 +23,7 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetProtocolDissector.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 
@@ -34,7 +35,15 @@ void EthernetPhyDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     const auto& header = packet->popAtFront<EthernetPhyHeaderBase>();
     callback.startProtocolDataUnit(&Protocol::ethernetPhy);
     callback.visitChunk(header, &Protocol::ethernetPhy);
-    callback.dissectPacket(packet, &Protocol::ethernetMac);
+    if (auto phyHeader = dynamicPtrCast<const EthernetFragmentPhyHeader>(header)) {
+        auto fragmentTag = packet->findTag<FragmentTag>();
+        if (phyHeader->getPreambleType() == SMD_Sx && fragmentTag != nullptr && fragmentTag->getLastFragment())
+            callback.dissectPacket(packet, &Protocol::ethernetMac);
+        else
+            callback.dissectPacket(packet, nullptr);
+    }
+    else
+        callback.dissectPacket(packet, &Protocol::ethernetMac);
     callback.endProtocolDataUnit(&Protocol::ethernetPhy);
 }
 
