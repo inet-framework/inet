@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetAddressInserter.h"
@@ -41,6 +42,8 @@ void EthernetAddressInserter::processPacket(Packet *packet)
     header->setSrc(srcAddress);
     header->setDest(macAddressReq->getDestAddress());
     packet->insertAtFront(header);
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
 }
 
 } // namespace inet
