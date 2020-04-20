@@ -59,8 +59,60 @@ class DispatchProtocolInd extends ProtocolTagBase
 //
 // This tag specifies the protocol of the packet.
 //
+// Packet processing at the senderb
+// ===============================
+//
+// | ApplicationData |
+//     whole packet has no protocol
+//     data part has no protocol
+//
+// | UdpHeader ApplicationData |
+//     whole packet has UDP protocol
+//     data part has UDP protocol
+//
+// | Ipv4Header UdpHeader ApplicationData |
+//     whole packet has IPv4 protocol
+//     data part has IPv4 protocol
+//
+// EthernetMacHeader | Ipv4Header UdpHeader ApplicationData |
+//     whole packet has incomplete Ethernet protocol
+//     data part has IPv4 protocol
+//
+// EthernetMacHeader | Ipv4Header UdpHeader ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has IPv4 protocol
+//
+// | EthernetMacHeader Ipv4Header UdpHeader ApplicationData EthernetPadding EthernetFcs |
+//     whole packet has Ethernet protocol
+//     data part has Ethernet protocol
+//
+// Packet processing at the receiver
+// =================================
+//
+// | EthernetMacHeader Ipv4Header UdpHeader ApplicationData EthernetPadding EthernetFcs |
+//     whole packet has Ethernet protocol
+//     data part has Ethernet protocol
+//
+// EthernetMacHeader Ipv4Header UdpHeader ApplicationData EthernetPadding | EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has no protocol
+//
+// EthernetMacHeader | Ipv4Header UdpHeader ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has IPv4 protocol
+//
+// EthernetMacHeader Ipv4Header | UdpHeader ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has UDP protocol
+//
+// EthernetMacHeader Ipv4Header UdpHeader | ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has no protocol
+//
 class PacketProtocolTag extends ProtocolTagBase
 {
+    b frontOffset = b(0); // extra offset relative to the packet data part front offset
+    b backOffset = b(0); // extra offset relative to the packet data part back offset
 }
 
 //
