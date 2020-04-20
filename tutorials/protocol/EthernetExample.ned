@@ -16,15 +16,13 @@
 package inet.tutorials.protocol;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 
-network EthernetExample
+network EthernetExample extends WiredNetworkBase
 {
     submodules:
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
-        }
         host1: StandardHost {
             @display("p=250,100");
         }
