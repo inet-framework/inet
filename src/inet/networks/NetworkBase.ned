@@ -15,18 +15,28 @@
 
 package inet.networks;
 
+import inet.common.packet.recorder.PcapRecorder;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 network NetworkBase
 {
+    parameters:
+        bool recordPcap = default(false);
+        int numPcapRecorders = default(recordPcap ? 1 : 0);
+        pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
     submodules:
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            parameters:
+                moduleNamePatterns = ".^";
+                @display("p=100,100;is=s");
+        }
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,100;is=s");
+                @display("p=100,200;is=s");
         }
         configurator: <default("Ipv4NetworkConfigurator")> like INetworkConfigurator if typename != "" {
             parameters:
-                @display("p=100,200;is=s");
+                @display("p=100,300;is=s");
         }
 }
