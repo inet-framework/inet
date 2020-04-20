@@ -26,7 +26,7 @@ void InterPacketGap::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        duration = par("duration");
+        durationPar = &par("duration");
         lastPacketEndTime = par("initialChannelBusy") ? 0 : -duration;
     }
 }
@@ -69,7 +69,7 @@ void InterPacketGap::handleMessage(cMessage *message)
             }
             else {
                 lastPacket = packet;
-                lastDelay = lastPacketEndTime + duration - simTime() + progress->getTimePosition();
+                lastDelay = lastPacketEndTime + *durationPar - simTime() + progress->getTimePosition();
                 if (lastDelay < 0)
                     lastDelay = 0;
                 lastPacketEndTime = now + lastDelay + packet->getDuration() - progress->getTimePosition();
@@ -132,7 +132,7 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
     packet->setArrival(getId(), inputGate->getId(), simTime());
     auto now = simTime();
     lastPacket = packet;
-    lastDelay = lastPacketEndTime + duration - now;
+    lastDelay = lastPacketEndTime + *durationPar - now;
     if (lastDelay < 0)
         lastDelay = 0;
     lastPacketEndTime = now + lastDelay + packet->getDuration();
@@ -159,7 +159,7 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate)
     take(packet);
     auto now = simTime();
     lastPacket = packet;
-    lastDelay = lastPacketEndTime + duration - now;
+    lastDelay = lastPacketEndTime + *durationPar - now;
     if (lastDelay < 0)
         lastDelay = 0;
     lastPacketEndTime = now + lastDelay + packet->getDuration();
