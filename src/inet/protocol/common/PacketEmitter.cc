@@ -27,14 +27,17 @@ void PacketEmitter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        signal = registerSignal(par("signalName"));
         packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         const char *directionString = par("direction");
         if (!strcmp(directionString, "inbound"))
             direction = DIRECTION_INBOUND;
         else if (!strcmp(directionString, "outbound"))
             direction = DIRECTION_OUTBOUND;
+        else if (!strcmp(directionString, "undefined"))
+            direction = DIRECTION_UNDEFINED;
         else
-            throw cRuntimeError("Unknown direction");
+            throw cRuntimeError("Unknown direction parameter value");
         const char *protocolName = par("protocolName");
         protocol = Protocol::getProtocol(protocolName);
     }
@@ -64,7 +67,7 @@ void PacketEmitter::emitPacket(Packet *packet)
         clone->copyTags(*packet);
         clone->addTagIfAbsent<DirectionTag>()->setDirection(direction);
         clone->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
-        emit(packetSentToLowerSignal, clone);
+        emit(signal, clone);
         delete clone;
     }
 }
