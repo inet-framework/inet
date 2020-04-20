@@ -97,16 +97,21 @@ void PcapRecorder::initialize()
         if (isAllIndex)
             mname.replace(mname.length() - 3, 3, "");
 
-        for (cModule::SubmoduleIterator i(getParentModule()); !i.end(); i++) {
-            cModule *submod = *i;
-            if (0 == strcmp(isAllIndex ? submod->getName() : submod->getFullName(), mname.c_str())) {
-                found = true;
+        if (mname[0] == '.')
+            for (auto & elem : signalList)
+                getParentModule()->subscribe(elem.first, this);
+        else {
+            for (cModule::SubmoduleIterator i(getParentModule()); !i.end(); i++) {
+                cModule *submod = *i;
+                if (0 == strcmp(isAllIndex ? submod->getName() : submod->getFullName(), mname.c_str())) {
+                    found = true;
 
-                for (auto & elem : signalList) {
-                    if (!submod->isSubscribed(elem.first, this)) {
-                        submod->subscribe(elem.first, this);
-                        EV << "PcapRecorder " << getFullPath() << " subscribed to "
-                           << submod->getFullPath() << ":" << getSignalName(elem.first) << endl;
+                    for (auto & elem : signalList) {
+                        if (!submod->isSubscribed(elem.first, this)) {
+                            submod->subscribe(elem.first, this);
+                            EV << "PcapRecorder " << getFullPath() << " subscribed to "
+                               << submod->getFullPath() << ":" << getSignalName(elem.first) << endl;
+                        }
                     }
                 }
             }
