@@ -26,7 +26,8 @@ void StreamingTransmitter::initialize(int stage)
 {
     PacketTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        datarate = bps(par("datarate"));
+        dataratePar = &par("datarate");
+        datarate = bps(*dataratePar);
         txEndTimer = new cMessage("endTimer");
     }
 }
@@ -48,6 +49,7 @@ void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     ASSERT(txSignal == nullptr);
+    datarate = bps(*dataratePar);
     txPacket = packet;
     take(txPacket);
 //    // TODO: new Signal

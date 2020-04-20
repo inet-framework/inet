@@ -23,6 +23,6 @@ import inet.protocol.transceiver.contract.IPacketTransmitter;
 simple StreamingTransmitter extends PacketTransmitterBase like IPacketTransmitter
 {
     parameters:
-        double datarate @unit(bps);
+        volatile double datarate @unit(bps);
         @class(StreamingTransmitter);
 }
