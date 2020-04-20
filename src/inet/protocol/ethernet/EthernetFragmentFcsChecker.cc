@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetFragmentFcsChecker.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
@@ -54,16 +55,18 @@ bool EthernetFragmentFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode,
 
 void EthernetFragmentFcsChecker::processPacket(Packet *packet)
 {
-    const auto& header = packet->popAtBack<EthernetFragmentFcs>(B(4));
+    const auto& trailer = packet->popAtBack<EthernetFragmentFcs>(B(4));
     auto fragmentTag = packet->getTag<FragmentTag>();
-    fragmentTag->setLastFragment(!header->getMCrc());
+    fragmentTag->setLastFragment(!trailer->getMCrc());
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
 }
 
 bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& header = packet->peekAtBack<EthernetFragmentFcs>(B(4));
-    auto fcsMode = header->getFcsMode();
-    auto fcs = header->getFcs();
+    const auto& trailer = packet->peekAtBack<EthernetFragmentFcs>(B(4));
+    auto fcsMode = trailer->getFcsMode();
+    auto fcs = trailer->getFcs();
     return checkFcs(packet, fcsMode, fcs);
 }
 

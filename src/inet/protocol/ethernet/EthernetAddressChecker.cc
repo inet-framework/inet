@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetAddressChecker.h"
@@ -39,6 +40,8 @@ void EthernetAddressChecker::processPacket(Packet *packet)
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(header->getSrc());
     macAddressInd->setDestAddress(header->getDest());
+    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() - header->getChunkLength());
 }
 
 bool EthernetAddressChecker::matchesPacket(const Packet *packet) const
