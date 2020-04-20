@@ -30,6 +30,8 @@ void EthernetTypeOrLengthInserter::processPacket(Packet *packet)
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     header->setTypeOrLength(ProtocolGroup::ethertype.findProtocolNumber(protocol));
     packet->insertAtFront(header);
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
 }
 
 } // namespace inet

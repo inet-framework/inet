@@ -61,6 +61,10 @@ void EthernetFragmentFcsInserter::processPacket(Packet *packet)
     header->setFcsMode(fcsMode);
     packet->insertAtBack(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+    packetProtocolTag->setProtocol(&Protocol::ethernetMac);
+    packetProtocolTag->setFrontOffset(b(0));
+    packetProtocolTag->setBackOffset(b(0));
 }
 
 } // namespace inet

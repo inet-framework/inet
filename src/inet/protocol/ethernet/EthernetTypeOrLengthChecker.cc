@@ -30,7 +30,10 @@ void EthernetTypeOrLengthChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8023TypeOrLength>();
     auto protocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+    packetProtocolTag->setFrontOffset(b(0));
+    packetProtocolTag->setBackOffset(b(0));
+    packetProtocolTag->setProtocol(protocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     // TODO: move to interface entry
     auto interfaceEntry = check_and_cast<InterfaceEntry *>(getParentModule());

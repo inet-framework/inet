@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetFcsChecker.h"
 
@@ -38,14 +39,16 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
 
 void EthernetFcsChecker::processPacket(Packet *packet)
 {
-    packet->popAtBack<EthernetFcs>(B(4));
+    const auto& trailer = packet->popAtBack<EthernetFcs>(B(4));
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
 }
 
 bool EthernetFcsChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& header = packet->peekAtBack<EthernetFcs>(B(4));
-    auto fcsMode = header->getFcsMode();
-    auto fcs = header->getFcs();
+    const auto& trailer = packet->peekAtBack<EthernetFcs>(B(4));
+    auto fcsMode = trailer->getFcsMode();
+    auto fcs = trailer->getFcs();
     return checkFcs(packet, fcsMode, fcs);
 }
 
