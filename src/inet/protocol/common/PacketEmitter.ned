@@ -24,9 +24,11 @@ simple PacketEmitter extends PacketFlowBase
     parameters:
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
         string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
-        string direction @enum("inbound", "outbound");
+        string direction @enum("undefined", "inbound", "outbound") = default("undefined");
         string protocolName;
+        string signalName;
         @class(PacketEmitter);
         @display("i=block/star");
         @signal[packetSentToLower](type=Packet);
+        @signal[packetReceivedFromLower](type=Packet);
 }
