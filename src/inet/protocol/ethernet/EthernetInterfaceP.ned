@@ -18,6 +18,8 @@
 package inet.protocol.ethernet;
 
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ieee8021q.IIeee8021qEncap;
+import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceEntry;
 import inet.protocol.common.InterPacketGap;
 import inet.protocol.common.PacketEmitter;
@@ -30,6 +32,7 @@ import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
+
 
 module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
 {
@@ -109,6 +112,15 @@ module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
             datarate = default(bitrate);
             @display("p=300,1400");
         }
+        llc: <default("OmittedIeee8022Llc")> like IIeee8022Llc {
+            @display("p=625,50");
+        }
+        ctag: <default("OmittedIeee8021qEncap")> like IIeee8021qEncap {
+            @display("p=625,125");
+        }
+        stag: <default("OmittedIeee8021qEncap")> like IIeee8021qEncap {
+            @display("p=625,175");
+        }
         typeOrLengthChecker: EthernetTypeOrLengthChecker {
             @display("p=950,100");
         }
@@ -148,8 +160,11 @@ module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
             @display("p=950,1400");
         }
     connections:
-        upperLayerIn --> typeOrLengthInserter.in;
-        typeOrLengthInserter.out --> addressInserter.in;
+        upperLayerIn --> llc.upperLayerIn;
+        llc.lowerLayerOut --> typeOrLengthInserter.in;
+        typeOrLengthInserter.out --> ctag.upperLayerIn;
+        ctag.lowerLayerOut --> stag.upperLayerIn;
+        stag.lowerLayerOut --> addressInserter.in;
         addressInserter.out --> paddingInserter.in;
         paddingInserter.out --> priorityClassifier1.in;
         priorityClassifier1.out++ --> normalQueue.in;
@@ -182,6 +197,9 @@ module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
         fragmentFcsChecker.out --> defragmenter.in;
         defragmenter.out --> m2.in++;
         m2.out --> addressChecker.in;
-        addressChecker.out --> typeOrLengthChecker.in;
-        typeOrLengthChecker.out --> upperLayerOut;
+        addressChecker.out --> stag.lowerLayerIn;
+        stag.upperLayerOut --> ctag.lowerLayerIn;
+        ctag.upperLayerOut --> typeOrLengthChecker.in;
+        typeOrLengthChecker.out --> llc.lowerLayerIn;
+        llc.upperLayerOut --> upperLayerOut;
 }
