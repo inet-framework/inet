@@ -27,7 +27,7 @@ void InterPacketGap::initialize(int stage)
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         durationPar = &par("duration");
-        lastPacketEndTime = par("initialChannelBusy") ? 0 : -duration;
+        lastPacketEndTime = par("initialChannelBusy") ? simTime() : SimTime().setRaw(INT64_MIN);
     }
 }
 
