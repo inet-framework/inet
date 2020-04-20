@@ -28,6 +28,7 @@ using namespace inet::physicallayer;
 class INET_API StreamingTransmitter : public PacketTransmitterBase
 {
   protected:
+    cPar *dataratePar = nullptr;
     bps datarate = bps(NaN);
 
     cMessage *txEndTimer = nullptr;
