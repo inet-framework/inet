@@ -17,8 +17,8 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetAddressChecker.h"
-#include "inet/protocol/ethernet/EthernetHeaders_m.h"
 
 namespace inet {
 

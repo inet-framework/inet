@@ -23,7 +23,6 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetProtocolDissector.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/protocol/ethernet/EthernetHeaders_m.h"
 
 namespace inet {
 

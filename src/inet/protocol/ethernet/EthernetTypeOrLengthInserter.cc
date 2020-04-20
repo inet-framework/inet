@@ -17,7 +17,7 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/ethernet/EthernetHeaders_m.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetTypeOrLengthInserter.h"
 
 namespace inet {
