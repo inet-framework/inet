@@ -17,12 +17,13 @@
 // @author: Zoltan Bojthe
 //
 
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetProtocolDissector.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/protocol/ethernet/EthernetHeaders_m.h"
 
 namespace inet {
 
@@ -31,7 +32,7 @@ Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyDissector);
 
 void EthernetPhyDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    const auto& header = packet->popAtFront<EthernetPhyHeader>();
+    const auto& header = packet->popAtFront<EthernetPhyHeaderBase>();
     callback.startProtocolDataUnit(&Protocol::ethernetPhy);
     callback.visitChunk(header, &Protocol::ethernetPhy);
     callback.dissectPacket(packet, &Protocol::ethernetMac);
@@ -40,17 +41,25 @@ void EthernetPhyDissector::dissect(Packet *packet, const Protocol *protocol, ICa
 
 void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    const auto& header = packet->popAtFront<EthernetMacHeader>();
+    const auto& macAddressesHeader = packet->popAtFront<Ieee8023MacAddresses>();
     callback.startProtocolDataUnit(&Protocol::ethernetMac);
-    callback.visitChunk(header, &Protocol::ethernetMac);
+    callback.visitChunk(macAddressesHeader, &Protocol::ethernetMac);
     const auto& fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-    if (isEth2Header(*header)) {
-        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getTypeOrLength());
+    int typeOrLength;
+    if (auto macHeader = dynamicPtrCast<const EthernetMacHeader>(macAddressesHeader))
+        typeOrLength = macHeader->getTypeOrLength();
+    else {
+        const auto& typeOrLengthHeader = packet->popAtFront<Ieee8023TypeOrLength>();
+        typeOrLength = typeOrLengthHeader->getTypeOrLength();
+        callback.visitChunk(typeOrLengthHeader, &Protocol::ethernetMac);
+    }
+    if (isEth2Type(typeOrLength)) {
+        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(typeOrLength);
         callback.dissectPacket(packet, payloadProtocol);
     }
     else {
         // LLC header
-        auto ethEndOffset = packet->getFrontOffset() + B(header->getTypeOrLength());
+        auto ethEndOffset = packet->getFrontOffset() + B(typeOrLength);
         auto trailerOffset = packet->getBackOffset();
         packet->setBackOffset(ethEndOffset);
         callback.dissectPacket(packet, &Protocol::ieee8022);
