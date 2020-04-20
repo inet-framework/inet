@@ -211,11 +211,9 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Opti
 void PacketPrinter::printPacket(Packet *packet, const Options *options, Context& context) const
 {
     PacketDissector::PduTreeBuilder pduTreeBuilder;
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
-    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     try {
         PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
-        packetDissector.dissectPacket(packet, protocol);
+        packetDissector.dissectPacket(packet);
     }
     catch (cRuntimeError& e) {
         // NOTE: don't propagate errors from printPacket, becaue it can break Qtenv for example
