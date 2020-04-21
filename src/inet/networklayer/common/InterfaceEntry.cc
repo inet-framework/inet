@@ -18,7 +18,9 @@
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/StringFormat.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -131,6 +133,22 @@ void InterfaceEntry::initialize(int stage)
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
     }
+}
+
+void InterfaceEntry::arrived(cMessage *message, cGate *gate, simtime_t time)
+{
+    if (gate == upperLayerOut && message->isPacket()) {
+        auto packet = check_and_cast<Packet *>(message);
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
+    }
+    cModule::arrived(message, gate, time);
+}
+
+void InterfaceEntry::pushPacket(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacket");
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
+    consumer->pushPacket(packet, upperLayerOut->getPathEndGate());
 }
 
 void InterfaceEntry::refreshDisplay() const
