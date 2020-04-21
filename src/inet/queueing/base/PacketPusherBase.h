@@ -55,7 +55,7 @@ class INET_API PacketPusherBase : public PacketProcessorBase, public virtual IPa
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { return b(0); }
 
     virtual void handleCanPushPacket(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { }
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

@@ -80,6 +80,13 @@ void PacketPusherBase::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
+void PacketPusherBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    if (producer != nullptr)
+        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+}
+
 } // namespace queueing
 } // namespace inet
 
