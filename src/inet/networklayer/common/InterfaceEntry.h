@@ -26,6 +26,8 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/contract/IPacketProcessor.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
@@ -88,7 +90,7 @@ class INET_API InterfaceEntryChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API InterfaceEntry : public cModule
+class INET_API InterfaceEntry : public cModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor
 {
     friend class InterfaceProtocolData;    // to call protocolDataChanged()
 
@@ -96,6 +98,9 @@ class INET_API InterfaceEntry : public cModule
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };
 
   protected:
+    cGate *upperLayerOut = nullptr;
+    queueing::IPassivePacketSink *consumer = nullptr;
+
     IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or nullptr
     int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
     std::string interfaceName;
@@ -151,11 +156,26 @@ class INET_API InterfaceEntry : public cModule
     virtual std::string getFullPath() const override { return cModule::getFullPath(); }
     virtual const char *getName() const override { return cModule::getName(); }
 
+    virtual void arrived(cMessage *message, cGate *gate, simtime_t time) override;
+
   public:
     InterfaceEntry();
     virtual ~InterfaceEntry();
     virtual std::string str() const override;
     virtual std::string getInterfaceFullPath() const;
+
+    virtual bool supportsPacketSending(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPassing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
     /**
      * Returns the IInterfaceTable this interface is in, or nullptr
