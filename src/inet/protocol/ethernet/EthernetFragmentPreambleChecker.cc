@@ -43,6 +43,7 @@ void EthernetFragmentPreambleChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<EthernetFragmentPhyHeader>();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     auto fragmentTag = packet->addTag<FragmentTag>();
     fragmentTag->setFragmentNumber(-1);
     fragmentTag->setNumFragments(-1);
