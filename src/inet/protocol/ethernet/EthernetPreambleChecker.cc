@@ -27,6 +27,7 @@ void EthernetPreambleChecker::processPacket(Packet *packet)
 {
     packet->popAtFront<EthernetPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 }
 
 bool EthernetPreambleChecker::matchesPacket(const Packet *packet) const
