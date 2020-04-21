@@ -125,16 +125,32 @@ template<typename T>
 cGate *findConnectedGate(cGate *gate, int direction = 0)
 {
     if (direction < 0 || (direction == 0 && gate->getType() == cGate::INPUT)) {
-        for (auto g = gate; g != nullptr; g = g->getPreviousGate())
-            if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::OUTPUT)
-                return g;
-        return nullptr;
+        auto g = gate;
+        while (g != nullptr) {
+            auto gateType = g->getType();
+            auto previousGate = g->getPreviousGate();
+            if (dynamic_cast<T *>(g->getOwnerModule()) &&
+                ((gateType == cGate::OUTPUT && previousGate == nullptr) ||
+                 (gateType == cGate::INPUT && g != gate && previousGate != nullptr)))
+                break;
+            else
+                g = previousGate;
+        }
+        return g;
     }
     else if (direction > 0 || (direction == 0 && gate->getType() == cGate::OUTPUT)) {
-        for (auto g = gate; g != nullptr; g = g->getNextGate())
-            if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::INPUT)
-                return g;
-        return nullptr;
+        auto g = gate;
+        while (g != nullptr) {
+            auto gateType = g->getType();
+            auto nextGate = g->getNextGate();
+            if (dynamic_cast<T *>(g->getOwnerModule()) &&
+                ((gateType == cGate::INPUT && nextGate == nullptr) ||
+                 (gateType == cGate::OUTPUT && g != gate && nextGate != nullptr)))
+                break;
+            else
+                g = nextGate;
+        }
+        return g;
     }
     else
         throw cRuntimeError("Unknown gate type");
