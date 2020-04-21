@@ -93,6 +93,8 @@ void InterfaceEntry::clearProtocolDataSet()
 void InterfaceEntry::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerOut = gate("upperLayerOut");
+        consumer = findConnectedModule<IPassivePacketSink>(upperLayerOut);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         WATCH(mtu);
         WATCH(state);
