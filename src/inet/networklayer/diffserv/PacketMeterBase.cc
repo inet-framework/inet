@@ -31,6 +31,12 @@ void PacketMeterBase::initialize(int stage)
     }
 }
 
+void PacketMeterBase::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
+}
+
 void PacketMeterBase::handleCanPushPacket(cGate *gate)
 {
     if (producer != nullptr)

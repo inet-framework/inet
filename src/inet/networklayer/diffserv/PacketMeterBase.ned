@@ -17,10 +17,17 @@
 
 package inet.networklayer.diffserv;
 
-simple PacketMeterBase
+import inet.queueing.base.PacketProcessorBase;
+
+
+simple PacketMeterBase extends PacketProcessorBase
 {
     parameters:
         @display("i=block/classifier");
+        @signal[packetPushed](type=inet::Packet);
+        @signal[packetPulled](type=inet::Packet);
+        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in;
 }
