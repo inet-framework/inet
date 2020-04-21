@@ -142,7 +142,8 @@ void PacketFlowBase::handleCanPushPacket(cGate *gate)
 
 void PacketFlowBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+    if (producer != nullptr)
+        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
 bool PacketFlowBase::canPullSomePacket(cGate *gate) const
@@ -226,7 +227,8 @@ void PacketFlowBase::handleCanPullPacket(cGate *gate)
 
 void PacketFlowBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
-    collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
+    if (collector != nullptr)
+        collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
 }
 
 } // namespace queueing
