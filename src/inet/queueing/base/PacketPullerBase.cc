@@ -47,11 +47,38 @@ Packet *PacketPullerBase::canPullPacket(cGate *gate) const
     return provider->canPullPacket(inputGate->getPathStartGate());
 }
 
+Packet *PacketPullerBase::pullPacket(cGate *gate)
+{
+    throw cRuntimeError("Invalid operation");
+}
+
+Packet *PacketPullerBase::pullPacketStart(cGate *gate)
+{
+    throw cRuntimeError("Invalid operation");
+}
+
+Packet *PacketPullerBase::pullPacketEnd(cGate *gate)
+{
+    throw cRuntimeError("Invalid operation");
+}
+
+Packet *PacketPullerBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
+{
+    throw cRuntimeError("Invalid operation");
+}
+
 void PacketPullerBase::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
         collector->handleCanPullPacket(outputGate->getPathEndGate());
+}
+
+void PacketPullerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    if (collector != nullptr)
+        collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
 }
 
 } // namespace queueing
