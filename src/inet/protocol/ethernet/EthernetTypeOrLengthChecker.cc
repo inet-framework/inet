@@ -35,9 +35,6 @@ void EthernetTypeOrLengthChecker::processPacket(Packet *packet)
     packetProtocolTag->setBackOffset(b(0));
     packetProtocolTag->setProtocol(protocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    // TODO: move to interface entry
-    auto interfaceEntry = check_and_cast<InterfaceEntry *>(getParentModule());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 }
 
 bool EthernetTypeOrLengthChecker::matchesPacket(const Packet *packet) const
