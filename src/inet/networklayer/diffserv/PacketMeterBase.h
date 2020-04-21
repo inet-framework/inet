@@ -18,15 +18,15 @@
 #ifndef __INET_PACKETMETERBASE_H
 #define __INET_PACKETMETERBASE_H
 
-#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
-#include "inet/queueing/contract/IPacketProcessor.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API PacketMeterBase : public PassivePacketSinkBase, public IActivePacketSource
+class INET_API PacketMeterBase : public PacketProcessorBase, public IPassivePacketSink, public IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;
@@ -35,6 +35,7 @@ class INET_API PacketMeterBase : public PassivePacketSinkBase, public IActivePac
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
     virtual int meterPacket(Packet *packet) = 0;
 
   public:
@@ -43,8 +44,17 @@ class INET_API PacketMeterBase : public PassivePacketSinkBase, public IActivePac
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+
+    virtual void pushPacketStart(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+
+    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace inet
