@@ -116,7 +116,10 @@ void StreamingTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps d
 
 b StreamingTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
 {
-    return b(0);
+    if (txPacket == nullptr)
+        return b(0);
+    simtime_t transmissionDuration = simTime() - txStartTime;
+    return b(std::floor(datarate.get() * transmissionDuration.dbl()));
 }
 
 } // namespace inet
