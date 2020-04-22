@@ -28,7 +28,10 @@ void EthernetTypeOrLengthInserter::processPacket(Packet *packet)
 {
     const auto& header = makeShared<Ieee8023TypeOrLength>();
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    header->setTypeOrLength(ProtocolGroup::ethertype.findProtocolNumber(protocol));
+    if (protocol == &Protocol::ieee8022)
+        header->setTypeOrLength(packet->getByteLength());
+    else
+        header->setTypeOrLength(ProtocolGroup::ethertype.findProtocolNumber(protocol));
     packet->insertAtFront(header);
     auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
