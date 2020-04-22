@@ -48,8 +48,8 @@ void Icmpv6::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerService(Protocol::icmpv6, gate("transportIn"), gate("ipv6In"));
-        registerProtocol(Protocol::icmpv6, gate("ipv6Out"), gate("transportOut"));
+        registerService(Protocol::icmpv6, gate("transportIn"), gate("transportOut"));
+        registerProtocol(Protocol::icmpv6, gate("ipv6Out"), gate("ipv6In"));
     }
 }
 
@@ -331,15 +331,15 @@ void Icmpv6::errorOut(const Ptr<const Icmpv6Header>& icmpv6msg)
 {
 }
 
-void Icmpv6::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Icmpv6::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", in->getBaseName())) {
+    if (!strcmp("transportOut", gate->getBaseName())) {
         int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
         if (protocolNumber != -1)
             transportProtocols.insert(protocolNumber);

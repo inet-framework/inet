@@ -120,8 +120,8 @@ void Udp::initialize(int stage)
                 ipv6->registerHook(0, &crcInsertion);
 #endif
         }
-        registerService(Protocol::udp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::udp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::udp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::udp, gate("ipOut"), gate("ipIn"));
     }
 }
 

@@ -51,8 +51,7 @@ void Rstp::initialize(int stage)
         upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::stp, nullptr, gate("relayIn"));
-        registerProtocol(Protocol::stp, gate("relayOut"), nullptr);
+        registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));
     }
 }
 

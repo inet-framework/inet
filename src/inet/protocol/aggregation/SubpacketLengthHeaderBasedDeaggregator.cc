@@ -28,8 +28,8 @@ void SubpacketLengthHeaderBasedDeaggregator::initialize(int stage)
 {
     DeaggregatorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::aggregation, inputGate, inputGate);
-        registerProtocol(IProtocol::aggregation, outputGate, outputGate);
+        registerService(IProtocol::aggregation, nullptr, inputGate);
+        registerProtocol(IProtocol::aggregation, nullptr, outputGate);
     }
 }
 

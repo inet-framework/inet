@@ -59,8 +59,7 @@ void Pim::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::pim, nullptr, gate("networkLayerIn"));
-        registerProtocol(Protocol::pim, gate("networkLayerOut"), nullptr);
+        registerProtocol(Protocol::pim, gate("networkLayerOut"), gate("networkLayerIn"));
     }
 }
 

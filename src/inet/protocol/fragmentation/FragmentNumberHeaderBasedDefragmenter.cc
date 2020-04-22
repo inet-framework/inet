@@ -29,8 +29,8 @@ void FragmentNumberHeaderBasedDefragmenter::initialize(int stage)
     DefragmenterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(IProtocol::fragmentation, inputGate, inputGate);
-        registerProtocol(IProtocol::fragmentation, outputGate, outputGate);
+        registerService(IProtocol::fragmentation, nullptr, inputGate);
+        registerProtocol(IProtocol::fragmentation, nullptr, outputGate);
     }
 }
 

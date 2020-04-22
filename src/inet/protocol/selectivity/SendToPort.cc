@@ -32,8 +32,8 @@ void SendToPort::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         port = par("port");
-        registerService(IProtocol::destinationPort, inputGate, inputGate);
-        registerProtocol(IProtocol::destinationPort, outputGate, outputGate);
+        registerService(IProtocol::destinationPort, inputGate, nullptr);
+        registerProtocol(IProtocol::destinationPort, outputGate, nullptr);
     }
 }
 

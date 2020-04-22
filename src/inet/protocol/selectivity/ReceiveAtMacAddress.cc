@@ -32,8 +32,8 @@ void ReceiveAtMacAddress::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         address = MacAddress(par("address").stringValue());
-        registerService(IProtocol::destinationMacAddress, inputGate, inputGate);
-        registerProtocol(IProtocol::destinationMacAddress, outputGate, outputGate);
+        registerService(IProtocol::destinationMacAddress, nullptr, inputGate);
+        registerProtocol(IProtocol::destinationMacAddress, nullptr, outputGate);
         getContainingNicModule(this)->setMacAddress(address);
     }
 }

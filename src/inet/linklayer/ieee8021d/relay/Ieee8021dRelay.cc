@@ -46,8 +46,8 @@ void Ieee8021dRelay::initialize(int stage)
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("ifIn"));
-        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("upperLayerOut"));
+        registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("ifIn"));
 
         //TODO FIX Move it at least to STP module (like in ANSA's CDP/LLDP)
         if(isStpAware) {

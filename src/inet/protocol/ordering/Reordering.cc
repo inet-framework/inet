@@ -28,8 +28,8 @@ void Reordering::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::sequenceNumber, inputGate, inputGate);
-        registerProtocol(IProtocol::sequenceNumber, outputGate, outputGate);
+        registerService(IProtocol::sequenceNumber, inputGate, nullptr);
+        registerProtocol(IProtocol::sequenceNumber, outputGate, nullptr);
     }
 }
 

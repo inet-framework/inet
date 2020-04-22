@@ -28,8 +28,8 @@ void DuplicateRemoval::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::sequenceNumber, inputGate, inputGate);
-        registerProtocol(IProtocol::sequenceNumber, outputGate, outputGate);
+        registerService(IProtocol::sequenceNumber, nullptr, inputGate);
+        registerProtocol(IProtocol::sequenceNumber, nullptr, outputGate);
     }
 }
 

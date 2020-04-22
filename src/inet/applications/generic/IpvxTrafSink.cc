@@ -49,8 +49,7 @@ void IpvxTrafSink::initialize(int stage)
             protocol = new Protocol(buff, buff);
             ProtocolGroup::ipprotocol.addProtocol(protocolId, protocol);
         }
-        registerService(*protocol, nullptr, gate("ipIn"));
-        registerProtocol(*protocol, gate("ipOut"), nullptr);
+        registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));
     }
 }
 

@@ -52,8 +52,7 @@ void ExtIpv4TunDevice::initialize(int stage)
         device = par("device").stdstringValue();
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
-        registerService(Protocol::ipv4, nullptr, gate("lowerLayerIn"));
-        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), nullptr);
+        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), gate("lowerLayerIn"));
         openTun(device);
         numSent = numReceived = 0;
         WATCH(numSent);
