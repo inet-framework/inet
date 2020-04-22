@@ -22,7 +22,8 @@ package inet.queueing.contract;
 // connects one input to one output. It can operate in both active and passive
 // mode. Packets can be pushed into its input or packets can be pulled from its
 // output. Processed packets are either dropped, if they don't match the filter
-// criteria, or they are passed through without any delay or reordering.
+// criteria, or they are passed through without any delay or reordering. Packets
+// are not modified in any way.
 //
 moduleinterface IPacketFilter extends IPacketFlow
 {
