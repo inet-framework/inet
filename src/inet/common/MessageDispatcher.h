@@ -88,8 +88,8 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in) override;
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {
