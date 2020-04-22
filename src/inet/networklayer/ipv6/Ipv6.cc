@@ -98,8 +98,8 @@ void Ipv6::initialize(int stage)
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
-        registerService(Protocol::ipv6, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("transportOut"));
+        registerService(Protocol::ipv6, gate("transportIn"), gate("transportOut"));
+        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("queueIn"));
 
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
@@ -116,15 +116,15 @@ void Ipv6::initialize(int stage)
     }
 }
 
-void Ipv6::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Ipv6::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (in->isName("transportIn"))
+    if (gate->isName("transportOut"))
         upperProtocols.insert(&protocol);
 }
 

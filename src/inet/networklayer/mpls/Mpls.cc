@@ -44,8 +44,8 @@ void Mpls::initialize(int stage)
         pct = getModuleFromPar<IIngressClassifier>(par("classifierModule"), this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::mpls, gate("netwIn"), gate("ifIn"));
-        registerProtocol(Protocol::mpls, gate("ifOut"), gate("netwOut"));
+        registerService(Protocol::mpls, gate("netwIn"), gate("netwOut"));
+        registerProtocol(Protocol::mpls, gate("ifOut"), gate("ifIn"));
     }
 }
 
@@ -307,26 +307,26 @@ void Mpls::handleRegisterInterface(const InterfaceEntry &interface, cGate *out, 
         registerInterface(interface, gate("netwIn"), gate("netwOut"));
 }
 
-void Mpls::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    if (!strcmp("ifOut", out->getName()))
+    if (!strcmp("ifOut", g->getName()))
         registerService(protocol, gate("netwIn"), servicePrimitive);
-    else if (!strcmp("netwOut", out->getName()))
+    else if (!strcmp("netwOut", g->getName()))
         registerService(protocol, gate("ifIn"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", out->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
-void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("ifIn", in->getName()))
+    if (!strcmp("ifIn", g->getName()))
         registerProtocol(protocol, gate("netwOut"), servicePrimitive);
-    else if (!strcmp("netwIn", in->getName()))
+    else if (!strcmp("netwIn", g->getName()))
         registerProtocol(protocol, gate("ifOut"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", in->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
 } // namespace inet

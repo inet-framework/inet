@@ -68,8 +68,8 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
     virtual const Protocol& getProtocol() const = 0;
 
   public:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 } // namespace inet

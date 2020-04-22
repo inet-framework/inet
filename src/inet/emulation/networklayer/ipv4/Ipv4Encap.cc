@@ -41,8 +41,7 @@ void Ipv4Encap::initialize(int stage)
         defaultTimeToLive = 16; // par("timeToLive");
         defaultMCTimeToLive = 16; // par("multicastTimeToLive");
         crcMode = CRC_COMPUTED;
-        registerService(Protocol::ipv4, gate("upperLayerIn"), nullptr);
-        registerProtocol(Protocol::ipv4, nullptr, gate("upperLayerOut"));
+        registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }
 

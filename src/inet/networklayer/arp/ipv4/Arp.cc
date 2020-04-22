@@ -78,8 +78,8 @@ void Arp::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        registerService(Protocol::arp, gate("netwIn"), gate("ifIn"));
-        registerProtocol(Protocol::arp, gate("ifOut"), gate("netwOut"));
+        registerService(Protocol::arp, gate("netwIn"), gate("netwOut"));
+        registerProtocol(Protocol::arp, gate("ifOut"), gate("ifIn"));
     }
 }
 

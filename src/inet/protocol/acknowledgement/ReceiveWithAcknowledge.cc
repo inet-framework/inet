@@ -29,8 +29,8 @@ void ReceiveWithAcknowledge::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::withAcknowledge, inputGate, inputGate);
-        registerProtocol(IProtocol::withAcknowledge, outputGate, outputGate);
+        registerService(IProtocol::withAcknowledge, nullptr, inputGate);
+        registerProtocol(IProtocol::withAcknowledge, nullptr, outputGate);
     }
 }
 

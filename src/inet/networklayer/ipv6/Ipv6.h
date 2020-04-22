@@ -224,8 +224,8 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     Ipv6();
     ~Ipv6();
 
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;

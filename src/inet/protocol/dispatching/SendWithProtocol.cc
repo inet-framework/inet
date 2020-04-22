@@ -31,13 +31,13 @@ void SendWithProtocol::processPacket(Packet *packet)
     packet->insertAtFront(header);
 }
 
-void SendWithProtocol::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void SendWithProtocol::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
     registerService(protocol, inputGate, servicePrimitive);
 }
 
-void SendWithProtocol::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void SendWithProtocol::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
     registerProtocol(protocol, outputGate, servicePrimitive);

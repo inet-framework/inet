@@ -29,8 +29,8 @@ void ReceiveWithHopLimit::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::hopLimit, inputGate, inputGate);
-        registerProtocol(IProtocol::hopLimit, outputGate, outputGate);
+        registerService(IProtocol::hopLimit, nullptr, inputGate);
+        registerProtocol(IProtocol::hopLimit, nullptr, outputGate);
     }
 }
 

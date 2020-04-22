@@ -45,8 +45,7 @@ void Ieee8022Llc::initialize(int stage)
     {
         if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
             //register service and protocol
-            registerService(Protocol::ieee8022, gate("upperLayerIn"), nullptr);
-            registerProtocol(Protocol::ieee8022, nullptr, gate("upperLayerOut"));
+            registerService(Protocol::ieee8022, gate("upperLayerIn"), gate("upperLayerOut"));
         }
 
         WATCH_PTRMAP(socketIdToSocketDescriptor);
@@ -240,15 +239,15 @@ const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llc
     return payloadProtocol;
 }
 
-void Ieee8022Llc::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Ieee8022Llc::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("upperLayerIn", in->getBaseName()))
+    if (!strcmp("upperLayerOut", gate->getBaseName()))
         upperProtocols.insert(&protocol);
 }
 

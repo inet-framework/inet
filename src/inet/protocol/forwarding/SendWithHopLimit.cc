@@ -30,8 +30,8 @@ void SendWithHopLimit::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         hopLimit = par("hopLimit");
-        registerService(IProtocol::hopLimit, inputGate, inputGate);
-        registerProtocol(IProtocol::hopLimit, outputGate, outputGate);
+        registerService(IProtocol::hopLimit, inputGate, nullptr);
+        registerProtocol(IProtocol::hopLimit, outputGate, nullptr);
     }
 }
 

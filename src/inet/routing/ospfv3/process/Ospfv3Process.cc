@@ -43,8 +43,7 @@ void Ospfv3Process::initialize(int stage)
         this->processID = (int)par("processID");
         this->parseConfig(par("interfaceConfig"));
 
-        registerService(Protocol::ospf, nullptr, gate("splitterIn"));
-        registerProtocol(Protocol::ospf, gate("splitterOut"), nullptr);
+        registerProtocol(Protocol::ospf, gate("splitterOut"), gate("splitterIn"));
 
         cMessage* init = new cMessage();
         init->setKind(INIT_PROCESS);

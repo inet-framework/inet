@@ -38,20 +38,20 @@ void NetworkProtocolBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(getProtocol(), gate("transportIn"), gate("queueIn"));
-        registerProtocol(getProtocol(), gate("queueOut"), gate("transportOut"));
+        registerService(getProtocol(), gate("transportIn"), gate("transportOut"));
+        registerProtocol(getProtocol(), gate("queueOut"), gate("queueIn"));
     }
 }
 
-void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (in->isName("transportIn"))
+    if (gate->isName("transportOut"))
         upperProtocols.insert(&protocol);
 }
 
