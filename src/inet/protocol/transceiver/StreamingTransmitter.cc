@@ -32,6 +32,13 @@ void StreamingTransmitter::initialize(int stage)
     }
 }
 
+StreamingTransmitter::~StreamingTransmitter()
+{
+    cancelAndDelete(txEndTimer);
+    delete txSignal;
+    delete txPacket;
+}
+
 void StreamingTransmitter::handleMessage(cMessage *message)
 {
     if (message == txEndTimer) {
