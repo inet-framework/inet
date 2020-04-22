@@ -29,7 +29,12 @@ Define_Module(EthernetTypeOrLengthChecker);
 void EthernetTypeOrLengthChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8023TypeOrLength>();
-    auto protocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
+    auto typeOrLength = header->getTypeOrLength();
+    const Protocol *protocol;
+    if (isIeee8023Length(typeOrLength))
+        protocol = &Protocol::ieee8022;
+    else
+        protocol = ProtocolGroup::ethertype.getProtocol(typeOrLength);
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
