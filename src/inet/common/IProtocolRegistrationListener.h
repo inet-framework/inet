@@ -23,19 +23,43 @@
 
 namespace inet {
 
-INET_API void registerService(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive);
-INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn, cGate *responseIn, cGate *confirmIn);
-INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn);
+/**
+ * Registers a service primitive (SDU processing) at the given gate.
+ *
+ * For example, IP receives service requests on upperLayerIn from transport
+ * protocols and sends service indications (e.g. TCP/UDP protocol indiciations)
+ * on upperLayerOut.
+ *
+ * For another example, Ethernet receives service requests on upperLayerIn from
+ * network protocols and sends service indications (e.g. IP protocol indications)
+ * on upperLayerOut.
+ */
+INET_API void registerService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive);
+INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut);
+INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut);
 
-INET_API void registerProtocol(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive);
-INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut, cGate *responseOut, cGate *confirmOut);
-INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut);
+/**
+ * Registers a protocol primitive (PDU processing) at the given gate.
+ *
+ * For example, IP receives protocol indiciations on lowerLayerIn and sends IP
+ * protocol packets (e.g. Ethernet service requests) on lowerLayerOut.
+ *
+ * For another example, Ethernet receives protocol indications on lowerLayerIn
+ * and sends protocol packets (e.g. transmission service requests) on lowerLayerOut.
+ */
+INET_API void registerProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive);
+INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn);
+INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn);
 
+/**
+ * This interface defines methods that are called during protocol service
+ * primitve registration.
+ */
 class INET_API IProtocolRegistrationListener
 {
   public:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) = 0;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) = 0;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) = 0;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) = 0;
 };
 
 } // namespace inet

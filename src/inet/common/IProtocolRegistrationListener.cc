@@ -16,57 +16,60 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
-void registerService(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void registerService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
-    auto out = in->getPathStartGate();
-    IProtocolRegistrationListener *protocolRegistration = dynamic_cast<IProtocolRegistrationListener *>(out->getOwner());
-    if (protocolRegistration != nullptr)
-        protocolRegistration->handleRegisterService(protocol, out, servicePrimitive);
+    auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
+    if (otherGate != nullptr) {
+        IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
+        protocolRegistration->handleRegisterService(protocol, otherGate, servicePrimitive);
+    }
 }
 
-void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn, cGate *responseIn, cGate *confirmIn)
+void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut)
+{
+    registerService(protocol, requestIn, indicationOut, requestIn, indicationOut);
+}
+
+void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut)
 {
     if (requestIn != nullptr)
         registerService(protocol, requestIn, SP_REQUEST);
-    if (indicationIn != nullptr)
-        registerService(protocol, indicationIn, SP_INDICATION);
+    if (indicationOut != nullptr)
+        registerService(protocol, indicationOut, SP_INDICATION);
     if (responseIn != nullptr)
         registerService(protocol, responseIn, SP_RESPONSE);
-    if (confirmIn != nullptr)
-        registerService(protocol, confirmIn, SP_CONFIRM);
+    if (confirmOut != nullptr)
+        registerService(protocol, confirmOut, SP_CONFIRM);
 }
 
-void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn)
+void registerProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
-    registerService(protocol, requestIn, indicationIn, requestIn, indicationIn);
+    auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
+    if (otherGate != nullptr) {
+        IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
+        protocolRegistration->handleRegisterProtocol(protocol, otherGate, servicePrimitive);
+    }
 }
 
-void registerProtocol(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn)
 {
-    auto in = out->getPathEndGate();
-    IProtocolRegistrationListener *protocolRegistration = dynamic_cast<IProtocolRegistrationListener *>(in->getOwner());
-    if (protocolRegistration != nullptr)
-        protocolRegistration->handleRegisterProtocol(protocol, in, servicePrimitive);
+    registerProtocol(protocol, requestOut, indicationIn, requestOut, indicationIn);
 }
 
-void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut)
-{
-    registerProtocol(protocol, requestOut, indicationOut, requestOut, indicationOut);
-}
-
-void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut, cGate *responseOut, cGate *confirmOut)
+void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn)
 {
     if (requestOut != nullptr)
         registerProtocol(protocol, requestOut, SP_REQUEST);
-    if (indicationOut != nullptr)
-        registerProtocol(protocol, indicationOut, SP_INDICATION);
+    if (indicationIn != nullptr)
+        registerProtocol(protocol, indicationIn, SP_INDICATION);
     if (responseOut != nullptr)
         registerProtocol(protocol, responseOut, SP_RESPONSE);
-    if (confirmOut != nullptr)
-        registerProtocol(protocol, confirmOut, SP_CONFIRM);
+    if (confirmIn != nullptr)
+        registerProtocol(protocol, confirmIn, SP_CONFIRM);
 }
 
 } // namespace inet
