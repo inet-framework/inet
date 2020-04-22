@@ -18,23 +18,30 @@
 package inet.protocol.ethernet;
 
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ieee8021q.IIeee8021qEncap;
-import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceEntry;
 import inet.protocol.common.InterPacketGap;
 import inet.protocol.common.PacketEmitter;
 import inet.protocol.common.PaddingInserter;
+import inet.protocol.common.ProtocolChecker;
 import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
+import inet.protocol.ieee8021q.IIeee8021qTagger;
+import inet.protocol.ieee8022.IIeee8022LlcChecker;
+import inet.protocol.ieee8022.IIeee8022LlcInserter;
 import inet.protocol.server.PreemptingServer;
 import inet.protocol.transceiver.PreemptibleTransmitter;
 import inet.protocol.transceiver.StreamingReceiver;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.ITrafficConditioner;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 
-
-module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
+// TODO: add VLAN priority queueing (e.g. https://erg.abdn.ac.uk/users/gorry/course/lan-pages/vlan.html)
+// TODO: add periodically open/closed gates to compound priority queues
+// TODO: add socket handling
+// TODO: dispatch for LLC/ethertype
+// TODO: connect/disconnect handling
+module AdvancedEthernetInterface extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         bool broadcast = default(true);
@@ -49,122 +56,145 @@ module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
         output upperLayerOut;
         inout phys;
     submodules:
-        typeOrLengthInserter: EthernetTypeOrLengthInserter {
+        ingressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
             @display("p=300,100");
         }
-        addressInserter: EthernetAddressInserter {
+        llcInserter: <default("OmittedIeee8022LlcInserter")> like IIeee8022LlcInserter {
             @display("p=300,200");
+        }
+        typeOrLengthInserter: EthernetTypeOrLengthInserter {
+            @display("p=300,300");
+        }
+        ctagInserter: <default("OmittedIeee8021qTagger")> like IIeee8021qTagger {
+            vlanTagType = "c";
+            @display("p=300,400");
+        }
+        stagInserter: <default("OmittedIeee8021qTagger")> like IIeee8021qTagger {
+            vlanTagType = "s";
+            @display("p=300,500");
+        }
+        addressInserter: EthernetAddressInserter {
+            @display("p=300,600");
         }
         paddingInserter: PaddingInserter {
             minLength = default(60B);
-            @display("p=300,300");
+            @display("p=300,700");
         }
         priorityClassifier1: PacketClassifier {
             classifierClass = default("inet::EthernetExpressOverNormalClassifier");
-            @display("p=300,400");
+            @display("p=300,800");
         }
         expressQueue: PacketQueue {
-            @display("p=100,500");
+            @display("p=100,900");
         }
         preemptedQueue: PacketQueue {
-            @display("p=300,500");
+            @display("p=300,900");
         }
         normalQueue: PacketQueue {
-            @display("p=500,500");
+            @display("p=500,900");
         }
         priorityScheduler: PriorityScheduler {
-            @display("p=200,600");
+            @display("p=200,1000");
         }
         preemptingServer: PreemptingServer {
             minPacketLength = 60B;
-            @display("p=300,700");
+            @display("p=300,1100");
         }
         priorityClassifier2: PacketClassifier {
             classifierClass = default("inet::EthernetExpressOverNormalClassifier");
-            @display("p=300,800");
+            @display("p=300,1200");
         }
         expressFcsInserter: EthernetFcsInserter {
-            @display("p=150,900");
+            @display("p=150,1300");
         }
         expressPreambleInserter: EthernetPreambleInserter {
-            @display("p=150,1000");
+            @display("p=150,1400");
         }
         fragmentFcsInserter: EthernetFragmentFcsInserter {
-            @display("p=450,900");
+            @display("p=450,1300");
         }
         fragmentPreambleInserter: EthernetFragmentPreambleInserter {
-            @display("p=450,1000");
+            @display("p=450,1400");
         }
         m1: PacketMultiplexer {
-            @display("p=300,1100");
+            @display("p=300,1500");
         }
         outboundEmitter: PacketEmitter {
             signalName = "packetSentToLower";
             direction = "outbound";
             protocolName = "ethernetphy";
-            @display("p=300,1200");
+            @display("p=300,1600");
         }
         interFrameGapInserter: InterPacketGap {
             duration = default(96s / dropUnit(bitrate));
-            @display("p=300,1300");
+            @display("p=300,1700");
         }
         transmitter: PreemptibleTransmitter {
             datarate = default(bitrate);
-            @display("p=300,1400");
+            @display("p=300,1800");
         }
-        llc: <default("OmittedIeee8022Llc")> like IIeee8022Llc {
-            @display("p=625,50");
-        }
-        ctag: <default("OmittedIeee8021qEncap")> like IIeee8021qEncap {
-            @display("p=625,125");
-        }
-        stag: <default("OmittedIeee8021qEncap")> like IIeee8021qEncap {
-            @display("p=625,175");
-        }
-        typeOrLengthChecker: EthernetTypeOrLengthChecker {
+        protocolChecker: ProtocolChecker {
             @display("p=950,100");
         }
-        addressChecker: EthernetAddressChecker {
+        egressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
             @display("p=950,200");
         }
+        llcChecker: <default("OmittedIeee8022LlcChecker")> like IIeee8022LlcChecker {
+            @display("p=950,300");
+        }
+        typeOrLengthChecker: EthernetTypeOrLengthChecker {
+            @display("p=950,400");
+        }
+        ctagChecker: <default("OmittedIeee8021qTagger")> like IIeee8021qTagger {
+            vlanTagType = "c";
+            @display("p=950,500");
+        }
+        stagChecker: <default("OmittedIeee8021qTagger")> like IIeee8021qTagger {
+            vlanTagType = "s";
+            @display("p=950,600");
+        }
+        addressChecker: EthernetAddressChecker {
+            @display("p=950,700");
+        }
         m2: PacketMultiplexer {
-            @display("p=950,800");
+            @display("p=950,1200");
         }
         expressFcsChecker: EthernetFcsChecker {
-            @display("p=800,900");
+            @display("p=800,1400");
         }
         expressPreambleChecker: EthernetPreambleChecker {
-            @display("p=800,1100");
+            @display("p=800,1500");
         }
         defragmenter: FragmentTagBasedDefragmenter {
-            @display("p=1100,900");
+            @display("p=1100,1300");
         }
         fragmentFcsChecker: EthernetFragmentFcsChecker {
-            @display("p=1100,1000");
+            @display("p=1100,1400");
         }
         fragmentPreambleChecker: EthernetFragmentPreambleChecker {
-            @display("p=1100,1100");
+            @display("p=1100,1500");
         }
         preambleClassifier: PacketClassifier {
             classifierClass = default("inet::EthernetPreambleClassifier");
-            @display("p=950,1200");
+            @display("p=950,1600");
         }
         inboundEmitter: PacketEmitter {
             signalName = "packetReceivedFromLower";
             direction = "inbound";
             protocolName = "ethernetphy";
-            @display("p=950,1300");
+            @display("p=950,1700");
         }
         receiver: StreamingReceiver {
             datarate = default(bitrate);
-            @display("p=950,1400");
+            @display("p=950,1800");
         }
     connections:
-        upperLayerIn --> llc.upperLayerIn;
-        llc.lowerLayerOut --> typeOrLengthInserter.in;
-        typeOrLengthInserter.out --> ctag.upperLayerIn;
-        ctag.lowerLayerOut --> stag.upperLayerIn;
-        stag.lowerLayerOut --> addressInserter.in;
+        upperLayerIn --> ingressConditioner.in;
+        ingressConditioner.out --> llcInserter.in;
+        llcInserter.out --> typeOrLengthInserter.in;
+        typeOrLengthInserter.out --> ctagInserter.in;
+        ctagInserter.out --> stagInserter.in;
+        stagInserter.out --> addressInserter.in;
         addressInserter.out --> paddingInserter.in;
         paddingInserter.out --> priorityClassifier1.in;
         priorityClassifier1.out++ --> normalQueue.in;
@@ -197,9 +227,11 @@ module EthernetInterfaceP extends InterfaceEntry like IEthernetInterface
         fragmentFcsChecker.out --> defragmenter.in;
         defragmenter.out --> m2.in++;
         m2.out --> addressChecker.in;
-        addressChecker.out --> stag.lowerLayerIn;
-        stag.upperLayerOut --> ctag.lowerLayerIn;
-        ctag.upperLayerOut --> typeOrLengthChecker.in;
-        typeOrLengthChecker.out --> llc.lowerLayerIn;
-        llc.upperLayerOut --> upperLayerOut;
+        addressChecker.out --> stagChecker.in;
+        stagChecker.out --> ctagChecker.in;
+        ctagChecker.out --> typeOrLengthChecker.in;
+        typeOrLengthChecker.out --> llcChecker.in;
+        llcChecker.out --> egressConditioner.in;
+        egressConditioner.out --> protocolChecker.in;
+        protocolChecker.out --> upperLayerOut;
 }
