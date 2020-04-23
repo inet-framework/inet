@@ -34,7 +34,10 @@ int PriorityScheduler::getNumPackets() const
 {
     int size = 0;
     for (auto collection : collections)
-        size += collection->getNumPackets();
+        if (collection != nullptr)
+            size += collection->getNumPackets();
+        else
+            return -1;
     return size;
 }
 
@@ -42,7 +45,10 @@ b PriorityScheduler::getTotalLength() const
 {
     b totalLength(0);
     for (auto collection : collections)
-        totalLength += collection->getTotalLength();
+        if (collection != nullptr)
+            totalLength += collection->getTotalLength();
+        else
+            return b(-1);
     return totalLength;
 }
 
