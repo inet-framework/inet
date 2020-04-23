@@ -18,18 +18,16 @@
 #ifndef __INET_PACKETGATE_H
 #define __INET_PACKETGATE_H
 
-#include "inet/queueing/base/PacketFilterBase.h"
-#include "inet/queueing/contract/IPacketFlow.h"
+#include "inet/queueing/base/PacketGateBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketGate : public PacketFilterBase, public virtual IPacketFlow
+class INET_API PacketGate : public PacketGateBase
 {
   protected:
-    int changeIndex = 0;
-    std::vector<simtime_t> changeTimes;
-    bool isOpen_ = false;
+    simtime_t openTime;
+    simtime_t closeTime;
 
     cMessage *changeTimer = nullptr;
 
@@ -37,32 +35,11 @@ class INET_API PacketGate : public PacketFilterBase, public virtual IPacketFlow
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual bool matchesPacket(const Packet *packet) const override;
-
     virtual void scheduleChangeTimer();
     virtual void processChangeTimer();
 
   public:
     virtual ~PacketGate() { cancelAndDelete(changeTimer); }
-
-    virtual bool isOpen() const { return isOpen_; }
-    virtual void open();
-    virtual void close();
-
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
-    virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
-
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
-
-    virtual bool canPushSomePacket(cGate *gate) const override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
-
-    virtual bool canPullSomePacket(cGate *gate) const override;
-    virtual Packet *canPullPacket(cGate *gate) const override;
-
-    virtual void handleCanPushPacket(cGate *gate) override;
-    virtual void handleCanPullPacket(cGate *gate) override;
 };
 
 } // namespace queueing

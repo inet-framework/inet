@@ -17,25 +17,18 @@
 
 package inet.queueing.gate;
 
-import inet.queueing.base.PacketProcessorBase;
-import inet.queueing.contract.IPacketSink;
-import inet.queueing.contract.IPacketSource;
+import inet.queueing.base.PacketGateBase;
+import inet.queueing.contract.IPacketGate;
 
 //
 // This module allows or forbids packets to pass through depending on whether
 // the gate is open or closed.
 //
-simple PacketGate extends PacketProcessorBase like IPacketSource, IPacketSink
+simple PacketGate extends PacketGateBase like IPacketGate
 {
     parameters:
         bool initiallyOpen = default(false);
-        double openTime @unit(s) = default(nan s); // if there's only one
-        double closeTime @unit(s) = default(nan s); // if there's only one
-        string changeTimes = default(""); // space separated list of times where state change happens
-        displayStringTextFormat = default("passed %p pk (%l)");
+        double openTime @unit(s);
+        double closeTime @unit(s);
         @class(PacketGate);
-        @display("i=block/cogwheel");
-    gates:
-        input in;
-        output out;
 }
