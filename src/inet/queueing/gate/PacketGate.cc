@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/common/PacketGate.h"
+#include "inet/queueing/gate/PacketGate.h"
 
 namespace inet {
 namespace queueing {
