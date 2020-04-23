@@ -374,13 +374,13 @@ void Igmpv2::handleMessage(cMessage *msg)
 void Igmpv2::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
+    if (protocol == Protocol::igmp && servicePrimitive == SP_INDICATION)
+        externalRouter = true;
 }
 
 void Igmpv2::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (protocol.getId() == Protocol::igmp.getId() && servicePrimitive == SP_INDICATION)
-        externalRouter = true;
 }
 
 // --- Methods for handling self messages ---
