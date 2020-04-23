@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/queueing/function/PacketClassifierFunction.h"
@@ -39,6 +40,14 @@ static int classifyEthernetPreamble(Packet *packet)
 }
 
 Register_Packet_Classifier_Function(EthernetPreambleClassifier, classifyEthernetPreamble);
+
+static int classifyPacketUserPriorityInd(Packet *packet)
+{
+    auto userPriorityInd = packet->findTag<UserPriorityInd>();
+    return userPriorityInd != nullptr ? userPriorityInd->getUserPriority() : 0;
+}
+
+Register_Packet_Classifier_Function(PacketUserPriorityIndClassifier, classifyPacketUserPriorityInd);
 
 } // namespace inet
 
