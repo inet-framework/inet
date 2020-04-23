@@ -19,8 +19,8 @@ package inet.protocol.ethernet;
 
 import inet.queueing.queue.PriorityQueue;
 
-module VlanPriorityCompoundQueue extends PriorityQueue
+module EthernetPriorityQueue extends PriorityQueue
 {
     parameters:
-        classifier.classifierClass = default("inet::EthernetVlanPriorityClassifier");
+        classifier.classifierClass = default("inet::PacketUserPriorityIndClassifier");
 }
