@@ -36,7 +36,7 @@ sim-time-limit = 10s
 cmdenv-event-banners = false
 *.provider.packetLength = 1B
 *.collector.collectionInterval = 1s
-*.gate.durations = "1 2"
+*.gate.durations = "1s 2s"
 
 %contains: stdout
 Initializing...
