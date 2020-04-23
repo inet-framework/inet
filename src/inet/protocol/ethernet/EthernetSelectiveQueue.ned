@@ -17,10 +17,10 @@
 
 package inet.protocol.ethernet;
 
-import inet.queueing.queue.PacketQueue;
+import inet.queueing.queue.SelectiveQueue;
 
-module VlanPriorityQueue extends PacketQueue
+module EthernetSelectiveQueue extends SelectiveQueue
 {
     parameters:
-        comparatorClass = default("inet::EthernetVlanPriorityComparator");
+        classifier.classifierClass = default("inet::PacketUserPriorityIndClassifier");
 }
