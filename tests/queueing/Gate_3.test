@@ -1,13 +1,13 @@
 %description:
 
 In this test, packets are collected periodically by an active packet sink
-(ActivePacketSink). The packets pass through a packet gate if it's open,
-otherwise packets are not generated. The packets are provided by a passive
-packet source (PassivePacketSource).
+(ActivePacketSink). The packets pass through a periodic packet gate if it's
+open, otherwise packets are not generated. The packets are provided by a
+passive packet source (PassivePacketSource).
 
 %file: test.ned
 
-import inet.queueing.gate.PacketGate;
+import inet.queueing.gate.PeriodicGate;
 import inet.queueing.sink.ActivePacketSink;
 import inet.queueing.source.PassivePacketSource;
 
@@ -17,7 +17,7 @@ network TestProviderCollector
         provider: PassivePacketSource {
             @display("p=100,100");
         }
-        gate: PacketGate {
+        gate: PeriodicGate {
             @display("p=200,100");
         }
         collector: ActivePacketSink {
@@ -36,10 +36,12 @@ sim-time-limit = 10s
 cmdenv-event-banners = false
 *.provider.packetLength = 1B
 *.collector.collectionInterval = 1s
-*.gate.openTime = 3s
-*.gate.closeTime = 7s
+*.gate.durations = "1 2"
 
 %contains: stdout
+Initializing...
+
+Running simulation...
 Opening gate.
 Providing packet provider-0.
 Passing through packet provider-0.
@@ -47,6 +49,8 @@ Collecting packet provider-0.
 Providing packet provider-1.
 Passing through packet provider-1.
 Collecting packet provider-1.
+Closing gate.
+Opening gate.
 Providing packet provider-2.
 Passing through packet provider-2.
 Collecting packet provider-2.
@@ -54,3 +58,15 @@ Providing packet provider-3.
 Passing through packet provider-3.
 Collecting packet provider-3.
 Closing gate.
+Opening gate.
+Providing packet provider-4.
+Passing through packet provider-4.
+Collecting packet provider-4.
+Providing packet provider-5.
+Passing through packet provider-5.
+Collecting packet provider-5.
+Closing gate.
+Opening gate.
+Providing packet provider-6.
+Passing through packet provider-6.
+Collecting packet provider-6.
