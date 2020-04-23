@@ -23,6 +23,7 @@ namespace inet {
 namespace queueing {
 
 Define_Module(PacketGate);
+
 void PacketGate::initialize(int stage)
 {
     PacketGateBase::initialize(stage);
