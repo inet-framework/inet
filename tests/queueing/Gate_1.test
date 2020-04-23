@@ -7,7 +7,7 @@ packet sink (PassivePacketSink).
 
 %file: test.ned
 
-import inet.queueing.common.PacketGate;
+import inet.queueing.gate.PacketGate;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
