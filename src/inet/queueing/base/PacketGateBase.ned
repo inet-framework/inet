@@ -28,6 +28,8 @@ simple PacketGateBase extends PacketProcessorBase
         displayStringTextFormat = default("passed %p pk (%l)");
         @class(PacketGateBase);
         @display("i=block/cogwheel");
+        @signal[gateStateChanged](type=bool);
+        @statistic[gateStateChanged](title="gate states"; record=vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;
