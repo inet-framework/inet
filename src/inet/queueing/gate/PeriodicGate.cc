@@ -28,10 +28,20 @@ void PeriodicGate::initialize(int stage)
     PacketGateBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         isOpen_ = par("initiallyOpen");
+        startTime = par("startTime");
         const char *durationsAsString = par("durations");
         cStringTokenizer tokenizer(durationsAsString);
         while (tokenizer.hasMoreTokens())
-            durations.push_back(SimTime::parse(tokenizer.nextToken()));
+            durations.push_back(cNEDValue::parseQuantity(tokenizer.nextToken(), "s"));
+        while (startTime > 0) {
+            if (startTime > durations[index]) {
+                isOpen_ = !isOpen_;
+                startTime -= durations[index];
+                index = (index + 1) % durations.size();
+            }
+            else
+                break;
+        }
         changeTimer = new cMessage("ChangeTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -53,8 +63,9 @@ void PeriodicGate::handleMessage(cMessage *message)
 void PeriodicGate::scheduleChangeTimer()
 {
     ASSERT(0 <= index && index < (int)durations.size());
-    scheduleAt(simTime() + durations[index], changeTimer);
+    scheduleAt(simTime() + durations[index] - startTime, changeTimer);
     index = (index + 1) % durations.size();
+    startTime = 0;
 }
 
 void PeriodicGate::processChangeTimer()
