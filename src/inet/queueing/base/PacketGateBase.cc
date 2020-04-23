@@ -20,6 +20,17 @@
 namespace inet {
 namespace queueing {
 
+simsignal_t PacketGateBase::gateStateChangedSignal = registerSignal("gateStateChanged");
+
+void PacketGateBase::initialize(int stage)
+{
+    PacketFlowBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        WATCH(isOpen_);
+    else if (stage == INITSTAGE_QUEUEING)
+        emit(gateStateChangedSignal, isOpen_);
+}
+
 void PacketGateBase::open()
 {
     ASSERT(!isOpen_);
@@ -29,6 +40,7 @@ void PacketGateBase::open()
         producer->handleCanPushPacket(inputGate->getPathStartGate());
     if (collector != nullptr)
         collector->handleCanPullPacket(outputGate->getPathEndGate());
+    emit(gateStateChangedSignal, isOpen_);
 }
 
 void PacketGateBase::close()
@@ -36,6 +48,7 @@ void PacketGateBase::close()
     ASSERT(isOpen_);
     EV_DEBUG << "Closing gate.\n";
     isOpen_ = false;
+    emit(gateStateChangedSignal, isOpen_);
 }
 
 void PacketGateBase::processPacket(Packet *packet)
