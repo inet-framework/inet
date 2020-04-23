@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.common;
+package inet.queueing.gate;
 
 import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPacketSink;
