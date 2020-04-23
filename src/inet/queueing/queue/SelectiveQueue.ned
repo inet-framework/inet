@@ -19,14 +19,15 @@ package inet.queueing.queue;
 
 import inet.queueing.contract.IPacketBuffer;
 import inet.queueing.contract.IPacketClassifier;
+import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module implements a priority queue with multiple inner queues and an
-// optional shared memory buffer.
+// This module implements a priority queue with multiple inner queues each having
+// its own periodic gate for packet selection and an optional shared memory buffer.
 //
-module PriorityQueue extends CompoundPacketQueue
+module SelectiveQueue extends CompoundPacketQueue
 {
     parameters:
         int numQueues;
@@ -44,15 +45,20 @@ module PriorityQueue extends CompoundPacketQueue
                 bufferModule = default(exists(buffer) ? "^.buffer" : "");
                 @display("p=300,100,column,125");
         }
+        gate[numQueues]: <default("PeriodicGate")> like IPacketGate {
+            parameters:
+                @display("p=500,100,column,125");
+        }
         scheduler: <default("PriorityScheduler")> like IPacketScheduler {
             parameters:
-                @display("p=500,100");
+                @display("p=700,100");
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;
         for i=0..sizeof(queue)-1 {
             classifier.out++ --> queue[i].in;
-            queue[i].out --> scheduler.in++;
+            queue[i].out --> gate[i].in;
+            gate[i].out --> scheduler.in++;
         }
         scheduler.out --> { @display("m=e"); } --> out;
 }
