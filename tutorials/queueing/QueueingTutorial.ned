@@ -13,7 +13,6 @@ import inet.queueing.common.PacketCloner;
 import inet.queueing.common.PacketDelayer;
 import inet.queueing.common.PacketDemultiplexer;
 import inet.queueing.common.PacketDuplicator;
-import inet.queueing.common.PacketGate;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPacketClassifier;
@@ -25,6 +24,7 @@ import inet.queueing.filter.ContentBasedFilter;
 import inet.queueing.filter.OrdinalBasedDropper;
 import inet.queueing.filter.RateLimiter;
 import inet.queueing.filter.RedDropper;
+import inet.queueing.gate.PacketGate;
 import inet.queueing.marker.ContentBasedLabeler;
 import inet.queueing.marker.ContentBasedTagger;
 import inet.queueing.marker.PacketTagger;
@@ -53,7 +53,6 @@ import inet.queueing.tokengenerator.PacketBasedTokenGenerator;
 import inet.queueing.tokengenerator.QueueBasedTokenGenerator;
 import inet.queueing.tokengenerator.SignalBasedTokenGenerator;
 import inet.queueing.tokengenerator.TimeBasedTokenGenerator;
-
 
 network ProducerConsumerTutorialStep
 {
@@ -233,7 +232,7 @@ network WrrClassifierTutorialStep
         consumer3: PassivePacketSink {
             @display("p=500,300");
         }
-        
+
     connections allowunconnected:
         producer.out --> classifier.in;
         classifier.out++ --> consumer1.in;
@@ -361,7 +360,7 @@ network WrrSchedulerTutorialStep
         provider3: PassivePacketSource {
             @display("p=100,300");
         }
-        
+
         scheduler: WrrScheduler {
             @display("p=300,100");
         }
@@ -548,7 +547,7 @@ module ExampleCompoundPriorityQueue extends CompoundPacketQueue
         }
         producer: ActivePacketSource {
             @display("p=325,350");
-        }            
+        }
         scheduler: PriorityScheduler {
             @display("p=550,100");
         }
@@ -1366,4 +1365,3 @@ network ExampleNetworkTutorialStep
         cable.bOut --> source.lowerIn;
 }
 
-//-------------------------------------------------
