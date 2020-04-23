@@ -32,9 +32,11 @@ import inet.protocol.transceiver.PreemptibleTransmitter;
 import inet.protocol.transceiver.StreamingReceiver;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
+
 
 // TODO: add VLAN priority queueing (e.g. https://erg.abdn.ac.uk/users/gorry/course/lan-pages/vlan.html)
 // TODO: add periodically open/closed gates to compound priority queues
@@ -84,13 +86,13 @@ module AdvancedEthernetInterface extends InterfaceEntry like IEthernetInterface
             classifierClass = default("inet::EthernetExpressOverNormalClassifier");
             @display("p=300,800");
         }
-        expressQueue: PacketQueue {
+        expressQueue: <default("PacketQueue")> like IPacketQueue {
             @display("p=100,900");
         }
         preemptedQueue: PacketQueue {
             @display("p=300,900");
         }
-        normalQueue: PacketQueue {
+        normalQueue: <default("PacketQueue")> like IPacketQueue {
             @display("p=500,900");
         }
         priorityScheduler: PriorityScheduler {
