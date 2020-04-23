@@ -26,10 +26,14 @@ namespace queueing {
 
 class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGate
 {
+  public:
+    static simsignal_t gateStateChangedSignal;
+
   protected:
     bool isOpen_ = false;
 
   protected:
+    virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
 
   public:
