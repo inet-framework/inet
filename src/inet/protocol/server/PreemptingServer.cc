@@ -87,11 +87,13 @@ void PreemptingServer::handleCanPushPacket(cGate *gate)
 void PreemptingServer::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
-    if (consumer->canPushSomePacket(outputGate->getPathEndGate()))
-        startSendingPacket();
+    if (consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+        if (provider->canPullSomePacket(inputGate->getPathStartGate()))
+            startSendingPacket();
+    }
     else {
         auto nextPacket = provider->canPullPacket(inputGate->getPathStartGate());
-        if (packet != nullptr && getPriority(nextPacket) > getPriority(packet)) {
+        if (packet != nullptr && nextPacket != nullptr && getPriority(nextPacket) > getPriority(packet)) {
             b confirmedLength = consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
             b preemptedLength = roundingLength * ((confirmedLength + roundingLength - b(1)) / roundingLength);
             if (preemptedLength < minPacketLength)
