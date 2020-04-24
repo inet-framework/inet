@@ -128,8 +128,8 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 void ExampleQosClassifier::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    if (!strcmp("out", g->getName()))
-        registerService(protocol, gate("in"), servicePrimitive);
+    if (!strcmp("in", g->getName()))
+        registerService(protocol, gate("out"), servicePrimitive);
     else
         throw cRuntimeError("Unknown gate: %s", g->getName());
 }
