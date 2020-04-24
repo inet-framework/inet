@@ -169,11 +169,11 @@ Packet *PacketFlowBase::pullPacket(cGate *gate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketStart(cGate *gate)
+Packet *PacketFlowBase::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     checkPacketStreaming(nullptr);
-    auto packet = provider->pullPacketStart(inputGate->getPathStartGate());
+    auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
     take(packet);
     inProgressStreamId = packet->getTreeId();
     processPacket(packet);
@@ -182,10 +182,10 @@ Packet *PacketFlowBase::pullPacketStart(cGate *gate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketEnd(cGate *gate)
+Packet *PacketFlowBase::pullPacketEnd(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketEnd");
-    auto packet = provider->pullPacketEnd(inputGate->getPathStartGate());
+    auto packet = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
     take(packet);
     checkPacketStreaming(packet);
     processPacket(packet);
@@ -196,10 +196,10 @@ Packet *PacketFlowBase::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
+Packet *PacketFlowBase::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
-    auto packet = provider->pullPacketProgress(inputGate->getPathStartGate(), position, extraProcessableLength);
+    auto packet = provider->pullPacketProgress(inputGate->getPathStartGate(), datarate, position, extraProcessableLength);
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();

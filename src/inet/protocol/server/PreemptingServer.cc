@@ -41,7 +41,7 @@ void PreemptingServer::initialize(int stage)
 
 void PreemptingServer::startSendingPacket()
 {
-    packet = provider->pullPacket(inputGate->getPathStartGate());
+    packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
     take(packet);
     auto fragmentTag = packet->findTag<FragmentTag>();
     if (fragmentTag == nullptr) {

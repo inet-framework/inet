@@ -28,6 +28,8 @@ using namespace inet::queueing;
 class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPacketFlow
 {
   protected:
+    bps datarate;
+
     cGate *inputGate = nullptr;
     IActivePacketSource *producer = nullptr;
     IPassivePacketSource *provider = nullptr;
@@ -69,9 +71,9 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
     virtual Packet *canPullPacket(cGate *gate) const override;
     virtual Packet *pullPacket(cGate *gate) override;
 
-    virtual Packet *pullPacketStart(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketProgress(cGate *gate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketStart(cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketEnd(cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }
     virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

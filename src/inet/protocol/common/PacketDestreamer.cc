@@ -120,11 +120,11 @@ Packet *PacketDestreamer::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
     ASSERT(!isStreaming());
-    auto packet = provider->pullPacketStart(inputGate->getPathStartGate());
+    auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
     EV_INFO << "Starting destreaming packet " << packet->getName() << "." << std::endl;
     take(packet);
     streamedPacket = packet;
-    packet = provider->pullPacketEnd(inputGate->getPathStartGate());
+    packet = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
     EV_INFO << "Ending destreaming packet " << packet->getName() << "." << std::endl;
     take(packet);
     delete streamedPacket;
