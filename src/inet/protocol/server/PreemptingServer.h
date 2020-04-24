@@ -25,6 +25,7 @@ using namespace inet::queueing;
 class INET_API PreemptingServer : public PacketServerBase
 {
   protected:
+    bps datarate = bps(NaN);
     b minPacketLength = b(-1);
     b roundingLength = b(-1);
     cGate *preemptedOutputGate = nullptr;

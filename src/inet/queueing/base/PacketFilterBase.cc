@@ -222,19 +222,19 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
     }
 }
 
-Packet *PacketFilterBase::pullPacketStart(cGate *gate)
+Packet *PacketFilterBase::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketFilterBase::pullPacketEnd(cGate *gate)
+Packet *PacketFilterBase::pullPacketEnd(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketEnd");
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketFilterBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
+Packet *PacketFilterBase::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     throw cRuntimeError("Invalid operation");

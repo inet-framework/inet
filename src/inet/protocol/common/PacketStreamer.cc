@@ -96,7 +96,7 @@ Packet *PacketStreamer::canPullPacket(cGate *gate) const
     return isStreaming() ? nullptr : provider->canPullPacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketStreamer::pullPacketStart(cGate *gate)
+Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     streamedPacket = provider->pullPacket(inputGate->getPathStartGate());
@@ -105,7 +105,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate)
     return streamedPacket->dup();
 }
 
-Packet *PacketStreamer::pullPacketEnd(cGate *gate)
+Packet *PacketStreamer::pullPacketEnd(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
@@ -117,7 +117,7 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketStreamer::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
+Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     EV_INFO << "Progressing streaming packet " << streamedPacket->getName() << "." << std::endl;
