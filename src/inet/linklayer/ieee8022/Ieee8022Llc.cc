@@ -247,7 +247,8 @@ void Ieee8022Llc::handleRegisterService(const Protocol& protocol, cGate *gate, S
 void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("upperLayerOut", gate->getBaseName()))
+// KLUDGE: this should be here: if (!strcmp("upperLayerOut", gate->getBaseName()))
+//         but then the register protocol calls are lost, because they can't go through the traffic conditioner
         upperProtocols.insert(&protocol);
 }
 
