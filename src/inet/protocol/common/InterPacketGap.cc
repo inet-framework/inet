@@ -93,14 +93,14 @@ void InterPacketGap::receivePacketStart(cPacket *cpacket)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     animateSend(packet, outputGate);
-    pushOrSendPacketStart(packet, outputGate->getPathEndGate(), consumer);
+    pushOrSendPacketStart(packet, outputGate, consumer);
 }
 
 void InterPacketGap::receivePacketProgress(cPacket *cpacket, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     animateSend(packet, outputGate);
-    pushOrSendPacketProgress(packet, outputGate->getPathEndGate(), consumer, b(bitPosition), b(extraProcessableBitLength));
+    pushOrSendPacketProgress(packet, outputGate, consumer, b(bitPosition), b(extraProcessableBitLength));
     if (bitPosition == packet->getBitLength())
         lastPacket = nullptr;
 }
@@ -109,7 +109,7 @@ void InterPacketGap::receivePacketEnd(cPacket *cpacket)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     animateSend(packet, outputGate);
-    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
     lastPacket = nullptr;
 }
 
@@ -165,7 +165,7 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate)
     lastPacketEndTime = now + lastDelay + packet->getDuration();
     if (lastDelay == 0) {
         animateSend(packet, outputGate);
-        pushOrSendPacketStart(packet, outputGate->getPathEndGate(), consumer);
+        pushOrSendPacketStart(packet, outputGate, consumer);
     }
     else
         sendPacketStart(packet, nullptr, 0, lastDelay);
@@ -176,7 +176,7 @@ void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, b position,
     Enter_Method("pushPacketProgress");
     take(packet);
     animateSend(packet, outputGate);
-    pushOrSendPacketProgress(packet, outputGate->getPathEndGate(), consumer, position, extraProcessableLength);
+    pushOrSendPacketProgress(packet, outputGate, consumer, position, extraProcessableLength);
 }
 
 void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
@@ -184,7 +184,7 @@ void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
     Enter_Method("pushPacketEnd");
     take(packet);
     animateSend(packet, outputGate);
-    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
 }
 
 b InterPacketGap::getPushPacketProcessedLength(Packet *packet, cGate *gate)
