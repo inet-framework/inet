@@ -105,12 +105,12 @@ Packet *PacketSchedulerBase::pullPacket(cGate *gate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketStart(cGate *gate)
+Packet *PacketSchedulerBase::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     checkPacketStreaming(nullptr);
     startPacketStreaming();
-    auto packet = providers[inProgressGateIndex]->pullPacketStart(inputGates[inProgressGateIndex]->getPathStartGate());
+    auto packet = providers[inProgressGateIndex]->pullPacketStart(inputGates[inProgressGateIndex]->getPathStartGate(), datarate);
     take(packet);
     inProgressStreamId = packet->getTreeId();
     animateSend(packet, outputGate);
@@ -118,12 +118,12 @@ Packet *PacketSchedulerBase::pullPacketStart(cGate *gate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
+Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketEnd");
     if (!isStreamingPacket())
         startPacketStreaming();
-    auto packet = providers[inProgressGateIndex]->pullPacketEnd(inputGates[inProgressGateIndex]->getPathStartGate());
+    auto packet = providers[inProgressGateIndex]->pullPacketEnd(inputGates[inProgressGateIndex]->getPathStartGate(), datarate);
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
@@ -133,12 +133,12 @@ Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
+Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     if (!isStreamingPacket())
         startPacketStreaming();
-    auto packet = providers[inProgressGateIndex]->pullPacketProgress(inputGates[inProgressGateIndex]->getPathStartGate(), position, extraProcessableLength);
+    auto packet = providers[inProgressGateIndex]->pullPacketProgress(inputGates[inProgressGateIndex]->getPathStartGate(), datarate, position, extraProcessableLength);
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();

@@ -52,17 +52,17 @@ Packet *PacketPullerBase::pullPacket(cGate *gate)
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketPullerBase::pullPacketStart(cGate *gate)
+Packet *PacketPullerBase::pullPacketStart(cGate *gate, bps datarate)
 {
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketPullerBase::pullPacketEnd(cGate *gate)
+Packet *PacketPullerBase::pullPacketEnd(cGate *gate, bps datarate)
 {
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketPullerBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
+Packet *PacketPullerBase::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     throw cRuntimeError("Invalid operation");
 }

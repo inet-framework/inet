@@ -69,9 +69,9 @@ class INET_API PacketStreamer : public PacketProcessorBase, public virtual IPack
     virtual Packet *canPullPacket(cGate *gate) const override;
     virtual Packet *pullPacket(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
-    virtual Packet *pullPacketStart(cGate *gate) override;
-    virtual Packet *pullPacketEnd(cGate *gate) override;
-    virtual Packet *pullPacketProgress(cGate *gate, b position, b extraProcessableLength) override;
+    virtual Packet *pullPacketStart(cGate *gate, bps datarate) override;
+    virtual Packet *pullPacketEnd(cGate *gate, bps datarate) override;
+    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override;
     virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPullPacket(cGate *gate) override;

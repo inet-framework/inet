@@ -59,9 +59,9 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual 
     virtual Packet *canPullPacket(cGate *gate) const override;
 
     virtual Packet *pullPacket(cGate *gate) override;
-    virtual Packet *pullPacketStart(cGate *gate) override;
-    virtual Packet *pullPacketEnd(cGate *gate) override;
-    virtual Packet *pullPacketProgress(cGate *gate, b position, b extraProcessableLength) override;
+    virtual Packet *pullPacketStart(cGate *gate, bps datarate) override;
+    virtual Packet *pullPacketEnd(cGate *gate, bps datarate) override;
+    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override;
 
     virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override;
 
