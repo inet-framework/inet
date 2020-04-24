@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/protocol/transceiver/StreamingTransmitter.h"
 
@@ -25,6 +26,7 @@ Define_Module(StreamingTransmitter);
 void StreamingTransmitter::initialize(int stage)
 {
     PacketTransmitterBase::initialize(stage);
+    OperationalBase0::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dataratePar = &par("datarate");
         datarate = bps(*dataratePar);
@@ -39,10 +41,11 @@ StreamingTransmitter::~StreamingTransmitter()
     delete txPacket;
 }
 
-void StreamingTransmitter::handleMessage(cMessage *message)
+void StreamingTransmitter::handleMessageWhenUp(cMessage *message)
 {
     if (message == txEndTimer) {
         endTx();
+        producer->handleCanPushPacket(inputGate->getPathStartGate());
     }
     else
         PacketTransmitterBase::handleMessage(message);
@@ -81,7 +84,6 @@ void StreamingTransmitter::endTx()
     txPacket = nullptr;
     txSignal = nullptr;
     txStartTime = -1;
-    producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 void StreamingTransmitter::abortTx()
@@ -99,7 +101,6 @@ void StreamingTransmitter::abortTx()
     delete txSignal;
     txSignal = nullptr;
     txStartTime = -1;
-    producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 simclocktime_t StreamingTransmitter::calculateDuration(const Packet *packet) const
@@ -127,6 +128,23 @@ b StreamingTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate
         return b(0);
     simtime_t transmissionDuration = simTime() - txStartTime;
     return b(std::floor(datarate.get() * transmissionDuration.dbl()));
+}
+
+void StreamingTransmitter::handleStartOperation(LifecycleOperation *operation)
+{
+    producer->handleCanPushPacket(inputGate->getPathStartGate());
+}
+
+void StreamingTransmitter::handleStopOperation(LifecycleOperation *operation)
+{
+    if (txSignal)
+        endTx();
+}
+
+void StreamingTransmitter::handleCrashOperation(LifecycleOperation *operation)
+{
+    if (txSignal)
+        abortTx();
 }
 
 } // namespace inet

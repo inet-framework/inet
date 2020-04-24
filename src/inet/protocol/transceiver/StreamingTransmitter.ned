@@ -26,3 +26,4 @@ simple StreamingTransmitter extends PacketTransmitterBase like IPacketTransmitte
         volatile double datarate @unit(bps);
         @class(StreamingTransmitter);
 }
+
