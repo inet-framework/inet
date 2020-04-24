@@ -139,16 +139,19 @@ void PacketMultiplexer::handlePushPacketProcessed(Packet *packet, cGate *gate, b
 void PacketMultiplexer::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    int size = gateSize("in");
-    for (int i = 0; i < size; i++)
-        if (i != g->getIndex())
-            registerService(protocol, gate("in", i), servicePrimitive);
+    if (g == outputGate) {
+        int size = gateSize("in");
+        for (int i = 0; i < size; i++)
+            if (i != g->getIndex())
+                registerService(protocol, gate("in", i), servicePrimitive);
+    }
 }
 
 void PacketMultiplexer::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    registerProtocol(protocol, gate("out"), servicePrimitive);
+    if (g != outputGate)
+        registerProtocol(protocol, gate("out"), servicePrimitive);
 }
 
 } // namespace queueing
