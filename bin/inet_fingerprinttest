@@ -34,7 +34,7 @@ from io import StringIO
 
 # FIXME this is a hard coded path!!! must be specified from command line or dicovered automatically
 rootDir = os.path.abspath(".")  # the working directory in the CSV file is relative to this dir
-cpuTimeLimit = "3000s"
+cpuTimeLimit = "600s"
 logFile = "test.out"
 extraOppRunArgs = ""
 debug=False
