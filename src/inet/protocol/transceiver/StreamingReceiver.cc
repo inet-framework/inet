@@ -22,6 +22,7 @@ Define_Module(StreamingReceiver);
 void StreamingReceiver::initialize(int stage)
 {
     PacketReceiverBase::initialize(stage);
+    OperationalBase0::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         datarate = bps(par("datarate"));
 }
@@ -31,12 +32,23 @@ StreamingReceiver::~StreamingReceiver()
     delete rxSignal;
 }
 
-void StreamingReceiver::handleMessage(cMessage *message)
+void StreamingReceiver::handleMessageWhenUp(cMessage *message)
 {
     if (message->getArrivalGate() == inputGate)
         receiveFromMedium(message);
     else
         PacketReceiverBase::handleMessage(message);
+}
+
+void StreamingReceiver::handleMessageWhenDown(cMessage *msg)
+{
+    if (!msg->isSelfMessage()) {
+        // received on input gate from another network node
+        EV << "Interface is turned off, dropping message (" << msg->getClassName() << ")" << msg->getName() << "\n";
+        delete msg;
+    }
+    else
+        OperationalBase0::handleMessageWhenDown(msg);
 }
 
 void StreamingReceiver::sendToUpperLayer(Packet *packet)
@@ -64,6 +76,22 @@ void StreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double d
     rxSignal = check_and_cast<Signal *>(cpacket);
     auto packet = decodePacket(rxSignal);
     sendToUpperLayer(packet);
+    delete rxSignal;
+    rxSignal = nullptr;
+}
+
+void StreamingReceiver::handleStartOperation(LifecycleOperation *operation)
+{
+}
+
+void StreamingReceiver::handleStopOperation(LifecycleOperation *operation)
+{
+    delete rxSignal;
+    rxSignal = nullptr;
+}
+
+void StreamingReceiver::handleCrashOperation(LifecycleOperation *operation)
+{
     delete rxSignal;
     rxSignal = nullptr;
 }
