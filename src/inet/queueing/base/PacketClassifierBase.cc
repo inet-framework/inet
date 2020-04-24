@@ -108,7 +108,7 @@ void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate)
     take(packet);
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
-    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex]->getPathEndGate(), consumers[inProgressGateIndex]);
+    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex], consumers[inProgressGateIndex]);
     updateDisplayString();
 }
 
@@ -123,7 +123,7 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
     auto outputGate = outputGates[inProgressGateIndex];
     auto consumer = consumers[inProgressGateIndex];
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
     updateDisplayString();
 }
 
@@ -139,7 +139,7 @@ void PacketClassifierBase::pushPacketProgress(Packet *packet,  cGate *gate, b po
     auto consumer = consumers[inProgressGateIndex];
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    pushOrSendPacketProgress(packet, outputGate->getPathEndGate(), consumer, position, extraProcessableLength);
+    pushOrSendPacketProgress(packet, outputGate, consumer, position, extraProcessableLength);
     updateDisplayString();
 }
 
