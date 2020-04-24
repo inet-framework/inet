@@ -18,6 +18,8 @@
 #ifndef __INET_STREAMINGTRANSMITTER_H
 #define __INET_STREAMINGTRANSMITTER_H
 
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
 
 namespace inet {
@@ -25,7 +27,7 @@ namespace inet {
 using namespace inet::queueing;
 using namespace inet::physicallayer;
 
-class INET_API StreamingTransmitter : public PacketTransmitterBase
+class INET_API StreamingTransmitter : public PacketTransmitterBase, public OperationalBase0
 {
   protected:
     cPar *dataratePar = nullptr;
@@ -38,7 +40,8 @@ class INET_API StreamingTransmitter : public PacketTransmitterBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void handleMessage(cMessage *msg) override { OperationalBase0::handleMessage(msg); }
+    virtual void handleMessageWhenUp(cMessage *message) override;
 
     virtual void startTx(Packet *packet);
     virtual void endTx();
@@ -47,7 +50,16 @@ class INET_API StreamingTransmitter : public PacketTransmitterBase
     virtual simclocktime_t calculateDuration(const Packet *packet) const override;
     virtual void scheduleTxEndTimer(Signal *signal);
 
+    // for lifecycle:
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
   public:
+    StreamingTransmitter() : OperationalBase0(static_cast<PacketTransmitterBase&>(*this)) {}
     virtual ~StreamingTransmitter();
 
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
