@@ -16,6 +16,8 @@
 #ifndef __INET_STREAMINGRECEIVER_H
 #define __INET_STREAMINGRECEIVER_H
 
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/protocol/transceiver/base/PacketReceiverBase.h"
 
@@ -24,7 +26,7 @@ namespace inet {
 using namespace inet::units::values;
 using namespace inet::physicallayer;
 
-class INET_API StreamingReceiver : public PacketReceiverBase
+class INET_API StreamingReceiver : public PacketReceiverBase, public OperationalBase0
 {
   protected:
     bps datarate = bps(NaN);
@@ -33,7 +35,9 @@ class INET_API StreamingReceiver : public PacketReceiverBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void handleMessage(cMessage *msg) override { OperationalBase0::handleMessage(msg); }
+    virtual void handleMessageWhenUp(cMessage *message) override;
+    virtual void handleMessageWhenDown(cMessage *message) override;
 
     virtual void sendToUpperLayer(Packet *packet);
 
@@ -41,7 +45,16 @@ class INET_API StreamingReceiver : public PacketReceiverBase
     virtual void receivePacketProgress(cPacket *packet, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
     virtual void receivePacketEnd(cPacket *packet, cGate *gate, double datarate) override;
 
+    // for lifecycle:
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
   public:
+    StreamingReceiver() : OperationalBase0(static_cast<PacketReceiverBase&>(*this)) {}
     virtual ~StreamingReceiver();
 
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
