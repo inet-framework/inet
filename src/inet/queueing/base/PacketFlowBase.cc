@@ -90,7 +90,7 @@ void PacketFlowBase::pushPacketStart(Packet *packet, cGate *gate)
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
     processPacket(packet);
-    pushOrSendPacketStart(packet, outputGate->getPathEndGate(), consumer);
+    pushOrSendPacketStart(packet, outputGate, consumer);
     updateDisplayString();
 }
 
@@ -104,7 +104,7 @@ void PacketFlowBase::pushPacketEnd(Packet *packet, cGate *gate)
         checkPacketStreaming(packet);
     processPacket(packet);
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
     updateDisplayString();
 }
 
@@ -120,10 +120,10 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, cGate *gate, b position,
     processPacket(packet);
     if (isPacketEnd) {
         endPacketStreaming(packet);
-        pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+        pushOrSendPacketEnd(packet, outputGate, consumer);
     }
     else
-        pushOrSendPacketProgress(packet, outputGate->getPathEndGate(), consumer, position, extraProcessableLength);
+        pushOrSendPacketProgress(packet, outputGate, consumer, position, extraProcessableLength);
     updateDisplayString();
 }
 

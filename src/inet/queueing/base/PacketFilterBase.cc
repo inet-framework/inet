@@ -132,7 +132,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
         endPacketStreaming(packet);
         dropPacket(packet);
     }
-    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
     updateDisplayString();
 }
 
