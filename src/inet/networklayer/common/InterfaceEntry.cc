@@ -18,6 +18,8 @@
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/SubmoduleLayout.h"
@@ -71,9 +73,6 @@ std::string InterfaceEntryChangeDetails::str() const
 
 InterfaceEntry::InterfaceEntry()
 {
-    state = UP;
-    carrier = true;
-    datarate = 0;
 }
 
 InterfaceEntry::~InterfaceEntry()
@@ -108,6 +107,12 @@ void InterfaceEntry::initialize(int stage)
         WATCH(loopback);
         WATCH(datarate);
         WATCH(macAddr);
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
+        if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP) {
+            state = UP;
+            carrier = true;
+        }
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         if (hasPar("address")) {
@@ -411,6 +416,7 @@ void InterfaceEntry::setState(State s)
         stateChanged(F_STATE);
     }
 }
+
 void InterfaceEntry::setCarrier(bool b)
 {
     ASSERT(!(b && (state == DOWN)));
@@ -419,6 +425,52 @@ void InterfaceEntry::setCarrier(bool b)
         carrier = b;
         stateChanged(F_CARRIER);
     }
+}
+
+bool InterfaceEntry::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    int stage = operation->getCurrentStage();
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (stage == ModuleStartOperation::STAGE_LINK_LAYER) {
+            handleStartOperation(operation);
+            return true;
+        }
+    }
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (stage == ModuleStopOperation::STAGE_LINK_LAYER) {
+            handleStopOperation(operation);
+            return true;
+        }
+    }
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (stage == ModuleCrashOperation::STAGE_CRASH) {
+            handleCrashOperation(operation);
+            return true;
+        }
+    }
+    else
+        throw cRuntimeError("unaccepted Lifecycle operation: (%s)%s", operation->getClassName(), operation->getName());
+    return true;
+}
+
+void InterfaceEntry::handleStartOperation(LifecycleOperation *operation)
+{
+    setState(State::UP);
+    setCarrier(true);
+}
+
+void InterfaceEntry::handleStopOperation(LifecycleOperation *operation)
+{
+    setState(State::DOWN);
+    setCarrier(false);
+}
+
+void InterfaceEntry::handleCrashOperation(LifecycleOperation *operation)
+{
+    setState(State::DOWN);
+    setCarrier(false);
 }
 
 } // namespace inet
