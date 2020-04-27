@@ -57,7 +57,6 @@ void PacketFlowBase::startPacketStreaming(Packet *packet)
 
 void PacketFlowBase::endPacketStreaming(Packet *packet)
 {
-    emit(packetPushedSignal, packet);
     handlePacketProcessed(packet);
     inProgressStreamId = -1;
 }
@@ -103,6 +102,7 @@ void PacketFlowBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
     else
         checkPacketStreaming(packet);
     processPacket(packet);
+    emit(packetPushedSignal, packet);
     endPacketStreaming(packet);
     pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
     updateDisplayString();
@@ -119,6 +119,7 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
     bool isPacketEnd = packet->getTotalLength() == position + extraProcessableLength;
     processPacket(packet);
     if (isPacketEnd) {
+        emit(packetPushedSignal, packet);
         endPacketStreaming(packet);
         pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
     }
@@ -143,6 +144,7 @@ void PacketFlowBase::handleCanPushPacket(cGate *gate)
 void PacketFlowBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
+    endPacketStreaming(packet);
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
@@ -191,6 +193,7 @@ Packet *PacketFlowBase::pullPacketEnd(cGate *gate, bps datarate)
     checkPacketStreaming(packet);
     processPacket(packet);
     inProgressStreamId = packet->getTreeId();
+    emit(packetPulledSignal, packet);
     endPacketStreaming(packet);
     animateSend(packet, outputGate);
     updateDisplayString();
@@ -206,8 +209,10 @@ Packet *PacketFlowBase::pullPacketProgress(cGate *gate, bps datarate, b position
     inProgressStreamId = packet->getTreeId();
     bool isPacketEnd = packet->getTotalLength() == position + extraProcessableLength;
     processPacket(packet);
-    if (isPacketEnd)
+    if (isPacketEnd) {
+        emit(packetPulledSignal, packet);
         endPacketStreaming(packet);
+    }
     animateSend(packet, outputGate);
     updateDisplayString();
     return packet;
@@ -229,6 +234,7 @@ void PacketFlowBase::handleCanPullPacket(cGate *gate)
 void PacketFlowBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
+    endPacketStreaming(packet);
     if (collector != nullptr)
         collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
 }
