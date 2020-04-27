@@ -63,9 +63,9 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     streamedPacket = packet;
     auto packetLength = packet->getTotalLength();
     EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketStart(packet->dup(), outputGate, consumer);
+    pushOrSendPacketStart(packet->dup(), outputGate, consumer, datarate);
     EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, datarate);
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packetLength;

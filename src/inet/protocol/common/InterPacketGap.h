@@ -50,9 +50,9 @@ class INET_API InterPacketGap : public PacketPusherBase
     virtual bool canPushSomePacket(cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-    virtual void pushPacketStart(Packet *packet, cGate *gate) override;
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
 
