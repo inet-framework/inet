@@ -142,6 +142,7 @@ void PacketFlowBase::handleCanPushPacket(cGate *gate)
 
 void PacketFlowBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
+    Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
@@ -227,6 +228,7 @@ void PacketFlowBase::handleCanPullPacket(cGate *gate)
 
 void PacketFlowBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
+    Enter_Method("handlePullPacketProcessed");
     if (collector != nullptr)
         collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
 }
