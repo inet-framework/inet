@@ -18,8 +18,9 @@
 package inet.protocol.ethernet;
 
 import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
 
-simple EthernetFcsInserter extends PacketFlowBase
+simple EthernetFcsInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string fcsMode @enum("disabled","declared","computed") = default("declared");
