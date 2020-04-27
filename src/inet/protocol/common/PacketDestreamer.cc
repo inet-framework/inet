@@ -101,7 +101,7 @@ void PacketDestreamer::handleCanPushPacket(cGate *gate)
 
 void PacketDestreamer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
-    Enter_Method("handlePushPacketConfirmation");
+    Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
