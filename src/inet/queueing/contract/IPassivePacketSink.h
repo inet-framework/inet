@@ -80,7 +80,7 @@ class INET_API IPassivePacketSink
      * be in progress. The packet must not be nullptr. The gate must be a valid
      * gate of this module and it must support pushing and streaming packets.
      */
-    virtual void pushPacketStart(Packet *packet, cGate *gate) = 0;
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) = 0;
 
     /**
      * Ends pushing the packet into the packet sink at the given gate. This is
@@ -98,7 +98,7 @@ class INET_API IPassivePacketSink
      * be in progress. The packet must not be nullptr. The gate must be a valid
      * gate of this module and it must support pushing and streaming packets.
      */
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) = 0;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) = 0;
 
     /**
      * Progresses pushing the packet into the packet sink at the given gate. This
@@ -118,7 +118,7 @@ class INET_API IPassivePacketSink
      * be in progress. The packet must not be nullptr. The gate must be a valid
      * gate of this module and it must support pushing and streaming packets.
      */
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) = 0;
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) = 0;
 
     /**
      * Returns the processed length of the currently streaming packet.

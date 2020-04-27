@@ -77,18 +77,18 @@ void PacketMultiplexer::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketMultiplexer::pushPacketStart(Packet *packet, cGate *gate)
+void PacketMultiplexer::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
     EV_INFO << "Forwarding pushed packet " << packet->getName() << "." << endl;
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
-    pushOrSendPacketStart(packet, outputGate, consumer);
+    pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     updateDisplayString();
 }
 
-void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -98,11 +98,11 @@ void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate)
     else
         checkPacketStreaming(packet);
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
     updateDisplayString();
 }
 
-void PacketMultiplexer::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
+void PacketMultiplexer::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -113,7 +113,7 @@ void PacketMultiplexer::pushPacketProgress(Packet *packet, cGate *gate, b positi
         checkPacketStreaming(packet);
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    pushOrSendPacketProgress(packet, outputGate, consumer, position, extraProcessableLength);
+    pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
     updateDisplayString();
 }
 

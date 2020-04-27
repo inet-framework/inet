@@ -49,9 +49,9 @@ class INET_API PreemptibleTransmitter : public PacketTransmitterBase
     virtual bool canPushSomePacket(cGate *gate) const override { return txPacket == nullptr; };
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return txPacket == nullptr; };
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-    virtual void pushPacketStart(Packet *packet, cGate *gate) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override;
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
 
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 };

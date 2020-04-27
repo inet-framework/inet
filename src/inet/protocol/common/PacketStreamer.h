@@ -28,6 +28,8 @@ using namespace inet::queueing;
 class INET_API PacketStreamer : public PacketProcessorBase, public virtual IPacketFlow
 {
   protected:
+    bps datarate = bps(NaN);
+
     cGate *inputGate = nullptr;
     IActivePacketSource *producer = nullptr;
     IPassivePacketSource *provider = nullptr;
@@ -57,9 +59,9 @@ class INET_API PacketStreamer : public PacketProcessorBase, public virtual IPack
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual void pushPacketStart(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handleCanPushPacket(cGate *gate) override;

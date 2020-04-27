@@ -72,7 +72,7 @@ void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
     scheduleAt(simTime() + signal->getDuration(), txEndTimer);
 }
 
-void StreamingTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
+void StreamingTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     take(packet);
     delete packet;

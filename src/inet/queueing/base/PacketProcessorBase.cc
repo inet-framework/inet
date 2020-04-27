@@ -124,31 +124,31 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate, IPassive
         send(packet, gate);
 }
 
-void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
+void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate)
 {
     if (consumer != nullptr) {
         animateSend(packet, gate);
-        consumer->pushPacketStart(packet, gate->getPathEndGate());
+        consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
     }
     else
         sendPacketStart(packet, gate, 0);
 }
 
-void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
+void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate)
 {
     if (consumer != nullptr) {
         animateSend(packet, gate);
-        consumer->pushPacketEnd(packet, gate->getPathEndGate());
+        consumer->pushPacketEnd(packet, gate->getPathEndGate(), datarate);
     }
     else
         sendPacketEnd(packet, gate, 0);
 }
 
-void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, b position, b extraProcessableLength)
+void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength)
 {
     if (consumer != nullptr) {
         animateSend(packet, gate);
-        consumer->pushPacketProgress(packet, gate->getPathEndGate(), position, extraProcessableLength);
+        consumer->pushPacketProgress(packet, gate->getPathEndGate(), datarate, position, extraProcessableLength);
     }
     else
         sendPacketProgress(packet, gate, 0, b(position).get(), 0, b(extraProcessableLength).get(), 0);
