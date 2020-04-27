@@ -18,8 +18,9 @@
 package inet.protocol.ethernet;
 
 import inet.queueing.base.PacketFilterBase;
+import inet.queueing.contract.IPacketFilter;
 
-simple EthernetFragmentPreambleChecker extends PacketFilterBase
+simple EthernetFragmentPreambleChecker extends PacketFilterBase like IPacketFilter
 {
     parameters:
         @class(EthernetFragmentPreambleChecker);
