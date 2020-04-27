@@ -29,12 +29,12 @@ uint32_t EthernetFragmentFcsInserter::computeComputedFcs(const Packet *packet) c
 {
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
-    uint32_t fragmentFcs = ethernetCRC(bytes.data(), packet->getByteLength());
     auto fragmentTag = packet->getTag<FragmentTag>();
-    if (fragmentTag->getFirstFragment())
-        completeFcs = 0;
-    completeFcs = ethernetCRC(bytes.data(), packet->getByteLength(), completeFcs);
-    return fragmentTag->getLastFragment() ? completeFcs : fragmentFcs ^ 0xFFFF0000;
+    currentFragmentCompleteFcs = ethernetCRC(bytes.data(), packet->getByteLength(), fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
+    if (fragmentTag->getLastFragment())
+        return currentFragmentCompleteFcs;
+    else
+        return ethernetCRC(bytes.data(), packet->getByteLength()) ^ 0xFFFF0000;
 }
 
 uint32_t EthernetFragmentFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) const
@@ -55,16 +55,22 @@ void EthernetFragmentFcsInserter::processPacket(Packet *packet)
 {
     const auto& header = makeShared<EthernetFragmentFcs>();
     auto fragmentTag = packet->getTag<FragmentTag>();
-    header->setMCrc(!fragmentTag->getLastFragment());
     auto fcs = computeFcs(packet, fcsMode);
     header->setFcs(fcs);
     header->setFcsMode(fcsMode);
+    header->setMCrc(!fragmentTag->getLastFragment());
     packet->insertAtBack(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setProtocol(&Protocol::ethernetMac);
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
+}
+
+void EthernetFragmentFcsInserter::handlePacketProcessed(Packet *packet)
+{
+    FcsInserterBase::handlePacketProcessed(packet);
+    lastFragmentCompleteFcs = currentFragmentCompleteFcs;
 }
 
 } // namespace inet
