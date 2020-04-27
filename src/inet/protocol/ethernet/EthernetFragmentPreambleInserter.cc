@@ -33,12 +33,19 @@ void EthernetFragmentPreambleInserter::processPacket(Packet *packet)
     header->setFragmentNumber(fragmentNumber);
     packet->insertAtFront(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
+}
+
+Packet *EthernetFragmentPreambleInserter::pullPacketStart(cGate *gate, bps datarate)
+{
+    auto packet = PacketFlowBase::pullPacketStart(gate, datarate);
+    auto fragmentTag = packet->getTag<FragmentTag>();
     if (!fragmentTag->getFirstFragment())
         fragmentNumber = (fragmentNumber + 1) % 4;
     if (fragmentTag->getLastFragment()) {
         fragmentNumber = 0;
         smdNumber = (smdNumber + 1) % 4;
     }
+    return packet;
 }
 
 } // namespace inet
