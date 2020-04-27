@@ -35,6 +35,7 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
     parameters:
         @class(InterfaceEntry);
         @lifecycleSupport;
+        @display("i=block/ifcard;bgl=2");
         string interfaceTableModule;
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
                                             // "auto". "auto" values will be replaced by
@@ -43,7 +44,6 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         bool csmacdSupport = default(!duplexMode);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         double bitrate @unit(bps) = default(0 bps);
         string fcsMode @enum("declared","computed") = default("declared");
-        @display("i=block/ifcard;bgl=2");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
         *.duplexMode = duplexMode;

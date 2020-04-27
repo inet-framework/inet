@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/tag/TagSet.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -90,7 +91,7 @@ class INET_API InterfaceEntryChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API InterfaceEntry : public cModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor
+class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle
 {
     friend class InterfaceProtocolData;    // to call protocolDataChanged()
 
@@ -319,6 +320,14 @@ class INET_API InterfaceEntry : public cModule, public queueing::IPassivePacketS
     //@{
     virtual bool setEstimateCostProcess(int, MacEstimateCostProcess *p);
     virtual MacEstimateCostProcess *getEstimateCostProcess(int);
+    //@}
+
+    // for lifecycle:
+    //@{
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleStartOperation(LifecycleOperation *operation);
+    virtual void handleStopOperation(LifecycleOperation *operation);
+    virtual void handleCrashOperation(LifecycleOperation *operation);
     //@}
 };
 
