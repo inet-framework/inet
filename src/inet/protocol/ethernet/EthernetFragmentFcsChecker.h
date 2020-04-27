@@ -27,7 +27,8 @@ using namespace inet::queueing;
 class INET_API EthernetFragmentFcsChecker : public FcsCheckerBase
 {
   protected:
-    mutable uint32_t completeFcs = 0;
+    uint32_t lastFragmentCompleteFcs = 0;
+    mutable uint32_t currentFragmentCompleteFcs = 0;
 
   protected:
     virtual bool checkComputedFcs(const Packet *packet, uint32_t fcs) const override;

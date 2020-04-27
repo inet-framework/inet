@@ -31,12 +31,10 @@ bool EthernetFragmentFcsChecker::checkComputedFcs(const Packet *packet, uint32_t
     auto bytes = data->getBytes();
     uint32_t fragmentFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4);
     auto fragmentTag = packet->getTag<FragmentTag>();
-    if (fragmentTag->getFirstFragment())
-        completeFcs = 0;
-    completeFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4, completeFcs);
+    currentFragmentCompleteFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4, fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
     bool lastFragment = receivedFcs != (fragmentFcs ^ 0xFFFF0000);
     fragmentTag->setLastFragment(lastFragment);
-    return !lastFragment || receivedFcs == completeFcs;
+    return !lastFragment || receivedFcs == currentFragmentCompleteFcs;
 }
 
 bool EthernetFragmentFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_t fcs) const
@@ -60,6 +58,7 @@ void EthernetFragmentFcsChecker::processPacket(Packet *packet)
     fragmentTag->setLastFragment(!trailer->getMCrc());
     auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
     packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
+    lastFragmentCompleteFcs = currentFragmentCompleteFcs;
 }
 
 bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const

@@ -27,12 +27,14 @@ using namespace inet::queueing;
 class INET_API EthernetFragmentFcsInserter : public FcsInserterBase
 {
   protected:
-    mutable uint32_t completeFcs = 0;
+    uint32_t lastFragmentCompleteFcs = 0;
+    mutable uint32_t currentFragmentCompleteFcs = 0;
 
   protected:
     virtual uint32_t computeComputedFcs(const Packet *packet) const override;
     virtual uint32_t computeFcs(const Packet *packet, FcsMode fcsMode) const override;
     virtual void processPacket(Packet *packet) override;
+    virtual void handlePacketProcessed(Packet *packet) override;
 };
 
 } // namespace inet
