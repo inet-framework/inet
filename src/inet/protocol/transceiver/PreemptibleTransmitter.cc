@@ -51,14 +51,14 @@ void PreemptibleTransmitter::pushPacket(Packet *packet, cGate *gate)
     startTx(packet);
 }
 
-void PreemptibleTransmitter::pushPacketStart(Packet *packet, cGate *gate)
+void PreemptibleTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
     startTx(packet);
 }
 
-void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
+void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -66,7 +66,7 @@ void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
     // TODO:
 }
 
-void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
+void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);

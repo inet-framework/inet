@@ -55,7 +55,7 @@ bool PacketDestreamer::canPushPacket(Packet *packet, cGate *gate) const
     return !isStreaming() && consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }
 
-void PacketDestreamer::pushPacketStart(Packet *packet, cGate *gate)
+void PacketDestreamer::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -63,7 +63,7 @@ void PacketDestreamer::pushPacketStart(Packet *packet, cGate *gate)
     EV_INFO << "Starting destreaming packet " << streamedPacket->getName() << "." << std::endl;
 }
 
-void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -78,7 +78,7 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketDestreamer::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
+void PacketDestreamer::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);

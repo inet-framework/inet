@@ -43,9 +43,9 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
 
     virtual void pushOrSendPacket(Packet *packet, cGate *gate);
     virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
-    virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
-    virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
-    virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, b position, b extraProcessableLength);
+    virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate);
+    virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate);
+    virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength);
 
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
 

@@ -95,7 +95,7 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate)
+void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -104,7 +104,7 @@ void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate)
     if (matchesPacket(packet)) {
         processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
-        pushOrSendPacketStart(packet, outputGate, consumer);
+        pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     }
     else {
         EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
@@ -113,7 +113,7 @@ void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -124,7 +124,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
     if (matchesPacket(packet)) {
         processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
-        pushOrSendPacketEnd(packet, outputGate, consumer);
+        pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
         endPacketStreaming(packet);
     }
     else {
@@ -132,11 +132,11 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
         endPacketStreaming(packet);
         dropPacket(packet);
     }
-    pushOrSendPacketEnd(packet, outputGate, consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
     updateDisplayString();
 }
 
-void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
+void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -149,7 +149,7 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, b positio
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         if (packet->getTotalLength() == position + extraProcessableLength)
             endPacketStreaming(packet);
-        pushOrSendPacketProgress(packet, outputGate, consumer, position, extraProcessableLength);
+        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
     }
     else {
         EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;

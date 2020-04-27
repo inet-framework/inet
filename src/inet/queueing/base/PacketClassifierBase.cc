@@ -102,17 +102,17 @@ void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate)
+void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
-    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex], consumers[inProgressGateIndex]);
+    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex], consumers[inProgressGateIndex], datarate);
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -123,11 +123,11 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
     auto outputGate = outputGates[inProgressGateIndex];
     auto consumer = consumers[inProgressGateIndex];
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketProgress(Packet *packet,  cGate *gate, b position, b extraProcessableLength)
+void PacketClassifierBase::pushPacketProgress(Packet *packet,  cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -139,7 +139,7 @@ void PacketClassifierBase::pushPacketProgress(Packet *packet,  cGate *gate, b po
     auto consumer = consumers[inProgressGateIndex];
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    pushOrSendPacketProgress(packet, outputGate, consumer, position, extraProcessableLength);
+    pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
     updateDisplayString();
 }
 
