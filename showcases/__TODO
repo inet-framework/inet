@@ -10,6 +10,7 @@ Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::Transpor
 
 BUGS:
 
+- Spectrum figures and spectrograms: when both are displayed on top of each other, the labels overlap
 - Fragmentation showcase: there is a block ack bug (not acking properly, the simulation slows down)
 - Txop showcase: ca8ab95: aggregated frames larger than the maxAMSDUsize are being created
 - Txop: it is not checked if the last frame's duration fits in the TXOP limit
