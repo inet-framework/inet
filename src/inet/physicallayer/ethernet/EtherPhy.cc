@@ -254,7 +254,7 @@ void EtherPhy::modifyTxProgress(cMessage *message)
 
     curTx->encapsulate(newPacket);
     auto duration = calculateDuration(curTx);
-    sendPacketProgress(curTx->dup(), physOutGate, duration, signalFirstChangedBitPosition.get(), timePosition);
+    sendPacketProgress(curTx->dup(), physOutGate, 0, duration, NaN, signalFirstChangedBitPosition.get(), timePosition);
 }
 
 bool EtherPhy::checkConnected()
@@ -418,7 +418,7 @@ void EtherPhy::startTx(EthernetSignalBase *signal)
     curTx = signal;
     curTxStartTime = simTime();
     auto duration = calculateDuration(curTx);
-    sendPacketStart(curTx->dup(), physOutGate, duration);
+    sendPacketStart(curTx->dup(), physOutGate, 0, duration, NaN);
     ASSERT(txTransmissionChannel->getTransmissionFinishTime() == simTime() + duration);
     scheduleAt(simTime() + duration, endTxMsg);
     changeTxState(TX_TRANSMITTING_STATE);
@@ -429,7 +429,7 @@ void EtherPhy::endTx()
     ASSERT(txState == TX_TRANSMITTING_STATE);
     ASSERT(curTx != nullptr);
     auto duration = calculateDuration(curTx);
-    sendPacketEnd(curTx, physOutGate, duration);
+    sendPacketEnd(curTx, physOutGate, 0, duration, NaN);
     emit(txFinishedSignal, 1);   //TODO
     curTx = nullptr;
     changeTxState(TX_IDLE_STATE);
@@ -570,17 +570,17 @@ void EtherPhy::abortRx()
 {
 }
 
-void EtherPhy::receivePacketStart(cPacket *packet)
+void EtherPhy::receivePacketStart(cPacket *packet, cGate *gate, double datarate)
 {
     startRx(check_and_cast<EthernetSignalBase *>(packet));
 }
 
-void EtherPhy::receivePacketProgress(cPacket *packet, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
+void EtherPhy::receivePacketProgress(cPacket *packet, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     throw cRuntimeError("receivePacketProgress not implemented");
 }
 
-void EtherPhy::receivePacketEnd(cPacket *packet)
+void EtherPhy::receivePacketEnd(cPacket *packet, cGate *gate, double datarate)
 {
     endRx(check_and_cast<EthernetSignalBase *>(packet));
 }

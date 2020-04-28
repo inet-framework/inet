@@ -121,9 +121,9 @@ class INET_API EtherPhy : public cSimpleModule, public cListener, public ILifecy
     virtual void abortTx();
 
     // overridden cPhyModule functions
-    virtual void receivePacketStart(cPacket *packet) override;
-    virtual void receivePacketProgress(cPacket *packet, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
-    virtual void receivePacketEnd(cPacket *packet) override;
+    virtual void receivePacketStart(cPacket *packet, cGate *gate, double datarate) override;
+    virtual void receivePacketProgress(cPacket *packet, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
+    virtual void receivePacketEnd(cPacket *packet, cGate *gate, double datarate) override;
 
     FcsCheckResult verifyFcs(Packet *packet);
     Packet *decapsulate(EthernetSignal *signal);
