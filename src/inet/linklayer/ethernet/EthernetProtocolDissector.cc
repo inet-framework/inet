@@ -53,13 +53,15 @@ void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     callback.startProtocolDataUnit(&Protocol::ethernetMac);
     callback.visitChunk(macAddressesHeader, &Protocol::ethernetMac);
     const auto& fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-    int typeOrLength;
+    int typeOrLength = -1;
     if (auto macHeader = dynamicPtrCast<const EthernetMacHeader>(macAddressesHeader))
         typeOrLength = macHeader->getTypeOrLength();
     else {
-        const auto& typeOrLengthHeader = packet->popAtFront<Ieee8023TypeOrLength>();
-        typeOrLength = typeOrLengthHeader->getTypeOrLength();
-        callback.visitChunk(typeOrLengthHeader, &Protocol::ethernetMac);
+        while (typeOrLength == -1 || typeOrLength == 0x8100 || typeOrLength == 0x88A8) {
+            const auto& typeOrLengthHeader = packet->popAtFront<Ieee8023TypeOrLength>();
+            typeOrLength = typeOrLengthHeader->getTypeOrLength();
+            callback.visitChunk(typeOrLengthHeader, &Protocol::ethernetMac);
+        }
     }
     if (isEth2Type(typeOrLength)) {
         auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(typeOrLength);
