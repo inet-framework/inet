@@ -21,7 +21,7 @@ module OmittedIeee8022LlcInserter like IIeee8022LlcInserter
 {
     parameters:
         @class(OmittedModule);
-        @display("i=block/inserter");
+        @display("i=block/inserter,black,50");
     gates:
         input in;
         output out;
