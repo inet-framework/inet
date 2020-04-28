@@ -27,9 +27,7 @@ class INET_API OmittedModule : public cModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-
-  public:
-    virtual void refreshDisplay() const override;
+    virtual bool initializeModules(int stage) override;
 };
 
 } // namespace inet

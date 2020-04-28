@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/OmittedModule.h"
+#include "inet/common/SubmoduleLayout.h"
 
 namespace inet {
 
@@ -24,10 +25,9 @@ Define_Module(OmittedModule);
 void OmittedModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        // TODO: add checks for channels
         for (cModule::GateIterator ig(this); !ig.end(); ig++) {
             auto gateIn = *ig;
-            if (gateIn->getType() == cGate::INPUT) {
+            if (gateIn->getType() == cGate::INPUT && gateIn->findTransmissionChannel() == nullptr) {
                 auto gateOut = gateIn->getNextGate();
                 auto previousGate = gateIn->getPreviousGate();
                 auto nextGate = gateOut->getNextGate();
@@ -40,10 +40,15 @@ void OmittedModule::initialize(int stage)
     }
 }
 
-void OmittedModule::refreshDisplay() const
+bool OmittedModule::initializeModules(int stage)
 {
-    // KLUDGE: this module neither can be deleted from initialize nor from receive signal, so...
-    const_cast<OmittedModule *>(this)->deleteModule();
+    bool result = cModule::initializeModules(stage);
+    if (stage == INITSTAGE_LAST) {
+        auto parentModule = getParentModule();
+        deleteModule();
+        layoutSubmodulesWithGates(parentModule);
+    }
+    return result;
 }
 
 } // namespace inet
