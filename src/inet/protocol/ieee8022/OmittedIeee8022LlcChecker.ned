@@ -21,7 +21,7 @@ module OmittedIeee8022LlcChecker like IIeee8022LlcChecker
 {
     parameters:
         @class(OmittedModule);
-        @display("i=block/checker");
+        @display("i=block/checker,black,50");
     gates:
         input in;
         output out;
