@@ -20,6 +20,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/SubmoduleLayout.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -133,6 +134,8 @@ void InterfaceEntry::initialize(int stage)
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
     }
+    else if (stage == INITSTAGE_LAST)
+        layoutSubmodulesWithoutGates(this);
 }
 
 void InterfaceEntry::arrived(cMessage *message, cGate *gate, simtime_t time)
