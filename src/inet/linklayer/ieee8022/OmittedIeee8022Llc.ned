@@ -21,7 +21,7 @@ module OmittedIeee8022Llc like IIeee8022Llc
 {
     parameters:
         @class(OmittedModule);
-        @display("i=block/layer");
+        @display("i=block/layer,black,50");
     gates:
         input upperLayerIn;
         output upperLayerOut;
