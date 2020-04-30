@@ -81,6 +81,8 @@ void NetfilterInfoHook::handleMessage(cMessage *msg)
 
 INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(Packet *datagram)
 {
+    Enter_Method("datagramPreRoutingHook");
+
     EV_INFO << "HOOK " << getFullPath() << ": PREROUTING packet=" << datagram->getName()
         // TODO find out interface name
             << " inIE=" << std::to_string(datagram->getTag<InterfaceInd>()->getInterfaceId())
@@ -90,6 +92,8 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(Packet *data
 
 INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(Packet *datagram)
 {
+    Enter_Method("datagramForwardHook");
+
     EV_INFO << "HOOK " << getFullPath() << ": FORWARD: packet=" << datagram->getName()
             << " inIE=" << std::to_string(datagram->getTag<InterfaceInd>()->getInterfaceId())
             << " outIE=" << std::to_string(datagram->getTag<InterfaceReq>()->getInterfaceId())
@@ -100,6 +104,8 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(Packet *datagra
 
 INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(Packet *datagram)
 {
+    Enter_Method("datagramPostRoutingHook");
+
     const auto& interfaceInd = datagram->findTag<InterfaceInd>();
     EV_INFO << "HOOK " << getFullPath() << ": POSTROUTING packet=" << datagram->getName()
             << " inIE=" << (interfaceInd ? std::to_string(interfaceInd->getInterfaceId()) : "undefined")
@@ -111,6 +117,8 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(Packet *dat
 
 INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(Packet *datagram)
 {
+    Enter_Method("datagramLocalInHook");
+
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL IN: packet=" << datagram->getName()
             << " inIE=" << datagram->getTag<InterfaceInd>()->getInterfaceId()
             << endl;
@@ -119,6 +127,8 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(Packet *datagra
 
 INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(Packet *datagram)
 {
+    Enter_Method("datagramLocalOutHook");
+
     const auto& interfaceReq = datagram->findTag<InterfaceReq>();
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL OUT: packet=" << datagram->getName()
             << " outIE=" << (interfaceReq ? std::to_string(interfaceReq->getInterfaceId()) : "undefined")

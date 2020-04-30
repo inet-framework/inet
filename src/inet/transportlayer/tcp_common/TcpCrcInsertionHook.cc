@@ -30,8 +30,12 @@
 namespace inet {
 namespace tcp {
 
-INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packet)
+Define_Module(TcpCrcInsertionHook);
+
+INetfilter::IHook::Result TcpCrcInsertionHook::datagramPostRoutingHook(Packet *packet)
 {
+    Enter_Method("datagramPostRoutingHook");
+
     if (packet->findTag<InterfaceInd>())
         return ACCEPT; // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
@@ -50,7 +54,7 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
     return ACCEPT;
 }
 
-void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet)
+void TcpCrcInsertionHook::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet)
 {
     auto crcMode = tcpHeader->getCrcMode();
     switch (crcMode) {
@@ -76,7 +80,7 @@ void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address
     }
 }
 
-uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const TcpHeader>& tcpHeader, const Ptr<const Chunk>& tcpData)
+uint16_t TcpCrcInsertionHook::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const TcpHeader>& tcpHeader, const Ptr<const Chunk>& tcpData)
 {
     auto pseudoHeader = makeShared<TransportPseudoHeader>();
     pseudoHeader->setSrcAddress(srcAddress);

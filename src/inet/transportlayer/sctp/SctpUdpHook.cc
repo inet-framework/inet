@@ -31,8 +31,12 @@
 namespace inet {
 namespace sctp {
 
+Define_Module(SctpUdpHook);
+
 INetfilter::IHook::Result SctpUdpHook::datagramPreRoutingHook(Packet *packet)
 {
+    Enter_Method("datagramPreRoutingHook");
+
     EV_INFO << "SctpUdpHook::datagramPreRoutingHook\n";
     EV_INFO << "Packet: " << packet << endl;
 //    auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();

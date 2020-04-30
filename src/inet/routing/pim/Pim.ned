@@ -83,3 +83,7 @@ module Pim like IPim
         pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
 
+simple PimCrcInsertionHook
+{
+}
+

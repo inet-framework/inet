@@ -170,7 +170,6 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
     int curAddrCounterM; // incr, when set curLocalAddr, decr when "felhasznaltam"
     TcpNscConnection *curConnM; // store current connection in connect/listen command
 
-    TcpCrcInsertion crcInsertion;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
     static const L3Address localInnerIpS; // local NSC IP addr

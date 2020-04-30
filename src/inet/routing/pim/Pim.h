@@ -26,25 +26,24 @@
 
 namespace inet {
 
+class PimCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+{
+  public:
+    virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *packet) override;
+    virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
+};
+
 /**
  * Compound module for PIM protocol (RFC 4601).
  */
 class INET_API Pim : public RoutingProtocolBase, protected cListener
 {
-  public:
-    class CrcInsertion : public NetfilterBase::HookBase {
-      public:
-        virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
-        virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
-        virtual Result datagramPostRoutingHook(Packet *packet) override;
-        virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
-        virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
-    };
-
   protected:
     // parameters
     CrcMode crcMode = CRC_MODE_UNDEFINED;
-    CrcInsertion crcInsertion;
 
   public:
     Pim() {}
@@ -67,4 +66,5 @@ class INET_API Pim : public RoutingProtocolBase, protected cListener
 } // namespace inet
 
 #endif
+
 

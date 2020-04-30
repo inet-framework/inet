@@ -180,14 +180,12 @@ class INET_API Sctp : public cSimpleModule
 
     UdpSocket udpSocket;
     int udpSockId;
-    SctpCrcInsertion crcInsertion;
 
     SocketOptions *socketOptions;
 
   protected:
     IRoutingTable *rt;
     IInterfaceTable *ift;
-    SctpUdpHook udpHook;
 
     int32_t sizeAssocMap;
 

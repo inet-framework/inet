@@ -96,3 +96,7 @@ simple Udp like IUdp
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 
+simple UdpCrcInsertionHook
+{
+}
+

@@ -28,6 +28,7 @@
 namespace inet {
 
 Define_Module(Pim);
+Define_Module(PimCrcInsertionHook);
 
 Pim::~Pim()
 {
@@ -43,6 +44,11 @@ void Pim::initialize(int stage)
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
+            cModuleType *moduleType = cModuleType::get("inet.routing.pim.PimCrcInsertionHook");
+            auto crcInsertion = check_and_cast<PimCrcInsertionHook *>(moduleType->create("crcInsertion", this));
+            crcInsertion->finalizeParameters();
+            crcInsertion->callInitialize();
+
             // For IPv6, the checksum also includes the IPv6 "pseudo-header",
             // as specified in RFC 2460, Section 8.1 [5].  This
             // "pseudo-header" is prepended to the PIM header for the purposes
@@ -54,7 +60,7 @@ void Pim::initialize(int stage)
 #ifdef INET_WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
-                ipv6->registerHook(0, &crcInsertion);
+                ipv6->registerHook(0, crcInsertion);
 #endif
         }
     }
@@ -80,8 +86,10 @@ void Pim::handleCrashOperation(LifecycleOperation *operation)
 {
 }
 
-INetfilter::IHook::Result Pim::CrcInsertion::datagramPostRoutingHook(Packet *packet)
+INetfilter::IHook::Result PimCrcInsertionHook::datagramPostRoutingHook(Packet *packet)
 {
+    Enter_Method("datagramPostRoutingHook");
+
     if (packet->findTag<InterfaceInd>())
         return ACCEPT; // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();

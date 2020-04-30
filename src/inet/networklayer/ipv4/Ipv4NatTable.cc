@@ -145,7 +145,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
                     tcpHeader->setDestPort(natEntry.getDestPort());
                 if (natEntry.getSrcPort() != -1)
                     tcpHeader->setSrcPort(natEntry.getSrcPort());
-                tcp::TcpCrcInsertion::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
+                tcp::TcpCrcInsertionHook::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
                 insertTransportProtocolHeader(packet, Protocol::tcp, tcpHeader);
             }
             else
