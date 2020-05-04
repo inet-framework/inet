@@ -35,7 +35,7 @@ module OmittedPacketFlow like IPacketFlow
 module OmittedPacketServer like IPacketServer
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/star,black,50");
     gates:
         input in;
@@ -47,7 +47,7 @@ module OmittedPacketServer like IPacketServer
 module OmittedPacketFilter like IPacketFilter
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/star,black,50");
     gates:
         input in;
