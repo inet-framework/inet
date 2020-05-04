@@ -51,7 +51,7 @@ void Ieee8021qTagger::initialize(int stage)
 void Ieee8021qTagger::processPacket(Packet *packet)
 {
     const auto& typeOrLengthHeader = packet->peekAtFront<Ieee8023TypeOrLength>();
-    const auto& vlanHeader = typeOrLengthHeader->getTypeOrLength() == etherType ? packet->peekAtFront<Ieee8021QHeader>() : nullptr;
+    const auto& vlanHeader = typeOrLengthHeader->getTypeOrLength() == etherType ? packet->peekAtFront<Ieee8021qHeader>() : nullptr;
 
     // user priority
     auto oldUserPriority = vlanHeader != nullptr ? vlanHeader->getPcp() : -1;
@@ -60,14 +60,14 @@ void Ieee8021qTagger::processPacket(Packet *packet)
     if (newUserPriority != oldUserPriority) {
         EV_WARN << "Changing PCP: new = " << newUserPriority << ", old = " << oldUserPriority << ".\n";
         if (oldUserPriority == -1 && newUserPriority != -1) {
-            auto vlanHeader = makeShared<Ieee8021QHeader>();
+            auto vlanHeader = makeShared<Ieee8021qHeader>();
             vlanHeader->setPcp(newUserPriority);
             packet->insertAtFront(vlanHeader);
         }
         else if (oldUserPriority != -1 && newUserPriority == -1)
-            packet->removeAtFront<Ieee8021QHeader>();
+            packet->removeAtFront<Ieee8021qHeader>();
         else {
-            auto vlanHeader = packet->removeAtFront<Ieee8021QHeader>();
+            auto vlanHeader = packet->removeAtFront<Ieee8021qHeader>();
             vlanHeader->setPcp(newUserPriority);
             packet->insertAtFront(vlanHeader);
         }
@@ -84,14 +84,14 @@ void Ieee8021qTagger::processPacket(Packet *packet)
     if (newVlanId != oldVlanId || newUserPriority != oldUserPriority) {
         EV_WARN << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
         if (oldVlanId == -1 && newVlanId != -1) {
-            auto vlanHeader = makeShared<Ieee8021QHeader>();
+            auto vlanHeader = makeShared<Ieee8021qHeader>();
             vlanHeader->setVid(newVlanId);
             packet->insertAtFront(vlanHeader);
         }
         else if (oldVlanId != -1 && newVlanId == -1)
-            packet->removeAtFront<Ieee8021QHeader>();
+            packet->removeAtFront<Ieee8021qHeader>();
         else {
-            auto vlanHeader = packet->removeAtFront<Ieee8021QHeader>();
+            auto vlanHeader = packet->removeAtFront<Ieee8021qHeader>();
             vlanHeader->setVid(newVlanId);
             packet->insertAtFront(vlanHeader);
         }
@@ -108,7 +108,7 @@ void Ieee8021qTagger::dropPacket(Packet *packet)
 bool Ieee8021qTagger::matchesPacket(const Packet *packet) const
 {
     const auto& typeOrLengthHeader = packet->peekAtFront<Ieee8023TypeOrLength>();
-    auto oldVlanId = typeOrLengthHeader->getTypeOrLength() == etherType ? packet->peekAtFront<Ieee8021QHeader>()->getVid() : -1;
+    auto oldVlanId = typeOrLengthHeader->getTypeOrLength() == etherType ? packet->peekAtFront<Ieee8021qHeader>()->getVid() : -1;
     auto vlanReq = packet->findTag<VlanReq>();
     auto newVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : oldVlanId;
     return vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), newVlanId) != vlanIdFilter.end();
