@@ -13,13 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/common/DscpTag_m.h"
-#include "inet/protocol/contract/IProtocol.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
-#include "inet/protocol/ordering/SequenceNumberHeader_m.h"
 #include "inet/protocol/server/PreemptingServer.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 
@@ -28,57 +22,31 @@ Define_Module(PreemptingServer);
 void PreemptingServer::initialize(int stage)
 {
     PacketServerBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        minPacketLength = b(par("minPacketLength"));
-        roundingLength = b(par("roundingLength"));
-        preemptedOutputGate = gate("preemptedOut");
-        preemptedConsumer = getConnectedModule<IPassivePacketSink>(preemptedOutputGate);
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketOperationSupport(preemptedOutputGate);
-    }
+    if (stage == INITSTAGE_LOCAL)
+        datarate = bps(par("datarate"));
 }
 
 void PreemptingServer::startSendingPacket()
 {
-    packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
-    take(packet);
-    auto fragmentTag = packet->findTag<FragmentTag>();
-    if (fragmentTag == nullptr) {
-        fragmentTag = packet->addTag<FragmentTag>();
-        fragmentTag->setFirstFragment(true);
-        fragmentTag->setLastFragment(true);
-        fragmentTag->setFragmentNumber(0);
-        fragmentTag->setNumFragments(-1);
-    }
-    packet->setArrival(getId(), inputGate->getId(), simTime());
-    EV_INFO << "Sending packet " << packet->getName() << " started." << endl;
-    animateSend(packet, outputGate);
-    consumer->pushPacketStart(packet->dup(), outputGate->getPathEndGate());
-    processedTotalLength += packet->getDataLength();
-    numProcessedPackets++;
+    streamedPacket = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
+    take(streamedPacket);
+    EV_INFO << "Sending packet " << streamedPacket->getName() << " started." << endl;
+    pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, datarate);
+    handlePacketProcessed(streamedPacket);
     updateDisplayString();
 }
 
 void PreemptingServer::endSendingPacket()
 {
-    EV_INFO << "Sending packet " << packet->getName() << " ended.\n";
-    consumer->pushPacketEnd(packet, outputGate->getPathEndGate());
-    packet = nullptr;
-}
-
-int PreemptingServer::getPriority(Packet *packet) const
-{
-    // TODO: make this a parameter
-    auto dscpInd = packet->findTag<DscpInd>();
-    return dscpInd != nullptr ? dscpInd->getDifferentiatedServicesCodePoint() : 0;
-//    return packet->getTag<UserPriorityReq>()->getUserPriority();
+    EV_INFO << "Sending packet " << streamedPacket->getName() << " ended.\n";
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, datarate);
+    streamedPacket = nullptr;
 }
 
 void PreemptingServer::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
-    if (packet != nullptr)
+    if (streamedPacket != nullptr)
         endSendingPacket();
     if (provider->canPullSomePacket(inputGate->getPathStartGate()))
         startSendingPacket();
@@ -87,39 +55,24 @@ void PreemptingServer::handleCanPushPacket(cGate *gate)
 void PreemptingServer::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
-    if (consumer->canPushSomePacket(outputGate->getPathEndGate())) {
-        if (provider->canPullSomePacket(inputGate->getPathStartGate()))
-            startSendingPacket();
+    if (streamedPacket != nullptr) {
+        delete streamedPacket;
+        streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
+        pushOrSendPacketEnd(streamedPacket, outputGate, consumer, datarate);
+        streamedPacket = nullptr;
     }
-    else {
-        auto nextPacket = provider->canPullPacket(inputGate->getPathStartGate());
-        if (packet != nullptr && nextPacket != nullptr && getPriority(nextPacket) > getPriority(packet)) {
-            b confirmedLength = consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
-            b preemptedLength = roundingLength * ((confirmedLength + roundingLength - b(1)) / roundingLength);
-            if (preemptedLength < minPacketLength)
-                preemptedLength = minPacketLength;
-            if (preemptedLength + minPacketLength <= packet->getTotalLength()) {
-                std::string name = std::string(packet->getName()) + "-frag";
-                // confirmed part
-                packet->setName(name.c_str());
-                const auto& remainingData = packet->removeAtBack(packet->getTotalLength() - preemptedLength);
-                FragmentTag *fragmentTag = packet->getTag<FragmentTag>();
-                fragmentTag->setLastFragment(false);
-                // remaining part
-                Packet *remainingPart = new Packet(name.c_str(), remainingData);
-                remainingPart->copyTags(*packet);
-                FragmentTag *remainingPartFragmentTag = remainingPart->getTag<FragmentTag>();
-                remainingPartFragmentTag->setFirstFragment(false);
-                remainingPartFragmentTag->setLastFragment(true);
-                remainingPartFragmentTag->setFragmentNumber(fragmentTag->getFragmentNumber() + 1);
-                // send parts
-                animateSend(packet, outputGate);
-                auto l = packet->getTotalLength() - preemptedLength;
-                consumer->pushPacketProgress(packet, outputGate->getPathEndGate(), preemptedLength, l);
-                packet = nullptr;
-                pushOrSendPacket(remainingPart, preemptedOutputGate, preemptedConsumer);
-            }
-        }
+    else if (consumer->canPushSomePacket(outputGate->getPathEndGate()) && provider->canPullSomePacket(inputGate->getPathStartGate()))
+        startSendingPacket();
+}
+
+void PreemptingServer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    if (streamedPacket != nullptr) {
+        delete streamedPacket;
+        streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
+        delete streamedPacket;
+        streamedPacket = nullptr;
     }
 }
 
