@@ -30,17 +30,18 @@ void EthernetFragmentPreambleInserter::processPacket(Packet *packet)
     const auto& header = makeShared<EthernetFragmentPhyHeader>();
     header->setPreambleType(fragmentTag->getFirstFragment() ? SMD_Sx : SMD_Cx);
     header->setSmdNumber(smdNumber);
-    header->setFragmentNumber(fragmentNumber);
+    header->setFragmentNumber(fragmentNumber % 4);
     packet->insertAtFront(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
 }
 
-Packet *EthernetFragmentPreambleInserter::pullPacketStart(cGate *gate, bps datarate)
+// TODO: is this correct?
+Packet *EthernetFragmentPreambleInserter::pullPacketEnd(cGate *gate, bps datarate)
 {
-    auto packet = PacketFlowBase::pullPacketStart(gate, datarate);
+    auto packet = PacketFlowBase::pullPacketEnd(gate, datarate);
     auto fragmentTag = packet->getTag<FragmentTag>();
     if (!fragmentTag->getFirstFragment())
-        fragmentNumber = (fragmentNumber + 1) % 4;
+        fragmentNumber++;
     if (fragmentTag->getLastFragment()) {
         fragmentNumber = 0;
         smdNumber = (smdNumber + 1) % 4;
