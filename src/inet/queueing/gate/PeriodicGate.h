@@ -27,7 +27,7 @@ class INET_API PeriodicGate : public PacketGateBase
 {
   protected:
     int index = 0;
-    simtime_t startTime;
+    simtime_t offset;
     std::vector<simtime_t> durations;
 
     cMessage *changeTimer = nullptr;
