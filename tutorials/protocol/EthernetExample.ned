@@ -15,7 +15,6 @@
 
 package inet.tutorials.protocol;
 
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
