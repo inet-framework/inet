@@ -20,9 +20,6 @@ import inet.queueing.base.PacketServerBase;
 simple PreemptingServer extends PacketServerBase
 {
     parameters:
-        int minPacketLength @unit(b);
-        int roundingLength @unit(b) = default(1B);
+        double datarate @unit(bps);
         @class(PreemptingServer);
-    gates:
-        output preemptedOut;
 }

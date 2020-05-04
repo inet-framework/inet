@@ -26,27 +26,22 @@ class INET_API PreemptingServer : public PacketServerBase
 {
   protected:
     bps datarate = bps(NaN);
-    b minPacketLength = b(-1);
-    b roundingLength = b(-1);
-    cGate *preemptedOutputGate = nullptr;
-    IPassivePacketSink *preemptedConsumer = nullptr;
 
-    Packet *packet = nullptr;
+    Packet *streamedPacket = nullptr;
 
   protected:
-    virtual ~PreemptingServer() { delete packet; }
     virtual void initialize(int stage) override;
 
     virtual void startSendingPacket();
     virtual void endSendingPacket();
 
-    virtual int getPriority(Packet *packet) const;
-
   public:
-    virtual bool supportsPacketPushing(cGate *gate) const override { return preemptedOutputGate == gate || PacketServerBase::supportsPacketPushing(gate); }
+    virtual ~PreemptingServer() { delete streamedPacket; }
 
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
+
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace inet
