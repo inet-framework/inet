@@ -22,5 +22,5 @@ import inet.queueing.queue.SelectiveQueue;
 module EthernetSelectiveQueue extends SelectiveQueue
 {
     parameters:
-        classifier.classifierClass = default("inet::PacketUserPriorityIndClassifier");
+        classifier.classifierClass = default("inet::queueing::PacketUserPriorityIndClassifier");
 }
