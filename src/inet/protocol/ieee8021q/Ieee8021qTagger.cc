@@ -55,12 +55,13 @@ void Ieee8021qTagger::processPacket(Packet *packet)
 
     // user priority
     auto oldUserPriority = vlanHeader != nullptr ? vlanHeader->getPcp() : -1;
-    auto userPriorityReq = packet->findTag<UserPriorityReq>();
+    auto userPriorityReq = packet->removeTagIfPresent<UserPriorityReq>();
     int newUserPriority = userPriorityReq != nullptr ? userPriorityReq->getUserPriority() : oldUserPriority;
     if (newUserPriority != oldUserPriority) {
-        EV_WARN << "Changing PCP: new = " << newUserPriority << ", old = " << oldUserPriority << ".\n";
+        EV_INFO << "Changing PCP: new = " << newUserPriority << ", old = " << oldUserPriority << ".\n";
         if (oldUserPriority == -1 && newUserPriority != -1) {
             auto vlanHeader = makeShared<Ieee8021qHeader>();
+            vlanHeader->setTypeOrLength(etherType);
             vlanHeader->setPcp(newUserPriority);
             packet->insertAtFront(vlanHeader);
         }
@@ -72,19 +73,21 @@ void Ieee8021qTagger::processPacket(Packet *packet)
             packet->insertAtFront(vlanHeader);
         }
     }
-    packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(newUserPriority);
+    if (newUserPriority != -1)
+        packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(newUserPriority);
 
     // VLAN id
     auto oldVlanId = vlanHeader != nullptr ? vlanHeader->getVid() : -1;
-    auto vlanReq = packet->findTag<VlanReq>();
+    auto vlanReq = packet->removeTagIfPresent<VlanReq>();
     auto newVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : oldVlanId;
     auto it = vlanIdMap.find(newVlanId);
     if (it != vlanIdMap.end())
         newVlanId = it->second;
     if (newVlanId != oldVlanId || newUserPriority != oldUserPriority) {
-        EV_WARN << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
+        EV_INFO << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
         if (oldVlanId == -1 && newVlanId != -1) {
             auto vlanHeader = makeShared<Ieee8021qHeader>();
+            vlanHeader->setTypeOrLength(etherType);
             vlanHeader->setVid(newVlanId);
             packet->insertAtFront(vlanHeader);
         }
@@ -96,7 +99,8 @@ void Ieee8021qTagger::processPacket(Packet *packet)
             packet->insertAtFront(vlanHeader);
         }
     }
-    packet->addTagIfAbsent<VlanInd>()->setVlanId(newVlanId);
+    if (newVlanId != -1)
+        packet->addTagIfAbsent<VlanInd>()->setVlanId(newVlanId);
 }
 
 void Ieee8021qTagger::dropPacket(Packet *packet)
