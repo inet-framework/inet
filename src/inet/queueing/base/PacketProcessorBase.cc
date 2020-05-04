@@ -171,22 +171,73 @@ void PacketProcessorBase::updateDisplayString() const
     }
 }
 
-void PacketProcessorBase::animateSend(Packet *packet, cGate *gate)
+void PacketProcessorBase::animateSend(cMessage *message, cGate *gate) const
 {
     auto envir = getEnvir();
     if (envir->isGUI()) {
         auto endGate = gate->getPathEndGate();
-        packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
-        packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
+        message->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
+        message->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
         if (gate->getNextGate() != nullptr) {
-            envir->beginSend(packet);
+            envir->beginSend(message);
             while (gate->getNextGate() != nullptr) {
-                envir->messageSendHop(packet, gate);
+                envir->messageSendHop(message, gate);
                 gate = gate->getNextGate();
             }
-            envir->endSend(packet);
+            envir->endSend(message);
         }
     }
+}
+
+void PacketProcessorBase::animateSendPacket(Packet *packet, cGate *gate) const
+{
+    if (getEnvir()->isGUI())
+        animateSend(packet, gate);
+}
+
+void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const
+{
+    if (getEnvir()->isGUI()) {
+        auto progressMessage = createProgressMessage(packet, cProgress::PACKET_START, datarate, b(0), b(0));
+        animateSend(progressMessage, gate);
+        delete progressMessage;
+    }
+}
+
+void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate, bps datarate) const
+{
+    if (getEnvir()->isGUI()) {
+        auto progressMessage = createProgressMessage(packet, cProgress::PACKET_END, datarate, packet->getDataLength(), b(0));
+        animateSend(progressMessage, gate);
+        delete progressMessage;
+    }
+}
+
+void PacketProcessorBase::animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength) const
+{
+    if (getEnvir()->isGUI()) {
+        auto progressMessage = createProgressMessage(packet, cProgress::PACKET_PROGRESS, datarate, position, extraProcessableLength);
+        animateSend(progressMessage, gate);
+        delete progressMessage;
+    }
+}
+
+cMessage *PacketProcessorBase::createProgressMessage(Packet *packet, int progressKind, bps datarate, b position, b extraProcessableLength) const
+{
+    std::string name = packet->getName();
+    switch (progressKind) {
+        case cProgress::PACKET_START: name += "-start"; break;
+        case cProgress::PACKET_END: name += "-end"; break;
+        case cProgress::PACKET_PROGRESS: name += "-progress"; break;
+    }
+    cProgress *progressMessage = new cProgress(name.c_str(), progressKind);
+    progressMessage->setPacket(packet);
+    progressMessage->setDatarate(bps(datarate).get());
+    progressMessage->setBitPosition(b(position).get());
+    progressMessage->setTimePosition(-1);
+    progressMessage->setExtraProcessableBitLength(b(extraProcessableLength).get());
+    progressMessage->setExtraProcessableDuration(-1);
+    return progressMessage;
 }
 
 const char *PacketProcessorBase::resolveDirective(char directive) const

@@ -50,7 +50,14 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
 
     virtual void updateDisplayString() const;
-    virtual void animateSend(Packet *packet, cGate *gate);
+
+    virtual void animateSend(cMessage *message, cGate *gate) const;
+    virtual void animateSendPacket(Packet *packet, cGate *gate) const;
+    virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const;
+    virtual void animateSendPacketEnd(Packet *packet, cGate *gate, bps datarate) const;
+    virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength) const;
+
+    virtual cMessage *createProgressMessage(Packet *packet, int progressKind, bps datarate, b position, b extraProcessableLength) const;
 
   public:
     virtual bool supportsPacketSending(cGate *gate) const override { return true; }
