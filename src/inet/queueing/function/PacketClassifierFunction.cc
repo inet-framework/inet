@@ -41,13 +41,21 @@ static int classifyPacketAsCharacterOrEnter(Packet *packet)
 
 Register_Packet_Classifier_Function(PacketCharacterOrEnterClassifier, classifyPacketAsCharacterOrEnter);
 
-static int classifyPacketByUserPriority(Packet *packet)
+static int classifyPacketByUserPriorityReq(Packet *packet)
 {
     auto userPriorityReq = packet->getTag<UserPriorityReq>();
     return userPriorityReq->getUserPriority();
 }
 
-Register_Packet_Classifier_Function(PacketUserPriorityClassifier, classifyPacketByUserPriority);
+Register_Packet_Classifier_Function(PacketUserPriorityReqClassifier, classifyPacketByUserPriorityReq);
+
+static int classifyPacketByUserPriorityInd(Packet *packet)
+{
+    auto userPriorityInd = packet->findTag<UserPriorityInd>();
+    return userPriorityInd != nullptr ? userPriorityInd->getUserPriority() : 0;
+}
+
+Register_Packet_Classifier_Function(PacketUserPriorityIndClassifier, classifyPacketByUserPriorityInd);
 
 } // namespace queueing
 } // namespace inet
