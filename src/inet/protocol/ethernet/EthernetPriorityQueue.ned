@@ -22,5 +22,6 @@ import inet.queueing.queue.PriorityQueue;
 module EthernetPriorityQueue extends PriorityQueue
 {
     parameters:
-        classifier.classifierClass = default("inet::PacketUserPriorityIndClassifier");
+        classifier.reverseOrder = default(true);
+        classifier.classifierClass = default("inet::queueing::PacketUserPriorityIndClassifier");
 }
