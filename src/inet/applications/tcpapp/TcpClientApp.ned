@@ -16,8 +16,9 @@
 package inet.applications.tcpapp;
 
 import inet.applications.contract.IApp;
-import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.IActivePacketSource;
+import inet.queueing.contract.IPacketFlow;
+import inet.queueing.contract.IPassivePacketSink;
 
 //
 // This module is a generic TCP client application. The traffic source
@@ -37,17 +38,28 @@ module TcpClientApp like IApp
             parameters:
                 @display("p=100,100");
         }
+        outbound: <default("OmittedPacketFlow")> like IPacketFlow {
+            parameters:
+                @display("p=100,200");
+        }
         sink: <default("PassivePacketSink")> like IPassivePacketSink {
             parameters:
                 @display("p=200,100");
         }
+        inbound: <default("OmittedPacketFlow")> like IPacketFlow {
+            parameters:
+                @display("p=200,200");
+        }
         io: TcpClientSocketIo {
             parameters:
-                @display("p=150,200");
+                @display("p=150,300");
         }
     connections:
-        source.out --> io.trafficIn;
+        source.out --> outbound.in;
+        outbound.out --> io.trafficIn;
         io.socketOut --> socketOut;
+
         socketIn --> io.socketIn;
-        io.trafficOut --> sink.in;
+        io.trafficOut --> inbound.in;
+        inbound.out --> sink.in;
 }
