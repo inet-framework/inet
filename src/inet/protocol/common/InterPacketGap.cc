@@ -170,6 +170,7 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
         pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     }
     else
+        // TODO: KLUDGE: why don't we use the gate here? breaks the Ethernet example
         sendPacketStart(packet, nullptr, lastDelay, packet->getDuration(), bps(datarate).get());
 }
 
