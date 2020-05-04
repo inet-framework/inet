@@ -32,7 +32,7 @@ void ActivePacketSource::initialize(int stage)
         productionTimer = new cMessage("ProductionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer == nullptr && !productionTimer->isScheduled())
+        if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))
             scheduleProductionTimer();
     }
 }
@@ -65,7 +65,7 @@ void ActivePacketSource::producePacket()
 void ActivePacketSource::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
-    if (gate->getPathStartGate() == outputGate && !productionTimer->isScheduled()) {
+    if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
         scheduleProductionTimer();
         producePacket();
     }

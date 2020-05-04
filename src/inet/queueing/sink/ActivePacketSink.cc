@@ -29,6 +29,10 @@ void ActivePacketSink::initialize(int stage)
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new cMessage("CollectionTimer");
     }
+    else if (stage == INITSTAGE_QUEUEING) {
+        if (provider->canPullSomePacket(inputGate->getPathStartGate()))
+            scheduleCollectionTimer();
+    }
 }
 
 void ActivePacketSink::handleMessage(cMessage *message)
@@ -62,7 +66,7 @@ void ActivePacketSink::collectPacket()
 void ActivePacketSink::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
-    if (gate->getPathEndGate() == inputGate && !collectionTimer->isScheduled()) {
+    if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
         scheduleCollectionTimer();
         collectPacket();
     }
