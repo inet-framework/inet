@@ -16,21 +16,29 @@
 //
 
 #include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/queueing/function/PacketClassifierFunction.h"
 
 namespace inet {
 
-static int classifyEthernetExpressOverNormal(Packet *packet)
+static int classifyPacketByVlanReq(Packet *packet)
 {
-    auto dscpInd = packet->findTag<DscpInd>();
-    return dscpInd != nullptr ? dscpInd->getDifferentiatedServicesCodePoint() : 0;
+    auto vlanReq = packet->findTag<VlanReq>();
+    return vlanReq != nullptr ? vlanReq->getVlanId() : 0;
 }
 
-Register_Packet_Classifier_Function(EthernetExpressOverNormalClassifier, classifyEthernetExpressOverNormal);
+Register_Packet_Classifier_Function(PacketVlanReqClassifier, classifyPacketByVlanReq);
 
-static int classifyEthernetPreamble(Packet *packet)
+static int classifyPacketByVlanInd(Packet *packet)
+{
+    auto vlanInd = packet->findTag<VlanInd>();
+    return vlanInd != nullptr ? vlanInd->getVlanId() : 0;
+}
+
+Register_Packet_Classifier_Function(PacketVlanIndClassifier, classifyPacketByVlanInd);
+
+static int classifyPacketByEthernetPreambleType(Packet *packet)
 {
     auto header = packet->peekAtFront<EthernetPhyHeaderBase>();
     if (auto fragmentHeader = dynamicPtrCast<const EthernetFragmentPhyHeader>(header))
@@ -39,15 +47,7 @@ static int classifyEthernetPreamble(Packet *packet)
         return 0;
 }
 
-Register_Packet_Classifier_Function(EthernetPreambleClassifier, classifyEthernetPreamble);
-
-static int classifyPacketUserPriorityInd(Packet *packet)
-{
-    auto userPriorityInd = packet->findTag<UserPriorityInd>();
-    return userPriorityInd != nullptr ? userPriorityInd->getUserPriority() : 0;
-}
-
-Register_Packet_Classifier_Function(PacketUserPriorityIndClassifier, classifyPacketUserPriorityInd);
+Register_Packet_Classifier_Function(PacketEthernetPreambleTypeClassifier, classifyPacketByEthernetPreambleType);
 
 } // namespace inet
 
