@@ -15,10 +15,11 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.ethernet.Ieee8023TypeOrLength;
 
 namespace inet;
 
-class Ieee8021qHeader extends FieldsChunk
+class Ieee8021qHeader extends Ieee8023TypeOrLength
 {
     chunkLength = B(4);
     uint8_t pcp;       // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
