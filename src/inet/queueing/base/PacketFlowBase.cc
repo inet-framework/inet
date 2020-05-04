@@ -63,12 +63,12 @@ void PacketFlowBase::endPacketStreaming(Packet *packet)
 
 bool PacketFlowBase::canPushSomePacket(cGate *gate) const
 {
-    return consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate());
 }
 
 bool PacketFlowBase::canPushPacket(Packet *packet, cGate *gate) const
 {
-    return consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }
 
 void PacketFlowBase::pushPacket(Packet *packet, cGate *gate)
