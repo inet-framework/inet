@@ -15,12 +15,39 @@
 
 package inet.queueing.common;
 
+import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
+import inet.queueing.contract.IPacketServer;
+
 
 module OmittedPacketFlow like IPacketFlow
 {
     parameters:
         @class(::inet::OmittedModule);
+        @display("i=block/star,black,50");
+    gates:
+        input in;
+        output out;
+    connections:
+        in --> out;
+}
+
+module OmittedPacketServer like IPacketServer
+{
+    parameters:
+        @class(OmittedModule);
+        @display("i=block/star,black,50");
+    gates:
+        input in;
+        output out;
+    connections:
+        in --> out;
+}
+
+module OmittedPacketFilter like IPacketFilter
+{
+    parameters:
+        @class(OmittedModule);
         @display("i=block/star,black,50");
     gates:
         input in;
