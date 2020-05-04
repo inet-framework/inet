@@ -167,6 +167,8 @@ void PacketSchedulerBase::handleCanPullPacket(cGate *gate)
 void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
+    inProgressStreamId = -1;
+    inProgressGateIndex = -1;
 }
 
 } // namespace queueing
