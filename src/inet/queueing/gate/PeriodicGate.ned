@@ -29,7 +29,7 @@ simple PeriodicGate extends PacketGateBase like IPacketGate
 {
     parameters:
         bool initiallyOpen = default(false);
-        double startTime @unit(s) = default(0s);
+        double offset @unit(s) = default(0s);
         string durations @unit(s); // space separated list of durations to stay open/closed
         @class(PeriodicGate);
 }
