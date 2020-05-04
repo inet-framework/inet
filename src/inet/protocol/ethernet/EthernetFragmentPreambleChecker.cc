@@ -33,7 +33,7 @@ bool EthernetFragmentPreambleChecker::matchesPacket(const Packet *packet) const
         return false;
     else {
         if (header->getSmdNumber() == smdNumber)
-            return header->getFragmentNumber() == fragmentNumber;
+            return header->getFragmentNumber() == fragmentNumber % 4;
         else
             return header->getFragmentNumber() == 0;
     }
@@ -45,26 +45,19 @@ void EthernetFragmentPreambleChecker::processPacket(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     auto fragmentTag = packet->addTag<FragmentTag>();
-    fragmentTag->setFragmentNumber(-1);
-    fragmentTag->setNumFragments(-1);
     if (header->getSmdNumber() == smdNumber) {
-        if (header->getFragmentNumber() == fragmentNumber) {
-            if (header->getPreambleType() == SMD_Cx)
-                fragmentNumber = (fragmentNumber + 1) % 4;
-            fragmentTag->setFirstFragment(false);
-        }
-        else
-            smdNumber = -1;
+        ASSERT(header->getFragmentNumber() == fragmentNumber % 4);
+        fragmentTag->setFirstFragment(false);
+        fragmentNumber++;
     }
     else {
-        if (header->getFragmentNumber() == 0) {
-            smdNumber = header->getSmdNumber();
-            fragmentNumber = 0;
-            fragmentTag->setFirstFragment(true);
-        }
-        else
-            smdNumber = -1;
+        ASSERT(header->getFragmentNumber() == 0);
+        fragmentTag->setFirstFragment(true);
+        smdNumber = header->getSmdNumber();
+        fragmentNumber = 0;
     }
+    fragmentTag->setFragmentNumber(fragmentNumber);
+    fragmentTag->setNumFragments(-1);
 }
 
 void EthernetFragmentPreambleChecker::dropPacket(Packet *packet)

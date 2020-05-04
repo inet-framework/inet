@@ -34,7 +34,7 @@ class INET_API EthernetFragmentPreambleInserter : public PacketFlowBase
     virtual void processPacket(Packet *packet) override;
 
   public:
-    virtual Packet *pullPacketStart(cGate *gate, bps datarate) override;
+    virtual Packet *pullPacketEnd(cGate *gate, bps datarate) override;
 };
 
 } // namespace inet
