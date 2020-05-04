@@ -20,10 +20,10 @@ package inet.linklayer.ethernet;
 
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.ITrafficConditioner;
 import inet.linklayer.ieee8021q.IIeee8021qEncap;
 import inet.networklayer.common.InterfaceEntry;
 import inet.physicallayer.ethernet.EtherPhy;
+import inet.queueing.contract.ITrafficConditioner;
 
 
 //

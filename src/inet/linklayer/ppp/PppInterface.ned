@@ -18,8 +18,9 @@
 package inet.linklayer.ppp;
 
 import inet.linklayer.contract.IPppInterface;
-import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.common.InterfaceEntry;
+import inet.queueing.contract.ITrafficConditioner;
+
 
 //
 // PPP interface. Complements the ~Ppp module with an output queue
