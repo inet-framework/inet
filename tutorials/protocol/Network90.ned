@@ -110,7 +110,7 @@ module SenderHost
         fragmenter.out --> multiplexer2.in++;
         multiplexer2.out --> inProgressQueue.in;
         inProgressQueue.out --> preemptingServer.in;
-        preemptingServer.preemptedOut --> multiplexer2.in++;
+// TODO:        preemptingServer.preemptedOut --> multiplexer2.in++;
         preemptingServer.out --> fcsInserter.in;
         fcsInserter.out --> interPacketGap.in;
         interPacketGap.out --> transmitter.in;
