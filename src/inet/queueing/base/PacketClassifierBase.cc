@@ -25,6 +25,7 @@ void PacketClassifierBase::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        reverseOrder = par("reverseOrder");
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         for (int i = 0; i < gateSize("out"); i++) {
@@ -52,7 +53,7 @@ int PacketClassifierBase::callClassifyPacket(Packet *packet)
     int index = classifyPacket(packet);
     if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
         throw cRuntimeError("Classified packet to invalid output gate: %d", index);
-    return index;
+    return reverseOrder ? outputGates.size() - index - 1 : index;
 }
 
 void PacketClassifierBase::checkPacketStreaming(Packet *packet)

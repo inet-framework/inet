@@ -28,6 +28,8 @@ namespace queueing {
 class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
+    bool reverseOrder;
+
     cGate *inputGate = nullptr;
     IActivePacketSource *producer = nullptr;
 
