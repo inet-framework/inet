@@ -30,6 +30,7 @@ void PreemptibleTransmitter::initialize(int stage)
 
 PreemptibleTransmitter::~PreemptibleTransmitter()
 {
+    delete txPacket;
     cancelAndDelete(txEndTimer);
 }
 
@@ -129,6 +130,7 @@ simtime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
 
 void PreemptibleTransmitter::scheduleTxEndTimer(Signal *signal)
 {
+    ASSERT(txStartTime != -1);
     scheduleAt(txStartTime + signal->getDuration(), txEndTimer);
 }
 
