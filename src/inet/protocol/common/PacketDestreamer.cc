@@ -131,7 +131,7 @@ Packet *PacketDestreamer::pullPacket(cGate *gate)
     streamedPacket = packet;
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
-    animateSend(packet, outputGate);
+    animateSendPacket(packet, outputGate);
     updateDisplayString();
     streamedPacket = nullptr;
     return packet;

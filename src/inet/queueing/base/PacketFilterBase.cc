@@ -210,7 +210,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
         if (matchesPacket(packet)) {
             processPacket(packet);
             EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
-            animateSend(packet, outputGate);
+            animateSendPacket(packet, outputGate);
             updateDisplayString();
             emit(packetPulledSignal, packet);
             return packet;
