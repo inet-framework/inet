@@ -30,7 +30,7 @@ void DefragmenterBase::startDefragmentation(Packet *fragmentPacket)
 {
     ASSERT(defragmentedPacket == nullptr);
     std::string name = fragmentPacket->getName();
-    auto pos = name.rfind('-');
+    auto pos = name.find("-frag");
     if (pos != std::string::npos)
         name = name.substr(0, pos);
     defragmentedPacket = new Packet(name.c_str());
