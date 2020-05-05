@@ -25,7 +25,7 @@ Define_Module(PacketCloner);
 
 void PacketCloner::initialize(int stage)
 {
-    PacketSinkBase::initialize(stage);
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
