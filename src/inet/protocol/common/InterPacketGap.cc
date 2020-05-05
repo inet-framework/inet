@@ -99,7 +99,6 @@ void InterPacketGap::receivePacketStart(cPacket *cpacket, cGate *gate, double da
 void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    animateSend(packet, outputGate);
     // TODO: datarate
     pushOrSendPacketProgress(packet, outputGate, consumer, bps(NaN), b(bitPosition), b(extraProcessableBitLength));
     if (bitPosition == packet->getBitLength())
@@ -109,7 +108,6 @@ void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double
 void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    animateSend(packet, outputGate);
     // TODO: datarate
     pushOrSendPacketEnd(packet, outputGate, consumer, bps(NaN));
     lastPacket = nullptr;
@@ -165,10 +163,8 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
     if (lastDelay < 0)
         lastDelay = 0;
     lastPacketEndTime = now + lastDelay + packet->getDuration();
-    if (lastDelay == 0) {
-        animateSend(packet, outputGate);
+    if (lastDelay == 0)
         pushOrSendPacketStart(packet, outputGate, consumer, datarate);
-    }
     else
         // TODO: KLUDGE: why don't we use the gate here? breaks the Ethernet example
         sendPacketStart(packet, nullptr, lastDelay, packet->getDuration(), bps(datarate).get());
@@ -178,7 +174,6 @@ void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
 {
     Enter_Method("pushPacketProgress");
     take(packet);
-    animateSend(packet, outputGate);
     pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
 }
 
@@ -186,7 +181,6 @@ void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
-    animateSend(packet, outputGate);
     pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
 }
 
