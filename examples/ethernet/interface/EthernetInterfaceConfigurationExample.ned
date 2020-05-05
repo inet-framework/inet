@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.tutorials.protocol;
+package inet.examples.ethernet.interface;
 
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 
-network EthernetExample extends WiredNetworkBase
+network EthernetInterfaceConfigurationExample extends WiredNetworkBase
 {
     submodules:
         host1: StandardHost {
