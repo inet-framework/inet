@@ -28,10 +28,11 @@ class INET_API InterPacketGap : public PacketPusherBase
 {
   protected:
     cPar *durationPar = nullptr;
+    cProgress *progress = nullptr;
 
-    cPacket *lastPacket = nullptr;
-    simtime_t lastDelay;
-    simtime_t lastPacketEndTime;
+    simtime_t packetDelay;
+    simtime_t packetStartTime;
+    simtime_t packetEndTime;
 
   protected:
     virtual void initialize(int stage) override;
@@ -41,23 +42,29 @@ class INET_API InterPacketGap : public PacketPusherBase
     virtual void receivePacketProgress(cPacket *packet, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
     virtual void receivePacketEnd(cPacket *packet, cGate *gate, double datarate) override;
 
+    virtual void pushOrSendOrScheduleProgress(Packet *packet, cGate *gate, int progressKind, bps datarate, b position, b extraProcessableLength = b(0));
+
   public:
+    virtual ~InterPacketGap() { cancelAndDelete(progress); }
+
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual bool canPushSomePacket(cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
+
     virtual void pushPacket(Packet *packet, cGate *gate) override;
+
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
     virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace inet
