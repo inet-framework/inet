@@ -99,8 +99,7 @@ void InterPacketGap::receivePacketStart(cPacket *cpacket, cGate *gate, double da
 void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    // TODO: datarate
-    pushOrSendPacketProgress(packet, outputGate, consumer, bps(NaN), b(bitPosition), b(extraProcessableBitLength));
+    pushOrSendPacketProgress(packet, outputGate, consumer, bps(datarate), b(bitPosition), b(extraProcessableBitLength));
     if (bitPosition == packet->getBitLength())
         lastPacket = nullptr;
 }
@@ -108,8 +107,7 @@ void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double
 void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    // TODO: datarate
-    pushOrSendPacketEnd(packet, outputGate, consumer, bps(NaN));
+    pushOrSendPacketEnd(packet, outputGate, consumer, bps(datarate));
     lastPacket = nullptr;
 }
 
