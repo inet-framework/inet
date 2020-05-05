@@ -65,6 +65,7 @@ void PacketTransmitter::endTx()
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
     delete txPacket;
     txPacket = nullptr;
+    producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 simtime_t PacketTransmitter::calculateDuration(const Packet *packet) const
