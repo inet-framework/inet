@@ -38,7 +38,7 @@ void EthernetPhyDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     if (auto phyHeader = dynamicPtrCast<const EthernetFragmentPhyHeader>(header)) {
         auto fragmentTag = packet->findTag<FragmentTag>();
         if (phyHeader->getPreambleType() == SMD_Sx && fragmentTag != nullptr && fragmentTag->getLastFragment())
-            callback.dissectPacket(packet, &Protocol::ethernetMac);
+            callback.dissectPacket(packet, nullptr); // TODO: the Ethernet MAC protocol could be dissected here (but the packet cannot be dissected deeper, so providing that protocol is incorrect)
         else
             callback.dissectPacket(packet, nullptr);
     }
