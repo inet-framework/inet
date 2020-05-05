@@ -173,7 +173,8 @@ void MultiFieldClassifier::pushPacket(Packet *packet, cGate *inputGate)
         outputGate = gate("out", gateIndex);
     else
         outputGate = gate("defaultOut", gateIndex);
-    pushOrSendPacket(packet, outputGate);
+    auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 void MultiFieldClassifier::refreshDisplay() const
