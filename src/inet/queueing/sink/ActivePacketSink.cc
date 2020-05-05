@@ -30,8 +30,10 @@ void ActivePacketSink::initialize(int stage)
         collectionTimer = new cMessage("CollectionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (provider->canPullSomePacket(inputGate->getPathStartGate()))
+        if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
             scheduleCollectionTimer();
+            collectPacket();
+        }
     }
 }
 
