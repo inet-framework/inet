@@ -67,13 +67,12 @@ void PacketFilterBase::endPacketStreaming(Packet *packet)
 
 bool PacketFilterBase::canPushSomePacket(cGate *gate) const
 {
-    return consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate());
 }
 
 bool PacketFilterBase::canPushPacket(Packet *packet, cGate *gate) const
 {
-    // TODO: KLUDGE:
-    return consumer->canPushPacket(packet, outputGate->getPathEndGate()) || !const_cast<PacketFilterBase *>(this)->matchesPacket(packet);
+    return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()) || !matchesPacket(packet);
 }
 
 void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
@@ -179,19 +178,19 @@ void PacketFilterBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bo
 
 bool PacketFilterBase::canPullSomePacket(cGate *gate) const
 {
-    // TODO: KLUDGE:
-    auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
         auto packet = provider->canPullPacket(providerGate);
         if (packet == nullptr)
             return false;
-        else if (nonConstThisPtr->matchesPacket(packet))
+        else if (matchesPacket(packet))
             return true;
         else {
+            auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
             packet = provider->pullPacket(providerGate);
-            const_cast<PacketFilterBase *>(this)->take(packet);
+            nonConstThisPtr->take(packet);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
+            // TODO: KLUDGE:
             nonConstThisPtr->dropPacket(packet);
             nonConstThisPtr->handlePacketProcessed(packet);
             updateDisplayString();
