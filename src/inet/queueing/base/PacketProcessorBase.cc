@@ -108,12 +108,6 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *gate) const
         throw cRuntimeError("Cannot check packet operation support on gate %s", gate->getFullPath().c_str());
 }
 
-void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate)
-{
-    auto consumer = findConnectedModule<IPassivePacketSink>(gate);
-    pushOrSendPacket(packet, gate, consumer);
-}
-
 void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
 {
     if (consumer != nullptr) {
