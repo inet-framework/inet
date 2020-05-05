@@ -148,6 +148,32 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, 
         sendPacketProgress(packet, gate, 0, packet->getDuration(), bps(datarate).get(), b(position).get(), 0, b(extraProcessableLength).get());
 }
 
+void PacketProcessorBase::pushOrSendProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, int progressKind, bps datarate, b position, b extraProcessableLength)
+{
+    if (consumer != nullptr) {
+        animateSendProgress(packet, gate, progressKind, datarate, position, extraProcessableLength);
+        pushProgress(packet, gate, consumer, progressKind, datarate, position, extraProcessableLength);
+    }
+    else
+        sendProgress(packet, gate, 0, packet->getDuration(), progressKind, bps(datarate).get(), b(position).get(), 0, b(extraProcessableLength).get(), 0);
+}
+
+void PacketProcessorBase::pushProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, int progressKind, bps datarate, b position, b extraProcessableLength)
+{
+    switch (progressKind) {
+        case cProgress::PACKET_START:
+            consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
+            break;
+        case cProgress::PACKET_END:
+            consumer->pushPacketEnd(packet, gate->getPathEndGate(), datarate);
+            break;
+        case cProgress::PACKET_PROGRESS:
+            consumer->pushPacketProgress(packet, gate->getPathEndGate(), datarate, position, extraProcessableLength);
+            break;
+        default: throw cRuntimeError("Unknown progress kind");
+    }
+}
+
 void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
 {
     PacketDropDetails details;
@@ -191,26 +217,23 @@ void PacketProcessorBase::animateSendPacket(Packet *packet, cGate *gate) const
 
 void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const
 {
-    if (getEnvir()->isGUI()) {
-        auto progressMessage = createProgressMessage(packet, cProgress::PACKET_START, datarate, b(0), b(0));
-        animateSend(progressMessage, gate);
-        delete progressMessage;
-    }
+    animateSendProgress(packet, gate, cProgress::PACKET_START, datarate, b(0), b(0));
 }
 
 void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate, bps datarate) const
 {
-    if (getEnvir()->isGUI()) {
-        auto progressMessage = createProgressMessage(packet, cProgress::PACKET_END, datarate, packet->getDataLength(), b(0));
-        animateSend(progressMessage, gate);
-        delete progressMessage;
-    }
+    animateSendProgress(packet, gate, cProgress::PACKET_END, datarate, packet->getDataLength(), b(0));
 }
 
 void PacketProcessorBase::animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength) const
 {
+    animateSendProgress(packet, gate, cProgress::PACKET_PROGRESS, datarate, position, extraProcessableLength);
+}
+
+void PacketProcessorBase::animateSendProgress(Packet *packet, cGate *gate, int progressKind, bps datarate, b position, b extraProcessableLength) const
+{
     if (getEnvir()->isGUI()) {
-        auto progressMessage = createProgressMessage(packet, cProgress::PACKET_PROGRESS, datarate, position, extraProcessableLength);
+        auto progressMessage = createProgressMessage(packet, progressKind, datarate, position, extraProcessableLength);
         animateSend(progressMessage, gate);
         delete progressMessage;
     }
@@ -225,7 +248,7 @@ cMessage *PacketProcessorBase::createProgressMessage(Packet *packet, int progres
         case cProgress::PACKET_PROGRESS: name += "-progress"; break;
     }
     cProgress *progressMessage = new cProgress(name.c_str(), progressKind);
-    progressMessage->setPacket(packet);
+    progressMessage->setPacket(packet->dup());
     progressMessage->setDatarate(bps(datarate).get());
     progressMessage->setBitPosition(b(position).get());
     progressMessage->setTimePosition(-1);
