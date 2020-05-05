@@ -117,7 +117,7 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate)
 void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
 {
     if (consumer != nullptr) {
-        animateSend(packet, gate);
+        animateSendPacket(packet, gate);
         consumer->pushPacket(packet, gate->getPathEndGate());
     }
     else
@@ -127,7 +127,7 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate, IPassive
 void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate)
 {
     if (consumer != nullptr) {
-        animateSend(packet, gate);
+        animateSendPacketStart(packet, gate, datarate);
         consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
     }
     else
@@ -137,7 +137,7 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPa
 void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate)
 {
     if (consumer != nullptr) {
-        animateSend(packet, gate);
+        animateSendPacketEnd(packet, gate, datarate);
         consumer->pushPacketEnd(packet, gate->getPathEndGate(), datarate);
     }
     else
@@ -147,7 +147,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPass
 void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength)
 {
     if (consumer != nullptr) {
-        animateSend(packet, gate);
+        animateSendPacketProgress(packet, gate, datarate, position, extraProcessableLength);
         consumer->pushPacketProgress(packet, gate->getPathEndGate(), datarate, position, extraProcessableLength);
     }
     else
