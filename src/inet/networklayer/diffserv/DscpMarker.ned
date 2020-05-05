@@ -18,7 +18,7 @@
 
 package inet.networklayer.diffserv;
 
-import inet.queueing.base.PassivePacketSinkBase;
+import inet.queueing.base.PacketProcessorBase;
 
 //
 // This module sets the DSCP field (lower six bit of Tos/TrafficClass) of IP datagrams
@@ -28,7 +28,7 @@ import inet.queueing.base.PassivePacketSinkBase;
 // Packets arrived at gate in[i] are marked with the ith value. If there are fewer
 // dscp values given than input gates, then the last one is repeated.
 //
-simple DscpMarker extends PassivePacketSinkBase
+simple DscpMarker extends PacketProcessorBase
 {
     parameters:
         string dscps; // space separated list if dscp values; both names (e.g. AF11, EF) and numbers (0x0A,0b101110) can be used

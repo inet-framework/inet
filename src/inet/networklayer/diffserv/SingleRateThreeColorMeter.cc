@@ -71,7 +71,8 @@ void SingleRateThreeColorMeter::pushPacket(Packet *packet, cGate *inputGate)
             outputGate = gate("redOut");
             break;
     }
-    pushOrSendPacket(packet, outputGate);
+    auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 void SingleRateThreeColorMeter::refreshDisplay() const
