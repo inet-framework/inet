@@ -41,7 +41,6 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
 
     virtual void checkPacketOperationSupport(cGate *gate) const;
 
-    virtual void pushOrSendPacket(Packet *packet, cGate *gate);
     virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
     virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate);
     virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate);
