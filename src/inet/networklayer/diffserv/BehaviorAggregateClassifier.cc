@@ -17,6 +17,7 @@
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -113,8 +114,11 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, cGate *inputGate)
     emit(pkClassSignal, index);
     if (index >= 0)
         pushOrSendPacket(packet, outputGates[index], consumers[index]);
-    else
-        pushOrSendPacket(packet, gate("defaultOut"));
+    else {
+        auto defaultOutputGate = gate("defaultOut");
+        auto defaultConsumer = findConnectedModule<IPassivePacketSink>(defaultOutputGate);
+        pushOrSendPacket(packet, defaultOutputGate, defaultConsumer);
+    }
 }
 
 void BehaviorAggregateClassifier::refreshDisplay() const

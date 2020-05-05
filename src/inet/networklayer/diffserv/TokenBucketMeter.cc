@@ -58,7 +58,8 @@ void TokenBucketMeter::pushPacket(Packet *packet, cGate *inputGate)
         numRed++;
         outputGate = gate("redOut");
     }
-    pushOrSendPacket(packet, outputGate);
+    auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 void TokenBucketMeter::refreshDisplay() const
