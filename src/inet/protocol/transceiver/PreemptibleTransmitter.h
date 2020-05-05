@@ -34,12 +34,15 @@ class INET_API PreemptibleTransmitter : public PacketTransmitterBase
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
+    virtual bool isTransmitting() const { return txPacket != nullptr; }
+
     virtual void startTx(Packet *packet);
     virtual void endTx();
     virtual void abortTx();
 
     virtual simtime_t calculateDuration(const Packet *packet) const override;
-    virtual void scheduleTxEndTimer(Signal *signal, simtime_t timePosition);
+
+    virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
     virtual ~PreemptibleTransmitter();
