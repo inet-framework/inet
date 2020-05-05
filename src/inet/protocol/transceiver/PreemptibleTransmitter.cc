@@ -24,7 +24,6 @@ void PreemptibleTransmitter::initialize(int stage)
     PacketTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dataratePar = &par("datarate");
-        datarate = bps(*dataratePar);
         txEndTimer = new cMessage("TxEndTimer");
     }
 }
@@ -46,7 +45,7 @@ void PreemptibleTransmitter::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    if (txPacket != nullptr)
+    if (isTransmitting())
         abortTx();
     startTx(packet);
 }
@@ -62,32 +61,37 @@ void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate, bps data
 {
     Enter_Method("pushPacketEnd");
     take(packet);
-    delete packet;
-    // TODO:
+    delete txPacket;
+    txPacket = packet;
+    auto signal = encodePacket(txPacket);
+    cancelEvent(txEndTimer);
+    scheduleTxEndTimer(signal);
+    delete signal;
 }
 
 void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
-    simtime_t timePosition = simTime() - txStartTime;
-    int bitPosition = std::floor(datarate.get() * timePosition.dbl());
     delete txPacket;
     txPacket = packet;
+    simtime_t timePosition = simTime() - txStartTime;
+    int bitPosition = std::floor(datarate.get() * timePosition.dbl());
     auto signal = encodePacket(txPacket);
     sendPacketProgress(signal, outputGate, 0, signal->getDuration(), bps(datarate).get(), bitPosition, timePosition);
-    scheduleTxEndTimer(signal, timePosition);
+    cancelEvent(txEndTimer);
+    scheduleTxEndTimer(signal);
 }
 
 void PreemptibleTransmitter::startTx(Packet *packet)
 {
-    datarate = bps(*dataratePar);
     ASSERT(txPacket == nullptr);
+    datarate = bps(*dataratePar);
     txPacket = packet;
     txStartTime = simTime();
     auto signal = encodePacket(txPacket);
     EV_INFO << "Starting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
-    scheduleTxEndTimer(signal, 0);
+    scheduleTxEndTimer(signal);
     sendPacketStart(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
 }
 
@@ -111,7 +115,8 @@ void PreemptibleTransmitter::abortTx()
     auto signal = encodePacket(txPacket);
     EV_INFO << "Aborting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     sendPacketEnd(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
-    producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
+    producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), false);
+    delete txPacket;
     txPacket = nullptr;
     txStartTime = -1;
     producer->handleCanPushPacket(inputGate->getPathStartGate());
@@ -122,11 +127,9 @@ simtime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
     return packet->getTotalLength().get() / datarate.get();
 }
 
-void PreemptibleTransmitter::scheduleTxEndTimer(Signal *signal, simtime_t timePosition)
+void PreemptibleTransmitter::scheduleTxEndTimer(Signal *signal)
 {
-    if (txEndTimer->isScheduled())
-        cancelEvent(txEndTimer);
-    scheduleAt(simTime() + signal->getDuration() - timePosition, txEndTimer);
+    scheduleAt(txStartTime + signal->getDuration(), txEndTimer);
 }
 
 b PreemptibleTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
@@ -136,3 +139,4 @@ b PreemptibleTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *ga
 }
 
 } // namespace inet
+
