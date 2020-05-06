@@ -1,0 +1,9 @@
+#!/bin/sh
+
+opp_runall inet -u Cmdenv -c Default &
+opp_runall inet -u Cmdenv -c Basic &
+opp_runall inet -u Cmdenv -c PriorityQueueing &
+opp_runall inet -u Cmdenv -c SelectiveQueueing &
+opp_runall inet -u Cmdenv -c Preemption &
+opp_runall inet -u Cmdenv -c PreemptionWithPriorityQueueing &
+opp_runall inet -u Cmdenv -c PreemptionWithSelectiveQueueing &
