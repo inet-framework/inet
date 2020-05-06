@@ -967,6 +967,19 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
             communicationRangeFigure->setLineWidth(communicationRangeLineWidth);
             networkNodeVisualization->addFigure(communicationRangeFigure);
         }
+        if ((module->hasPar("displayDetectionRange") && module->par("displayDetectionRange"))) {
+            auto detectionRangeFigure = new cOvalFigure("detectionRange");
+//            auto transmitter = radio->getTransmitter();
+            m maxDetectionRange = radio->getTransmitter()->getMaxDetectionRange();
+            std::cout << "detectionrange: " << maxDetectionRange << std::endl;
+            detectionRangeFigure->setTags((std::string("detection_range ") + tags).c_str());
+            detectionRangeFigure->setTooltip("This circle represents the detection range of a wireless interface");
+            detectionRangeFigure->setBounds(cFigure::Rectangle(-maxDetectionRange.get(), -maxDetectionRange.get(), 2 * maxDetectionRange.get(), 2 * maxDetectionRange.get()));
+            detectionRangeFigure->setLineColor(detectionRangeLineColor);
+            detectionRangeFigure->setLineStyle(detectionRangeLineStyle);
+            detectionRangeFigure->setLineWidth(detectionRangeLineWidth);
+            networkNodeVisualization->addFigure(detectionRangeFigure);
+        }
         if (displaySignalDepartures || displaySignalArrivals) {
             if (displaySignalDepartures) {
                 std::string imageName = par("signalDepartureImage");

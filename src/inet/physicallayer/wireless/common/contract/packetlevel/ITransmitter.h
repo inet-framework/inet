@@ -51,6 +51,8 @@ class INET_API ITransmitter : public IPrintableObject
      */
     virtual m getMaxInterferenceRange() const = 0;
 
+    virtual m getMaxDetectionRange() const = 0;
+
     /**
      * Returns a transmission which describes the radio signal corresponding to
      * the provided packet. This function never returns nullptr.
