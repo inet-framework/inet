@@ -21,6 +21,8 @@ import inet.node.inet.StandardHost;
 
 network EthernetInterfaceConfigurationExample extends WiredNetworkBase
 {
+    parameters:
+        string highTsOperation;
     submodules:
         host1: StandardHost {
             @display("p=250,100");
