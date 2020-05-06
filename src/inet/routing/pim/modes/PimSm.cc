@@ -381,8 +381,9 @@ void PimSm::processJoinG(Ipv4Address group, Ipv4Address rp, Ipv4Address upstream
             // Join state, and the Expiry Timer (ET) is restarted, set to
             // maximum of its current value and the HoldTime from the
             // triggering Join/Prune message.
-            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
-                restartTimer(downstream->expiryTimer, holdTime);
+// TODO:
+//            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
+//                restartTimer(downstream->expiryTimer, holdTime);
         }
         else if (downstream->joinPruneState == DownstreamInterface::PRUNE_PENDING) {
             // The (*,G) downstream state machine on interface I transitions
@@ -391,8 +392,9 @@ void PimSm::processJoinG(Ipv4Address group, Ipv4Address rp, Ipv4Address upstream
             // restarted, set to maximum of its current value and the
             // HoldTime from the triggering Join/Prune message.
             cancelAndDeleteTimer(downstream->prunePendingTimer);
-            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
-                restartTimer(downstream->expiryTimer, holdTime);
+// TODO:
+//            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
+//                restartTimer(downstream->expiryTimer, holdTime);
         }
     }
 
@@ -441,8 +443,9 @@ void PimSm::processJoinSG(Ipv4Address source, Ipv4Address group, Ipv4Address ups
             // Join state, and the Expiry Timer (ET) is restarted, set to
             // maximum of its current value and the HoldTime from the
             // triggering Join/Prune message.
-            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
-                restartTimer(downstream->expiryTimer, holdTime);
+// TODO:
+//            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
+//                restartTimer(downstream->expiryTimer, holdTime);
         }
         else if (downstream->joinPruneState == DownstreamInterface::PRUNE_PENDING) {
             // The (S,G) downstream state machine on interface I transitions
@@ -451,8 +454,9 @@ void PimSm::processJoinSG(Ipv4Address source, Ipv4Address group, Ipv4Address ups
             // restarted, set to maximum of its current value and the
             // HoldTime from the triggering Join/Prune message.
             cancelAndDeleteTimer(downstream->prunePendingTimer);
-            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
-                restartTimer(downstream->expiryTimer, holdTime);
+// TODO:
+//            if (getClockTime() + holdTime > downstream->expiryTimer->getArrivalTime())
+//                restartTimer(downstream->expiryTimer, holdTime);
         }
     }
 
@@ -1942,21 +1946,21 @@ void PimSm::Route::startKeepAliveTimer(double keepAlivePeriod)
     ASSERT(this->type == SG);
     keepAliveTimer = new cMessage("PIMKeepAliveTimer", KeepAliveTimer);
     keepAliveTimer->setContextPointer(this);
-    owner->scheduleClockEvent(getClockTime() + keepAlivePeriod, keepAliveTimer);
+    // TODO: owner->scheduleClockEvent(getClockTime() + keepAlivePeriod, keepAliveTimer);
 }
 
 void PimSm::Route::startRegisterStopTimer(double interval)
 {
     registerStopTimer = new cMessage("PIMRegisterStopTimer", RegisterStopTimer);
     registerStopTimer->setContextPointer(this);
-    owner->scheduleClockEvent(getClockTime() + interval, registerStopTimer);
+    // TODO: owner->scheduleClockEvent(getClockTime() + interval, registerStopTimer);
 }
 
 void PimSm::Route::startJoinTimer(double joinPrunePeriod)
 {
     joinTimer = new cMessage("PIMJoinTimer", JoinTimer);
     joinTimer->setContextPointer(this);
-    owner->scheduleClockEvent(getClockTime() + joinPrunePeriod, joinTimer);
+    // TODO: owner->scheduleClockEvent(getClockTime() + joinPrunePeriod, joinTimer);
 }
 
 PimSm::DownstreamInterface *PimSm::Route::findDownstreamInterfaceByInterfaceId(int interfaceId)
@@ -2051,7 +2055,7 @@ void PimSm::PimsmInterface::startExpiryTimer(double holdTime)
 {
     expiryTimer = new cMessage("PIMExpiryTimer", ExpiryTimer);
     expiryTimer->setContextPointer(this);
-    pimsm()->scheduleClockEvent(getClockTime() + holdTime, expiryTimer);
+    // TODO: pimsm()->scheduleClockEvent(getClockTime() + holdTime, expiryTimer);
 }
 
 PimSm::DownstreamInterface::~DownstreamInterface()
@@ -2161,7 +2165,7 @@ void PimSm::DownstreamInterface::startPrunePendingTimer(double joinPruneOverride
     ASSERT(!prunePendingTimer);
     prunePendingTimer = new cMessage("PIMPrunePendingTimer", PrunePendingTimer);
     prunePendingTimer->setContextPointer(this);
-    pimsm()->scheduleClockEvent(getClockTime() + joinPruneOverrideInterval, prunePendingTimer);
+// TODO:    pimsm()->scheduleClockEvent(getClockTime() + joinPruneOverrideInterval, prunePendingTimer);
 }
 
 std::ostream& operator<<(std::ostream& out, const PimSm::Route& route)

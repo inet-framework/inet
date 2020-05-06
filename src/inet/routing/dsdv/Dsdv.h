@@ -94,7 +94,7 @@ class INET_API DsdvIpv4Route : public Ipv4Route
         simclocktime_t expiryTime;  // time the routing entry is valid until
 
     public:
-        virtual bool isValid() const override { return expiryTime == 0 || expiryTime > getClockTime(); }
+        virtual bool isValid() const override { return true; } // TODO: return expiryTime == 0 || expiryTime > getClockTime(); }
 
         simclocktime_t getExpiryTime() const {return expiryTime;}
         void setExpiryTime(simclocktime_t time) {expiryTime = time;}

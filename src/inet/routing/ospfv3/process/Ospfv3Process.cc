@@ -173,12 +173,12 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
             p.prefixLength = prefLength;
 
             if (isInInterfaceTable6(ift, address6) < 0) {
-                intfData6->assignAddress(address6, false, SIMTIME_ZERO, SIMTIME_ZERO);
+                intfData6->assignAddress(address6, false, SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO);
 
                 // add this routes to routing table
                 Ipv6Route *route = new Ipv6Route(p.prefix.getPrefix(prefLength), p.prefixLength, IRoute::IFACENETMASK);
                 route->setInterface(myInterface);
-                route->setExpiryTime(SIMTIME_ZERO);
+                route->setExpiryTime(SIMCLOCKTIME_ZERO);
                 route->setMetric(0);
                 route->setAdminDist(Ipv6Route::dDirectlyConnected);
 

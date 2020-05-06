@@ -1124,7 +1124,7 @@ void xMIPv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& d
        Solicitation).*/
     // TODO
 
-    sendMobilityMessageToIPv6Module(packet, dest, src, ie->getInterfaceId(), sendTime);
+    sendMobilityMessageToIPv6Module(packet, dest, src, ie->getInterfaceId(), sendTime.asSimTime());
 
     // statistic collection
     /*if (rt6->isHomeAgent())

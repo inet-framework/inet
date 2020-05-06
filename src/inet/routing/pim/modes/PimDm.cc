@@ -635,8 +635,9 @@ void PimDm::processPrune(Route *route, int intId, int holdTime, int numRpfNeighb
         // holdtime contained in the Prune(S,G) message if it is greater
         // than the current value.
         EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
-        if (downstream->pruneTimer->getArrivalTime() < getClockTime() + holdTime)
-            restartTimer(downstream->pruneTimer, holdTime);
+// TODO:
+//        if (downstream->pruneTimer->getArrivalTime() < getClockTime() + holdTime)
+//            restartTimer(downstream->pruneTimer, holdTime);
     }
 
     //
@@ -1820,14 +1821,14 @@ void PimDm::UpstreamInterface::startGraftRetryTimer()
 {
     graftRetryTimer = new cMessage("PIMGraftRetryTimer", GraftRetryTimer);
     graftRetryTimer->setContextPointer(this);
-    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->graftRetryInterval, graftRetryTimer);
+    // TODO: pimdm()->scheduleClockEvent(getClockTime() + pimdm()->graftRetryInterval, graftRetryTimer);
 }
 
 void PimDm::UpstreamInterface::startOverrideTimer()
 {
     overrideTimer = new cMessage("PIMOverrideTimer", UpstreamOverrideTimer);
     overrideTimer->setContextPointer(this);
-    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->overrideInterval, overrideTimer);
+    // TODO: pimdm()->scheduleClockEvent(getClockTime() + pimdm()->overrideInterval, overrideTimer);
 }
 
 /**
@@ -1839,7 +1840,7 @@ void PimDm::UpstreamInterface::startSourceActiveTimer()
 {
     sourceActiveTimer = new cMessage("PIMSourceActiveTimer", SourceActiveTimer);
     sourceActiveTimer->setContextPointer(this);
-    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->sourceActiveInterval, sourceActiveTimer);
+    // TODO: pimdm()->scheduleClockEvent(getClockTime() + pimdm()->sourceActiveInterval, sourceActiveTimer);
 }
 
 /**
@@ -1851,7 +1852,7 @@ void PimDm::UpstreamInterface::startStateRefreshTimer()
 {
     stateRefreshTimer = new cMessage("PIMStateRefreshTimer", StateRefreshTimer);
     sourceActiveTimer->setContextPointer(this);
-    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->stateRefreshInterval, stateRefreshTimer);
+    // TODO: pimdm()->scheduleClockEvent(getClockTime() + pimdm()->stateRefreshInterval, stateRefreshTimer);
 }
 
 PimDm::DownstreamInterface::~DownstreamInterface()
@@ -1869,7 +1870,7 @@ void PimDm::DownstreamInterface::startPruneTimer(double holdTime)
 {
     cMessage *timer = new cMessage("PimPruneTimer", PruneTimer);
     timer->setContextPointer(this);
-    owner->owner->scheduleClockEvent(getClockTime() + holdTime, timer);
+    // TODO: owner->owner->scheduleClockEvent(getClockTime() + holdTime, timer);
     pruneTimer = timer;
 }
 
@@ -1888,7 +1889,7 @@ void PimDm::DownstreamInterface::startPrunePendingTimer(double overrideInterval)
     ASSERT(!prunePendingTimer);
     cMessage *timer = new cMessage("PimPrunePendingTimer", PrunePendingTimer);
     timer->setContextPointer(this);
-    owner->owner->scheduleClockEvent(getClockTime() + overrideInterval, timer);
+    // TODO: owner->owner->scheduleClockEvent(getClockTime() + overrideInterval, timer);
     prunePendingTimer = timer;
 }
 

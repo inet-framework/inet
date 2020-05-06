@@ -28,6 +28,7 @@
 
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -49,7 +50,7 @@ class TcpNscReceiveQueue;
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
-class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback, public LifecycleUnsupported
+class INET_API TcpNsc : public SimpleModule, ISendCallback, IInterruptCallback, public LifecycleUnsupported
 {
   protected:
     enum { MAX_SEND_BYTES = 500000 };

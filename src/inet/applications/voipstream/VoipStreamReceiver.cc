@@ -253,7 +253,7 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
         curConn.lastPacketFinish += lostSamples * (1.0 / curConn.sampleRate);
         FINGERPRINT_ADD_EXTRA_DATA(lostSamples);
     }
-    emit(delaySignal, curConn.lastPacketFinish - pk->getCreationTime());
+    emit(delaySignal, curConn.lastPacketFinish.asSimTime() - pk->getCreationTime());
     curConn.seqNo = newSeqNo;
 
     if (vp->getType() == VOICE) {

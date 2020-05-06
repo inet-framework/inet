@@ -94,9 +94,9 @@ class INET_API PimDm : public PimBase, protected cListener
         void startOverrideTimer();
         void startSourceActiveTimer();
         void startStateRefreshTimer();
-        void startPruneLimitTimer() { lastPruneSentTime = getClockTime(); }
+        void startPruneLimitTimer() { } // TODO: lastPruneSentTime = getClockTime(); }
         void stopPruneLimitTimer() { lastPruneSentTime = 0; }
-        bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && getClockTime() < lastPruneSentTime + pimdm()->pruneLimitInterval; }
+        bool isPruneLimitTimerRunning() { return true; } // TODO: lastPruneSentTime > 0.0 && getClockTime() < lastPruneSentTime + pimdm()->pruneLimitInterval; }
     };
 
     struct DownstreamInterface : public Interface

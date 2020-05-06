@@ -55,7 +55,7 @@ void SimpleVoipReceiver::TalkspurtInfo::addPacket(const SimpleVoipPacket *pk)
     VoipPacketInfo packet;
     packet.packetID = pk->getPacketID();
     packet.creationTime = pk->getVoipTimestamp();
-    packet.arrivalTime = getClockTime();
+    // TODO: packet.arrivalTime = getClockTime();
     packets.push_back(packet);
 }
 
@@ -156,7 +156,7 @@ void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)
 
     EV_DEBUG << "PACKET ARRIVED: TALKSPURT " << voice->getTalkspurtID() << " PACKET " << voice->getPacketID() << "\n\n";
 
-    simtime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
+    simtime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp().asSimTime();
     emit(voipPacketDelaySignal, delay);
 
     delete packet;

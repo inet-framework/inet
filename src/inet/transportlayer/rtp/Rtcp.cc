@@ -351,7 +351,7 @@ void Rtcp::processIncomingRTPPacket(Packet *packet, Ipv4Address address, int por
         }
     }
     if (good) {
-        participantInfo->processRTPPacket(packet, getId(), packet->getArrivalTime());
+        // TODO: participantInfo->processRTPPacket(packet, getId(), packet->getArrivalTime());
     }
     else {
         EV_INFO << "Incoming packet address/port conflict, packet dropped.\n";
@@ -362,7 +362,7 @@ void Rtcp::processIncomingRTPPacket(Packet *packet, Ipv4Address address, int por
 void Rtcp::processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int port)
 {
     calculateAveragePacketSize(packet->getByteLength());
-    simclocktime_t arrivalTime = packet->getArrivalTime();
+    simclocktime_t arrivalTime = 0; // TODO: packet->getArrivalTime();
 
     for (int i = 0; packet->getByteLength() > 0; i++) {
         // remove the rtcp packet from the rtcp compound packet

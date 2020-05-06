@@ -47,7 +47,7 @@ Coord PositionTable::getPosition(const L3Address& address) const
 void PositionTable::setPosition(const L3Address& address, const Coord& coord)
 {
     ASSERT(!address.isUnspecified());
-    addressToPositionMap[address] = AddressToPositionMapValue(getClockTime(), coord);
+// TODO:    addressToPositionMap[address] = AddressToPositionMapValue(getClockTime(), coord);
 }
 
 void PositionTable::removePosition(const L3Address& address)

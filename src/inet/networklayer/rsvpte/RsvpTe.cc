@@ -143,7 +143,7 @@ void RsvpTe::createPath(const SessionObj& session, const SenderTemplateObj& send
         else {
             EV_INFO << "path is permanent, we will try again later" << endl;
 
-            sendPathNotify(getId(), sit->sobj, pit->sender, PATH_RETRY, retryInterval);
+            sendPathNotify(getId(), sit->sobj, pit->sender, PATH_RETRY, retryInterval.asSimTime());
         }
     }
 }
@@ -1693,7 +1693,7 @@ void RsvpTe::pathProblem(PathStateBlock *psb)
     if (p->permanent) {
         EV_INFO << "this path is permanent, we will try to re-create it later" << endl;
 
-        sendPathNotify(getId(), psb->Session_Object, psb->Sender_Template_Object, PATH_RETRY, retryInterval);
+        sendPathNotify(getId(), psb->Session_Object, psb->Sender_Template_Object, PATH_RETRY, retryInterval.asSimTime());
     }
     else {
         EV_INFO << "removing path from traffic database" << endl;
