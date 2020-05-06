@@ -27,6 +27,7 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 module Ieee80211UnitDiskRadio extends Ieee80211Radio
 {
     parameters:
+        bool displayDetectionRange = default(false); // if true communication range is displayed as a blue circle around the node
         transmitter.typename = default("Ieee80211UnitDiskTransmitter");
         receiver.typename = default("Ieee80211UnitDiskReceiver");
         @class(Radio);

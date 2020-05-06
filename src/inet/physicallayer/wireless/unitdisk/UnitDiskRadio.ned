@@ -38,6 +38,7 @@ import inet.physicallayer.wireless.common.radio.packetlevel.Radio;
 module UnitDiskRadio extends Radio
 {
     parameters:
+        bool displayDetectionRange = default(false); // if true detection range is displayed as a TODO circle around the node
         transmitter.typename = default("UnitDiskTransmitter");
         receiver.typename = default("UnitDiskReceiver");
         separateTransmissionParts = default(false);

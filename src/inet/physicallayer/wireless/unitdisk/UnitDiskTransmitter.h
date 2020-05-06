@@ -50,6 +50,7 @@ class INET_API UnitDiskTransmitter : public TransmitterBase
     virtual bps getBitrate() const { return bitrate; }
     virtual m getMaxCommunicationRange() const override { return communicationRange; }
     virtual m getMaxInterferenceRange() const override { return interferenceRange; }
+    virtual m getMaxDetectionRange() const override { return detectionRange; }
 };
 
 } // namespace physicallayer

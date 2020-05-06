@@ -89,6 +89,9 @@ void MediumVisualizerBase::initialize(int stage)
         communicationRangeLineColor = cFigure::Color(par("communicationRangeLineColor"));
         communicationRangeLineStyle = cFigure::parseLineStyle(par("communicationRangeLineStyle"));
         communicationRangeLineWidth = par("communicationRangeLineWidth");
+        detectionRangeLineColor = cFigure::Color(par("detectionRangeLineColor"));
+        detectionRangeLineStyle = cFigure::parseLineStyle(par("detectionRangeLineStyle"));
+        detectionRangeLineWidth = par("detectionRangeLineWidth");
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
         autoPowerAxis = par("autoPowerAxis");

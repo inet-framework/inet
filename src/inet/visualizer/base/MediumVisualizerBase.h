@@ -75,6 +75,9 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color communicationRangeLineColor;
     cFigure::LineStyle communicationRangeLineStyle;
     double communicationRangeLineWidth = NaN;
+    cFigure::Color detectionRangeLineColor;
+    cFigure::LineStyle detectionRangeLineStyle;
+    double detectionRangeLineWidth = NaN;
     bool autoPowerAxis = false;
     W signalMinPower = W(NaN);
     W signalMaxPower = W(NaN);

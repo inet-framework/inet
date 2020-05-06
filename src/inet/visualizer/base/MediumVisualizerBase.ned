@@ -68,6 +68,11 @@ simple MediumVisualizerBase extends VisualizerBase
         string interferenceRangeLineColor = default("gray"); // interference range circle color, gray by default
         string interferenceRangeLineStyle = default("solid"); // interference range circle line style, solid by default
         double interferenceRangeLineWidth = default(1); // interference range circle line width, 1 by default
+        
+//        bool displayCommunicationRanges = default(false); // display communication ranges as circles around radios, enabled by default
+        string detectionRangeLineColor = default("black"); // communication range circle line color, blue by default
+        string detectionRangeLineStyle = default("dashed"); // communication range circle line style, solid by default
+        double detectionRangeLineWidth = default(1); // communication range circle line width, 1 by default
 
         // parameters shared between power density maps, spectrums and spectrograms
         bool autoPowerAxis = default(true); // enables automatic power axis configuration
