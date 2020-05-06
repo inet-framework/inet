@@ -418,6 +418,7 @@ void EtherPhy::startTx(EthernetSignalBase *signal)
     curTx = signal;
     curTxStartTime = simTime();
     auto duration = calculateDuration(curTx);
+    EV << "Sending PACKET_START " << curTx << " to phy\n";
     sendPacketStart(curTx->dup(), physOutGate, 0, duration, NaN);
     ASSERT(txTransmissionChannel->getTransmissionFinishTime() == simTime() + duration);
     scheduleAt(simTime() + duration, endTxMsg);
@@ -429,6 +430,7 @@ void EtherPhy::endTx()
     ASSERT(txState == TX_TRANSMITTING_STATE);
     ASSERT(curTx != nullptr);
     auto duration = calculateDuration(curTx);
+    EV << "Sending PACKET_END " << curTx << " to phy\n";
     sendPacketEnd(curTx, physOutGate, 0, duration, NaN);
     emit(txFinishedSignal, 1);   //TODO
     curTx = nullptr;
@@ -537,6 +539,7 @@ Packet *EtherPhy::decapsulate(EthernetSignal *signal)
 
 void EtherPhy::startRx(EthernetSignalBase *signal)
 {
+    EV << "receiving PACKET_START " << signal << " from phy\n";
     // only the rx end received in full duplex mode
     if (rxState == RX_IDLE_STATE)
         changeRxState(RX_RECEIVING_STATE);
@@ -545,6 +548,7 @@ void EtherPhy::startRx(EthernetSignalBase *signal)
 
 void EtherPhy::endRx(EthernetSignalBase *signal)
 {
+    EV << "receiving PACKET_END " << signal << " from phy\n";
     if (signal->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
     if (signal->getBitrate() != bitrate)
