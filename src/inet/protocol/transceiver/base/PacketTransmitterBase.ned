@@ -22,6 +22,7 @@ import inet.queueing.base.PacketProcessorBase;
 simple PacketTransmitterBase extends PacketProcessorBase
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional 
         @class(PacketTransmitterBase);
         @display("i=block/wtx");
     gates:

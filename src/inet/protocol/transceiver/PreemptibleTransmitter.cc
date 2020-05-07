@@ -76,10 +76,10 @@ void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps
     take(packet);
     delete txPacket;
     txPacket = packet;
-    simtime_t timePosition = simTime() - txStartTime;
+    simclocktime_t timePosition = getClockTime() - txStartTime;
     int bitPosition = std::floor(datarate.get() * timePosition.dbl());
     auto signal = encodePacket(txPacket);
-    sendPacketProgress(signal, outputGate, 0, signal->getDuration(), bps(datarate).get(), bitPosition, timePosition);
+    sendPacketProgress(signal, outputGate, 0, signal->getDuration(), bps(datarate).get(), bitPosition, CLOCKTIME_AS_SIMTIME(timePosition));
     cancelEvent(txEndTimer);
     scheduleTxEndTimer(signal);
 }
@@ -89,7 +89,7 @@ void PreemptibleTransmitter::startTx(Packet *packet)
     ASSERT(txPacket == nullptr);
     datarate = bps(*dataratePar);
     txPacket = packet;
-    txStartTime = simTime();
+    txStartTime = getClockTime();
     auto signal = encodePacket(txPacket);
     EV_INFO << "Starting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     scheduleTxEndTimer(signal);
@@ -123,7 +123,7 @@ void PreemptibleTransmitter::abortTx()
     producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
-simtime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
+simclocktime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
 {
     return packet->getTotalLength().get() / datarate.get();
 }
@@ -131,12 +131,12 @@ simtime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
 void PreemptibleTransmitter::scheduleTxEndTimer(Signal *signal)
 {
     ASSERT(txStartTime != -1);
-    scheduleAt(txStartTime + signal->getDuration(), txEndTimer);
+    scheduleClockEvent(txStartTime + SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
 }
 
 b PreemptibleTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
 {
-    simtime_t transmissionDuration = simTime() - txStartTime;
+    simclocktime_t transmissionDuration = getClockTime() - txStartTime;
     return b(std::floor(datarate.get() * transmissionDuration.dbl()));
 }
 

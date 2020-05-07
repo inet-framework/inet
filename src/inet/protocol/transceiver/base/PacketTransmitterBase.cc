@@ -23,7 +23,7 @@ namespace inet {
 
 void PacketTransmitterBase::initialize(int stage)
 {
-    PacketProcessorBase::initialize(stage);
+    ClockUsingModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
@@ -55,7 +55,7 @@ Signal *PacketTransmitterBase::encodePacket(const Packet *txPacket) const
     auto duration = calculateDuration(packet);
     auto signal = new Signal(packet->getName());
     signal->encapsulate(packet);
-    signal->setDuration(duration);
+    signal->setDuration(CLOCKTIME_AS_SIMTIME(duration));
     return signal;
 }
 

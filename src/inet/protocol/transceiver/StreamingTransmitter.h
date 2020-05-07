@@ -39,7 +39,7 @@ class INET_API StreamingTransmitter : public PacketTransmitterBase
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual simtime_t calculateDuration(const Packet *packet) const override;
+    virtual simclocktime_t calculateDuration(const Packet *packet) const override;
     virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
