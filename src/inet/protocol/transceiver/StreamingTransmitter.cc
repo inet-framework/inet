@@ -60,7 +60,7 @@ void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
     scheduleTxEndTimer(txSignal);
 }
 
-simtime_t StreamingTransmitter::calculateDuration(const Packet *packet) const
+simclocktime_t StreamingTransmitter::calculateDuration(const Packet *packet) const
 {
     return packet->getDataLength().get() / datarate.get();
 }
@@ -69,7 +69,7 @@ void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
 {
     if (txEndTimer->isScheduled())
         cancelEvent(txEndTimer);
-    scheduleAt(simTime() + signal->getDuration(), txEndTimer);
+    scheduleClockEvent(getClockTime() + SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
 }
 
 void StreamingTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)

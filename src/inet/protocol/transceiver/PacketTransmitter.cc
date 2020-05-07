@@ -68,14 +68,14 @@ void PacketTransmitter::endTx()
     producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
-simtime_t PacketTransmitter::calculateDuration(const Packet *packet) const
+simclocktime_t PacketTransmitter::calculateDuration(const Packet *packet) const
 {
     return packet->getDataLength().get() / datarate.get();
 }
 
 void PacketTransmitter::scheduleTxEndTimer(Signal *signal)
 {
-    scheduleAt(simTime() + signal->getDuration(), txEndTimer);
+    scheduleClockEvent(getClockTime() + SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
 }
 
 } // namespace inet

@@ -18,6 +18,7 @@
 #ifndef __INET_PACKETTRANSMITTERBASE_H
 #define __INET_PACKETTRANSMITTERBASE_H
 
+#include "inet/common/base/ClockUsingModuleMixin.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
@@ -28,7 +29,7 @@ namespace inet {
 using namespace inet::queueing;
 using namespace inet::physicallayer;
 
-class INET_API PacketTransmitterBase : public PacketProcessorBase, public virtual IPassivePacketSink
+class INET_API PacketTransmitterBase : public ClockUsingModuleMixin<PacketProcessorBase>, public virtual IPassivePacketSink
 {
   protected:
     cGate *inputGate = nullptr;
@@ -41,7 +42,7 @@ class INET_API PacketTransmitterBase : public PacketProcessorBase, public virtua
 
     virtual Signal *encodePacket(const Packet *packet) const;
 
-    virtual simtime_t calculateDuration(const Packet *packet) const = 0;
+    virtual simclocktime_t calculateDuration(const Packet *packet) const = 0;
 
   public:
     virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }

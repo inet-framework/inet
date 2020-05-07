@@ -26,7 +26,7 @@ class INET_API PreemptibleTransmitter : public PacketTransmitterBase
     cPar *dataratePar = nullptr;
     bps datarate = bps(NaN);
 
-    simtime_t txStartTime = -1;
+    simclocktime_t txStartTime = -1;
     cMessage *txEndTimer = nullptr;
     Packet *txPacket = nullptr;
 
@@ -40,7 +40,7 @@ class INET_API PreemptibleTransmitter : public PacketTransmitterBase
     virtual void endTx();
     virtual void abortTx();
 
-    virtual simtime_t calculateDuration(const Packet *packet) const override;
+    virtual simclocktime_t calculateDuration(const Packet *packet) const override;
 
     virtual void scheduleTxEndTimer(Signal *signal);
 
