@@ -1,5 +1,19 @@
     <features cppSourceRoots="src" definesFile="src/inet/features.h">
     <feature
+        id="clocksupport"
+        name="Clock support"
+        description = "Support for the simulation of clock drifting, clock skew, and time synchronization"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.common.clock
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_CLOCK_SUPPORT"
+        linkerFlags = ""
+        />
+    <feature
         id="TCP_common"
         name="TCP Common"
         description = "The common part of TCP implementations"
