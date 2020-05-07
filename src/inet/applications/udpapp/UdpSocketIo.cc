@@ -127,7 +127,8 @@ void UdpSocketIo::handleStartOperation(LifecycleOperation *operation)
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), par("localPort"));
     const char *destAddrs = par("destAddress");
-    socket.connect(*destAddrs ? L3AddressResolver().resolve(destAddrs) : L3Address(), par("destPort"));
+    if (*destAddrs)
+        socket.connect(L3AddressResolver().resolve(destAddrs), par("destPort"));
 }
 
 void UdpSocketIo::handleStopOperation(LifecycleOperation *operation)
