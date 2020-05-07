@@ -36,6 +36,7 @@ OperationalBase::~OperationalBase()
 
 void OperationalBase::initialize(int stage)
 {
+    ClockUsingModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         WATCH(operationalState);
         activeOperationTimeout = new cMessage("ActiveOperationTimeout");

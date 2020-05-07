@@ -18,11 +18,12 @@
 #ifndef __INET_OPERATIONALBASE_H
 #define __INET_OPERATIONALBASE_H
 
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
-class INET_API OperationalBase : public cSimpleModule, public ILifecycle
+class INET_API OperationalBase : public ClockUsingModuleBase, public ILifecycle
 {
   protected:
     enum State {

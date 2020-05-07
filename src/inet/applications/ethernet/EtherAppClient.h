@@ -48,8 +48,8 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
 
     // self messages
     cMessage *timerMsg = nullptr;
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
 
     Ieee8022LlcSocket llcSocket;
 

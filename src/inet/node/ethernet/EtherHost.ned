@@ -20,6 +20,7 @@ package inet.node.ethernet;
 import inet.applications.ethernet.EtherAppClient;
 import inet.applications.ethernet.EtherAppServer;
 import inet.common.MessageDispatcher;
+import inet.common.clock.IClock;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherEncap;
@@ -36,6 +37,7 @@ module EtherHost
 {
     parameters:
         bool hasStatus = default(false);
+        bool hasClock = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string fcsMode @enum("declared","computed") = default("declared");
         @networkNode();
@@ -45,11 +47,16 @@ module EtherHost
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
         eth.encap.typename = "EtherEncapDummy";
+        *.clockModule = hasClock ? "^.clock" : "";
+        *.*.clockModule = hasClock ? "^.^.clock" : "";	
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=100,100;is=s");
+        }
+        clock: <default("LinearClock")> like IClock if hasClock { // note: 'if typename != ""' cannot be made to work 
+            @display("p=100,170;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:

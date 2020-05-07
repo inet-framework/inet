@@ -64,7 +64,7 @@ void EtherAppClient::initialize(int stage)
 
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         llcSocket.setOutputGate(gate("out"));
         llcSocket.setCallback(this);
@@ -123,8 +123,8 @@ bool EtherAppClient::isGenerator()
 
 void EtherAppClient::scheduleNextPacket(bool start)
 {
-    simtime_t cur = simTime();
-    simtime_t next;
+    simclocktime_t cur = getClockTime();
+    simclocktime_t next;
     if (start) {
         next = cur <= startTime ? startTime : cur;
         timerMsg->setKind(START);
@@ -133,14 +133,14 @@ void EtherAppClient::scheduleNextPacket(bool start)
         next = cur + *sendInterval;
         timerMsg->setKind(NEXT);
     }
-    if (stopTime < SIMTIME_ZERO || next < stopTime)
-        scheduleAt(next, timerMsg);
+    if (stopTime < SIMCLOCKTIME_ZERO || next < stopTime)
+        scheduleClockEvent(next, timerMsg);
 }
 
 void EtherAppClient::cancelNextPacket()
 {
     if (timerMsg)
-        cancelEvent(timerMsg);
+        cancelClockEvent(timerMsg);
 }
 
 MacAddress EtherAppClient::resolveDestMacAddress()
@@ -197,7 +197,7 @@ void EtherAppClient::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
 
 void EtherAppClient::finish()
 {
-    cancelAndDelete(timerMsg);
+    cancelAndDeleteClockEvent(timerMsg);
     timerMsg = nullptr;
 }
 
