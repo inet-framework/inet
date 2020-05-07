@@ -56,9 +56,12 @@ void ExampleQosClassifier::handleMessage(cMessage *msg)
 
 int ExampleQosClassifier::getUserPriority(cMessage *msg)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     int ipProtocol = -1;
+
+#if defined(WITH_IPv4) || defined(WITH_IPv6) || defined(WITH_UDP) || defined(WITH_TCP_COMMON)
+    auto packet = check_and_cast<Packet *>(msg);
     b ipHeaderLength = b(-1);
+#endif
 
 #ifdef WITH_IPv4
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
