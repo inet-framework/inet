@@ -4,7 +4,7 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -34,7 +34,7 @@ namespace ospfv3 {
 
 class Ospfv3Instance;
 
-class INET_API Ospfv3Process : protected cListener, public SimpleModule
+class INET_API Ospfv3Process : protected cListener, public ClockUsingModuleBase
 {
   public:
     Ospfv3Process();

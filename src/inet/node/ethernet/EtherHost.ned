@@ -20,7 +20,7 @@ package inet.node.ethernet;
 import inet.applications.ethernet.EtherAppClient;
 import inet.applications.ethernet.EtherAppServer;
 import inet.common.MessageDispatcher;
-import inet.common.clock.IClock;
+import inet.common.clock.contract.IClock;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherEncap;
@@ -48,7 +48,7 @@ module EtherHost
         *.fcsMode = fcsMode;
         eth.encap.typename = "EtherEncapDummy";
         *.clockModule = hasClock ? "^.clock" : "";
-        *.*.clockModule = hasClock ? "^.^.clock" : "";	
+        *.*.clockModule = hasClock ? "^.^.clock" : "";
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:

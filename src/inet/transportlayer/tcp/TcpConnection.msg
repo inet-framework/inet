@@ -23,7 +23,7 @@ import inet.common.packet.ChunkBuffer;
 import inet.common.packet.ChunkQueue;
 import inet.common.packet.Packet;
 import inet.networklayer.common.L3Address;
-import inet.common.clock.SimClockTime;
+import inet.common.clock.common.SimClockTime;
 
 cplusplus {{
 #include "inet/transportlayer/tcp/Tcp.h"

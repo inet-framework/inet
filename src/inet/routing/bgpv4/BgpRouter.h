@@ -40,7 +40,7 @@ class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
 private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
-    SimpleModule *bgpModule = nullptr;
+    ClockUsingModuleBase *bgpModule = nullptr;
     ospfv2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
     bool redistributeInternal = false;
@@ -70,7 +70,7 @@ private:
     std::vector<AsId> _ASListOUT;
 
   public:
-    BgpRouter(SimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
+    BgpRouter(ClockUsingModuleBase *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
     virtual ~BgpRouter();
 
     RouterId getRouterId() { return rt->getRouterId(); }

@@ -17,7 +17,7 @@
 
 package inet.node.base;
 
-import inet.common.clock.IClock;
+import inet.common.clock.contract.IClock;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.node.inet.INetworkNode;
@@ -54,7 +54,8 @@ module NodeBase like INetworkNode
                 @display("p=125,80;is=s");
         }
         clock: <default("LinearClock")> like IClock if hasClock { // note: 'if typename != ""' cannot be made to work 
-            @display("p=100,170;is=s");
+            parameters:
+	            @display("p=125,240;is=s");
         }
         energyStorage: <default("")> like IEnergyStorage if typename != "" {
             parameters:

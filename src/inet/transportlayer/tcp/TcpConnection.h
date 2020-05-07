@@ -324,7 +324,7 @@ class INET_API TcpStateVariables : public cObject
  * When the CLOSED state is reached, TCP will delete the TcpConnection object.
  *
  */
-class INET_API TcpConnection : public SimpleModule
+class INET_API TcpConnection : public ClockUsingModuleBase
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;

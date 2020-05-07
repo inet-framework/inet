@@ -24,7 +24,7 @@ import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CrcMode;
-import inet.common.clock.SimClockTime;
+import inet.common.clock.common.SimClockTime;
 
 cplusplus {{
 #include "inet/common/ProtocolGroup.h"

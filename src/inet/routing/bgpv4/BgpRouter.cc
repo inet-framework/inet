@@ -24,7 +24,7 @@
 namespace inet {
 namespace bgp {
 
-BgpRouter::BgpRouter(SimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt)
+BgpRouter::BgpRouter(ClockUsingModuleBase *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt)
 {
     this->bgpModule = bgpModule;
     this->ift = ift;

@@ -27,7 +27,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
@@ -65,7 +65,7 @@ class Ipv6RoutingTable;
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public SimpleModule
+class INET_API xMIPv6 : public ClockUsingModuleBase
 {
   public:
     virtual ~xMIPv6();

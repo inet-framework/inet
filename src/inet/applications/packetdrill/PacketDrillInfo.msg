@@ -17,7 +17,7 @@
 
 
 import inet.common.INETDefs;
-import inet.common.clock.SimClockTime;
+import inet.common.clock.common.SimClockTime;
 
 namespace inet;
 

@@ -24,7 +24,7 @@
 #define __INET_BINDINGUPDATELIST_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
@@ -43,7 +43,7 @@ class InterfaceEntry;
 
 #define PRE_BINDING_EXPIRY          2 // amount of seconds before BUL expiry that indicate that a binding will shortly expiry
 
-class INET_API BindingUpdateList : public SimpleModule
+class INET_API BindingUpdateList : public ClockUsingModuleBase
 {
   public:
 //###########################Declaration of BUL and BC added by Zarrar Yousaf @ CNI Uni Dortmund on 04.06.07######

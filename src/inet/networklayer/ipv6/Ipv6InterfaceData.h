@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/clock/SimClockTime.h"
+#include "inet/common/clock/common/SimClockTime.h"
 
 #ifndef WITH_IPv6
 #error "IPv6 feature disabled"

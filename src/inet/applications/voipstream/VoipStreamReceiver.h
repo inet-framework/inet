@@ -38,14 +38,14 @@ extern "C" {
 #include "inet/applications/voipstream/AudioOutFile.h"
 #include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
-class INET_API VoipStreamReceiver : public SimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
+class INET_API VoipStreamReceiver : public ClockUsingModuleBase, public LifecycleUnsupported, public UdpSocket::ICallback
 {
   public:
     VoipStreamReceiver() {}

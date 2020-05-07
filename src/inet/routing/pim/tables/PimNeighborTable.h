@@ -21,7 +21,7 @@
 #define __INET_PIMNEIGHBORTABLE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -75,7 +75,7 @@ class INET_API PimNeighbor : public cObject
  *
  * Expired entries are automatically deleted.
  */
-class INET_API PimNeighborTable : public SimpleModule
+class INET_API PimNeighborTable : public ClockUsingModuleBase
 {
   public:
     enum TimerKind {

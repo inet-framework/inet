@@ -16,7 +16,7 @@
 #define __INET_LINKSTATEROUTING_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"
@@ -53,7 +53,7 @@ class InterfaceEntry;
  *
  * See NED file for more info.
  */
-class INET_API LinkStateRouting : public SimpleModule, public cListener
+class INET_API LinkStateRouting : public ClockUsingModuleBase, public cListener
 {
   protected:
     Ted *tedmod = nullptr;

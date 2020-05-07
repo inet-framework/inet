@@ -20,7 +20,7 @@
 #define __INET_SCTPCLIENT_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 
@@ -35,7 +35,7 @@ class SctpAssociation;
 /**
  * Implements the SctpClient simple module. See the NED file for more info.
  */
-class INET_API SctpClient : public SimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported
+class INET_API SctpClient : public ClockUsingModuleBase, public SctpSocket::ICallback, public LifecycleUnsupported
 {
   protected:
     struct PathStatus

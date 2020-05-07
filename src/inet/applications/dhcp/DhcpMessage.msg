@@ -21,7 +21,7 @@ import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.linklayer.common.MacAddress;
-import inet.common.clock.SimClockTime;
+import inet.common.clock.common.SimClockTime;
 
 namespace inet;
 

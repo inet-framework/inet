@@ -21,7 +21,7 @@ import inet.networklayer.common.L3Address;
 import inet.transportlayer.contract.TransportHeaderBase;
 import inet.transportlayer.common.CrcMode;
 import inet.common.packet.Message;
-import inet.common.clock.SimClockTime;
+import inet.common.clock.common.SimClockTime;
 
 namespace inet::sctp;
 

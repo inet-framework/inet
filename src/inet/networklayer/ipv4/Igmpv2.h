@@ -22,7 +22,7 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -34,7 +34,7 @@ namespace inet {
 class IInterfaceTable;
 class IIpv4RoutingTable;
 
-class INET_API Igmpv2 : public SimpleModule, public IProtocolRegistrationListener, public cListener
+class INET_API Igmpv2 : public ClockUsingModuleBase, public IProtocolRegistrationListener, public cListener
 {
   protected:
     enum RouterState {

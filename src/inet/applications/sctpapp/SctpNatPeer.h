@@ -16,7 +16,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/common/SimpleModule.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
@@ -43,7 +43,7 @@ struct nat_message
  * arrives on them.
  */
 
-class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported
+class INET_API SctpNatPeer : public ClockUsingModuleBase, public SctpSocket::ICallback, public LifecycleUnsupported
 {
   protected:
     //SctpAssociation* assoc;

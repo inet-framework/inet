@@ -23,7 +23,7 @@ import inet.common.packet.Packet;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
 import inet.common.TagBase;
-import inet.common.clock.SimClockTime;
+import inet.common.clock.common.SimClockTime;
 
 cplusplus {{
 #include <vector>

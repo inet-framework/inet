@@ -19,8 +19,8 @@
 #define __INET_MESSAGEHANDLER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimpleModule.h"
-#include "inet/common/clock/SimClockTime.h"
+#include "inet/common/base/ClockUsingModuleBase.h"
+#include "inet/common/clock/common/SimClockTime.h"
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 #include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
@@ -35,7 +35,7 @@ namespace ospfv2 {
 class INET_API MessageHandler : public IMessageHandler
 {
   private:
-    SimpleModule *ospfModule;
+    ClockUsingModuleBase *ospfModule;
 
     HelloHandler helloHandler;
     DatabaseDescriptionHandler ddHandler;
@@ -44,7 +44,7 @@ class INET_API MessageHandler : public IMessageHandler
     LinkStateAcknowledgementHandler lsAckHandler;
 
   public:
-    MessageHandler(Router *containingRouter, SimpleModule *containingModule);
+    MessageHandler(Router *containingRouter, ClockUsingModuleBase *containingModule);
 
     void messageReceived(cMessage *message);
     void handleTimer(cMessage *timer);

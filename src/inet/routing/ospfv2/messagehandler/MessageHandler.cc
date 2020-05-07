@@ -29,7 +29,7 @@ namespace ospfv2 {
 
 using namespace ospf;
 
-MessageHandler::MessageHandler(Router *containingRouter, SimpleModule *containingModule) :
+MessageHandler::MessageHandler(Router *containingRouter, ClockUsingModuleBase *containingModule) :
     IMessageHandler(containingRouter),
     ospfModule(containingModule),
     helloHandler(containingRouter),
