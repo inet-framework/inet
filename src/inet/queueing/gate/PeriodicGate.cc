@@ -25,7 +25,7 @@ Define_Module(PeriodicGate);
 
 void PeriodicGate::initialize(int stage)
 {
-    PacketGateBase::initialize(stage);
+    ClockUsingModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         isOpen_ = par("initiallyOpen");
         offset = par("offset");
@@ -63,7 +63,7 @@ void PeriodicGate::handleMessage(cMessage *message)
 void PeriodicGate::scheduleChangeTimer()
 {
     ASSERT(0 <= index && index < (int)durations.size());
-    scheduleAt(simTime() + durations[index] - offset, changeTimer);
+    scheduleClockEvent(getClockTime() + durations[index] - offset, changeTimer);
     index = (index + 1) % durations.size();
     offset = 0;
 }

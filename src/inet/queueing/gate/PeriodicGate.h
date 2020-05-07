@@ -18,17 +18,18 @@
 #ifndef __INET_PERIODICGATE_H
 #define __INET_PERIODICGATE_H
 
+#include "inet/common/base/ClockUsingModuleMixin.h"
 #include "inet/queueing/base/PacketGateBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PeriodicGate : public PacketGateBase
+class INET_API PeriodicGate : public ClockUsingModuleMixin<PacketGateBase>
 {
   protected:
     int index = 0;
-    simtime_t offset;
-    std::vector<simtime_t> durations;
+    simclocktime_t offset;
+    std::vector<simclocktime_t> durations;
 
     cMessage *changeTimer = nullptr;
 

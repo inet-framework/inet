@@ -28,6 +28,7 @@ import inet.queueing.contract.IPacketGate;
 simple PeriodicGate extends PacketGateBase like IPacketGate
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional 
         bool initiallyOpen = default(false);
         double offset @unit(s) = default(0s);
         string durations @unit(s); // space separated list of durations to stay open/closed
