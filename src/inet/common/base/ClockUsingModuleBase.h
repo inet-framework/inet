@@ -16,58 +16,12 @@
 #ifndef __INET_CLOCKUSINGMODULEBASE_H
 #define __INET_CLOCKUSINGMODULEBASE_H
 
-#include "inet/common/clock/common/SimClockTime.h"
-
-#ifdef WITH_CLOCK_SUPPORT
-#include "inet/common/clock/contract/IClock.h"
-#endif
+#include "inet/common/base/ClockUsingModuleMixin.h"
 
 namespace inet {
 
-/**
- * Base class for most INET simple modules.
- */
-class INET_API ClockUsingModuleBase : public cSimpleModule
+class INET_API ClockUsingModuleBase : public ClockUsingModuleMixin<cSimpleModule>
 {
-#ifdef WITH_CLOCK_SUPPORT
-  protected:
-    IClock *clock = nullptr;
-
-#ifndef NDEBUG
-    mutable bool usedClockApi = false;
-    const char *className = nullptr; // saved class name for use in destructor
-#endif
-
-  protected:
-    virtual IClock *findClockModule() const;
-
-  public:
-    ClockUsingModuleBase(unsigned stacksize = 0) : cSimpleModule(stacksize) { }
-    virtual ~ClockUsingModuleBase();
-
-    virtual void initialize(int stage);
-
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg);
-    virtual cMessage *cancelClockEvent(cMessage *msg);
-    virtual void cancelAndDeleteClockEvent(cMessage *msg);
-    virtual simclocktime_t getClockTime() const;
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const;
-
-    using cSimpleModule::uniform;
-    using cSimpleModule::exponential;
-    using cSimpleModule::normal;
-    using cSimpleModule::truncnormal;
-    virtual SimClockTime uniform(SimClockTime a, SimClockTime b, int rng=0) const  {return uniform(a.dbl(), b.dbl(), rng);}
-    virtual SimClockTime exponential(SimClockTime mean, int rng=0) const  {return exponential(mean.dbl(), rng);}
-    virtual SimClockTime normal(SimClockTime mean, SimClockTime stddev, int rng=0) const  {return normal(mean.dbl(), stddev.dbl(), rng);}
-    virtual SimClockTime truncnormal(SimClockTime mean, SimClockTime stddev, int rng=0) const  {return truncnormal(mean.dbl(), stddev.dbl(), rng);}
-#else // #ifdef WITH_CLOCK_SUPPORT
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) { scheduleAt(t, msg); }
-    virtual cMessage *cancelClockEvent(cMessage *msg) { return cancelEvent(msg); }
-    virtual void cancelAndDeleteClockEvent(cMessage *msg) { cancelAndDelete(msg); }
-    virtual simclocktime_t getClockTime() const { return simTime(); }
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const { return msg->getArrivalTime(); }
-#endif // #ifdef WITH_CLOCK_SUPPORT
 };
 
 
