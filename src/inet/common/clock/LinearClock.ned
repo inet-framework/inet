@@ -18,11 +18,14 @@ package inet.common.clock;
 import inet.common.clock.contract.IClock;
 
 //
-// Models a clock where the clock time is identical to the simulation time.
+// Models a clock where the drift rate is constant.
 //
-simple IdealClock like IClock
+simple LinearClock like IClock
 {
     parameters:
+        double origin @unit(s) = default(0s); // the simulation time when the clock's value is zero
+        //TODO rename to: offset? startTime? timeShift? 
+        double driftRate @unit(ppm) = default(0ppm); // clock precision, expressed as a ratio in parts per million
         @display("i=block/timer");
 }
 
