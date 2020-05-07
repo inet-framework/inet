@@ -24,10 +24,10 @@ Define_Module(InterPacketGap);
 
 void InterPacketGap::initialize(int stage)
 {
-    PacketPusherBase::initialize(stage);
+    ClockUsingModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         durationPar = &par("duration");
-        packetEndTime = par("initialChannelBusy") ? simTime() : SimTime().setRaw(INT64_MIN);
+        packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN);
         progress = new cProgress(nullptr, cProgress::PACKET_START);
         WATCH(packetStartTime);
         WATCH(packetEndTime);
@@ -88,13 +88,13 @@ void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double data
 
 bool InterPacketGap::canPushSomePacket(cGate *gate) const
 {
-    return simTime() >= packetEndTime &&
+    return getClockTime() >= packetEndTime &&
            (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()));
 }
 
 bool InterPacketGap::canPushPacket(Packet *packet, cGate *gate) const
 {
-    return simTime() >= packetEndTime &&
+    return getClockTime() >= packetEndTime &&
            (consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()));
 }
 
@@ -102,17 +102,17 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    auto now = simTime();
+    auto now = getClockTime();
     packetDelay = packetEndTime + *durationPar - now;
     if (packetDelay < 0)
         packetDelay = 0;
     packetStartTime = now + packetDelay;
-    packetEndTime = packetStartTime + packet->getDuration();
+    packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
     if (packetDelay == 0)
         pushOrSendPacket(packet, outputGate, consumer);
     else {
         EV_INFO << "Inserting packet gap before " << packet->getName() << "." << endl;
-        scheduleAt(now + packetDelay, packet);
+        scheduleClockEvent(now + packetDelay, packet);
     }
 }
 
@@ -146,7 +146,7 @@ void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
 
 void InterPacketGap::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
-    packetEndTime = simTime();
+    packetEndTime = getClockTime();
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
@@ -159,14 +159,14 @@ b InterPacketGap::getPushPacketProcessedLength(Packet *packet, cGate *gate)
 
 void InterPacketGap::pushOrSendOrScheduleProgress(Packet *packet, cGate *gate, int progressKind, bps datarate, b position, b extraProcessableLength)
 {
-    auto now = simTime();
+    auto now = getClockTime();
     if (now >= packetEndTime) {
         packetDelay = packetEndTime + *durationPar - now;
         if (packetDelay < 0)
             packetDelay = 0;
         packetStartTime = now + packetDelay;
     }
-    packetEndTime = packetStartTime + packet->getDuration();
+    packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
     if (!progress->isScheduled())
         pushOrSendProgress(packet, outputGate, consumer, progressKind, datarate, position, extraProcessableLength);
     else {
@@ -177,7 +177,7 @@ void InterPacketGap::pushOrSendOrScheduleProgress(Packet *packet, cGate *gate, i
         progress->setDatarate(bps(datarate).get());
         progress->setBitPosition(b(position).get());
         progress->setExtraProcessableBitLength(b(extraProcessableLength).get());
-        scheduleAt(packetStartTime, progress);
+        scheduleClockEvent(packetStartTime, progress);
     }
 }
 
