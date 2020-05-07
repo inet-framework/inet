@@ -17,6 +17,7 @@
 
 package inet.networklayer.common;
 
+import inet.common.clock.contract.IClock;
 import inet.common.packet.recorder.PcapRecorder;
 
 module InterfaceEntry
@@ -26,11 +27,16 @@ module InterfaceEntry
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         string displayStringTextFormat = default("%a (%i)\n%m");
         pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
+        **.clockModule = default(exists(clock) ? absPath(".clock") : "");
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:
                 moduleNamePatterns = ".^";
                 @display("p=100,100;is=s");
+        }
+        clock: <default("")> like IClock if typename != "" {
+            parameters:
+                @display("p=100,200;is=s");
         }
 }
 
