@@ -27,7 +27,7 @@ void InterPacketGap::initialize(int stage)
     ClockUsingModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         durationPar = &par("duration");
-        packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN);
+        packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
         progress = new cProgress(nullptr, cProgress::PACKET_START);
         WATCH(packetStartTime);
         WATCH(packetEndTime);
