@@ -35,6 +35,8 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
     simclocktime_t packetStartTime;
     simclocktime_t packetEndTime;
 
+    cMessage *timer = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
