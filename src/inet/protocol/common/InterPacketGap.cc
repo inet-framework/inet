@@ -22,6 +22,8 @@ namespace inet {
 
 Define_Module(InterPacketGap);
 
+// TODO: review streaming operation with respect to holding back packet push until the packet gap elapses
+
 void InterPacketGap::initialize(int stage)
 {
     ClockUsingModuleMixin::initialize(stage);
@@ -29,15 +31,25 @@ void InterPacketGap::initialize(int stage)
         durationPar = &par("duration");
         packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
         progress = new cProgress(nullptr, cProgress::PACKET_START);
+        timer = new cMessage("IFG-timer");
         WATCH(packetStartTime);
         WATCH(packetEndTime);
+    }
+    else if (stage == INITSTAGE_LAST) {
+        if (packetEndTime + durationPar->doubleValue() > getClockTime())
+            scheduleClockEvent(packetEndTime + durationPar->doubleValue(), timer);
     }
 }
 
 void InterPacketGap::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
-        if (message->isPacket()) {
+        if (message == timer) {
+            if (canPushSomePacket(inputGate))
+                if (producer != nullptr)
+                    producer->handleCanPushPacket(inputGate->getPathStartGate());
+        }
+        else if (message->isPacket()) {
             auto packet = check_and_cast<Packet *>(message);
             pushOrSendPacket(packet, outputGate, consumer);
             handlePacketProcessed(packet);
@@ -88,13 +100,15 @@ void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double data
 
 bool InterPacketGap::canPushSomePacket(cGate *gate) const
 {
-    return getClockTime() >= packetEndTime &&
+    // TODO: getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
+    return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()));
 }
 
 bool InterPacketGap::canPushPacket(Packet *packet, cGate *gate) const
 {
-    return getClockTime() >= packetEndTime &&
+    // TODO: getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
+    return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()));
 }
 
@@ -103,7 +117,7 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     auto now = getClockTime();
-    packetDelay = packetEndTime + *durationPar - now;
+    packetDelay = packetEndTime + durationPar->doubleValue() - now;
     if (packetDelay < 0)
         packetDelay = 0;
     packetStartTime = now + packetDelay;
@@ -119,8 +133,15 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
 void InterPacketGap::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
-    if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+    if (packetEndTime + durationPar->doubleValue() <= getClockTime()) {
+        if (producer != nullptr)
+            producer->handleCanPushPacket(inputGate->getPathStartGate());
+    }
+    else {
+        if (timer->isScheduled())
+            cancelEvent(timer);
+        scheduleClockEvent(packetEndTime + durationPar->doubleValue(), timer);
+    }
 }
 
 void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
@@ -161,7 +182,7 @@ void InterPacketGap::pushOrSendOrScheduleProgress(Packet *packet, cGate *gate, i
 {
     auto now = getClockTime();
     if (now >= packetEndTime) {
-        packetDelay = packetEndTime + *durationPar - now;
+        packetDelay = packetEndTime + durationPar->doubleValue() - now;
         if (packetDelay < 0)
             packetDelay = 0;
         packetStartTime = now + packetDelay;
