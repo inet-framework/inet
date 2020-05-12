@@ -47,6 +47,8 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
 
     virtual void pushOrSendOrScheduleProgress(Packet *packet, cGate *gate, int progressKind, bps datarate, b position, b extraProcessableLength = b(0));
 
+    virtual const char *resolveDirective(char directive) const override;
+
   public:
     virtual ~InterPacketGap() { cancelAndDelete(progress); }
 
