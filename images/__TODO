@@ -1,0 +1,141 @@
+Icons should be similar to those in omnetpp/block
+
+Must have new icons
+===================
+
+-aggregator
+ merges incoming packets and produces a single aggregated packet
+-deaggregator
+ cuts an aggregated packet into pieces and sends them along
+
+-cloner
+ copies incoming packet to each output
+ 
+-configurator
+ configures interfaces/nodes/networks during initialize
+
+-connection
+ represents a connection between two nodes (e.g. TCP)
+
+-decapsulation
+ removes protocol headers from a packet
+-encapsulation
+ inserts protocol headers into a packet
+
+-fragmenter
+ splits up incoming packets and produces multiple fragments
+-defragmenter
+ concatenates incoming fragments and produces a single packet
+
+-duplicator
+ duplicates incoming packets and produces multiple copies
+
+-energy consumer
+ consumes energy over time
+-energy generator
+ generates energy over time
+-energy storage
+ stores energy over time
+-energy managment
+ manages node status (up/down) based on the energy storage state
+
+-gate
+ packets either go through or not depending on whether the gate is open or closed
+
+-marker/tagger/labeler
+ packets are tagged with some metainformation based on the data they contain
+
+-meter
+ some property of several packets going through is measured over time and attached to the packet
+
+-mobility
+ specifies movement in space over time
+
+-policy
+ determines some
+ 
+-ratecontrol
+ controls the speed of an interface
+
+-scheduler (dual of classifier which already has a good icon)
+ chooses packets from one of its sources
+
+-serializer
+ converts a packet from the native object based representation to its network byte order binary one
+-deserializer
+ converts a packet from its network byte order binary representation to the native object based one
+
+-selectivity
+ packets are either passed through or not depending on matching some data they must contain (e.g address/port)
+
+-shaper
+ a stream of packets are let through while shaping some property of the stream
+ 
+-status
+ controls node/interface up/down/etc. status
+
+-streamer
+ streams a packet received on its input as a whole to its output
+-destreamer
+ receives a streamed packet on its input and passes it as a whole to its output
+
+-tokengenerator
+ generates tokens (basically tokens are just a number) in other modules based on signals/packets/time/etc.
+
+Probably should have new icons
+==============================
+
+-checksum checker
+ drops incoming packets if the checksum is incorrect
+-checksum inserter
+ calculates and insert checksums into passing packets
+
+-delayer
+ delayes packets from input to output
+
+-multiplexer
+ passes/streams incoming packets from multiple inputs to a single output
+-demultiplexer
+ passes/streams outgoing packets to multiple outputs from a single input
+
+-filter
+ lets through packets or drops them depending on the filter criteria
+
+-history
+ lets through packets while keeping a copy of the last N packets
+
+-server
+ pulls packets from its input, processes them and pushes them to its output
+
+-service
+ combines multiple modules to form a generic complex service such as forwarding or data restructuring service
+
+Already have good icons
+=======================
+
++buffer
+ omnetpp/block/buffer
+
++checker
+ inet/block/checker
+
++classifier
+ omnetpp/block/classifier
+
++inserter
+ inet/block/inserter
+
++queue
+ omnetpp/block/queue
+ 
++receiver
+ omnetpp/block/wrx
+
++sink
+ omnetpp/block/sink
+
++source
+ omnetpp/block/source
+
++transmitter
+ omnetpp/block/wtx
