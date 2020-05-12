@@ -31,13 +31,18 @@ class INET_API StreamingTransmitter : public PacketTransmitterBase
     cPar *dataratePar = nullptr;
     bps datarate = bps(NaN);
 
+    simtime_t txStartTime = -1;
     cMessage *txEndTimer = nullptr;
-    Signal *txSignal = nullptr;
     Packet *txPacket = nullptr;
+    Signal *txSignal = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+
+    virtual void startTx(Packet *packet);
+    virtual void endTx();
+    virtual void abortTx();
 
     virtual simclocktime_t calculateDuration(const Packet *packet) const override;
     virtual void scheduleTxEndTimer(Signal *signal);
