@@ -25,6 +25,7 @@ simple InterPacketGap extends PacketProcessorBase
         string clockModule = default(""); // relative path of a module that implements IClock; optional 
         bool initialChannelBusy = default(false); // assume that channel was busy before the simulation started
         volatile double duration @unit(s);
+        displayStringTextFormat = default("ifg: %g");
         @display("i=block/timer");
         @class(InterPacketGap);
     gates:
