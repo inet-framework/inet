@@ -28,17 +28,14 @@ void StreamingTransmitter::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         dataratePar = &par("datarate");
         datarate = bps(*dataratePar);
-        txEndTimer = new cMessage("endTimer");
+        txEndTimer = new cMessage("TxEndTimer");
     }
 }
 
 void StreamingTransmitter::handleMessage(cMessage *message)
 {
     if (message == txEndTimer) {
-        sendPacketEnd(txSignal, outputGate, 0, txSignal->getDuration(), bps(datarate).get());
-        txSignal = nullptr;
-        producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        endTx();
     }
     else
         PacketTransmitterBase::handleMessage(message);
@@ -49,15 +46,53 @@ void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     ASSERT(txSignal == nullptr);
-    datarate = bps(*dataratePar);
+
+    datarate = bps(*dataratePar);    // refresh stored datarate before start packet sending
+    startTx(packet);
+}
+
+void StreamingTransmitter::startTx(Packet *packet)
+{
+    datarate = bps(*dataratePar);    //TODO for refresh datarate before start packet sending
+
+    ASSERT(txPacket == nullptr);
+    ASSERT(txSignal == nullptr);
     txPacket = packet;
-    take(txPacket);
-//    // TODO: new Signal
-//    auto s = new EthernetSignal(packet->getName());
-//    s->setBitrate(datarate.get());
+    txStartTime = simTime();
     txSignal = encodePacket(txPacket);
-    sendPacketStart(txSignal->dup(), outputGate, 0, txSignal->getDuration(), bps(datarate).get());
+    EV_INFO << "Starting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << txSignal->getDuration() << std::endl;
     scheduleTxEndTimer(txSignal);
+    sendPacketStart(txSignal->dup(), outputGate, 0, txSignal->getDuration(), bps(datarate).get());
+}
+
+void StreamingTransmitter::endTx()
+{
+    EV_INFO << "Ending transmission: packetName = " << txPacket->getName() << std::endl;
+    sendPacketEnd(txSignal, outputGate, 0, txSignal->getDuration(), bps(datarate).get());
+    producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
+    delete txPacket;
+    txPacket = nullptr;
+    txSignal = nullptr;
+    txStartTime = -1;
+    producer->handleCanPushPacket(inputGate->getPathStartGate());
+}
+
+void StreamingTransmitter::abortTx()
+{
+    ASSERT(txPacket != nullptr);
+    ASSERT(txSignal != nullptr);
+    cancelEvent(txEndTimer);
+    b transmittedLength = getPushPacketProcessedLength(txPacket, inputGate);
+    txPacket->eraseAtBack(txPacket->getTotalLength() - transmittedLength);
+    auto signal = encodePacket(txPacket);
+    EV_INFO << "Aborting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
+    sendPacketEnd(txSignal, outputGate, 0, signal->getDuration(), bps(datarate).get());
+    producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
+    txPacket = nullptr;
+    delete txSignal;
+    txSignal = nullptr;
+    txStartTime = -1;
+    producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 simclocktime_t StreamingTransmitter::calculateDuration(const Packet *packet) const
