@@ -22,7 +22,7 @@ Define_Module(StreamingReceiver);
 void StreamingReceiver::initialize(int stage)
 {
     PacketReceiverBase::initialize(stage);
-    OperationalBase0::initialize(stage);
+    OperationalMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         datarate = bps(par("datarate"));
 }
@@ -48,7 +48,7 @@ void StreamingReceiver::handleMessageWhenDown(cMessage *msg)
         delete msg;
     }
     else
-        OperationalBase0::handleMessageWhenDown(msg);
+        OperationalMixin::handleMessageWhenDown(msg);
 }
 
 void StreamingReceiver::sendToUpperLayer(Packet *packet)
