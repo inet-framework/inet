@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,27 +14,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// author: Zoltan Bojthe
-//
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/OperationalMixin.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
-OperationalBase::OperationalBase()
+template <typename T>
+OperationalMixin<T>::~OperationalMixin()
 {
+    T::cancelAndDelete(activeOperationExtraTimer);
+    T::cancelAndDelete(activeOperationTimeout);
 }
 
-OperationalBase::~OperationalBase()
-{
-    cancelAndDelete(activeOperationExtraTimer);
-    cancelAndDelete(activeOperationTimeout);
-}
-
-void OperationalBase::initialize(int stage)
+template <typename T>
+void OperationalMixin<T>::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         WATCH(operationalState);
@@ -51,12 +47,13 @@ void OperationalBase::initialize(int stage)
     }
 }
 
-void OperationalBase::handleMessage(cMessage *message)
+template <typename T>
+void OperationalMixin<T>::handleMessage(cMessage *message)
 {
     if (message == activeOperationExtraTimer)
         finishActiveOperation();
     else if (message == activeOperationTimeout) {
-        cancelEvent(activeOperationExtraTimer);
+        T::cancelEvent(activeOperationExtraTimer);
         handleActiveOperationTimeout(message);
     }
     else {
@@ -76,18 +73,20 @@ void OperationalBase::handleMessage(cMessage *message)
     }
 }
 
-void OperationalBase::handleMessageWhenDown(cMessage *message)
+template <typename T>
+void OperationalMixin<T>::handleMessageWhenDown(cMessage *message)
 {
     if (message->isSelfMessage())
-        throw cRuntimeError("Self message '%s' received when %s is down", message->getName(), getComponentType()->getName());
+        throw cRuntimeError("Self message '%s' received when %s is down", message->getName(), T::getComponentType()->getName());
     else if (simTime() == lastChange)
-        EV_WARN << getComponentType()->getName() << " is down, dropping '" << message->getName() << "' message\n";
+        EV_WARN << T::getComponentType()->getName() << " is down, dropping '" << message->getName() << "' message\n";
     else
-        throw cRuntimeError("Message '%s' received when %s is down", message->getName(), getComponentType()->getName());
+        throw cRuntimeError("Message '%s' received when %s is down", message->getName(), T::getComponentType()->getName());
     delete message;
 }
 
-bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
+template <typename T>
+bool OperationalMixin<T>::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     int stage = operation->getCurrentStage();
@@ -125,57 +124,65 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
     return true;
 }
 
-void OperationalBase::scheduleOperationTimeout(simtime_t timeout)
+template <typename T>
+void OperationalMixin<T>::scheduleOperationTimeout(simtime_t timeout)
 {
     ASSERT(activeOperation.isDelayedFinish);
     ASSERT(!activeOperationTimeout->isScheduled());
     activeOperationTimeout->setContextPointer(activeOperation.operation);
-    scheduleAt(simTime() + timeout, activeOperationTimeout);
+    T::scheduleAt(simTime() + timeout, activeOperationTimeout);
     // TODO: schedule timer and use module parameter
 }
 
-void OperationalBase::handleActiveOperationTimeout(cMessage *message)
+template <typename T>
+void OperationalMixin<T>::handleActiveOperationTimeout(cMessage *message)
 {
     handleCrashOperation(activeOperation.operation);
     finishActiveOperation();
 }
 
-void OperationalBase::setupActiveOperation(LifecycleOperation *operation, IDoneCallback *doneCallback, State endState)
+template <typename T>
+void OperationalMixin<T>::setupActiveOperation(LifecycleOperation *operation, IDoneCallback *doneCallback, State endState)
 {
     ASSERT(activeOperation.operation == nullptr);
     activeOperation.set(operation, doneCallback, endState);
 }
 
-void OperationalBase::setOperationalState(State newState)
+template <typename T>
+void OperationalMixin<T>::setOperationalState(State newState)
 {
     operationalState = newState;
     lastChange = simTime();
 }
 
-OperationalBase::State OperationalBase::getInitialOperationalState() const
+template <typename T>
+typename OperationalMixin<T>::State OperationalMixin<T>::getInitialOperationalState() const
 {
     cModule *node = findContainingNode(this);
     NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
     return (!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? OPERATING : NOT_OPERATING;
 }
 
-void OperationalBase::delayActiveOperationFinish(simtime_t timeout)
+template <typename T>
+void OperationalMixin<T>::delayActiveOperationFinish(simtime_t timeout)
 {
     ASSERT(activeOperation.operation != nullptr);
     activeOperation.delayFinish();
     scheduleOperationTimeout(timeout);
 }
 
-void OperationalBase::startActiveOperationExtraTime(simtime_t extraTime)
+template <typename T>
+void OperationalMixin<T>::startActiveOperationExtraTime(simtime_t extraTime)
 {
     ASSERT(extraTime >= SIMTIME_ZERO);
     ASSERT(!activeOperationExtraTimer->isScheduled());
     activeOperation.delayFinish();
     setOperationalState(activeOperation.endState);
-    scheduleAt(simTime() + extraTime, activeOperationExtraTimer);
+    T::scheduleAt(simTime() + extraTime, activeOperationExtraTimer);
 }
 
-void OperationalBase::startActiveOperationExtraTimeOrFinish(simtime_t extraTime)
+template <typename T>
+void OperationalMixin<T>::startActiveOperationExtraTimeOrFinish(simtime_t extraTime)
 {
     if (extraTime >= SIMTIME_ZERO)
         startActiveOperationExtraTime(extraTime);
@@ -183,37 +190,51 @@ void OperationalBase::startActiveOperationExtraTimeOrFinish(simtime_t extraTime)
         finishActiveOperation();
 }
 
-void OperationalBase::finishActiveOperation()
+template <typename T>
+void OperationalMixin<T>::finishActiveOperation()
 {
     setOperationalState(activeOperation.endState);
     if (activeOperation.isDelayedFinish) {
-        cancelEvent(activeOperationExtraTimer);
-        cancelEvent(activeOperationTimeout);
+        T::cancelEvent(activeOperationExtraTimer);
+        T::cancelEvent(activeOperationTimeout);
         activeOperation.doneCallback->invoke();
     }
     activeOperation.clear();
 }
 
-void OperationalBase::refreshDisplay() const
+template <typename T>
+void OperationalMixin<T>::refreshDisplay() const
 {
+    auto& displayString = T::getDisplayString();
     switch (operationalState) {
     case STARTING_OPERATION:
-        getDisplayString().setTagArg("i2", 0, "status/up");
+        displayString.setTagArg("i2", 0, "status/up");
         break;
     case OPERATING:
-        getDisplayString().removeTag("i2");
+        displayString.removeTag("i2");
         break;
     case STOPPING_OPERATION:
     case CRASHING_OPERATION:
-        getDisplayString().setTagArg("i2", 0, "status/down");
+        displayString.setTagArg("i2", 0, "status/down");
         break;
     case NOT_OPERATING:
-        getDisplayString().setTagArg("i2", 0, "status/cross");
+        displayString.setTagArg("i2", 0, "status/cross");
         break;
     default:
         break;
     }
 }
+
+} // namespace inet
+
+#include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
+#include "inet/protocol/transceiver/base/PacketReceiverBase.h"
+
+namespace inet {
+
+template class OperationalMixin<cSimpleModule>;
+template class OperationalMixin<PacketTransmitterBase>;
+template class OperationalMixin<PacketReceiverBase>;
 
 } // namespace inet
 
