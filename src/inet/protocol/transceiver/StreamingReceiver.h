@@ -17,7 +17,7 @@
 #define __INET_STREAMINGRECEIVER_H
 
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/protocol/transceiver/base/PacketReceiverBase.h"
 
@@ -26,7 +26,7 @@ namespace inet {
 using namespace inet::units::values;
 using namespace inet::physicallayer;
 
-class INET_API StreamingReceiver : public PacketReceiverBase, public OperationalBase0
+class INET_API StreamingReceiver : public OperationalMixin<PacketReceiverBase>
 {
   protected:
     bps datarate = bps(NaN);
@@ -35,7 +35,7 @@ class INET_API StreamingReceiver : public PacketReceiverBase, public Operational
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override { OperationalBase0::handleMessage(msg); }
+    virtual void handleMessage(cMessage *msg) override { OperationalMixin::handleMessage(msg); }
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleMessageWhenDown(cMessage *message) override;
 
@@ -54,7 +54,7 @@ class INET_API StreamingReceiver : public PacketReceiverBase, public Operational
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    StreamingReceiver() : OperationalBase0(static_cast<PacketReceiverBase&>(*this)) {}
+    StreamingReceiver() {}
     virtual ~StreamingReceiver();
 
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }

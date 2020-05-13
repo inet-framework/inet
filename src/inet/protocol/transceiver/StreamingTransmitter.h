@@ -19,7 +19,7 @@
 #define __INET_STREAMINGTRANSMITTER_H
 
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ namespace inet {
 using namespace inet::queueing;
 using namespace inet::physicallayer;
 
-class INET_API StreamingTransmitter : public PacketTransmitterBase, public OperationalBase0
+class INET_API StreamingTransmitter : public OperationalMixin<PacketTransmitterBase>
 {
   protected:
     cPar *dataratePar = nullptr;
@@ -40,7 +40,7 @@ class INET_API StreamingTransmitter : public PacketTransmitterBase, public Opera
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override { OperationalBase0::handleMessage(msg); }
+    virtual void handleMessage(cMessage *msg) override { OperationalMixin::handleMessage(msg); }
     virtual void handleMessageWhenUp(cMessage *message) override;
 
     virtual void startTx(Packet *packet);
@@ -59,7 +59,7 @@ class INET_API StreamingTransmitter : public PacketTransmitterBase, public Opera
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    StreamingTransmitter() : OperationalBase0(static_cast<PacketTransmitterBase&>(*this)) {}
+    StreamingTransmitter() { }
     virtual ~StreamingTransmitter();
 
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
