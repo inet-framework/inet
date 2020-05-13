@@ -234,7 +234,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
                 packetCopy->setKind(ETHERNET_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
                 send(packetCopy, "upperLayerOut");
-                stealPacket |= socket->vlanId != -1;
+                stealPacket |= socket->vlanId != -1;    //TODO Why?
             }
         }
         // TODO: should the socket configure if it steals packets or not?
