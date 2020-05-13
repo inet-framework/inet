@@ -26,7 +26,7 @@ Define_Module(StreamingTransmitter);
 void StreamingTransmitter::initialize(int stage)
 {
     PacketTransmitterBase::initialize(stage);
-    OperationalBase0::initialize(stage);
+    OperationalMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dataratePar = &par("datarate");
         datarate = bps(*dataratePar);
