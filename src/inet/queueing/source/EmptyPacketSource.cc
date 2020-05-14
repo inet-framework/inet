@@ -15,12 +15,24 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/source/EmptyPacketSource.h"
 
 namespace inet {
 namespace queueing {
 
 Define_Module(EmptyPacketSource);
+
+void EmptyPacketSource::initialize(int stage)
+{
+    PacketProcessorBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        outputGate = gate("out");
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    }
+    else if (stage == INITSTAGE_QUEUEING)
+        checkPacketOperationSupport(outputGate);
+}
 
 void EmptyPacketSource::handleCanPushPacket(cGate *gate)
 {
