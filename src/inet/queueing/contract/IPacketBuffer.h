@@ -19,6 +19,7 @@
 #define __INET_IPACKETBUFFER_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/queueing/contract/IPacketCollection.h"
 
 namespace inet {
 namespace queueing {
@@ -26,7 +27,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet buffers.
  */
-class INET_API IPacketBuffer
+class INET_API IPacketBuffer : public virtual IPacketCollection
 {
   public:
     class INET_API ICallback
