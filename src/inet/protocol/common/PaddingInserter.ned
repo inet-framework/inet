@@ -18,8 +18,9 @@
 package inet.protocol.common;
 
 import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
 
-simple PaddingInserter extends PacketFlowBase
+simple PaddingInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
         int minLength @unit(b);
