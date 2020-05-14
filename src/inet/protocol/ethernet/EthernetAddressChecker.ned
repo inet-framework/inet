@@ -18,8 +18,9 @@
 package inet.protocol.ethernet;
 
 import inet.queueing.base.PacketFilterBase;
+import inet.queueing.contract.IPacketFilter;
 
-simple EthernetAddressChecker extends PacketFilterBase
+simple EthernetAddressChecker extends PacketFilterBase like IPacketFilter
 {
     parameters:
         bool promiscuous = default(false);

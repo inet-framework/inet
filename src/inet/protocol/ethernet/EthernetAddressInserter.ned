@@ -18,8 +18,9 @@
 package inet.protocol.ethernet;
 
 import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
 
-simple EthernetAddressInserter extends PacketFlowBase
+simple EthernetAddressInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
         @class(EthernetAddressInserter);
