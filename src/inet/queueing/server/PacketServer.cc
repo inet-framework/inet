@@ -62,7 +62,6 @@ void PacketServer::startProcessingPacket()
 {
     packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
-    packet->setArrival(getId(), inputGate->getId(), simTime());
     EV_INFO << "Processing packet " << packet->getName() << " started." << endl;
 }
 
