@@ -36,7 +36,7 @@ network StatisticVisualizationPacketErrorRateShowcase
         visualizer: IntegratedVisualizer {
             parameters:
                 @display("p=64.256,62.247997");
-                @foo(type=plot;bounds=0,0,150,60;maxValue=1.1;minValue=-0.1);
+                @foo(type=plot;bounds=0,0,150,60;maxY=1.1;minY=-0.1;timeWindow=1);
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
