@@ -53,6 +53,8 @@ void ApskLayeredTransmitter::initialize(int stage)
         digitalAnalogConverter = dynamic_cast<const IDigitalAnalogConverter *>(getSubmodule("digitalAnalogConverter"));
         power = W(par("power"));
         bitrate = bps(par("bitrate"));
+        if (bitrate <= bps(0))
+            throw cRuntimeError("Invalid birate: %s", bitrate.str().c_str());
         bandwidth = Hz(par("bandwidth"));
         centerFrequency = Hz(par("centerFrequency"));
         const char *levelOfDetailStr = par("levelOfDetail");
