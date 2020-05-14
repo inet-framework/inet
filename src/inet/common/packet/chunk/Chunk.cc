@@ -32,14 +32,14 @@ Chunk::Chunk() :
 Chunk::Chunk(const Chunk& other) :
     id(nextId++),
     flags(other.flags & ~CF_IMMUTABLE),
-    tags(other.tags)
+    regionTags(other.regionTags)
 {
 }
 
 void Chunk::forEachChild(cVisitor *v)
 {
-    for (int i = 0; i < tags.getNumTags(); i++)
-        v->visit(tags.getTag(i));
+    for (int i = 0; i < regionTags.getNumTags(); i++)
+        v->visit(const_cast<TagBase *>(regionTags.getTag(i).get()));
 }
 
 void Chunk::handleChange()
@@ -47,12 +47,12 @@ void Chunk::handleChange()
     checkMutable();
 }
 
-int Chunk::getBinDumpNumLines()
+int Chunk::getBinDumpNumLines() const
 {
     return (b(getChunkLength()).get() + 31) / 32;
 }
 
-int Chunk::getHexDumpNumLines()
+int Chunk::getHexDumpNumLines() const
 {
     return ((b(getChunkLength()).get() + 7) / 8 + 15) / 16;
 }
@@ -106,16 +106,6 @@ const char *Chunk::getHexDumpLine(int index)
     return asStringValue.c_str();
 }
 
-int Chunk::getTagsArraySize()
-{
-    return tags.getNumTags();
-}
-
-const RegionTagSet::RegionTag<cObject>& Chunk::getTags(int index)
-{
-    return tags.getRegionTag(index);
-}
-
 const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto chunkType = chunk->getChunkType();
@@ -125,7 +115,7 @@ const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<C
     serialize(outputStream, chunk, offset, length < b(0) ? std::min(-length, chunk->getChunkLength() - offset) : length);
     MemoryInputStream inputStream(outputStream.getData());
     const auto& result = deserialize(inputStream, typeInfo);
-    result->tags.copyTags(chunk->tags, offset, b(0), result->getChunkLength());
+    result->regionTags.copyTags(chunk->regionTags, offset, b(0), result->getChunkLength());
     return result;
 }
 
