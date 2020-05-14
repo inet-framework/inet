@@ -102,6 +102,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual LastValueRecorder *findResultRecorder(cResultListener *resultListener);
     virtual std::string getText(const StatisticVisualization *statisticVisualization);
     virtual const char *getUnit(cComponent *source);
+    virtual std::string getRecordingMode();
 
     virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) = 0;
     virtual const StatisticVisualization *getStatisticVisualization(cComponent *source, simsignal_t signal);

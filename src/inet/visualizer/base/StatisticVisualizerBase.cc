@@ -24,7 +24,7 @@ namespace inet {
 
 namespace visualizer {
 
-Register_ResultRecorder("statisticVisualizer", StatisticVisualizerBase::LastValueRecorder);
+Register_ResultRecorder("statisticVisualizerLastValueRecorder", StatisticVisualizerBase::LastValueRecorder);
 
 StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int moduleId, simsignal_t signal, const char *unit) :
     moduleId(moduleId),
@@ -125,13 +125,9 @@ void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t 
 {
     cStatisticBuilder statisticBuilder(getEnvir()->getConfig());
     cProperty statisticTemplateProperty;
-    std::string record;
-    if (*statisticExpression == '\0')
-        record = "statisticVisualizer";
-    else
-        record = std::string("statisticVisualizer(") + statisticExpression + std::string(")");
+    auto recordingMode = getRecordingMode();
     statisticTemplateProperty.addKey("record");
-    statisticTemplateProperty.setValue("record", 0, record.c_str());
+    statisticTemplateProperty.setValue("record", 0, recordingMode.c_str());
     statisticBuilder.addResultRecorders(source, signal, statisticName, &statisticTemplateProperty);
 }
 
@@ -150,8 +146,12 @@ StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::getResultRe
 
 StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::findResultRecorder(cResultListener *resultListener)
 {
-    if (auto resultRecorder = dynamic_cast<StatisticVisualizerBase::LastValueRecorder *>(resultListener))
-        return resultRecorder;
+    if (auto resultRecorder = dynamic_cast<StatisticVisualizerBase::LastValueRecorder *>(resultListener)) {
+        if (getRecordingMode() == resultRecorder->getRecordingMode() && !strcmp(statisticName, resultRecorder->getStatisticName()))
+            return resultRecorder;
+        else
+            return nullptr;
+    }
     else if (auto resultFilter = dynamic_cast<cResultFilter *>(resultListener)) {
         auto delegates = resultFilter->getDelegates();
         for (auto delegate : delegates) {
@@ -181,6 +181,14 @@ const char *StatisticVisualizerBase::getUnit(cComponent *source)
         }
     }
     return statisticUnit;
+}
+
+std::string StatisticVisualizerBase::getRecordingMode()
+{
+    if (*statisticExpression == '\0')
+        return "statisticVisualizerLastValueRecorder";
+    else
+        return std::string("statisticVisualizerLastValueRecorder(") + statisticExpression + std::string(")");
 }
 
 const StatisticVisualizerBase::StatisticVisualization *StatisticVisualizerBase::getStatisticVisualization(cComponent *source, simsignal_t signal)
