@@ -56,11 +56,10 @@ class INET_API ClockUsingModuleMixin : public T
   public:
     virtual ~ClockUsingModuleMixin() {
 #ifndef NDEBUG
-    bool supportsClock = T::hasPar("clockModule");
-    if (supportsClock && !usedClockApi)
-        std::cerr << "** Warning: Class '" << className << "' has a 'clockModule' parameter but does not use the clock API (at least in this simulation)\n";
-    if (!supportsClock && usedClockApi)
-        std::cerr << "** Warning: Class '" << className << "' uses the clock API but does not have a 'clockModule' parameter\n";
+        if (clock != nullptr && !usedClockApi)
+            std::cerr << "*** Warning: Class '" << className << "' has a clock module set but does not use the clock API (at least in this simulation)\n";
+        if (!T::hasPar("clockModule") && usedClockApi)
+            std::cerr << "*** Warning: Class '" << className << "' uses the clock API but does not have a clock module parameter\n";
 #endif
     }
 
