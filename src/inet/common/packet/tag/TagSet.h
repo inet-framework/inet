@@ -75,9 +75,19 @@ class INET_API TagSet : public cObject
     template <typename T> T *findTag() const;
 
     /**
+     * Returns the tag for the provided type, or returns nullptr if no such tag is present, check inheritance.
+     */
+    template <typename T> T *findTagWithInherit() const;
+
+    /**
      * Returns the tag for the provided type, or throws an exception if no such tag is present.
      */
     template <typename T> T *getTag() const;
+
+    /**
+     * Returns the tag for the provided type, or throws an exception if no such tag is present. Check inheritance.
+     */
+    template <typename T> T *getTagWithInherit() const;
 
     /**
      * Returns a newly added tag for the provided type, or throws an exception if such a tag is already present.
@@ -167,6 +177,41 @@ inline T *TagSet::removeTagIfPresent()
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : static_cast<T *>(removeTag(index));
 }
+
+
+template <typename T>
+inline T *TagSet::findTagWithInherit() const
+{
+    int index = getTagIndex<T>();
+    if (index != -1) return static_cast<T *>((*tags)[index]);
+    // check if exist tag of that is derived from this.
+    //
+    for (unsigned int i = 0; i < tags->size(); i++) {
+        T * temp = dynamic_cast<T *> ((*tags)[i]);
+        if (temp != nullptr) {
+            return static_cast<T *>((*tags)[i]);
+        }
+    }
+    return  nullptr;
+}
+
+template <typename T>
+inline T *TagSet::getTagWithInherit() const
+{
+    int index = getTagIndex<T>();
+    if (index != -1) return static_cast<T *>((*tags)[index]);
+    // check if exist tag of that is derived from this.
+    //
+    for (unsigned int i = 0; i < tags->size(); i++) {
+        T * temp = dynamic_cast<T *> ((*tags)[i]);
+        if (temp != nullptr) {
+            return static_cast<T *>((*tags)[i]);
+        }
+    }
+    throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
+    return  nullptr;
+}
+
 
 } // namespace
 
