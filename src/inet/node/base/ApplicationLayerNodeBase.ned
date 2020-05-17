@@ -19,28 +19,41 @@ package inet.node.base;
 
 import inet.applications.contract.IApp;
 import inet.common.MessageDispatcher;
+import inet.common.misc.ThruputMeter;
 
 module ApplicationLayerNodeBase extends TransportLayerNodeBase
 {
     parameters:
         int numApps = default(0);
+        bool hasThrugmeter = default(false);
         @figure[applicationLayer](type=rectangle; pos=250,6; size=1000,130; lineColor=#808080; cornerRadius=5; fillColor=#ffff00; fillOpacity=0.1);
         @figure[applicationLayer.title](type=text; pos=1245,11; anchor=ne; text="application layer");
 
     submodules:
         app[numApps]: <> like IApp {
             parameters:
-                @display("p=375,76,row,150");
+                @display("p=313.425,29.925,row,150");
         }
         at: MessageDispatcher {
             parameters:
                 @display("p=750,146;b=1000,5,,,,1");
         }
-
+        truMeterApp[numApps*2]: ThruputMeter if numApps != 0 && hasThrugmeter {
+            parameters:
+                @display("p=406.34998,91.35");
+        }
     connections allowunconnected:
-        for i=0..numApps-1 {
+
+        for i=0..numApps-1, if !hasThrugmeter {
             app[i].socketOut --> at.in++;
             app[i].socketIn <-- at.out++;
+        }
+
+        for i=0..numApps-1, if hasThrugmeter {
+            app[i].socketOut --> truMeterApp[2*i].in;
+            truMeterApp[2*i].out --> at.in++;
+            truMeterApp[2*i+1].in <-- at.out++;
+            app[i].socketIn <-- truMeterApp[2*i+1].out;
         }
 
         at.out++ --> udp.appIn if hasUdp;
