@@ -41,6 +41,8 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     class INET_API PathVisualization : public LineManager::ModulePath {
       public:
         std::string label;
+        mutable int numPackets = 0;
+        mutable b totalLength = b(0);
         mutable AnimationPosition lastUsageAnimationPosition;
 
       public:
@@ -50,10 +52,12 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
+        const PathVisualization *pathVisualization = nullptr;
         const cPacket *packet = nullptr;
 
       public:
-        DirectiveResolver(const cPacket *packet) : packet(packet) { }
+        DirectiveResolver(const PathVisualization *pathVisualization, const cPacket *packet) :
+            pathVisualization(pathVisualization), packet(packet) { }
 
         virtual const char *resolveDirective(char directive) const override;
     };
