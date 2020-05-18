@@ -15,18 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CLOCKUSINGMODULEBASE_H
-#define __INET_CLOCKUSINGMODULEBASE_H
-
-#include "inet/common/base/ClockUsingModuleMixin.h"
+#include "inet/common/base/ClockUsingModuleMixinImpl.h"
+#include "inet/queueing/base/PacketGateBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 
-class INET_API ClockUsingModuleBase : public ClockUsingModuleMixin<cSimpleModule>
-{
-};
+#ifdef WITH_CLOCK_SUPPORT
+template class ClockUsingModuleMixin<cSimpleModule>;
+template class ClockUsingModuleMixin<queueing::PacketProcessorBase>;
+template class ClockUsingModuleMixin<queueing::PacketPusherBase>;
+template class ClockUsingModuleMixin<queueing::PacketGateBase>;
+#endif
 
 } // namespace inet
-
-#endif // ifndef __INET_CLOCKUSINGMODULEBASE_H
-
