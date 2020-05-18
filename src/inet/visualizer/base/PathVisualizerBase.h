@@ -114,6 +114,10 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual bool isPathEnd(cModule *module) const = 0;
     virtual bool isPathElement(cModule *module) const = 0;
 
+    virtual void processPathStart(cModule *networkNode, const char *label, Packet *packet);
+    virtual void processPathElement(cModule *networkNode, const char *label, Packet *packet);
+    virtual void processPathEnd(cModule *networkNode, const char *label, Packet *packet);
+
     virtual const PathVisualization *createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const = 0;
     virtual const PathVisualization *getPathVisualization(const std::vector<int>& path);
     virtual void addPathVisualization(const PathVisualization *pathVisualization);
@@ -125,9 +129,8 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual void addToIncompletePath(const std::string& label, int chunkId, cModule *module);
     virtual void removeIncompletePath(const std::string& label, int chunkId);
 
-    virtual std::string getPathVisualizationText(cPacket *packet) const;
+    virtual std::string getPathVisualizationText(const PathVisualization *pathVisualization, cPacket *packet) const;
     virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet);
-    virtual void updatePathVisualization(const std::vector<int>& path, cPacket *packet);
 
   public:
     virtual ~PathVisualizerBase();
