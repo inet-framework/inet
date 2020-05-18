@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/FlowTag.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
@@ -226,69 +227,87 @@ void PathVisualizerBase::removeIncompletePath(const std::string& label, int chun
     incompletePaths.erase(incompletePaths.find({label, chunkId}));
 }
 
-void PathVisualizerBase::updatePathVisualization(const std::vector<int>& moduleIds, cPacket *packet)
-{
-    const PathVisualization *pathVisualization = getPathVisualization(moduleIds);
-    if (pathVisualization == nullptr) {
-        pathVisualization = createPathVisualization(moduleIds, packet);
-        addPathVisualization(pathVisualization);
-    }
-    else
-        refreshPathVisualization(pathVisualization, packet);
-}
-
 void PathVisualizerBase::refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet)
 {
     pathVisualization->lastUsageAnimationPosition = AnimationPosition();
 }
 
+void PathVisualizerBase::processPathStart(cModule *networkNode, const char *label, Packet *packet)
+{
+    mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int chunkId) {
+        auto path = getIncompletePath(label, chunkId);
+        if (path != nullptr)
+            removeIncompletePath(label, chunkId);
+        addToIncompletePath(label, chunkId, networkNode);
+    });
+}
+
+void PathVisualizerBase::processPathElement(cModule *networkNode, const char *label, Packet *packet)
+{
+    mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int chunkId) {
+        auto path = getIncompletePath(label, chunkId);
+        if (path != nullptr)
+            addToIncompletePath(label, chunkId, networkNode);
+    });
+}
+
+void PathVisualizerBase::processPathEnd(cModule *networkNode, const char *label, Packet *packet)
+{
+    std::set<const PathVisualization *> updatedVisualizations;
+    mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int chunkId) {
+        auto path = getIncompletePath(label, chunkId);
+        if (path != nullptr) {
+            addToIncompletePath(label, chunkId, networkNode);
+            if (path->size() > 1) {
+                auto pathVisualization = getPathVisualization(*path);
+                if (pathVisualization == nullptr) {
+                    pathVisualization = createPathVisualization(label, *path, packet);
+                    addPathVisualization(pathVisualization);
+                }
+                pathVisualization->totalLength += chunk->getChunkLength();
+                updatedVisualizations.insert(pathVisualization);
+            }
+            removeIncompletePath(label, chunkId);
+        }
+    });
+    for (auto pathVisualization : updatedVisualizations) {
+        pathVisualization->numPackets++;
+        refreshPathVisualization(pathVisualization, packet);
+    }
+}
+
 void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
-    if (signal == packetReceivedFromUpperSignal) {
-        if (isPathStart(static_cast<cModule *>(source))) {
-            auto module = check_and_cast<cModule *>(source);
+    Enter_Method("receiveSignal");
+    if (signal == startPathSignal) {
+        auto module = check_and_cast<cModule *>(source);
+        if (isPathStart(module)) {
             auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<Packet *>(object);
-            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                auto module = getContainingNode(check_and_cast<cModule *>(source));
-                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) {
-                    auto path = getIncompletePath(id);
-                    if (path != nullptr)
-                        removeIncompletePath(id);
-                    addToIncompletePath(id, module);
-                });
-            }
+            auto label = details != nullptr ? details->getName() : "";
+            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet))
+                processPathStart(networkNode, label, packet);
         }
     }
-    else if (signal == packetReceivedFromLowerSignal) {
-        if (isPathElement(static_cast<cModule *>(source))) {
-            auto packet = check_and_cast<Packet *>(object);
-            if (packetFilter.matches(packet)) {
-                auto module = getContainingNode(check_and_cast<cModule *>(source));
-                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) {
-                    auto path = getIncompletePath(id);
-                    if (path != nullptr)
-                        addToIncompletePath(id, module);
-                });
-            }
-        }
-    }
-    else if (signal == packetSentToUpperSignal) {
-        if (isPathEnd(static_cast<cModule *>(source))) {
-            auto module = check_and_cast<cModule *>(source);
+    else if (signal == extendPathSignal) {
+        auto module = check_and_cast<cModule *>(source);
+        if (isPathElement(module)) {
             auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<Packet *>(object);
-            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) {
-                    auto path = getIncompletePath(id);
-                    if (path != nullptr) {
-                        if (path->size() > 1)
-                            updatePathVisualization(*path, packet);
-                        removeIncompletePath(id);
-                    }
-                });
-            }
+            auto label = details != nullptr ? details->getName() : "";
+            // NOTE: nodeFilter is intentionally not applied here, because it's only important at the end points
+            if (packetFilter.matches(packet))
+                processPathElement(networkNode, label, packet);
+        }
+    }
+    else if (signal == endPathSignal) {
+        auto module = check_and_cast<cModule *>(source);
+        if (isPathEnd(module)) {
+            auto networkNode = getContainingNode(module);
+            auto packet = check_and_cast<Packet *>(object);
+            auto label = details != nullptr ? details->getName() : "";
+            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet))
+                processPathEnd(networkNode, label, packet);
         }
     }
     else
