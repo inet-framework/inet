@@ -108,27 +108,29 @@ void PathVisualizerBase::handleParameterChange(const char *name)
 
 void PathVisualizerBase::refreshDisplay() const
 {
-    AnimationPosition currentAnimationPosition;
-    std::vector<const PathVisualization *> removedPathVisualizations;
-    for (auto it : pathVisualizations) {
-        auto pathVisualization = it.second;
-        double delta;
-        if (!strcmp(fadeOutMode, "simulationTime"))
-            delta = (currentAnimationPosition.getSimulationTime() - pathVisualization->lastUsageAnimationPosition.getSimulationTime()).dbl();
-        else if (!strcmp(fadeOutMode, "animationTime"))
-            delta = currentAnimationPosition.getAnimationTime() - pathVisualization->lastUsageAnimationPosition.getAnimationTime();
-        else if (!strcmp(fadeOutMode, "realTime"))
-            delta = currentAnimationPosition.getRealTime() - pathVisualization->lastUsageAnimationPosition.getRealTime();
-        else
-            throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
-        if (delta > fadeOutTime)
-            removedPathVisualizations.push_back(pathVisualization);
-        else
-            setAlpha(pathVisualization, 1 - delta / fadeOutTime);
-    }
-    for (auto path : removedPathVisualizations) {
-        const_cast<PathVisualizerBase *>(this)->removePathVisualization(path);
-        delete path;
+    if (fadeOutTime > 0) {
+        AnimationPosition currentAnimationPosition;
+        std::vector<const PathVisualization *> removedPathVisualizations;
+        for (auto it : pathVisualizations) {
+            auto pathVisualization = it.second;
+            double delta;
+            if (!strcmp(fadeOutMode, "simulationTime"))
+                delta = (currentAnimationPosition.getSimulationTime() - pathVisualization->lastUsageAnimationPosition.getSimulationTime()).dbl();
+            else if (!strcmp(fadeOutMode, "animationTime"))
+                delta = currentAnimationPosition.getAnimationTime() - pathVisualization->lastUsageAnimationPosition.getAnimationTime();
+            else if (!strcmp(fadeOutMode, "realTime"))
+                delta = currentAnimationPosition.getRealTime() - pathVisualization->lastUsageAnimationPosition.getRealTime();
+            else
+                throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
+            if (delta > fadeOutTime)
+                removedPathVisualizations.push_back(pathVisualization);
+            else
+                setAlpha(pathVisualization, 1 - delta / fadeOutTime);
+        }
+        for (auto path : removedPathVisualizations) {
+            const_cast<PathVisualizerBase *>(this)->removePathVisualization(path);
+            delete path;
+        }
     }
 }
 
