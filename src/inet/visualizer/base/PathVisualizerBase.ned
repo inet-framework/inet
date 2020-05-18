@@ -49,6 +49,10 @@ simple PathVisualizerBase extends VisualizerBase
     parameters:
         bool displayRoutes = default(false); // display polyline arrow for active routes, disabled by default
 
+        string startPathSignal = default("packetReceivedFromUpper");
+        string extendPathSignal = default("packetReceivedFromLower");
+        string endPathSignal = default("packetSentToUpper");
+
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
         string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
