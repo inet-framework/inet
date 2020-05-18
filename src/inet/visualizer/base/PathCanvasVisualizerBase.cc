@@ -59,8 +59,8 @@ bool isPointOnSegment(const LineSegment& segment, const Coord& point)
             std::min(p1.y, p2.y) <= point.y && point.y <= std::max(p1.y, p2.y));
 }
 
-PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const std::vector<int>& path, LabeledPolylineFigure *figure) :
-    PathVisualization(path),
+PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const char *label, const std::vector<int>& path, LabeledPolylineFigure *figure) :
+    PathVisualization(label, path),
     figure(figure)
 {
 }
@@ -146,7 +146,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
     visualizationTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
+const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const
 {
     auto figure = new LabeledPolylineFigure("path");
     auto polylineFigure = figure->getPolylineFigure();
