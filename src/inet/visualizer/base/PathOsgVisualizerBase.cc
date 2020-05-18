@@ -32,8 +32,8 @@ namespace visualizer {
 
 #ifdef WITH_OSG
 
-PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const std::vector<int>& path, osg::Node *node) :
-    PathVisualization(path),
+PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const char *label, const std::vector<int>& path, osg::Node *node) :
+    PathVisualization(label, path),
     node(node)
 {
 }
@@ -66,7 +66,7 @@ void PathOsgVisualizerBase::refreshDisplay() const
     visualizationTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
+const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const
 {
     std::vector<Coord> points;
     for (auto id : path) {
@@ -75,7 +75,7 @@ const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVi
     }
     auto node = inet::osg::createPolyline(points, cFigure::ARROW_NONE, cFigure::ARROW_BARBED);
     node->setStateSet(inet::osg::createLineStateSet(lineColorSet.getColor(pathVisualizations.size()), lineStyle, lineWidth));
-    return new PathOsgVisualization(path, node);
+    return new PathOsgVisualization(label, path, node);
 }
 
 void PathOsgVisualizerBase::addPathVisualization(const PathVisualization *pathVisualization)

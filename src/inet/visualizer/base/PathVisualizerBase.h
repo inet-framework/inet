@@ -40,10 +40,11 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
   protected:
     class INET_API PathVisualization : public LineManager::ModulePath {
       public:
+        std::string label;
         mutable AnimationPosition lastUsageAnimationPosition;
 
       public:
-        PathVisualization(const std::vector<int>& path);
+        PathVisualization(const char *label, const std::vector<int>& path);
         virtual ~PathVisualization() {}
     };
 
@@ -82,9 +83,9 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 
     LineManager *lineManager = nullptr;
     /**
-     * Maps packet to module vector.
+     * Maps path label and chunk id to module id vector.
      */
-    std::map<int, std::vector<int>> incompletePaths;
+    std::map<std::pair<std::string, int>, std::vector<int>> incompletePaths;
     /**
      * Maps nodes to the number of paths that go through it.
      */
@@ -106,16 +107,16 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual bool isPathEnd(cModule *module) const = 0;
     virtual bool isPathElement(cModule *module) const = 0;
 
-    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path, cPacket *packet) const = 0;
+    virtual const PathVisualization *createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const = 0;
     virtual const PathVisualization *getPathVisualization(const std::vector<int>& path);
     virtual void addPathVisualization(const PathVisualization *pathVisualization);
     virtual void removePathVisualization(const PathVisualization *pathVisualization);
     virtual void removeAllPathVisualizations();
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const = 0;
 
-    virtual const std::vector<int> *getIncompletePath(int chunkId);
-    virtual void addToIncompletePath(int chunkId, cModule *module);
-    virtual void removeIncompletePath(int chunkId);
+    virtual const std::vector<int> *getIncompletePath(const std::string& label, int chunkId);
+    virtual void addToIncompletePath(const std::string& label, int chunkId, cModule *module);
+    virtual void removeIncompletePath(const std::string& label, int chunkId);
 
     virtual std::string getPathVisualizationText(cPacket *packet) const;
     virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet);
