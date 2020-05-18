@@ -79,6 +79,9 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     const char *fadeOutMode = nullptr;
     double fadeOutTime = NaN;
     double fadeOutAnimationSpeed = NaN;
+    simsignal_t startPathSignal = -1;
+    simsignal_t extendPathSignal = -1;
+    simsignal_t endPathSignal = -1;
     //@}
 
     LineManager *lineManager = nullptr;
