@@ -35,6 +35,12 @@ const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directi
 {
     static std::string result;
     switch (directive) {
+        case 'p':
+            result = std::to_string(pathVisualization->numPackets);
+            break;
+        case 'l':
+            result = pathVisualization->totalLength.str();
+            break;
         case 'L':
             result = pathVisualization->label;
             break;
@@ -144,9 +150,9 @@ void PathVisualizerBase::unsubscribe()
     }
 }
 
-std::string PathVisualizerBase::getPathVisualizationText(cPacket *packet) const
+std::string PathVisualizerBase::getPathVisualizationText(const PathVisualization *pathVisualization, cPacket *packet) const
 {
-    DirectiveResolver directiveResolver(packet);
+    DirectiveResolver directiveResolver(pathVisualization, packet);
     return labelFormat.formatString(&directiveResolver);
 }
 
