@@ -15,6 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef __INET_OPERATIONALMIXINIMPL_H
+#define __INET_OPERATIONALMIXINIMPL_H
+
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
@@ -227,14 +230,5 @@ void OperationalMixin<T>::refreshDisplay() const
 
 } // namespace inet
 
-#include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
-#include "inet/protocol/transceiver/base/PacketReceiverBase.h"
-
-namespace inet {
-
-template class OperationalMixin<cSimpleModule>;
-template class OperationalMixin<PacketTransmitterBase>;
-template class OperationalMixin<PacketReceiverBase>;
-
-} // namespace inet
+#endif // ifndef __INET_OPERATIONALMIXINIMPL_H
 
