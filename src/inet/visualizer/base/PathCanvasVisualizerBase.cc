@@ -159,9 +159,7 @@ const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPat
     auto labelFigure = figure->getLabelFigure();
     labelFigure->setFont(labelFont);
     labelFigure->setColor(isEmpty(labelColorAsString) ? lineColor : labelColor);
-    auto text = getPathVisualizationText(packet);
-    labelFigure->setText(text.c_str());
-    return new PathCanvasVisualization(path, figure);
+    return new PathCanvasVisualization(label, path, figure);
 }
 
 void PathCanvasVisualizerBase::addPathVisualization(const PathVisualization *pathVisualization)
@@ -190,7 +188,7 @@ void PathCanvasVisualizerBase::refreshPathVisualization(const PathVisualization 
 {
     PathVisualizerBase::refreshPathVisualization(pathVisualization, packet);
     auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(pathVisualization);
-    auto text = getPathVisualizationText(packet);
+    auto text = getPathVisualizationText(pathVisualization, packet);
     pathCanvasVisualization->figure->getLabelFigure()->setText(text.c_str());
 }
 
