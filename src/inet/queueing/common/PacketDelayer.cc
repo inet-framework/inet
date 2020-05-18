@@ -30,7 +30,7 @@ void PacketDelayer::handleMessage(cMessage *message)
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else
-        throw cRuntimeError("Unknown message");
+        PacketPusherBase::handleMessage(message);
 }
 
 void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
@@ -54,7 +54,8 @@ void PacketDelayer::handleCanPushPacket(cGate *gate)
 void PacketDelayer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
-    producer->handlePushPacketProcessed(packet, gate, successful);
+    if (producer != nullptr)
+        producer->handlePushPacketProcessed(packet, gate, successful);
 }
 
 } // namespace queueing
