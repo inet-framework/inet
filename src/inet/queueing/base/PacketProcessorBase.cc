@@ -193,11 +193,11 @@ void PacketProcessorBase::updateDisplayString() const
 
 void PacketProcessorBase::animateSend(cMessage *message, cGate *gate) const
 {
+    auto endGate = gate->getPathEndGate();
+    message->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
     auto envir = getEnvir();
     if (envir->isGUI()) {
-        auto endGate = gate->getPathEndGate();
         message->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
-        message->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
         if (gate->getNextGate() != nullptr) {
             envir->beginSend(message);
             while (gate->getNextGate() != nullptr) {
