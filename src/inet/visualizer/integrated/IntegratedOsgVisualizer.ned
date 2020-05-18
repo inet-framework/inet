@@ -30,6 +30,7 @@ import inet.visualizer.contract.INetworkConnectionVisualizer;
 import inet.visualizer.contract.INetworkNodeVisualizer;
 import inet.visualizer.contract.INetworkRouteVisualizer;
 import inet.visualizer.contract.IPacketDropVisualizer;
+import inet.visualizer.contract.IPacketFlowVisualizer;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;
 import inet.visualizer.contract.IQueueVisualizer;
@@ -97,6 +98,10 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
         packetDropVisualizer: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
                 @display("p=150,1100");
+        }
+        packetFlowVisualizer: <default("PacketFlowOsgVisualizer")> like IPacketFlowVisualizer if typename != "" {
+            parameters:
+                @display("p=150,1200");
         }
         queueVisualizer: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
