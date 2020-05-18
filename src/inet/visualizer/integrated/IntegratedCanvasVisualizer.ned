@@ -30,6 +30,7 @@ import inet.visualizer.contract.INetworkConnectionVisualizer;
 import inet.visualizer.contract.INetworkNodeVisualizer;
 import inet.visualizer.contract.INetworkRouteVisualizer;
 import inet.visualizer.contract.IPacketDropVisualizer;
+import inet.visualizer.contract.IPacketFlowVisualizer;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;
 import inet.visualizer.contract.IQueueVisualizer;
@@ -98,6 +99,10 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         packetDropVisualizer: <default("PacketDropCanvasVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
                 @display("p=150,1100");
+        }
+        packetFlowVisualizer: <default("PacketFlowCanvasVisualizer")> like IPacketFlowVisualizer if typename != "" {
+            parameters:
+                @display("p=150,1200");
         }
         queueVisualizer: <default("QueueCanvasVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
