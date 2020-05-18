@@ -96,16 +96,16 @@ Quaternion VisualizerBase::getOrientation(const cModule *networkNode) const
         return check_and_cast<IMobility *>(mobility)->getCurrentAngularPosition();
 }
 
-void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const
+void VisualizerBase::mapChunks(const Ptr<const Chunk>& chunk, const std::function<void(const Ptr<const Chunk>&, int)>& thunk) const
 {
     if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
         for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks())
-            mapChunkIds(elementChunk, thunk);
+            mapChunks(elementChunk, thunk);
     }
     else if (chunk->getChunkType() == Chunk::CT_SLICE)
-        thunk(staticPtrCast<const SliceChunk>(chunk)->getChunk()->getChunkId());
+        thunk(chunk, staticPtrCast<const SliceChunk>(chunk)->getChunk()->getChunkId());
     else
-        thunk(chunk->getChunkId());
+        thunk(chunk, chunk->getChunkId());
 }
 
 } // namespace visualizer

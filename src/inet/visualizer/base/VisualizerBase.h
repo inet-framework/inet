@@ -44,7 +44,7 @@ class INET_API VisualizerBase : public cSimpleModule
     virtual Coord getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const;
     virtual Quaternion getOrientation(const cModule *networkNode) const;
 
-    virtual void mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const;
+    virtual void mapChunks(const Ptr<const Chunk>& chunk, const std::function<void(const Ptr<const Chunk>&, int)>& thunk) const;
 };
 
 } // namespace visualizer
