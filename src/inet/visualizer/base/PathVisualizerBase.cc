@@ -80,6 +80,9 @@ void PathVisualizerBase::initialize(int stage)
         fadeOutMode = par("fadeOutMode");
         fadeOutTime = par("fadeOutTime");
         fadeOutAnimationSpeed = par("fadeOutAnimationSpeed");
+        startPathSignal = registerSignal(par("startPathSignal"));
+        extendPathSignal = registerSignal(par("extendPathSignal"));
+        endPathSignal = registerSignal(par("endPathSignal"));
         if (displayRoutes)
             subscribe();
     }
@@ -125,9 +128,9 @@ void PathVisualizerBase::refreshDisplay() const
 
 void PathVisualizerBase::subscribe()
 {
-    visualizationSubjectModule->subscribe(packetSentToUpperSignal, this);
-    visualizationSubjectModule->subscribe(packetReceivedFromUpperSignal, this);
-    visualizationSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
+    visualizationSubjectModule->subscribe(startPathSignal, this);
+    visualizationSubjectModule->subscribe(extendPathSignal, this);
+    visualizationSubjectModule->subscribe(endPathSignal, this);
 }
 
 void PathVisualizerBase::unsubscribe()
@@ -135,9 +138,9 @@ void PathVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
     if (visualizationSubjectModule != nullptr) {
-        visualizationSubjectModule->unsubscribe(packetSentToUpperSignal, this);
-        visualizationSubjectModule->unsubscribe(packetReceivedFromUpperSignal, this);
-        visualizationSubjectModule->unsubscribe(packetReceivedFromLowerSignal, this);
+        visualizationSubjectModule->unsubscribe(startPathSignal, this);
+        visualizationSubjectModule->unsubscribe(extendPathSignal, this);
+        visualizationSubjectModule->unsubscribe(endPathSignal, this);
     }
 }
 
