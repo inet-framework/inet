@@ -1,8 +1,10 @@
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// Copyright (C) OpenSim Ltd
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -10,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_CLOCKUSINGMODULEMIXIN_H
@@ -37,90 +39,19 @@ class INET_API ClockUsingModuleMixin : public T
 #endif
 
   protected:
-    virtual IClock *findClockModule() const {
-        if (T::hasPar("clockModule")) {
-            const char *clockModulePath = T::par("clockModule");
-            if (*clockModulePath) {
-                cModule *clockModule = T::getModuleByPath(clockModulePath);
-                if (clockModule == nullptr)
-                    throw cRuntimeError("Clock module '%s' not found", clockModulePath);
-                return check_and_cast<IClock *>(clockModule);
-            }
-            else
-                return nullptr;
-        }
-        else
-            return nullptr;
-    }
+    virtual IClock *findClockModule() const;
 
   public:
-    virtual ~ClockUsingModuleMixin() {
-#ifndef NDEBUG
-        if (clock != nullptr && !usedClockApi)
-            std::cerr << "*** Warning: Class '" << className << "' has a clock module set but does not use the clock API (at least in this simulation)\n";
-        if (!T::hasPar("clockModule") && usedClockApi)
-            std::cerr << "*** Warning: Class '" << className << "' uses the clock API but does not have a clock module parameter\n";
-#endif
-    }
+    virtual ~ClockUsingModuleMixin();
 
-    virtual void initialize(int stage) {
-        T::initialize(stage);
-        if (stage == 0)
-            clock = findClockModule();
-#ifndef NDEBUG
-        className = T::getClassName();
-#endif
-    }
+    virtual void initialize(int stage);
 
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) {
-#ifndef NDEBUG
-        usedClockApi = true;
-#endif
-        if (clock != nullptr)
-            clock->scheduleClockEvent(t, msg);
-        else
-            T::scheduleAt(t.asSimTime(), msg);
-    }
+    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg);
+    virtual cMessage *cancelClockEvent(cMessage *msg);
+    virtual void cancelAndDeleteClockEvent(cMessage *msg);
 
-    virtual cMessage *cancelClockEvent(cMessage *msg) {
-#ifndef NDEBUG
-        usedClockApi = true;
-#endif
-        if (clock != nullptr)
-            return clock->cancelClockEvent(msg);
-        else
-            return T::cancelEvent(msg);
-    }
-
-    virtual void cancelAndDeleteClockEvent(cMessage *msg) {
-#ifndef NDEBUG
-        usedClockApi = true;
-#endif
-        if (clock)
-            delete clock->cancelClockEvent(msg);
-        else
-            T::cancelAndDelete(msg);
-    }
-
-    virtual simclocktime_t getClockTime() const {
-#ifndef NDEBUG
-        usedClockApi = true;
-#endif
-        if (clock != nullptr)
-            return clock->getClockTime();
-        else
-            return SimClockTime::from(simTime());
-    }
-
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const {
-#ifndef NDEBUG
-        usedClockApi = true;
-#endif
-        if (clock != nullptr)
-            return clock->getArrivalClockTime(msg);
-        else
-            return SimClockTime::from(msg->getArrivalTime());
-    }
+    virtual simclocktime_t getClockTime() const;
+    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const;
 
     using T::uniform;
     using T::exponential;
@@ -131,9 +62,10 @@ class INET_API ClockUsingModuleMixin : public T
     virtual SimClockTime normal(SimClockTime mean, SimClockTime stddev, int rng=0) const  {return normal(mean.dbl(), stddev.dbl(), rng);}
     virtual SimClockTime truncnormal(SimClockTime mean, SimClockTime stddev, int rng=0) const  {return truncnormal(mean.dbl(), stddev.dbl(), rng);}
 #else // #ifdef WITH_CLOCK_SUPPORT
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) { scheduleAt(t, msg); }
-    virtual cMessage *cancelClockEvent(cMessage *msg) { return cancelEvent(msg); }
-    virtual void cancelAndDeleteClockEvent(cMessage *msg) { cancelAndDelete(msg); }
+  public:
+    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) { T::scheduleAt(t, msg); }
+    virtual cMessage *cancelClockEvent(cMessage *msg) { return T::cancelEvent(msg); }
+    virtual void cancelAndDeleteClockEvent(cMessage *msg) { T::cancelAndDelete(msg); }
     virtual simclocktime_t getClockTime() const { return simTime(); }
     virtual simclocktime_t getArrivalClockTime(cMessage *msg) const { return msg->getArrivalTime(); }
 #endif // #ifdef WITH_CLOCK_SUPPORT
