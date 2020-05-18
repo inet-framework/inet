@@ -25,8 +25,9 @@ namespace inet {
 
 namespace visualizer {
 
-PathVisualizerBase::PathVisualization::PathVisualization(const std::vector<int>& path) :
-    ModulePath(path)
+PathVisualizerBase::PathVisualization::PathVisualization(const char *label, const std::vector<int>& path) :
+    ModulePath(path),
+    label(label)
 {
 }
 
@@ -34,6 +35,9 @@ const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directi
 {
     static std::string result;
     switch (directive) {
+        case 'L':
+            result = pathVisualization->label;
+            break;
         case 'n':
             result = packet->getName();
             break;
@@ -143,9 +147,9 @@ std::string PathVisualizerBase::getPathVisualizationText(cPacket *packet) const
     return labelFormat.formatString(&directiveResolver);
 }
 
-const PathVisualizerBase::PathVisualization *PathVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
+const PathVisualizerBase::PathVisualization *PathVisualizerBase::createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const
 {
-    return new PathVisualization(path);
+    return new PathVisualization(label, path);
 }
 
 const PathVisualizerBase::PathVisualization *PathVisualizerBase::getPathVisualization(const std::vector<int>& path)
@@ -189,26 +193,26 @@ void PathVisualizerBase::removeAllPathVisualizations()
     }
 }
 
-const std::vector<int> *PathVisualizerBase::getIncompletePath(int chunkId)
+const std::vector<int> *PathVisualizerBase::getIncompletePath(const std::string& label, int chunkId)
 {
-    auto it = incompletePaths.find(chunkId);
+    auto it = incompletePaths.find({label, chunkId});
     if (it == incompletePaths.end())
         return nullptr;
     else
         return &it->second;
 }
 
-void PathVisualizerBase::addToIncompletePath(int chunkId, cModule *module)
+void PathVisualizerBase::addToIncompletePath(const std::string& label, int chunkId, cModule *module)
 {
-    auto& moduleIds = incompletePaths[chunkId];
+    auto& moduleIds = incompletePaths[{label, chunkId}];
     auto moduleId = module->getId();
     if (moduleIds.size() == 0 || moduleIds[moduleIds.size() - 1] != moduleId)
         moduleIds.push_back(moduleId);
 }
 
-void PathVisualizerBase::removeIncompletePath(int chunkId)
+void PathVisualizerBase::removeIncompletePath(const std::string& label, int chunkId)
 {
-    incompletePaths.erase(incompletePaths.find(chunkId));
+    incompletePaths.erase(incompletePaths.find({label, chunkId}));
 }
 
 void PathVisualizerBase::updatePathVisualization(const std::vector<int>& moduleIds, cPacket *packet)

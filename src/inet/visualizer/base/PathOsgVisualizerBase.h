@@ -34,7 +34,7 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
         osg::Node *node = nullptr;
 
       public:
-        PathOsgVisualization(const std::vector<int>& path, osg::Node *node);
+        PathOsgVisualization(const char *label, const std::vector<int>& path, osg::Node *node);
         virtual ~PathOsgVisualization();
     };
 
@@ -42,7 +42,7 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path, cPacket *packet) const override;
+    virtual const PathVisualization *createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const override;
     virtual void addPathVisualization(const PathVisualization *pathVisualization) override;
     virtual void removePathVisualization(const PathVisualization *pathVisualization) override;
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override;
