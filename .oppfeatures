@@ -722,6 +722,7 @@
                        inet.power.base
                        inet.power.consumer
                        inet.power.generator
+                       inet.power.management
                        inet.power.storage
                       "
         extraSourceFolders = ""
@@ -860,6 +861,7 @@
                        inet.visualizer.base
                        inet.visualizer.common
                        inet.visualizer.environment
+                       inet.visualizer.flow
                        inet.visualizer.integrated
                        inet.visualizer.linklayer
                        inet.visualizer.mobility
