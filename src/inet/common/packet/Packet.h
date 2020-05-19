@@ -16,6 +16,8 @@
 #ifndef __INET_PACKET_H_
 #define __INET_PACKET_H_
 
+#include <functional>
+#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/tag/TagSet.h"
@@ -565,6 +567,162 @@ class INET_API Packet : public cPacket
      * current representation. Resets both front and back offsets to zero.
      */
     const Ptr<Chunk> removeAll();
+    //@}
+
+    /** @name Updating data related functions */
+    //@{
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateAtFront(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0);
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateAtBack(std::function<void (const Ptr<Chunk>&)> f, b length, int flags = 0);
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateData(std::function<void (const Ptr<Chunk>&)> f, int flags = 0);
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateDataAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0);
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags = 0);
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0);
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    void updateAtFront(std::function<void (const Ptr<T>&)> f, b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+        updateAt<T>(f, getFrontOffset(), length, flags);
+    }
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    void updateAtBack(std::function<void (const Ptr<T>&)> f, b length, int flags = 0) {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
+        updateAt<T>(f, getBackOffset() - length, length, flags);
+    }
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    void updateData(std::function<void (const Ptr<T>&)> f, int flags = 0) {
+        updateAt<T>(f, getFrontOffset(), getDataLength(), flags);
+    }
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    void updateDataAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+        updateAt<T>(f, getFrontOffset() + offset, length, flags);
+    }
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    void updateAll(std::function<void (const Ptr<T>&)> f, int flags = 0) {
+        updateAt<T>(f, b(0), getTotalLength(), flags);
+    }
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The length of back popped part
+     * must be zero before calling this function. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    void updateAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+        auto totalLength = getTotalLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+        const auto& chunk = peekAt<T>(offset, length, flags);
+        b chunkLength = chunk->getChunkLength();
+        b frontLength = offset;
+        b backLength = totalLength - offset - chunkLength;
+        const auto& mutableChunk = makeExclusivelyOwnedMutableChunk(chunk);
+        f(mutableChunk);
+        CHUNK_CHECK_USAGE(chunkLength == mutableChunk->getChunkLength(), "length is different");
+        if (mutableChunk != chunk) {
+            const auto& sequenceChunk = makeShared<SequenceChunk>();
+            if (frontLength > b(0)) {
+                const auto& frontPart = peekAt(b(0), frontLength);
+                sequenceChunk->insertAtBack(frontPart);
+            }
+            mutableChunk->markImmutable();
+            sequenceChunk->insertAtBack(mutableChunk);
+            if (backLength > b(0)) {
+                const auto& backPart = peekAt(totalLength - backLength, backLength);
+                sequenceChunk->insertAtBack(backPart);
+            }
+            sequenceChunk->markImmutable();
+            content = sequenceChunk;
+        }
+    }
     //@}
 
     /** @name Tag related functions */
