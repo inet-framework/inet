@@ -1164,6 +1164,20 @@
         linkerFlags = ""
         />
     <feature
+        id="queueing"
+        name="Queueing library"
+        description = "Queues, classifiers, schedulers, servers, etc."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.queueing
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_QUEUEING"
+        linkerFlags = ""
+        />
+    <feature
         id="wirelesstutorial"
         name="Wireless tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to wireless communication networks."
