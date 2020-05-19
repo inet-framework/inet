@@ -16,7 +16,9 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 #include "inet/queueing/function/PacketDropperFunction.h"
 #include "inet/queueing/queue/PacketQueue.h"
@@ -122,6 +124,12 @@ Packet *PacketQueue::pullPacket(cGate *gate)
     }
     else
         queue.pop();
+    auto queueingTime = simTime() - packet->getArrivalTime();
+    auto packetEvent = new PacketQueuedEvent();
+    packetEvent->setQueuePacketLength(getNumPackets());
+    packetEvent->setQueueDataLength(getTotalLength());
+    insertPacketEvent(this, packet, PEK_QUEUED, queueingTime, packetEvent);
+    increaseTimeTag<QueueingTimeTag>(packet, queueingTime);
     emit(packetPulledSignal, packet);
     animateSendPacket(packet, outputGate);
     updateDisplayString();
