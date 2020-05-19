@@ -313,6 +313,36 @@ const Ptr<Chunk> Packet::removeAll()
     return result;
 }
 
+void Packet::updateAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length, int flags)
+{
+    updateAt<Chunk>(f, offset, length, flags);
+}
+
+void Packet::updateAtFront(std::function<void (const Ptr<Chunk>&)> f, b length, int flags)
+{
+    updateAt(f, getFrontOffset(), length, flags);
+}
+
+void Packet::updateAtBack(std::function<void (const Ptr<Chunk>&)> f, b length, int flags)
+{
+    updateAt(f, getBackOffset() - length, length, flags);
+}
+
+void Packet::updateData(std::function<void (const Ptr<Chunk>&)> f, int flags)
+{
+    updateAt(f, getFrontOffset(), getDataLength(), flags);
+}
+
+void Packet::updateDataAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length, int flags)
+{
+    updateAt(f, getFrontOffset() + offset, length, flags);
+}
+
+void Packet::updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags)
+{
+    updateAt(f, b(0), getTotalLength(), flags);
+}
+
 //(inet::Packet)UdpBasicAppData-0 (5000 B) [content]
 std::string Packet::str() const
 {
