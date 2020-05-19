@@ -1178,6 +1178,20 @@
         linkerFlags = ""
         />
     <feature
+        id="protocolsupport"
+        name="Protocol support"
+        description = "Aggregation, fragmentation, etc."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.protocol
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PROTOCOL"
+        linkerFlags = ""
+        />
+    <feature
         id="wirelesstutorial"
         name="Wireless tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to wireless communication networks."
