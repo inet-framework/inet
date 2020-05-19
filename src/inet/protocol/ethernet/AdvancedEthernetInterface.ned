@@ -43,6 +43,8 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 import inet.queueing.contract.ITrafficConditioner;
 import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.timing.TimingMeasurementMaker;
+import inet.queueing.timing.TimingMeasurementStarter;
 
 // TODO: add socket handling
 // TODO: dispatch for LLC/ethertype
@@ -292,6 +294,7 @@ moduleinterface IEthernetMacLayer
 module EthernetMacLayer like IEthernetMacLayer
 {
     parameters:
+        paddingInserter.minLength = default(60B);
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -299,7 +302,7 @@ module EthernetMacLayer like IEthernetMacLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        typeOrLengthInserter: EthernetTypeOrLengthInserter {
+        typeOrLengthInserter: <default("EthernetTypeOrLengthInserter")> like IPacketFlow {
             @display("p=200,100");
         }
         ctagInserter: <default("OmittedIeee8021qInserter")> like IIeee8021qInserter {
@@ -310,11 +313,10 @@ module EthernetMacLayer like IEthernetMacLayer
             vlanTagType = "s";
             @display("p=200,300");
         }
-        addressInserter: EthernetAddressInserter {
+        addressInserter: <default("EthernetAddressInserter")> like IPacketFlow {
             @display("p=200,400");
         }
-        paddingInserter: PaddingInserter {
-            minLength = default(60B);
+        paddingInserter: <default("PaddingInserter")> like IPacketFlow {
             @display("p=200,500");
         }
         queue: <default("PacketQueue")> like IPacketQueue {
@@ -332,7 +334,7 @@ module EthernetMacLayer like IEthernetMacLayer
         preambleInserter: <default("EthernetPreambleInserter")> like IPacketFlow {
             @display("p=200,1000");
         }
-        typeOrLengthChecker: EthernetTypeOrLengthChecker {
+        typeOrLengthChecker: <default("EthernetTypeOrLengthChecker")> like IPacketFilter {
             @display("p=500,100");
         }
         ctagChecker: <default("OmittedIeee8021qChecker")> like IIeee8021qChecker {
@@ -343,7 +345,7 @@ module EthernetMacLayer like IEthernetMacLayer
             vlanTagType = "s";
             @display("p=500,300");
         }
-        addressChecker: EthernetAddressChecker {
+        addressChecker: <default("EthernetAddressChecker")> like IPacketFilter {
             @display("p=500,400");
         }
         fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
@@ -372,6 +374,17 @@ module EthernetMacLayer like IEthernetMacLayer
         stagChecker.out --> ctagChecker.in;
         ctagChecker.out --> typeOrLengthChecker.in;
         typeOrLengthChecker.out --> { @display("m=n"); } --> upperLayerOut;
+}
+
+module EthernetRawMacLayer extends EthernetMacLayer
+{
+    parameters:
+        typeOrLengthInserter.typename = default("OmittedPacketFlow");
+        addressInserter.typename = default("OmittedPacketFlow");
+        paddingInserter.typename = default("OmittedPacketFlow");
+        fcsInserter.typename = default("OmittedPacketFlow");
+        addressChecker.typename = default("OmittedPacketFilter");
+        typeOrLengthChecker.typename = default("OmittedPacketFilter");
 }
 
 module EthernetStreamingMacLayer extends EthernetMacLayer
@@ -470,6 +483,12 @@ module EthernetPhyLayer like IEthernetPhyLayer
 {
     parameters:
         volatile double bitrate @unit(bps);
+        outboundEmitter.signalName = "packetSentToLower";
+        outboundEmitter.direction = "outbound";
+        outboundEmitter.protocolName = "ethernetphy";
+        inboundEmitter.signalName = "packetReceivedFromLower";
+        inboundEmitter.direction = "inbound";
+        inboundEmitter.protocolName = "ethernetphy";
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -477,10 +496,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        outboundEmitter: PacketEmitter {
-            signalName = "packetSentToLower";
-            direction = "outbound";
-            protocolName = "ethernetphy";
+        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=150,100");
         }
         interFrameGapInserter: InterPacketGap {
@@ -491,10 +507,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
             datarate = default(bitrate);
             @display("p=150,300");
         }
-        inboundEmitter: PacketEmitter {
-            signalName = "packetReceivedFromLower";
-            direction = "inbound";
-            protocolName = "ethernetphy";
+        inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=350,100");
         }
         receiver: StreamingReceiver {
