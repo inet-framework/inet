@@ -1064,6 +1064,20 @@
         linkerFlags = ""
         />
     <feature
+        id="Ieee8022"
+        name="IEEE 802.2"
+        description = ""
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.ieee8022
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_IEEE8022"
+        linkerFlags = ""
+        />
+    <feature
         id="TUN"
         name="TUN"
         description = "TUN/TAP virtual network interface"
