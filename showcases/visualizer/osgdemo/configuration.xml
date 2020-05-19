@@ -1,0 +1,3 @@
+<config>
+		<interface hosts='**' address="192.168.1.x" netmask="255.255.255.0" />
+</config>

@@ -1,0 +1,5 @@
+<config>
+	<interface hosts='host' names='ext*' address='10.1.1.3' netmask='255.255.255.0'/>
+	<!-- <route hosts='incomingHost' destination='10.1.1.3' netmask='255.255.255.255' gateway='*' interface='eth0'/> -->
+	<route hosts='host' destination='192.168.0.0' netmask='255.255.0.0' gateway='10.1.1.3' interface='ext0'/>
+</config>

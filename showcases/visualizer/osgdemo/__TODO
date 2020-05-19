@@ -1,0 +1,7 @@
+Osgdemo TODO
+------------
+
+- forceBroadcast???
+- UdpBasicApp-ban a sendInterval felülírja a startTime paramétert
+- Signal terjedés: valamilyen szögből jól látszik, valamiből nem
+- PhysicalLinkVisualizer a térkép alá rajzol
