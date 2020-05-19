@@ -1,0 +1,5 @@
+<config>
+    <interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>
+    <autoroute metric="errorRate" sourceHosts="**" destinationInterfaces="*.wlan0">
+    </autoroute>
+</config>

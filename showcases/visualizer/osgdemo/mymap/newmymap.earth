@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<map version="2">
+  <options lighting="true" name="Readymap-map" type="geocentric">
+    <terrain lighting="false" />
+  </options>
+  <image driver="tms" name="readymap_imagery" url="readymap_imagery/tms.xml">
+    <cache_policy min_time="1517235649" usage="no_cache" />
+  </image>
+  <elevation driver="tms" name="readymap_elevation" offset="false" url="readymap_elevation/tms.xml">
+    <cache_policy usage="no_cache" />
+  </elevation>
+</map>

@@ -1,0 +1,35 @@
+Emulation Examples
+==================
+
+This folder contains various examples which connect the simulation with real
+networks. There are two key components to do this. One is the called external
+interface (ExtInterface) which represents the network interface in the simulation
+towards the real network. The other is called the RealTimeScheduler which is
+responsible for synchronizing the simulation time with real time.
+
+In order to run any emulation example in this folder, INET must be compiled with
+the "Network Emulation" feature enabled. Enabling this feature can be done using
+the IDE / INET Project Properties / Project Features or the opp_featuretool. If
+the "Network Emulation" feature is not enabled, the simulation will stop with a
+'Class "inet::RealTimeScheduler" not found' error.
+
+To compile INET with the "Network Emulation" feature enabled, make sure that
+libpcap-dev (v1.5.3 or later) is installed on your machine.
+
+In order to be able to send packets through raw sockets and to receive packets
+through pcap, applications require special permissions. There are two ways to
+achieve this under linux.
+
+The suggested solution is to use setcap to set the application permissions:
+
+$ sudo setcap cap_net_raw,cap_net_admin=eip opp_run_dbg
+$ sudo setcap cap_net_raw,cap_net_admin=eip opp_run_release
+
+This solution makes running the examples from the IDE possible. Alternatively,
+the application can be started with root privileges from command line:
+
+$ sudo `inet_dbg -p -u Cmdenv`
+
+In any case, it's generally a bad idea to start the IDE as superuser. Doing so
+may silently change the file ownership for certain IDE configuraiton files, and
+it may prevent the IDE to start up for the normal user afterwards.
