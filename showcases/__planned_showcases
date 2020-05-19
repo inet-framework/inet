@@ -1,23 +1,13 @@
 Planned Showcases:
 ------------------
 
--Fingerprints: 
 -Hardware-in-the-loop: simulated AODV, real network
--Dimensional analog model: signal shape, min vs mean, 
-	-> Physical Layer Signal Representation/Physical Layer Analog Domain Representation/Physical Signal Analog Domain Representation 
-	unit disk/scalar/dimensional Wifi -> 
-	same network; switch analog model -> when to use which one? (how to choose) for example:
-		unit disk: for routing
-		scalar: (unit disk not sufficient)(two wifi channels (2x2 nodes))
-		dimensional: (scalar not sufficient)(complex spectral stuff)(coexistence?)(cross technology interference?)
 -Modeling radio interference:
 	modeling radio interference -> distinct showcase -> noise sources (bg noise with
 	spectrum; noise source with spectrum (and changing in time);
 	->the features of the dimensional model
 	wide noise, narrow noise, 
 -Corruption mode: corruption level and its effects on protocols (independent from wifi -> APSK radio)
--Emulation/videostreaming
--Emulation/basic
 -Throughput: add ht/vht mode
 -Hud (distinct logical and physical views)
 -UWBIR-Wifi coexistence: 802.15.4 MAC + APSK UWBIR radio + arbitrary packet level error model
@@ -27,3 +17,5 @@ Planned Showcases:
  - configure message display
  - TODO: regular expr.
  - TODO: OSI level
+-Neuralnetworkerrormodel -> training data generation, training, error model generation -> include these
+-Timing measurement and packet flows
