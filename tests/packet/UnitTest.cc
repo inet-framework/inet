@@ -564,6 +564,53 @@ static void testBackPopOffset()
     ASSERT_ERROR(packet1.peekAtBack(B(1)), "length is invalid");
 }
 
+static void testUpdate()
+{
+    // 1. update destructively
+    Packet packet1;
+    packet1.insertAtFront(makeImmutableApplicationHeader(42));
+    packet1.insertAtBack(makeImmutableTcpHeader());
+    // 2. update at front
+    ASSERT(packet1.peekAtFront<ApplicationHeader>()->getSomeData() == 42);
+    packet1.updateAtFront<ApplicationHeader>([] (const Ptr<ApplicationHeader>& applicationHeader) {
+        applicationHeader->setSomeData(0);
+    });
+    ASSERT(packet1.peekAtFront<ApplicationHeader>()->getSomeData() == 0);
+    // 3. update at back
+    ASSERT(packet1.peekAtBack<TcpHeader>(B(20))->getCrc() == 0);
+    packet1.updateAtBack<TcpHeader>([] (const Ptr<TcpHeader>& tcpHeader) {
+        tcpHeader->setCrc(42);
+    }, B(20));
+    ASSERT(packet1.peekAtBack<TcpHeader>(B(20))->getCrc() == 42);
+    // 4. udpate copy of the original
+    auto& packet2 = *packet1.dup();
+    // 5. update at front
+    ASSERT(packet2.peekAtFront<ApplicationHeader>()->getSomeData() == 0);
+    packet2.updateAtFront<ApplicationHeader>([] (const Ptr<ApplicationHeader>& applicationHeader) {
+        applicationHeader->setSomeData(42);
+    });
+    ASSERT(packet1.peekAtFront<ApplicationHeader>()->getSomeData() == 0);
+    ASSERT(packet2.peekAtFront<ApplicationHeader>()->getSomeData() == 42);
+    // 6. update at back
+    ASSERT(packet2.peekAtBack<TcpHeader>(B(20))->getCrc() == 42);
+    packet2.updateAtBack<TcpHeader>([] (const Ptr<TcpHeader>& tcpHeader) {
+        tcpHeader->setCrc(0);
+    }, B(20));
+    ASSERT(packet1.peekAtBack<TcpHeader>(B(20))->getCrc() == 42);
+    ASSERT(packet2.peekAtBack<TcpHeader>(B(20))->getCrc() == 0);
+
+    // 7. update in the middle
+    Packet packet3;
+    packet3.insertAtFront(makeImmutableApplicationHeader(42));
+    packet3.insertAtFront(makeImmutableTcpHeader());
+    packet3.insertAtFront(makeImmutableIpHeader());
+    ASSERT(packet3.peekAt<TcpHeader>(B(20))->getCrc() == 0);
+    packet3.updateAt<TcpHeader>([] (const Ptr<TcpHeader>& tcpHeader) {
+        tcpHeader->setCrc(42);
+    }, B(20));
+    ASSERT(packet3.peekAt<TcpHeader>(B(20))->getCrc() == 42);
+}
+
 static void testEncapsulation()
 {
     // 1. packet contains all chunks of encapsulated packet as is
@@ -1753,12 +1800,12 @@ static void testRegionTagSet()
     ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
     }
 
-    { // 11. removeAllTags
+    { // 11. removeTagsWherePresent
     RegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     tag1->setCreationTime(42);
-    const auto& tags1 = regionTagSet.removeAllTags<CreationTimeTag>(b(0), b(1000));
+    const auto& tags1 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(0), b(1000));
     ASSERT(tags1.size() == 1);
     ASSERT(tags1[0].getOffset() == b(0) && tags1[0].getLength() == b(1000));
     const auto& tag2 = tags1[0].getTag();
@@ -1769,7 +1816,7 @@ static void testRegionTagSet()
     tag3->setCreationTime(42);
     const auto& tag4 = regionTagSet.addTag<CreationTimeTag>(b(1000), b(1000));
     tag4->setCreationTime(81);
-    const auto& tags2 = regionTagSet.removeAllTags<CreationTimeTag>(b(500), b(1000));
+    const auto& tags2 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(500), b(1000));
     ASSERT(tags2.size() == 2);
     ASSERT(tags2[0].getOffset() == b(500) && tags2[0].getLength() == b(500));
     ASSERT(tags2[1].getOffset() == b(1000) && tags2[1].getLength() == b(500));
@@ -1935,6 +1982,7 @@ void UnitTest::initialize()
     testTrailer();
     testFrontPopOffset();
     testBackPopOffset();
+    testUpdate();
     testEncapsulation();
     testAggregation();
     testFragmentation();
