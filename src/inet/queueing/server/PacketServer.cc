@@ -15,7 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
 #include "inet/queueing/server/PacketServer.h"
 
 namespace inet {
@@ -68,6 +70,9 @@ void PacketServer::startProcessingPacket()
 void PacketServer::endProcessingPacket()
 {
     EV_INFO << "Processing packet " << packet->getName() << " ended.\n";
+    simtime_t processingTime = (simTime() - processingTimer->getSendingTime()) / packet->getBitLength();
+    insertPacketEvent(this, packet, PEK_PROCESSED, processingTime);
+    increaseTimeTag<ProcessingTimeTag>(packet, processingTime);
     processedTotalLength += packet->getDataLength();
     emit(packetServedSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
