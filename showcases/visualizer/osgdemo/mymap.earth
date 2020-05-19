@@ -1,0 +1,32 @@
+<map name="Mymap-offline" type="geocentric" version="2">
+
+<!-- Offline map: Readymap image and elevation
+    <options lighting="true">
+		<terrain lighting="true"/>
+		<normalize_edges="true"/>
+	</options>
+
+    <image name="mymap_imagery" driver="xyz">
+        <url>mymap/readymap_imagery/tms.xml</url>
+    </image>
+
+    <elevation name="readymap_elevation" driver="tms">
+        <url>mymap/readymap_elevation/tms.xml</url>
+    </elevation>
+-->
+
+<!-- Offline map: OSM image and Readymap elevation
+-->
+    <options lighting="true">
+		<terrain lighting="true"/>
+	</options>
+
+    <image name="mymap_imagery" driver="tms">
+        <url>mymap_osm/osm_imagery/tms.xml</url>
+    </image>
+
+    <elevation name="readymap_elevation" driver="tms">
+        <url>mymap/readymap_elevation/tms.xml</url>
+    </elevation>
+
+</map>

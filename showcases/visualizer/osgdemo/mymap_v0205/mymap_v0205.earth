@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<map>
+  <version>2</version>
+  <options>
+    <name>Mymap-source-for-download-tiles</name>
+    <type>geocentric</type>
+    <lighting>true</lighting>
+    <terrain>
+      <lighting>false</lighting>
+    </terrain>
+  </options>
+  <image>
+    <enabled>true</enabled>
+    <cache_policy>
+      <usage>no_cache</usage>
+    </cache_policy>
+    <url>osm_imagery/tms.xml</url>
+    <name>osm_imagery</name>
+    <driver>tms</driver>
+  </image>
+  <image>
+    <enabled>true</enabled>
+    <cache_policy>
+      <usage>no_cache</usage>
+    </cache_policy>
+    <url>wmflabs_hillshading/tms.xml</url>
+    <name>wmflabs_hillshading</name>
+    <driver>tms</driver>
+  </image>
+  <elevation>
+    <enabled>true</enabled>
+    <cache_policy>
+      <usage>no_cache</usage>
+    </cache_policy>
+    <url>readymap_elevation/tms.xml</url>
+    <name>readymap_elevation</name>
+    <driver>tms</driver>
+  </elevation>
+</map>

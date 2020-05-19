@@ -319,7 +319,7 @@ broadcasts an ``AodvRreq`` message. The RREQ is re-broadcast by the
 adjacent nodes until it gets to ``destination``. The destination node
 sends a unicast ``AodvRrep``. It is forwarded on the reverse path the
 RREQ message arrived on
-(``destination``->``node6``->``node1``->``source``). As the intermediate
+(``destination`` ⮕ ``node6`` ⮕ ``node1`` ⮕ ``source``). As the intermediate
 nodes receive the RREP message, the routes to ``destination`` are
 created. The routes are visualized with black arrows, and the
 :ned:`RoutingTableVisualizer` is configured to visualize only the routes
@@ -332,9 +332,9 @@ moved out of range of ``destination``. The ping packet gets to
 ``host6``, but can't get to ``destination`` (``host6`` tries to transmit
 the packet a few times, but it doesn't get an ACK). So ``host6``
 broadcasts an ``AodvRerr`` message, indicating that the link no longer
-works. When the RERR gets back to ``host1``, it initiates route discovery
-by broadcasting an RREQ message. When a new route is discovered
-(``source``->``node1``->``destination``), the ping traffic can continue.
+works. When the RERR gets back to ``host1``, it initates route discovery
+by broadcasting a RREQ message. When a new route is discovered
+(``source`` ⮕ ``node1`` ⮕ ``destination``), the ping traffic can continue.
 
 The following log excerpt shows ``node6`` handling the first RREQ and
 RREP messages:

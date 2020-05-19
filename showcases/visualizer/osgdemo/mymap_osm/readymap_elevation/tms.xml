@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<tilemap tilemapservice="" version="1.0.0">
+  <title>readymap_elevation</title>
+  <abstract></abstract>
+  <srs>EPSG:4326</srs>
+  <vsrs></vsrs>
+  <boundingbox maxx="180.0000000000000000000000000" maxy="90.0000000000000000000000000" minx="-180.0000000000000000000000000" miny="-90.0000000000000000000000000" />
+  <origin x="-180.0000000000000000000000000" y="-90.0000000000000000000000000" />
+  <tileformat extension="tif" height="257" mime-type="image/tiff" width="257" />
+  <tilesets profile="global-geodetic">
+    <tileset href="" order="0" units-per-pixel="0.7003891050583657129635640" />
+    <tileset href="" order="1" units-per-pixel="0.3501945525291828564817820" />
+    <tileset href="" order="2" units-per-pixel="0.1750972762645914282408910" />
+    <tileset href="" order="3" units-per-pixel="0.0875486381322957141204455" />
+    <tileset href="" order="4" units-per-pixel="0.0437743190661478570602227" />
+    <tileset href="" order="5" units-per-pixel="0.0218871595330739285301114" />
+    <tileset href="" order="6" units-per-pixel="0.0109435797665369642650557" />
+    <tileset href="" order="7" units-per-pixel="0.0054717898832684821325278" />
+    <tileset href="" order="8" units-per-pixel="0.0027358949416342410662639" />
+    <tileset href="" order="9" units-per-pixel="0.0013679474708171205331320" />
+    <tileset href="" order="10" units-per-pixel="0.0006839737354085602665660" />
+  </tilesets>
+</tilemap>
