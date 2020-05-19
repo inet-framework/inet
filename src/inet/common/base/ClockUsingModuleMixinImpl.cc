@@ -24,9 +24,13 @@ namespace inet {
 
 #ifdef WITH_CLOCK_SUPPORT
 template class ClockUsingModuleMixin<cSimpleModule>;
+
+#ifdef WITH_QUEUEING
 template class ClockUsingModuleMixin<queueing::PacketProcessorBase>;
 template class ClockUsingModuleMixin<queueing::PacketPusherBase>;
 template class ClockUsingModuleMixin<queueing::PacketGateBase>;
-#endif
+#endif // #ifdef WITH_QUEUEING
+
+#endif // #ifdef WITH_CLOCK_SUPPORT
 
 } // namespace inet
