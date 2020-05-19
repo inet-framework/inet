@@ -1,0 +1,26 @@
+so
+
+what is the structure?
+
+the essence?
+
+- its real applications that communicate through a simulated network
+- it uses the extupperethernet interface to separate the simulation and the real world
+at the ethernet interface/link layer
+- and uses tap devices in the host os
+- and actually there are two VLC instances
+- one of them sends a video stream, through the simulated network, to the other which plays it
+
+how to build this ?
+
+what does it need to contain?
+
+- overview
+- emulation features
+- extethernet
+- schematic
+- how its realized
+- network
+- config
+- scripts
+- actually how to run this and what does it do
