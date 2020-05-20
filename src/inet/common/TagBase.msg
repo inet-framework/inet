@@ -4,6 +4,10 @@
 
 import inet.common.INETDefs;
 
+cplusplus{{
+#include "inet/common/TagBase.h"
+}}
+
 namespace inet;
 
 //
@@ -12,5 +16,5 @@ namespace inet;
 //
 class TagBase extends cObject
 {
+    @existingClass;
 }
-
