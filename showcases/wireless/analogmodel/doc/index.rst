@@ -12,7 +12,7 @@ This showcase describes the available analog signal representation models, their
 drawbacks, and contains three example simulations for typical use cases.
 
 | INET version: ``4.2``
-| Source files location: `inet/showcases/wireless/analogmodel <https://github.com/inet-framework/inet/tree/master/showcases/wireless/analogmodel>`__
+| Source files location: `inet/showcases/wireless/analogmodel <https://github.com/inet-framework/inet-showcases/tree/master/wireless/analogmodel>`__
 
 About Analog Models
 -------------------
@@ -66,10 +66,6 @@ configurable with parameters:
 - **Communication range**: transmissions are always unsuccessful outside this range
 - **Interference range**: transmissions can't interfere with and prevent other receptions outside this range
 - **Detection range**: transmissions can't be detected outside this range; inside this range, transmissions might cause network nodes detecting them to defer from transmitting (when using a suitable MAC module, such as :ned:`CsmaCaMac` or :ned:`Ieee80211Mac`)
-
-.. figure:: media/range2.png
-   :align: center
-   :width: 60%
 
 In general, the signals using any analog model might carry protocol related meta-information,
 configurable by parameters of the transmitter, such as bitrate, header length, modulation,
@@ -197,7 +193,7 @@ The source host is configured to use the default 802.11g mode, and 54Mbps data r
 Here is a video of the simulation (successful link-layer transmissions are indicated with arrows;
 incorrectly received packets are indicated with packet drop animations):
 
-.. video:: media/Distance5.mp4
+.. video:: media/Distance4.mp4
    :width: 100%
 
 .. normal run, playback speed 1, animation speed 0.1, run until 6.5s
