@@ -39,7 +39,12 @@ bool ProtocolChecker::matchesPacket(const Packet *packet) const
 
 void ProtocolChecker::dropPacket(Packet *packet)
 {
-    EV_WARN << "Unknown protocol, dropping packet\n";
+    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    if (protocol)
+        EV_WARN << "Unregistered protocol '" << protocol->getName() << "', dropping packet\n";
+    else
+        EV_WARN << "The PacketProtocolTag missing, dropping packet\n";
     PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
 }
 
