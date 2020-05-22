@@ -70,6 +70,7 @@ class INET_API Protocol
     static const Protocol dsr;
     static const Protocol dymo;
     static const Protocol egp;
+    static const Protocol ethernetFlowCtrl;
     static const Protocol ethernetMac;
     static const Protocol ethernetPhy;
     static const Protocol ftp;
