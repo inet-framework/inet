@@ -76,6 +76,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x22F0, &Protocol::tsn},
     { 0x22F3, &Protocol::trill},
     { 0x22F4, &Protocol::l2isis},
+    { 0x8100, &Protocol::ieee8021QCtag },
     { 0x86DD, &Protocol::ipv6 },
     { 0x36FC, &Protocol::flooding },         // ETHERTYPE_INET_FLOODING, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
@@ -83,6 +84,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x86FF, &Protocol::nextHopForwarding },         // ETHERTYPE_INET_NEXTHOP
     { 0x8808, &Protocol::ethernetFlowCtrl },
     { 0x8847, &Protocol::mpls },
+    { 0x88A8, &Protocol::ieee8021QStag },
     { 0x88CC, &Protocol::lldp },
     { 0x891d, &Protocol::tteth },
 });
