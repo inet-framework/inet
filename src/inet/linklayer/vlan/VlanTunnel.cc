@@ -58,7 +58,7 @@ void VlanTunnel::initialize(int stage)
         socket.setCallback(this);
         socket.setOutputGate(gate("upperLayerOut"));
         socket.setInterfaceEntry(realInterfaceEntry);
-        socket.bind(MacAddress(), interfaceEntry->getMacAddress(), nullptr, vlanId);
+        socket.bind(interfaceEntry->getMacAddress(), MacAddress(), nullptr, vlanId);
     }
 }
 
