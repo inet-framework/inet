@@ -93,8 +93,8 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
     else if (auto bindCommand = dynamic_cast<EthernetBindCommand *>(ctrl)) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         Socket *socket = new Socket(socketId);
-        socket->sourceAddress = bindCommand->getSourceAddress();
-        socket->destinationAddress = bindCommand->getDestinationAddress();
+        socket->sourceAddress = bindCommand->getLocalAddress();
+        socket->destinationAddress = bindCommand->getRemoteAddress();
         socket->protocol = bindCommand->getProtocol();
         socket->vlanId = bindCommand->getVlanId();
         socketIdToSocketMap[socketId] = socket;

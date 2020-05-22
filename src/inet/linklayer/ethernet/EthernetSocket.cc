@@ -49,12 +49,12 @@ void EthernetSocket::sendToEthernet(cMessage *msg)
     check_and_cast<cSimpleModule *>(gateToEthernet->getOwnerModule())->send(msg, gateToEthernet);
 }
 
-void EthernetSocket::bind(const MacAddress& sourceAddress, const MacAddress& destinationAddress, Protocol *protocol, int vlanId)
+void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, int vlanId)
 {
     auto request = new Request("BIND", ETHERNET_C_BIND);
     EthernetBindCommand *ctrl = new EthernetBindCommand();
-    ctrl->setSourceAddress(sourceAddress);
-    ctrl->setDestinationAddress(destinationAddress);
+    ctrl->setLocalAddress(localAddress);
+    ctrl->setRemoteAddress(remoteAddress);
     ctrl->setProtocol(protocol);
     ctrl->setVlanId(vlanId);
     request->setControlInfo(ctrl);

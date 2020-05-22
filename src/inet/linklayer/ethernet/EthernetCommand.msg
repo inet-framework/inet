@@ -42,10 +42,10 @@ class EthernetCommandBase extends cObject
 
 class EthernetBindCommand extends EthernetCommandBase
 {
-    MacAddress sourceAddress;
-    MacAddress destinationAddress;
+    MacAddress localAddress;
+    MacAddress remoteAddress;
     int vlanId;
-	Protocol *protocol;
+    const Protocol *protocol;
 }
 
 class EthernetCloseCommand extends EthernetCommandBase
