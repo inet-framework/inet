@@ -84,6 +84,7 @@ const Protocol Protocol::dsdv2("dsdv2", "DSDV 2");
 const Protocol Protocol::dsr("dsr", "DSR");
 const Protocol Protocol::dymo("dymo", "DYMO");
 const Protocol Protocol::egp("egp", "EGP");
+const Protocol Protocol::ethernetFlowCtrl("ethernetflowctrl", "Ethernet Flow Control", Protocol::LinkLayer);
 const Protocol Protocol::ethernetMac("ethernetmac", "Ethernet MAC", Protocol::LinkLayer);
 const Protocol Protocol::ethernetPhy("ethernetphy", "Ethernet PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ftp("ftp", "FTP");
