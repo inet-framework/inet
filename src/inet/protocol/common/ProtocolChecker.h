@@ -31,6 +31,7 @@ class INET_API ProtocolChecker : public PacketFilterBase, public IProtocolRegist
     std::set<const Protocol *> protocols;
 
   protected:
+    virtual void initialize(int stage) override;
     virtual void dropPacket(Packet *packet) override;
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
