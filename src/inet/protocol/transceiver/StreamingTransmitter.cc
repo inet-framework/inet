@@ -97,8 +97,8 @@ void StreamingTransmitter::abortTx()
     EV_INFO << "Aborting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     sendPacketEnd(txSignal, outputGate, 0, signal->getDuration(), bps(datarate).get());
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
+    delete txPacket;
     txPacket = nullptr;
-    delete txSignal;
     txSignal = nullptr;
     txStartTime = -1;
 }
@@ -138,7 +138,7 @@ void StreamingTransmitter::handleStartOperation(LifecycleOperation *operation)
 void StreamingTransmitter::handleStopOperation(LifecycleOperation *operation)
 {
     if (txSignal)
-        endTx();
+        abortTx();    //TODO: for finishing current transmission correctly, should wait the txEndTimer...
 }
 
 void StreamingTransmitter::handleCrashOperation(LifecycleOperation *operation)

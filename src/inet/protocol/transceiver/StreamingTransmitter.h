@@ -40,7 +40,6 @@ class INET_API StreamingTransmitter : public OperationalMixin<PacketTransmitterB
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override { OperationalMixin::handleMessage(msg); }
     virtual void handleMessageWhenUp(cMessage *message) override;
 
     virtual void startTx(Packet *packet);
