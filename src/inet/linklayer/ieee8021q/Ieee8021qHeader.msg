@@ -24,6 +24,7 @@ class Ieee8021qHeader extends Ieee8023TypeOrLength
     chunkLength = B(4);
     uint8_t pcp;       // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                        // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
+                       // Priority order lowest to highest: 1 0 2 3 4 5 6 7
     bool de;           // Drop Eligible (DE): a 1-bit field. May be used separately or in conjunction with PCP to indicate frames eligible to be dropped in the presence of congestion.
     uint16_t vid;      // VLAN Identifier (VID): a 12-bit field specifying the VLAN to which the frame belongs.
                        // The hexadecimal values of 0x000 and 0xFFF are reserved. All other values may be used as VLAN identifiers, allowing up to 4,094 VLANs.
