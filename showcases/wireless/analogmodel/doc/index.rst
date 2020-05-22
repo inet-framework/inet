@@ -67,6 +67,10 @@ configurable with parameters:
 - **Interference range**: transmissions can't interfere with and prevent other receptions outside this range
 - **Detection range**: transmissions can't be detected outside this range; inside this range, transmissions might cause network nodes detecting them to defer from transmitting (when using a suitable MAC module, such as :ned:`CsmaCaMac` or :ned:`Ieee80211Mac`)
 
+.. figure:: media/range2.png
+   :align: center
+   :width: 60%
+
 In general, the signals using any analog model might carry protocol related meta-information,
 configurable by parameters of the transmitter, such as bitrate, header length, modulation,
 channel number, etc. The protocol related meta-information can be used by the simulation
