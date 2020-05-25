@@ -24,6 +24,12 @@ Define_Module(InterPacketGap);
 
 // TODO: review streaming operation with respect to holding back packet push until the packet gap elapses
 
+InterPacketGap::~InterPacketGap()
+{
+    cancelAndDelete(progress);
+    cancelAndDelete(timer);
+}
+
 void InterPacketGap::initialize(int stage)
 {
     ClockUsingModuleMixin::initialize(stage);
