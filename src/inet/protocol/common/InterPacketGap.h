@@ -30,12 +30,11 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
   protected:
     cPar *durationPar = nullptr;
     cProgress *progress = nullptr;
+    cMessage *timer = nullptr;
 
     clocktime_t packetDelay;
     clocktime_t packetStartTime;
     clocktime_t packetEndTime;
-
-    cMessage *timer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -50,7 +49,7 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
     virtual const char *resolveDirective(char directive) const override;
 
   public:
-    virtual ~InterPacketGap() { cancelAndDelete(progress); }
+    virtual ~InterPacketGap();
 
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
