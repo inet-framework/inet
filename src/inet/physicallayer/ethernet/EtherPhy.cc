@@ -254,7 +254,7 @@ void EtherPhy::modifyTxProgress(cMessage *message)
 
     curTx->encapsulate(newPacket);
     auto duration = calculateDuration(curTx);
-    sendPacketProgress(curTx->dup(), physOutGate, 0, duration, NaN, signalFirstChangedBitPosition.get(), timePosition);
+    sendPacketProgress(curTx->dup(), physOutGate, 0, duration, curTx->getBitrate(), signalFirstChangedBitPosition.get(), timePosition);
 }
 
 bool EtherPhy::checkConnected()
@@ -419,7 +419,7 @@ void EtherPhy::startTx(EthernetSignalBase *signal)
     curTxStartTime = simTime();
     auto duration = calculateDuration(curTx);
     EV << "Sending PACKET_START " << curTx << " to phy\n";
-    sendPacketStart(curTx->dup(), physOutGate, 0, duration, NaN);
+    sendPacketStart(curTx->dup(), physOutGate, 0, duration, curTx->getBitrate());
     ASSERT(txTransmissionChannel->getTransmissionFinishTime() == simTime() + duration);
     scheduleAt(simTime() + duration, endTxMsg);
     changeTxState(TX_TRANSMITTING_STATE);
@@ -431,7 +431,7 @@ void EtherPhy::endTx()
     ASSERT(curTx != nullptr);
     auto duration = calculateDuration(curTx);
     EV << "Sending PACKET_END " << curTx << " to phy\n";
-    sendPacketEnd(curTx, physOutGate, 0, duration, NaN);
+    sendPacketEnd(curTx, physOutGate, 0, duration, curTx->getBitrate());
     emit(txFinishedSignal, 1);   //TODO
     curTx = nullptr;
     changeTxState(TX_IDLE_STATE);
