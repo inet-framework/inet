@@ -1567,8 +1567,8 @@ static void testTagSet()
 
     // 7. addTagIfAbsent
     TagSet tagSet7;
-    const auto& tag8 = tagSet7.addTagIfAbsent<CreationTimeTag>();
-    const auto& tag9 = tagSet7.addTagIfAbsent<CreationTimeTag>();
+    const auto& tag8 = tagSet7.addTagIfAbsent<CreationTimeTag>().get();
+    const auto& tag9 = tagSet7.addTagIfAbsent<CreationTimeTag>().get();
     ASSERT(tag9 != nullptr);
     ASSERT(tag9 == tag8);
     ASSERT(tagSet7.getNumTags() == 1);
@@ -1576,8 +1576,8 @@ static void testTagSet()
     // 8. removeTag
     TagSet tagSet8;
     ASSERT_ERROR(tagSet8.removeTag<CreationTimeTag>(), "is absent");
-    const auto& tag10 = tagSet8.addTag<CreationTimeTag>();
-    const auto& tag11 = tagSet8.removeTag<CreationTimeTag>();
+    const auto& tag10 = tagSet8.addTag<CreationTimeTag>().get();
+    const auto& tag11 = tagSet8.removeTag<CreationTimeTag>().get();
     ASSERT(tag11 != nullptr);
     ASSERT(tag11 == tag10);
     ASSERT(tagSet8.getNumTags() == 0);
@@ -1585,8 +1585,8 @@ static void testTagSet()
     // 9. removeTagIfPresent
     TagSet tagSet9;
     tagSet9.removeTagIfPresent<CreationTimeTag>();
-    const auto& tag12 = tagSet9.addTag<CreationTimeTag>();
-    const auto& tag13 = tagSet9.removeTagIfPresent<CreationTimeTag>();
+    const auto& tag12 = tagSet9.addTag<CreationTimeTag>().get();
+    const auto& tag13 = tagSet9.removeTagIfPresent<CreationTimeTag>().get();
     ASSERT(tag13 != nullptr);
     ASSERT(tag13 == tag12);
     ASSERT(tagSet9.getNumTags() == 0);
@@ -1615,8 +1615,8 @@ static void testRegionTagSet()
 
     { // 2. getTag
     RegionTagSet regionTagSet;
-    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
-    const auto& tag2 = regionTagSet.getTag(0);
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)).get();
+    const auto& tag2 = regionTagSet.getTag(0).get();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     }
@@ -1669,7 +1669,7 @@ static void testRegionTagSet()
     tag3->setCreationTime(42);
     const auto& tag4 = regionTagSet.addTag<CreationTimeTag>(b(1000), b(1000));
     tag4->setCreationTime(81);
-    const auto& tags2 = regionTagSet.getAllTags<CreationTimeTag>(b(500), b(1000));
+    const auto& tags2 = regionTagSet.getAllTagsForUpdate<CreationTimeTag>(b(500), b(1000));
     ASSERT(tags2.size() == 2);
     ASSERT(tags2[0].getOffset() == b(500) && tags2[0].getLength() == b(500));
     ASSERT(tags2[1].getOffset() == b(1000) && tags2[1].getLength() == b(500));
@@ -1679,9 +1679,11 @@ static void testRegionTagSet()
     ASSERT(tag5->getCreationTime() == 42);
     ASSERT(tag6 != nullptr);
     ASSERT(tag6->getCreationTime() == 81);
-    ASSERT(regionTagSet.getNumTags() == 2);
-    ASSERT(regionTagSet.getRegionTag(0).getOffset() == b(0) && regionTagSet.getRegionTag(0).getLength() == b(1000));
-    ASSERT(regionTagSet.getRegionTag(1).getOffset() == b(1000) && regionTagSet.getRegionTag(1).getLength() == b(1000));
+    ASSERT(regionTagSet.getNumTags() == 4);
+    ASSERT(regionTagSet.getRegionTag(0).getOffset() == b(0) && regionTagSet.getRegionTag(0).getLength() == b(500));
+    ASSERT(regionTagSet.getRegionTag(1).getOffset() == b(500) && regionTagSet.getRegionTag(1).getLength() == b(500));
+    ASSERT(regionTagSet.getRegionTag(2).getOffset() == b(1000) && regionTagSet.getRegionTag(1).getLength() == b(500));
+    ASSERT(regionTagSet.getRegionTag(3).getOffset() == b(1500) && regionTagSet.getRegionTag(1).getLength() == b(500));
     }
 
     { // 7. addTag
@@ -1701,8 +1703,8 @@ static void testRegionTagSet()
 
     { // 8. addTagIfAbsent
     RegionTagSet regionTagSet;
-    const auto& tag1 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
-    const auto& tag2 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
+    const auto& tag1 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000)).get();
+    const auto& tag2 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     ASSERT(regionTagSet.getNumTags() == 1);
@@ -1718,7 +1720,7 @@ static void testRegionTagSet()
     { // 9. removeTag
     RegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
-    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(100), b(800)), "Overlapping");
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(-100), b(200)), "Overlapping");
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(900), b(200)), "Overlapping");
@@ -1726,7 +1728,7 @@ static void testRegionTagSet()
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(1000), b(100)), "is absent");
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(2000), b(1000)), "is absent");
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(-2000), b(1000)), "is absent");
-    const auto& tag2 = regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
@@ -1736,7 +1738,7 @@ static void testRegionTagSet()
     { // 10. removeTagIfPresent
     RegionTagSet regionTagSet;
     ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
-    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(100), b(800)), "Overlapping");
     ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(-100), b(200)), "Overlapping");
     ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(900), b(200)), "Overlapping");
@@ -1744,7 +1746,7 @@ static void testRegionTagSet()
     ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(1000), b(100)) == nullptr);
     ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(2000), b(1000)) == nullptr);
     ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(-2000), b(1000)) == nullptr);
-    const auto& tag2 = regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     ASSERT(regionTagSet.getNumTags() == 0);
@@ -1793,7 +1795,7 @@ static void testRegionTagSet()
     }
 }
 
-static void testChunkTags()
+static void testChunkRegionTags()
 {
     // FieldsChunk
     auto chunk1 = makeShared<IpHeader>();
@@ -1836,6 +1838,23 @@ static void testPacketTags()
     packet1.popAtFront<TcpHeader>();
     const auto& tag3 = packet1.getTag<CreationTimeTag>();
     ASSERT(tag3 == tag2);
+}
+
+static void testPacketRegionTags()
+{
+    {
+    // 1. copy on write for duplicated packet
+    Packet packet1;
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(1000)));
+    auto timeTag = packet1.addRegionTag<CreationTimeTag>(B(0), B(1000));
+    timeTag->setCreationTime(42);
+    auto packet2 = packet1.dup();
+    packet2->mapAllRegionTagsForUpdate<CreationTimeTag>(B(0), B(1000), [&] (b o, b l, const Ptr<CreationTimeTag>& timeTag) {
+        timeTag->setCreationTime(0);
+    });
+    ASSERT(packet1.getRegionTag<CreationTimeTag>(B(0), B(1000))->getCreationTime() == 42);
+    ASSERT(packet2->getRegionTag<CreationTimeTag>(B(0), B(1000))->getCreationTime() == 0);
+    }
 }
 
 static void testRegionTags()
@@ -1939,8 +1958,9 @@ void UnitTest::initialize()
     testReorderBuffer();
     testTagSet();
     testRegionTagSet();
-    testChunkTags();
+    testChunkRegionTags();
     testPacketTags();
+    testPacketRegionTags();
     testRegionTags();
 }
 
