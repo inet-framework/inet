@@ -17,9 +17,10 @@
 #define __INET_PACKET_H_
 
 #include <functional>
-#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/tag/RegionTagSet.h"
 #include "inet/common/packet/tag/TagSet.h"
 
 namespace inet {
@@ -83,6 +84,7 @@ class INET_API Packet : public cPacket
     Chunk::BackwardIterator backIterator;
     b totalLength;
     TagSet tags;
+    RegionTagSet regionTags;
 
   protected:
     const Chunk *getContent() const { return content.get(); } // only for class descriptor
@@ -90,6 +92,8 @@ class INET_API Packet : public cPacket
     const ChunkTemporarySharedPtr *getFront() const; // only for class descriptor
     const ChunkTemporarySharedPtr *getData() const; // only for class descriptor
     const ChunkTemporarySharedPtr *getBack() const; // only for class descriptor
+    int getRegionTagsArraySize(); // only for class descriptor
+    const RegionTagSet::RegionTag<cObject>& getRegionTags(int index); // only for class descriptor
 
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);
@@ -800,6 +804,121 @@ class INET_API Packet : public cPacket
      */
     template<typename T> T *removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
+    }
+    //@}
+
+    /** @name Region tag related functions */
+    //@{
+    /**
+     * Returns the number of region tags.
+     */
+    int getNumRegionTags() const {
+        return regionTags.getNumTags();
+    }
+
+    /**
+     * Returns the region tag at the given index.
+     */
+    const cObject *getRegionTag(int index) const {
+        return regionTags.getTag(index);
+    }
+
+    /**
+     * Clears the set of region tags in the given region.
+     */
+    void clearRegionTags(b offset = b(0), b length = b(-1)) {
+        regionTags.clearTags(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Copies the set of region tags from the source region to the provided region.
+     */
+    void copyRegionTags(const Packet& source, b sourceOffset = b(0), b offset = b(0), b length = b(-1)) {
+        regionTags.copyTags(source.regionTags, sourceOffset, offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Returns the region tag for the provided type and range, or returns nullptr if no such region tag is found.
+     */
+    template<typename T> const T *findRegionTag(b offset = b(0), b length = b(-1)) const {
+        return regionTags.findTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Returns the region tag for the provided type and range, or throws an exception if no such region tag is found.
+     */
+    template<typename T> const T *getRegionTag(b offset = b(0), b length = b(-1)) const {
+        return regionTags.getTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Maps all tags in the provided range to to the function.
+     */
+    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void (b, b, const T*)> f) const {
+        return regionTags.mapAllTags<const T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
+    }
+
+    /**
+     * Maps all tags in the provided range to to the function.
+     */
+    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void (b, b, T*)> f) {
+        return regionTags.mapAllTags<T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
+    }
+
+    /**
+     * Returns all region tags for the provided type and range in a detached vector of region tags.
+     */
+    template<typename T> std::vector<RegionTagSet::RegionTag<const T>> getAllRegionTags(b offset = b(0), b length = b(-1)) const {
+        return regionTags.getAllTags<const T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Returns all region tags for the provided type and range in a detached vector of region tags.
+     */
+    template<typename T> std::vector<RegionTagSet::RegionTag<T>> getAllRegionTags(b offset = b(0), b length = b(-1)) {
+        return regionTags.getAllTags<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Returns a newly added region tag for the provided type and range, or throws an exception if such a region tag is already present.
+     */
+    template<typename T> T *addRegionTag(b offset = b(0), b length = b(-1)) {
+        return regionTags.addTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Returns a newly added region tag for the provided type and range if absent, or returns the region tag that is already present.
+     */
+    template<typename T> T *addRegionTagIfAbsent(b offset = b(0), b length = b(-1)) {
+        return regionTags.addTagIfAbsent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Returns the newly added region tags for the provided type and range where the tag is absent.
+     */
+    template<typename T> std::vector<RegionTagSet::RegionTag<T>> addRegionTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
+        return regionTags.addTagsWhereAbsent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Removes the region tag for the provided type and range, or throws an exception if no such region tag is found.
+     */
+    template <typename T> T *removeRegionTag(b offset, b length) {
+        return regionTags.removeTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Removes the region tag for the provided type and range if present, or returns nullptr if no such region tag is found.
+     */
+    template <typename T> T *removeRegionTagIfPresent(b offset, b length) {
+        return regionTags.removeTagIfPresent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    }
+
+    /**
+     * Removes and returns all region tags for the provided type and range.
+     */
+    template <typename T> std::vector<RegionTagSet::RegionTag<T>> removeRegionTagsWherePresent(b offset, b length) {
+        return regionTags.removeTagsWherePresent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
     //@}
 

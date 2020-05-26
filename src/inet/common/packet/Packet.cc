@@ -81,6 +81,16 @@ const ChunkTemporarySharedPtr *Packet::getBack() const
     return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
 }
 
+int Packet::getRegionTagsArraySize()
+{
+    return regionTags.getNumTags();
+}
+
+const RegionTagSet::RegionTag<cObject>& Packet::getRegionTags(int index)
+{
+    return regionTags.getRegionTag(index);
+}
+
 void Packet::forEachChild(cVisitor *v)
 {
     cPacket::forEachChild(v);
