@@ -459,23 +459,6 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Filling with data related functions */
-    //@{
-    /**
-     * Inserts the provided part at the beginning of the packet. The inserted
-     * part is automatically marked immutable. The length of front popped part
-     * must be zero before calling this function.
-     */
-    void insertAtFront(const Ptr<const Chunk>& chunk);
-
-    /**
-     * Inserts the provided part at the end of the packet. The inserted part is
-     * automatically marked immutable. The length of back popped part must be
-     * zero before calling this function.
-     */
-    void insertAtBack(const Ptr<const Chunk>& chunk);
-    //@}
-
     /** @name Erasing data related functions */
     //@{
     /**
@@ -573,7 +556,110 @@ class INET_API Packet : public cPacket
     const Ptr<Chunk> removeAll();
     //@}
 
-    /** @name Updating data related functions */
+    /** @name Content insertion functions */
+    //@{
+    /**
+     * Inserts the provided part at the beginning of the packet. The inserted
+     * part is automatically marked immutable. The length of front popped part
+     * must be zero before calling this function.
+     */
+    void insertAtFront(const Ptr<const Chunk>& chunk);
+
+    /**
+     * Inserts the provided part at the end of the packet. The inserted part is
+     * automatically marked immutable. The length of back popped part must be
+     * zero before calling this function.
+     */
+    void insertAtBack(const Ptr<const Chunk>& chunk);
+
+    /**
+     */
+    void insertData(const Ptr<const Chunk>& chunk);
+
+    /**
+     */
+    void insertDataAt(b offset, const Ptr<const Chunk>& chunk);
+
+    /**
+     */
+    void insertAll(const Ptr<const Chunk>& chunk);
+
+    /**
+     */
+    void insertAt(b offset, const Ptr<const Chunk>& chunk);
+    //@}
+
+    /** @name Content replacing functions */
+    //@{
+    /**
+     */
+    void replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0);
+
+    /**
+     */
+    void replaceAtBack(const Ptr<const Chunk>& chunk, b length, int flags = 0);
+
+    /**
+     */
+    void replaceData(const Ptr<const Chunk>& chunk, int flags = 0);
+
+    /**
+     */
+    void replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0);
+
+    /**
+     */
+    void replaceAll(const Ptr<const Chunk>& chunk, int flags = 0);
+
+    /**
+     */
+    void replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0);
+
+    /**
+     */
+    template <typename T>
+    void replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+        replaceAt<T>(chunk, getFrontOffset(), length, flags);
+    }
+
+    /**
+     */
+    template <typename T>
+    void replaceAtBack(const Ptr<const Chunk>& chunk, b length, int flags = 0) {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
+        replaceAt<T>(chunk, getBackOffset() - length, length, flags);
+    }
+
+    /**
+     */
+    template <typename T>
+    void replaceData(const Ptr<const Chunk>& chunk, int flags = 0) {
+        replaceAt<T>(chunk, getFrontOffset(), getDataLength(), flags);
+    }
+
+    /**
+     */
+    template <typename T>
+    void replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+        replaceAt<T>(chunk, getFrontOffset() + offset, length, flags);
+    }
+
+    /**
+     */
+    template <typename T>
+    void replaceAll(const Ptr<const Chunk>& chunk, int flags = 0) {
+        replaceAt<T>(chunk, b(0), getTotalLength(), flags);
+    }
+
+    /**
+     */
+    template <typename T>
+    void replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+    }
+    //@}
+
+    /** @name Content updating functions */
     //@{
     /**
      * Updates the designated part by applying the provided function on the
