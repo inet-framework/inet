@@ -89,7 +89,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x891d, &Protocol::tteth },
 });
 
-// excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2
+// excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml
 ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
