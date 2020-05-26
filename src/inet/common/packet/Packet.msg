@@ -33,6 +33,7 @@ class Packet extends cPacket
     ChunkTemporarySharedPtr *dissection @packetData @getter(getDissection);
     Chunk *content @packetData @getter(getContent);
     cObject *tags[] @getter(getTag) @sizeGetter(getNumTags);
+    RegionTagSet::cObjectRegionTag regionTags[] @packetData(false);
 
     b frontOffset;
     b backOffset;
