@@ -80,36 +80,73 @@ class INET_API Packet : public cPacket
      * it's reused if possible to allow efficient merging with newly added chunks.
      */
     Ptr<const Chunk> content;
+    /**
+     * Position of the front separator measured from the front of the packet.
+     */
     Chunk::ForwardIterator frontIterator;
+    /**
+     * Position of the back separator measured from the back of the packet.
+     */
     Chunk::BackwardIterator backIterator;
+    /**
+     * Cached total length of the packet including the popped frond and back parts.
+     */
     b totalLength;
+
+    /**
+     * The set of tags attached to the packet as whole.
+     */
     TagSet tags;
+    /**
+     * The set of tags attached to regions of the content of the packet.
+     */
     RegionTagSet regionTags;
 
   protected:
-    const Chunk *getContent() const { return content.get(); } // only for class descriptor
-    const ChunkTemporarySharedPtr *getDissection() const; // only for class descriptor
-    const ChunkTemporarySharedPtr *getFront() const; // only for class descriptor
-    const ChunkTemporarySharedPtr *getData() const; // only for class descriptor
-    const ChunkTemporarySharedPtr *getBack() const; // only for class descriptor
-    int getRegionTagsArraySize(); // only for class descriptor
-    const RegionTagSet::RegionTag<cObject>& getRegionTags(int index); // only for class descriptor
+    /** @name Class descriptor functions */
+    //@{
+    const Chunk *getContent() const { return content.get(); }
+    const ChunkTemporarySharedPtr *getDissection() const;
+    const ChunkTemporarySharedPtr *getFront() const;
+    const ChunkTemporarySharedPtr *getData() const;
+    const ChunkTemporarySharedPtr *getBack() const;
+    int getRegionTagsArraySize();
+    const RegionTagSet::RegionTag<cObject>& getRegionTags(int index);
+    //@}
 
+    /** @name Self checking functions */
+    //@{
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);
         content->seekIterator(copy, iterator.getPosition());
         return iterator.getPosition() == copy.getPosition() && (iterator.getIndex() == -1 || iterator.getIndex() == copy.getIndex());
     }
+    //@}
 
   public:
+    /** @name Constructors */
+    //@{
     explicit Packet(const char *name = nullptr, short kind = 0);
     Packet(const char *name, const Ptr<const Chunk>& content);
     Packet(const Packet& other);
+    //@}
 
+    /** @name Supported cPacket interface functions */
+    //@{
     virtual Packet *dup() const override { return new Packet(*this); }
     virtual void forEachChild(cVisitor *v) override;
+    virtual bool hasBitError() const override { return cPacket::hasBitError() || content->isIncorrect(); }
+    //@}
 
-    /** @name Length querying related functions */
+    /** @name Unsupported cPacket interface functions */
+    //@{
+    virtual void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
+    virtual cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
+    virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }
+    virtual void setControlInfo(cObject *p) override { throw cRuntimeError("Invalid operation"); }
+    //@}
+
+    /** @name Length querying functions */
     //@{
     /**
      * Returns the total packet length ignoring front and back offsets.
@@ -126,23 +163,7 @@ class INET_API Packet : public cPacket
     virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
     //@}
 
-    /** @name Other overridden cPacket functions */
-    //@{
-    virtual bool hasBitError() const override { return cPacket::hasBitError() || content->isIncorrect(); }
-    //@}
-
-    /** @name Unsupported cPacket functions */
-    //@{
-    virtual void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
-
-    virtual cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
-
-    virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }
-
-    virtual void setControlInfo(cObject *p) override { throw cRuntimeError("Invalid operation"); }
-    //@}
-
-    /** @name Data part front querying related functions */
+    /** @name Data part front querying functions */
     //@{
     /**
      * Returns the front offset measured from the beginning of the packet.
@@ -219,7 +240,7 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Data part back querying related functions */
+    /** @name Data part back querying functions */
     //@{
     /**
      * Returns the back offset measured from the beginning of the packet.
@@ -294,7 +315,7 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Data part querying related functions */
+    /** @name Data part querying functions */
     //@{
     /**
      * Returns the current length of the data part of the packet. This is the
@@ -380,7 +401,7 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Content querying related functions */
+    /** @name Content querying functions */
     //@{
     /**
      * Returns the designated part of the packet as an immutable chunk in its
@@ -459,7 +480,7 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Erasing data related functions */
+    /** @name Content erasing functions */
     //@{
     /**
      * Erases the requested amount of data from the beginning of the packet. The
@@ -497,7 +518,7 @@ class INET_API Packet : public cPacket
     void trim();
     //@}
 
-    /** @name Removing data related functions */
+    /** @name Content removing functions */
     //@{
     /**
      * Removes the designated part and returns it as a mutable chunk in its
@@ -815,7 +836,7 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Tag related functions */
+    /** @name Whole tagging functions */
     //@{
     /**
      * Returns all tags.
@@ -893,7 +914,7 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Region tag related functions */
+    /** @name Region tagging functions */
     //@{
     /**
      * Returns the number of region tags.
@@ -1008,10 +1029,13 @@ class INET_API Packet : public cPacket
     }
     //@}
 
+    /** @name Utility functions */
+    //@{
     /**
      * Returns a human readable string representation.
      */
     virtual std::string str() const override;
+    //@}
 };
 
 INET_API TagSet& getTags(cMessage *msg);
