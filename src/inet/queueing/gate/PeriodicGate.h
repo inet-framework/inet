@@ -28,8 +28,8 @@ class INET_API PeriodicGate : public ClockUsingModuleMixin<PacketGateBase>
 {
   protected:
     int index = 0;
-    simclocktime_t offset;
-    std::vector<simclocktime_t> durations;
+    clocktime_t offset;
+    std::vector<clocktime_t> durations;
 
     cMessage *changeTimer = nullptr;
 

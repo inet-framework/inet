@@ -29,11 +29,11 @@ namespace inet {
 class INET_API PredictableClockBase : public ClockBase, public IClock
 {
   public:
-    virtual simclocktime_t fromSimTime(simtime_t t) const = 0;
-    virtual simtime_t toSimTime(simclocktime_t t) const = 0;
+    virtual clocktime_t fromSimTime(simtime_t t) const = 0;
+    virtual simtime_t toSimTime(clocktime_t t) const = 0;
 
-    virtual simclocktime_t getClockTime() const override;
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) override;
+    virtual clocktime_t getClockTime() const override;
+    virtual void scheduleClockEvent(clocktime_t t, cMessage *msg) override;
     virtual cMessage *cancelClockEvent(cMessage *msg) override;
 };
 

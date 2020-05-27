@@ -103,7 +103,7 @@ void StreamingTransmitter::abortTx()
     txStartTime = -1;
 }
 
-simclocktime_t StreamingTransmitter::calculateDuration(const Packet *packet) const
+clocktime_t StreamingTransmitter::calculateDuration(const Packet *packet) const
 {
     return packet->getDataLength().get() / datarate.get();
 }

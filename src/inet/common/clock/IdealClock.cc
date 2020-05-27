@@ -19,19 +19,19 @@ namespace inet {
 
 Define_Module(IdealClock);
 
-simclocktime_t IdealClock::fromSimTime(simtime_t t) const
+clocktime_t IdealClock::fromSimTime(simtime_t t) const
 {
-    return SimClockTime::from(t);
+    return ClockTime::from(t);
 }
 
-simtime_t IdealClock::toSimTime(simclocktime_t clock) const
+simtime_t IdealClock::toSimTime(clocktime_t clock) const
 {
     return clock.asSimTime();
 }
 
-simclocktime_t IdealClock::getArrivalClockTime(cMessage *msg) const
+clocktime_t IdealClock::getArrivalClockTime(cMessage *msg) const
 {
-    return SimClockTime::from(msg->getArrivalTime());
+    return ClockTime::from(msg->getArrivalTime());
 }
 
 } // namespace inet

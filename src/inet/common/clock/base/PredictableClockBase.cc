@@ -17,12 +17,12 @@
 
 namespace inet {
 
-simclocktime_t PredictableClockBase::getClockTime() const
+clocktime_t PredictableClockBase::getClockTime() const
 {
     return fromSimTime(simTime());
 }
 
-void PredictableClockBase::scheduleClockEvent(simclocktime_t t, cMessage *msg)
+void PredictableClockBase::scheduleClockEvent(clocktime_t t, cMessage *msg)
 {
     getTargetModule()->scheduleAt(toSimTime(t), msg);
 }

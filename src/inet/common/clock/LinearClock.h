@@ -31,9 +31,9 @@ class INET_API LinearClock : public PredictableClockBase
 
   public:
     virtual void initialize() override;
-    virtual simclocktime_t fromSimTime(simtime_t t) const override;
-    virtual simtime_t toSimTime(simclocktime_t t) const override;
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const override; // note: imprecise (may not be exactly equal to simclocktime passed into scheduleClockEvent())
+    virtual clocktime_t fromSimTime(simtime_t t) const override;
+    virtual simtime_t toSimTime(clocktime_t t) const override;
+    virtual clocktime_t getArrivalClockTime(cMessage *msg) const override; // note: imprecise (may not be exactly equal to clocktime passed into scheduleClockEvent())
 };
 
 } // namespace inet

@@ -19,7 +19,7 @@
 #define __INET_CLOCKUSINGMODULEMIXINIMPL_H
 
 #include "inet/common/base/ClockUsingModuleMixin.h"
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/common/clock/common/ClockTime.h"
 
 #ifdef WITH_CLOCK_SUPPORT
 #include "inet/common/clock/contract/IClock.h"
@@ -67,7 +67,7 @@ void ClockUsingModuleMixin<T>::initialize(int stage) {
 }
 
 template<typename T>
-void ClockUsingModuleMixin<T>::scheduleClockEvent(simclocktime_t t, cMessage *msg) {
+void ClockUsingModuleMixin<T>::scheduleClockEvent(clocktime_t t, cMessage *msg) {
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
@@ -100,25 +100,25 @@ void ClockUsingModuleMixin<T>::cancelAndDeleteClockEvent(cMessage *msg) {
 }
 
 template<typename T>
-simclocktime_t ClockUsingModuleMixin<T>::getClockTime() const {
+clocktime_t ClockUsingModuleMixin<T>::getClockTime() const {
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
     if (clock != nullptr)
         return clock->getClockTime();
     else
-        return SimClockTime::from(simTime());
+        return ClockTime::from(simTime());
 }
 
 template<typename T>
-simclocktime_t ClockUsingModuleMixin<T>::getArrivalClockTime(cMessage *msg) const {
+clocktime_t ClockUsingModuleMixin<T>::getArrivalClockTime(cMessage *msg) const {
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
     if (clock != nullptr)
         return clock->getArrivalClockTime(msg);
     else
-        return SimClockTime::from(msg->getArrivalTime());
+        return ClockTime::from(msg->getArrivalTime());
 }
 
 #endif // #ifdef WITH_CLOCK_SUPPORT

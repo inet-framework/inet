@@ -31,9 +31,9 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
     cPar *durationPar = nullptr;
     cProgress *progress = nullptr;
 
-    simclocktime_t packetDelay;
-    simclocktime_t packetStartTime;
-    simclocktime_t packetEndTime;
+    clocktime_t packetDelay;
+    clocktime_t packetStartTime;
+    clocktime_t packetEndTime;
 
     cMessage *timer = nullptr;
 

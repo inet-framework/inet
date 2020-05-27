@@ -42,7 +42,7 @@ class INET_API PacketTransmitterBase : public ClockUsingModuleMixin<PacketProces
 
     virtual Signal *encodePacket(const Packet *packet) const;
 
-    virtual simclocktime_t calculateDuration(const Packet *packet) const = 0;
+    virtual clocktime_t calculateDuration(const Packet *packet) const = 0;
 
   public:
     virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }

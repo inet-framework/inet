@@ -76,7 +76,7 @@ void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps
     take(packet);
     delete txPacket;
     txPacket = packet;
-    simclocktime_t timePosition = getClockTime() - txStartTime;
+    clocktime_t timePosition = getClockTime() - txStartTime;
     int bitPosition = std::floor(datarate.get() * timePosition.dbl());
     auto signal = encodePacket(txPacket);
     sendPacketProgress(signal, outputGate, 0, signal->getDuration(), bps(datarate).get(), bitPosition, CLOCKTIME_AS_SIMTIME(timePosition));
@@ -123,7 +123,7 @@ void PreemptibleTransmitter::abortTx()
     producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
-simclocktime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
+clocktime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
 {
     return packet->getTotalLength().get() / datarate.get();
 }
@@ -138,7 +138,7 @@ b PreemptibleTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *ga
 {
     if (txPacket == nullptr)
         return b(0);
-    simclocktime_t transmissionDuration = getClockTime() - txStartTime;
+    clocktime_t transmissionDuration = getClockTime() - txStartTime;
     return b(std::floor(datarate.get() * transmissionDuration.dbl()));
 }
 

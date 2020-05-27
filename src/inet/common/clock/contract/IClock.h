@@ -16,7 +16,7 @@
 #ifndef __INET_ICLOCK_H
 #define __INET_ICLOCK_H
 
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/common/clock/common/ClockTime.h"
 
 namespace inet {
 
@@ -32,12 +32,12 @@ class INET_API IClock
     /**
      * Return the current time.
      */
-    virtual simclocktime_t getClockTime() const = 0;
+    virtual clocktime_t getClockTime() const = 0;
 
     /**
      * Schedule an event to be delivered to the context module at the given time.
      */
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) = 0;
+    virtual void scheduleClockEvent(clocktime_t t, cMessage *msg) = 0;
 
     /**
      * Cancels an event.
@@ -47,7 +47,7 @@ class INET_API IClock
     /**
      * Returns the arrival time of a message scheduled via scheduleClockEvent().
      */
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const = 0;
+    virtual clocktime_t getArrivalClockTime(cMessage *msg) const = 0;
 };
 
 } // namespace inet
