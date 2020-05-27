@@ -34,7 +34,7 @@ class INET_API PacketTransmitter : public PacketTransmitterBase
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual simclocktime_t calculateDuration(const Packet *packet) const override;
+    virtual clocktime_t calculateDuration(const Packet *packet) const override;
     virtual void scheduleTxEndTimer(Signal *signal);
 
     virtual void startTx(Packet *packet);

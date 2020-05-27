@@ -68,7 +68,7 @@ void PacketTransmitter::endTx()
     producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
-simclocktime_t PacketTransmitter::calculateDuration(const Packet *packet) const
+clocktime_t PacketTransmitter::calculateDuration(const Packet *packet) const
 {
     return packet->getDataLength().get() / datarate.get();
 }

@@ -14,31 +14,31 @@
 //
 
 cplusplus {{
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/common/clock/common/ClockTime.h"
 }}
 
 namespace inet;
 
-class SimClockTime
+class ClockTime
 {
     @existingClass;
     @overwritePreviousDefinition;
     @descriptor(false);
     @opaque;
     @byValue;
-    @cppType(inet::common::SimClockTime);
-    @fromString(inet::common::SimClockTime::parse($)); @toString($.str());
-    @defaultValue(SIMCLOCKTIME_ZERO);
+    @cppType(inet::common::ClockTime);
+    @fromString(inet::common::ClockTime::parse($)); @toString($.str());
+    @defaultValue(CLOCKTIME_ZERO);
 }
 
-class simclocktime_t
+class clocktime_t
 {
     @existingClass;
     @overwritePreviousDefinition;
     @descriptor(false);
     @opaque;
     @byValue;
-    @cppType(inet::simclocktime_t);
-    @fromString(inet::common::SimClockTime::parse($)); @toString($.str());
-    @defaultValue(SIMCLOCKTIME_ZERO);
+    @cppType(inet::clocktime_t);
+    @fromString(inet::common::ClockTime::parse($)); @toString($.str());
+    @defaultValue(CLOCKTIME_ZERO);
 }

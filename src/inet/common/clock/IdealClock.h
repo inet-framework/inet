@@ -26,9 +26,9 @@ namespace inet {
 class INET_API IdealClock : public PredictableClockBase
 {
   public:
-    virtual simclocktime_t fromSimTime(simtime_t t) const override;
-    virtual simtime_t toSimTime(simclocktime_t t) const override;
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const override;
+    virtual clocktime_t fromSimTime(simtime_t t) const override;
+    virtual simtime_t toSimTime(clocktime_t t) const override;
+    virtual clocktime_t getArrivalClockTime(cMessage *msg) const override;
 };
 
 } // namespace inet

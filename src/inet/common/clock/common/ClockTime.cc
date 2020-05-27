@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/common/clock/common/ClockTime.h"
 
 namespace inet {
 
 #ifdef WITH_CLOCK_SUPPORT
 
-const SimClockTime SimClockTime::ZERO;
+const ClockTime ClockTime::ZERO;
 
 #endif // WITH_CLOCK_SUPPORT
 

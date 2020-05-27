@@ -18,7 +18,7 @@
 #ifndef __INET_CLOCKUSINGMODULEMIXIN_H
 #define __INET_CLOCKUSINGMODULEMIXIN_H
 
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/common/clock/common/ClockTime.h"
 
 #ifdef WITH_CLOCK_SUPPORT
 #include "inet/common/clock/contract/IClock.h"
@@ -46,28 +46,28 @@ class INET_API ClockUsingModuleMixin : public T
 
     virtual void initialize(int stage);
 
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg);
+    virtual void scheduleClockEvent(clocktime_t t, cMessage *msg);
     virtual cMessage *cancelClockEvent(cMessage *msg);
     virtual void cancelAndDeleteClockEvent(cMessage *msg);
 
-    virtual simclocktime_t getClockTime() const;
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const;
+    virtual clocktime_t getClockTime() const;
+    virtual clocktime_t getArrivalClockTime(cMessage *msg) const;
 
     using T::uniform;
     using T::exponential;
     using T::normal;
     using T::truncnormal;
-    virtual SimClockTime uniform(SimClockTime a, SimClockTime b, int rng=0) const  {return uniform(a.dbl(), b.dbl(), rng);}
-    virtual SimClockTime exponential(SimClockTime mean, int rng=0) const  {return exponential(mean.dbl(), rng);}
-    virtual SimClockTime normal(SimClockTime mean, SimClockTime stddev, int rng=0) const  {return normal(mean.dbl(), stddev.dbl(), rng);}
-    virtual SimClockTime truncnormal(SimClockTime mean, SimClockTime stddev, int rng=0) const  {return truncnormal(mean.dbl(), stddev.dbl(), rng);}
+    virtual ClockTime uniform(ClockTime a, ClockTime b, int rng=0) const  {return uniform(a.dbl(), b.dbl(), rng);}
+    virtual ClockTime exponential(ClockTime mean, int rng=0) const  {return exponential(mean.dbl(), rng);}
+    virtual ClockTime normal(ClockTime mean, ClockTime stddev, int rng=0) const  {return normal(mean.dbl(), stddev.dbl(), rng);}
+    virtual ClockTime truncnormal(ClockTime mean, ClockTime stddev, int rng=0) const  {return truncnormal(mean.dbl(), stddev.dbl(), rng);}
 #else // #ifdef WITH_CLOCK_SUPPORT
   public:
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) { T::scheduleAt(t, msg); }
+    virtual void scheduleClockEvent(clocktime_t t, cMessage *msg) { T::scheduleAt(t, msg); }
     virtual cMessage *cancelClockEvent(cMessage *msg) { return T::cancelEvent(msg); }
     virtual void cancelAndDeleteClockEvent(cMessage *msg) { T::cancelAndDelete(msg); }
-    virtual simclocktime_t getClockTime() const { return simTime(); }
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const { return msg->getArrivalTime(); }
+    virtual clocktime_t getClockTime() const { return simTime(); }
+    virtual clocktime_t getArrivalClockTime(cMessage *msg) const { return msg->getArrivalTime(); }
 #endif // #ifdef WITH_CLOCK_SUPPORT
 };
 

@@ -46,7 +46,7 @@ class INET_API StreamingTransmitter : public OperationalMixin<PacketTransmitterB
     virtual void endTx();
     virtual void abortTx();
 
-    virtual simclocktime_t calculateDuration(const Packet *packet) const override;
+    virtual clocktime_t calculateDuration(const Packet *packet) const override;
     virtual void scheduleTxEndTimer(Signal *signal);
 
     // for lifecycle:
