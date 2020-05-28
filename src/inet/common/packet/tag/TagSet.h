@@ -16,7 +16,10 @@
 #ifndef __INET_TAGSET_H_
 #define __INET_TAGSET_H_
 
-#include "inet/common/INETDefs.h"
+#include <vector>
+#include <memory>
+#include "inet/common/Ptr.h"
+#include "inet/common/TagBase.h"
 
 namespace inet {
 
@@ -24,40 +27,55 @@ namespace inet {
  * This class maintains a set of tags. Tags are usually small data strcutures
  * that hold some relevant information. Tags are identified by their type,
  * which means that this class supports adding the same tag type only once.
- * Added tags are exclusively owned by this class and they get deleted with it.
+ * Tags are shared between other instances of this class. Tags can be changed
+ * with a copy-on-write mechanism.
  */
 class INET_API TagSet : public cObject
 {
   protected:
-    std::vector<cObject *> *tags;
+    /**
+     * Both the vector and the individual tags can be shared among different instances of this class.
+     */
+    Ptr<SharedVector<Ptr<const TagBase>>> tags;
 
   protected:
-    void ensureAllocated();
-
-    void addTag(cObject *tag);
-    cObject *removeTag(int index);
+    void setTag(int index, const Ptr<const TagBase>& tag);
+    void addTag(const Ptr<const TagBase>& tag);
+    const Ptr<TagBase> removeTag(int index);
 
     int getTagIndex(const std::type_info& typeInfo) const;
     template <typename T> int getTagIndex() const;
 
+    void ensureTagsVectorAllocated();
+    void prepareTagsVectorForUpdate();
+
   public:
-    TagSet();
-    TagSet(const TagSet& other);
-    TagSet(TagSet&& other);
-    ~TagSet();
+    /** @name Constructors and operators */
+    //@{
+    TagSet() : tags(nullptr) { }
+    TagSet(const TagSet& other) : tags(other.tags) { }
+    TagSet(TagSet&& other) : tags(other.tags) { other.tags = nullptr; }
 
     TagSet& operator=(const TagSet& other);
     TagSet& operator=(TagSet&& other);
+    //@}
 
+    /** @name Type independent functions */
+    //@{
     /**
      * Returns the number of tags.
      */
     int getNumTags() const;
 
     /**
-     * Returns the tag at the given index. The index must be in the range [0, getNumTags()).
+     * Returns the shared tag at the given index. The index must be in the range [0, getNumTags()).
      */
-    cObject *getTag(int index) const;
+    const Ptr<const TagBase>& getTag(int index) const;
+
+    /**
+     * Returns the exclusively owned tag at the given index for update. The index must be in the range [0, getNumTags()).
+     */
+    const Ptr<TagBase> getTagForUpdate(int index);
 
     /**
      * Clears the set of tags.
@@ -68,46 +86,99 @@ class INET_API TagSet : public cObject
      * Copies the set of tags from the other set.
      */
     void copyTags(const TagSet& other);
+    //@}
+
+    /** @name Type dependent functions */
+    //@{
+    /**
+     * Returns the shared tag of the provided type, or returns nullptr if no such tag is present.
+     */
+    template <typename T> const Ptr<const T> findTag() const;
 
     /**
-     * Returns the tag for the provided type, or returns nullptr if no such tag is present.
+     * Returns the exclusively owned tag of the provided type for update, or returns nullptr if no such tag is present.
      */
-    template <typename T> T *findTag() const;
+    template <typename T> const Ptr<T> findTagForUpdate();
 
     /**
-     * Returns the tag for the provided type, or throws an exception if no such tag is present.
+     * Returns the shared tag of the provided type, or throws an exception if no such tag is present.
      */
-    template <typename T> T *getTag() const;
+    template <typename T> const Ptr<const T> getTag() const;
 
     /**
-     * Returns a newly added tag for the provided type, or throws an exception if such a tag is already present.
+     * Returns the exclusively owned tag of the provided type for update, or throws an exception if no such tag is present.
      */
-    template <typename T> T *addTag();
+    template <typename T> const Ptr<T> getTagForUpdate();
 
     /**
-     * Returns a newly added tag for the provided type if absent, or returns the tag that is already present.
+     * Returns a newly added exclusively owned tag of the provided type for update, or throws an exception if such a tag is already present.
      */
-    template <typename T> T *addTagIfAbsent();
+    template <typename T> const Ptr<T> addTag();
 
     /**
-     * Removes the tag for the provided type, or throws an exception if no such tag is present.
+     * Returns a newly added exclusively owned tag of the provided type if absent, or returns the exclusively owned tag that is already present for update.
      */
-    template <typename T> T *removeTag();
+    template <typename T> const Ptr<T> addTagIfAbsent();
 
     /**
-     * Removes the tag for the provided type if present, or returns nullptr if no such tag is present.
+     * Removes the tag of the provided type and returns it for update, or throws an exception if no such tag is present.
      */
-    template <typename T> T *removeTagIfPresent();
+    template <typename T> const Ptr<T> removeTag();
+
+    /**
+     * Removes the tag of the provided type if present and returns it for update, or returns nullptr if no such tag is present.
+     */
+    template <typename T> const Ptr<T> removeTagIfPresent();
+    //@}
 };
+
+inline TagSet& TagSet::operator=(const TagSet& other)
+{
+    if (this != &other)
+        tags = other.tags;
+    return *this;
+}
+
+inline TagSet& TagSet::operator=(TagSet&& other)
+{
+    if (this != &other) {
+        tags = other.tags;
+        other.tags = nullptr;
+    }
+    return *this;
+}
 
 inline int TagSet::getNumTags() const
 {
     return tags == nullptr ? 0 : tags->size();
 }
 
-inline cObject *TagSet::getTag(int index) const
+inline void TagSet::setTag(int index, const Ptr<const TagBase>& tag)
 {
-    return tags->at(index);
+    (*tags)[index] = tag;
+}
+
+inline const Ptr<const TagBase>& TagSet::getTag(int index) const
+{
+    return (*tags)[index];
+}
+
+inline const Ptr<TagBase> TagSet::getTagForUpdate(int index)
+{
+    const Ptr<const TagBase>& tag = getTag(index);
+    if (tag.use_count() != 1)
+        setTag(index, tag->dupShared());
+    return constPtrCast<TagBase>(getTag(index));
+}
+
+inline void TagSet::clearTags()
+{
+    tags = nullptr;
+}
+
+inline void TagSet::copyTags(const TagSet& source)
+{
+    operator=(source);
 }
 
 template <typename T>
@@ -117,55 +188,75 @@ inline int TagSet::getTagIndex() const
 }
 
 template <typename T>
-inline T *TagSet::findTag() const
+inline const Ptr<const T> TagSet::findTag() const
 {
     int index = getTagIndex<T>();
-    return index == -1 ? nullptr : static_cast<T *>((*tags)[index]);
+    return index == -1 ? nullptr : staticPtrCast<const T>(getTag(index));
 }
 
 template <typename T>
-inline T *TagSet::getTag() const
+inline const Ptr<T> TagSet::findTagForUpdate()
+{
+    int index = getTagIndex<T>();
+    return index == -1 ? nullptr : staticPtrCast<T>(getTagForUpdate(index));
+}
+
+template <typename T>
+inline const Ptr<const T> TagSet::getTag() const
 {
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
-    return static_cast<T *>((*tags)[index]);
+    return staticPtrCast<const T>(getTag(index));
 }
 
 template <typename T>
-inline T *TagSet::addTag()
+inline const Ptr<T> TagSet::getTagForUpdate()
+{
+    int index = getTagIndex<T>();
+    if (index == -1)
+        throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
+    return staticPtrCast<T>(getTagForUpdate(index));
+}
+
+template <typename T>
+inline const Ptr<T> TagSet::addTag()
 {
     int index = getTagIndex<T>();
     if (index != -1)
         throw cRuntimeError("Tag '%s' is present", opp_typename(typeid(T)));
-    T *tag = new T();
+    const Ptr<T>& tag = makeShared<T>();
     addTag(tag);
     return tag;
 }
 
 template <typename T>
-inline T *TagSet::addTagIfAbsent()
+inline const Ptr<T> TagSet::addTagIfAbsent()
 {
-    T *tag = findTag<T>();
-    if (tag == nullptr)
-        addTag(tag = new T());
-    return tag;
+    const Ptr<T>& tag = findTagForUpdate<T>();
+    if (tag != nullptr)
+        return tag;
+    else {
+        const Ptr<T>& tag = makeShared<T>();
+        addTag(tag);
+        return tag;
+    }
 }
 
 template <typename T>
-inline T *TagSet::removeTag()
+inline const Ptr<T> TagSet::removeTag()
 {
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
-    return static_cast<T *>(removeTag(index));
+    return staticPtrCast<T>(removeTag(index));
 }
 
 template <typename T>
-inline T *TagSet::removeTagIfPresent()
+inline const Ptr<T> TagSet::removeTagIfPresent()
 {
     int index = getTagIndex<T>();
-    return index == -1 ? nullptr : static_cast<T *>(removeTag(index));
+    return index == -1 ? nullptr : staticPtrCast<T>(removeTag(index));
 }
 
 } // namespace
