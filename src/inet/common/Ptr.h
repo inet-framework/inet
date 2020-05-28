@@ -47,6 +47,9 @@ namespace inet {
 template<class T>
 using Ptr = std::shared_ptr<T>;
 
+template<class T>
+using SharedBase = std::enable_shared_from_this<T>;
+
 template<class T, typename... Args>
 Ptr<T> makeShared(Args&&... args)
 {
@@ -75,6 +78,9 @@ Ptr<T> constPtrCast(const Ptr<U>& r)
 
 template<class T>
 using Ptr = IntrusivePtr<T>;
+
+template<class T>
+using SharedBase = IntrusivePtrCounter<T>;
 
 template<class T, typename... Args>
 Ptr<T> makeShared(Args&&... args)
@@ -111,6 +117,12 @@ Ptr<T> __checknull(const Ptr<T>& p, const char *expr, const char *file, int line
         throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);
     return p;
 }
+
+
+template <typename T>
+class INET_API SharedVector : public std::vector<T>, public SharedBase<SharedVector<T>>
+{
+};
 
 } // namespace inet
 
