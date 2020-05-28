@@ -25,7 +25,7 @@ class Message extends cMessage
 {
     @existingClass;
     @descriptor(readonly);
-    cObject *tags[] @getter(getTag) @sizeGetter(getNumTags);
+    cObject *tags[] @getter(_getTag) @sizeGetter(getNumTags);
 }
 
 class Request extends Message
