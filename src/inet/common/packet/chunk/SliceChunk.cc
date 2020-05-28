@@ -46,7 +46,7 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->offset && this->offset <= chunkLength);
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->length && this->offset + this->length <= chunkLength);
 #endif
-    tags.copyTags(chunk->tags, offset, b(0), length);
+    regionTags.copyTags(chunk->regionTags, offset, b(0), length);
 }
 
 void SliceChunk::forEachChild(cVisitor *v)
