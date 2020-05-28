@@ -86,7 +86,7 @@ void InterfaceEntry::clearProtocolDataSet()
     int n = protocolDataSet.getNumTags();
     ids.reserve(n);
     for (int i=0; i < n; i++)
-        ids[i] = static_cast<InterfaceProtocolData *>(protocolDataSet.getTag(i))->id;
+        ids[i] = staticPtrCast<const InterfaceProtocolData>(protocolDataSet.getTag(i))->id;
     protocolDataSet.clearTags();
     for (int i=0; i < n; i++)
         changed(interfaceConfigChangedSignal, ids[i]);
