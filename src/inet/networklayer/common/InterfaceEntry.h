@@ -23,6 +23,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/TagBase.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
@@ -53,7 +54,7 @@ class INET_API MacEstimateCostProcess
  * Base class for protocol-specific data on an interface.
  * Notable subclasses are Ipv4InterfaceData and Ipv6InterfaceData.
  */
-class INET_API InterfaceProtocolData : public cObject
+class INET_API InterfaceProtocolData : public TagBase
 {
     friend class InterfaceEntry;    //only this guy is allowed to set ownerp
 
@@ -238,8 +239,8 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     /**
      * Returns the message tag at the given index.
      */
-    cObject *getProtocolData(int index) const {
-        return protocolDataSet.getTag(index);
+    const Ptr<const InterfaceProtocolData> getProtocolData(int index) const {
+        return staticPtrCast<const InterfaceProtocolData>(protocolDataSet.getTag(index));
     }
 
     /**
@@ -250,23 +251,37 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     /**
      * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
      */
-    template<typename T> T *findProtocolData() const {
+    template<typename T> const Ptr<const T> findProtocolData() const {
         return protocolDataSet.findTag<T>();
+    }
+
+    /**
+     * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
+     */
+    template<typename T> const Ptr<T> findProtocolDataForUpdate() {
+        return protocolDataSet.findTagForUpdate<T>();
     }
 
     /**
      * Returns the message tag for the provided type or throws an exception if no such message tag is found.
      */
-    template<typename T> T *getProtocolData() const {
+    template<typename T> const Ptr<const T> getProtocolData() const {
         return protocolDataSet.getTag<T>();
+    }
+
+    /**
+     * Returns the message tag for the provided type or throws an exception if no such message tag is found.
+     */
+    template<typename T> const Ptr<T> getProtocolDataForUpdate() {
+        return protocolDataSet.getTagForUpdate<T>();
     }
 
     /**
      * Returns a newly added message tag for the provided type, or throws an exception if such a message tag is already present.
      */
-    template<typename T> T *addProtocolData() {
+    template<typename T> Ptr<T> addProtocolData() {
         auto t = protocolDataSet.addTag<T>();
-        auto ipd = check_and_cast<InterfaceProtocolData *>(t);
+        auto ipd = staticPtrCast<InterfaceProtocolData>(t);
         ipd->ownerp = this;
         changed(interfaceConfigChangedSignal, ipd->id);
         return t;
@@ -275,17 +290,20 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     /**
      * Returns a newly added message tag for the provided type if absent, or returns the message tag that is already present.
      */
-    template<typename T> T *addProtocolDataIfAbsent() {
-        auto t = protocolDataSet.findTag<T>();
-        if (t == nullptr)
-            t = protocolDataSet.addTag<T>();
+    template<typename T> const Ptr<T> addProtocolDataIfAbsent() {
+        auto t = protocolDataSet.addTagIfAbsent<T>();
+        auto ipd = staticPtrCast<InterfaceProtocolData>(t);
+        if (ipd->ownerp != this) {
+            ipd->ownerp = this;
+            changed(interfaceConfigChangedSignal, ipd->id);
+        }
         return t;
     }
 
     /**
      * Removes the message tag for the provided type, or throws an exception if no such message tag is found.
      */
-    template<typename T> T *removeProtocolData() {
+    template<typename T> Ptr<T> removeProtocolData() {
         auto t = protocolDataSet.removeTag<T>();
         check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
         changed(interfaceConfigChangedSignal, t->id);
@@ -295,7 +313,7 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     /**
      * Removes the message tag for the provided type if present, or returns nullptr if no such message tag is found.
      */
-    template<typename T> T *removeProtocolDataIfPresent() {
+    template<typename T> Ptr<T> removeProtocolDataIfPresent() {
         auto t = protocolDataSet.removeTagIfPresent<T>();
         if (t != nullptr) {
             check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
