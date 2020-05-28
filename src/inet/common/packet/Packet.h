@@ -22,6 +22,7 @@
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/tag/RegionTagSet.h"
 #include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/TagBase.h"
 
 namespace inet {
 
@@ -110,8 +111,8 @@ class INET_API Packet : public cPacket
     const ChunkTemporarySharedPtr *getFront() const;
     const ChunkTemporarySharedPtr *getData() const;
     const ChunkTemporarySharedPtr *getBack() const;
-    int getRegionTagsArraySize();
-    const RegionTagSet::RegionTag<cObject>& getRegionTags(int index);
+    const TagBase *_getTag(int index) { return tags.getTag(index).get(); }
+    const RegionTagSet::RegionTag<TagBase>& _getRegionTag(int index) { return regionTags.getRegionTag(index); }
     //@}
 
     /** @name Self checking functions */
@@ -853,7 +854,7 @@ class INET_API Packet : public cPacket
     /**
      * Returns the packet tag at the given index.
      */
-    cObject *getTag(int index) const {
+    const Ptr<const TagBase> getTag(int index) const {
         return tags.getTag(index);
     }
 
@@ -874,42 +875,56 @@ class INET_API Packet : public cPacket
     /**
      * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
      */
-    template<typename T> T *findTag() const {
+    template<typename T> const Ptr<const T> findTag() const {
         return tags.findTag<T>();
+    }
+
+    /**
+     * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
+     */
+    template<typename T> const Ptr<T> findTagForUpdate() {
+        return tags.findTagForUpdate<T>();
     }
 
     /**
      * Returns the packet tag for the provided type or throws an exception if no such packet tag is found.
      */
-    template<typename T> T *getTag() const {
+    template<typename T> const Ptr<const T> getTag() const {
         return tags.getTag<T>();
+    }
+
+    /**
+     * Returns the packet tag for the provided type or throws an exception if no such packet tag is found.
+     */
+    template<typename T> const Ptr<T> getTagForUpdate() {
+        return tags.getTagForUpdate<T>();
     }
 
     /**
      * Returns a newly added packet tag for the provided type, or throws an exception if such a packet tag is already present.
      */
-    template<typename T> T *addTag() {
+    template<typename T> const Ptr<T> addTag() {
         return tags.addTag<T>();
     }
 
     /**
      * Returns a newly added packet tag for the provided type if absent, or returns the packet tag that is already present.
      */
-    template<typename T> T *addTagIfAbsent() {
+    template<typename T> const Ptr<T> addTagIfAbsent() {
         return tags.addTagIfAbsent<T>();
     }
 
     /**
      * Removes the packet tag for the provided type, or throws an exception if no such packet tag is found.
      */
-    template<typename T> T *removeTag() {
+    template<typename T> const Ptr<T> removeTag() {
         return tags.removeTag<T>();
     }
 
     /**
      * Removes the packet tag for the provided type if present, or returns nullptr if no such packet tag is found.
      */
-    template<typename T> T *removeTagIfPresent() {
+    template<typename T> const Ptr<T> removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
     //@}
@@ -926,7 +941,7 @@ class INET_API Packet : public cPacket
     /**
      * Returns the region tag at the given index.
      */
-    const cObject *getRegionTag(int index) const {
+    const Ptr<const TagBase> getRegionTag(int index) const {
         return regionTags.getTag(index);
     }
 
@@ -947,29 +962,29 @@ class INET_API Packet : public cPacket
     /**
      * Returns the region tag for the provided type and range, or returns nullptr if no such region tag is found.
      */
-    template<typename T> const T *findRegionTag(b offset = b(0), b length = b(-1)) const {
+    template<typename T> const Ptr<const T> findRegionTag(b offset = b(0), b length = b(-1)) const {
         return regionTags.findTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns the region tag for the provided type and range, or throws an exception if no such region tag is found.
      */
-    template<typename T> const T *getRegionTag(b offset = b(0), b length = b(-1)) const {
+    template<typename T> const Ptr<const T> getRegionTag(b offset = b(0), b length = b(-1)) const {
         return regionTags.getTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void (b, b, const T*)> f) const {
+    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const {
         return regionTags.mapAllTags<const T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void (b, b, T*)> f) {
-        return regionTags.mapAllTags<T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
+    template<typename T> void mapAllRegionTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f) {
+        return regionTags.mapAllTagsForUpdate<T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
     }
 
     /**
@@ -982,21 +997,21 @@ class INET_API Packet : public cPacket
     /**
      * Returns all region tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<T>> getAllRegionTags(b offset = b(0), b length = b(-1)) {
-        return regionTags.getAllTags<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
+    template<typename T> std::vector<RegionTagSet::RegionTag<T>> getAllRegionTagsForUpdate(b offset = b(0), b length = b(-1)) {
+        return regionTags.getAllTagsForUpdate<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns a newly added region tag for the provided type and range, or throws an exception if such a region tag is already present.
      */
-    template<typename T> T *addRegionTag(b offset = b(0), b length = b(-1)) {
+    template<typename T> const Ptr<T> addRegionTag(b offset = b(0), b length = b(-1)) {
         return regionTags.addTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns a newly added region tag for the provided type and range if absent, or returns the region tag that is already present.
      */
-    template<typename T> T *addRegionTagIfAbsent(b offset = b(0), b length = b(-1)) {
+    template<typename T> const Ptr<T> addRegionTagIfAbsent(b offset = b(0), b length = b(-1)) {
         return regionTags.addTagIfAbsent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
@@ -1010,14 +1025,14 @@ class INET_API Packet : public cPacket
     /**
      * Removes the region tag for the provided type and range, or throws an exception if no such region tag is found.
      */
-    template <typename T> T *removeRegionTag(b offset, b length) {
+    template <typename T> const Ptr<T> removeRegionTag(b offset, b length) {
         return regionTags.removeTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Removes the region tag for the provided type and range if present, or returns nullptr if no such region tag is found.
      */
-    template <typename T> T *removeRegionTagIfPresent(b offset, b length) {
+    template <typename T> const Ptr<T> removeRegionTagIfPresent(b offset, b length) {
         return regionTags.removeTagIfPresent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 

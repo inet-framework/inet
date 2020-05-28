@@ -50,7 +50,8 @@ Packet::Packet(const Packet& other) :
     frontIterator(other.frontIterator),
     backIterator(other.backIterator),
     totalLength(other.totalLength),
-    tags(other.tags)
+    tags(other.tags),
+    regionTags(other.regionTags)
 {
     CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
 }
@@ -81,22 +82,14 @@ const ChunkTemporarySharedPtr *Packet::getBack() const
     return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
 }
 
-int Packet::getRegionTagsArraySize()
-{
-    return regionTags.getNumTags();
-}
-
-const RegionTagSet::RegionTag<cObject>& Packet::getRegionTags(int index)
-{
-    return regionTags.getRegionTag(index);
-}
-
 void Packet::forEachChild(cVisitor *v)
 {
     cPacket::forEachChild(v);
     v->visit(const_cast<Chunk *>(content.get()));
     for (int i = 0; i < tags.getNumTags(); i++)
-        v->visit(tags.getTag(i));
+        v->visit(const_cast<TagBase *>(tags.getTag(i).get()));
+    for (int i = 0; i < regionTags.getNumTags(); i++)
+        v->visit(const_cast<TagBase *>(regionTags.getTag(i).get()));
 }
 
 void Packet::setFrontOffset(b offset)
@@ -325,7 +318,32 @@ const Ptr<Chunk> Packet::removeAll()
 
 void Packet::updateAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length, int flags)
 {
-    updateAt<Chunk>(f, offset, length, flags);
+    auto totalLength = getTotalLength();
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+    const auto& chunk = peekAt(offset, length, flags);
+    b chunkLength = chunk->getChunkLength();
+    b frontLength = offset;
+    const auto& frontPart = frontLength > b(0) ? peekAt(b(0), frontLength) : nullptr;
+    b backLength = totalLength - offset - chunkLength;
+    const auto& backPart = backLength > b(0) ? peekAt(totalLength - backLength, backLength) : nullptr;
+    content = EmptyChunk::singleton;
+    const auto& mutableChunk = makeExclusivelyOwnedMutableChunk(chunk);
+    f(mutableChunk);
+    CHUNK_CHECK_USAGE(chunkLength == mutableChunk->getChunkLength(), "length is different");
+    mutableChunk->markImmutable();
+    if (frontLength == b(0) && backLength == b(0))
+        content = mutableChunk;
+    else {
+        const auto& sequenceChunk = makeShared<SequenceChunk>();
+        if (frontLength > b(0))
+            sequenceChunk->insertAtBack(frontPart);
+        sequenceChunk->insertAtBack(mutableChunk);
+        if (backLength > b(0))
+            sequenceChunk->insertAtBack(backPart);
+        sequenceChunk->markImmutable();
+        content = sequenceChunk;
+    }
 }
 
 void Packet::updateAtFront(std::function<void (const Ptr<Chunk>&)> f, b length, int flags)
