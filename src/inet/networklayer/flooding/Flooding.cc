@@ -289,9 +289,8 @@ void Flooding::encapsulate(Packet *appPkt)
     auto pkt = makeShared<FloodingHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(b(headerLength));
 
-    auto hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();
+    auto& hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();
     int ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
-    delete hopLimitReq;
     if (ttl == -1)
         ttl = defaultTtl;
 
@@ -299,7 +298,7 @@ void Flooding::encapsulate(Packet *appPkt)
     seqNum++;
     pkt->setTtl(ttl);
 
-    auto addressReq = appPkt->findTag<L3AddressReq>();
+    const auto& addressReq = appPkt->findTag<L3AddressReq>();
     if (addressReq == nullptr) {
         EV << "warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";

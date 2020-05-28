@@ -24,7 +24,7 @@ namespace inet {
 
 static int classifyPacketByVlanReq(Packet *packet)
 {
-    auto vlanReq = packet->findTag<VlanReq>();
+    const auto& vlanReq = packet->findTag<VlanReq>();
     return vlanReq != nullptr ? vlanReq->getVlanId() : 0;
 }
 
@@ -32,7 +32,7 @@ Register_Packet_Classifier_Function(PacketVlanReqClassifier, classifyPacketByVla
 
 static int classifyPacketByVlanInd(Packet *packet)
 {
-    auto vlanInd = packet->findTag<VlanInd>();
+    const auto& vlanInd = packet->findTag<VlanInd>();
     return vlanInd != nullptr ? vlanInd->getVlanId() : 0;
 }
 

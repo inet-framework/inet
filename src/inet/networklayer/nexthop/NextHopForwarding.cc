@@ -171,7 +171,7 @@ void NextHopForwarding::handleCommand(Request *request)
 
 const InterfaceEntry *NextHopForwarding::getSourceInterfaceFrom(Packet *packet)
 {
-    auto interfaceInd = packet->findTag<InterfaceInd>();
+    const auto& interfaceInd = packet->findTag<InterfaceInd>();
     return interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
@@ -214,9 +214,9 @@ void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
         return;
 
     inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    auto destIeTag = packet->findTag<InterfaceReq>();
+    const auto& destIeTag = packet->findTag<InterfaceReq>();
     destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
-    auto nextHopTag = packet->findTag<NextHopAddressReq>();
+    const auto& nextHopTag = packet->findTag<NextHopAddressReq>();
     L3Address nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
     datagramPreRouting(packet, inIE, destIE, nextHop);
 }
@@ -241,9 +241,9 @@ void NextHopForwarding::handlePacketFromHL(Packet *packet)
     if (datagramLocalOutHook(packet) != IHook::ACCEPT)
         return;
 
-    auto destIeTag = packet->findTag<InterfaceReq>();
+    const auto& destIeTag = packet->findTag<InterfaceReq>();
     destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
-    auto nextHopTag = packet->findTag<NextHopAddressReq>();
+    const auto& nextHopTag = packet->findTag<NextHopAddressReq>();
     nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
 
     datagramLocalOut(packet, destIE, nextHop);
@@ -508,22 +508,20 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const InterfaceEntr
 {
     auto header = makeShared<NextHopForwardingHeader>();
     header->setChunkLength(B(par("headerLength")));
-    auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
+    auto& l3AddressReq = transportPacket->removeTag<L3AddressReq>();
     L3Address src = l3AddressReq->getSrcAddress();
     L3Address dest = l3AddressReq->getDestAddress();
-    delete l3AddressReq;
 
     header->setProtocol(transportPacket->getTag<PacketProtocolTag>()->getProtocol());
 
-    auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
+    auto& hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
-    delete hopLimitReq;
 
     // set source and destination address
     header->setDestinationAddress(dest);
 
     // multicast interface option, but allow interface selection for unicast packets as well
-    auto ifTag = transportPacket->findTag<InterfaceReq>();
+    const auto& ifTag = transportPacket->findTag<InterfaceReq>();
     destIE = ifTag ? interfaceTable->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
 
 
@@ -612,7 +610,7 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEn
     if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getInterfaceName() << " is not broadcast, skipping ARP\n";
         //Peer to peer interface, no broadcast, no MACAddress. // packet->addTagIfAbsent<MACAddressReq>()->setDestinationAddress(macAddress);
-        delete datagram->removeTagIfPresent<DispatchProtocolReq>();
+        datagram->removeTagIfPresent<DispatchProtocolReq>();
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
         datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
@@ -634,7 +632,7 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEn
     else {
         // add control info with MAC address
         datagram->addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopMAC);
-        delete datagram->removeTagIfPresent<DispatchProtocolReq>();
+        datagram->removeTagIfPresent<DispatchProtocolReq>();
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
         datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);

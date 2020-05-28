@@ -90,7 +90,7 @@ void HostAutoConfigurator::setupNetworkLayer()
 
         EV_INFO << "interface " << ifname << " gets " << myAddress.str() << "/" << netmask.str() << std::endl;
 
-        auto ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+        auto& ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
         ipv4Data->setIPAddress(myAddress);
         ipv4Data->setNetmask(netmask);
         ie->setBroadcast(true);

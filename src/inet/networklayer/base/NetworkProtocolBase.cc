@@ -59,7 +59,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (Packet *packet = dynamic_cast<Packet *>(message)) {
         const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        const auto *addr = packet->getTag<L3AddressInd>();
+        const auto& addr = packet->getTag<L3AddressInd>();
         auto remoteAddress(addr->getSrcAddress());
         auto localAddress(addr->getDestAddress());
         bool hasSocket = false;
@@ -100,7 +100,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
         auto& tags = getTags(message);
-        delete tags.removeTagIfPresent<DispatchProtocolReq>();
+        tags.removeTagIfPresent<DispatchProtocolReq>();
         tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
@@ -110,7 +110,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
                 auto& tags = getTags(duplicate);
-                delete tags.removeTagIfPresent<DispatchProtocolReq>();
+                tags.removeTagIfPresent<DispatchProtocolReq>();
                 tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 send(duplicate, "queueOut");
             }

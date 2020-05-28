@@ -329,7 +329,7 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     Ipv4Address getIpv4Netmask() const;
     //@}
 
-    virtual void joinMulticastGroup(const L3Address& address) const;    // XXX why const method?
+    virtual void joinMulticastGroup(const L3Address& address);
     virtual void changeMulticastGroupMembership(const L3Address& multicastAddress,
             McastSourceFilterMode oldFilterMode, const std::vector<L3Address>& oldSourceList,
             McastSourceFilterMode newFilterMode, const std::vector<L3Address>& newSourceList);

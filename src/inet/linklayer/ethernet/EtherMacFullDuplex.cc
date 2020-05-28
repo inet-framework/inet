@@ -97,11 +97,10 @@ void EtherMacFullDuplex::startFrameTransmission()
     ASSERT(!hdr->getSrc().isUnspecified());
 
     // send
-    auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
+    auto& oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
 
     frame->setKind(physicallayer::ETH_CMD_SEND);   //TODO or CMD_SEND_PREEMPTABLE, ...
 

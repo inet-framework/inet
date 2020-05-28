@@ -51,13 +51,13 @@ std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int
 
 Hz NarrowbandTransmitterBase::computeCenterFrequency(const Packet *packet) const
 {
-    auto signalBandReq = const_cast<Packet *>(packet)->findTag<SignalBandReq>();
+    const auto& signalBandReq = const_cast<Packet *>(packet)->findTag<SignalBandReq>();
     return signalBandReq != nullptr ? signalBandReq->getCenterFrequency() : centerFrequency;
 }
 
 Hz NarrowbandTransmitterBase::computeBandwidth(const Packet *packet) const
 {
-    auto signalBandReq = const_cast<Packet *>(packet)->findTag<SignalBandReq>();
+    const auto& signalBandReq = const_cast<Packet *>(packet)->findTag<SignalBandReq>();
     return signalBandReq != nullptr ? signalBandReq->getBandwidth() : bandwidth;
 }
 

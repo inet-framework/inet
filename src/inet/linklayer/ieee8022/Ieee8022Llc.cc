@@ -138,7 +138,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
         }
     }
 
-    auto protocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& protocolTag = packet->findTag<PacketProtocolTag>();
     if (protocolTag != nullptr && upperProtocols.find(protocolTag->getProtocol()) != upperProtocols.end()) {
         send(packet, "upperLayerOut");
     }
@@ -155,7 +155,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
 
 void Ieee8022Llc::encapsulate(Packet *frame)
 {
-    auto protocolTag = frame->findTag<PacketProtocolTag>();
+    const auto& protocolTag = frame->findTag<PacketProtocolTag>();
     const Protocol *protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
     int ethType = -1;
     int snapOui = -1;
@@ -215,8 +215,8 @@ void Ieee8022Llc::decapsulate(Packet *frame)
         frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     }
     else {
-        delete frame->removeTagIfPresent<DispatchProtocolReq>();
-        delete frame->removeTagIfPresent<PacketProtocolTag>();
+        frame->removeTagIfPresent<DispatchProtocolReq>();
+        frame->removeTagIfPresent<PacketProtocolTag>();
     }
 }
 

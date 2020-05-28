@@ -123,7 +123,7 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
     /*
      * Gets port data from the InterfaceTable
      */
-    Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum);
+    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum);
 
     bool isForwardingInterface(InterfaceEntry *ie);
 

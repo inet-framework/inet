@@ -449,7 +449,7 @@ void SctpAssociation::sendIndicationToApp(int32 code, int32 value)
 
     Indication *msg = new Indication(indicationName(code), code);
 
-    SctpCommandReq *indication = msg->addTag<SctpCommandReq>();
+    auto& indication = msg->addTag<SctpCommandReq>();
     indication->setSocketId(assocId);
     indication->setLocalAddr(localAddr);
     indication->setLocalPort(localPort);
@@ -2045,7 +2045,7 @@ void SctpAssociation::pushUlp()
             auto applicationData = makeShared<BytesChunk>();
             applicationData->setBytes(vec);
             applicationData->addTag<CreationTimeTag>()->setCreationTime(smsg->getCreationTime());
-            SctpRcvReq *cmd = applicationPacket->addTag<SctpRcvReq>();
+            auto& cmd = applicationPacket->addTag<SctpRcvReq>();
             cmd->setSocketId(assocId);
             cmd->setGate(appGateIndex);
             cmd->setSid(chunk->sid);
@@ -2831,7 +2831,7 @@ void SctpAssociation::pathStatusIndication(const SctpPathVariables *path,
         const bool status)
 {
     Indication *msg = new Indication("StatusInfo", SCTP_I_STATUS);
-    SctpStatusReq *cmd = msg->addTag<SctpStatusReq>();
+    auto& cmd = msg->addTag<SctpStatusReq>();
     cmd->setPathId(path->remoteAddress);
     cmd->setSocketId(assocId);
     cmd->setActive(status);

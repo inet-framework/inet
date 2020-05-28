@@ -26,7 +26,7 @@ Define_Module(PacketDeserializer);
 
 void PacketDeserializer::processPacket(Packet *packet)
 {
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector::ChunkBuilder chunkBuilder;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, chunkBuilder);

@@ -33,7 +33,7 @@ namespace inet {
 
 const Protocol *findTransportProtocol(Packet *packet)
 {
-    auto transportProtocolInd = packet->findTag<TransportProtocolInd>();
+    const auto& transportProtocolInd = packet->findTag<TransportProtocolInd>();
     return transportProtocolInd == nullptr ? nullptr : transportProtocolInd->getProtocol();
 }
 
@@ -48,7 +48,7 @@ const Protocol& getProtocolId(Packet *packet)
 
 const Ptr<const TransportHeaderBase> findTransportProtocolHeader(Packet *packet)
 {
-    auto transportProtocolInd = packet->findTag<TransportProtocolInd>();
+    const auto& transportProtocolInd = packet->findTag<TransportProtocolInd>();
     return transportProtocolInd == nullptr ? nullptr : dynamicPtrCast<const TransportHeaderBase>(transportProtocolInd->getTransportProtocolHeader());
 }
 

@@ -222,7 +222,7 @@ void Ipv6RoutingTable::routeChanged(Ipv6Route *entry, int fieldCode)
 
 void Ipv6RoutingTable::configureInterfaceForIpv6(InterfaceEntry *ie)
 {
-    Ipv6InterfaceData *ipv6IfData = ie->addProtocolData<Ipv6InterfaceData>();
+    auto ipv6IfData = ie->addProtocolData<Ipv6InterfaceData>();
 
     // for routers, turn on advertisements by default
     //FIXME: we will use this isRouter flag for now. what if future implementations
@@ -256,7 +256,7 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
 
     //o  The loopback address.
     if (ie->isLoopback()) {
-        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(Ipv6Address("::1"), false, SIMTIME_ZERO, SIMTIME_ZERO);
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(Ipv6Address("::1"), false, SIMTIME_ZERO, SIMTIME_ZERO);
         return;
     }
     //o  Its required Link-Local Address for each interface.
@@ -266,7 +266,7 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
     //ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, 0, 0);
 #else /* WITH_xMIPv6 */
     Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-    ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
+    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
 #endif /* WITH_xMIPv6 */
 
     /*o  Any additional Unicast and Anycast Addresses that have been configured
@@ -318,7 +318,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement
        in RAs. The Ipv6 interface data gets overwritten if lines 249 to 262 is uncommented.
        The fix is to create an XML file with all the default values. Customised XML files
        can be used for future protocols that requires different values. (MIPv6)*/
-    Ipv6InterfaceData *d = ie->getProtocolData<Ipv6InterfaceData>();
+    auto& d = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
 
     // parse basic config (attributes)
     d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));

@@ -32,7 +32,7 @@ void ProtocolChecker::initialize(int stage)
 
 bool ProtocolChecker::matchesPacket(const Packet *packet) const
 {
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     return protocol != nullptr && protocols.find(protocol) != protocols.end();
 }

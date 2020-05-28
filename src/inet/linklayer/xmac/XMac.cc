@@ -659,7 +659,7 @@ void XMac::encapsulate(Packet *packet)
 
     //encapsulate the network packet
     packet->insertAtFront(pkt);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
     EV_DETAIL << "pkt encapsulated\n";
 }
 

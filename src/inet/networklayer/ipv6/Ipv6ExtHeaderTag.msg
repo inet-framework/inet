@@ -26,7 +26,7 @@ cplusplus {{
 std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader *eh);
 }}
 
-class Ipv6ExtHeaderTagBase extends cObject
+class Ipv6ExtHeaderTagBase extends TagBase
 {
     Ipv6ExtensionHeader *extensionHeader[] @owned; // array of extension headers, subclassed from ~IPv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag
 }

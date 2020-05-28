@@ -95,7 +95,6 @@ void Ieee8021qEncap::processPacket(Packet *packet, std::vector<int>& vlanIdFilte
     auto oldVlanId = vlanTag != nullptr ? vlanTag->getVid() : -1;
     auto vlanReq = packet->removeTagIfPresent<VlanReq>();
     auto newVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : oldVlanId;
-    delete vlanReq;
     bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), newVlanId) != vlanIdFilter.end();
     if (acceptPacket) {
         auto it = vlanIdMap.find(newVlanId);

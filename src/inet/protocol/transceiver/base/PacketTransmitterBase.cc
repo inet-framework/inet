@@ -62,7 +62,6 @@ Signal *PacketTransmitterBase::encodePacket(const Packet *txPacket) const
     if (oldPacketProtocolTag != nullptr) {
         auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
         *newPacketProtocolTag = *oldPacketProtocolTag;
-        delete oldPacketProtocolTag;
     }
     auto signal = new Signal(packet->getName());
     signal->encapsulate(packet);

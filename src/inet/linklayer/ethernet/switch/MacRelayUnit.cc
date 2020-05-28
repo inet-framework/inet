@@ -79,11 +79,10 @@ void MacRelayUnit::broadcast(Packet *packet, int arrivalInterfaceId)
 {
     EV_DETAIL << "Broadcast frame " << packet << endl;
 
-    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
+    auto& oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
     packet->clearTags();
     auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
     packet->trim();
 
     int numPorts = ifTable->getNumInterfaces();
@@ -136,11 +135,10 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 
     if (outputInterfaceId >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
-        auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
+        auto& oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
         packet->clearTags();
         auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
         *newPacketProtocolTag = *oldPacketProtocolTag;
-        delete oldPacketProtocolTag;
         packet->addTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
         packet->trim();
         emit(packetSentToLowerSignal, packet);

@@ -91,7 +91,7 @@ void MessageDispatcher::handleCanPushPacket(cGate *outGate)
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 {
-    auto socketInd = packet->findTag<SocketInd>();
+    const auto& socketInd = packet->findTag<SocketInd>();
     if (socketInd != nullptr) {
         int socketId = socketInd->getSocketId();
         auto it = socketIdToGateIndex.find(socketId);
@@ -100,9 +100,9 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         else
             throw cRuntimeError("handlePacket(): Unknown socket, id = %d, sender = %s", socketId, inGate->getPathStartGate()->getOwnerModule()->getFullName());
     }
-    auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();;
+    const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();;
     if (dispatchProtocolReq != nullptr) {
-        auto packetProtocolTag = packet->findTag<PacketProtocolTag>();;
+        const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();;
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
         // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1)) {
@@ -129,7 +129,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         else
             throw cRuntimeError("handlePacket(): Unknown service primitive");
     }
-    auto interfaceReq = packet->findTag<InterfaceReq>();
+    const auto& interfaceReq = packet->findTag<InterfaceReq>();
     if (interfaceReq != nullptr) {
         int interfaceId = interfaceReq->getInterfaceId();
         auto it = interfaceIdToGateIndex.find(interfaceId);
@@ -143,7 +143,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 
 cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
 {
-    auto socketReq = message->findTag<SocketReq>();
+    const auto& socketReq = message->findTag<SocketReq>();
     if (socketReq != nullptr) {
         int socketReqId = socketReq->getSocketId();
         auto it = socketIdToGateIndex.find(socketReqId);
@@ -152,7 +152,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         else if (it->first != socketReqId)
             throw cRuntimeError("handleMessage(): Socket is already registered: id = %d, gate = %d, new gate = %d (from %s)", socketReqId, it->second, inGate->getIndex(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
     }
-    auto socketInd = message->findTag<SocketInd>();
+    const auto& socketInd = message->findTag<SocketInd>();
     if (socketInd != nullptr) {
         int socketId = socketInd->getSocketId();
         auto it = socketIdToGateIndex.find(socketId);
@@ -161,7 +161,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         else
             throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketId);
     }
-    auto dispatchProtocolReq = message->findTag<DispatchProtocolReq>();;
+    const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();;
     if (dispatchProtocolReq != nullptr) {
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
         // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
@@ -185,7 +185,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         else
             throw cRuntimeError("handlePacket(): Unknown service primitive");
     }
-    auto interfaceReq = message->findTag<InterfaceReq>();
+    const auto& interfaceReq = message->findTag<InterfaceReq>();
     if (interfaceReq != nullptr) {
         int interfaceId = interfaceReq->getInterfaceId();
         auto it = interfaceIdToGateIndex.find(interfaceId);

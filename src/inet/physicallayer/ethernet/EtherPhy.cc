@@ -244,7 +244,7 @@ void EtherPhy::modifyTxProgress(cMessage *message)
     ASSERT(scheduledTxModifier == message);
     scheduledTxModifier = nullptr;
     auto newPacket = check_and_cast<Packet *>(message);
-    auto req = newPacket->removeTag<PreemptionModifyReq>();
+    auto& req = newPacket->removeTag<PreemptionModifyReq>();
     b signalFirstChangedBitPosition = PREAMBLE_BYTES + SFD_BYTES + req->getFirstChangedOffset();
     simtime_t timePosition = calculateDuration(signalFirstChangedBitPosition, curTx->getBitrate());
     ASSERT(curTxStartTime + timePosition == simTime());
@@ -368,7 +368,7 @@ void EtherPhy::handleDisconnected()
 EthernetSignal *EtherPhy::encapsulate(Packet *packet)
 {
     auto phyHeader = makeShared<EthernetFragmentPhyHeader>();
-    PreemptionReq *req = nullptr;
+    Ptr<PreemptionReq> req = nullptr;
     switch (packet->getKind()) {
         case ETH_CMD_SEND:
             phyHeader->setPreambleType(SFD);

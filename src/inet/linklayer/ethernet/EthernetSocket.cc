@@ -95,7 +95,7 @@ void EthernetSocket::setCallback(ICallback *callback)
 bool EthernetSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
-    auto socketInd = tags.findTag<SocketInd>();
+    const auto& socketInd = tags.findTag<SocketInd>();
     return socketInd != nullptr && socketInd->getSocketId() == socketId;
 }
 

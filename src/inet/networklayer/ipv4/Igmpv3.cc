@@ -109,7 +109,7 @@ void Igmpv3::initialize(int stage)
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (ie->isMulticast())
-                    ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
+                    ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
             }
         }
     }
@@ -366,7 +366,7 @@ void Igmpv3::processRouterGroupTimer(cMessage *msg)
         groupData->filter = IGMPV3_FM_INCLUDE;
         if (!timerRunning) {
             EV_DETAIL << "Deleting multicast listener for group '" << groupData->groupAddr << "' from the interface table.\n";
-            ie->getProtocolData<Ipv4InterfaceData>()->removeMulticastListener(groupData->groupAddr);
+            ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->removeMulticastListener(groupData->groupAddr);
             groupData->parent->deleteGroupData(groupData->groupAddr);
 
             EV_DETAIL << "New Router State is <deleted>.\n";
@@ -399,7 +399,7 @@ void Igmpv3::processRouterSourceTimer(cMessage *msg)
         }
     }
     if (last) {
-        ie->getProtocolData<Ipv4InterfaceData>()->removeMulticastListener(groupData->groupAddr);
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->removeMulticastListener(groupData->groupAddr);
         groupData->parent->deleteGroupData(groupData->groupAddr);
     }
 }
@@ -896,7 +896,7 @@ void Igmpv3::processReport(Packet *packet)
             groupData->collectForwardedSources(newSourceList);
 
             if (newSourceList != oldSourceList) {
-                ie->getProtocolData<Ipv4InterfaceData>()->setMulticastListeners(groupData->groupAddr, newSourceList.filterMode, newSourceList.sources);
+                ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setMulticastListeners(groupData->groupAddr, newSourceList.filterMode, newSourceList.sources);
                 // TODO notifications?
             }
         }

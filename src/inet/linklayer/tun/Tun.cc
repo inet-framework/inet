@@ -57,7 +57,7 @@ void Tun::handleUpperMessage(cMessage *message)
 
 void Tun::handleUpperPacket(Packet *packet)
 {
-    auto socketReq = packet->findTag<SocketReq>();
+    const auto& socketReq = packet->findTag<SocketReq>();
     // check if packet is from app by finding SocketReq with sockedId that is in socketIds
     auto sId = socketReq != nullptr ? socketReq->getSocketId() : -1;
     ASSERT(packet->getControlInfo() == nullptr);

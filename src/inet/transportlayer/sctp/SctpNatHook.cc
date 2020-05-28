@@ -42,10 +42,10 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
 {
     SctpNatEntry *entry;
     SctpChunk *chunk;
-    auto tag = datagram->findTag<InterfaceReq>();
+    const auto& tag = datagram->findTag<InterfaceReq>();
     const InterfaceEntry *outIE = (tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr);
 
-    auto inIeTag = datagram->findTag<InterfaceInd>();
+    const auto& inIeTag = datagram->findTag<InterfaceInd>();
     const InterfaceEntry *inIE = (inIeTag != nullptr ? ift->getInterfaceById(inIeTag->getInterfaceId()) : nullptr);
 
     const auto& dgram = removeNetworkProtocolHeader<Ipv4Header>(datagram);

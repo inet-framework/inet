@@ -173,7 +173,7 @@ void NextHopRoutingTable::configureInterface(InterfaceEntry *ie)
     int metric = (int)(ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
     int interfaceModuleId = ie->getId();
     // mac
-    NextHopInterfaceData *d = ie->addProtocolData<NextHopInterfaceData>();
+    auto d = ie->addProtocolData<NextHopInterfaceData>();
     d->setMetric(metric);
     if (addressType == L3Address::MAC)
         d->setAddress(ie->getMacAddress());
