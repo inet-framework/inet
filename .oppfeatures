@@ -1216,6 +1216,30 @@
         linkerFlags = ""
         />
     <feature
+        id="queueingtutorial"
+        name="Queueing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to queueing."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = "tutorial queueing"
+        nedPackages = "inet.tutorials.queueing"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="protocoltutorial"
+        name="Protocol tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to protocol."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = "tutorial protocol"
+        nedPackages = "inet.tutorials.protocol"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="general_showcases"
         name="General showcases"
         description = "Showcases that demonstrate features which are independent of any specific network technology."
