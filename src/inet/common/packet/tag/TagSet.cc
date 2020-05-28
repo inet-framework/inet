@@ -17,110 +17,21 @@
 
 namespace inet {
 
-TagSet::TagSet() :
-    tags(nullptr)
+void TagSet::addTag(const Ptr<const TagBase>& tag)
 {
-}
-
-TagSet::TagSet(const TagSet& other) :
-    tags(nullptr)
-{
-    operator=(other);
-}
-
-TagSet::TagSet(TagSet&& other) :
-    tags(other.tags)
-{
-    other.tags = nullptr;
-}
-
-TagSet::~TagSet()
-{
-    clearTags();
-}
-
-TagSet& TagSet::operator=(const TagSet& other)
-{
-    if (this != &other) {
-        clearTags();
-        if (other.tags == nullptr)
-            tags = nullptr;
-        else {
-            ensureAllocated();
-            for (auto tag : *other.tags)
-                addTag(tag->dup());
-        }
-    }
-    return *this;
-}
-
-TagSet& TagSet::operator=(TagSet&& other)
-{
-    if (this != &other) {
-        clearTags();
-        tags = other.tags;
-        other.tags = nullptr;
-    }
-    return *this;
-}
-
-void TagSet::ensureAllocated()
-{
-    if (tags == nullptr) {
-        tags = new std::vector<cObject *>();
-        tags->reserve(16);
-    }
-}
-
-void TagSet::addTag(cObject *tag)
-{
-    ensureAllocated();
+    ensureTagsVectorAllocated();
+    prepareTagsVectorForUpdate();
     tags->push_back(tag);
-    if (tag->isOwnedObject())
-        take(static_cast<cOwnedObject *>(tag));
 }
 
-cObject *TagSet::removeTag(int index)
+const Ptr<TagBase> TagSet::removeTag(int index)
 {
-    cObject *tag = (*tags)[index];
-    if (tag->isOwnedObject())
-        drop(static_cast<cOwnedObject *>(tag));
+    prepareTagsVectorForUpdate();
+    const Ptr<TagBase> tag = getTagForUpdate(index);
     tags->erase(tags->begin() + index);
-    if (tags->size() == 0) {
-        delete tags;
+    if (tags->size() == 0)
         tags = nullptr;
-    }
-    return tag;
-}
-
-void TagSet::clearTags()
-{
-    if (tags != nullptr) {
-        int numTags = tags->size();
-        for (int index = 0; index < numTags; index++) {
-            cObject *tag = (*tags)[index];
-            if (tag->isOwnedObject())
-                drop(static_cast<cOwnedObject *>(tag));
-            delete tag;
-        }
-        delete tags;
-        tags = nullptr;
-    }
-}
-
-void TagSet::copyTags(const TagSet& source)
-{
-    clearTags();
-    if (source.tags != nullptr) {
-        int numTags = source.tags->size();
-        tags = new std::vector<cObject *>(numTags);
-        for (int index = 0; index < numTags; index++) {
-            cObject *tag = (*source.tags)[index]->dup();
-            if (tag->isOwnedObject())
-                take(static_cast<cOwnedObject *>(tag));
-            (*tags)[index] = tag;
-        }
-    }
+    return constPtrCast<TagBase>(tag);
 }
 
 int TagSet::getTagIndex(const std::type_info& typeInfo) const
@@ -130,11 +41,29 @@ int TagSet::getTagIndex(const std::type_info& typeInfo) const
     else {
         int numTags = tags->size();
         for (int index = 0; index < numTags; index++) {
-            cObject *tag = (*tags)[index];
-            if (typeInfo == typeid(*tag))
+            const Ptr<const TagBase>& tag = (*tags)[index];
+            const TagBase *tagObject = tag.get();
+            if (typeInfo == typeid(*tagObject))
                 return index;
         }
         return -1;
+    }
+}
+
+void TagSet::ensureTagsVectorAllocated()
+{
+    if (tags == nullptr) {
+        tags = makeShared<SharedVector<Ptr<const TagBase>>>();
+        tags->reserve(16);
+    }
+}
+
+void TagSet::prepareTagsVectorForUpdate()
+{
+    if (tags.use_count() != 1) {
+        const auto& newTags = makeShared<SharedVector<Ptr<const TagBase>>>();
+        newTags->insert(newTags->begin(), tags->begin(), tags->end());
+        tags = newTags;
     }
 }
 
