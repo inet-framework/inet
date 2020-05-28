@@ -17,6 +17,7 @@
 #define __INET_MESSAGE_H_
 
 #include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/TagBase.h"
 
 namespace inet {
 
@@ -26,6 +27,12 @@ class INET_API Message : public cMessage
 
   protected:
     TagSet tags;
+
+  protected:
+    /** @name Class descriptor functions */
+    //@{
+    const TagBase *_getTag(int index) { return tags.getTag(index).get(); }
+    //@}
 
   public:
     explicit Message(const char *name = nullptr, short kind = 0);
@@ -50,7 +57,7 @@ class INET_API Message : public cMessage
     /**
      * Returns the message tag at the given index.
      */
-    cObject *getTag(int index) const {
+    const Ptr<const TagBase> getTag(int index) const {
         return tags.getTag(index);
     }
 
@@ -71,42 +78,56 @@ class INET_API Message : public cMessage
     /**
      * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
      */
-    template<typename T> T *findTag() const {
+    template<typename T> const Ptr<const T> findTag() const {
         return tags.findTag<T>();
+    }
+
+    /**
+     * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
+     */
+    template<typename T> const Ptr<T> findTagForUpdate() {
+        return tags.findTagForUpdate<T>();
     }
 
     /**
      * Returns the message tag for the provided type or throws an exception if no such message tag is found.
      */
-    template<typename T> T *getTag() const {
+    template<typename T> const Ptr<const T> getTag() const {
         return tags.getTag<T>();
+    }
+
+    /**
+     * Returns the message tag for the provided type or throws an exception if no such message tag is found.
+     */
+    template<typename T> const Ptr<T> getTagForUpdate() {
+        return tags.getTagForUpdate<T>();
     }
 
     /**
      * Returns a newly added message tag for the provided type, or throws an exception if such a message tag is already present.
      */
-    template<typename T> T *addTag() {
+    template<typename T> const Ptr<T> addTag() {
         return tags.addTag<T>();
     }
 
     /**
      * Returns a newly added message tag for the provided type if absent, or returns the message tag that is already present.
      */
-    template<typename T> T *addTagIfAbsent() {
+    template<typename T> const Ptr<T> addTagIfAbsent() {
         return tags.addTagIfAbsent<T>();
     }
 
     /**
      * Removes the message tag for the provided type, or throws an exception if no such message tag is found.
      */
-    template<typename T> T *removeTag() {
+    template<typename T> const Ptr<T> removeTag() {
         return tags.removeTag<T>();
     }
 
     /**
      * Removes the message tag for the provided type if present, or returns nullptr if no such message tag is found.
      */
-    template<typename T> T *removeTagIfPresent() {
+    template<typename T> const Ptr<T> removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
     //@}
