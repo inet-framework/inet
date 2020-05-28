@@ -58,7 +58,7 @@ const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     // 3. peeking without conversion returns a BitCountChunk
     if (converter == nullptr) {
         auto result = makeShared<BitCountChunk>(length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
-        result->tags.copyTags(tags, iterator.getPosition(), b(0), result->getChunkLength());
+        result->regionTags.copyTags(regionTags, iterator.getPosition(), b(0), result->getChunkLength());
         result->markImmutable();
         return result;
     }
