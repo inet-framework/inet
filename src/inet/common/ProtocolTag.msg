@@ -115,6 +115,14 @@ class PacketProtocolTag extends ProtocolTagBase
     b backOffset = b(0); // extra offset relative to the packet data part back offset
 }
 
+cplusplus(PacketProtocolTag) {{
+    void set(const Protocol *protocol, b frontOffset = b(0), b backOffset = b(0)) {
+        this->protocol = protocol;
+        this->frontOffset = frontOffset;
+        this->backOffset = backOffset;
+    }
+}}
+
 //
 // This request determines the transport protocol that should be used to send the packet.
 // It may be present from the application to the transport protocol.
