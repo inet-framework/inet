@@ -95,6 +95,7 @@ class INET_API EtherMacFullDuplexBase : public MacProtocolBase
     const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
     bool promiscuous = false;    // if true, passes up all received frames
     bool duplexMode = false;    // true if operating in full-duplex mode
@@ -155,7 +156,7 @@ class INET_API EtherMacFullDuplexBase : public MacProtocolBase
     /**
      * Inserts padding in front of FCS and calculate FCS
      */
-    void addPaddingAndSetFcs(Packet *packet, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES) const;
+    void addPaddingAndFcs(Packet *packet, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES) const;
 
   protected:
     //  initialization

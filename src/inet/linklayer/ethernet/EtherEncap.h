@@ -33,7 +33,6 @@ namespace inet {
 class INET_API EtherEncap : public Ieee8022Llc
 {
   protected:
-    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     int seqNum;
 
     // statistics

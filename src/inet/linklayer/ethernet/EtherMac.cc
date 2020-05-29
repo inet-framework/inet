@@ -244,7 +244,8 @@ void EtherMac::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
-    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
+    addPaddingAndFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
+    packet->setBackOffset(b(0));
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
@@ -846,6 +847,8 @@ void EtherMac::frameReceptionComplete()
         delete packet;
         return;
     }
+    packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+    packet->getTagForUpdate<PacketProtocolTag>()->setBackOffset(ETHER_FCS_BYTES);
 
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     if (dropFrameNotForUs(packet, frame))

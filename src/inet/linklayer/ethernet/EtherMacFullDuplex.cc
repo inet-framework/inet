@@ -150,7 +150,7 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
-    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
+    addPaddingAndFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";

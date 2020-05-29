@@ -30,7 +30,6 @@ namespace ieee80211 {
 class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
 {
   protected:
-    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     bool upperLayerOutConnected = false;
 
   protected:

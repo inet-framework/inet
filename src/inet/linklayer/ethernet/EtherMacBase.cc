@@ -182,6 +182,7 @@ void EtherMacBase::initialize(int stage)
         rxTransmissionChannel = nullptr;
         txTransmissionChannel = nullptr;
         currentTxFrame = nullptr;
+        fcsMode = parseFcsMode(par("fcsMode"));
 
         initializeFlags();
 
@@ -661,10 +662,8 @@ void EtherMacBase::changeReceptionState(MacReceiveState newState)
     emit(receptionStateChangedSignal, newState);
 }
 
-void EtherMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
+void EtherMacBase::addPaddingAndFcs(Packet *packet, B requiredMinBytes) const
 {
-    auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-
     B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
     if (paddingLength > B(0)) {
         const auto& ethPadding = makeShared<EthernetPadding>();
@@ -672,7 +671,8 @@ void EtherMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
         packet->insertAtBack(ethPadding);
     }
 
-    switch(ethFcs->getFcsMode()) {
+    auto ethFcs = makeShared<EthernetFcs>(fcsMode);
+    switch(fcsMode) {
         case FCS_DECLARED_CORRECT:
             ethFcs->setFcs(0xC00DC00DL);
             break;

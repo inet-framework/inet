@@ -50,7 +50,6 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
 #if defined(WITH_ETHERNET)
         packet->trim();
         auto ethHeader = packet->removeAtFront<EthernetMacHeader>();
-        auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
         if (isEth2Header(*ethHeader)) {
             const Protocol *payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
 #if defined(WITH_IPv4)
@@ -61,9 +60,7 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
                 insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
                 packet->insertAtFront(ethHeader);
                 // TODO: recalculate ethernet CRC
-                ethFcs->setFcs(0);
-                packet->insertAtBack(ethFcs);
-                packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+                packet->addTagIfAbsent<PacketProtocolTag>()->set(&Protocol::ethernetMac, b(0), ETHER_FCS_BYTES);
             }
 #else
             throw cRuntimeError("IPv4 feature is disabled");
@@ -71,7 +68,6 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
         }
         else {
             packet->insertAtFront(ethHeader);
-            packet->insertAtBack(ethFcs);
         }
 #else
         throw cRuntimeError("Ethernet feature is disabled");

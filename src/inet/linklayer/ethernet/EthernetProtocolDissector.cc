@@ -52,7 +52,6 @@ void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     const auto& macAddressesHeader = packet->popAtFront<Ieee8023MacAddresses>();
     callback.startProtocolDataUnit(&Protocol::ethernetMac);
     callback.visitChunk(macAddressesHeader, &Protocol::ethernetMac);
-    const auto& fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     int typeOrLength = -1;
     if (auto macHeader = dynamicPtrCast<const EthernetMacHeader>(macAddressesHeader))
         typeOrLength = macHeader->getTypeOrLength();
@@ -77,10 +76,19 @@ void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     }
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
-        const auto& padding = packet->popAtFront(paddingLength);        // remove padding (type is not EthernetPadding!)
+        Ptr<const EthernetFcs> fcs;
+        if (paddingLength >= ETHER_FCS_BYTES) {
+            const auto& p = packet->peekAtBack(ETHER_FCS_BYTES);
+            if (dynamicPtrCast<const EthernetFcs>(p) || dynamicPtrCast<const BytesChunk>(p) || dynamicPtrCast<const BitsChunk>(p)) {
+                fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES, Chunk::PF_ALLOW_SERIALIZATION);
+                paddingLength -= ETHER_FCS_BYTES;
+            }
+        }
+        const auto& padding = packet->popAtFront(paddingLength);        // remove padding
         callback.visitChunk(padding, &Protocol::ethernetMac);
+        if (fcs != nullptr)
+            callback.visitChunk(fcs, &Protocol::ethernetMac);
     }
-    callback.visitChunk(fcs, &Protocol::ethernetMac);
     callback.endProtocolDataUnit(&Protocol::ethernetMac);
 }
 

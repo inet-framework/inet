@@ -124,6 +124,7 @@ module EtherMacFullDuplex like IEtherMac
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
         int mtu @unit(B) = default(1500B);
+        string fcsMode @enum("declared", "computed");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation

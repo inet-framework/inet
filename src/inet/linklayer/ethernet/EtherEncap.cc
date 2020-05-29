@@ -65,7 +65,6 @@ void EtherEncap::initialize(int stage)
 {
     Ieee8022Llc::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        fcsMode = parseFcsMode(par("fcsMode"));
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
@@ -171,10 +170,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     ethHeader->setDest(macAddressReq->getDestAddress());
     ethHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethHeader);
-
-    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
-
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->set(&Protocol::ethernetMac, b(0), ETHER_FCS_BYTES);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
 }
@@ -182,7 +178,6 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
 {
     auto ethHeader = packet->popAtFront<EthernetMacHeader>();
-    packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
     // add Ieee802Ctrl to packet
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
@@ -287,8 +282,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertAtFront(hdr);
-    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->set(&Protocol::ethernetMac, b(0), ETHER_FCS_BYTES);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");

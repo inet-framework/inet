@@ -17,7 +17,6 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 #ifdef WITH_ETHERNET
@@ -39,9 +38,6 @@ void Ieee80211Portal::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
-#ifdef WITH_ETHERNET
-        fcsMode = parseFcsMode(par("fcsMode"));
-#endif // ifdef WITH_ETHERNET
     }
 }
 
@@ -109,9 +105,8 @@ void Ieee80211Portal::decapsulate(Packet *packet)
     ethernetHeader->setDest(packet->getTag<MacAddressInd>()->getDestAddress());
     ethernetHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethernetHeader);
-    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->set(&Protocol::ethernetMac, b(0), ETHER_FCS_BYTES);
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET

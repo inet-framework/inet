@@ -66,7 +66,6 @@ void ExtEthernetTapDevice::handleMessage(cMessage *msg)
     if (protocol != &Protocol::ethernetMac)
         throw cRuntimeError("Accepts ethernet packets only");
     const auto& ethHeader = packet->peekAtFront<EthernetMacHeader>();
-    packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto bytesChunk = packet->peekDataAsBytes();
     uint8_t buffer[packet->getByteLength() + 4];
     buffer[0] = 0;
@@ -151,9 +150,8 @@ bool ExtEthernetTapDevice::notify(int fd)
         ASSERT (nread > 4);
         // buffer[0..1]: flags, buffer[2..3]: ethertype
         Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
-        packet->insertAtBack(makeShared<EthernetFcs>(FCS_COMPUTED));    //TODO get fcsMode from NED parameter
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
-        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        packet->addTag<PacketProtocolTag>()->set(&Protocol::ethernetMac, b(0), ETHER_FCS_BYTES);    // without FCS
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
         emit(packetReceivedSignal, packet);
         const auto& macHeader = packet->peekAtFront<EthernetMacHeader>();
