@@ -554,8 +554,8 @@ class INET_API PeriodicallyInterpolated1DFunction : public FunctionBase<R, Domai
         }
         const auto& i2 = i.getIntersected(Interval<X>(Point<X>(start), Point<X>(end), 0b1, 0b0, 0b0));
         if (!i2.isEmpty()) {
-            int startIndex = math::maxnan(0, (int)std::floor(toDouble(std::get<0>(i.getLower()) - start) / toDouble(step)));
-            int endIndex = math::minnan((int)rs.size() - 1, (int)std::ceil(toDouble(std::get<0>(i.getUpper()) - start) / toDouble(step)));
+            int startIndex = std::max(0, (int)std::floor(toDouble(std::get<0>(i.getLower()) - start) / toDouble(step)));
+            int endIndex = std::min((int)rs.size() - 1, (int)std::ceil(toDouble(std::get<0>(i.getUpper()) - start) / toDouble(step)));
             for (int index = startIndex; index < endIndex; index++) {
                 Point<X> startPoint(start + step * index);
                 Point<X> endPoint(start + step * (index + 1));
@@ -644,11 +644,11 @@ class INET_API PeriodicallyInterpolated2DFunction : public FunctionBase<R, Domai
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(startY)), Point<X, Y>(X(startX), Y(endY)), 0b01, 0b00, 0b00)), callback);
         const auto& i1 = i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), Y(startY)), Point<X, Y>(X(endX), Y(endY)), 0b11, 0b00, 0b00));
         if (!i1.isEmpty()) {
-            int startIndexX = math::maxnan(0, (int)std::floor(toDouble(std::get<0>(i.getLower()) - startX) / toDouble(stepX)));
-            int endIndexX = math::minnan(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i.getUpper()) - startX) / toDouble(stepX)));
+            int startIndexX = std::max(0, (int)std::floor(toDouble(std::get<0>(i.getLower()) - startX) / toDouble(stepX)));
+            int endIndexX = std::min(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i.getUpper()) - startX) / toDouble(stepX)));
             for (int indexX = startIndexX; indexX < endIndexX; indexX++) {
-                int startIndexY = math::maxnan(0, (int)std::floor(toDouble(std::get<1>(i.getLower()) - startY) / toDouble(stepY)));
-                int endIndexY = math::minnan(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i.getUpper()) - startY) / toDouble(stepY)));
+                int startIndexY = std::max(0, (int)std::floor(toDouble(std::get<1>(i.getLower()) - startY) / toDouble(stepY)));
+                int endIndexY = std::min(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i.getUpper()) - startY) / toDouble(stepY)));
                 for (int indexY = startIndexY; indexY < endIndexY; indexY++) {
                     Point<X, Y> startPoint(startX + stepX * indexX, startY + stepY * indexY);
                     Point<X, Y> endPoint(startX + stepX * (indexX + 1), startY + stepY * (indexY + 1));

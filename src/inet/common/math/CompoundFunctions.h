@@ -592,10 +592,10 @@ class INET_API Rasterized2DFunction : public FunctionBase<R, Domain<X, Y>>
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(startY)), Point<X, Y>(X(startX), Y(endY)), 0b01, 0b00, 0b00)), callback);
         const auto& i1 = i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), Y(startY)), Point<X, Y>(X(endX), Y(endY)), 0b11, 0b00, 0b00));
         if (!i1.isEmpty()) {
-            int startIndexX = math::maxnan(0, (int)std::floor(toDouble(std::get<0>(i1.getLower()) - startX) / toDouble(stepX)));
-            int endIndexX = math::minnan(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i1.getUpper()) - startX) / toDouble(stepX)));
-            int startIndexY = math::maxnan(0, (int)std::floor(toDouble(std::get<1>(i1.getLower()) - startY) / toDouble(stepY)));
-            int endIndexY = math::minnan(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i1.getUpper()) - startY) / toDouble(stepY)));
+            int startIndexX = std::max(0, (int)std::floor(toDouble(std::get<0>(i1.getLower()) - startX) / toDouble(stepX)));
+            int endIndexX = std::min(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i1.getUpper()) - startX) / toDouble(stepX)));
+            int startIndexY = std::max(0, (int)std::floor(toDouble(std::get<1>(i1.getLower()) - startY) / toDouble(stepY)));
+            int endIndexY = std::min(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i1.getUpper()) - startY) / toDouble(stepY)));
             int countX = endIndexX - startIndexX;
             int countY = endIndexY - startIndexY;
             R *means = new R[countX * countY];
@@ -607,10 +607,10 @@ class INET_API Rasterized2DFunction : public FunctionBase<R, Domain<X, Y>>
             Interval<X, Y> interval(lower, upper, 0b11, 0b00, 0b00);
             function->partition(interval, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *f2) {
                 if (f2->isNonZero(i2)) {
-                    int partitionStartIndexX = math::maxnan(0, (int)std::floor(toDouble(std::get<0>(i2.getLower()) - startX) / toDouble(stepX)));
-                    int partitionEndIndexX = math::minnan(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i2.getUpper()) - startX) / toDouble(stepX)));
-                    int partitionStartIndexY = math::maxnan(0, (int)std::floor(toDouble(std::get<1>(i2.getLower()) - startY) / toDouble(stepY)));
-                    int partitionEndIndexY = math::minnan(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i2.getUpper()) - startY) / toDouble(stepY)));
+                    int partitionStartIndexX = std::max(0, (int)std::floor(toDouble(std::get<0>(i2.getLower()) - startX) / toDouble(stepX)));
+                    int partitionEndIndexX = std::min(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i2.getUpper()) - startX) / toDouble(stepX)));
+                    int partitionStartIndexY = std::max(0, (int)std::floor(toDouble(std::get<1>(i2.getLower()) - startY) / toDouble(stepY)));
+                    int partitionEndIndexY = std::min(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i2.getUpper()) - startY) / toDouble(stepY)));
                     for (int indexX = partitionStartIndexX; indexX < partitionEndIndexX; indexX++) {
                         for (int indexY = partitionStartIndexY; indexY < partitionEndIndexY; indexY++) {
                             Point<X, Y> lowerCell(startX + stepX * indexX, startY + stepY * indexY);
