@@ -20,7 +20,7 @@ shows how (1) the number of packets sent/received by an application, and
 (2) IEEE 802.11 MAC state information can be displayed on the network level.
 
 | INET version: ``4.1``
-| Source files location: `inet/showcases/visualizer/submoduleinfo <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/submoduleinfo>`__
+| Source files location: `inet/showcases/visualizer/submoduleinfo <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/submoduleinfo>`__
 
 About the visualizer
 --------------------

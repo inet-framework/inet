@@ -8,7 +8,7 @@ In this showcase, we perform a parameter study examining how packet error
 rate changes as a function of distance in an 802.11g wireless network.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/errorrate <https://github.com/inet-framework/inet-showcases/tree/master/wireless/errorrate>`__
+| Source files location: `inet/showcases/wireless/errorrate <https://github.com/inet-framework/inet/tree/master/showcases/wireless/errorrate>`__
 
 The Model
 ---------

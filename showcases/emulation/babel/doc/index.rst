@@ -18,7 +18,7 @@ instances of the Babel daemon.
 Note that the emulation example only runs on Linux.
 
 | INET version: ``4.1``
-| Source files location: `inet/showcases/emulation/babel <https://github.com/inet-framework/inet-showcases/tree/master/emulation/babel>`__
+| Source files location: `inet/showcases/emulation/babel <https://github.com/inet-framework/inet/tree/master/showcases/emulation/babel>`__
 
 The Model
 ---------

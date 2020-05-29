@@ -14,7 +14,7 @@ spatial power density. This showcase demonstrates such visualizations with three
 simulations.
 
 | INET version: ``4.2``
-| Source files location: `inet/showcases/visualizer/spectrum <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/spectrum>`__
+| Source files location: `inet/showcases/visualizer/spectrum <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/spectrum>`__
 
 About the Visualizer
 --------------------

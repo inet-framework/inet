@@ -15,7 +15,7 @@ MANET routing protocols with three example simulations, using a reactive
 protocol.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/routing/manet <https://github.com/inet-framework/inet-showcases/tree/master/routing/manet>`__
+| Source files location: `inet/showcases/routing/manet <https://github.com/inet-framework/inet/tree/master/showcases/routing/manet>`__
 
 About MANETs
 ------------

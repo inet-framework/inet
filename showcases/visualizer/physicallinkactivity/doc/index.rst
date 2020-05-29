@@ -14,7 +14,7 @@ The showcase consists of three simulation models, each demonstrating
 different features of the physical link visualizer.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/physicallinkactivity <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/physicallinkactivity>`__
+| Source files location: `inet/showcases/visualizer/physicallinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/physicallinkactivity>`__
 
 About the Visualizer
 --------------------

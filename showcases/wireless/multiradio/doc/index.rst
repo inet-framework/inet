@@ -11,7 +11,7 @@ or a dual-band wireless router. This showcase demonstrates how such devices
 can be simulated in INET.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/multiradio <https://github.com/inet-framework/inet-showcases/tree/master/wireless/multiradio>`__
+| Source files location: `inet/showcases/wireless/multiradio <https://github.com/inet-framework/inet/tree/master/showcases/wireless/multiradio>`__
 
 The model
 ---------

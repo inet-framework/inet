@@ -15,7 +15,7 @@ interact and affect each other's operation. This showcase demonstrates the coexi
 of INET's 802.11 and 802.15.4 models.
 
 | INET version: ``4.2``
-| Source files location: `inet/showcases/wireless/coexistence <https://github.com/inet-framework/inet-showcases/tree/master/wireless/coexistence>`__
+| Source files location: `inet/showcases/wireless/coexistence <https://github.com/inet-framework/inet/tree/master/showcases/wireless/coexistence>`__
 
 The Model
 ---------

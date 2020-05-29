@@ -18,7 +18,7 @@ visualization with the visualizer's default settings; the second one is
 about the advanced features.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/interfacetable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/interfacetable>`__
+| Source files location: `inet/showcases/visualizer/interfacetable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/interfacetable>`__
 
 About the visualizer
 --------------------

@@ -18,7 +18,7 @@ two example simulations, showing the basics and the more advanced
 features of the visualization.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/statistic <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/statistic>`__
+| Source files location: `inet/showcases/visualizer/statistic <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/statistic>`__
 
 About the visualizer
 --------------------

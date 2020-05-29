@@ -12,7 +12,7 @@ This showcase describes the available analog signal representation models, their
 drawbacks, and contains three example simulations for typical use cases.
 
 | INET version: ``4.2``
-| Source files location: `inet/showcases/wireless/analogmodel <https://github.com/inet-framework/inet-showcases/tree/master/wireless/analogmodel>`__
+| Source files location: `inet/showcases/wireless/analogmodel <https://github.com/inet-framework/inet/tree/master/showcases/wireless/analogmodel>`__
 
 About Analog Models
 -------------------
