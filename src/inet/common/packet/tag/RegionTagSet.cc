@@ -130,38 +130,47 @@ void RegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void (b
 void RegionTagSet::clearTags(b offset, b length)
 {
     if (regionTags != nullptr) {
-        prepareTagsVectorForUpdate();
+        bool changed = false;
         b clearStartOffset = offset;
         b clearEndOffset = offset + length;
-        for (auto it = regionTags->begin(); it != regionTags->end(); it++) {
-            auto& regionTag = *it;
+        for (int i = 0; i < (int)regionTags->size(); i++) {
+            auto& regionTag = (*regionTags)[i];
             if (clearEndOffset <= regionTag.getStartOffset() || regionTag.getEndOffset() <= clearStartOffset)
                 // no intersection
                 continue;
             else if (clearStartOffset <= regionTag.getStartOffset() && regionTag.getEndOffset() <= clearEndOffset) {
                 // clear totally covers region
-                auto tag = regionTag.getTag();
-                regionTags->erase(it--);
+                prepareTagsVectorForUpdate();
+                regionTags->erase(regionTags->begin() + i--);
+                changed = true;
             }
             else if (regionTag.getStartOffset() < clearStartOffset && clearEndOffset < regionTag.getEndOffset()) {
                 // clear splits region into two parts
+                prepareTagsVectorForUpdate();
                 RegionTag<TagBase> previousRegion(regionTag.getStartOffset(), clearStartOffset - regionTag.getStartOffset(), regionTag.getTag());
-                regionTags->insert(it, previousRegion);
+                regionTags->insert(regionTags->begin() + i++, previousRegion);
                 regionTag.setLength(regionTag.getEndOffset() - clearEndOffset);
                 regionTag.setOffset(clearEndOffset);
+                changed = true;
             }
             else if (regionTag.getEndOffset() <= clearEndOffset) {
                 // clear cuts end of region
+                prepareTagsVectorForUpdate();
                 regionTag.setLength(clearStartOffset - regionTag.getStartOffset());
+                changed = true;
             }
             else if (clearStartOffset <= regionTag.getStartOffset()) {
                 // clear cuts beginning of region
+                prepareTagsVectorForUpdate();
                 regionTag.setLength(regionTag.getEndOffset() - clearEndOffset);
                 regionTag.setOffset(clearEndOffset);
+                changed = true;
             }
             else
                 ASSERT(false);
         }
+        if (changed)
+            sortTagsVector();
     }
 }
 
@@ -169,7 +178,6 @@ void RegionTagSet::copyTags(const RegionTagSet& source, b sourceOffset, b offset
 {
     auto shift = offset - sourceOffset;
     clearTags(offset, length);
-    ensureTagsVectorAllocated();
     source.mapAllTags(sourceOffset, length, [&] (b o, b l, const Ptr<const TagBase>& tag) {
         b startOffset = o < sourceOffset ? sourceOffset : o;
         b endOffset = o + l > sourceOffset + length ? sourceOffset + length : o + l;
