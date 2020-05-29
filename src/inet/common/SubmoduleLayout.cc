@@ -70,7 +70,7 @@ void layoutSubmodulesWithGates(cModule *module, int dimensionIndex, double modul
             auto jt = std::find(submodules.begin(), submodules.end(), connectedModule);
             if (jt != submodules.end() && jt - submodules.begin() < i) {
                 auto connectedPosition = getPosition(connectedModule, dimensionIndex);
-                maxPosition = std::max(connectedPosition, connectedPosition);
+                maxPosition = std::max(maxPosition, connectedPosition);
             }
         }
         auto submodulePosition = maxPosition + moduleSpacing;
