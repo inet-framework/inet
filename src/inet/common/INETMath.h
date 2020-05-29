@@ -220,6 +220,40 @@ inline double n_choose_k(int n, int k) {
     return dRes;
 }
 
+/**
+ * This function properly and symmetrically handles NaNs in contrast with std::min and std::fmin.
+ * For example, the minimum of NaN and 1 must be NaN independently of the argument order.
+ * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
+ */
+template<typename T>
+inline const T minnan(const T& a, const T& b) {
+    if (a < b)
+        return a;
+    else if (b < a)
+        return b;
+    else if (a == b)
+        return a;
+    else
+        return T(NaN);
+}
+
+/**
+ * This function properly and symmetrically handles NaNs in contrast with std::max and std::fmax.
+ * For example, the maximum of NaN and 1 must be NaN independently of the argument order.
+ * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
+ */
+template<typename T>
+inline const T maxnan(const T& a, const T& b) {
+    if (a > b)
+        return a;
+    else if (b > a)
+        return b;
+    else if (a == b)
+        return a;
+    else
+        return T(NaN);
+}
+
 } // namespace math
 
 } // namespace inet
