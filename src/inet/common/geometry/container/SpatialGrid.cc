@@ -189,9 +189,9 @@ void SpatialGrid::clearGrid()
 
 SpatialGrid::Triplet<int> SpatialGrid::coordToMatrixIndices(const Coord& pos) const
 {
-    int xCoord = numVoxels[0] == 0 ? 0 : std::min((int)floor((pos.x - constraintAreaMin.x) / voxelSizes.x), numVoxels[0] - 1);
-    int yCoord = numVoxels[1] == 0 ? 0 : std::min((int)floor((pos.y - constraintAreaMin.y) / voxelSizes.y), numVoxels[1] - 1);
-    int zCoord = numVoxels[2] == 0 ? 0 : std::min((int)floor((pos.z - constraintAreaMin.z) / voxelSizes.z), numVoxels[2] - 1);
+    int xCoord = numVoxels[0] == 0 ? 0 : math::minnan((int)floor((pos.x - constraintAreaMin.x) / voxelSizes.x), numVoxels[0] - 1);
+    int yCoord = numVoxels[1] == 0 ? 0 : math::minnan((int)floor((pos.y - constraintAreaMin.y) / voxelSizes.y), numVoxels[1] - 1);
+    int zCoord = numVoxels[2] == 0 ? 0 : math::minnan((int)floor((pos.z - constraintAreaMin.z) / voxelSizes.z), numVoxels[2] - 1);
     return Triplet<int>(xCoord, yCoord, zCoord);
 }
 
