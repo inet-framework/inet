@@ -39,14 +39,14 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
 
 void EthernetFcsChecker::processPacket(Packet *packet)
 {
-    const auto& trailer = packet->popAtBack<EthernetFcs>(B(4));
+    const auto& trailer = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
 }
 
 bool EthernetFcsChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& trailer = packet->peekAtBack<EthernetFcs>(B(4));
+    const auto& trailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto fcsMode = trailer->getFcsMode();
     auto fcs = trailer->getFcs();
     return checkFcs(packet, fcsMode, fcs);
