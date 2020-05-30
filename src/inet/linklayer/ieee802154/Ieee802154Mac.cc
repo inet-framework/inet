@@ -909,5 +909,30 @@ void Ieee802154Mac::decapsulate(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
+void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation){
+    updateMacState(IDLE_1);
+    //manageQueue() to see waiting packets or set to idle if none
+    MacProtocolBase::handleStartOperation(operation);
+}
+
+void Ieee802154Mac::handleStopOperation(LifecycleOperation *operation) {
+    //TODO: More gracefully allow current Tx to end (delay operation)
+    //Cancel all self message timers
+    cancelEvent(backoffTimer);
+    cancelEvent(ccaTimer);
+    cancelEvent(sifsTimer);
+    cancelEvent(rxAckTimer);
+    MacProtocolBase::handleStopOperation(operation);
+}
+
+void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation) {
+    cancelEvent(backoffTimer);
+    cancelEvent(ccaTimer);
+    cancelEvent(sifsTimer);
+    cancelEvent(rxAckTimer);
+    MacProtocolBase::handleCrashOperation(operation);
+
+}
+
 } // namespace inet
 
