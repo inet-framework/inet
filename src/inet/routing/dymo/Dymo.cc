@@ -1405,8 +1405,11 @@ void Dymo::handleStartOperation(LifecycleOperation *operation)
 void Dymo::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a RERR to notify peers about broken routes
-    for (auto & elem : targetAddressToRREQTimer)
+    for (auto & elem : targetAddressToRREQTimer){
         cancelRouteDiscovery(elem.first);
+        cancelRreqTimer(target);
+        eraseRreqTimer(target);
+    }
 }
 
 void Dymo::handleCrashOperation(LifecycleOperation *operation)
