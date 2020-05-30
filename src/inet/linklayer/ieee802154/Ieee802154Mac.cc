@@ -449,7 +449,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
 
 void Ieee802154Mac::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
 {
-    if (event == EV_FRAME_TRANSMITTED) {
+    if (event == EV_FRAME_TRANSMITTED && currentTxFrame != nullptr) {
         //    delete msg;
         Packet *packet = currentTxFrame;
         const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
