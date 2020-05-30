@@ -301,6 +301,11 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     virtual void decapsulate(Packet *packet);
 
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
     Packet *ackMessage;
 
     //sequence number for sending, map for the general case with more senders
