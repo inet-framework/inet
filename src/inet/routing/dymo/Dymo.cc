@@ -74,6 +74,9 @@ Dymo::~Dymo()
 {
     for (auto & elem : targetAddressToRREQTimer)
         cancelAndDelete(elem.second);
+    for (auto & pkt_timer : jitterTimerPacketMap){
+        cancelJitterTimerPacket(pkt_timer.first);
+    }
     cancelAndDelete(expungeTimer);
 }
 
@@ -164,6 +167,8 @@ void Dymo::processSelfMessage(cMessage *message)
         processRreqBackoffTimer(backoffTimer);
     else if (auto holddownTimer = dynamic_cast<RreqHolddownTimer *>(message))
         processRreqHolddownTimer(holddownTimer);
+    else if (auto jitterTimer = dynamic_cast<PacketJitterTimer *>(message))
+        processJitterTimerPacket(jitterTimer);
     else
         throw cRuntimeError("Unknown self message");
 }
@@ -381,12 +386,40 @@ void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
 // handling Udp packets
 //
 
-void Dymo::sendUdpPacket(cPacket *packet, double delay)
+void Dymo::sendUdpPacket(cPacket *packet)
 {
+    send(packet, "ipOut");
+}
+
+void Dymo::scheduleJitterTimerPacket(cPacket *packet, double delay)
+{
+
     if (delay == 0)
-        send(packet, "ipOut");
-    else
-        sendDelayed(packet, delay, "ipOut");
+        sendUdpPacket(packet);
+    else{
+        PacketJitterTimer* message = new PacketJitterTimer("PacketJitterTimer");
+        jitterTimerPacketMap[message] = packet;
+        scheduleAt(simTime() + delay, message);
+    }
+}
+
+void Dymo::processJitterTimerPacket(PacketJitterTimer *msg)
+{
+    sendUdpPacket(jitterTimerPacketMap[msg]);
+    eraseJitterTimerPacket(msg);
+    delete msg;
+}
+
+void Dymo::cancelJitterTimerPacket(PacketJitterTimer *msg){
+    auto tt = jitterTimerPacketMap.find(msg);
+    delete tt->second;
+    cancelAndDelete(msg);
+    eraseJitterTimerPacket(msg);
+}
+
+void Dymo::eraseJitterTimerPacket(PacketJitterTimer *msg){
+    auto tt = jitterTimerPacketMap.find(msg);
+    jitterTimerPacketMap.erase(tt);
 }
 
 void Dymo::processUdpPacket(Packet *packet)
@@ -422,7 +455,7 @@ void Dymo::sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
     udpPacket->addTag<HopLimitReq>()->setHopLimit(255);
     udpPacket->insertAtFront(udpHeader);
     udpPacket->insertAtBack(packet);
-    sendUdpPacket(udpPacket, delay);
+    scheduleJitterTimerPacket(udpPacket, delay);
 }
 
 void Dymo::processDymoPacket(Packet *packet, const Ptr<const DymoPacket>& dymoPacket)
@@ -1410,6 +1443,9 @@ void Dymo::handleStopOperation(LifecycleOperation *operation)
         cancelRreqTimer(elem.first);
         eraseRreqTimer(elem.first);
     }
+    for (auto & pkt_timer : jitterTimerPacketMap){
+        cancelJitterTimerPacket(pkt_timer.first);
+    }
 }
 
 void Dymo::handleCrashOperation(LifecycleOperation *operation)
@@ -1417,6 +1453,7 @@ void Dymo::handleCrashOperation(LifecycleOperation *operation)
     targetAddressToSequenceNumber.clear();
     targetAddressToRREQTimer.clear();
     targetAddressToDelayedPackets.clear();
+    jitterTimerPacketMap.clear();
 }
 
 //
