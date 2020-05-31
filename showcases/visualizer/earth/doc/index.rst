@@ -16,7 +16,7 @@ three example configurations of increasing complexity, each
 demonstrating various features of the visualization.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/earth <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/earth>`__
+| Source files location: `inet/showcases/visualizer/earth <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/earth>`__
 
 About the Visualizer
 --------------------

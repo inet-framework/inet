@@ -9,7 +9,7 @@ for high priority data by providing contention-free channel access for a period 
 This showcase demonstrates frame exchanges during a TXOP.
 
 | INET version: ``4.2``
-| Source files location: `inet/showcases/wireless/txop <https://github.com/inet-framework/inet-showcases/tree/master/wireless/txop>`__
+| Source files location: `inet/showcases/wireless/txop <https://github.com/inet-framework/inet/tree/master/showcases/wireless/txop>`__
 
 About TXOP
 ----------

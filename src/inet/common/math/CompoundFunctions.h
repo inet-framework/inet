@@ -138,7 +138,7 @@ class INET_API DomainShiftedFunction : public FunctionBase<R, D>
 //
 //  public:
 //    ValueTruncatedFunction(const Ptr<const IFunction<R, D>>& function, const typename D::I& domain) :
-//        function(function), range(Interval<R>(std::min(R(0), function->getMin(domain)), std::max(R(0), function->getMax(domain)), 0b1, 0b1, 0b0)), domain(domain)
+//        function(function), range(Interval<R>(math::minnan(R(0), function->getMin(domain)), math::maxnan(R(0), function->getMax(domain)), 0b1, 0b1, 0b0)), domain(domain)
 //    { }
 //
 //    virtual Interval<R> getRange() const override { return range; }
@@ -338,7 +338,7 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             return function->getValue(p.template getReplaced<X, DIMENSION>(upper));
         else {
             X x1 = lower + step * floor(toDouble(x - lower) / toDouble(step));
-            X x2 = std::min(upper, x1 + step);
+            X x2 = math::minnan(upper, x1 + step);
             R r1 = function->getValue(p.template getReplaced<X, DIMENSION>(x1));
             R r2 = function->getValue(p.template getReplaced<X, DIMENSION>(x2));
             return interpolator->getValue(x1, r1, x2, r2, x);
@@ -357,7 +357,7 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             function->partition(i.template getFixed<X, DIMENSION>(lower), [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
                 if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
                     auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(xl);
-                    auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(std::min(lower, xu));
+                    auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(math::minnan(lower, xu));
                     ConstantFunction<R, D> g(f1c->getConstantValue());
                     typename D::I i2(p1, p2, i.getLowerClosed() | fixed, (i.getUpperClosed() & ~m) | fixed, i.getFixed());
                     callback(i2, &g);
@@ -367,12 +367,12 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             });
         }
         if (xu >= lower && upper >= xl) {
-            X min = lower + step * floor(toDouble(std::max(lower, xl) - lower) / toDouble(step));
-            X max = (i.getFixed() & m) ? min + step : lower + step * ceil(toDouble(std::min(upper, xu) - lower) / toDouble(step));
+            X min = lower + step * floor(toDouble(math::maxnan(lower, xl) - lower) / toDouble(step));
+            X max = (i.getFixed() & m) ? min + step : lower + step * ceil(toDouble(math::minnan(upper, xu) - lower) / toDouble(step));
             for (X x = min; x < max; x += step) {
                 X x1 = x;
                 X x2 = x + step;
-                Interval<X> j(std::max(x1, xl), std::min(x2, xu), true, fixed, fixed);
+                Interval<X> j(math::maxnan(x1, xl), math::minnan(x2, xu), true, fixed, fixed);
                 // determine the smallest intervals along the other dimensions for which the primitive functions are calculated
                 function->partition(i.template getFixed<X, DIMENSION>(x1), [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
                     function->partition(i2.template getFixed<X, DIMENSION>(x2), [&] (const typename D::I& i3, const IFunction<R, D> *f3) {
@@ -459,7 +459,7 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
         if (xu > upper) {
             function->partition(i.template getFixed<X, DIMENSION>(upper), [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
                 if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
-                    auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(std::max(upper, xl));
+                    auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(math::maxnan(upper, xl));
                     auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(xu);
                     ConstantFunction<R, D> g(f1c->getConstantValue());
                     typename D::I i2(p1, p2, i.getLowerClosed() | m, (i.getUpperClosed() & ~m) | fixed, i.getFixed());

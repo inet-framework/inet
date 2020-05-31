@@ -14,7 +14,7 @@ This showcase demonstrates how network nodes are visualized and how their
 appearance can be customized in INET simulations.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/networknode <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/networknode>`__
+| Source files location: `inet/showcases/visualizer/networknode <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/networknode>`__
 
 About the Visualizer
 --------------------

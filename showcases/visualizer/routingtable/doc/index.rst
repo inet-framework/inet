@@ -16,7 +16,7 @@ This showcase contains three simulation models of increasing complexity,
 each demonstrating different features of routing table visualization.
 
 | INET version: ``3.6``
-| Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/routingtable>`__
+| Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/routingtable>`__
 
 About the visualizer
 --------------------

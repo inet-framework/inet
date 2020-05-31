@@ -34,9 +34,11 @@ void FacingMobility::initialize(int stage)
 Quaternion FacingMobility::getCurrentAngularPosition()
 {
     Coord direction = targetMobility->getCurrentPosition() - sourceMobility->getCurrentPosition();
+    direction.normalize();
     auto alpha = rad(atan2(direction.y, direction.x));
     auto beta = rad(-asin(direction.z));
     auto gamma = rad(0.0);
+    ASSERT(!std::isnan(alpha.get()) && !std::isnan(beta.get()));
     lastOrientation = Quaternion(EulerAngles(alpha, beta, gamma));
     return lastOrientation;
 }

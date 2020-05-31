@@ -15,6 +15,7 @@ General Wireless:
    ieee802154/doc/index
    power/doc/index
    coexistence/doc/index
+   analogmodel/doc/index
 .. levelofdetail/doc/index
 .. scaling/doc/index
 

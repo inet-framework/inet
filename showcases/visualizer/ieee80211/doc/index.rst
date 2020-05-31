@@ -11,7 +11,7 @@ above node icons. INET provides such a visualizer that we demonstrate in
 this showcase.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/ieee80211 <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/ieee80211>`__
+| Source files location: `inet/showcases/visualizer/ieee80211 <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/ieee80211>`__
 
 About the visualizer
 --------------------

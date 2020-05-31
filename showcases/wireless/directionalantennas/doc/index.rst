@@ -15,7 +15,7 @@ Four of these represent well-known antenna models, while the last one
 is a universal antenna that can model any rotationally symmetrical antenna pattern.
 
 | INET version: ``4.1``
-| Source files location: `inet/showcases/wireless/directionalantennas <https://github.com/inet-framework/inet-showcases/tree/master/general/directionalantennas>`__
+| Source files location: `inet/showcases/wireless/directionalantennas <https://github.com/inet-framework/inet/tree/master/showcases/general/directionalantennas>`__
 
 Concepts
 --------

@@ -13,7 +13,7 @@ The showcase contains an example simulation, which computes received
 power vs. distance using several path loss model types.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/pathloss <https://github.com/inet-framework/inet-showcases/tree/master/wireless/pathloss>`__
+| Source files location: `inet/showcases/wireless/pathloss <https://github.com/inet-framework/inet/tree/master/showcases/wireless/pathloss>`__
 
 About path loss models
 ----------------------

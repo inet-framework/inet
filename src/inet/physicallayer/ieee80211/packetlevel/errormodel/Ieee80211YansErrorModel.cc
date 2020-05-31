@@ -122,7 +122,7 @@ double Ieee80211YansErrorModel::getFecBpskBer(double snr, double nbits, Hz signa
     }
     double pd = calculatePd(ber, dFree);
     double pmu = adFree * pd;
-    pmu = std::min(pmu, 1.0);
+    pmu = math::minnan(pmu, 1.0);
     double pms = pow(1 - pmu, nbits);
     return pms;
 }
@@ -139,7 +139,7 @@ double Ieee80211YansErrorModel::getFecQamBer(double snr, uint32_t nbits, Hz sign
     /* second term */
     pd = calculatePd(ber, dFree + 1);
     pmu += adFreePlusOne * pd;
-    pmu = std::min(pmu, 1.0);
+    pmu = math::minnan(pmu, 1.0);
     double pms = pow(1 - pmu, (int)nbits);
     return pms;
 }

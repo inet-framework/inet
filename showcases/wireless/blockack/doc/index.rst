@@ -12,7 +12,7 @@ and corresponding interframe spaces, thereby increasing throughput.
 This showcase demonstrates the block acknowledgment feature in INET's 802.11 model.
 
 | INET version: ``4.1``
-| Source files location: `inet/showcases/wireless/blockack <https://github.com/inet-framework/inet-showcases/tree/master/wireless/blockack>`__
+| Source files location: `inet/showcases/wireless/blockack <https://github.com/inet-framework/inet/tree/master/showcases/wireless/blockack>`__
 
 About Block Acknowledgment
 --------------------------

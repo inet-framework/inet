@@ -89,7 +89,7 @@ class INET_API FunctionBase : public IFunction<R, D>
     virtual R getMin(const typename D::I& i) const override {
         R result(getUpperBound<R>());
         this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
-            result = std::min(f1->getMin(i1), result);
+            result = math::minnan(f1->getMin(i1), result);
         });
         return result;
     }
@@ -98,7 +98,7 @@ class INET_API FunctionBase : public IFunction<R, D>
     virtual R getMax(const typename D::I& i) const override {
         R result(getLowerBound<R>());
         this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
-            result = std::max(f1->getMax(i1), result);
+            result = math::maxnan(f1->getMax(i1), result);
         });
         return result;
     }

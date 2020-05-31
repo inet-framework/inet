@@ -15,7 +15,7 @@ interact and affect each other's operation. This showcase demonstrates the coexi
 of INET's 802.11 and 802.15.4 models.
 
 | INET version: ``4.2``
-| Source files location: `inet/showcases/wireless/coexistence <https://github.com/inet-framework/inet-showcases/tree/master/wireless/coexistence>`__
+| Source files location: `inet/showcases/wireless/coexistence <https://github.com/inet-framework/inet/tree/master/showcases/wireless/coexistence>`__
 
 The Model
 ---------
@@ -193,9 +193,9 @@ Here is the ``frequencyGains`` parameter value specifying this spectrum:
 
 Briefly about the syntax:
 
-- The parameter uses frequency and gain pairs to define points on the frequency/gain graph. Between these points, the interpolation mode can be specified, e.g. ``left`` (take value of the left point), ``greater`` (take the greater of the two points), ``linear``, etc.
+- The parameter uses frequency and gain pairs to define points on the frequency/gain graph. ``c`` is the center frequency and ``b`` is the bandwidth. These values are properties of the transmission, i.e. the receiver listens on the frequency band defined by the center frequency and bandwidth. However, the signal can have radio energy outside of this range, which can cause interference.
+- Between these points, the interpolation mode can be specified, e.g. ``left`` (take value of the left point), ``greater`` (take the greater of the two points), ``linear``, etc.
 - The ``-inf Hz/-inf dB`` and the ``+inf Hz/+inf dB`` points are implicit (hence the ``frequencyGains`` string starts with an interpolation mode).
-- ``c`` is the center frequency and ``b`` is the bandwidth. These values are properties of the transmission, i.e. the receiver listens on the center frequency and bandwidth. However, the signal can have radio energy outside of this range, which can cause interference.
 
 For more on the syntax, see :ned:`DimensionalTransmitterBase`.
 

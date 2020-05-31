@@ -84,7 +84,7 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
     virtual double getA() const { return toDouble(rUpper - rLower) / toDouble(upper.get(dimension) - lower.get(dimension)); }
     virtual double getB() const { return (toDouble(rLower) * upper.get(dimension) - toDouble(rUpper) * lower.get(dimension)) / (upper.get(dimension) - lower.get(dimension)); }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(std::min(rLower, rUpper), std::max(rLower, rUpper), 0b1, 0b1, 0b0); }
+    virtual Interval<R> getRange() const override { return Interval<R>(math::minnan(rLower, rUpper), math::maxnan(rLower, rUpper), 0b1, 0b1, 0b0); }
 
     virtual R getValue(const typename D::P& p) const override {
         double alpha = (p - lower).get(dimension) / (upper - lower).get(dimension);
@@ -104,11 +104,11 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
     }
 
     virtual R getMin(const typename D::I& i) const override {
-        return std::min(getValue(i.getLower()), getValue(i.getUpper()));
+        return math::minnan(getValue(i.getLower()), getValue(i.getUpper()));
     }
 
     virtual R getMax(const typename D::I& i) const override {
-        return std::max(getValue(i.getLower()), getValue(i.getUpper()));
+        return math::maxnan(getValue(i.getLower()), getValue(i.getUpper()));
     }
 
     virtual R getMean(const typename D::I& i) const override {
@@ -174,8 +174,8 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
     virtual int getDimension1() const { return dimension1; }
     virtual int getDimension2() const { return dimension2; }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(std::min(std::min(rLowerLower, rLowerUpper), std::min(rUpperLower, rUpperUpper)),
-                                                                       std::max(std::max(rLowerLower, rLowerUpper), std::max(rUpperLower, rUpperUpper)),
+    virtual Interval<R> getRange() const override { return Interval<R>(math::minnan(math::minnan(rLowerLower, rLowerUpper), math::minnan(rUpperLower, rUpperUpper)),
+                                                                       math::maxnan(math::maxnan(rLowerLower, rLowerUpper), math::maxnan(rUpperLower, rUpperUpper)),
                                                                        0b1, 0b1, 0b0); }
 
     virtual R getValue(const typename D::P& p) const override {
@@ -205,12 +205,12 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
 
     virtual R getMin(const typename D::I& i) const override {
         auto j = getOtherInterval(i);
-        return std::min(std::min(getValue(i.getLower()), getValue(j.getLower())), std::min(getValue(j.getUpper()), getValue(i.getUpper())));
+        return math::minnan(math::minnan(getValue(i.getLower()), getValue(j.getLower())), math::minnan(getValue(j.getUpper()), getValue(i.getUpper())));
     }
 
     virtual R getMax(const typename D::I& i) const override {
         auto j = getOtherInterval(i);
-        return std::max(std::max(getValue(i.getLower()), getValue(j.getLower())), std::max(getValue(j.getUpper()), getValue(i.getUpper())));
+        return math::maxnan(math::maxnan(getValue(i.getLower()), getValue(j.getLower())), math::maxnan(getValue(j.getUpper()), getValue(i.getUpper())));
     }
 
     virtual R getMean(const typename D::I& i) const override {
@@ -263,7 +263,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
         if (i.getLower().get(dimension) < x && x < i.getUpper().get(dimension))
             return getLowerBound<R>();
         else
-            return std::min(getValue(i.getLower()), getValue(i.getUpper()));
+            return math::minnan(getValue(i.getLower()), getValue(i.getUpper()));
     }
 
     virtual R getMax(const typename D::I& i) const override {
@@ -271,7 +271,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
         if (i.getLower().get(dimension) < x && x < i.getUpper().get(dimension))
             return getUpperBound<R>();
         else
-            return std::max(getValue(i.getLower()), getValue(i.getUpper()));
+            return math::maxnan(getValue(i.getLower()), getValue(i.getUpper()));
     }
 
     virtual R getMean(const typename D::I& i) const override {
