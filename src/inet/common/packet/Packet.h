@@ -610,24 +610,10 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the tag for the provided type, or returns nullptr if no such tag is present, check inheritance.
-     */
-    template <typename T> T *findTagWithInherit() const {
-        return tags.findTagWithInherit<T>();
-    }
-
-    /**
      * Returns the packet tag for the provided type or throws an exception if no such packet tag is found.
      */
     template<typename T> T *getTag() const {
         return tags.getTag<T>();
-    }
-
-    /**
-     * Returns the tag for the provided type, or throws an exception if no such tag is present. Check inheritance.
-     */
-    template <typename T> T *getTagWithInherit() const {
-        return tags.getTagWithInherit<T>();
     }
 
     /**
