@@ -1440,8 +1440,8 @@ void Dymo::handleStopOperation(LifecycleOperation *operation)
     // TODO: send a RERR to notify peers about broken routes
     for (auto & elem : targetAddressToRREQTimer){
         cancelRouteDiscovery(elem.first);
-        cancelRreqTimer(target);
-        eraseRreqTimer(target);
+        cancelRreqTimer(elem.first);
+        eraseRreqTimer(elem.first);
     }
     for (auto & pkt_timer : jitterTimerPacketMap){
         cancelJitterTimerPacket(pkt_timer.first);
