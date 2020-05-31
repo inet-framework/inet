@@ -12,7 +12,7 @@ fragments, thereby increasing the chance of successful data transfer.
 This showcase demonstrates 802.11 MAC-level fragmentation.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/fragmentation <https://github.com/inet-framework/inet-showcases/tree/master/wireless/fragmentation>`__
+| Source files location: `inet/showcases/wireless/fragmentation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/fragmentation>`__
 
 About 802.11 Fragmentation
 --------------------------

@@ -10,7 +10,7 @@ to show how the handover takes place between the two APs, including
 beacons, active scanning, the authentication and association processes.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/handover <https://github.com/inet-framework/inet-showcases/tree/master/wireless/handover>`__
+| Source files location: `inet/showcases/wireless/handover <https://github.com/inet-framework/inet/tree/master/showcases/wireless/handover>`__
 
 The Model
 ---------

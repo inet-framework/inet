@@ -8,7 +8,7 @@ This example analyzes how application-level throughput changes as a
 function of nominal bitrate in an 802.11g network.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/throughput <https://github.com/inet-framework/inet-showcases/tree/master/wireless/throughput>`__
+| Source files location: `inet/showcases/wireless/throughput <https://github.com/inet-framework/inet/tree/master/showcases/wireless/throughput>`__
 
 The model
 ---------

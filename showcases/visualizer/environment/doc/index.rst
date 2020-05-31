@@ -15,7 +15,7 @@ environment is essential. This showcase contains two example
 simulations, which demonstrate the visualization of physical objects.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/environment <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/environment>`__
+| Source files location: `inet/showcases/visualizer/environment <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/environment>`__
 
 About the visualizer
 --------------------

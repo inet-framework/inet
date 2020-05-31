@@ -78,6 +78,7 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
     else {
         const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
         W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(part), reception->getEndTime(part));
+        ASSERT(W(0.0) <= minReceptionPower);
         bool isReceptionPossible = minReceptionPower >= sensitivity;
         EV_DEBUG << "Computing whether reception is possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
@@ -96,8 +97,10 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
             return true;
         else if (packetErrorRate == 1.0)
             return false;
-        else
+        else {
+            ASSERT(0.0 < packetErrorRate && packetErrorRate <= 1.0);
             return dblrand() > packetErrorRate;
+        }
     }
 }
 

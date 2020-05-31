@@ -76,8 +76,8 @@ class INET_API Interval
     template<size_t ... IS>
     Interval<T ...> intersectImpl(const Interval<T ...>& o, integer_sequence<size_t, IS...>) const {
         unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-        Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... ); (void)l;
-        Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... ); (void)u;
+        Point<T ...> l( math::maxnan(std::get<IS>(lower), std::get<IS>(o.lower)) ... ); (void)l;
+        Point<T ...> u( math::minnan(std::get<IS>(upper), std::get<IS>(o.upper)) ... ); (void)u;
         unsigned char lc = 0;
         unsigned char uc = 0;
         (void)std::initializer_list<unsigned char>{ lc += ((b >> IS) & (std::get<IS>(upper) < std::get<IS>(l) || std::get<IS>(lower) > std::get<IS>(u) ? 0 :
@@ -86,8 +86,8 @@ class INET_API Interval
         (void)std::initializer_list<unsigned char>{ uc += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
                                                                        (std::get<IS>(upper) == std::get<IS>(o.upper) ? (upperClosed & o.upperClosed) :
                                                                        (std::get<IS>(upper) < std::get<IS>(o.upper) ? upperClosed : o.upperClosed)))) ... };
-        Point<T ...> l1( std::min(std::get<IS>(upper), std::get<IS>(l)) ... );
-        Point<T ...> u1( std::max(std::get<IS>(lower), std::get<IS>(u)) ... );
+        Point<T ...> l1( math::minnan(std::get<IS>(upper), std::get<IS>(l)) ... );
+        Point<T ...> u1( math::maxnan(std::get<IS>(lower), std::get<IS>(u)) ... );
         return Interval<T ...>(l1, u1, lc, uc, (fixed | o.getFixed()) & lc & uc);
     }
 

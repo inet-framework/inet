@@ -16,7 +16,7 @@ This showcase contains several simulation models demonstrating typical
 causes of packet drops.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/packetdrop <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/packetdrop>`__
+| Source files location: `inet/showcases/visualizer/packetdrop <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/packetdrop>`__
 
 About the visualizer
 --------------------

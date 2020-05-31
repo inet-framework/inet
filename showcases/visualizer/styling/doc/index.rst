@@ -15,7 +15,7 @@ This showcase consists of four examples that demonstrate how to
 customize lines, arrows, icons, fonts, and annotations.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/styling <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/styling>`__
+| Source files location: `inet/showcases/visualizer/styling <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/styling>`__
 
 Customizing Lines and Arrows
 ----------------------------

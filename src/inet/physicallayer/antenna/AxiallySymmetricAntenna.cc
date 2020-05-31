@@ -66,7 +66,8 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseG
     if (gainMap.find(deg(0)) == gainMap.end())
         throw cRuntimeError("The first angle must be 0");
     if (gainMap.find(deg(180)) == gainMap.end())
-        throw cRuntimeError("The last angle must be 180");}
+        throw cRuntimeError("The last angle must be 180");
+}
 
 double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion direction) const
 {

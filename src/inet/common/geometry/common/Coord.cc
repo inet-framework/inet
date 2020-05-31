@@ -46,7 +46,7 @@ static double dist(double coord1, double coord2, double size)
     else {
         assert(size != 0);
         double dist = math::modulo(difference, size);
-        return std::min(dist, size - dist);
+        return math::minnan(dist, size - dist);
     }
 }
 

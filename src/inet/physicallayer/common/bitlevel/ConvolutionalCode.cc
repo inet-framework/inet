@@ -76,7 +76,7 @@ double ConvolutionalCode::computeNetBitErrorRate(double grossBitErrorRate) const
     }
     else
         throw cRuntimeError("Not yet implemented");
-    return std::max(std::min(netBitErrorRate, 1.0), 0.0);
+    return math::maxnan(math::minnan(netBitErrorRate, 1.0), 0.0);
 }
 
 } // namespace physicallayer
