@@ -147,7 +147,10 @@ const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC");
 const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::unitDisk("unitdisk", "UnitDisk");
 const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Network Protocol
+
+// Additional wireless protocols
 const Protocol Protocol::lora("lora", "Lora"); //Lora Protocol
+const Protocol Protocol::lte("lte", "LTE", Protocol::LinkLayer); //Lora Protocol
 
 } // namespace inet
 

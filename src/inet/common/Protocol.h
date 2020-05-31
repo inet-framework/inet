@@ -133,7 +133,10 @@ class INET_API Protocol
     static const Protocol shortcutPhy;
     static const Protocol unitDisk;
     static const Protocol wiseRoute;
+
+    // Additional wireless protocols
     static const Protocol lora;
+    static const Protocol lte;
 };
 
 inline std::ostream& operator << (std::ostream& o, const Protocol& t) { o << t.str(); return o; }
