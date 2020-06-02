@@ -16,7 +16,7 @@
 #ifndef __INET_MESSAGE_H_
 #define __INET_MESSAGE_H_
 
-#include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/packet/tag/SharingTagSet.h"
 #include "inet/common/TagBase.h"
 
 namespace inet {
@@ -26,7 +26,7 @@ class INET_API Message : public cMessage
   friend class MessageDescriptor;
 
   protected:
-    TagSet tags;
+    SharingTagSet tags;
 
   protected:
     /** @name Class descriptor functions */
@@ -45,7 +45,7 @@ class INET_API Message : public cMessage
     /**
      * Returns all tags.
      */
-    TagSet& getTags() { return tags; }
+    SharingTagSet& getTags() { return tags; }
 
     /**
      * Returns the number of message tags.

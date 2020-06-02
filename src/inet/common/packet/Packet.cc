@@ -380,7 +380,7 @@ std::string Packet::str() const
 }
 
 // TODO: move?
-TagSet& getTags(cMessage *msg)
+SharingTagSet& getTags(cMessage *msg)
 {
     if (msg->isPacket())
         return check_and_cast<Packet *>(msg)->getTags();

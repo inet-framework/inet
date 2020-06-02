@@ -20,8 +20,8 @@
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
-#include "inet/common/packet/tag/RegionTagSet.h"
-#include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/packet/tag/SharingRegionTagSet.h"
+#include "inet/common/packet/tag/SharingTagSet.h"
 #include "inet/common/TagBase.h"
 
 namespace inet {
@@ -97,11 +97,11 @@ class INET_API Packet : public cPacket
     /**
      * The set of tags attached to the packet as whole.
      */
-    TagSet tags;
+    SharingTagSet tags;
     /**
      * The set of tags attached to regions of the content of the packet.
      */
-    RegionTagSet regionTags;
+    SharingRegionTagSet regionTags;
 
   protected:
     /** @name Class descriptor functions */
@@ -112,7 +112,7 @@ class INET_API Packet : public cPacket
     const ChunkTemporarySharedPtr *getData() const;
     const ChunkTemporarySharedPtr *getBack() const;
     const TagBase *_getTag(int index) { return tags.getTag(index).get(); }
-    const RegionTagSet::RegionTag<TagBase>& _getRegionTag(int index) { return regionTags.getRegionTag(index); }
+    const SharingRegionTagSet::RegionTag<TagBase>& _getRegionTag(int index) { return regionTags.getRegionTag(index); }
     //@}
 
     /** @name Self checking functions */
@@ -842,7 +842,7 @@ class INET_API Packet : public cPacket
     /**
      * Returns all tags.
      */
-    TagSet& getTags() { return tags; }
+    SharingTagSet& getTags() { return tags; }
 
     /**
      * Returns the number of packet tags.
@@ -990,14 +990,14 @@ class INET_API Packet : public cPacket
     /**
      * Returns all region tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<const T>> getAllRegionTags(b offset = b(0), b length = b(-1)) const {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<const T>> getAllRegionTags(b offset = b(0), b length = b(-1)) const {
         return regionTags.getAllTags<const T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns all region tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<T>> getAllRegionTagsForUpdate(b offset = b(0), b length = b(-1)) {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllRegionTagsForUpdate(b offset = b(0), b length = b(-1)) {
         return regionTags.getAllTagsForUpdate<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
@@ -1018,7 +1018,7 @@ class INET_API Packet : public cPacket
     /**
      * Returns the newly added region tags for the provided type and range where the tag is absent.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<T>> addRegionTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> addRegionTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
         return regionTags.addTagsWhereAbsent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
@@ -1039,7 +1039,7 @@ class INET_API Packet : public cPacket
     /**
      * Removes and returns all region tags for the provided type and range.
      */
-    template <typename T> std::vector<RegionTagSet::RegionTag<T>> removeRegionTagsWherePresent(b offset, b length) {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> removeRegionTagsWherePresent(b offset, b length) {
         return regionTags.removeTagsWherePresent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
     //@}
@@ -1053,7 +1053,7 @@ class INET_API Packet : public cPacket
     //@}
 };
 
-INET_API TagSet& getTags(cMessage *msg);
+INET_API SharingTagSet& getTags(cMessage *msg);
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
 
