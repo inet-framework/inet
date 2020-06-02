@@ -247,7 +247,7 @@ const Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int 
 {
     if (isStpAware) {
         InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
-        const Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->getProtocolData<Ieee8021dInterfaceData>().get() : nullptr;
+        const Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->getProtocolData<Ieee8021dInterfaceData>() : nullptr;
 
         if (!portData)
             throw cRuntimeError("Ieee8021dInterfaceData not found for port = %d", interfaceId);

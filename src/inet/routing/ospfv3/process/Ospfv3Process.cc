@@ -159,7 +159,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
 
             std::string add6 = addr6c;
             std::string prefix6 = add6.substr(0, add6.find("/"));
-            auto& intfData6 = myInterface->findProtocolDataForUpdate<Ipv6InterfaceData>();
+            auto intfData6 = myInterface->findProtocolDataForUpdate<Ipv6InterfaceData>();
             int prefLength;
             Ipv6Address address6;
             if (!(address6.tryParseAddrWithPrefix(addr6c, prefLength)))
@@ -188,7 +188,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
         //interface ipv4 configuration
         Ipv4Address addr;
         Ipv4Address mask;
-        auto&  intfData = myInterface->findProtocolDataForUpdate<Ipv4InterfaceData>(); //new Ipv4InterfaceData();
+        auto intfData = myInterface->findProtocolDataForUpdate<Ipv4InterfaceData>(); //new Ipv4InterfaceData();
         bool alreadySet = false;
 
         cXMLElementList ipv4AddrList = (*interfaceIt)->getElementsByTagName("IPAddress");

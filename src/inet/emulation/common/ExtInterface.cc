@@ -114,7 +114,7 @@ void ExtInterface::copyNetworkAddressFromExt()
     close(fd);
 
     if (ipv4Address.isUnspecified() && ipv4Netmask.isUnspecified()) {
-        auto& interfaceData = findProtocolDataForUpdate<Ipv4InterfaceData>();
+        auto interfaceData = findProtocolDataForUpdate<Ipv4InterfaceData>();
         if (interfaceData != nullptr) {
             interfaceData->setIPAddress(Ipv4Address());
             interfaceData->setNetmask(Ipv4Address());
