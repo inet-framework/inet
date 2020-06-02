@@ -95,6 +95,7 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<const 
     emit(rcvSeqSignal, tcpseg->getSequenceNo());
     emit(rcvAckSignal, tcpseg->getAckNo());
 
+    emit(tcpRcvPayloadBytesSignal, int(packet->getByteLength() - B(tcpseg->getHeaderLength()).get()));
     //
     // Note: this code is organized exactly as RFC 793, section "3.9 Event
     // Processing", subsection "SEGMENT ARRIVES".

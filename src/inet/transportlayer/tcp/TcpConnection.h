@@ -347,6 +347,7 @@ class INET_API TcpConnection : public cSimpleModule
     static simsignal_t sackedBytesSignal;    // current number of received sacked bytes
     static simsignal_t tcpRcvQueueBytesSignal;    // current amount of used bytes in tcp receive queue
     static simsignal_t tcpRcvQueueDropsSignal;    // number of drops in tcp receive queue
+    static simsignal_t tcpRcvPayloadBytesSignal;  // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
 
     // connection identification by apps: socketId
     int socketId = -1;    // identifies connection within the app

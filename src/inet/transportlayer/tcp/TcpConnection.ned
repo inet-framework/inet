@@ -39,6 +39,7 @@ simple TcpConnection {
         @signal[sackedBytes];    // current number of received sacked bytes
         @signal[tcpRcvQueueBytes];    // current amount of used bytes in tcp receive queue
         @signal[tcpRcvQueueDrops];    // number of drops in tcp receive queue
+        @signal[tcpRcvPayloadBytes];   // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
 
         //TcpAlgorithm signals:
         @signal[cwnd];    // will record changes to snd_cwnd
