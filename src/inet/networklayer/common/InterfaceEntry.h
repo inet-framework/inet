@@ -19,12 +19,11 @@
 #define __INET_INTERFACEENTRY_H
 
 #include <vector>
-
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/packet/tag/TagSet.h"
-#include "inet/common/TagBase.h"
+#include "inet/common/packet/tag/SharingTagSet.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TagBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -119,7 +118,7 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     MacAddress macAddr;    ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token;    ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
-    TagSet protocolDataSet;
+    SharingTagSet protocolDataSet;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:

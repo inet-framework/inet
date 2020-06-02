@@ -30,7 +30,7 @@ cplusplus {{
 
 namespace inet;
 
-class RegionTagSet::TagBaseRegionTag extends cObject
+class SharingRegionTagSet::TagBaseRegionTag extends cObject
 {
     @existingClass;
     @descriptor(readonly);
@@ -54,7 +54,7 @@ class Chunk extends cObject
     b chunkLength @packetData(false);
     string rawBin[] @label("raw bin ") @getter("getBinDumpLine") @sizeGetter("getBinDumpNumLines");
     string rawHex[] @label("raw hex ") @getter("getHexDumpLine") @sizeGetter("getHexDumpNumLines");
-    RegionTagSet::TagBaseRegionTag regionTags[] @packetData(false) @getter(_getTag) @sizeGetter(getNumTags);
+    SharingRegionTagSet::TagBaseRegionTag regionTags[] @packetData(false) @getter(_getTag) @sizeGetter(getNumTags);
 }
 
 class BitCountChunk extends Chunk
