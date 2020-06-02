@@ -20,10 +20,10 @@
 
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
+#include "inet/common/packet/tag/SharingRegionTagSet.h"
 #include "inet/common/Ptr.h"
-#include "inet/common/Units.h"
-#include "inet/common/packet/tag/RegionTagSet.h"
 #include "inet/common/TemporarySharedPtr.h"
+#include "inet/common/Units.h"
 
 // checking chunk implementation is disabled by default
 #ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED
@@ -361,7 +361,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>
     /**
      * The set of region tags attached to the data represented by this chunk.
      */
-    RegionTagSet regionTags;
+    SharingRegionTagSet regionTags;
 
   protected:
     /** @name Class descriptor functions */
@@ -370,7 +370,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>
     int getHexDumpNumLines() const;
     const char *getBinDumpLine(int index);
     const char *getHexDumpLine(int index);
-    const RegionTagSet::RegionTag<TagBase>& _getTag(int index) const { return regionTags.getRegionTag(index); }
+    const SharingRegionTagSet::RegionTag<TagBase>& _getTag(int index) const { return regionTags.getRegionTag(index); }
     //@}
 
     /** @name Self checking functions */
@@ -693,14 +693,14 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>
     /**
      * Returns all chunk tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<const T>> getAllTags(b offset = b(0), b length = b(-1)) const {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<const T>> getAllTags(b offset = b(0), b length = b(-1)) const {
         return regionTags.getAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns all chunk tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<T>> getAllTagsForUpdate(b offset = b(0), b length = b(-1)) {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllTagsForUpdate(b offset = b(0), b length = b(-1)) {
         checkMutable();
         return regionTags.getAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -724,7 +724,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>
     /**
      * Returns the newly added chunk tags for the provided type and range where the tag is absent.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<T>> addTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> addTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
         checkMutable();
         return regionTags.addTagsWhereAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -748,7 +748,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>
     /**
      * Removes and returns all chunk tags for the provided type and range.
      */
-    template <typename T> std::vector<RegionTagSet::RegionTag<T>> removeTagsWherePresent(b offset, b length) {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> removeTagsWherePresent(b offset, b length) {
         checkMutable();
         return regionTags.removeTagsWherePresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
