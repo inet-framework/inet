@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_TAGSET_H_
-#define __INET_TAGSET_H_
+#ifndef __INET_SHARINGTAGSET_H_
+#define __INET_SHARINGTAGSET_H_
 
 #include <vector>
 #include <memory>
@@ -30,7 +30,7 @@ namespace inet {
  * Tags are shared between other instances of this class. Tags can be changed
  * with a copy-on-write mechanism.
  */
-class INET_API TagSet : public cObject
+class INET_API SharingTagSet : public cObject
 {
   protected:
     /**
@@ -52,12 +52,12 @@ class INET_API TagSet : public cObject
   public:
     /** @name Constructors and operators */
     //@{
-    TagSet() : tags(nullptr) { }
-    TagSet(const TagSet& other) : tags(other.tags) { }
-    TagSet(TagSet&& other) : tags(other.tags) { other.tags = nullptr; }
+    SharingTagSet() : tags(nullptr) { }
+    SharingTagSet(const SharingTagSet& other) : tags(other.tags) { }
+    SharingTagSet(SharingTagSet&& other) : tags(other.tags) { other.tags = nullptr; }
 
-    TagSet& operator=(const TagSet& other);
-    TagSet& operator=(TagSet&& other);
+    SharingTagSet& operator=(const SharingTagSet& other);
+    SharingTagSet& operator=(SharingTagSet&& other);
     //@}
 
     /** @name Type independent functions */
@@ -85,7 +85,7 @@ class INET_API TagSet : public cObject
     /**
      * Copies the set of tags from the other set.
      */
-    void copyTags(const TagSet& other);
+    void copyTags(const SharingTagSet& other);
     //@}
 
     /** @name Type dependent functions */
@@ -132,14 +132,14 @@ class INET_API TagSet : public cObject
     //@}
 };
 
-inline TagSet& TagSet::operator=(const TagSet& other)
+inline SharingTagSet& SharingTagSet::operator=(const SharingTagSet& other)
 {
     if (this != &other)
         tags = other.tags;
     return *this;
 }
 
-inline TagSet& TagSet::operator=(TagSet&& other)
+inline SharingTagSet& SharingTagSet::operator=(SharingTagSet&& other)
 {
     if (this != &other) {
         tags = other.tags;
@@ -148,22 +148,22 @@ inline TagSet& TagSet::operator=(TagSet&& other)
     return *this;
 }
 
-inline int TagSet::getNumTags() const
+inline int SharingTagSet::getNumTags() const
 {
     return tags == nullptr ? 0 : tags->size();
 }
 
-inline void TagSet::setTag(int index, const Ptr<const TagBase>& tag)
+inline void SharingTagSet::setTag(int index, const Ptr<const TagBase>& tag)
 {
     (*tags)[index] = tag;
 }
 
-inline const Ptr<const TagBase>& TagSet::getTag(int index) const
+inline const Ptr<const TagBase>& SharingTagSet::getTag(int index) const
 {
     return (*tags)[index];
 }
 
-inline const Ptr<TagBase> TagSet::getTagForUpdate(int index)
+inline const Ptr<TagBase> SharingTagSet::getTagForUpdate(int index)
 {
     const Ptr<const TagBase>& tag = getTag(index);
     if (tag.use_count() != 1)
@@ -171,38 +171,38 @@ inline const Ptr<TagBase> TagSet::getTagForUpdate(int index)
     return constPtrCast<TagBase>(getTag(index));
 }
 
-inline void TagSet::clearTags()
+inline void SharingTagSet::clearTags()
 {
     tags = nullptr;
 }
 
-inline void TagSet::copyTags(const TagSet& source)
+inline void SharingTagSet::copyTags(const SharingTagSet& source)
 {
     operator=(source);
 }
 
 template <typename T>
-inline int TagSet::getTagIndex() const
+inline int SharingTagSet::getTagIndex() const
 {
     return getTagIndex(typeid(T));
 }
 
 template <typename T>
-inline const Ptr<const T> TagSet::findTag() const
+inline const Ptr<const T> SharingTagSet::findTag() const
 {
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<const T>(getTag(index));
 }
 
 template <typename T>
-inline const Ptr<T> TagSet::findTagForUpdate()
+inline const Ptr<T> SharingTagSet::findTagForUpdate()
 {
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<T>(getTagForUpdate(index));
 }
 
 template <typename T>
-inline const Ptr<const T> TagSet::getTag() const
+inline const Ptr<const T> SharingTagSet::getTag() const
 {
     int index = getTagIndex<T>();
     if (index == -1)
@@ -211,7 +211,7 @@ inline const Ptr<const T> TagSet::getTag() const
 }
 
 template <typename T>
-inline const Ptr<T> TagSet::getTagForUpdate()
+inline const Ptr<T> SharingTagSet::getTagForUpdate()
 {
     int index = getTagIndex<T>();
     if (index == -1)
@@ -220,7 +220,7 @@ inline const Ptr<T> TagSet::getTagForUpdate()
 }
 
 template <typename T>
-inline const Ptr<T> TagSet::addTag()
+inline const Ptr<T> SharingTagSet::addTag()
 {
     int index = getTagIndex<T>();
     if (index != -1)
@@ -231,7 +231,7 @@ inline const Ptr<T> TagSet::addTag()
 }
 
 template <typename T>
-inline const Ptr<T> TagSet::addTagIfAbsent()
+inline const Ptr<T> SharingTagSet::addTagIfAbsent()
 {
     const Ptr<T>& tag = findTagForUpdate<T>();
     if (tag != nullptr)
@@ -244,7 +244,7 @@ inline const Ptr<T> TagSet::addTagIfAbsent()
 }
 
 template <typename T>
-inline const Ptr<T> TagSet::removeTag()
+inline const Ptr<T> SharingTagSet::removeTag()
 {
     int index = getTagIndex<T>();
     if (index == -1)
@@ -253,7 +253,7 @@ inline const Ptr<T> TagSet::removeTag()
 }
 
 template <typename T>
-inline const Ptr<T> TagSet::removeTagIfPresent()
+inline const Ptr<T> SharingTagSet::removeTagIfPresent()
 {
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<T>(removeTag(index));
@@ -261,5 +261,5 @@ inline const Ptr<T> TagSet::removeTagIfPresent()
 
 } // namespace
 
-#endif // #ifndef __INET_TAGSET_H_
+#endif // #ifndef __INET_SHARINGTAGSET_H_
 
