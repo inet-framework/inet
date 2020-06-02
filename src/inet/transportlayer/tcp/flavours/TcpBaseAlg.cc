@@ -593,7 +593,7 @@ void TcpBaseAlg::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 
     bool fullSegmentsOnly = state->nagle_enabled && state->snd_una != state->snd_max;
-    if (state->dupacks < DUPTHRESH && state->limited_transmit_enabled) // DUPTRESH = 3
+    if (state->dupacks < state->dupthresh && state->limited_transmit_enabled) // DUPTRESH = 3
         conn->sendOneNewSegment(fullSegmentsOnly, state->snd_cwnd); // RFC 3042
 
     //
