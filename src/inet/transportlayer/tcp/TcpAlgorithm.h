@@ -182,6 +182,17 @@ class INET_API TcpAlgorithm : public cObject
      * to update state vars with new measured RTT value.
      */
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) = 0;
+
+    /**
+     * Called before sending ACK. Determines whether to set ECE bit.
+     */
+    virtual bool shouldMarkAck() = 0;
+
+    /**
+     * Called before processing segment in established state.
+     * This function process ECN marks.
+     */
+    virtual void processEcnInEstablished() = 0;
 };
 
 } // namespace tcp

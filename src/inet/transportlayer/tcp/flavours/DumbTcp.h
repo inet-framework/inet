@@ -89,6 +89,10 @@ class INET_API DumbTcp : public TcpAlgorithm
     virtual void restartRexmitTimer() override;
 
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) override;
+
+    virtual bool shouldMarkAck() override;
+
+    virtual void processEcnInEstablished() override;
 };
 
 } // namespace tcp
