@@ -13,20 +13,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/tag/RegionTagSet.h"
+#include "inet/common/packet/tag/SharingRegionTagSet.h"
 
 namespace inet {
 
-void RegionTagSet::addTag(b offset, b length, const Ptr<const TagBase>& tag)
+void SharingRegionTagSet::addTag(b offset, b length, const Ptr<const TagBase>& tag)
 {
     ensureTagsVectorAllocated();
     prepareTagsVectorForUpdate();
     regionTags->push_back(RegionTag<TagBase>(offset, length, tag));
 }
 
-std::vector<RegionTagSet::RegionTag<TagBase>> RegionTagSet::addTagsWhereAbsent(const std::type_info& typeInfo, b offset, b length, const Ptr<const TagBase>& tag)
+std::vector<SharingRegionTagSet::RegionTag<TagBase>> SharingRegionTagSet::addTagsWhereAbsent(const std::type_info& typeInfo, b offset, b length, const Ptr<const TagBase>& tag)
 {
-    std::vector<RegionTagSet::RegionTag<TagBase>> result;
+    std::vector<SharingRegionTagSet::RegionTag<TagBase>> result;
     b endOffset = offset + length;
     b o = offset;
     if (regionTags != nullptr) {
@@ -61,7 +61,7 @@ std::vector<RegionTagSet::RegionTag<TagBase>> RegionTagSet::addTagsWhereAbsent(c
     return result;
 }
 
-const Ptr<TagBase> RegionTagSet::removeTag(int index)
+const Ptr<TagBase> SharingRegionTagSet::removeTag(int index)
 {
     prepareTagsVectorForUpdate();
     const Ptr<TagBase> tag = getTagForUpdate(index);
@@ -71,7 +71,7 @@ const Ptr<TagBase> RegionTagSet::removeTag(int index)
     return constPtrCast<TagBase>(tag);
 }
 
-void RegionTagSet::mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const TagBase>&)> f) const
+void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const TagBase>&)> f) const
 {
     if (regionTags != nullptr) {
         b startOffset = offset;
@@ -98,7 +98,7 @@ void RegionTagSet::mapAllTags(b offset, b length, std::function<void (b, b, cons
     }
 }
 
-void RegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<TagBase>&)> f)
+void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<TagBase>&)> f)
 {
     if (regionTags != nullptr) {
         prepareTagsVectorForUpdate();
@@ -127,7 +127,7 @@ void RegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void (b
     }
 }
 
-void RegionTagSet::clearTags(b offset, b length)
+void SharingRegionTagSet::clearTags(b offset, b length)
 {
     if (regionTags != nullptr) {
         bool changed = false;
@@ -174,7 +174,7 @@ void RegionTagSet::clearTags(b offset, b length)
     }
 }
 
-void RegionTagSet::copyTags(const RegionTagSet& source, b sourceOffset, b offset, b length)
+void SharingRegionTagSet::copyTags(const SharingRegionTagSet& source, b sourceOffset, b offset, b length)
 {
     auto shift = offset - sourceOffset;
     clearTags(offset, length);
@@ -185,14 +185,14 @@ void RegionTagSet::copyTags(const RegionTagSet& source, b sourceOffset, b offset
     });
 }
 
-void RegionTagSet::moveTags(b shift)
+void SharingRegionTagSet::moveTags(b shift)
 {
     if (regionTags != nullptr)
         for (auto& regionTag : *regionTags)
             regionTag.setOffset(regionTag.getOffset() + shift);
 }
 
-void RegionTagSet::splitTags(const std::type_info& typeInfo, b offset)
+void SharingRegionTagSet::splitTags(const std::type_info& typeInfo, b offset)
 {
     if (regionTags != nullptr) {
         std::vector<RegionTag<TagBase>> insertedRegionTags;
@@ -213,7 +213,7 @@ void RegionTagSet::splitTags(const std::type_info& typeInfo, b offset)
     }
 }
 
-int RegionTagSet::getTagIndex(const std::type_info& typeInfo, b offset, b length) const
+int SharingRegionTagSet::getTagIndex(const std::type_info& typeInfo, b offset, b length) const
 {
     if (regionTags == nullptr)
         return -1;
@@ -236,7 +236,7 @@ int RegionTagSet::getTagIndex(const std::type_info& typeInfo, b offset, b length
     }
 }
 
-void RegionTagSet::ensureTagsVectorAllocated()
+void SharingRegionTagSet::ensureTagsVectorAllocated()
 {
     if (regionTags == nullptr) {
         regionTags = makeShared<SharedVector<RegionTag<TagBase>>>();
@@ -244,7 +244,7 @@ void RegionTagSet::ensureTagsVectorAllocated()
     }
 }
 
-void RegionTagSet::prepareTagsVectorForUpdate()
+void SharingRegionTagSet::prepareTagsVectorForUpdate()
 {
     if (regionTags.use_count() != 1) {
         const auto& newRegionTags = makeShared<SharedVector<RegionTag<TagBase>>>();
