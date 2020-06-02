@@ -13,18 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/packet/tag/SharingTagSet.h"
 
 namespace inet {
 
-void TagSet::addTag(const Ptr<const TagBase>& tag)
+void SharingTagSet::addTag(const Ptr<const TagBase>& tag)
 {
     ensureTagsVectorAllocated();
     prepareTagsVectorForUpdate();
     tags->push_back(tag);
 }
 
-const Ptr<TagBase> TagSet::removeTag(int index)
+const Ptr<TagBase> SharingTagSet::removeTag(int index)
 {
     prepareTagsVectorForUpdate();
     const Ptr<TagBase> tag = getTagForUpdate(index);
@@ -34,7 +34,7 @@ const Ptr<TagBase> TagSet::removeTag(int index)
     return constPtrCast<TagBase>(tag);
 }
 
-int TagSet::getTagIndex(const std::type_info& typeInfo) const
+int SharingTagSet::getTagIndex(const std::type_info& typeInfo) const
 {
     if (tags == nullptr)
         return -1;
@@ -50,7 +50,7 @@ int TagSet::getTagIndex(const std::type_info& typeInfo) const
     }
 }
 
-void TagSet::ensureTagsVectorAllocated()
+void SharingTagSet::ensureTagsVectorAllocated()
 {
     if (tags == nullptr) {
         tags = makeShared<SharedVector<Ptr<const TagBase>>>();
@@ -58,7 +58,7 @@ void TagSet::ensureTagsVectorAllocated()
     }
 }
 
-void TagSet::prepareTagsVectorForUpdate()
+void SharingTagSet::prepareTagsVectorForUpdate()
 {
     if (tags.use_count() != 1) {
         const auto& newTags = makeShared<SharedVector<Ptr<const TagBase>>>();
