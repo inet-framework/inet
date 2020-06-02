@@ -260,7 +260,7 @@ void TcpNewReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
+    if (state->dupacks == state->dupthresh) {    // DUPTHRESH = 3
         if (!state->lossRecovery) {
             // RFC 3782, page 4:
             // "1) Three duplicate ACKs:
@@ -323,7 +323,7 @@ void TcpNewReno::receivedDuplicateAck()
         }
         EV_INFO << "NewReno on dupAcks == DUPTHRESH(=3): TCP is already in Fast Recovery procedure\n";
     }
-    else if (state->dupacks > DUPTHRESH) {    // DUPTHRESH = 3
+    else if (state->dupacks > state->dupthresh) {    // DUPTHRESH = 3
         if (state->lossRecovery) {
             // RFC 3782, page 4:
             // "3) Fast Recovery:

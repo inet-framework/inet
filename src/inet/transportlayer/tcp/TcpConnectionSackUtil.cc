@@ -142,8 +142,8 @@ bool TcpConnection::isLost(uint32 seqNum)
     // false."
     ASSERT(seqGE(seqNum, state->snd_una));    // HighAck = snd_una
 
-    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= DUPTHRESH    // DUPTHRESH = 3
-                   || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (DUPTHRESH * state->snd_mss));
+    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh    // DUPTHRESH = 3
+                   || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (state->dupthresh * state->snd_mss));
 
     return isLost;
 }
