@@ -134,6 +134,15 @@ void DumbTcp::rttMeasurementCompleteUsingTS(uint32 echoedTS)
 {
 }
 
+bool DumbTcp::shouldMarkAck()
+{
+    return false;
+}
+
+void DumbTcp::processEcnInEstablished()
+{
+
+}
 } // namespace tcp
 
 } // namespace inet

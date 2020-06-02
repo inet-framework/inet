@@ -135,6 +135,10 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const
 
 TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
+
+    // Delegates additional processing of ECN to the algorithm
+    tcpAlgorithm->processEcnInEstablished();
+
     //
     // RFC 793: first check sequence number
     //
@@ -1142,6 +1146,8 @@ bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
         if (tcpseg->getEceBit() == true) {
             EV_INFO << "Received packet with ECE\n";
             state->gotEce = true;
+        }else{
+            state->gotEce = false;
         }
     }
 
