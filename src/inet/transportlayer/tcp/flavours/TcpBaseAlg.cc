@@ -687,6 +687,7 @@ bool TcpBaseAlg::shouldMarkAck()
         }
         return  state->ecnEchoState;
     }
+    return false;
 }
 
 
