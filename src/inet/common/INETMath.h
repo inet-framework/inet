@@ -225,8 +225,9 @@ inline double n_choose_k(int n, int k) {
  * For example, the minimum of NaN and 1 must be NaN independently of the argument order.
  * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
  */
-template<typename T, class = typename std::enable_if<!std::is_integral<T>::value>::type>
+template<typename T>
 inline const T minnan(const T& a, const T& b) {
+static_assert(!std::is_integral<T>::value, "minnan() is only meant for doubles and double based units, use std::min() for integers");
     if (a < b)
         return a;
     else if (b < a)
@@ -242,8 +243,9 @@ inline const T minnan(const T& a, const T& b) {
  * For example, the maximum of NaN and 1 must be NaN independently of the argument order.
  * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
  */
-template<typename T, class = typename std::enable_if<!std::is_integral<T>::value>::type>
+template<typename T>
 inline const T maxnan(const T& a, const T& b) {
+static_assert(!std::is_integral<T>::value, "maxnan() is only meant for doubles and double based units, use std::max() for integers");
     if (a > b)
         return a;
     else if (b > a)
