@@ -232,7 +232,7 @@ void Ipv4DynamicNat::handleMessage(cMessage *msg)
 }
 
 
-class Callback : public PacketDissector::CallbackBase {
+class TransportPortsExtractor : public PacketDissector::CallbackBase {
 public:
     const Protocol *transportProtocol = nullptr;
     uint16_t srcPort = -1;
@@ -256,14 +256,6 @@ public:
     }
 };
 
-std::pair<int, uint16_t> getTransportProtocolAndDestPort(Packet *datagram)
-{
-    Callback cb;
-    PacketDissector pd(ProtocolDissectorRegistry::globalRegistry, cb);
-    pd.dissectPacket(datagram, &Protocol::ipv4);
-
-    return {cb.transportProtocol->getId(), cb.destPort};
-}
 
 INetfilter::IHook::Result Ipv4DynamicNat::datagramPreRoutingHook(Packet *datagram)
 {
@@ -271,7 +263,11 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPreRoutingHook(Packet *datagra
 
     if (incomingFilter->matches(datagram)) {
 
-        auto transportProtocolAndDestPort = getTransportProtocolAndDestPort(datagram);
+        TransportPortsExtractor cb;
+        PacketDissector pd(ProtocolDissectorRegistry::globalRegistry, cb);
+        pd.dissectPacket(datagram, &Protocol::ipv4);
+
+        std::pair<int, uint16_t> transportProtocolAndDestPort = {cb.transportProtocol->getId(), cb.destPort};
 
         std::cout << "incoming packet, protocol id and dest port: " << transportProtocolAndDestPort.first << " " << transportProtocolAndDestPort.second << std::endl;
         if (portMapping.find(transportProtocolAndDestPort) != portMapping.end()) {
@@ -280,10 +276,8 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPreRoutingHook(Packet *datagra
             std::cout << "mapping to: " << mapTo.first << " " << mapTo.second << std::endl;
 
             Ipv4NatEntry natEntry;
-
             natEntry.setDestAddress(mapTo.first);
             natEntry.setDestPort(mapTo.second);
-
             applyNatEntry(datagram, natEntry);
         }
         else {
@@ -319,7 +313,7 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagr
         Ipv4Address sourceAddress = ipv4Header->getSourceAddress().toIpv4();
         uint16_t sourcePort = -1;
 
-        Callback cb;
+        TransportPortsExtractor cb;
         PacketDissector pd(ProtocolDissectorRegistry::globalRegistry, cb);
         pd.dissectPacket(datagram, &Protocol::ipv4);
         sourcePort = cb.srcPort;
@@ -349,10 +343,12 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagr
         else {
             std::cout << "outgoing packet is already mapped" << std::endl;
         }
+
         std::cout << "----" << std::endl;
         for (auto it = portMapping.begin(); it != portMapping.end(); ++it)
             std::cout << "(" << it->first.first << ", " << it->first.second << " -> " << it->second.first << ", " << it->second.second << std::endl;
         std::cout << "----" << std::endl;
+
         Ipv4NatEntry natEntry;
         natEntry.setSrcAddress(ie->getIpv4Address());
         natEntry.setSrcPort(externalSourcePort);
