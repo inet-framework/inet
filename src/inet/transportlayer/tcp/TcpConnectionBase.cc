@@ -51,7 +51,7 @@ simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg");    // nu
 simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes");    // current number of received sacked bytes
 simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes");    // current amount of used bytes in tcp receive queue
 simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops");    // number of drops in tcp receive queue
-
+simsignal_t TcpConnection::tcpRcvPayloadBytesSignal = registerSignal("tcpRcvPayloadBytes");  // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
 
 TcpStateVariables::TcpStateVariables()
 {

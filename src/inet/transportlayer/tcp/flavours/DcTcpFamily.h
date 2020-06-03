@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2020 Marcel Marek
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,47 +15,51 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPTAHOERENOFAMILY_H
-#define __INET_TCPTAHOERENOFAMILY_H
+#ifndef __INET_DCTCPFAMILY_H
+#define __INET_DCTCPFAMILY_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
 namespace inet {
 namespace tcp {
 
 /**
- * State variables for TcpTahoeRenoFamily.
+ * State variables for DcTcp.
  */
-class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariables
+class INET_API DcTcpFamilyStateVariables : public TcpTahoeRenoFamilyStateVariables
 {
   public:
-    TcpTahoeRenoFamilyStateVariables();
+    DcTcpFamilyStateVariables();
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
-    virtual void setSendQueueLimit(uint32 newLimit);
 
-    uint32 ssthresh;    ///< slow start threshold
+    //DCTCP
+    bool dctcp_ce;
+    uint32 dctcp_windEnd;
+    uint32 dctcp_bytesAcked;
+    uint32 dctcp_bytesMarked; //amount of bytes marked
+    double dctcp_alpha;
+    double dctcp_gamma;
+
+
 };
 
 /**
- * Provides utility functions to implement TcpTahoe, TcpReno and TcpNewReno.
- * (TcpVegas should inherit from TcpBaseAlg instead of this one.)
+ * Provides utility functions to implement DcTcp.
  */
-class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
+class INET_API DcTcpFamily : public TcpTahoeRenoFamily
 {
   protected:
-    TcpTahoeRenoFamilyStateVariables *& state;    // alias to TcpAlgorithm's 'state'
+    DcTcpFamilyStateVariables *& state;    // alias to TcpAlgorithm's 'state'
 
   public:
     /** Ctor */
-    TcpTahoeRenoFamily();
-
-    void initialize() override;
+    DcTcpFamily();
 };
 
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPTAHOERENOFAMILY_H
+#endif // ifndef __INET_DCTCPFAMILY_H
 
