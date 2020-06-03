@@ -90,7 +90,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
-    if (state->dupacks >= state->dupthresh) {    // DUPTHRESH = 3
+    if (state->dupacks >= state->dupthresh) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -240,8 +240,8 @@ void TcpReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks == state->dupthresh) {    // DUPTHRESH = 3
-        EV_INFO << "Reno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
+    if (state->dupacks == state->dupthresh) {
+        EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
 
         if (state->sack_enabled) {
             // RFC 3517, page 6: "When a TCP sender receives the duplicate ACK corresponding to
@@ -329,14 +329,14 @@ void TcpReno::receivedDuplicateAck()
         // try to transmit new segments (RFC 2581)
         sendData(false);
     }
-    else if (state->dupacks > state->dupthresh) {    // DUPTHRESH = 3
+    else if (state->dupacks > state->dupthresh) {
         //
         // Reno: For each additional duplicate ACK received, increment cwnd by SMSS.
         // This artificially inflates the congestion window in order to reflect the
         // additional segment that has left the network
         //
         state->snd_cwnd += state->snd_mss;
-        EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
+        EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 
         conn->emit(cwndSignal, state->snd_cwnd);
 

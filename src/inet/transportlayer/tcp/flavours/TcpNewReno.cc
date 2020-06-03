@@ -260,7 +260,7 @@ void TcpNewReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks == state->dupthresh) {    // DUPTHRESH = 3
+    if (state->dupacks == state->dupthresh) {
         if (!state->lossRecovery) {
             // RFC 3782, page 4:
             // "1) Three duplicate ACKs:
@@ -276,7 +276,7 @@ void TcpNewReno::receivedDuplicateAck()
             // the acknowledgement "ack_number" covers more than "recover" when:
             //      ack_number - 1 > recover;"
             if (state->snd_una - 1 > state->recover) {
-                EV_INFO << "NewReno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
+                EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
 
                 // RFC 3782, page 4:
                 // "1A) Invoking Fast Retransmit:
@@ -311,7 +311,7 @@ void TcpNewReno::receivedDuplicateAck()
                 sendData(false);
             }
             else {
-                EV_INFO << "NewReno on dupAcks == DUPTHRESH(=3): not invoking Fast Retransmit and Fast Recovery\n";
+                EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": not invoking Fast Retransmit and Fast Recovery\n";
 
                 // RFC 3782, page 4:
                 // "1B) Not invoking Fast Retransmit:
@@ -321,9 +321,9 @@ void TcpNewReno::receivedDuplicateAck()
                 // subsequent duplicate ACKs."
             }
         }
-        EV_INFO << "NewReno on dupAcks == DUPTHRESH(=3): TCP is already in Fast Recovery procedure\n";
+        EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": TCP is already in Fast Recovery procedure\n";
     }
-    else if (state->dupacks > state->dupthresh) {    // DUPTHRESH = 3
+    else if (state->dupacks > state->dupthresh) {
         if (state->lossRecovery) {
             // RFC 3782, page 4:
             // "3) Fast Recovery:
@@ -335,7 +335,7 @@ void TcpNewReno::receivedDuplicateAck()
 
             conn->emit(cwndSignal, state->snd_cwnd);
 
-            EV_DETAIL << "NewReno on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
+            EV_DETAIL << "NewReno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 
             // RFC 3782, page 5:
             // "4) Fast Recovery, continued:

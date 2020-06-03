@@ -47,7 +47,7 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
-    if (state->dupacks >= state->dupthresh) {    // DUPTHRESH = 3
+    if (state->dupacks >= state->dupthresh) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
