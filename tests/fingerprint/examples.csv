@@ -73,6 +73,7 @@
 
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            17e9-1380/tplx, PASS,
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            4c55-e934/tplx, PASS,
+
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            cec2-82de/tplx, PASS,
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,             0000-0000/tplx, ERROR,   # not a complete simulations, defaults.ini included by other ini files
@@ -143,6 +144,9 @@
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableSourceHost -r 0,              10s,     8d38-e18e/tplx, PASS,
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableDestinationInterfaces -r 0,   10s,     767c-2ea2/tplx, PASS,
 
+/examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         3a86-9211/tplx, PASS,   # DcTcpIncast extended
+/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         11bb-3b7f/tplx, PASS,
+
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            56b0-c7b2/tplx, PASS,
 
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          d144-8111/tplx, PASS,
@@ -187,6 +191,8 @@
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             89ae-6d92/tplx, PASS,
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           5db1-e02b/tplx, PASS,
+
+/examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         f44c-613f/tplx, PASS,
 
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            565c-1aee/tplx, PASS,
 
@@ -262,7 +268,6 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 4,              500s,            190b-038c/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 5,              500s,            6fd4-8f60/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 6,              500s,            4994-65a7/tplx, PASS,
-
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 0,  500s,            e803-dc6d/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 1,              500s,            7268-2069/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 2,              500s,            fb50-e852/tplx, PASS,
