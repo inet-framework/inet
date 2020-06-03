@@ -22,6 +22,8 @@ import inet.node.ethernet.Eth1G;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.scene.NetworkNodeVisualizer;
 import ned.DatarateChannel;
 
 
@@ -53,6 +55,9 @@ network CloudAndRouters
         }
         internet: InternetCloud {
             @display("p=250,400;is=vl");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=100,158");
         }
     connections:
         for i=0..numSenders-1 {
