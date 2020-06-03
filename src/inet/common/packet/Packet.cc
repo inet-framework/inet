@@ -152,7 +152,7 @@ const Ptr<const Chunk> Packet::popAtFront(b length, int flags)
 
 void Packet::setBackOffset(b offset)
 {
-    CHUNK_CHECK_USAGE(frontIterator.getPosition() <= offset, "offset is out of range");
+    CHUNK_CHECK_USAGE(frontIterator.getPosition() <= offset && offset <= getTotalLength(), "offset is out of range");
     content->seekIterator(backIterator, getTotalLength() - offset);
     CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
 }
