@@ -43,7 +43,7 @@ network CloudAndRouters
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=123,374;is=s");
+                @display("p=100,401;is=s");
         }
 
         srouter[numSenderNets]: Router {

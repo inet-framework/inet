@@ -1,0 +1,13 @@
+<config>
+	<interface hosts='**' names="ppp*" address='13.37.x.x' netmask='/30'/>
+	<route hosts='**srouter**' destination="*" netmask="*" gateway="internet" />
+	<route hosts='**recip**' destination="*" netmask="*" gateway="internet" />
+	
+	
+	<interface hosts='**srouter**' names="eth*" address='192.168.1.1' netmask='255.255.255.0'/>
+
+	<interface hosts='**sender**' address='192.168.1.x' netmask='255.255.255.0' gateway="192.168.1.1"/>
+	
+	<route hosts='**sender**' destination="*" netmask="*" gateway="192.168.1.1" />
+	
+</config>

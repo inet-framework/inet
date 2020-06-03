@@ -460,8 +460,23 @@ void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
             EV_DEBUG << "<-- configuring isolated network " << it.first << ". \n";
         }
     }
-    else
-        assignAddresses(topology.linkInfos);
+    else {
+
+        std::vector<LinkInfo *> internetLinkInfos;
+        for (const auto &li: topology.linkInfos) {
+            std::cout << "networkid: " << li->networkId << std::endl;
+            std::cout << "has gateway info? " << std::boolalpha << (li->gatewayInterfaceInfo != nullptr) << std::endl;
+
+            if (li->interfaceInfos.size() == 4) {
+                std::cout << "it has four ifaces, lets assign" << std::endl;
+                assignAddresses({li});
+            } else
+                internetLinkInfos.push_back(li);
+        }
+        std::cout << "assigning inet: " << internetLinkInfos.size() << std::endl;
+        assignAddresses(internetLinkInfos);
+
+    }
 }
 
 void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
