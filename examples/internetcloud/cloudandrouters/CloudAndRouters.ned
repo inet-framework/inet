@@ -19,6 +19,7 @@ package inet.examples.internetcloud.cloudandrouters;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
@@ -30,8 +31,9 @@ import ned.DatarateChannel;
 network CloudAndRouters
 {
     parameters:
-        int numSenders;
-
+        int numSenderNets;
+        int numHostsPerNet @display("bgb=694,791");
+        @display("bgb=672,745");
     types:
         channel C extends DatarateChannel
         {
@@ -41,13 +43,13 @@ network CloudAndRouters
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,70;is=s");
+                @display("p=123,374;is=s");
         }
 
-        srouter[numSenders]: Router {
-            @display("p=250,200,row,100");
+        srouter[numSenderNets]: Router {
+            @display("p=250,282,row,${numHostsPerNet}00");
         }
-        sender[numSenders]: StandardHost {
+        sender[numSenderNets*numHostsPerNet]: StandardHost {
             @display("p=250,100,row,100");
         }
         recip: StandardHost {
@@ -59,11 +61,19 @@ network CloudAndRouters
         visualizer: IntegratedCanvasVisualizer {
             @display("p=100,158");
         }
-    connections:
-        for i=0..numSenders-1 {
-            srouter[i].pppg++ <--> C <--> internet.pppg++;
-            sender[i].ethg++ <--> Eth1G <--> srouter[i].ethg++;
+        etherSwitch[numSenderNets]: EtherSwitch {
+            @display("p=250,232,row,${numHostsPerNet}00");
         }
+    connections:
+        for i=0..numSenderNets-1 {
+            srouter[i].pppg++ <--> C <--> internet.pppg++;
+            etherSwitch[i].ethg++ <--> Eth1G <--> srouter[i].ethg++;
+        }
+        for i=0..(numSenderNets*numHostsPerNet)-1 {
+            sender[i].ethg++ <--> Eth1G <--> etherSwitch[int(floor(i/numHostsPerNet))].ethg++;
+        }
+
         internet.pppg++ <--> C <--> recip.pppg++;
+
 }
 
