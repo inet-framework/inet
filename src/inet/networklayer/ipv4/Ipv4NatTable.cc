@@ -231,28 +231,38 @@ void Ipv4DynamicNat::handleMessage(cMessage *msg)
     throw cRuntimeError("This module can not handle messages");
 }
 
+
+class Callback : public PacketDissector::CallbackBase {
+public:
+    const Protocol *transportProtocol = nullptr;
+    uint16_t srcPort = -1;
+    uint16_t destPort = -1;
+
+    virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override {
+        if (protocol == &Protocol::udp) {
+            std::cout << "UDP!" << std::endl;
+            transportProtocol = protocol;
+            Ptr<const UdpHeader> header = dynamicPtrCast<const UdpHeader>(chunk);
+            srcPort = header->getSrcPort();
+            destPort = header->getDestPort();
+        }
+        if (protocol == &Protocol::tcp) {
+            std::cout << "TCP!" << std::endl;
+            transportProtocol = protocol;
+            Ptr<const tcp::TcpHeader> header = dynamicPtrCast<const tcp::TcpHeader>(chunk);
+            srcPort = header->getSrcPort();
+            destPort = header->getDestPort();
+        }
+    }
+};
+
 std::pair<int, uint16_t> getTransportProtocolAndDestPort(Packet *datagram)
 {
-    auto& ipv4Header = getNetworkProtocolHeader(datagram);
-    auto transportProtocol = ipv4Header->getProtocol();
+    Callback cb;
+    PacketDissector pd(ProtocolDissectorRegistry::globalRegistry, cb);
+    pd.dissectPacket(datagram, &Protocol::ipv4);
 
-    int port = -1;
-
-#ifdef WITH_UDP
-    if (transportProtocol == &Protocol::udp) {
-        auto& udpHeader = getTransportProtocolHeader(datagram);
-        port = udpHeader->getDestinationPort();
-    }
-#endif
-
-#ifdef WITH_TCP_COMMON
-    if (transportProtocol == &Protocol::tcp) {
-        auto& tcpHeader = getTransportProtocolHeader(datagram);
-        port = tcpHeader->getDestinationPort();
-    }
-#endif
-
-    return {transportProtocol->getId(), port};
+    return {cb.transportProtocol->getId(), cb.destPort};
 }
 
 INetfilter::IHook::Result Ipv4DynamicNat::datagramPreRoutingHook(Packet *datagram)
@@ -277,6 +287,7 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPreRoutingHook(Packet *datagra
             applyNatEntry(datagram, natEntry);
         }
         else {
+            // this is mostly for ICMP, but is very much broken
             std::cout << "using hacky default mapping" << std::endl;
             Ipv4NatEntry natEntry;
             natEntry.setDestAddress(Ipv4Address("192.168.1.100"));
@@ -287,6 +298,7 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPreRoutingHook(Packet *datagra
 
     return ACCEPT;
 }
+
 
 INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagram)
 {
@@ -300,7 +312,6 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagr
         InterfaceEntry *ie = ift->findInterfaceByName(par("publicInterfaceName").stringValue());
 
 
-
         auto& ipv4Header = getNetworkProtocolHeader(datagram);
         auto transportProtocol = ipv4Header->getProtocol();
 
@@ -308,19 +319,10 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagr
         Ipv4Address sourceAddress = ipv4Header->getSourceAddress().toIpv4();
         uint16_t sourcePort = -1;
 
-    #ifdef WITH_UDP
-        if (transportProtocol == &Protocol::udp) {
-            auto& udpHeader = getTransportProtocolHeader(datagram);
-            sourcePort = udpHeader->getSourcePort();
-        }
-    #endif
-
-    #ifdef WITH_TCP_COMMON
-        if (transportProtocol == &Protocol::tcp) {
-            auto& tcpHeader = getTransportProtocolHeader(datagram);
-            sourcePort = tcpHeader->getSourcePort();
-        }
-    #endif
+        Callback cb;
+        PacketDissector pd(ProtocolDissectorRegistry::globalRegistry, cb);
+        pd.dissectPacket(datagram, &Protocol::ipv4);
+        sourcePort = cb.srcPort;
 
         std::pair<Ipv4Address, uint16_t> sourceAddressAndPort = {sourceAddress, sourcePort};
 

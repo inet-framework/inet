@@ -70,6 +70,16 @@ class INET_API PacketDissector
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) = 0;
     };
 
+    class INET_API CallbackBase : public ICallback
+    {
+      public:
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) { return true; }
+        virtual void startProtocolDataUnit(const Protocol *protocol) { }
+        virtual void endProtocolDataUnit(const Protocol *protocol) { }
+        virtual void markIncorrect() { }
+        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) { }
+    };
+
     class INET_API ProtocolDissectorCallback : public ProtocolDissector::ICallback
     {
       protected:
