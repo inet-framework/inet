@@ -1,17 +1,7 @@
 <internetCloud symmetric="true">
   <parameters name="good">
-    <traffic src="srouter[0]" dest="rrouter" delay="20ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.01" />
-    <traffic src="srouter[1]" dest="rrouter" delay="30ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.02" />
-    <traffic src="srouter[2]" dest="rrouter" delay="40ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.03" />
-    <traffic src="srouter[3]" dest="rrouter" delay="50ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.04" />
-    <traffic src="srouter[4]" dest="rrouter" delay="60ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.05" />
-    <traffic src="srouter[5]" dest="rrouter" delay="70ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.06" />
-    <traffic src="srouter[6]" dest="rrouter" delay="80ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.07" />
-    <traffic src="srouter[7]" dest="rrouter" delay="90ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.08" />
-    <traffic src="srouter[8]" dest="rrouter" delay="100ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.09" />
-    <traffic src="srouter[9]" dest="rrouter" delay="110ms+truncnormal(200ms,60ms)" datarate="uniform(100kbps,1Mbps)" drop="uniform(0,1) &lt; 0.10" />
-<!--
-    <traffic src="**" dest="**" delay="10ms+truncnormal(100ms,20ms)" datarate="uniform(100kbps,500kbps)" drop="uniform(0,1) &lt; uniform(0.01, 0.05)" />
--->
+
+    <traffic src="**" dest="**" delay="1ms+uniform(10ms,20ms)" datarate="uniform(100Mbps,500Mbps)" drop="uniform(0, 1) &lt; 0.001" />
+
   </parameters>
 </internetCloud>

@@ -147,6 +147,10 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
                 insertTransportProtocolHeader(packet, Protocol::tcp, tcpHeader);
             }
             else
+            if (transportProtocol == &Protocol::icmpv4) {
+                // TODO
+            }
+            else
 #endif
                 throw cRuntimeError("Unknown protocol: '%s'", transportProtocol ? transportProtocol->getName() : std::to_string((int)ipv4Header->getProtocolId()).c_str());
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);

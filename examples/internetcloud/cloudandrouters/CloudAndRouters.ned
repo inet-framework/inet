@@ -18,7 +18,7 @@
 package inet.examples.internetcloud.cloudandrouters;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth1G;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
@@ -33,8 +33,8 @@ network CloudAndRouters
     types:
         channel C extends DatarateChannel
         {
-            delay = 20ms;
-            datarate = 5Mbps;
+            delay = 0.1ms;
+            datarate = 1000Mbps;
         }
     submodules:
         configurator: Ipv4NetworkConfigurator {
@@ -48,9 +48,6 @@ network CloudAndRouters
         sender[numSenders]: StandardHost {
             @display("p=250,100,row,100");
         }
-        rrouter: Router {
-            @display("p=250,600");
-        }
         recip: StandardHost {
             @display("p=250,700");
         }
@@ -58,11 +55,10 @@ network CloudAndRouters
             @display("p=250,400;is=vl");
         }
     connections:
-        rrouter.pppg++ <--> C <--> internet.pppg++;
-        recip.ethg++ <--> Eth100M <--> rrouter.ethg++;
         for i=0..numSenders-1 {
             srouter[i].pppg++ <--> C <--> internet.pppg++;
-            sender[i].ethg++ <--> Eth100M <--> srouter[i].ethg++;
+            sender[i].ethg++ <--> Eth1G <--> srouter[i].ethg++;
         }
+        internet.pppg++ <--> C <--> recip.pppg++;
 }
 
