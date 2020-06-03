@@ -46,6 +46,31 @@ class INET_API Ipv4NatTable : public cSimpleModule, public NetfilterBase::HookBa
     virtual Result datagramLocalOutHook(Packet *datagram) override { return processPacket(datagram, LOCALOUT); }
 };
 
+
+class INET_API Ipv4DynamicNat : public cSimpleModule, public NetfilterBase::HookBase
+{
+  protected:
+    INetfilter *networkProtocol = nullptr;
+
+    PacketFilter *outgoingFilter;
+    PacketFilter *incomingFilter;
+
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
+    virtual Result processPacket(Packet *packet, INetfilter::IHook::Type type);
+
+  public:
+    virtual ~Ipv4DynamicNat();
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { return processPacket(datagram, PREROUTING); }
+    virtual Result datagramForwardHook(Packet *datagram) override { return processPacket(datagram, FORWARD); }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return processPacket(datagram, POSTROUTING); }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return processPacket(datagram, LOCALIN); }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { return processPacket(datagram, LOCALOUT); }
+};
+
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4NATTABLE_H

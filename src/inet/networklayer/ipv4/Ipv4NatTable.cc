@@ -104,6 +104,50 @@ void Ipv4NatTable::parseConfig()
     }
 }
 
+void replaceStuff(Packet *packet, const Ipv4NatEntry &natEntry)
+{
+    auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+    if (!natEntry.getDestAddress().isUnspecified())
+        ipv4Header->setDestAddress(natEntry.getDestAddress());
+    if (!natEntry.getSrcAddress().isUnspecified())
+        ipv4Header->setSrcAddress(natEntry.getSrcAddress());
+    auto transportProtocol = ipv4Header->getProtocol();
+#ifdef WITH_UDP
+    if (transportProtocol == &Protocol::udp) {
+        auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
+        // TODO: if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
+        auto udpData = packet->peekData();
+        if (natEntry.getDestPort() != -1)
+            udpHeader->setDestPort(natEntry.getDestPort());
+        if (natEntry.getSrcPort() != -1)
+            udpHeader->setSrcPort(natEntry.getSrcPort());
+        Udp::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), udpHeader, packet);
+        insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
+    }
+    else
+#endif
+#ifdef WITH_TCP_COMMON
+    if (transportProtocol == &Protocol::tcp) {
+        auto& tcpHeader = removeTransportProtocolHeader<tcp::TcpHeader>(packet);
+        // TODO: if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))
+        auto tcpData = packet->peekData();
+        if (natEntry.getDestPort() != -1)
+            tcpHeader->setDestPort(natEntry.getDestPort());
+        if (natEntry.getSrcPort() != -1)
+            tcpHeader->setSrcPort(natEntry.getSrcPort());
+        tcp::TcpCrcInsertion::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
+        insertTransportProtocolHeader(packet, Protocol::tcp, tcpHeader);
+    }
+    else
+    if (transportProtocol == &Protocol::icmpv4) {
+        // TODO
+    }
+    else
+#endif
+        throw cRuntimeError("Unknown protocol: '%s'", transportProtocol ? transportProtocol->getName() : std::to_string((int)ipv4Header->getProtocolId()).c_str());
+    insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+}
+
 INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter::IHook::Type type)
 {
     Enter_Method_Silent();
@@ -114,51 +158,95 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
         const auto& natEntry = lt->second.second;
         // TODO: this might be slow for too many filters
         if (packetFilter->matches(packet)) {
-            auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-            if (!natEntry.getDestAddress().isUnspecified())
-                ipv4Header->setDestAddress(natEntry.getDestAddress());
-            if (!natEntry.getSrcAddress().isUnspecified())
-                ipv4Header->setSrcAddress(natEntry.getSrcAddress());
-            auto transportProtocol = ipv4Header->getProtocol();
-#ifdef WITH_UDP
-            if (transportProtocol == &Protocol::udp) {
-                auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
-                // TODO: if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
-                auto udpData = packet->peekData();
-                if (natEntry.getDestPort() != -1)
-                    udpHeader->setDestPort(natEntry.getDestPort());
-                if (natEntry.getSrcPort() != -1)
-                    udpHeader->setSrcPort(natEntry.getSrcPort());
-                Udp::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), udpHeader, packet);
-                insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
-            }
-            else
-#endif
-#ifdef WITH_TCP_COMMON
-            if (transportProtocol == &Protocol::tcp) {
-                auto& tcpHeader = removeTransportProtocolHeader<tcp::TcpHeader>(packet);
-                // TODO: if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))
-                auto tcpData = packet->peekData();
-                if (natEntry.getDestPort() != -1)
-                    tcpHeader->setDestPort(natEntry.getDestPort());
-                if (natEntry.getSrcPort() != -1)
-                    tcpHeader->setSrcPort(natEntry.getSrcPort());
-                tcp::TcpCrcInsertion::insertCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), tcpHeader, packet);
-                insertTransportProtocolHeader(packet, Protocol::tcp, tcpHeader);
-            }
-            else
-            if (transportProtocol == &Protocol::icmpv4) {
-                // TODO
-            }
-            else
-#endif
-                throw cRuntimeError("Unknown protocol: '%s'", transportProtocol ? transportProtocol->getName() : std::to_string((int)ipv4Header->getProtocolId()).c_str());
-            insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+            replaceStuff(packet, natEntry);
             break;
         }
     }
     return ACCEPT;
 }
+
+
+
+
+
+
+
+
+
+Define_Module(Ipv4DynamicNat);
+
+Ipv4DynamicNat::~Ipv4DynamicNat()
+{
+    delete incomingFilter;
+    delete outgoingFilter;
+}
+
+void Ipv4DynamicNat::initialize(int stage)
+{
+    /*
+     * <config>
+
+        <entry type="postrouting" packetDataFilter='*Ipv4Header* AND sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*' srcAddress="13.37.0.1" />
+
+        <entry type="prerouting" packetDataFilter='*Ipv4Header* AND NOT sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*' destAddress="192.168.1.100" />
+
+    </config>
+    */
+
+    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        // TODO: read params
+        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+
+        // TODO: use privateSubnet parameter
+
+        outgoingFilter = new PacketFilter();
+        outgoingFilter->setPattern("*", "*Ipv4Header* AND sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*");
+
+        incomingFilter = new PacketFilter();
+        incomingFilter->setPattern("*", "*Ipv4Header* AND NOT sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*");
+
+        networkProtocol->registerHook(0, this);
+    }
+}
+
+void Ipv4DynamicNat::handleMessage(cMessage *msg)
+{
+    throw cRuntimeError("This module can not handle messages");
+}
+
+
+INetfilter::IHook::Result Ipv4DynamicNat::processPacket(Packet *packet, INetfilter::IHook::Type type)
+{
+    Enter_Method_Silent();
+
+    if (type == POSTROUTING && outgoingFilter->matches(packet)) {
+
+        // TODO: use configured public ip address parameter
+
+        Ipv4NatEntry natEntry;
+        natEntry.setSrcAddress(Ipv4Address("13.37.0.1"));
+        replaceStuff(packet, natEntry);
+    }
+
+    if (type == PREROUTING && incomingFilter->matches(packet)) {
+
+        // TODO: use the (not yet existing) dynamic port lookup table parameter
+
+        Ipv4NatEntry natEntry;
+        natEntry.setDestAddress(Ipv4Address("192.168.1.100"));
+        replaceStuff(packet, natEntry);
+    }
+
+    return ACCEPT;
+}
+
+
+
+
+
 
 } // namespace inet
 

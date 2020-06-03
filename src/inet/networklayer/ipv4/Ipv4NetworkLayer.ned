@@ -58,7 +58,7 @@ module Ipv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=100,200;is=s");
         }
-        natTable: Ipv4NatTable {
+        natTable: <default("Ipv4NatTable")> like IIpv4Nat {
             parameters:
                 @display("p=100,300;is=s");
         }

@@ -17,13 +17,32 @@ package inet.networklayer.ipv4;
 
 import inet.networklayer.contract.IRoutingTable;
 
+
+moduleinterface IIpv4Nat
+{
+}
+
+
 //
 // Stores the network address translation table.
 //
-simple Ipv4NatTable
+simple Ipv4NatTable like IIpv4Nat
 {
     parameters:
         string networkProtocolModule = default("^.ip");
         xml config = default(xml("<config></config>")); // XML configuration parameters for network address translation
+        @display("i=block/table");
+}
+
+
+
+//
+// Stores the network address translation table.
+//
+simple Ipv4DynamicNat like IIpv4Nat
+{
+    parameters:
+        string networkProtocolModule = default("^.ip");
+        string privateSubnet = default("192.168.1.0/24");
         @display("i=block/table");
 }
