@@ -14,7 +14,7 @@ This showcase consists of one simulation model that demonstrates
 important features of the mobility visualizer.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/mobility <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/mobility>`__
+| Source files location: `inet/showcases/visualizer/mobility <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/mobility>`__
 
 About the Visualizer
 --------------------

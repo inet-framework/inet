@@ -249,6 +249,57 @@ Define_NED_Function2(nedf_xmlattr,
         "It returns the defaultValue (or throws an error) if the attribute does not exists."
         )
 
+
+cNEDValue nedf_selectWithRandomDistribution(cComponent *context, cNEDValue argv[], int argc)
+{
+    if (argc != 2)
+        throw cRuntimeError("selectWithRandomDistribution(): Attribute list is not 2 Arguments : %i", argc);
+
+    if (argv[0].getType() != cNEDValue::STRING)
+        throw cRuntimeError("selectWithRandomDistribution(): string arguments expected, argument 1");
+
+    if (argv[1].getType() != cNEDValue::STRING)
+        throw cRuntimeError("selectWithRandomDistribution(): string arguments expected, argument 2");
+
+    cStringTokenizer tokenizer1(argv[0]);
+    cStringTokenizer tokenizer2(argv[1]);
+
+    auto list1 = tokenizer1.asVector();
+    auto list2 = tokenizer2.asDoubleVector();
+
+    if (list1.size() != list2.size())
+        throw cRuntimeError("selectWithRandomDistribution(): argument 1 and 2 has different numbers of elements");
+
+    double val = 0;
+    for (auto elem : list2)
+        val += elem;
+
+    if (abs(val-1.0) > 0.00001)
+        throw cRuntimeError("selectWithRandomDistribution(): The probability list doesn't add 1 %f", val);
+
+    // generate probability distribution list
+    val = 0;
+    for (auto &elem : list2) {
+        double temp = elem;
+        elem += val;
+        val += temp;
+    }
+
+    double p = context->uniform(0, 1.0);
+
+    for (unsigned int i = 0; i < list2.size(); i++) {
+        if (p < list2[i])
+            return list1[i];
+    }
+    return list1.back();
+}
+
+Define_NED_Function2(nedf_selectWithRandomDistribution,
+        "string selectWithRandomDistribution(string list, string probabilityList)",
+        "string",
+        "return an element of the first list using with the probability distribution of the second list"
+        );
+
 } // namespace utils
 
 } // namespace inet

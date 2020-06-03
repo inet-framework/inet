@@ -29,12 +29,12 @@ class INET_API InterpolatorBase : public IInterpolator<X, Y>
   public:
     virtual Y getMin(const X x1, const Y y1, const X x2, const Y y2) const override {
         ASSERT(x1 <= x2);
-        return std::min(y1, y2);
+        return math::minnan(y1, y2);
     }
 
     virtual Y getMax(const X x1, const Y y1, const X x2, const Y y2) const override {
         ASSERT(x1 <= x2);
-        return std::max(y1, y2);
+        return math::maxnan(y1, y2);
     }
 };
 
@@ -126,7 +126,7 @@ class INET_API MinimumInterpolator : public ConstantInterpolatorBase<X, Y>
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
         ASSERT(x1 <= x && x <= x2);
-        return std::min(y1, y2);
+        return math::minnan(y1, y2);
     }
 };
 
@@ -142,7 +142,7 @@ class INET_API MaximumInterpolator : public ConstantInterpolatorBase<X, Y>
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
         ASSERT(x1 <= x && x <= x2);
-        return std::max(y1, y2);
+        return math::maxnan(y1, y2);
     }
 };
 

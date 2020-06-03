@@ -15,7 +15,7 @@ in INET's 802.11 model, examining if frame aggregation is useful when sending
 lots of small packets.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/aggregation <https://github.com/inet-framework/inet-showcases/tree/master/wireless/aggregation>`__
+| Source files location: `inet/showcases/wireless/aggregation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/aggregation>`__
 
 About Aggregation
 -----------------

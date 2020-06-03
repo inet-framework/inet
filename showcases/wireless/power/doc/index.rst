@@ -13,7 +13,7 @@ will also have energy storage (battery) and energy "generator" (e.g.
 solar cells) units built into them.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/power <https://github.com/inet-framework/inet-showcases/tree/master/wireless/power>`__
+| Source files location: `inet/showcases/wireless/power <https://github.com/inet-framework/inet/tree/master/showcases/wireless/power>`__
 
 The model
 ---------

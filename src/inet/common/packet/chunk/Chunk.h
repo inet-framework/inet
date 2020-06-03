@@ -440,7 +440,12 @@ class INET_API Chunk : public cObject,
     /**
      * Returns a mutable copy of this chunk in a shared pointer.
      */
-    virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
+    virtual const Ptr<Chunk> dupShared() const {
+        auto chunk = Ptr<Chunk>(static_cast<Chunk *>(dup()));
+        chunk->markMutableIfExclusivelyOwned();
+        return chunk;
+    };
+
     virtual void forEachChild(cVisitor *v) override;
     //@}
 

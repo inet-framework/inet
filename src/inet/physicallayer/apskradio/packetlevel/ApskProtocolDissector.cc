@@ -17,12 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/common/ProtocolGroup.h"
-#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskProtocolDissector.h"
-
 
 namespace inet {
 
@@ -33,23 +31,17 @@ void ApskProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
     auto header = packet->popAtFront<ApskPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::apskPhy);
     callback.visitChunk(header, &Protocol::apskPhy);
-
-    //FIXME KLUDGE: remove PhyPadding if exists
-    auto padding = dynamicPtrCast<const BitCountChunk>(packet->peekAtFront());
-    if (padding != nullptr) {
-        packet->popAtFront<BitCountChunk>(padding->getChunkLength());
-        callback.visitChunk(padding, &Protocol::apskPhy);
+    auto headerPaddingLength = header->getHeaderLengthField() - header->getChunkLength();
+    if (headerPaddingLength > b(0)) {
+        const auto& headerPadding = packet->popAtFront(headerPaddingLength);
+        callback.visitChunk(headerPadding, &Protocol::apskPhy);
     }
-    // end of KLUDGE
-
+    auto trailerPaddingLength = packet->getDataLength() - header->getPayloadLengthField();
+    auto trailerPadding = trailerPaddingLength > b(0) ? packet->popAtBack(trailerPaddingLength) : nullptr;
     auto payloadProtocol = header->getPayloadProtocol();
     callback.dissectPacket(packet, payloadProtocol);
-
-    auto paddingLength = packet->getDataLength();
-    if (paddingLength > b(0)) {
-        const auto& padding = packet->popAtFront(paddingLength);        // remove padding
-        callback.visitChunk(padding, &Protocol::apskPhy);
-    }
+    if (trailerPaddingLength > b(0))
+        callback.visitChunk(trailerPadding, &Protocol::apskPhy);
     callback.endProtocolDataUnit(&Protocol::apskPhy);
 }
 

@@ -13,7 +13,7 @@ This showcase contains three configurations of increasing complexity,
 each showing different features of the visualization.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/visualizer/radiomediumactivity <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/radiomediumactivity>`__
+| Source files location: `inet/showcases/visualizer/radiomediumactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/radiomediumactivity>`__
 
 About the visualizer
 --------------------

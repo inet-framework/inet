@@ -12,7 +12,7 @@ framework implements several variants. This showcase demonstrates the
 improve application level throughput.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/ratecontrol <https://github.com/inet-framework/inet-showcases/tree/master/wireless/ratecontrol>`__
+| Source files location: `inet/showcases/wireless/ratecontrol <https://github.com/inet-framework/inet/tree/master/showcases/wireless/ratecontrol>`__
 
 The model
 ---------

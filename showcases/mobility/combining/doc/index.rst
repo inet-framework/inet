@@ -16,7 +16,7 @@ can be combined to create more complex motion patterns. (Elementary mobility
 models themselves are demonstrated in  :doc:`../../basic/doc/index`.)
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/mobility/combining <https://github.com/inet-framework/inet-showcases/tree/master/mobility/combining>`__
+| Source files location: `inet/showcases/mobility/combining <https://github.com/inet-framework/inet/tree/master/showcases/mobility/combining>`__
 
 Overview
 --------

@@ -24,6 +24,7 @@
         {% include "header_sourcelink.html" %}
         </nav>
     </div>
+    {%- if theme_header_links|tobool %}
     <div class="mdl-layout__header-row header-links">
       <div class="mdl-layout-spacer"></div>
       <nav class="mdl-navigation">
@@ -42,4 +43,5 @@
       {%- endfor %}
       </nav>
     </div>
+    {%- endif %}
 </header>

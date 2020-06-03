@@ -33,7 +33,7 @@ release = '4.2'
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '2.2'
+needs_sphinx = '3.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -142,7 +142,10 @@ html_theme_options = {
     'show_drawer_title': False,
     # Render footer.
     # Values: True, False (Default: True)
-    'show_footer': False
+    'show_footer': False,
+
+    # google analytics
+    'googleanalytics_id': 'UA-240922-3'
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

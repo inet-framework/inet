@@ -18,6 +18,10 @@
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/visualizer/linklayer/DataLinkCanvasVisualizer.h"
 
+#ifdef WITH_IEEE80211
+#include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
+#endif // WITH_IEEE80211
+
 namespace inet {
 
 namespace visualizer {
@@ -26,12 +30,20 @@ Define_Module(DataLinkCanvasVisualizer);
 
 bool DataLinkCanvasVisualizer::isLinkStart(cModule *module) const
 {
-    return dynamic_cast<MacProtocolBase *>(module) != nullptr;
+    return dynamic_cast<MacProtocolBase *>(module) != nullptr
+#ifdef WITH_IEEE80211
+           || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
+#endif // WITH_IEEE80211
+        ;
 }
 
 bool DataLinkCanvasVisualizer::isLinkEnd(cModule *module) const
 {
-    return dynamic_cast<MacProtocolBase *>(module) != nullptr;
+    return dynamic_cast<MacProtocolBase *>(module) != nullptr
+#ifdef WITH_IEEE80211
+           || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
+#endif // WITH_IEEE80211
+        ;
 }
 
 const LinkVisualizerBase::LinkVisualization *DataLinkCanvasVisualizer::createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const

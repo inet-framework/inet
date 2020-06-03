@@ -8,7 +8,7 @@ This showcase demonstrates the hidden node problem in 802.11 wireless
 networks, and the RTS/CTS mechanism that addresses it.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/hiddennode <https://github.com/inet-framework/inet-showcases/tree/master/wireless/hiddennode>`__
+| Source files location: `inet/showcases/wireless/hiddennode <https://github.com/inet-framework/inet/tree/master/showcases/wireless/hiddennode>`__
 
 Description of the hidden node problem
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

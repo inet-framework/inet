@@ -39,8 +39,8 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     Coord k = m.getAbs().getMultipliedElementwise(size / 2);
     Coord t1 = -n - k;
     Coord t2 = -n + k;
-    double tN = std::max(std::max(t1.x, t1.y), t1.z);
-    double tF = std::min(std::min(t2.x, t2.y), t2.z);
+    double tN = math::maxnan(math::maxnan(t1.x, t1.y), t1.z);
+    double tF = math::minnan(math::minnan(t2.x, t2.y), t2.z);
     double l = lineSegment.length();
     if (tN > tF || tF < 0.0 || tN > l) {
         intersection1 = intersection2 = normal1 = normal2 = Coord::NIL;

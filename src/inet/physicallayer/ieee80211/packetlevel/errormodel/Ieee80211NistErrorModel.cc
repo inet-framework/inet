@@ -93,7 +93,7 @@ double Ieee80211NistErrorModel::getFecBpskBer(double snr, double nbits, uint32_t
         return 1.0;
     }
     double pe = calculatePe(ber, bValue);
-    pe = std::min(pe, 1.0);
+    pe = math::minnan(pe, 1.0);
     double pms = pow(1 - pe, nbits);
     return pms;
 }
@@ -105,7 +105,7 @@ double Ieee80211NistErrorModel::getFecQpskBer(double snr, double nbits, uint32_t
         return 1.0;
     }
     double pe = calculatePe(ber, bValue);
-    pe = std::min(pe, 1.0);
+    pe = math::minnan(pe, 1.0);
     double pms = pow(1 - pe, nbits);
     return pms;
 }
@@ -156,7 +156,7 @@ double Ieee80211NistErrorModel::getFec16QamBer(double snr, uint32_t nbits, uint3
         return 1.0;
     }
     double pe = calculatePe(ber, bValue);
-    pe = std::min(pe, 1.0);
+    pe = math::minnan(pe, 1.0);
     double pms = pow(1 - pe, (double)nbits);
     return pms;
 }
@@ -168,7 +168,7 @@ double Ieee80211NistErrorModel::getFec64QamBer(double snr, uint32_t nbits, uint3
         return 1.0;
     }
     double pe = calculatePe(ber, bValue);
-    pe = std::min(pe, 1.0);
+    pe = math::minnan(pe, 1.0);
     double pms = pow(1 - pe, (double)nbits);
     return pms;
 }
@@ -180,7 +180,7 @@ double Ieee80211NistErrorModel::getFec256QamBer(double snr, uint64_t nbits, uint
       return 1.0;
   }
   double pe = calculatePe (ber, bValue);
-  pe = std::min (pe, 1.0);
+  pe = math::minnan(pe, 1.0);
   double pms = std::pow (1 - pe, nbits);
   return pms;
 }
@@ -192,7 +192,7 @@ double Ieee80211NistErrorModel::getFec1024QamBer(double snr, uint64_t nbits, uin
       return 1.0;
   }
   double pe = calculatePe (ber, bValue);
-  pe = std::min (pe, 1.0);
+  pe = math::minnan(pe, 1.0);
   double pms = std::pow (1 - pe, nbits);
   return pms;
 }

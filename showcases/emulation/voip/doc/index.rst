@@ -28,7 +28,7 @@ features of the INET Framework to be turned on (they are off by default), and it
 only runs on Linux.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet-showcases/tree/master/emulation/voip>`__
+| Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet/tree/master/showcases/emulation/voip>`__
 
 
 Introduction

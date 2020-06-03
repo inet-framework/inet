@@ -11,7 +11,7 @@ available in INET. It contains an example simulation that features a
 wireless sensor network.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/wireless/ieee802154 <https://github.com/inet-framework/inet-showcases/tree/master/wireless/ieee802154>`__
+| Source files location: `inet/showcases/wireless/ieee802154 <https://github.com/inet-framework/inet/tree/master/showcases/wireless/ieee802154>`__
 
 The model
 ---------

@@ -15,7 +15,7 @@ records PCAP traces of TCP, UDP, and ICMP traffic, using various
 physical layer protocols like Ethernet and 802.11.
 
 | INET version: ``4.0``
-| Source files location: `inet/showcases/general/pcaprecording <https://github.com/inet-framework/inet-showcases/tree/master/general/pcaprecording>`__
+| Source files location: `inet/showcases/general/pcaprecording <https://github.com/inet-framework/inet/tree/master/showcases/general/pcaprecording>`__
 
 The model
 ---------
