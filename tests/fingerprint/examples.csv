@@ -1,4 +1,5 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,         c989-82f3/tplx, PASS,
 # /examples/adhoc/idealwireless/,      -f .qtenv.ini -c General -r 0
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            c989-82f3/tplx, PASS, wireless adhoc
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            ad9e-8fc6/tplx, PASS, wireless adhoc
@@ -226,6 +227,9 @@
 
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,     5s,              defb-8774/tplx, PASS,
 
+/examples/inet/tcpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         403b-01ad/tplx, PASS,
+/examples/inet/tcpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         df77-6303/tplx, PASS,
+
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c default_tcp -r 0,            100s,            476a-f98a/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet -r 0,             100s,            476a-f98a/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_msg -r 0,         100s,            476a-f98a/tplx, PASS,
@@ -285,6 +289,9 @@
 
 /examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0,                 10s,             1025-9a06/tplx, PASS,
 /examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0,                 10s,             507f-96e1/tplx, PASS,
+
+/examples/inet/udpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         0b36-9d13/tplx, PASS,
+/examples/inet/udpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         803d-2648/tplx, PASS,
 
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           badd-c767/tplx, PASS,
 
@@ -408,6 +415,8 @@
 /examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             3ac6-40fe/tplx, PASS, wireless
 /examples/objectcache/,              -f omnetpp.ini -c BvhObjectCache -r 0,         20s,             3ac6-40fe/tplx, PASS, wireless
 
+/examples/openstreetmap/,            -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx, PASS,
+
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            5017-e52a/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            6d07-70b0/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            4a82-58d0/tplx, PASS,
@@ -504,6 +513,9 @@
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000/tplx, ERROR, wireless # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,          4d52-8b6f/tplx, PASS, wireless
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0000-0000/tplx, ERROR, wireless # [Config Ping2] # __interactive__
+
+/examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,         5d68-3a54/tplx, PASS,
+# /examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0000-0000/tplx, PASS,   # [Config Ping2] # __interactive__
 
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      35b0-558e/tplx, PASS, wireless
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredNonCompliant80211Ping -r 0, 100s,   42ed-145b/tplx, PASS, wireless
