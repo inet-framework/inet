@@ -104,7 +104,7 @@ void Ipv4NatTable::parseConfig()
     }
 }
 
-void replaceStuff(Packet *packet, const Ipv4NatEntry &natEntry)
+void applyNatEntry(Packet *packet, const Ipv4NatEntry &natEntry)
 {
     auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
     if (!natEntry.getDestAddress().isUnspecified())
@@ -158,7 +158,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
         const auto& natEntry = lt->second.second;
         // TODO: this might be slow for too many filters
         if (packetFilter->matches(packet)) {
-            replaceStuff(packet, natEntry);
+            applyNatEntry(packet, natEntry);
             break;
         }
     }
@@ -183,30 +183,44 @@ Ipv4DynamicNat::~Ipv4DynamicNat()
 
 void Ipv4DynamicNat::initialize(int stage)
 {
-    /*
-     * <config>
-
-        <entry type="postrouting" packetDataFilter='*Ipv4Header* AND sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*' srcAddress="13.37.0.1" />
-
-        <entry type="prerouting" packetDataFilter='*Ipv4Header* AND NOT sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*' destAddress="192.168.1.100" />
-
-    </config>
-    */
-
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        // TODO: read params
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
 
         // TODO: use privateSubnet parameter
 
-        outgoingFilter = new PacketFilter();
-        outgoingFilter->setPattern("*", "*Ipv4Header* AND sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*");
+        std::string privateSubnetAddress = par("privateSubnetAddress").stringValue();
+        std::string privateSubnetNetmask = par("privateSubnetNetmask").stringValue();
 
-        incomingFilter = new PacketFilter();
-        incomingFilter->setPattern("*", "*Ipv4Header* AND NOT sourceAddress =~ 192.168.1.* AND NOT destAddress =~ 192.168.1.*");
+        Ipv4Address addr(privateSubnetAddress.c_str());
+        Ipv4Address mask(privateSubnetNetmask.c_str());
+        int maskLength = mask.getNetmaskLength();
+
+        if (!mask.isValidNetmask() || (maskLength != 8 && maskLength != 16 && maskLength != 24))
+            throw cRuntimeError("privateSubnetNetmask must be one of: 255.255.255.0, 255.255.0.0, 255.0.0.0");
+
+        addr = addr.doAnd(mask);
+
+        std::string subnetFilter;
+        switch (maskLength) {
+            case 8:
+                subnetFilter = std::to_string(addr.getDByte(0)) + ".*.*.*";
+                break;
+            case 16:
+                subnetFilter = std::to_string(addr.getDByte(0)) + "." + std::to_string(addr.getDByte(1)) + ".*.*";
+                break;
+            case 24:
+                subnetFilter = std::to_string(addr.getDByte(0)) + "." + std::to_string(addr.getDByte(1)) + "." + std::to_string(addr.getDByte(2)) + ".*";
+                break;
+        }
+
+        outgoingFilter = new PacketFilter();
+        outgoingFilter->setPattern("*", ("*Ipv4Header* AND sourceAddress =~ " + subnetFilter + " AND NOT destAddress =~ " + subnetFilter).c_str());
+
+        incomingFilter = new PacketFilter(); // the last AND NOT destAddress =~ part is... strange... maybe unnecessary?
+        incomingFilter->setPattern("*", ("*Ipv4Header* AND NOT sourceAddress =~ " + subnetFilter + " AND NOT destAddress =~ " + subnetFilter).c_str());
 
         networkProtocol->registerHook(0, this);
     }
@@ -217,34 +231,134 @@ void Ipv4DynamicNat::handleMessage(cMessage *msg)
     throw cRuntimeError("This module can not handle messages");
 }
 
+std::pair<int, uint16_t> getTransportProtocolAndDestPort(Packet *datagram)
+{
+    auto& ipv4Header = getNetworkProtocolHeader(datagram);
+    auto transportProtocol = ipv4Header->getProtocol();
 
-INetfilter::IHook::Result Ipv4DynamicNat::processPacket(Packet *packet, INetfilter::IHook::Type type)
+    int port = -1;
+
+#ifdef WITH_UDP
+    if (transportProtocol == &Protocol::udp) {
+        auto& udpHeader = getTransportProtocolHeader(datagram);
+        port = udpHeader->getDestinationPort();
+    }
+#endif
+
+#ifdef WITH_TCP_COMMON
+    if (transportProtocol == &Protocol::tcp) {
+        auto& tcpHeader = getTransportProtocolHeader(datagram);
+        port = tcpHeader->getDestinationPort();
+    }
+#endif
+
+    return {transportProtocol->getId(), port};
+}
+
+INetfilter::IHook::Result Ipv4DynamicNat::datagramPreRoutingHook(Packet *datagram)
 {
     Enter_Method_Silent();
 
-    if (type == POSTROUTING && outgoingFilter->matches(packet)) {
+    if (incomingFilter->matches(datagram)) {
 
-        // TODO: use configured public ip address parameter
+        auto transportProtocolAndDestPort = getTransportProtocolAndDestPort(datagram);
 
-        Ipv4NatEntry natEntry;
-        natEntry.setSrcAddress(Ipv4Address("13.37.0.1"));
-        replaceStuff(packet, natEntry);
-    }
+        std::cout << "incoming packet, protocol id and dest port: " << transportProtocolAndDestPort.first << " " << transportProtocolAndDestPort.second << std::endl;
+        if (portMapping.find(transportProtocolAndDestPort) != portMapping.end()) {
+            auto mapTo = portMapping[transportProtocolAndDestPort];
 
-    if (type == PREROUTING && incomingFilter->matches(packet)) {
+            std::cout << "mapping to: " << mapTo.first << " " << mapTo.second << std::endl;
 
-        // TODO: use the (not yet existing) dynamic port lookup table parameter
+            Ipv4NatEntry natEntry;
 
-        Ipv4NatEntry natEntry;
-        natEntry.setDestAddress(Ipv4Address("192.168.1.100"));
-        replaceStuff(packet, natEntry);
+            natEntry.setDestAddress(mapTo.first);
+            natEntry.setDestPort(mapTo.second);
+
+            applyNatEntry(datagram, natEntry);
+        }
+        else {
+            std::cout << "using hacky default mapping" << std::endl;
+            Ipv4NatEntry natEntry;
+            natEntry.setDestAddress(Ipv4Address("192.168.1.100"));
+            applyNatEntry(datagram, natEntry);
+        }
+
     }
 
     return ACCEPT;
 }
 
+INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagram)
+{
+    Enter_Method_Silent();
+
+    if (outgoingFilter->matches(datagram)) {
+
+        // TODO don't do all this lookup for every packet...
+
+        IInterfaceTable *ift = check_and_cast<IInterfaceTable *>(findContainingNode(this)->getSubmodule("interfaceTable"));
+        InterfaceEntry *ie = ift->findInterfaceByName(par("publicInterfaceName").stringValue());
 
 
+
+        auto& ipv4Header = getNetworkProtocolHeader(datagram);
+        auto transportProtocol = ipv4Header->getProtocol();
+
+        std::cout << "outgoing packet transport protocol id: " << transportProtocol->getId() << std::endl;
+        Ipv4Address sourceAddress = ipv4Header->getSourceAddress().toIpv4();
+        uint16_t sourcePort = -1;
+
+    #ifdef WITH_UDP
+        if (transportProtocol == &Protocol::udp) {
+            auto& udpHeader = getTransportProtocolHeader(datagram);
+            sourcePort = udpHeader->getSourcePort();
+        }
+    #endif
+
+    #ifdef WITH_TCP_COMMON
+        if (transportProtocol == &Protocol::tcp) {
+            auto& tcpHeader = getTransportProtocolHeader(datagram);
+            sourcePort = tcpHeader->getSourcePort();
+        }
+    #endif
+
+        std::pair<Ipv4Address, uint16_t> sourceAddressAndPort = {sourceAddress, sourcePort};
+
+        std::cout << "outgoing packet, source address and port: " << sourceAddress << " " << sourcePort << std::endl;
+
+        bool alreadyMapped = false;
+        uint16_t externalSourcePort = -1;
+        for (auto it = portMapping.begin(); it != portMapping.end(); ++it)
+            if (it->second == sourceAddressAndPort) {
+                alreadyMapped = true;
+                externalSourcePort = it->first.second;
+                break;
+            }
+
+        if (!alreadyMapped) {
+            std::cout << "outgoing packet is not mapped yet" << std::endl;
+            if (sourcePort != (uint16_t)-1) {
+                static uint16_t nextExternalPort = 49000;
+                nextExternalPort++;
+                externalSourcePort = nextExternalPort;
+                portMapping[{transportProtocol->getId(), nextExternalPort}] = sourceAddressAndPort;
+            }
+        }
+        else {
+            std::cout << "outgoing packet is already mapped" << std::endl;
+        }
+        std::cout << "----" << std::endl;
+        for (auto it = portMapping.begin(); it != portMapping.end(); ++it)
+            std::cout << "(" << it->first.first << ", " << it->first.second << " -> " << it->second.first << ", " << it->second.second << std::endl;
+        std::cout << "----" << std::endl;
+        Ipv4NatEntry natEntry;
+        natEntry.setSrcAddress(ie->getIpv4Address());
+        natEntry.setSrcPort(externalSourcePort);
+        applyNatEntry(datagram, natEntry);
+    }
+
+    return ACCEPT;
+}
 
 
 

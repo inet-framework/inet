@@ -47,27 +47,33 @@ class INET_API Ipv4NatTable : public cSimpleModule, public NetfilterBase::HookBa
 };
 
 
+
+
 class INET_API Ipv4DynamicNat : public cSimpleModule, public NetfilterBase::HookBase
 {
   protected:
     INetfilter *networkProtocol = nullptr;
 
-    PacketFilter *outgoingFilter;
-    PacketFilter *incomingFilter;
+    PacketFilter *outgoingFilter = nullptr;
+    PacketFilter *incomingFilter = nullptr;
+
+    // (protocol_id [UDP or TCP], external_router_port) -> (private_host_address, private_host_port)
+    std::map<std::pair<int, uint16_t>, std::pair<Ipv4Address, uint16_t>> portMapping;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual Result processPacket(Packet *packet, INetfilter::IHook::Type type);
 
   public:
     virtual ~Ipv4DynamicNat();
-    virtual Result datagramPreRoutingHook(Packet *datagram) override { return processPacket(datagram, PREROUTING); }
-    virtual Result datagramForwardHook(Packet *datagram) override { return processPacket(datagram, FORWARD); }
-    virtual Result datagramPostRoutingHook(Packet *datagram) override { return processPacket(datagram, POSTROUTING); }
-    virtual Result datagramLocalInHook(Packet *datagram) override { return processPacket(datagram, LOCALIN); }
-    virtual Result datagramLocalOutHook(Packet *datagram) override { return processPacket(datagram, LOCALOUT); }
+
+    virtual Result datagramPreRoutingHook(Packet *datagram) override;
+    virtual Result datagramPostRoutingHook(Packet *datagram) override;
+
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; };
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; };
+    virtual Result datagramLocalOutHook(Packet *datagram) override { return ACCEPT; };
 };
 
 

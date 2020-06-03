@@ -43,6 +43,10 @@ simple Ipv4DynamicNat like IIpv4Nat
 {
     parameters:
         string networkProtocolModule = default("^.ip");
-        string privateSubnet = default("192.168.1.0/24");
+        
+        string privateSubnetAddress = default("192.168.1.0");
+        string privateSubnetNetmask = default("255.255.255.0");
+        
+        string publicInterfaceName = default("ppp0");
         @display("i=block/table");
 }
