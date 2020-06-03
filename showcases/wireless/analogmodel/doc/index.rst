@@ -197,7 +197,7 @@ The source host is configured to use the default 802.11g mode, and 54Mbps data r
 Here is a video of the simulation (successful link-layer transmissions are indicated with arrows;
 incorrectly received packets are indicated with packet drop animations):
 
-.. video:: media/Distance4.mp4
+.. video:: media/Distance5.mp4
    :width: 100%
 
 .. normal run, playback speed 1, animation speed 0.1, run until 6.5s
