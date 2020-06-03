@@ -61,13 +61,15 @@ class INET_API SharingRegionTagSet : public cObject
         RegionTag(RegionTag&& other) : offset(other.offset), length(other.length), tag(other.tag) { other.tag = nullptr; }
 
         RegionTag& operator=(const RegionTag& other) {
-            if (this != &other)
+            if (this != &other) {
                 offset = other.offset; length = other.length; tag = other.tag;
+            }
             return *this;
         }
         RegionTag& operator=(RegionTag&& other) {
-            if (this != &other)
+            if (this != &other) {
                 offset = other.offset; length = other.length; tag = other.tag; other.tag = nullptr;
+            }
             return *this;
         }
 
