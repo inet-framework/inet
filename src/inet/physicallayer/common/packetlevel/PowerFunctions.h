@@ -57,6 +57,7 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
         auto pathLoss = radioMedium->getPathLoss()->computePathLoss(propagationSpeed, frequency, distance);
         auto obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(frequency, transmissionPosition, receptionPosition) : 1;
         double gain = transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss;
+        ASSERT(!std::isnan(gain));
         if (gain > 1.0) {
             EV_STATICCONTEXT;
             EV_WARN << "Signal power attenuation is zero.\n";

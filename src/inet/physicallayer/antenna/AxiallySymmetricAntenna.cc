@@ -87,7 +87,9 @@ double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion direct
         double lowerGain = lowerBound->second;
         double upperGain = upperBound->second;
         double alpha = unit((angle - lowerAngle) / (upperAngle - lowerAngle)).get();
-        return (1 - alpha) * lowerGain + alpha * upperGain;
+        double gain = (1 - alpha) * lowerGain + alpha * upperGain;
+        ASSERT(!std::isnan(gain));
+        return gain;
     }
 }
 

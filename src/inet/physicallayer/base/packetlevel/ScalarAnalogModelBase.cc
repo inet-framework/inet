@@ -52,7 +52,9 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarSignalAnalogModel->getPower();
+    ASSERT(!std::isnan(transmissionPower.get()));
     double gain = transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss;
+    ASSERT(!std::isnan(gain));
     if (gain > 1.0) {
         EV_WARN << "Signal power attenuation is zero.\n";
         gain = 1.0;
