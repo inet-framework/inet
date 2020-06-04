@@ -4,10 +4,10 @@
 	<route hosts='**recip**' destination="*" netmask="*" gateway="internet" />
 	
 	
-	<interface hosts='**srouter**' names="eth*" address='192.168.1.1' netmask='255.255.255.0'/>
+	<interface hosts='**srouter**' names="eth*" address='192.168.1.254' netmask='255.255.255.0'/>
 
-	<interface hosts='**sender**' address='192.168.1.x' netmask='255.255.255.0' gateway="192.168.1.1"/>
+	<interface hosts='**sender**' address='192.168.1.x' netmask='255.255.255.0' gateway="192.168.1.254"/>
 	
-	<route hosts='**sender**' destination="*" netmask="*" gateway="192.168.1.1" />
+	<route hosts='**sender**' destination="*" netmask="*" gateway="192.168.1.254" />
 	
 </config>
