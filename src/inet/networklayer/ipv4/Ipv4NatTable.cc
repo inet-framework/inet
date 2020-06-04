@@ -301,8 +301,9 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagr
     if (outgoingFilter->matches(datagram)) {
 
         // TODO don't do all this lookup for every packet...
+        cModule *containingNode = findContainingNode(this);
 
-        IInterfaceTable *ift = check_and_cast<IInterfaceTable *>(findContainingNode(this)->getSubmodule("interfaceTable"));
+        IInterfaceTable *ift = check_and_cast<IInterfaceTable *>(containingNode->getSubmodule("interfaceTable"));
         InterfaceEntry *ie = ift->findInterfaceByName(par("publicInterfaceName").stringValue());
 
 
@@ -344,10 +345,15 @@ INetfilter::IHook::Result Ipv4DynamicNat::datagramPostRoutingHook(Packet *datagr
             std::cout << "outgoing packet is already mapped" << std::endl;
         }
 
+        std::stringstream nattable;
         std::cout << "----" << std::endl;
-        for (auto it = portMapping.begin(); it != portMapping.end(); ++it)
-            std::cout << "(" << it->first.first << ", " << it->first.second << " -> " << it->second.first << ", " << it->second.second << std::endl;
+        for (auto it = portMapping.begin(); it != portMapping.end(); ++it) {
+            std::cout << Protocol::getProtocol(it->first.first)->getName() << ":" << it->first.second << " <-> " << it->second.first << ":" << it->second.second << std::endl;
+            nattable << Protocol::getProtocol(it->first.first)->getName() << ": " << it->first.second << " <-> " << it->second.first << ":" << it->second.second << std::endl;
+        }
         std::cout << "----" << std::endl;
+        containingNode->getDisplayString().setTagArg("t", 0, nattable.str().c_str());
+        containingNode->getDisplayString().setTagArg("t", 1, "r");
 
         Ipv4NatEntry natEntry;
         natEntry.setSrcAddress(ie->getIpv4Address());
