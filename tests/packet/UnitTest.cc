@@ -1563,7 +1563,7 @@ static void testReorderBuffer()
 static void testTagSet()
 {
     // 1. getNumTags
-    TagSet tagSet1;
+    SharingTagSet tagSet1;
     ASSERT(tagSet1.getNumTags() == 0);
     tagSet1.addTag<CreationTimeTag>();
     ASSERT(tagSet1.getNumTags() == 1);
@@ -1571,14 +1571,14 @@ static void testTagSet()
     ASSERT(tagSet1.getNumTags() == 0);
 
     // 2. getTag
-    TagSet tagSet2;
+    SharingTagSet tagSet2;
     const auto& tag1 = tagSet2.addTag<CreationTimeTag>();
     const auto& tag2 = tagSet2.getTag(0);
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
 
     // 3. clearTags
-    TagSet tagSet3;
+    SharingTagSet tagSet3;
     tagSet3.clearTags();
     ASSERT(tagSet3.getNumTags() == 0);
     tagSet3.addTag<CreationTimeTag>();
@@ -1586,7 +1586,7 @@ static void testTagSet()
     ASSERT(tagSet3.getNumTags() == 0);
 
     // 4. findTag
-    TagSet tagSet4;
+    SharingTagSet tagSet4;
     ASSERT(tagSet4.findTag<CreationTimeTag>() == nullptr);
     const auto& tag3 = tagSet4.addTag<CreationTimeTag>();
     const auto& tag4 = tagSet4.findTag<CreationTimeTag>();
@@ -1596,7 +1596,7 @@ static void testTagSet()
     ASSERT(tagSet4.findTag<CreationTimeTag>() == nullptr);
 
     // 5. getTag
-    TagSet tagSet5;
+    SharingTagSet tagSet5;
     ASSERT_ERROR(tagSet5.getTag<CreationTimeTag>(), "is absent");
     const auto& tag5 = tagSet5.addTag<CreationTimeTag>();
     const auto& tag6 = tagSet5.getTag<CreationTimeTag>();
@@ -1606,14 +1606,14 @@ static void testTagSet()
     ASSERT_ERROR(tagSet5.getTag<CreationTimeTag>(), "is absent");
 
     // 6. addTag
-    TagSet tagSet6;
+    SharingTagSet tagSet6;
     const auto& tag7 = tagSet6.addTag<CreationTimeTag>();
     ASSERT(tag7 != nullptr);
     ASSERT(tagSet6.getNumTags() == 1);
     ASSERT_ERROR(tagSet6.addTag<CreationTimeTag>(), "is present");
 
     // 7. addTagIfAbsent
-    TagSet tagSet7;
+    SharingTagSet tagSet7;
     const auto& tag8 = tagSet7.addTagIfAbsent<CreationTimeTag>().get();
     const auto& tag9 = tagSet7.addTagIfAbsent<CreationTimeTag>().get();
     ASSERT(tag9 != nullptr);
@@ -1621,7 +1621,7 @@ static void testTagSet()
     ASSERT(tagSet7.getNumTags() == 1);
 
     // 8. removeTag
-    TagSet tagSet8;
+    SharingTagSet tagSet8;
     ASSERT_ERROR(tagSet8.removeTag<CreationTimeTag>(), "is absent");
     const auto& tag10 = tagSet8.addTag<CreationTimeTag>().get();
     const auto& tag11 = tagSet8.removeTag<CreationTimeTag>().get();
@@ -1630,7 +1630,7 @@ static void testTagSet()
     ASSERT(tagSet8.getNumTags() == 0);
 
     // 9. removeTagIfPresent
-    TagSet tagSet9;
+    SharingTagSet tagSet9;
     tagSet9.removeTagIfPresent<CreationTimeTag>();
     const auto& tag12 = tagSet9.addTag<CreationTimeTag>().get();
     const auto& tag13 = tagSet9.removeTagIfPresent<CreationTimeTag>().get();
@@ -1640,8 +1640,8 @@ static void testTagSet()
     ASSERT(tagSet9.removeTagIfPresent<CreationTimeTag>() == nullptr);
 
     // 10. copyTags
-    TagSet tagSet10;
-    TagSet tagSet11;
+    SharingTagSet tagSet10;
+    SharingTagSet tagSet11;
     tagSet11.copyTags(tagSet10);
     ASSERT(tagSet11.getNumTags() == 0);
     tagSet10.addTag<CreationTimeTag>();
@@ -1652,7 +1652,7 @@ static void testTagSet()
 static void testRegionTagSet()
 {
     { // 1. getNumTags
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.getNumTags() == 0);
     regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     ASSERT(regionTagSet.getNumTags() == 1);
@@ -1661,7 +1661,7 @@ static void testRegionTagSet()
     }
 
     { // 2. getTag
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)).get();
     const auto& tag2 = regionTagSet.getTag(0).get();
     ASSERT(tag2 != nullptr);
@@ -1669,7 +1669,7 @@ static void testRegionTagSet()
     }
 
     { // 3. clearTags
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     regionTagSet.clearTags(b(0), b(1000));
     ASSERT(regionTagSet.getNumTags() == 0);
     regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
@@ -1678,7 +1678,7 @@ static void testRegionTagSet()
     }
 
     { // 4. findTag
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.findTag<CreationTimeTag>(b(0), b(1000)) == nullptr);
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     const auto& tag2 = regionTagSet.findTag<CreationTimeTag>(b(0), b(1000));
@@ -1689,7 +1689,7 @@ static void testRegionTagSet()
     }
 
     { // 5. getTag
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.getTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     const auto& tag2 = regionTagSet.getTag<CreationTimeTag>(b(0), b(1000));
@@ -1700,7 +1700,7 @@ static void testRegionTagSet()
     }
 
     { // 6. getAllTags
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.getAllTags<CreationTimeTag>(b(0), b(1000)).size() == 0);
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     tag1->setCreationTime(42);
@@ -1734,7 +1734,7 @@ static void testRegionTagSet()
     }
 
     { // 7. addTag
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     ASSERT(tag1 != nullptr);
     ASSERT(regionTagSet.getNumTags() == 1);
@@ -1749,7 +1749,7 @@ static void testRegionTagSet()
     }
 
     { // 8. addTagIfAbsent
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     const auto& tag1 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000)).get();
     const auto& tag2 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT(tag2 != nullptr);
@@ -1765,7 +1765,7 @@ static void testRegionTagSet()
     }
 
     { // 9. removeTag
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(100), b(800)), "Overlapping");
@@ -1783,7 +1783,7 @@ static void testRegionTagSet()
     }
 
     { // 10. removeTagIfPresent
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)).get();
     ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(100), b(800)), "Overlapping");
@@ -1801,7 +1801,7 @@ static void testRegionTagSet()
     }
 
     { // 11. removeTagsWherePresent
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     tag1->setCreationTime(42);
@@ -1832,8 +1832,8 @@ static void testRegionTagSet()
     }
 
     { // 12. copyTags
-    RegionTagSet regionTagSet1;
-    RegionTagSet regionTagSet2;
+    SharingRegionTagSet regionTagSet1;
+    SharingRegionTagSet regionTagSet2;
     regionTagSet2.copyTags(regionTagSet1, b(0), b(0), b(1000));
     ASSERT(regionTagSet2.getNumTags() == 0);
     regionTagSet1.addTag<CreationTimeTag>(b(0), b(1000));
