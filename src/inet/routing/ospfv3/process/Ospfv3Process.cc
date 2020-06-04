@@ -115,7 +115,7 @@ int Ospfv3Process::isInRoutingTable6(Ipv6RoutingTable *rtTable, Ipv6Address addr
 int Ospfv3Process::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr)
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        if (ifTable->getInterface(i)->findProtocolData<Ipv4InterfaceData>()->getIPAddress() == addr) {
+        if (ifTable->getInterface(i)->getProtocolData<Ipv4InterfaceData>()->getIPAddress() == addr) {
             return i;
         }
     }
@@ -125,8 +125,8 @@ int Ospfv3Process::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr
 int Ospfv3Process::isInInterfaceTable6(IInterfaceTable *ifTable, Ipv6Address addr)
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        for (int j = 0; j < ifTable->getInterface(i)->findProtocolData<Ipv6InterfaceData>()->getNumAddresses(); j++) {
-            if (ifTable->getInterface(i)->findProtocolData<Ipv6InterfaceData>()->getAddress(j) == addr) {
+        for (int j = 0; j < ifTable->getInterface(i)->getProtocolData<Ipv6InterfaceData>()->getNumAddresses(); j++) {
+            if (ifTable->getInterface(i)->getProtocolData<Ipv6InterfaceData>()->getAddress(j) == addr) {
                 return i;
             }
         }
