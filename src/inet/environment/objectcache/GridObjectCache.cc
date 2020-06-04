@@ -43,8 +43,8 @@ void GridObjectCache::initialize(int stage)
         double cellSizeX = par("cellSizeX");
         double cellSizeY = par("cellSizeY");
         double cellSizeZ = par("cellSizeZ");
-        const Coord spaceMin = physicalEnvironment->getSpaceMin();
-        const Coord spaceMax = physicalEnvironment->getSpaceMax();
+        const Coord& spaceMin = physicalEnvironment->getSpaceMin();
+        const Coord& spaceMax = physicalEnvironment->getSpaceMax();
         const Coord spaceSize = spaceMax - spaceMin;
         if (std::isnan(cellSizeX))
             cellSizeX = spaceSize.x / par("cellCountX").intValue();

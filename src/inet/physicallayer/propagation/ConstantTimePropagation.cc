@@ -39,7 +39,7 @@ void ConstantTimePropagation::initialize(int stage)
 const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const
 {
     arrivalComputationCount++;
-    const Coord position = mobility->getCurrentPosition();
+    const Coord& position = mobility->getCurrentPosition();
     const Quaternion& orientation = mobility->getCurrentAngularPosition();
     const simtime_t startTime = transmission->getStartTime();
     const simtime_t endTime = transmission->getEndTime();

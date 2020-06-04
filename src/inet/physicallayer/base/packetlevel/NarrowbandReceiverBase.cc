@@ -56,7 +56,7 @@ std::ostream& NarrowbandReceiverBase::printToStream(std::ostream& stream, int le
     return SnirReceiverBase::printToStream(stream, level);
 }
 
-const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
 {
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth);
 }

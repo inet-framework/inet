@@ -46,7 +46,7 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
     const m distance;
 
   public:
-    FrequencyDependentAttenuationFunction(const IRadioMedium *radioMedium, const double transmitterAntennaGain, const double receiverAntennaGain, const Coord transmissionPosition, const Coord receptionPosition) :
+    FrequencyDependentAttenuationFunction(const IRadioMedium *radioMedium, const double transmitterAntennaGain, const double receiverAntennaGain, const Coord& transmissionPosition, const Coord& receptionPosition) :
         radioMedium(radioMedium), transmitterAntennaGain(transmitterAntennaGain), receiverAntennaGain(receiverAntennaGain), transmissionPosition(transmissionPosition), receptionPosition(receptionPosition), distance(m(transmissionPosition.distance(receptionPosition)))
     {
     }

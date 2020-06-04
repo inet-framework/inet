@@ -45,7 +45,7 @@ void ConstantSpeedPropagation::initialize(int stage)
     }
 }
 
-const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
+const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t time, const Coord& position, IMobility *mobility) const
 {
     // TODO: return mobility->getPosition(time);
     throw cRuntimeError("Movement approximation is not implemented");
@@ -66,14 +66,14 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
     arrivalComputationCount++;
     const simtime_t startTime = transmission->getStartTime();
     const simtime_t endTime = transmission->getEndTime();
-    const Coord startPosition = transmission->getStartPosition();
-    const Coord endPosition = transmission->getEndPosition();
-    const Coord startArrivalPosition = ignoreMovementDuringPropagation ? mobility->getCurrentPosition() : computeArrivalPosition(startTime, startPosition, mobility);
+    const Coord& startPosition = transmission->getStartPosition();
+    const Coord& endPosition = transmission->getEndPosition();
+    const Coord& startArrivalPosition = ignoreMovementDuringPropagation ? mobility->getCurrentPosition() : computeArrivalPosition(startTime, startPosition, mobility);
     const simtime_t startPropagationTime = startPosition.distance(startArrivalPosition) / propagationSpeed.get();
     const simtime_t startArrivalTime = startTime + startPropagationTime;
     const Quaternion& startArrivalOrientation = mobility->getCurrentAngularPosition();
     if (ignoreMovementDuringReception) {
-        const Coord endArrivalPosition = startArrivalPosition;
+        const Coord& endArrivalPosition = startArrivalPosition;
         const simtime_t endPropagationTime = startPropagationTime;
         const simtime_t endArrivalTime = endTime + startPropagationTime;
         const simtime_t preambleDuration = transmission->getPreambleDuration();
@@ -83,7 +83,7 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
         return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
     }
     else {
-        const Coord endArrivalPosition = computeArrivalPosition(endTime, endPosition, mobility);
+        const Coord& endArrivalPosition = computeArrivalPosition(endTime, endPosition, mobility);
         const simtime_t endPropagationTime = endPosition.distance(endArrivalPosition) / propagationSpeed.get();
         const simtime_t endArrivalTime = endTime + endPropagationTime;
         const simtime_t preambleDuration = transmission->getPreambleDuration();

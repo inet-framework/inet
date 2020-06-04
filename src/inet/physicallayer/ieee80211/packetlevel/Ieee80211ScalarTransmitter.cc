@@ -53,8 +53,8 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const simtime_t duration = transmissionMode->getDuration(B(phyHeader->getLengthField()));
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
-    const Coord startPosition = mobility->getCurrentPosition();
-    const Coord endPosition = mobility->getCurrentPosition();
+    const Coord& startPosition = mobility->getCurrentPosition();
+    const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto headerLength = b(transmissionMode->getHeaderMode()->getLength());
