@@ -74,7 +74,7 @@ class INET_API EulerAngles
 
     EulerAngles operator-(const EulerAngles a) const { return EulerAngles(alpha - a.alpha, beta - a.beta, gamma - a.gamma); }
 
-    EulerAngles operator*(float f) const { return EulerAngles(alpha * f, beta * f, gamma * f); }
+    EulerAngles operator*(double f) const { return EulerAngles(alpha * f, beta * f, gamma * f); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const EulerAngles& a)
