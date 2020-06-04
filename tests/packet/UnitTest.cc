@@ -1885,6 +1885,19 @@ static void testPacketTags()
     packet1.popAtFront<TcpHeader>();
     const auto& tag3 = packet1.getTag<CreationTimeTag>();
     ASSERT(tag3 == tag2);
+
+    // 4. copy on write for duplicated packet
+    Packet packet2;
+    packet2.insertAtBack(makeImmutableByteCountChunk(B(1000)));
+    const auto& tag4 = packet2.addTag<CreationTimeTag>();
+    tag4->setCreationTime(42);
+    auto packet3 = packet2.dup();
+    auto tag5 = packet3->getTagForUpdate<CreationTimeTag>();
+    tag5->setCreationTime(0);
+    auto tag6 = packet2.getTag<CreationTimeTag>();
+    ASSERT(tag6->getCreationTime() == 42);
+    auto tag7 = packet3->getTag<CreationTimeTag>();
+    ASSERT(tag7->getCreationTime() == 0);
 }
 
 static void testPacketRegionTags()
