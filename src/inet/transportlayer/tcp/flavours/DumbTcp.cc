@@ -141,9 +141,8 @@ bool DumbTcp::shouldMarkAck()
 
 void DumbTcp::processEcnInEstablished()
 {
-
 }
-} // namespace tcp
 
+} // namespace tcp
 } // namespace inet
 
