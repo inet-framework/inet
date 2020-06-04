@@ -95,7 +95,6 @@ void TcpLwipConnection::initConnection(TcpLwipConnection& connP, int connIdP, Lw
 
 TcpLwipConnection::~TcpLwipConnection()
 {
-    ASSERT(!pcbM);
     delete receiveQueueM;
     delete sendQueueM;
 }
