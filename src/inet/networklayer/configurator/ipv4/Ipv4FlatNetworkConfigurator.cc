@@ -100,8 +100,9 @@ void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVecto
         for (int k = 0; k < ift->getNumInterfaces(); k++) {
             InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback()) {
-                ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(Ipv4Address(addr));
-                ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
+                auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
+                ipv4Data->setIPAddress(Ipv4Address(addr));
+                ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
             }
         }
     }
