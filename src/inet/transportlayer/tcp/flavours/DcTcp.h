@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2020 Marcel Marek
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,8 +24,8 @@
 #include "inet/transportlayer/tcp/flavours/DcTcpFamily.h"
 
 namespace inet {
-
 namespace tcp {
+
 /**
  * State variables for DcTcp.
  */
@@ -61,12 +61,9 @@ protected:
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
-
-
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_DCTCP_H

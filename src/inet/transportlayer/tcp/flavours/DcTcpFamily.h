@@ -41,8 +41,6 @@ class INET_API DcTcpFamilyStateVariables : public TcpTahoeRenoFamilyStateVariabl
     uint32 dctcp_bytesMarked; //amount of bytes marked
     double dctcp_alpha;
     double dctcp_gamma;
-
-
 };
 
 /**

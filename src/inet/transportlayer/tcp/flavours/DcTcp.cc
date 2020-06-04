@@ -1,7 +1,5 @@
 //
-// Copyright (C) 2004-2005 Andras Varga
-// Copyright (C) 2009 Thomas Reschka
-// Copyright (C) 2019-2020 Marcel Marek
+// Copyright (C) 2020 Marcel Marek
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,7 +20,6 @@
 #include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(DcTcp);
@@ -40,7 +37,6 @@ void DcTcp::initialize()
 {
     TcpReno::initialize();
     state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
-
 }
 
 void DcTcp::receivedDataAck(uint32 firstSeqAcked)
@@ -58,7 +54,7 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
     }
     else {
         bool performSsCa = true; //Stands for: "perform slow start and congestion avoidance"
-        if (state && state->ect){
+        if (state && state->ect) {
             // RFC 8257 3.3.1
             uint32 bytes_acked = state->snd_una - firstSeqAcked;
 
@@ -72,15 +68,15 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
                 state->dctcp_bytesMarked += bytes_acked;
                 conn->emit(markingProbSignal, 1);
             }
-            else{
+            else {
                 conn->emit(markingProbSignal, 0);
             }
 
 
             // RFC 8257 3.3.4
-            if(state->snd_una > state->dctcp_windEnd){
+            if (state->snd_una > state->dctcp_windEnd) {
 
-                if (state->dctcp_bytesMarked){
+                if (state->dctcp_bytesMarked) {
                     cut = true;
                 }
 
@@ -101,7 +97,6 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
                 // RFC 8257 3.3.8
                 state->dctcp_bytesAcked = state->dctcp_bytesMarked = 0;
                 state->sndCwr = false;
-
             }
 
             // Applying DcTcp style cwnd update only if there was congestion and the window has not yet been reduced during current interval
@@ -119,7 +114,6 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
                 state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
 
                 conn->emit(ssthreshSignal, state->ssthresh);
-
             }
         }
 
@@ -220,15 +214,15 @@ bool DcTcp::shouldMarkAck()
 
 void DcTcp::processEcnInEstablished()
 {
-    if(state && state->ect){
-    // RFC 8257 3.2.1
-        if(state->gotCeIndication && !state->dctcp_ce){
+    if (state && state->ect) {
+        // RFC 8257 3.2.1
+        if (state->gotCeIndication && !state->dctcp_ce) {
             state->dctcp_ce = true;
             state->ack_now = true;
         }
 
         // RFC 8257 3.2.2
-        if(!state->gotCeIndication && state->dctcp_ce){
+        if (!state->gotCeIndication && state->dctcp_ce) {
             state->dctcp_ce = false;
             state->ack_now = true;
         }
@@ -236,6 +230,5 @@ void DcTcp::processEcnInEstablished()
 }
 
 } // namespace tcp
-
 } // namespace inet
 
