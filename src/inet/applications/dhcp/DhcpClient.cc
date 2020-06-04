@@ -316,8 +316,9 @@ void DhcpClient::recordLease(const Ptr<const DhcpMessage>& dhcpACK)
 
 void DhcpClient::bindLease()
 {
-    ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(lease->ip);
-    ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setNetmask(lease->subnetMask);
+    auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
+    ipv4Data->setIPAddress(lease->ip);
+    ipv4Data->setNetmask(lease->subnetMask);
 
     std::string banner = "Got IP " + lease->ip.str();
     host->bubble(banner.c_str());
