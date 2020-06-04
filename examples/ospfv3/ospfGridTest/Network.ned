@@ -1,6 +1,9 @@
 
 
+package inet.examples.ospfv3.ospfGridTest;
+
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 import inet.visualizer.integrated.IntegratedVisualizer;
@@ -18,6 +21,10 @@ network GridNetwork
         }
         visualizer: IntegratedVisualizer {
             @display("p=0,10");
+        }
+        routingTableRecorder: RoutingTableRecorder {
+            parameters:
+                @display("p=0,20");
         }
     connections:
 
