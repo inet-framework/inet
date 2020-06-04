@@ -71,7 +71,8 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseG
 
 double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion direction) const
 {
-    rad angle = rad(std::acos(direction.rotate(Coord::X_AXIS) * Coord::X_AXIS));
+    double product = math::minnan(1.0, math::maxnan(-1.0, direction.rotate(Coord::X_AXIS) * Coord::X_AXIS));
+    rad angle = rad(std::acos(product));
     // NOTE: 0 and M_PI are always in the map
     std::map<rad, double>::const_iterator lowerBound = gainMap.lower_bound(angle);
     std::map<rad, double>::const_iterator upperBound = gainMap.upper_bound(angle);
