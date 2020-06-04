@@ -37,7 +37,6 @@ PimNeighbor::PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version)
 
 PimNeighbor::~PimNeighbor()
 {
-    ASSERT(!livenessTimer->isScheduled());
     delete livenessTimer;
 }
 
