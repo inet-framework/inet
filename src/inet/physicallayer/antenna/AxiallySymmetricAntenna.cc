@@ -69,7 +69,7 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseG
         throw cRuntimeError("The last angle must be 180");
 }
 
-double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion direction) const
+double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion& direction) const
 {
     double product = math::minnan(1.0, math::maxnan(-1.0, direction.rotate(Coord::X_AXIS) * Coord::X_AXIS));
     rad angle = rad(std::acos(product));

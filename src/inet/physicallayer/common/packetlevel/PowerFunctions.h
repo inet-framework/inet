@@ -95,7 +95,7 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
     const mps propagationSpeed;
 
   public:
-    SpaceAndFrequencyDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion startOrientation, const mps propagationSpeed) :
+    SpaceAndFrequencyDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion& startOrientation, const mps propagationSpeed) :
         transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed) { }
 
     virtual double getValue(const Point<m, m, m, simsec, Hz>& p) const override {
@@ -173,7 +173,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
     const Hz frequency;
 
   public:
-    SpaceDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion startOrientation, const mps propagationSpeed, Hz frequency) :
+    SpaceDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion& startOrientation, const mps propagationSpeed, Hz frequency) :
         transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed), frequency(frequency) { }
 
     virtual double getValue(const Point<m, m, m, simsec, Hz>& p) const override {

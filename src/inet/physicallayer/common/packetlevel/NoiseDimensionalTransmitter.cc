@@ -55,8 +55,8 @@ const ITransmission *NoiseDimensionalTransmitter::createTransmission(const IRadi
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
-    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
-    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, power);
     return new DimensionalTransmission(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, nullptr, b(-1), b(-1), centerFrequency, bandwidth, bps(NaN), powerFunction);
 }

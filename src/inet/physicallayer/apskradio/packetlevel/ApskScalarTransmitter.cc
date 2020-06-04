@@ -55,8 +55,8 @@ const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *tra
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
-    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
-    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     return new ApskScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, transmissionCenterFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
 }
 

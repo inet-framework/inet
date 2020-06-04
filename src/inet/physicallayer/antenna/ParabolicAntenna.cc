@@ -54,7 +54,7 @@ ParabolicAntenna::AntennaGain::AntennaGain(double maxGain, double minGain, deg b
 {
 }
 
-double ParabolicAntenna::AntennaGain::computeGain(const Quaternion direction) const
+double ParabolicAntenna::AntennaGain::computeGain(const Quaternion& direction) const
 {
     deg alpha = rad(std::acos(direction.rotate(Coord::X_AXIS) * Coord::X_AXIS));
     ASSERT(deg(0) <= alpha && alpha <= deg(360));

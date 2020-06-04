@@ -39,7 +39,7 @@ class INET_API Arrival : public virtual IArrival
     const Quaternion endOrientation;
 
   public:
-    Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation);
+    Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
