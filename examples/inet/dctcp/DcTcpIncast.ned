@@ -19,11 +19,9 @@ network DcTcpIncast
         channel NormalP extends DatarateChannel
         {
             parameters:
-
                 per = 0;
                 ber = 0;
         }
-
 
     submodules:
         routerCore: Router {
