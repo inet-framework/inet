@@ -61,8 +61,9 @@ TransmissionBitModel::TransmissionBitModel(b headerLength, bps headerBitRate, b 
 {
 }
 
-ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
-    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits)
+ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, double bitErrorRate) :
+    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits),
+    bitErrorRate(bitErrorRate)
 {
 }
 

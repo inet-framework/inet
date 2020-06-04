@@ -35,21 +35,21 @@ const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const Lay
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
-    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate());
+    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate(), packetErrorRate);
 }
 
 const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const
 {
     const TransmissionBitModel *transmissionBitModel = check_and_cast<const TransmissionBitModel *>(transmission->getBitModel());
     if (bitErrorRate == 0)
-        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), new BitVector(*transmissionBitModel->getBits()));
+        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), new BitVector(*transmissionBitModel->getBits()), bitErrorRate);
     else {
         BitVector *receivedBits = new BitVector(*transmissionBitModel->getBits());
         for (unsigned int i = 0; i < receivedBits->getSize(); i++) {
             if (uniform(0, 1) < bitErrorRate)
                 receivedBits->toggleBit(i);
         }
-        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), receivedBits);
+        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), receivedBits, bitErrorRate);
     }
 }
 
@@ -57,7 +57,7 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
 {
     if (symbolErrorRate == 0) {
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
-        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), new std::vector<const ISymbol*>(*transmissionSymbolModel->getSymbols()));
+        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), new std::vector<const ISymbol*>(*transmissionSymbolModel->getSymbols()), symbolErrorRate);
     }
     else {
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
@@ -76,7 +76,7 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
             else
                 receivedSymbols->push_back(transmittedSymbols_i);
         }
-        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), receivedSymbols);
+        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), receivedSymbols, symbolErrorRate);
     }
 }
 

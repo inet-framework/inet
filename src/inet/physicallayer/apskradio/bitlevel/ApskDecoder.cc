@@ -92,7 +92,7 @@ const IReceptionPacketModel *ApskDecoder::decode(const IReceptionBitModel *bitMo
     }
     delete decodedBits;
     packet->setBitError(hasBitError);
-    return new ReceptionPacketModel(packet, bps(NaN));
+    return new ReceptionPacketModel(packet, bps(NaN), NaN);
 }
 
 } // namespace physicallayer

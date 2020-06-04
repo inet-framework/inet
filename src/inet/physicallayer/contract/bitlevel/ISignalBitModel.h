@@ -57,6 +57,8 @@ class INET_API ITransmissionBitModel : public virtual ISignalBitModel
 
 class INET_API IReceptionBitModel : public virtual ISignalBitModel
 {
+  public:
+    virtual double getBitErrorRate() const = 0;
 };
 
 } // namespace physicallayer

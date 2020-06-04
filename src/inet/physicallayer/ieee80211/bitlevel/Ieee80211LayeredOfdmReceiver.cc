@@ -152,7 +152,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(c
         const BitVector *dataBits = dataFieldBitModel->getBits();
         for (unsigned int i = 0; i < dataBits->getSize(); i++)
             bits->appendBit(dataBits->getBit(i));
-        return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataBitRate(), bits);
+        return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataBitRate(), bits, NaN);
     }
     return nullptr;
 }
@@ -262,7 +262,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createSignalFieldBitMode
         const BitVector *bits = bitModel->getBits();
         for (unsigned int i = 0; i < signalFieldLength; i++)
             signalFieldBits->appendBit(bits->getBit(i));
-        signalFieldBitModel = new ReceptionBitModel(b(signalFieldLength), bitModel->getHeaderBitRate(), b(-1), bps(NaN), signalFieldBits);
+        signalFieldBitModel = new ReceptionBitModel(b(signalFieldLength), bitModel->getHeaderBitRate(), b(-1), bps(NaN), signalFieldBits, NaN);
     }
     return signalFieldBitModel;
 }
@@ -310,7 +310,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
         BitVector *dataBits = new BitVector();
         for (unsigned int i = 0; i < encodedDataFieldLengthInBits; i++)
             dataBits->appendBit(bits->getBit(encodedSignalFieldLength + i));
-        dataFieldBitModel = new ReceptionBitModel(b(-1), bps(NaN), b(encodedDataFieldLengthInBits), bitModel->getDataBitRate(), dataBits);
+        dataFieldBitModel = new ReceptionBitModel(b(-1), bps(NaN), b(encodedDataFieldLengthInBits), bitModel->getDataBitRate(), dataBits, NaN);
     }
     return dataFieldBitModel;
 }
@@ -333,7 +333,7 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketM
     Packet *packet = new Packet(name);
     packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAll());
     packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAll());
-    return new ReceptionPacketModel(packet, bps(NaN));
+    return new ReceptionPacketModel(packet, bps(NaN), NaN);
 }
 
 const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth) const
@@ -394,7 +394,13 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
     snirInd->setAverageSnir(snir->getMean());
-    packet->addTagIfAbsent<ErrorRateInd>(); // TODO: should be done  setPacketErrorRate(packetModel->getPER());
+    auto errorRateInd = packet->addTagIfAbsent<ErrorRateInd>();
+    if (symbolModel != nullptr)
+        errorRateInd->setSymbolErrorRate(symbolModel->getSymbolErrorRate());
+    if (bitModel != nullptr)
+        errorRateInd->setBitErrorRate(bitModel->getBitErrorRate());
+    if (packetModel != nullptr)
+        errorRateInd->setPacketErrorRate(packetModel->getPacketErrorRate());
     auto modeInd = packet->addTagIfAbsent<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
     auto channelInd = packet->addTagIfAbsent<Ieee80211ChannelInd>();

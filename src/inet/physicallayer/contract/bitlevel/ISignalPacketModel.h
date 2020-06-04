@@ -48,6 +48,8 @@ class INET_API ITransmissionPacketModel : public virtual ISignalPacketModel
 
 class INET_API IReceptionPacketModel : public virtual ISignalPacketModel
 {
+  public:
+    virtual double getPacketErrorRate() const = 0;
 };
 
 } // namespace physicallayer

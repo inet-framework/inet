@@ -64,7 +64,7 @@ const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const L
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
-    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate());
+    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate(), NaN);
 }
 
 const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
@@ -92,7 +92,7 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
     }
     else
         throw cRuntimeError("Unknown data modulation");
-    return new ReceptionBitModel(b(signalBitLength), signalBitRate, b(dataBitLength), dataBitRate, corruptedBits);
+    return new ReceptionBitModel(b(signalBitLength), signalBitRate, b(dataBitLength), dataBitRate, corruptedBits, NaN);
 }
 
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const

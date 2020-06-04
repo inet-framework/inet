@@ -43,7 +43,7 @@ Ieee80211OfdmTransmissionSymbolModel::Ieee80211OfdmTransmissionSymbolModel(int h
 }
 
 Ieee80211OfdmReceptionSymbolModel::Ieee80211OfdmReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols) :
-    ReceptionSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols)
+    ReceptionSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols, NaN)
 {
 }
 } /* namespace physicallayer */

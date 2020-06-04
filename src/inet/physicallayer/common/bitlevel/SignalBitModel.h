@@ -65,8 +65,13 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
 
 class INET_API ReceptionBitModel : public SignalBitModel, public virtual IReceptionBitModel
 {
+  protected:
+    double bitErrorRate;
+
   public:
-    ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits);
+    ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, double bitErrorRate);
+
+    virtual double getBitErrorRate() const override { return bitErrorRate; }
 };
 
 } // namespace physicallayer
