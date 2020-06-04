@@ -256,24 +256,26 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
         packet->insertAtBack(phyTrailer);
     }
+    const Protocol *protocol = nullptr;
     if (dynamic_cast<Ieee80211FhssPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211FhssPhy);
+        protocol = &Protocol::ieee80211FhssPhy;
     else if (dynamic_cast<Ieee80211IrPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211IrPhy);
+        protocol = &Protocol::ieee80211IrPhy;
     else if (dynamic_cast<Ieee80211DsssPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211DsssPhy);
+        protocol = &Protocol::ieee80211DsssPhy;
     else if (dynamic_cast<Ieee80211HrDsssPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HrDsssPhy);
+        protocol = &Protocol::ieee80211HrDsssPhy;
     else if (dynamic_cast<Ieee80211OfdmPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+        protocol = &Protocol::ieee80211OfdmPhy;
     else if (dynamic_cast<Ieee80211ErpOfdmPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211ErpOfdmPhy);
+        protocol = &Protocol::ieee80211ErpOfdmPhy;
     else if (dynamic_cast<Ieee80211HtPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HtPhy);
+        protocol = &Protocol::ieee80211HtPhy;
     else if (dynamic_cast<Ieee80211VhtPhyHeader*>(phyHeader.get()))
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211VhtPhy);
+        protocol = &Protocol::ieee80211VhtPhy;
     else
         throw cRuntimeError("Invalid IEEE 802.11 PHY header type.");
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(protocol);
 }
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
