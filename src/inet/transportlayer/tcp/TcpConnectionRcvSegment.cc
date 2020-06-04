@@ -1143,12 +1143,10 @@ bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
     //ECN
     TcpStateVariables* state = getState();
     if (state && state->ect) {
-        if (tcpseg->getEceBit() == true) {
+        if (tcpseg->getEceBit() == true)
             EV_INFO << "Received packet with ECE\n";
-            state->gotEce = true;
-        }else{
-            state->gotEce = false;
-        }
+
+        state->gotEce = tcpseg->getEceBit();
     }
 
     //
