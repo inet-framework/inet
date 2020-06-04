@@ -1,5 +1,5 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
-/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,         c989-82f3/tplx, PASS,
+/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,         87cf-952a/tplx, PASS,
 # /examples/adhoc/idealwireless/,      -f .qtenv.ini -c General -r 0
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            87cf-952a/tplx, PASS, wireless adhoc
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            0def-d781/tplx, PASS, wireless adhoc
