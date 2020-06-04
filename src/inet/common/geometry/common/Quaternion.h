@@ -37,10 +37,10 @@ class INET_API Quaternion
     //! basic ctors
     Quaternion() {}
     Quaternion(double real, double i, double j, double k): s(real), v(i, j, k) { }
-    Quaternion(double real, const Coord &imag): s(real), v(imag) { }
+    Quaternion(double real, const Coord& imag): s(real), v(imag) { }
 
     //! constructs a Quaternion from a normalized axis - angle pair rotation
-    Quaternion(const Coord &axis, double angle);
+    Quaternion(const Coord& axis, double angle);
 
     //! from 3 euler angles
     explicit Quaternion(const EulerAngles& angles);
@@ -113,7 +113,7 @@ class INET_API Quaternion
     void getRotationAxisAndAngle(Coord &axis, double &angle) const;
 
     //! rotates v by this quaternion (quaternion must be unit)
-    Coord rotate(const Coord &v) const;
+    Coord rotate(const Coord& v) const;
 
     //! returns the euler angles from a rotation Quaternion
     EulerAngles toEulerAngles(bool homogenous=false) const;

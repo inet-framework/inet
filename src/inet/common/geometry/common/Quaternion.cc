@@ -22,7 +22,7 @@ namespace inet {
 Quaternion Quaternion::IDENTITY = Quaternion();
 Quaternion Quaternion::NIL = Quaternion(NaN, NaN, NaN, NaN);
 
-Quaternion::Quaternion(const Coord &axis, double angle) : Quaternion(std::cos(angle/2), axis*std::sin(angle/2))
+Quaternion::Quaternion(const Coord& axis, double angle) : Quaternion(std::cos(angle/2), axis*std::sin(angle/2))
 {
     // nothing
 }
@@ -133,7 +133,7 @@ void Quaternion::getRotationAxisAndAngle(Coord &axis, double &angle) const
     angle *= 2;
 }
 
-Coord Quaternion::rotate(const Coord &v) const
+Coord Quaternion::rotate(const Coord& v) const
 {
     Quaternion V(0, v);
     Quaternion conjugate(*this);
