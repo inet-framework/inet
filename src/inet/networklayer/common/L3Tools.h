@@ -24,15 +24,15 @@
 
 namespace inet {
 
-const Protocol *findNetworkProtocol(Packet *packet);
-const Protocol& getNetworkProtocol(Packet *packet);
+INET_API const Protocol *findNetworkProtocol(Packet *packet);
+INET_API const Protocol& getNetworkProtocol(Packet *packet);
 
-const Ptr<const NetworkHeaderBase> findNetworkProtocolHeader(Packet *packet);
-const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet);
+INET_API const Ptr<const NetworkHeaderBase> findNetworkProtocolHeader(Packet *packet);
+INET_API const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet);
 
-const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(const Packet *packet, const Protocol& protocol);
+INET_API const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(const Packet *packet, const Protocol& protocol);
 
-void insertNetworkProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<NetworkHeaderBase>& header);
+INET_API void insertNetworkProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<NetworkHeaderBase>& header);
 
 template <typename T>
 const Ptr<T> removeNetworkProtocolHeader(Packet *packet)
@@ -41,7 +41,7 @@ const Ptr<T> removeNetworkProtocolHeader(Packet *packet)
     return removeProtocolHeader<T>(packet);
 }
 
-const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const Protocol& protocol);
+INET_API const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const Protocol& protocol);
 
 };
 
