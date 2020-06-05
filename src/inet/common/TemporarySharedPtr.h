@@ -70,23 +70,54 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
 };
 
 /**
+ * The only reason this class exists is to delete the proxy descriptors for the temporaryPtr objects
+ * when a single static instance of it is deleted at process shutdown.
+ * One destructor for each T is enough. - Perhaps this map _always_ contains _exactly_ one element...? So could be removed?
+ */
+template <typename T>
+struct TemporarySharedPtrClassDescriptorRegistry {
+    std::map<cClassDescriptor *, TemporarySharedPtrClassDescriptor<T> *> proxyDescs;
+
+    TemporarySharedPtrClassDescriptor<T> *getOrCreateProxyDescriptorFor(cClassDescriptor *origDesc) {
+        if (proxyDescs.find(origDesc) == proxyDescs.end())
+            proxyDescs[origDesc] = new TemporarySharedPtrClassDescriptor<T>(origDesc);
+        return proxyDescs[origDesc];
+  }
+    ~TemporarySharedPtrClassDescriptorRegistry() {
+        for (auto a : proxyDescs)
+            delete a.second;
+    }
+};
+
+/**
  * This class provides support for Qtenv inspectors for objects referenced by shared pointers.
  */
-// TODO: subclass from cTemporary when available to fix leaking memory from the inspector
+
 template<typename T>
-class TemporarySharedPtr : public cObject
+class TemporarySharedPtr
+#if OMNETPP_BUILDNUM >= 1502
+    : public cTemporary
+#else
+    : public cObject // in this case, these objects will leak :(
+#endif
 {
   private:
+    static TemporarySharedPtrClassDescriptorRegistry<T> proxyDescriptorRegistry; // we only need to create one instance for every T in Ptr<T>
+
     const Ptr<const T> object;
-    TemporarySharedPtrClassDescriptor<T> *classDescriptor;
+    TemporarySharedPtrClassDescriptor<T> *classDescriptor = nullptr;
 
   public:
-    TemporarySharedPtr(const Ptr<const T> object) : object(object), classDescriptor(new TemporarySharedPtrClassDescriptor<T>(object.get()->getDescriptor())) { }
-    virtual ~TemporarySharedPtr() { delete classDescriptor; }
+    TemporarySharedPtr(const Ptr<const T> object) : object(object),
+        classDescriptor(proxyDescriptorRegistry.getOrCreateProxyDescriptorFor(object.get()->getDescriptor())) { }
+    virtual ~TemporarySharedPtr() {  }
 
     const Ptr<const T>& getObject() const { return object; }
     virtual cClassDescriptor *getDescriptor() const override { return classDescriptor; }
 };
+
+template<typename T>
+TemporarySharedPtrClassDescriptorRegistry<T> TemporarySharedPtr<T>::proxyDescriptorRegistry;
 
 } // namespace
 
