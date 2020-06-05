@@ -18,23 +18,15 @@
 
 package inet.examples.inet.tcpclientserver;
 
-import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth1G;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
 
 
 network ClientServer
 {
     parameters:
         double per = default(0);
-    types:
-        channel C extends DatarateChannel
-        {
-            datarate = 10Mbps;
-            delay = 0.1us;
-            per = per;
-        }
     submodules:
         client1: StandardHost {
             parameters:
@@ -48,10 +40,7 @@ network ClientServer
             parameters:
                 @display("p=100,100;is=s");
         }
-        netAnimTrace: NetAnimTrace {
-            @display("p=100,200;is=s");
-        }
     connections:
-        client1.pppg++ <--> C <--> server.pppg++;
+        client1.ethg++ <--> Eth1G <--> server.ethg++;
 }
 
