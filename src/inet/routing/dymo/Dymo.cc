@@ -139,6 +139,7 @@ void Dymo::initialize(int stage)
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);
+        multicastRouteSet.setSelftAddress(getSelfAddress());
     }
 }
 
@@ -488,6 +489,8 @@ bool Dymo::permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     //    Cost(L)), where 'L' is the incoming link, the RteMsg is
     //    disregarded.
     // TODO: implement
+    if (multicastRouteSet.check(rteMsg))
+        return false;
     return true;
 }
 
