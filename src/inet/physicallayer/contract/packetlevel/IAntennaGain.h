@@ -56,7 +56,7 @@ class INET_API IAntennaGain : public IPrintableObject
      * it determines how well the antenna converts radio waves arriving from
      * the specified direction.
      */
-    virtual double computeGain(const Quaternion direction) const = 0;
+    virtual double computeGain(const Quaternion& direction) const = 0;
 };
 
 } // namespace physicallayer

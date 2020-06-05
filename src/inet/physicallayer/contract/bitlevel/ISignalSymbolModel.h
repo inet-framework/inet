@@ -48,6 +48,8 @@ class INET_API ITransmissionSymbolModel : public virtual ISignalSymbolModel
 
 class INET_API IReceptionSymbolModel : public virtual ISignalSymbolModel
 {
+  public:
+    virtual double getSymbolErrorRate() const = 0;
 };
 
 } // namespace physicallayer

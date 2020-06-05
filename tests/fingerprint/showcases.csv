@@ -36,7 +36,7 @@
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWireless -r 0,                  500s,            e6c7-acc6/tplx, PASS,
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                      500s,            265a-6ac7/tplx, PASS,
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c ActivityLevel -r 0,      100s,         97d4-2b70/tplx, PASS,
-/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Dynamic -r 0,                                        500s,            b9ea-8790/tplx, PASS,
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Dynamic -r 0,                                        500s,            96f0-642e/tplx, PASS, wireless
 
 # /showcases/visualizer/earth/,        -f omnetpp.ini -c DefaultSettings -r 0,                                    500s,            0000-0000/tplx, PASS,   # Osg doesn't work in command line DefaultSettings extended
 # /showcases/visualizer/earth/,        -f omnetpp.ini -c TempConfig -r 0,                                         500s,            0000-0000/tplx, PASS,
@@ -69,7 +69,7 @@
 
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            47ee-3b66/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0,                          500s,            f5b9-3448/tplx, PASS,
-/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            d2d4-d947/tplx, PASS,
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            8323-4f51/tplx, PASS, wireless
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0,                               250s,            e0f3-acda/tplx, PASS,
 
 # /showcases/visualizer/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0,                              250s,            2410-572d/tplx, PASS,
@@ -85,7 +85,7 @@
 
 /showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                      500s,            a1da-0032/tplx, PASS,
 /showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                  250s,            1642-3498/tplx, PASS,
-/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c Mobile -r 0,                                     500s,            93d5-1d16/tplx, PASS,
+/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c Mobile -r 0,                                     500s,            73db-6871/tplx, PASS, wireless
 
 # /showcases/visualizer/radiomediumactivity/,  -f omnetpp.ini -c DisplayingSignalsTransmissionsReceptions -r 0,       500s,            f98f-dd46/tplx, PASS, # unfinished
 # /showcases/visualizer/radiomediumactivity/,  -f omnetpp.ini -c DisplayingPropagationTransmissionsReceptionsV2 -r 0,       500s,            f98f-dd46/tplx, PASS,

@@ -142,7 +142,7 @@ class INET_API Coord
     /**
      * @brief Dot product
      */
-    float operator*(const Coord& v) const {
+    double operator*(const Coord& v) const {
         return x * v.x + y * v.y + z * v.z;
     }
 

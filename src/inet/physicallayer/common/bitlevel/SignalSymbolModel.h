@@ -60,8 +60,13 @@ class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtua
 
 class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual IReceptionSymbolModel
 {
+  protected:
+    double symbolErrorRate;
+
   public:
-    ReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols);
+    ReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, double symbolErrorRate);
+
+    virtual double getSymbolErrorRate() const override { return symbolErrorRate; }
 };
 
 } // namespace physicallayer

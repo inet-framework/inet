@@ -278,7 +278,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
             // added comprobation to check that received ACK do not acks all outstanding data. If not,
             // TcpConnection::retransmitOneSegment will fail: ASSERT(bytes!=0), line 839), because bytes = snd_max-snd_una
             if (expired && (state->snd_max - state->snd_una > 0)) {
-                state->dupacks = DUPTHRESH;
+                state->dupacks = state->dupthresh;
                 EV_DETAIL << "Vegas: retransmission (v_rtt_timeout) " << "\n";
                 conn->retransmitOneSegment(false);    //retransmit one segment from snd_una
             }
@@ -311,7 +311,7 @@ void TcpVegas::receivedDuplicateAck()
     bool expired = found && ((currentTime - tSent) >= state->v_rtt_timeout);
 
     // rtx if Vegas timeout || 3 dupacks
-    if (expired || state->dupacks == DUPTHRESH) {    //DUPTHRESH = 3
+    if (expired || state->dupacks == state->dupthresh) {
         uint32 win = std::min(state->snd_cwnd, state->snd_wnd);
         state->v_worried = std::min((uint32)2 * state->snd_mss, state->snd_nxt - state->snd_una);
 
@@ -345,10 +345,10 @@ void TcpVegas::receivedDuplicateAck()
         conn->retransmitOneSegment(false);
 
         if (found && num_transmits == 1)
-            state->dupacks = DUPTHRESH;
+            state->dupacks = state->dupthresh;
     }
     //else if dupacks > duphtresh, cwnd+1
-    else if (state->dupacks > DUPTHRESH) {    // DUPTHRESH = 3
+    else if (state->dupacks > state->dupthresh) {
         state->snd_cwnd += state->snd_mss;
         conn->emit(cwndSignal, state->snd_cwnd);
     }

@@ -103,7 +103,7 @@ double InterpolatingAntenna::AntennaGain::computeGain(const std::map<rad, double
     }
 }
 
-double InterpolatingAntenna::AntennaGain::computeGain(Quaternion direction) const
+double InterpolatingAntenna::AntennaGain::computeGain(const Quaternion& direction) const
 {
     auto eulerAngles = direction.toEulerAngles();
     return computeGain(headingGainMap, eulerAngles.alpha) *

@@ -69,7 +69,7 @@ class INET_API IReceiver : public IPrintableObject
     /**
      * Returns a description of how the receiver is listening on the medium.
      */
-    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const = 0;
+    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const = 0;
 
     /**
      * Returns the result of the listening process specifying the reception

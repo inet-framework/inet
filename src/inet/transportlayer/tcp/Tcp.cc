@@ -171,8 +171,7 @@ void Tcp::handleLowerPacket(Packet *packet)
                 // This may be true only in receiver side. According to RFC 3168, page 20:
                 // pure acknowledgement packets (e.g., packets that do not contain
                 // any accompanying data) MUST be sent with the not-ECT codepoint.
-                if (ecn == 3)
-                    state->gotCeIndication = true;
+                state->gotCeIndication = (ecn == 3);
             }
 
             bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);

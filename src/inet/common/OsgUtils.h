@@ -56,7 +56,7 @@ Geometry *createAnnulusGeometry(const Coord& center, double outerRadius, double 
 Geometry *createQuadGeometry(const Coord& start, const Coord& end);
 Geometry *createPolygonGeometry(const std::vector<Coord>& points, const Coord& translation = Coord::ZERO);
 
-Node *createArrowhead(const Coord& start, const Coord &end, double width = 10.0, double height = 20.0);
+Node *createArrowhead(const Coord& start, const Coord& end, double width = 10.0, double height = 20.0);
 Node *createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
 Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
 osgText::Text *createText(const char *string, const Coord& position, const cFigure::Color& color);

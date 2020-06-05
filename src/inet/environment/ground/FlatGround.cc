@@ -29,12 +29,12 @@ void FlatGround::initialize(int stage)
         elevation = par("elevation");
 }
 
-Coord FlatGround::computeGroundProjection(const Coord &position) const
+Coord FlatGround::computeGroundProjection(const Coord& position) const
 {
     return Coord(position.x, position.y, elevation);
 }
 
-Coord FlatGround::computeGroundNormal(const Coord &position) const
+Coord FlatGround::computeGroundNormal(const Coord& position) const
 {
     return Coord(0, 0, 1);
 }

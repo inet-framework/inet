@@ -58,7 +58,7 @@ const IReceptionBitModel *ApskDemodulator::demodulate(const IReceptionSymbolMode
         for (unsigned int j = 0; j < symbolBits.getSize(); j++)
             bits->appendBit(symbolBits.getBit(j));
     }
-    return new ReceptionBitModel(b(-1), bps(NaN), b(-1), bps(NaN), bits);
+    return new ReceptionBitModel(b(-1), bps(NaN), b(-1), bps(NaN), bits, NaN);
 }
 
 } // namespace physicallayer

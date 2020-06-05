@@ -170,7 +170,7 @@ Geometry *createPolygonGeometry(const std::vector<Coord>& points, const Coord& t
     return geometry;
 }
 
-osg::Node *createArrowhead(const Coord& start, const Coord &end, double width, double height)
+osg::Node *createArrowhead(const Coord& start, const Coord& end, double width, double height)
 {
     auto direction = start - end;
     auto arrowhead = inet::osg::createArrowheadGeometry(direction, Coord::ZERO, width, height);

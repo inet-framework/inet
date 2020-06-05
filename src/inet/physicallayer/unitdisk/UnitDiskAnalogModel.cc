@@ -39,10 +39,10 @@ const IReception *UnitDiskAnalogModel::computeReception(const IRadio *receiverRa
     const UnitDiskTransmission *idealTransmission = check_and_cast<const UnitDiskTransmission *>(transmission);
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
-    const Coord receptionStartPosition = arrival->getStartPosition();
-    const Coord receptionEndPosition = arrival->getEndPosition();
-    const Quaternion receptionStartOrientation = arrival->getStartOrientation();
-    const Quaternion receptionEndOrientation = arrival->getEndOrientation();
+    const Coord& receptionStartPosition = arrival->getStartPosition();
+    const Coord& receptionEndPosition = arrival->getEndPosition();
+    const Quaternion& receptionStartOrientation = arrival->getStartOrientation();
+    const Quaternion& receptionEndOrientation = arrival->getEndOrientation();
     m distance = m(transmission->getStartPosition().distance(receptionStartPosition));
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(Hz(NaN), transmission->getStartPosition(), receptionStartPosition) : 1;
     ASSERT(obstacleLoss == 0 || obstacleLoss == 1);

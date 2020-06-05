@@ -46,7 +46,7 @@ std::ostream& Ieee802154UwbIrReceiver::printToStream(std::ostream& stream, int l
     return stream << "Ieee802154UwbIrReceiver";
 }
 
-const IListening *Ieee802154UwbIrReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *Ieee802154UwbIrReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
 {
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, cfg.centerFrequency, cfg.bandwidth);
 }

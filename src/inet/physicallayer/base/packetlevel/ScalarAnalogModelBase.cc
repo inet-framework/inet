@@ -45,14 +45,16 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
-    const Coord receptionStartPosition = arrival->getStartPosition();
-    // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
+    const Coord& receptionStartPosition = arrival->getStartPosition();
+    // TODO: could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarSignalAnalogModel->getPower();
+    ASSERT(!std::isnan(transmissionPower.get()));
     double gain = transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss;
+    ASSERT(!std::isnan(gain));
     if (gain > 1.0) {
         EV_WARN << "Signal power attenuation is zero.\n";
         gain = 1.0;

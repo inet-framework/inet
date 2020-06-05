@@ -31,6 +31,9 @@ class INET_API NetworkHeaderBase : public FieldsChunk
   protected:
     virtual NetworkHeaderBase *dup() const override { throw omnetpp::cRuntimeError("You forgot to manually add a dup() function to class %s", getClassName()); }
   public:
+    NetworkHeaderBase() : FieldsChunk() {}
+    NetworkHeaderBase(const NetworkHeaderBase& other) : FieldsChunk(other) {}
+
     virtual L3Address getSourceAddress() const = 0;
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;

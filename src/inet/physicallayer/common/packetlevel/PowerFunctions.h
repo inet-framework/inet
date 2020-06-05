@@ -46,7 +46,7 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
     const m distance;
 
   public:
-    FrequencyDependentAttenuationFunction(const IRadioMedium *radioMedium, const double transmitterAntennaGain, const double receiverAntennaGain, const Coord transmissionPosition, const Coord receptionPosition) :
+    FrequencyDependentAttenuationFunction(const IRadioMedium *radioMedium, const double transmitterAntennaGain, const double receiverAntennaGain, const Coord& transmissionPosition, const Coord& receptionPosition) :
         radioMedium(radioMedium), transmitterAntennaGain(transmitterAntennaGain), receiverAntennaGain(receiverAntennaGain), transmissionPosition(transmissionPosition), receptionPosition(receptionPosition), distance(m(transmissionPosition.distance(receptionPosition)))
     {
     }
@@ -57,6 +57,7 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
         auto pathLoss = radioMedium->getPathLoss()->computePathLoss(propagationSpeed, frequency, distance);
         auto obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(frequency, transmissionPosition, receptionPosition) : 1;
         double gain = transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss;
+        ASSERT(!std::isnan(gain));
         if (gain > 1.0) {
             EV_STATICCONTEXT;
             EV_WARN << "Signal power attenuation is zero.\n";
@@ -94,7 +95,7 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
     const mps propagationSpeed;
 
   public:
-    SpaceAndFrequencyDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion startOrientation, const mps propagationSpeed) :
+    SpaceAndFrequencyDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion& startOrientation, const mps propagationSpeed) :
         transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed) { }
 
     virtual double getValue(const Point<m, m, m, simsec, Hz>& p) const override {
@@ -172,7 +173,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
     const Hz frequency;
 
   public:
-    SpaceDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion startOrientation, const mps propagationSpeed, Hz frequency) :
+    SpaceDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion& startOrientation, const mps propagationSpeed, Hz frequency) :
         transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed), frequency(frequency) { }
 
     virtual double getValue(const Point<m, m, m, simsec, Hz>& p) const override {

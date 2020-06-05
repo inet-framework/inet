@@ -65,12 +65,12 @@ class INET_API IRadioSignal
     /**
      * Returns the position where the signal starts at the start time.
      */
-    virtual const Coord getStartPosition() const = 0;
+    virtual const Coord& getStartPosition() const = 0;
 
     /**
      * Returns the position where the signal ends at the end time.
      */
-    virtual const Coord getEndPosition() const = 0;
+    virtual const Coord& getEndPosition() const = 0;
 };
 
 class INET_API INarrowbandSignal

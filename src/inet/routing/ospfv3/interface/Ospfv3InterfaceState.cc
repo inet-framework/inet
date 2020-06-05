@@ -203,7 +203,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
     }
 
     if ((oldState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED || oldState == Ospfv3Interface::INTERFACE_STATE_BACKUP) &&
-        (nextState != Ospfv3Interface::INTERFACE_STATE_DESIGNATED || nextState != Ospfv3Interface::INTERFACE_STATE_BACKUP))
+        (nextState != Ospfv3Interface::INTERFACE_STATE_DESIGNATED && nextState != Ospfv3Interface::INTERFACE_STATE_BACKUP))
     {
         InterfaceEntry* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
         Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
