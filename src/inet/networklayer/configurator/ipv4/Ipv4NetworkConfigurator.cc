@@ -581,24 +581,38 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
             // determine the complete IP address for all compatible interfaces
             for (auto & compatibleInterface : compatibleInterfaces) {
                 InterfaceEntry *interfaceEntry = compatibleInterface->interfaceEntry;
+                EV_TRACE << "Finding address for " << interfaceEntry->getInterfaceFullPath() << "..." << std::endl;
+
                 uint32 interfaceAddress = compatibleInterface->address & ~networkNetmask;
                 uint32 interfaceAddressSpecifiedBits = compatibleInterface->addressSpecifiedBits;
                 uint32 interfaceAddressUnspecifiedBits = ~interfaceAddressSpecifiedBits & ~networkNetmask;    // 1 means the interface address is unspecified
-                uint32 interfaceAddressUnspecifiedPartMaximum = 0;
-                for (auto & assignedInterfaceAddress : assignedInterfaceAddresses) {
-                    uint32 otherInterfaceAddress = assignedInterfaceAddress;
-                    if ((otherInterfaceAddress & ~interfaceAddressUnspecifiedBits) == ((networkAddress | interfaceAddress) & ~interfaceAddressUnspecifiedBits)) {
-                        uint32 otherInterfaceAddressUnspecifiedPart = getPackedBits(otherInterfaceAddress, interfaceAddressUnspecifiedBits);
-                        if (otherInterfaceAddressUnspecifiedPart > interfaceAddressUnspecifiedPartMaximum)
-                            interfaceAddressUnspecifiedPartMaximum = otherInterfaceAddressUnspecifiedPart;
-                    }
-                }
-                interfaceAddressUnspecifiedPartMaximum++;
-                interfaceAddress = setPackedBits(interfaceAddress, interfaceAddressUnspecifiedBits, interfaceAddressUnspecifiedPartMaximum);
+                EV_TRACE << "Unspecified bits: " << Ipv4Address(interfaceAddressUnspecifiedBits) << std::endl;
+
+                uint32 interfaceAddressUnspecifiedPart = 1;
+                // this cannot be reached, because it would be the broadcast address
+                // TODO: maybe except if the lowest bit is already specified as 0?
+                uint32 interfaceAddressUnspecifiedPartMaximum = getPackedBits(0xFFFFFFFF, interfaceAddressUnspecifiedBits);
 
                 // determine the complete address and netmask for interface
-                uint32 completeAddress = networkAddress | interfaceAddress;
+                uint32 completeAddress = compatibleInterface->address;
                 uint32 completeNetmask = networkNetmask;
+
+                for (; interfaceAddressUnspecifiedPart < interfaceAddressUnspecifiedPartMaximum; interfaceAddressUnspecifiedPart++) {
+                    uint32 interfaceAddressCandidate = setPackedBits(interfaceAddress, interfaceAddressUnspecifiedBits, interfaceAddressUnspecifiedPart);
+                    uint32 completeAddressCandidate = networkAddress | interfaceAddressCandidate;
+
+                    EV_TRACE << "Trying address: " << Ipv4Address(completeAddressCandidate) << std::endl;
+
+                    if (!contains(assignedInterfaceAddresses, completeAddressCandidate)) {
+                        EV_TRACE << "This will address is not yet used, assigning." << std::endl;
+                        completeAddress = completeAddressCandidate;
+                        break;
+                    }
+                    else
+                        EV_TRACE << "Already used, trying the next one..." << std::endl;
+                }
+                if (interfaceAddressUnspecifiedPart == interfaceAddressUnspecifiedPartMaximum)
+                    throw cRuntimeError("Failed to find unique interface address"); // TODO: add details
 
                 // check if we could really find a unique IP address
                 if (assignUniqueAddresses && assignedAddressToInterfaceEntryMap.find(completeAddress) != assignedAddressToInterfaceEntryMap.end())
