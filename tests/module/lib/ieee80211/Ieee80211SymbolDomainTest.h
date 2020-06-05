@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if 1
 #ifndef __INET_IEEE80211SYMBOLMODELTEST_H
 #define __INET_IEEE80211SYMBOLMODELTEST_H
 
@@ -56,4 +55,3 @@ class INET_API Ieee80211SymbolDomainTest : public cSimpleModule
 
 #endif /* __INET_IEEE80211SYMBOLMODELTEST_H */
 
-#endif

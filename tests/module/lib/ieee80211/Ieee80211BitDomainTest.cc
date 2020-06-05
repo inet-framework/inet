@@ -15,8 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if 1
-
 #include "Ieee80211BitDomainTest.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
@@ -134,6 +132,4 @@ void Ieee80211BitDomainTest::testIeee80211BitDomain() const
 }
 
 } /* namespace inet */
-
-#endif
 
