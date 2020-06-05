@@ -88,6 +88,7 @@ class INET_API SharingRegionTagSet : public cObject
         void setTag(const Ptr<const T>& tag) { this->tag = tag; }
 
         virtual std::string str() const override {
+            using std::operator<<; // KLUDGE: but whyyyyyyyy?
             std::stringstream stream;
             stream << "(" << getStartOffset() << ", " << getEndOffset() << ") " << (tag != nullptr ? tag->str() : "<nullptr>");
             return stream.str();
