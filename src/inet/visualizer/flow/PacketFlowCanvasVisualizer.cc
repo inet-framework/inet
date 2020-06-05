@@ -82,7 +82,6 @@ void PacketFlowCanvasVisualizer::processPathElement(cModule *networkNode, const 
         for (int i = 0; i < (int)flowTag->getNamesArraySize(); i++) {
             auto label = flowTag->getNames(i);
             mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int chunkId) {
-                std::cout << "Adding " << networkNode->getFullPath() << " with label " << label << " and id " << chunkId << " to path.\n";
                 auto path = getIncompletePath(label, chunkId);
                 if (path != nullptr) {
                     addToIncompletePath(label, chunkId, networkNode);
