@@ -15,8 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if 1
-
 #include "Ieee80211SymbolDomainTest.h"
 #include "inet/common/ModuleAccess.h"
 #include <fstream>
@@ -79,9 +77,9 @@ void Ieee80211SymbolDomainTest::test() const
     const ITransmissionBitModel *dataBitModel = ieee80211OFDMDataEncoder->encode(&dataPacketModel);
     const ITransmissionSymbolModel *transmissionSignalSymbolModel = ieee80211OFDMSignalModulator->modulate(signalBitModel);
     const ITransmissionSymbolModel *transmissionDataSymbolModel = ieee80211OFDMDataModulator->modulate(dataBitModel);
-    ReceptionSymbolModel receptionSignalSymbolModel(0, 0, 0, 0, new std::vector<const ISymbol *>(*transmissionSignalSymbolModel->getSymbols()));
+    ReceptionSymbolModel receptionSignalSymbolModel(0, 0, 0, 0, new std::vector<const ISymbol *>(*transmissionSignalSymbolModel->getSymbols()), NaN);
     const IReceptionBitModel *receptionSignalBitModel = ieee80211OFDMSignalDemodulator->demodulate(&receptionSignalSymbolModel);
-    ReceptionSymbolModel receptionDataSymbolModel(0, 0, 0, 0, new std::vector<const ISymbol *>(*transmissionDataSymbolModel->getSymbols()));
+    ReceptionSymbolModel receptionDataSymbolModel(0, 0, 0, 0, new std::vector<const ISymbol *>(*transmissionDataSymbolModel->getSymbols()), NaN);
     const IReceptionBitModel *receptionDataBitModel = ieee80211OFDMDataDemodulator->demodulate(&receptionDataSymbolModel);
     const IReceptionPacketModel *receptionSignalPacketModel = ieee80211OFDMSignalDecoder->decode(receptionSignalBitModel);
     const IReceptionPacketModel *receptionDataPacketModel = ieee80211OFDMDataDecoder->decode(receptionDataBitModel);
@@ -101,4 +99,3 @@ void Ieee80211SymbolDomainTest::test() const
 
 } /* namespace inet */
 
-#endif
