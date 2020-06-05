@@ -39,10 +39,11 @@ Hz Ieee80211EnumeratedBand::getCenterFrequency(int channelNumber) const
     return centers[channelNumber];
 }
 
-Ieee80211ArithmeticalBand::Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, int numChannels) :
+Ieee80211ArithmeticalBand::Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, Hz bandwith, int numChannels) :
     Ieee80211BandBase(name),
     start(start),
     spacing(spacing),
+    bandwith(bandwith),
     numChannels(numChannels)
 {
 }
@@ -72,17 +73,17 @@ const Ieee80211EnumeratedBand Ieee80211CompliantBands::band2_4GHz("2.4 GHz",
     GHz(2.484),    // 14, this channel is intentionally further away from the previous than the others, see 802.11 specification
 });
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5), MHz(5), 200);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5), MHz(5), MHz(5), 200);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz (20 MHz)", GHz(5), MHz(20), 25);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz (20 MHz)", GHz(5), MHz(20), MHz(20), 25);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz40MHz("5 GHz (40 MHz)", GHz(5), MHz(40), 12);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz40MHz("5 GHz (40 MHz)", GHz(5), MHz(40), MHz(40), 12);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz80MHz("5 GHz (80 MHz)", GHz(5), MHz(80), 5);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz80MHz("5 GHz (80 MHz)", GHz(5), MHz(80), MHz(80), 5);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz160MHz("5 GHz (160 MHz)", GHz(5), MHz(160), 2);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz160MHz("5 GHz (160 MHz)", GHz(5), MHz(160), MHz(160), 2);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5_9GHz("5.9 GHz", GHz(5.855), MHz(10), 7);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5_9GHz("5.9 GHz", GHz(5.855), MHz(10), MHz(10), 7);
 
 const std::vector<const IIeee80211Band *> Ieee80211CompliantBands::bands = {&band2_4GHz, &band5GHz, &band5GHz20MHz, &band5GHz40MHz, &band5GHz80MHz, &band5GHz160MHz, &band5_9GHz};
 
