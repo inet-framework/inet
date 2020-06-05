@@ -1961,7 +1961,7 @@ std::string Ospfv3Interface::detailedInfo() const
     out << ipv6int->getLinkLocalAddress() << ", Interface ID " << this->interfaceId << "\n";
 
     if (this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-        Ipv4InterfaceData* ipv4int = ie->findProtocolData<Ipv4InterfaceData>();
+        Ipv4InterfaceData* ipv4int = ie->getProtocolData<Ipv4InterfaceData>();
         out << "Internet Address " << ipv4int->getIPAddress() << endl;
     }
 

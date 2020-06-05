@@ -116,8 +116,9 @@ int Ospfv3Process::isInRoutingTable6(Ipv6RoutingTable *rtTable, Ipv6Address addr
 int Ospfv3Process::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr)
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        if (ifTable->getInterface(i)->findProtocolData<Ipv4InterfaceData>()->getIPAddress() == addr) {
-            return i;
+        if (auto ipv4Data = ifTable->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
+            if (ipv4Data->getIPAddress() == addr)
+                return i;
         }
     }
     return -1;
@@ -187,13 +188,13 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
         }
 
         //interface ipv4 configuration
-        Ipv4Address addr;
-        Ipv4Address mask;
-        Ipv4InterfaceData * intfData = myInterface->findProtocolData<Ipv4InterfaceData>(); //new Ipv4InterfaceData();
         bool alreadySet = false;
 
         cXMLElementList ipv4AddrList = (*interfaceIt)->getElementsByTagName("IPAddress");
         if (ipv4AddrList.size() == 1) {
+            Ipv4Address addr;
+            Ipv4Address mask;
+            Ipv4InterfaceData * intfData = myInterface->getProtocolData<Ipv4InterfaceData>();
             for (auto & ipv4Rec : ipv4AddrList) {
                 const char * addr4c = ipv4Rec->getNodeValue(); //from string make ipv4 address and store to interface config
                 addr = (Ipv4Address(addr4c));
