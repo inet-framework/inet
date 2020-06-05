@@ -51,7 +51,7 @@ class INET_API TimingMeasurementStarter : public PacketFlowBase
                 << "range (" << offset << ", " << offset + length << "), ";
         if (flowName != nullptr && *flowName != '\0')
             EV_INFO << "flowName = " << flowName << ", ";
-        EV_INFO << "class = " << T::getClassName() << std::endl;
+        EV_INFO << "class = " << typeid(T).name() << std::endl;
         packet->addRegionTagsWhereAbsent<T>(offset, length);
         packet->mapAllRegionTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& timeTag) {
             timeTag->insertFlowNames(flowName);
