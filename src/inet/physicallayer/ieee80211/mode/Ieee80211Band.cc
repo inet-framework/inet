@@ -73,7 +73,7 @@ const Ieee80211EnumeratedBand Ieee80211CompliantBands::band2_4GHz("2.4 GHz",
     GHz(2.484),    // 14, this channel is intentionally further away from the previous than the others, see 802.11 specification
 });
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5), MHz(5), MHz(5), 200);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5), MHz(5), MHz(20), 200);
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz (20 MHz)", GHz(5), MHz(20), MHz(20), 25);
 

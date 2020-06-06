@@ -72,6 +72,8 @@ void Ieee80211ReceiverBase::setBand(const IIeee80211Band *band)
         this->band = band;
         if (!std::isnan(this->band->getBandwith().get()))
             setBandwidth(this->band->getBandwith());
+        else
+            setBandwidth(MHz(20));// Default bandwidth
         if (channel != nullptr)
             setChannel(new Ieee80211Channel(band, channel->getChannelNumber()));
     }
@@ -85,6 +87,8 @@ void Ieee80211ReceiverBase::setChannel(const Ieee80211Channel *channel)
         setCenterFrequency(channel->getCenterFrequency());
         if (!std::isnan(this->band->getBandwith().get()))
             setBandwidth(channel->getBand()->getBandwith());
+        else
+            setBandwidth(MHz(20)); // Default bandwidth
     }
 }
 
