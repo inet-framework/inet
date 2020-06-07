@@ -19,6 +19,7 @@
 #define __INET_NETWORKNAMESPACECONTEXT_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 
@@ -30,6 +31,14 @@ class INET_API NetworkNamespaceContext
 
   public:
     NetworkNamespaceContext(const char *networkNamespace);
+
+    static bool namespaceExists(const char *networkNamespace) {
+        std::string namespaceAsString = "/var/run/netns/";
+        namespaceAsString += networkNamespace;
+        return utils::fileExists(namespaceAsString.c_str());
+    }
+
+    static void ensureNamespaceExists(const char *networkNamespace);
     ~NetworkNamespaceContext();
 };
 

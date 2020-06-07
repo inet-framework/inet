@@ -12,6 +12,7 @@ FEATURETOOL := opp_featuretool
 #
 #CFLAGS += -Wold-style-cast
 
+LIBS += -lcap
 
 ifeq ($(PLATFORM),win32.x86_64)
   #
