@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPV4NATTABLE_H
-#define __INET_IPV4NATTABLE_H
+#ifndef __INET_IPV4DYNAMICNAPT_H
+#define __INET_IPV4DYNAMICNAPT_H
 
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -22,32 +22,34 @@
 
 namespace inet {
 
-class INET_API Ipv4NatTable : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API Ipv4DynamicNapt : public cSimpleModule, public NetfilterBase::HookBase
 {
   protected:
-    cXMLElement *config = nullptr;
     INetfilter *networkProtocol = nullptr;
 
-    std::multimap<INetfilter::IHook::Type, std::pair<PacketFilter *, Ipv4NatEntry>> natEntries;
+    PacketFilter *outgoingFilter = nullptr;
+    PacketFilter *incomingFilter = nullptr;
+
+    // (protocol_id [UDP or TCP], external_router_port) -> (private_host_address, private_host_port)
+    std::map<std::pair<int, uint16_t>, std::pair<Ipv4Address, uint16_t>> portMapping;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual void parseConfig();
-    virtual Result processPacket(Packet *packet, INetfilter::IHook::Type type);
 
   public:
-    virtual ~Ipv4NatTable();
-    virtual Result datagramPreRoutingHook(Packet *datagram) override { return processPacket(datagram, PREROUTING); }
-    virtual Result datagramForwardHook(Packet *datagram) override { return processPacket(datagram, FORWARD); }
-    virtual Result datagramPostRoutingHook(Packet *datagram) override { return processPacket(datagram, POSTROUTING); }
-    virtual Result datagramLocalInHook(Packet *datagram) override { return processPacket(datagram, LOCALIN); }
-    virtual Result datagramLocalOutHook(Packet *datagram) override { return processPacket(datagram, LOCALOUT); }
-};
+    virtual ~Ipv4DynamicNapt();
 
+    virtual Result datagramPreRoutingHook(Packet *datagram) override;
+    virtual Result datagramPostRoutingHook(Packet *datagram) override;
+
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; };
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; };
+    virtual Result datagramLocalOutHook(Packet *datagram) override { return ACCEPT; };
+};
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4NATTABLE_H
+#endif // ifndef __INET_IPV4DYNAMICNAPT_H
 

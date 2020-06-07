@@ -15,17 +15,15 @@
 
 package inet.networklayer.ipv4;
 
-import inet.networklayer.contract.IRoutingTable;
 
-//
-// Stores the network address translation table.
-//
-simple Ipv4NatTable like IIpv4Nat
+simple Ipv4DynamicNapt like IIpv4Nat
 {
     parameters:
         string networkProtocolModule = default("^.ip");
-        xml config = default(xml("<config></config>")); // XML configuration parameters for network address translation
+        
+        string privateSubnetAddress = default("192.168.1.0");
+        string privateSubnetNetmask = default("255.255.255.0");
+        
+        string publicInterfaceName = default("ppp0");
         @display("i=block/table");
 }
-
-

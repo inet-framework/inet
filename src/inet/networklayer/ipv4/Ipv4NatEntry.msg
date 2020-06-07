@@ -20,6 +20,7 @@ namespace inet;
 
 class Ipv4NatEntry extends cObject
 {
+    @customize(true);
     Ipv4Address destAddress;
     int destPort = -1;
     Ipv4Address srcAddress;
