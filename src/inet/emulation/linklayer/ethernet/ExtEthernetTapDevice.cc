@@ -99,28 +99,28 @@ void ExtEthernetTapDevice::finish()
 /*
 
 
- ip tuntap del dev tap0 mode tap
- ip addr add 192.168.10.2 dev tap0
- sudo ip link set up dev tap0
- ip link set up dev tap0
+ip tuntap add mode tap dev tap0
 
+ ip link set up dev tap0
+ ip link set up dev tap0 address 2e:6f:c3:7f:6e:cf
+
+ ip addr add 192.168.10.2 dev tap0
+ ip addr add 192.168.10.2/24 dev tap0
  X ip addr del fe80::440d:27ff:fe14:d7ca/64 dev tap0
 
  ? ip route add 192.168.10.0/24 dev tap0
 
+ ip tuntap del dev tap0 mode tap
 
-ip tuntap add mode tap dev tap0
-ip addr add 192.168.10.2/24 dev tap0
-
-1139  sudo ip netns del srv
+ ip netns del srv
  */
 
 void ExtEthernetTapDevice::openTap(std::string dev)
 {
     NetworkNamespaceContext context(par("namespace"));
 
-
-    run_command({"ip", "tuntap", "add", "mode", "tap", "dev", dev.c_str()}, true, true);
+    if (!checkTapDeviceExists(dev))
+        run_command({"ip", "tuntap", "add", "mode", "tap", "dev", dev.c_str()}, true, true);
 
 
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)

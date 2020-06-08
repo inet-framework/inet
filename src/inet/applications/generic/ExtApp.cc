@@ -21,6 +21,27 @@ namespace inet {
 
 Define_Module(ExtApp);
 
+void ExtApp::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        std::vector<std::string> prefixStrings = check_and_cast<cValueArray *>(par("commandPrefix").objectValue())->asStringVector();
+        std::vector<std::string> commandStrings = check_and_cast<cValueArray *>(par("command").objectValue())->asStringVector();
+
+        std::string netns = par("namespace").stringValue();
+
+        std::vector<const char *> args;
+
+        for (const auto& c : prefixStrings)
+            args.push_back(c.c_str());
+
+        for (const auto& c : commandStrings)
+            args.push_back(c.c_str());
+
+        NetworkNamespaceContext ctxt(netns.c_str());
+        run_command(args, false, false);
+    }
+}
+
 
 // EXECUTE_ON_SHUTDOWN(killProcess());
 

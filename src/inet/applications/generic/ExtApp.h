@@ -29,36 +29,13 @@ class INET_API ExtApp : public cSimpleModule
 
   public:
 
-    int numInitStages() const override {
-        return NUM_INIT_STAGES;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override;
+
+    void handleMessage(cMessage *msg) override {
+        ASSERT(false);
     }
-
-    void initialize(int stage) override {
-        if (stage == INITSTAGE_LOCAL) {
-            std::vector<std::string> prefixStrings = check_and_cast<cValueArray *>(par("commandPrefix").objectValue())->asStringVector();
-            std::vector<std::string> commandStrings = check_and_cast<cValueArray *>(par("command").objectValue())->asStringVector();
-
-            std::string netns = par("namespace").stringValue();
-
-            std::vector<const char *> args;
-
-            /*
-            args.push_back("ip");
-            args.push_back("netns");
-            args.push_back("exec");
-            args.push_back(netns.c_str());
-            */
-            for (const auto& c : prefixStrings)
-                args.push_back(c.c_str());
-
-            for (const auto& c : commandStrings) {
-                args.push_back(c.c_str());
-            }
-            auto c = NetworkNamespaceContext(netns.c_str());
-            run_command(args, false, false);
-        }
-    }
-    void handleMessage(cMessage *msg) override {}
 
 };
 
