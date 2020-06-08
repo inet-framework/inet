@@ -1,0 +1,6 @@
+<config>
+   <interface hosts="ParSimNetwork3.host2" names="eth0" address="10.0.0.2" netmask="255.255.255.252" metric="20"/>
+   <multicast-group hosts="ParSimNetwork3.host2" interfaces="eth0" address="224.0.0.1"/>
+   <route hosts="ParSimNetwork3.host2" destination="10.0.0.0" netmask="255.255.255.252" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="ParSimNetwork3.host2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+</config>
