@@ -46,7 +46,7 @@ class INET_API ExtEthernetTapDevice : public cSimpleModule, public RealTimeSched
     virtual void refreshDisplay() const override;
     virtual void finish() override;
 
-    virtual void openTap(std::string dev);
+    virtual std::string openTap(const std::string& dev);
     virtual void closeTap();
 
   public:

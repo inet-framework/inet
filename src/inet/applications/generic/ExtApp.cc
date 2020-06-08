@@ -23,6 +23,7 @@ Define_Module(ExtApp);
 
 void ExtApp::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         std::vector<std::string> prefixStrings = check_and_cast<cValueArray *>(par("commandPrefix").objectValue())->asStringVector();
         std::vector<std::string> commandStrings = check_and_cast<cValueArray *>(par("command").objectValue())->asStringVector();
@@ -38,7 +39,7 @@ void ExtApp::initialize(int stage)
             args.push_back(c.c_str());
 
         NetworkNamespaceContext ctxt(netns.c_str());
-        run_command(args, false, false);
+        execCommand(args, false, false);
     }
 }
 

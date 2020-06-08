@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2015 Opensim Ltd
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,26 +18,30 @@
 #ifndef __INET_LINUXUTILS_H
 #define __INET_LINUXUTILS_H
 
-#include <vector>
+#ifdef __linux__
 
-#include <sys/capability.h>
+#include <vector>
+#include <sys/capability.h> // cap_value_t
+
 namespace inet {
 
-static const std::vector<cap_value_t> required_capabilities = {
-        CAP_NET_ADMIN, // to change interface configuration (IP addresses, etc)
-        CAP_NET_RAW, // to be able to use raw sockets
-        CAP_SYS_ADMIN, // to be able to switch between network namespaces back and forth
-        CAP_DAC_OVERRIDE // to be able to create new bind mounts (files in /var/run/netns) for newly created network namespaces
+static const std::vector<cap_value_t> DEFAULT_REQUIRED_CAPABILITIES = {
+    CAP_NET_ADMIN,   // to change host networking and interface configuration (IP addresses, routes, etc)
+    CAP_NET_RAW,     // to use raw sockets
+    CAP_SYS_ADMIN,   // to switch between network namespaces back and forth
+    CAP_DAC_OVERRIDE // to create new bind mounts (files in /var/run/netns) for newly created network namespaces
 };
 
-// source: https://unix.stackexchange.com/a/581945/329864
-// in addition to adding the i flag, this adds the capabilities to the "ambient set"
-void make_capabilities_inheritable(const std::vector<cap_value_t>& caps = required_capabilities);
-// this does not really reset the i flag, instead, removes the capabilities from the "ambient set"
-void make_capabilities_uninheritable(const std::vector<cap_value_t>& caps = required_capabilities);
+void makeCapabilitiesInheritable(const std::vector<cap_value_t>& caps = DEFAULT_REQUIRED_CAPABILITIES);
 
-int run_command(std::vector<const char *> args, bool wait_for_exit = true, bool hand_down_capabilities = false);
+void makeCapabilitiesUninheritable(const std::vector<cap_value_t>& caps = DEFAULT_REQUIRED_CAPABILITIES);
+
+int execCommand(const std::vector<const char *>& args, bool waitForExit = true, bool handDownCapabilities = false);
+
 } // namespace inet
+
+#endif // __linux__
+// #else error? warning?
 
 #endif // ifndef __INET_LINUXUTILS_H
 

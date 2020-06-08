@@ -23,9 +23,10 @@
 
 namespace inet {
 
+using namespace utils;
+
 NetworkNamespaceContext::NetworkNamespaceContext(const char *networkNamespace)
 {
-    std::cout << "netnscont ctor" << std::endl;
     if (networkNamespace != nullptr && *networkNamespace != '\0') {
         ensureNamespaceExists(networkNamespace);
 #ifdef __linux__
@@ -43,25 +44,23 @@ NetworkNamespaceContext::NetworkNamespaceContext(const char *networkNamespace)
     }
 }
 
-
 bool NetworkNamespaceContext::checkNamespaceExists(const char *networkNamespace)
 {
-    std::string namespaceAsString = "/var/run/netns/";
-    namespaceAsString += networkNamespace;
-    return utils::fileExists(namespaceAsString.c_str());
+#ifdef __linux__
+    return fileExists((std::string("/var/run/netns/") + networkNamespace).c_str());
+#else
+    throw cRuntimeError("Network namespaces are only supported on Linux");
+#endif
 }
-
 
 void NetworkNamespaceContext::ensureNamespaceExists(const char *networkNamespace)
 {
-    if (!checkNamespaceExists(networkNamespace)) {
-        try {
-            run_command({"ip", "netns", "add", networkNamespace}, true, true);
-        }
-        catch (const char *err) {
-            std::cerr << err << std::endl;
-        }
-    }
+#ifdef __linux__
+    if (!checkNamespaceExists(networkNamespace))
+        execCommand({"ip", "netns", "add", networkNamespace}, true, true);
+#else
+    throw cRuntimeError("Network namespaces are only supported on Linux");
+#endif
 }
 
 NetworkNamespaceContext::~NetworkNamespaceContext()

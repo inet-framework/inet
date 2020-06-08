@@ -28,10 +28,9 @@ class INET_API InheritableCapabilityContext
 {
   protected:
     std::vector<cap_value_t> capabilities;
+
   public:
-
-    InheritableCapabilityContext(const std::vector<cap_value_t>& capabilities = required_capabilities);
-
+    InheritableCapabilityContext(const std::vector<cap_value_t>& capabilities = DEFAULT_REQUIRED_CAPABILITIES);
     ~InheritableCapabilityContext();
 };
 

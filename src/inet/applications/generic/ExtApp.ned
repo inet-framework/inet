@@ -21,9 +21,9 @@ package inet.applications.generic;
 simple ExtApp
 {
     parameters:
-        string namespace = default("srv");
-        object commandPrefix = default(["konsole", "--hold", "-e"]);
-        object command = default(["python3", "echo_server.py"]);
+        string namespace = default("");
+        object commandPrefix; //["konsole", "--hold", "-e"] or ["gnome-terminal", "-x"] or similar... 
+        object command; // should be something like: ["python3", "echo_server.py"]
         //object command = default(["ip", "netns", "exec", "srv", "python3", "echo_server.py"]);
 }
 

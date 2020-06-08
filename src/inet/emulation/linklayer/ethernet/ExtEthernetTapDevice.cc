@@ -53,7 +53,7 @@ void ExtEthernetTapDevice::initialize(int stage)
         device = par("device").stdstringValue();
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
-        openTap(device);
+        device = openTap(device);
         numSent = numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
@@ -99,9 +99,9 @@ void ExtEthernetTapDevice::finish()
 /*
 
 
-ip tuntap add mode tap dev tap0
+Y ip tuntap add mode tap dev tap0
 
- ip link set up dev tap0
+Y ip link set up dev tap0
  ip link set up dev tap0 address 2e:6f:c3:7f:6e:cf
 
  ip addr add 192.168.10.2 dev tap0
@@ -115,13 +115,14 @@ ip tuntap add mode tap dev tap0
  ip netns del srv
  */
 
-void ExtEthernetTapDevice::openTap(std::string dev)
+std::string ExtEthernetTapDevice::openTap(const std::string& dev)
 {
     NetworkNamespaceContext context(par("namespace"));
 
-    if (!checkTapDeviceExists(dev))
-        run_command({"ip", "tuntap", "add", "mode", "tap", "dev", dev.c_str()}, true, true);
-
+    if (!checkTapDeviceExists(dev)) {
+        execCommand({"ip", "tuntap", "add", "mode", "tap", "dev", dev.c_str()}, true, true);
+        execCommand({"ip", "link", "set", "up", "dev", dev.c_str()}, true, true); // address 2e:6f:c3:7f:6e:cf ?
+    }
 
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
         throw cRuntimeError("Cannot open TAP device: %s", strerror(errno));
@@ -135,17 +136,14 @@ void ExtEthernetTapDevice::openTap(std::string dev)
          * the kernel will try to allocate the "next" device of the
          * specified type */
         strncpy(ifr.ifr_name, dev.c_str(), IFNAMSIZ);
+
     if (ioctl(fd, (TUNSETIFF), (void *) &ifr) < 0) {
         close(fd);
         throw cRuntimeError("Cannot create TAP device: %s", strerror(errno));
     }
 
-    /* if the operation was successful, write back the name of the
-     * interface to the variable "dev", so the caller can know
-     * it. Note that the caller MUST reserve space in *dev (see calling
-     * code below) */
-    dev = ifr.ifr_name;
     rtScheduler->addCallback(fd, this);
+    return ifr.ifr_name; // in case it was auto-allocated
 }
 
 void ExtEthernetTapDevice::closeTap()

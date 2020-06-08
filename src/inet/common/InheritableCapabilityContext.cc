@@ -26,13 +26,13 @@ namespace inet {
 InheritableCapabilityContext::InheritableCapabilityContext(const std::vector<cap_value_t>& capabilities)
     : capabilities(capabilities)
 {
-    make_capabilities_inheritable(capabilities);
+    makeCapabilitiesInheritable(capabilities);
 }
 
 
 InheritableCapabilityContext::~InheritableCapabilityContext()
 {
-    make_capabilities_uninheritable(capabilities);
+    makeCapabilitiesUninheritable(capabilities);
 }
 
 } // namespace inet
