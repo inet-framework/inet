@@ -22,18 +22,6 @@ namespace inet {
 
 Define_Module(CircleMobility);
 
-CircleMobility::CircleMobility()
-{
-    cx = 0;
-    cy = 0;
-    cz = 0;
-    r = -1;
-    startAngle = deg(0);
-    speed = 0;
-    omega = 0;
-    angle = deg(0);
-}
-
 void CircleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
@@ -49,6 +37,8 @@ void CircleMobility::initialize(int stage)
         speed = par("speed");
         omega = speed / r;
         stationary = (omega == 0);
+        lastAngularVelocity = Quaternion(EulerAngles(rad(omega), rad(0), rad(0)));
+        WATCH(lastAngularVelocity);
     }
 }
 

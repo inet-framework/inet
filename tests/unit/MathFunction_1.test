@@ -212,5 +212,5 @@ SNIR over time: function(s) → unit {
       → 5
     constant over [40 s … inf s)
       → -nan
-  } min = -nan, max = -nan, mean = -nan
+  } min = nan, max = nan, mean = -nan
 }

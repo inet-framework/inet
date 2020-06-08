@@ -34,13 +34,13 @@ class INET_API FacingMobility : public MobilityBase
     virtual void handleSelfMessage(cMessage *msg) override { throw cRuntimeError("Unknown self message"); }
 
   public:
-    virtual Coord getCurrentPosition() override { return lastPosition; }
-    virtual Coord getCurrentVelocity() override { return Coord::ZERO; }
-    virtual Coord getCurrentAcceleration() override { return Coord::ZERO; }
+    virtual const Coord& getCurrentPosition() override { return lastPosition; }
+    virtual const Coord& getCurrentVelocity() override { return Coord::ZERO; }
+    virtual const Coord& getCurrentAcceleration() override { return Coord::ZERO; }
 
-    virtual Quaternion getCurrentAngularPosition() override;
-    virtual Quaternion getCurrentAngularVelocity() override { return Quaternion::NIL; }
-    virtual Quaternion getCurrentAngularAcceleration() override { return Quaternion::NIL; }
+    virtual const Quaternion& getCurrentAngularPosition() override;
+    virtual const Quaternion& getCurrentAngularVelocity() override { return Quaternion::NIL; }
+    virtual const Quaternion& getCurrentAngularAcceleration() override { return Quaternion::NIL; }
 };
 
 } // namespace inet

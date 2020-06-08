@@ -108,25 +108,25 @@ void MovingMobilityBase::scheduleUpdate()
         scheduleAt(nextChange, moveTimer);
 }
 
-Coord MovingMobilityBase::getCurrentPosition()
+const Coord& MovingMobilityBase::getCurrentPosition()
 {
     moveAndUpdate();
     return lastPosition;
 }
 
-Coord MovingMobilityBase::getCurrentVelocity()
+const Coord& MovingMobilityBase::getCurrentVelocity()
 {
     moveAndUpdate();
     return lastVelocity;
 }
 
-Quaternion MovingMobilityBase::getCurrentAngularPosition()
+const Quaternion& MovingMobilityBase::getCurrentAngularPosition()
 {
     moveAndUpdate();
     return lastOrientation;
 }
 
-Quaternion MovingMobilityBase::getCurrentAngularVelocity()
+const Quaternion& MovingMobilityBase::getCurrentAngularVelocity()
 {
     moveAndUpdate();
     return lastAngularVelocity;

@@ -32,17 +32,17 @@ namespace inet {
 class INET_API CircleMobility : public MovingMobilityBase
 {
   protected:
-    double cx;
-    double cy;
-    double cz;
-    double r;
-    rad startAngle;
-    double speed;
+    double cx = 0;
+    double cy = 0;
+    double cz = 0;
+    double r = -1;
+    rad startAngle = rad(0);
+    double speed = 0;
     /** @brief angular velocity [rad/s], derived from speed and radius. */
-    double omega;
+    double omega = 0;
 
     /** @brief Direction from the center of the circle. */
-    rad angle;
+    rad angle = rad(0);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -58,10 +58,9 @@ class INET_API CircleMobility : public MovingMobilityBase
 
   public:
     virtual double getMaxSpeed() const override { return speed; }
-    CircleMobility();
 
-    virtual Quaternion getCurrentAngularVelocity() override { return Quaternion(EulerAngles(rad(omega), rad(0), rad(0))); }
-    virtual Quaternion getCurrentAngularAcceleration() override { return Quaternion(); }
+    virtual const Quaternion& getCurrentAngularVelocity() override { return lastAngularVelocity; }
+    virtual const Quaternion& getCurrentAngularAcceleration() override { return Quaternion::IDENTITY; }
 };
 
 } // namespace inet
