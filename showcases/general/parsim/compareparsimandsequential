@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#./runparsim-mpi -u Cmdenv | grep "10.0.0.11" > pinglog-parsim-rngs-host1
+#inet -u Cmdenv --parallel-simulation=false | grep "10.0.0.11" > pinglog-seq-rngs-host1
+
+echo "Running parsim...."
+./runparsim-mpi -u Cmdenv | grep "10.0.0.26" > pinglog-parsim-rngs-host3
+echo "Running seqsim...."
+inet -u Cmdenv --parallel-simulation=false | grep "10.0.0.26" > pinglog-seq-rngs-host3
+
+#meld pinglog-parsim-rngs-host1 pinglog-seq-rngs-host1
+meld pinglog-parsim-rngs-host3 pinglog-seq-rngs-host3
