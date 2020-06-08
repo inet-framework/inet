@@ -7,6 +7,7 @@ src/Makefile.vc
 *_sm.cc
 .oppfeaturestate
 .nedexclusions
+.pydevproject
 src/inet/features.h
 src/inet/opp_defines.h
 precompiled_*.h.*
