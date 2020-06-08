@@ -23,7 +23,7 @@ simple ExtApp
     parameters:
         string namespace = default("srv");
         object commandPrefix = default(["konsole", "--hold", "-e"]);
-        // object command = default(["python3", "echo_server.py"]);
-        object command = default(["ip", "netns", "exec", "srv", "python3", "echo_server.py"]);
+        object command = default(["python3", "echo_server.py"]);
+        //object command = default(["ip", "netns", "exec", "srv", "python3", "echo_server.py"]);
 }
 
