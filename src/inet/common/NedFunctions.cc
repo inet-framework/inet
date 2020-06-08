@@ -274,7 +274,7 @@ cNEDValue nedf_selectWithRandomDistribution(cComponent *context, cNEDValue argv[
     for (auto elem : list2)
         val += elem;
 
-    if (abs(val-1.0) > 0.00001)
+    if (std::abs(val-1.0) > 0.00001)
         throw cRuntimeError("selectWithRandomDistribution(): The probability list doesn't add 1 %f", val);
 
     // generate probability distribution list
@@ -287,9 +287,11 @@ cNEDValue nedf_selectWithRandomDistribution(cComponent *context, cNEDValue argv[
 
     double p = context->uniform(0, 1.0);
 
+    char valStr[40];
     for (unsigned int i = 0; i < list2.size(); i++) {
-        if (p < list2[i])
+        if (p < list2[i]) {
             return list1[i];
+        }
     }
     return list1.back();
 }
