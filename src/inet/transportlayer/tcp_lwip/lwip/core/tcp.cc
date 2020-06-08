@@ -1048,7 +1048,7 @@ tcp_alloc(u8_t prio)
     }
   }
   if (pcb != nullptr) {
-    memset(pcb, 0, sizeof(struct tcp_pcb));
+    memset((void *)pcb, 0, sizeof(struct tcp_pcb));
     pcb->prio = TCP_PRIO_NORMAL;
     pcb->snd_buf = TCP_SND_BUF;
     pcb->snd_queuelen = 0;
