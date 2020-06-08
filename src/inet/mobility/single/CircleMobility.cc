@@ -22,18 +22,6 @@ namespace inet {
 
 Define_Module(CircleMobility);
 
-CircleMobility::CircleMobility()
-{
-    cx = 0;
-    cy = 0;
-    cz = 0;
-    r = -1;
-    startAngle = deg(0);
-    speed = 0;
-    omega = 0;
-    angle = deg(0);
-}
-
 void CircleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
