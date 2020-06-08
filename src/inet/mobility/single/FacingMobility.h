@@ -32,6 +32,7 @@ class INET_API FacingMobility : public MobilityBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleSelfMessage(cMessage *msg) override { throw cRuntimeError("Unknown self message"); }
+    virtual void handleParameterChange(const char *name) override;
 
   public:
     virtual const Coord& getCurrentPosition() override { return lastPosition; }
