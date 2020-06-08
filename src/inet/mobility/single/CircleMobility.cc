@@ -49,6 +49,8 @@ void CircleMobility::initialize(int stage)
         speed = par("speed");
         omega = speed / r;
         stationary = (omega == 0);
+        lastAngularVelocity = Quaternion(EulerAngles(rad(omega), rad(0), rad(0)));
+        WATCH(lastAngularVelocity);
     }
 }
 

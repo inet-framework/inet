@@ -40,6 +40,11 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
         OC_FACE_FORWARD
     };
 
+    Coord lastVelocity;
+    Coord lastAcceleration;
+    Quaternion lastAngularVelocity;
+    Quaternion lastAngularAcceleration;
+
   protected:
     PositionComposition positionComposition = PositionComposition::PC_UNDEFINED;
     OrientationComposition orientationComposition = OrientationComposition::OC_UNDEFINED;

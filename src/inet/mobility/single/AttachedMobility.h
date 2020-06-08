@@ -29,6 +29,8 @@ class INET_API AttachedMobility : public MobilityBase, public cListener
     Coord positionOffset = Coord::NIL;
     Quaternion orientationOffset = Quaternion::NIL;
     bool isZeroOffset = false;
+    Coord lastVelocity;
+    Quaternion lastAngularPosition;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

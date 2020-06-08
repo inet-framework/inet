@@ -39,6 +39,8 @@ void AttachedMobility::initialize(int stage)
         orientationOffset = Quaternion(EulerAngles(alpha, beta, gamma));
         isZeroOffset = positionOffset == Coord::ZERO;
         check_and_cast<cModule *>(mobility)->subscribe(IMobility::mobilityStateChangedSignal, this);
+        WATCH(lastVelocity);
+        WATCH(lastAngularPosition);
     }
 }
 
@@ -51,17 +53,18 @@ void AttachedMobility::receiveSignal(cComponent *source, simsignal_t signal, cOb
 const Coord& AttachedMobility::getCurrentPosition()
 {
     if (isZeroOffset)
-        return mobility->getCurrentPosition();
+        lastPosition = mobility->getCurrentPosition();
     else {
         RotationMatrix rotation(mobility->getCurrentAngularPosition().toEulerAngles());
-        return mobility->getCurrentPosition() + rotation.rotateVector(positionOffset);
+        lastPosition = mobility->getCurrentPosition() + rotation.rotateVector(positionOffset);
     }
+    return lastPosition;
 }
 
 const Coord& AttachedMobility::getCurrentVelocity()
 {
     if (isZeroOffset)
-        return mobility->getCurrentVelocity();
+        lastVelocity = mobility->getCurrentVelocity();
     else {
         RotationMatrix rotation(mobility->getCurrentAngularPosition().toEulerAngles());
         Coord rotatedOffset = rotation.rotateVector(positionOffset);
@@ -70,8 +73,9 @@ const Coord& AttachedMobility::getCurrentVelocity()
         double rotationAngle;
         quaternion.getRotationAxisAndAngle(rotationAxis, rotationAngle);
         auto additionalVelocity = rotationAngle == 0 ? Coord::ZERO : rotationAxis % rotatedOffset * rotationAngle;
-        return mobility->getCurrentVelocity() + additionalVelocity;
+        lastVelocity = mobility->getCurrentVelocity() + additionalVelocity;
     }
+    return lastVelocity;
 }
 
 const Coord& AttachedMobility::getCurrentAcceleration()
@@ -86,9 +90,9 @@ const Coord& AttachedMobility::getCurrentAcceleration()
 
 const Quaternion& AttachedMobility::getCurrentAngularPosition()
 {
-    auto angularPosition = mobility->getCurrentAngularPosition();
-    angularPosition *= Quaternion(orientationOffset);
-    return angularPosition;
+    lastAngularPosition = mobility->getCurrentAngularPosition();
+    lastAngularPosition *= Quaternion(orientationOffset);
+    return lastAngularPosition;
 }
 
 const Quaternion& AttachedMobility::getCurrentAngularVelocity()
