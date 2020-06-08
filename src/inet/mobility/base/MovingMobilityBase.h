@@ -91,13 +91,13 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual void orient();
 
   public:
-    virtual Coord getCurrentPosition() override;
-    virtual Coord getCurrentVelocity() override;
-    virtual Coord getCurrentAcceleration() override { throw cRuntimeError("Invalid operation"); }
+    virtual const Coord& getCurrentPosition() override;
+    virtual const Coord& getCurrentVelocity() override;
+    virtual const Coord& getCurrentAcceleration() override { throw cRuntimeError("Invalid operation"); }
 
-    virtual Quaternion getCurrentAngularPosition() override;
-    virtual Quaternion getCurrentAngularVelocity() override;
-    virtual Quaternion getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
+    virtual const Quaternion& getCurrentAngularPosition() override;
+    virtual const Quaternion& getCurrentAngularVelocity() override;
+    virtual const Quaternion& getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace inet

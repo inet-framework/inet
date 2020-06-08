@@ -31,7 +31,7 @@ void FacingMobility::initialize(int stage)
     }
 }
 
-Quaternion FacingMobility::getCurrentAngularPosition()
+const Quaternion& FacingMobility::getCurrentAngularPosition()
 {
     Coord direction = targetMobility->getCurrentPosition() - sourceMobility->getCurrentPosition();
     direction.normalize();

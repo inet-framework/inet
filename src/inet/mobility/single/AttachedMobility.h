@@ -36,13 +36,13 @@ class INET_API AttachedMobility : public MobilityBase, public cListener
     virtual void handleSelfMessage(cMessage *msg) override { throw cRuntimeError("Unknown self message"); }
 
   public:
-    virtual Coord getCurrentPosition() override;
-    virtual Coord getCurrentVelocity() override;
-    virtual Coord getCurrentAcceleration() override;
+    virtual const Coord& getCurrentPosition() override;
+    virtual const Coord& getCurrentVelocity() override;
+    virtual const Coord& getCurrentAcceleration() override;
 
-    virtual Quaternion getCurrentAngularPosition() override;
-    virtual Quaternion getCurrentAngularVelocity() override;
-    virtual Quaternion getCurrentAngularAcceleration() override;
+    virtual const Quaternion& getCurrentAngularPosition() override;
+    virtual const Quaternion& getCurrentAngularVelocity() override;
+    virtual const Quaternion& getCurrentAngularAcceleration() override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };

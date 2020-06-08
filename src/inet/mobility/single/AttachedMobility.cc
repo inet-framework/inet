@@ -48,7 +48,7 @@ void AttachedMobility::receiveSignal(cComponent *source, simsignal_t signal, cOb
         emitMobilityStateChangedSignal();
 }
 
-Coord AttachedMobility::getCurrentPosition()
+const Coord& AttachedMobility::getCurrentPosition()
 {
     if (isZeroOffset)
         return mobility->getCurrentPosition();
@@ -58,7 +58,7 @@ Coord AttachedMobility::getCurrentPosition()
     }
 }
 
-Coord AttachedMobility::getCurrentVelocity()
+const Coord& AttachedMobility::getCurrentVelocity()
 {
     if (isZeroOffset)
         return mobility->getCurrentVelocity();
@@ -74,7 +74,7 @@ Coord AttachedMobility::getCurrentVelocity()
     }
 }
 
-Coord AttachedMobility::getCurrentAcceleration()
+const Coord& AttachedMobility::getCurrentAcceleration()
 {
     if (isZeroOffset)
         return mobility->getCurrentAcceleration();
@@ -84,19 +84,19 @@ Coord AttachedMobility::getCurrentAcceleration()
     }
 }
 
-Quaternion AttachedMobility::getCurrentAngularPosition()
+const Quaternion& AttachedMobility::getCurrentAngularPosition()
 {
     auto angularPosition = mobility->getCurrentAngularPosition();
     angularPosition *= Quaternion(orientationOffset);
     return angularPosition;
 }
 
-Quaternion AttachedMobility::getCurrentAngularVelocity()
+const Quaternion& AttachedMobility::getCurrentAngularVelocity()
 {
     return mobility->getCurrentAngularVelocity();
 }
 
-Quaternion AttachedMobility::getCurrentAngularAcceleration()
+const Quaternion& AttachedMobility::getCurrentAngularAcceleration()
 {
     return mobility->getCurrentAngularAcceleration();
 }

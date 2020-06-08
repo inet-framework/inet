@@ -83,13 +83,13 @@ void RotatingMobilityBase::scheduleUpdate()
         scheduleAt(nextChange, rotateTimer);
 }
 
-Quaternion RotatingMobilityBase::getCurrentAngularPosition()
+const Quaternion& RotatingMobilityBase::getCurrentAngularPosition()
 {
     rotateAndUpdate();
     return lastOrientation;
 }
 
-Quaternion RotatingMobilityBase::getCurrentAngularVelocity()
+const Quaternion& RotatingMobilityBase::getCurrentAngularVelocity()
 {
     rotateAndUpdate();
     return lastAngularVelocity;

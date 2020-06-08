@@ -63,7 +63,7 @@ void SuperpositioningMobility::setInitialPosition()
     lastPosition = getCurrentPosition();
 }
 
-Coord SuperpositioningMobility::getCurrentPosition()
+const Coord& SuperpositioningMobility::getCurrentPosition()
 {
     switch (positionComposition) {
         case PositionComposition::PC_ZERO:
@@ -84,7 +84,7 @@ Coord SuperpositioningMobility::getCurrentPosition()
     return lastPosition;
 }
 
-Coord SuperpositioningMobility::getCurrentVelocity()
+const Coord& SuperpositioningMobility::getCurrentVelocity()
 {
     switch (positionComposition) {
         case PositionComposition::PC_ZERO:
@@ -103,7 +103,7 @@ Coord SuperpositioningMobility::getCurrentVelocity()
     }
 }
 
-Coord SuperpositioningMobility::getCurrentAcceleration()
+const Coord& SuperpositioningMobility::getCurrentAcceleration()
 {
     switch (positionComposition) {
         case PositionComposition::PC_ZERO:
@@ -122,7 +122,7 @@ Coord SuperpositioningMobility::getCurrentAcceleration()
     }
 }
 
-Quaternion SuperpositioningMobility::getCurrentAngularPosition()
+const Quaternion& SuperpositioningMobility::getCurrentAngularPosition()
 {
     switch (orientationComposition) {
         case OrientationComposition::OC_ZERO: {
@@ -182,7 +182,7 @@ Quaternion SuperpositioningMobility::getCurrentAngularPosition()
     return lastOrientation;
 }
 
-Quaternion SuperpositioningMobility::getCurrentAngularVelocity()
+const Quaternion& SuperpositioningMobility::getCurrentAngularVelocity()
 {
     switch (orientationComposition) {
         case OrientationComposition::OC_ZERO:
@@ -202,7 +202,7 @@ Quaternion SuperpositioningMobility::getCurrentAngularVelocity()
     }
 }
 
-Quaternion SuperpositioningMobility::getCurrentAngularAcceleration()
+const Quaternion& SuperpositioningMobility::getCurrentAngularAcceleration()
 {
     switch (orientationComposition) {
         case OrientationComposition::OC_ZERO:

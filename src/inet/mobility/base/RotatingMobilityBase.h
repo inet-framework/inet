@@ -73,10 +73,10 @@ class INET_API RotatingMobilityBase : public MobilityBase
 
   public:
     /** @brief Returns the current angular position at the current simulation time. */
-    virtual Quaternion getCurrentAngularPosition() override;
+    virtual const Quaternion& getCurrentAngularPosition() override;
 
     /** @brief Returns the current angular velocity at the current simulation time. */
-    virtual Quaternion getCurrentAngularVelocity() override;
+    virtual const Quaternion& getCurrentAngularVelocity() override;
 };
 
 } // namespace inet

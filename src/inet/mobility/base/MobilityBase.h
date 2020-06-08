@@ -180,8 +180,8 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
   public:
     virtual double getMaxSpeed() const override { return NaN; }
 
-    virtual Coord getConstraintAreaMax() const override { return constraintAreaMax; }
-    virtual Coord getConstraintAreaMin() const override { return constraintAreaMin; }
+    virtual const Coord& getConstraintAreaMax() const override { return constraintAreaMax; }
+    virtual const Coord& getConstraintAreaMin() const override { return constraintAreaMin; }
 };
 
 } // namespace inet

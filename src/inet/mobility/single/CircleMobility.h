@@ -61,7 +61,7 @@ class INET_API CircleMobility : public MovingMobilityBase
     CircleMobility();
 
     virtual Quaternion getCurrentAngularVelocity() override { return Quaternion(EulerAngles(rad(omega), rad(0), rad(0))); }
-    virtual Quaternion getCurrentAngularAcceleration() override { return Quaternion(); }
+    virtual const Quaternion& getCurrentAngularAcceleration() override { return Quaternion::IDENTITY; }
 };
 
 } // namespace inet

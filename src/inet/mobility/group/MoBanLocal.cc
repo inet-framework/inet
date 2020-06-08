@@ -124,12 +124,12 @@ void MoBanLocal::setMoBANParameters(Coord referencePoint, double radius, double 
     scheduleUpdate();
 }
 
-Coord MoBanLocal::getCurrentPosition()
+const Coord& MoBanLocal::getCurrentPosition()
 {
     return LineSegmentsMobilityBase::getCurrentPosition() + coordinator->getCurrentPosition();
 }
 
-Coord MoBanLocal::getCurrentVelocity()
+const Coord& MoBanLocal::getCurrentVelocity()
 {
     return LineSegmentsMobilityBase::getCurrentVelocity() + coordinator->getCurrentVelocity();
 }
