@@ -36,3 +36,15 @@ network ParSimNetwork2 extends ParSimNetwork
             @display("p=35,48");
         }
 }
+
+network ParSimNetwork3 extends ParSimNetwork
+{
+    submodules:
+
+        configurator1: Ipv4NetworkConfigurator {
+            @display("p=50,50");
+        }
+        configurator2: Ipv4NetworkConfigurator {
+            @display("p=350,50");
+        }
+}
