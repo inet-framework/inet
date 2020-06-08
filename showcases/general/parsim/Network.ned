@@ -6,10 +6,9 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.parsim.Parsim2;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
-
+import inet.visualizer.integrated.IntegratedVisualizer;
 
 channel Ethernet100 extends ned.DatarateChannel
 {
@@ -33,10 +32,10 @@ module Subnetwork
         inout ethg[];
     submodules:
         configurator: Ipv4NetworkConfigurator {
-            @display("p=300,50;is=s");
+            @display("p=243,38;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=300,100;is=s");
+            @display("p=349.11246,39.053257;is=s");
         }
         wiredHost1: StandardHost {
             @display("p=50,150");
@@ -53,66 +52,65 @@ module Subnetwork
         switch: EtherSwitch {
             @display("p=150,200");
         }
-//        wirelessHost1: WirelessHost {
-//            @display("p=350,150");
-//        }
-//        wirelessHost2: WirelessHost {
-//            @display("p=350,250");
-//        }
-//        wirelessHost3: WirelessHost {
-//            @display("p=450,100");
-//        }
-//        wirelessHost4: WirelessHost {
-//            @display("p=450,300");
-//        }
-//        ap: AccessPoint {
-//            @display("p=450,200");
-//        }
+        wirelessHost1: WirelessHost {
+            @display("p=350,150");
+        }
+        wirelessHost2: WirelessHost {
+            @display("p=350,250");
+        }
+        wirelessHost3: WirelessHost {
+            @display("p=450,100");
+        }
+        wirelessHost4: WirelessHost {
+            @display("p=450,300");
+        }
+        ap: AccessPoint {
+            @display("p=450,200");
+        }
     connections:
         wiredHost1.ethg++ <--> Ethernet100 <--> switch.ethg++;
         wiredHost2.ethg++ <--> Ethernet100 <--> switch.ethg++;
         wiredHost3.ethg++ <--> Ethernet100 <--> switch.ethg++;
         wiredHost4.ethg++ <--> Ethernet100 <--> switch.ethg++;
-//        switch.ethg++ <--> Ethernet100 <--> ap.ethg++;
+        switch.ethg++ <--> Ethernet100 <--> ap.ethg++;
         switch.ethg++ <--> ethg++;
 }
 
 network ParsimNetwork
 {
     parameters:
-        @display("bgb=812,600");
+        @display("bgb=700,427");
     submodules:
-        submodule: Parsim2;
-        visualizer: <default("")> like IIntegratedVisualizer if typename != "" {
-            @display("p=750,100;is=s");
-        }
+        //        visualizer: <default("")> like IIntegratedVisualizer if typename != "" {
+        //            @display("p=633,50;is=s");
+        //        }
         routerA: Router {
             **.networkConfiguratorModule = absPath("^.subnetworkA.configurator");
-            @display("p=200,100");
+            @display("p=250,100");
         }
         routerB: Router {
             **.networkConfiguratorModule = absPath("^.subnetworkB.configurator");
-            @display("p=200,300");
+            @display("p=250,300");
         }
         routerC: Router {
             **.networkConfiguratorModule = absPath("^.subnetworkC.configurator");
-            @display("p=400,300");
+            @display("p=450,300");
         }
         routerD: Router {
             **.networkConfiguratorModule = absPath("^.subnetworkD.configurator");
-            @display("p=400,100");
+            @display("p=450,100");
         }
         subnetworkA: Subnetwork {
-            @display("p=50,50");
+            @display("p=100,50");
         }
         subnetworkB: Subnetwork {
-            @display("p=50,350");
+            @display("p=100,350");
         }
         subnetworkD: Subnetwork {
-            @display("p=500,50");
+            @display("p=600,50");
         }
         subnetworkC: Subnetwork {
-            @display("p=500,350");
+            @display("p=600,350");
         }
     connections:
         routerA.pppg++ <--> PppChannel <--> routerD.pppg++;
