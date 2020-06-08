@@ -112,7 +112,7 @@ class INET_API Message : public cMessage
     //@}
 };
 
-class Request : public Message
+class INET_API Request : public Message
 {
   public:
     explicit Request(const char *name = "Req", short kind = 0);
@@ -121,7 +121,7 @@ class Request : public Message
     virtual Request *dup() const override { return new Request(*this); }
 };
 
-class Indication : public Message
+class INET_API Indication : public Message
 {
   public:
     explicit Indication(const char *name = "Ind", short kind = 0);
