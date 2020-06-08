@@ -25,11 +25,13 @@ void make_capabilities_inheritable()
     if (caps == NULL)
         throw "Failed to load capabilities";
     printf("DEBUG: Loaded Capabilities: %s\n", cap_to_text(caps, NULL));
-    cap_value_t cap_list[3];
+    cap_value_t cap_list[4];
     cap_list[0] = CAP_NET_ADMIN;
     cap_list[1] = CAP_NET_RAW;
     cap_list[2] = CAP_SYS_ADMIN;
-    if (cap_set_flag(caps, CAP_INHERITABLE, 3, cap_list, CAP_SET) == -1)
+    cap_list[3] = CAP_MKNOD;
+
+    if (cap_set_flag(caps, CAP_INHERITABLE, 4, cap_list, CAP_SET) == -1)
         throw "Failed to set inheritable";
     printf("DEBUG: Loaded Capabilities: %s\n", cap_to_text(caps, NULL));
     if (cap_set_proc(caps) == -1)
@@ -47,6 +49,8 @@ void make_capabilities_inheritable()
     if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, CAP_NET_RAW, 0, 0) == -1)
         throw "Failed to pr_cap_ambient_raise!";
     if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, CAP_SYS_ADMIN, 0, 0) == -1)
+        throw "Failed to pr_cap_ambient_raise!";
+    if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, CAP_MKNOD, 0, 0) == -1)
         throw "Failed to pr_cap_ambient_raise!";
 
     /* checking... (but the ambient flag is not visible...) */
@@ -139,7 +143,7 @@ void reset_net_ns()
 
 
 int main(int ac, char **av){
-
+/*
     const char *args[] = { "ip", "addr", 0};
     runcmd( const_cast<char**>(args));
     printf("BOOP\n");
@@ -152,7 +156,7 @@ int main(int ac, char **av){
 
     runcmd( const_cast<char**>(args));
     printf("BOOP\n");
-
+*/
 
 
     try {
@@ -168,7 +172,7 @@ int main(int ac, char **av){
     //execvp(args[0], const_cast<char**>(args));
     //runcmd( const_cast<char**>(args));
 
-    const char *args2[] = {"ip", "netns", "exec", "srv", "ip", "addr", 0};
+    const char *args2[] = {"ip", "netns", "add", "bubuu", 0};
     runcmd( const_cast<char**>(args2));
     printf("BOOP\n");
 

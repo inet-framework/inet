@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSimLtd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -15,31 +15,25 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NETWORKNAMESPACECONTEXT_H
-#define __INET_NETWORKNAMESPACECONTEXT_H
+#include <cstdio>
+#include <fcntl.h>
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/INETUtils.h"
+#include "inet/common/InheritableCapabilityContext.h"
+#include "inet/common/LinuxUtils.h"
 
 namespace inet {
 
-class INET_API NetworkNamespaceContext
+InheritableCapabilityContext::InheritableCapabilityContext(const std::vector<cap_value_t>& capabilities)
+    : capabilities(capabilities)
 {
-  protected:
-    int oldNs = -1;
-    int newNs = -1;
+    make_capabilities_inheritable(capabilities);
+}
 
-  public:
 
-    static bool checkNamespaceExists(const char *networkNamespace);
-    static void ensureNamespaceExists(const char *networkNamespace);
-
-    NetworkNamespaceContext(const char *networkNamespace);
-
-    ~NetworkNamespaceContext();
-};
+InheritableCapabilityContext::~InheritableCapabilityContext()
+{
+    make_capabilities_uninheritable(capabilities);
+}
 
 } // namespace inet
-
-#endif // ifndef __INET_NETWORKNAMESPACECONTEXT_H
 

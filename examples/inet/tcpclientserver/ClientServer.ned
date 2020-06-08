@@ -18,6 +18,7 @@
 
 package inet.examples.inet.tcpclientserver;
 
+import inet.applications.generic.ExtApp;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;
 import inet.node.inet.StandardHost;
@@ -39,6 +40,9 @@ network ClientServer
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
+        }
+        extApp: ExtApp {
+            @display("p=348,36");
         }
     connections:
         client1.ethg++ <--> Eth1G <--> server.ethg++;

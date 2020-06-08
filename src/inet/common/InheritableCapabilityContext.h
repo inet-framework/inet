@@ -15,31 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NETWORKNAMESPACECONTEXT_H
-#define __INET_NETWORKNAMESPACECONTEXT_H
+#ifndef __INET_INHERITABLECAPABILITYCONTEXT_H
+#define __INET_INHERITABLECAPABILITYCONTEXT_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/LinuxUtils.h"
 
 namespace inet {
 
-class INET_API NetworkNamespaceContext
+class INET_API InheritableCapabilityContext
 {
   protected:
-    int oldNs = -1;
-    int newNs = -1;
-
+    std::vector<cap_value_t> capabilities;
   public:
 
-    static bool checkNamespaceExists(const char *networkNamespace);
-    static void ensureNamespaceExists(const char *networkNamespace);
+    InheritableCapabilityContext(const std::vector<cap_value_t>& capabilities = required_capabilities);
 
-    NetworkNamespaceContext(const char *networkNamespace);
-
-    ~NetworkNamespaceContext();
+    ~InheritableCapabilityContext();
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKNAMESPACECONTEXT_H
+#endif // ifndef __INET_INHERITABLECAPABILITYCONTEXT_H
 

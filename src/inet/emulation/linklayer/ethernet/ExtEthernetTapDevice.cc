@@ -35,6 +35,8 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 
+#include "inet/common/LinuxUtils.h"
+
 namespace inet {
 
 Define_Module(ExtEthernetTapDevice);
@@ -68,15 +70,9 @@ void ExtEthernetTapDevice::handleMessage(cMessage *msg)
     const auto& ethHeader = packet->peekAtFront<EthernetMacHeader>();
     packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto bytesChunk = packet->peekDataAsBytes();
-    uint8_t buffer[packet->getByteLength() + 4];
-    buffer[0] = 0;
-    buffer[1] = 0;
-    buffer[2] = 0x86; // Ethernet
-    buffer[3] = 0xdd;
-    size_t packetLength = bytesChunk->copyToBuffer(buffer + 4, packet->getByteLength());
-    ASSERT(packetLength == (size_t)packet->getByteLength());
-    packetLength += 4;
-    ssize_t nwrite = write(fd, buffer, packetLength);
+
+    size_t packetLength = bytesChunk->getByteArraySize();
+    ssize_t nwrite = write(fd, bytesChunk->getBytes().data(), packetLength);
     if ((size_t)nwrite == packetLength) {
         emit(packetSentSignal, packet);
         EV_INFO << "Sent a " << packet->getTotalLength() << " packet from " << ethHeader->getSrc() << " to " << ethHeader->getDest() << " to TAP device '" << device << "'.\n";
@@ -100,16 +96,40 @@ void ExtEthernetTapDevice::finish()
     closeTap();
 }
 
+/*
+
+
+ ip tuntap del dev tap0 mode tap
+ ip addr add 192.168.10.2 dev tap0
+ sudo ip link set up dev tap0
+ ip link set up dev tap0
+
+ X ip addr del fe80::440d:27ff:fe14:d7ca/64 dev tap0
+
+ ? ip route add 192.168.10.0/24 dev tap0
+
+
+ip tuntap add mode tap dev tap0
+ip addr add 192.168.10.2/24 dev tap0
+
+1139  sudo ip netns del srv
+ */
+
 void ExtEthernetTapDevice::openTap(std::string dev)
 {
     NetworkNamespaceContext context(par("namespace"));
+
+
+    run_command({"ip", "tuntap", "add", "mode", "tap", "dev", dev.c_str()}, true, true);
+
+
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
         throw cRuntimeError("Cannot open TAP device: %s", strerror(errno));
 
     // preparation of the struct ifr, of type "struct ifreq"
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    ifr.ifr_flags = IFF_TAP; /* IFF_TUN or IFF_TAP, plus maybe IFF_NO_PI */
+    ifr.ifr_flags = IFF_TAP | IFF_NO_PI; /* IFF_TUN or IFF_TAP, plus maybe IFF_NO_PI */
     if (!dev.empty())
         /* if a device name was specified, put it in the structure; otherwise,
          * the kernel will try to allocate the "next" device of the
@@ -148,9 +168,7 @@ bool ExtEthernetTapDevice::notify(int fd)
         throw cRuntimeError("Cannot read '%s' device: %s", device.c_str(), strerror(errno));
     }
     else if (nread > 0) {
-        ASSERT (nread > 4);
-        // buffer[0..1]: flags, buffer[2..3]: ethertype
-        Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
+        Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer, nread));
         packet->insertAtBack(makeShared<EthernetFcs>(FCS_COMPUTED));    //TODO get fcsMode from NED parameter
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);

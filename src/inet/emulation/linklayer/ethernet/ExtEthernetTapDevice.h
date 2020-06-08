@@ -52,6 +52,12 @@ class INET_API ExtEthernetTapDevice : public cSimpleModule, public RealTimeSched
   public:
     virtual ~ExtEthernetTapDevice();
 
+    static bool checkTapDeviceExists(const std::string& device) {
+        // note: this cannot tell the difference between tun and tap devices
+        // source: https://unix.stackexchange.com/a/40562/329864
+        return utils::fileExists(("/sys/class/net/" + device + "/tun_flags").c_str());
+
+    }
     virtual bool notify(int fd) override;
 };
 

@@ -17,6 +17,7 @@
 
 package inet.examples.internetcloud.cloudandrouters;
 
+import inet.applications.generic.ExtApp;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EtherSwitch;
