@@ -10,15 +10,15 @@
 /tutorials/configurator/,            -f omnetpp.ini -c Step7A -r 0,                             500s,           0000-0000/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step7B -r 0,                             500s,           0000-0000/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           0000-0000/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           60a1-6591/tplx, PASS,   # Step8A extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           dd8c-f9f7/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           834d-bfc5/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           4b6f-7cd9/tplx, PASS,   # Step10A extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           4b6f-7cd9/tplx, PASS,   # Step10B extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           60a1-6591/tplx, PASS,	wireless   # Step8A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           dd8c-f9f7/tplx, PASS,	wireless
+/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           834d-bfc5/tplx, PASS,	wireless
+/tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           4b6f-7cd9/tplx, PASS,   wireless # Step10A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           4b6f-7cd9/tplx, PASS,   wireless # Step10B extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx, PASS,	wireless
 /tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           0000-0000/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           b2ae-c80d/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           5d92-856e/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           5d92-856e/tplx, PASS,	wireless
 
 # /tutorials/rip/,                     -f omnetpp.ini -c Step1 -r 0,                              100s,           c5dc-94dd/tplx, PASS,
 # /tutorials/rip/,                     -f omnetpp.ini -c Step2 -r 0,                              100s,           8277-66eb/tplx, PASS,   # Step2 extended
