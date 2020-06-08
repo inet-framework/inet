@@ -120,6 +120,8 @@ class INET_API PaparazziMobility : public MovingMobilityBase
     /** @brief Move the host according to the current simulation time. */
     virtual void move() override;
 
+    Quaternion angularVelocity;
+    Quaternion angularAceleration;
 
     simtime_t computeStayAt(const double &sp, const double &radious, const int& endDregree);
     simtime_t computeOvalTime(const double &sp, const double &radious, const double &linDist);
@@ -128,8 +130,8 @@ class INET_API PaparazziMobility : public MovingMobilityBase
   public:
     virtual double getMaxSpeed() const override { return speed; }
 
-    virtual Quaternion getCurrentAngularVelocity() override { return Quaternion(EulerAngles(rad(omega), rad(0), rad(0))); }
-    virtual Quaternion getCurrentAngularAcceleration() override { return Quaternion(); }
+    virtual Quaternion& getCurrentAngularVelocity() override {angularVelocity = Quaternion(EulerAngles(rad(omega), rad(0), rad(0))); return angularVelocity;}
+    virtual Quaternion& getCurrentAngularAcceleration() override { return angularAceleration;}
 };
 
 } // namespace inet
