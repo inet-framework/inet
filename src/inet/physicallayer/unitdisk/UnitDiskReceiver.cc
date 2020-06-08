@@ -77,7 +77,7 @@ bool UnitDiskReceiver::computeIsReceptionSuccessful(const IListening *listening,
         return false;
 }
 
-const IListening *UnitDiskReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *UnitDiskReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
 {
     return new UnitDiskListening(radio, startTime, endTime, startPosition, endPosition);
 }

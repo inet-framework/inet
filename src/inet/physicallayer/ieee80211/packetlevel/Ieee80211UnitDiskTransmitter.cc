@@ -61,10 +61,10 @@ const ITransmission *Ieee80211UnitDiskTransmitter::createTransmission(const IRad
     const simtime_t duration = transmissionMode->getDuration(packet->getDataLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
-    const Coord startPosition = mobility->getCurrentPosition();
-    const Coord endPosition = mobility->getCurrentPosition();
-    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
-    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
+    const Coord& startPosition = mobility->getCurrentPosition();
+    const Coord& endPosition = mobility->getCurrentPosition();
+    const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;

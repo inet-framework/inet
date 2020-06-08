@@ -450,6 +450,7 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
 
 void TcpConnection::configureStateVariables()
 {
+    state->dupthresh = tcpMain->par("dupthresh");
     long advertisedWindowPar = tcpMain->par("advertisedWindow");
     state->ws_support = tcpMain->par("windowScalingSupport");    // if set, this means that current host supports WS (RFC 1323)
     state->ws_manual_scale = tcpMain->par("windowScalingFactor"); // scaling factor (set manually) to help for Tcp validation
@@ -707,19 +708,10 @@ void TcpConnection::sendAck()
     // data packets) until it receives a CWR packet (a packet with the CWR
     // flag set).  After the receipt of the CWR packet, acknowledgments for
     // subsequent non-CE data packets do not have the ECN-Echo flag set.
+
     TcpStateVariables* state = getState();
     if (state && state->ect) {
-        if (state->gotCeIndication) {
-            EV_INFO << "Received CE... ";
-            if (state->ecnEchoState)
-                EV_INFO << "Already in ecnEcho state\n";
-            else {
-                state->ecnEchoState = true;
-                EV << "Entering ecnEcho state\n";
-            }
-            state->gotCeIndication = false;
-        }
-        if (state->ecnEchoState == true) {
+        if (tcpAlgorithm->shouldMarkAck()) {
             tcpseg->setEceBit(true);
             EV_INFO << "In ecnEcho state... send ACK with ECE bit set\n";
         }

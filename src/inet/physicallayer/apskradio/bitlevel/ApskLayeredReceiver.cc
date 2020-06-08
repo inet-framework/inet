@@ -160,7 +160,13 @@ const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
     auto packet = const_cast<Packet *>(packetModel->getPacket());
-    packet->addTagIfAbsent<ErrorRateInd>(); // TODO: setPacketErrorRate(per);
+    auto errorRateInd = packet->addTagIfAbsent<ErrorRateInd>();
+    if (symbolModel != nullptr)
+        errorRateInd->setSymbolErrorRate(symbolModel->getSymbolErrorRate());
+    if (bitModel != nullptr)
+        errorRateInd->setBitErrorRate(bitModel->getBitErrorRate());
+    if (packetModel != nullptr)
+        errorRateInd->setPacketErrorRate(packetModel->getPacketErrorRate());
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
@@ -168,7 +174,7 @@ const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListe
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
-const IListening *ApskLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *ApskLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
 {
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth);
 }

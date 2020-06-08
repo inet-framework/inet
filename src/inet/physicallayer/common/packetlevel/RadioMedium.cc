@@ -195,7 +195,7 @@ bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *pac
     return false;
 }
 
-bool RadioMedium::isInCommunicationRange(const ITransmission *transmission, const Coord startPosition, const Coord endPosition) const
+bool RadioMedium::isInCommunicationRange(const ITransmission *transmission, const Coord& startPosition, const Coord& endPosition) const
 {
     m maxCommunicationRange = mediumLimitCache->getMaxCommunicationRange();
     return std::isnan(maxCommunicationRange.get()) ||
@@ -203,7 +203,7 @@ bool RadioMedium::isInCommunicationRange(const ITransmission *transmission, cons
             transmission->getEndPosition().distance(endPosition) < maxCommunicationRange.get());
 }
 
-bool RadioMedium::isInInterferenceRange(const ITransmission *transmission, const Coord startPosition, const Coord endPosition) const
+bool RadioMedium::isInInterferenceRange(const ITransmission *transmission, const Coord& startPosition, const Coord& endPosition) const
 {
     m maxInterferenceRange = mediumLimitCache->getMaxInterferenceRange();
     return std::isnan(maxInterferenceRange.get()) ||

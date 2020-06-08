@@ -62,10 +62,10 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const simtime_t duration = transmissionMode->getDuration(B(phyHeader->getLengthField()));
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
-    const Coord startPosition = mobility->getCurrentPosition();
-    const Coord endPosition = mobility->getCurrentPosition();
-    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
-    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
+    const Coord& startPosition = mobility->getCurrentPosition();
+    const Coord& endPosition = mobility->getCurrentPosition();
+    const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, transmissionBandwidth, transmissionPower);
     auto headerLength = b(transmissionMode->getHeaderMode()->getLength());
     auto dataLength = b(transmissionMode->getDataMode()->getCompleteLength(B(phyHeader->getLengthField())));

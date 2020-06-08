@@ -52,7 +52,7 @@ CosineAntenna::AntennaGain::AntennaGain(double maxGain, deg beamWidth) :
 {
 }
 
-double CosineAntenna::AntennaGain::computeGain(const Quaternion direction) const
+double CosineAntenna::AntennaGain::computeGain(const Quaternion& direction) const
 {
     double exponent = -3.0 / (20 * std::log10(std::cos(math::deg2rad(beamWidth.get()) / 4.0)));
     double angle = std::acos(direction.rotate(Coord::X_AXIS) * Coord::X_AXIS);

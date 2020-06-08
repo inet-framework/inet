@@ -69,9 +69,10 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseG
         throw cRuntimeError("The last angle must be 180");
 }
 
-double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion direction) const
+double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion& direction) const
 {
-    rad angle = rad(std::acos(direction.rotate(Coord::X_AXIS) * Coord::X_AXIS));
+    double product = math::minnan(1.0, math::maxnan(-1.0, direction.rotate(Coord::X_AXIS) * Coord::X_AXIS));
+    rad angle = rad(std::acos(product));
     // NOTE: 0 and M_PI are always in the map
     std::map<rad, double>::const_iterator lowerBound = gainMap.lower_bound(angle);
     std::map<rad, double>::const_iterator upperBound = gainMap.upper_bound(angle);
@@ -87,7 +88,9 @@ double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion direct
         double lowerGain = lowerBound->second;
         double upperGain = upperBound->second;
         double alpha = unit((angle - lowerAngle) / (upperAngle - lowerAngle)).get();
-        return (1 - alpha) * lowerGain + alpha * upperGain;
+        double gain = (1 - alpha) * lowerGain + alpha * upperGain;
+        ASSERT(!std::isnan(gain));
+        return gain;
     }
 }
 

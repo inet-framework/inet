@@ -33,7 +33,7 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual const Coord computeArrivalPosition(const simtime_t startTime, const Coord startPosition, IMobility *mobility) const;
+    virtual const Coord computeArrivalPosition(const simtime_t startTime, const Coord& startPosition, IMobility *mobility) const;
 
   public:
     ConstantSpeedPropagation();

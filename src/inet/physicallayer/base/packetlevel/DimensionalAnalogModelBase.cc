@@ -40,8 +40,8 @@ const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase:
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
     const DimensionalTransmission *dimensionalTransmission = check_and_cast<const DimensionalTransmission *>(transmission);
     const IDimensionalSignal *dimensionalSignalAnalogModel = check_and_cast<const IDimensionalSignal *>(transmission->getAnalogModel());
-    const Coord transmissionStartPosition = transmission->getStartPosition();
-    const Coord receptionStartPosition = arrival->getStartPosition();
+    const Coord& transmissionStartPosition = transmission->getStartPosition();
+    const Coord& receptionStartPosition = arrival->getStartPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmissionStartPosition, arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmissionStartPosition, arrival->getStartOrientation());
     const auto& transmissionPowerFunction = dimensionalSignalAnalogModel->getPower();

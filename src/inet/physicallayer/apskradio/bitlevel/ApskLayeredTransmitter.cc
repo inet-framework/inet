@@ -164,10 +164,10 @@ const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *tr
     // assuming movement and rotation during transmission is negligible
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const simtime_t endTime = startTime + analogModel->getDuration();
-    const Coord startPosition = mobility->getCurrentPosition();
-    const Coord endPosition = mobility->getCurrentPosition();
-    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
-    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
+    const Coord& startPosition = mobility->getCurrentPosition();
+    const Coord& endPosition = mobility->getCurrentPosition();
+    const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
 }
 

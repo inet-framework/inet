@@ -891,7 +891,7 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
         cLabelFigure *labelFigure = static_cast<cLabelFigure *>(groupFigure->getFigure(1));
         double phi = transmission->getId();
         labelFigure->setTransform(cFigure::Transform().translate(endRadius * sin(phi), endRadius * cos(phi)));
-        const Coord transmissionStart = transmission->getStartPosition();
+        const Coord& transmissionStart = transmission->getStartPosition();
         // KLUDGE: to workaround overflow bugs in drawing, Tkenv?
         double offset = std::fmod(startRadius, signalFigure->getWaveLength());
 //        if (startRadius > 10000)

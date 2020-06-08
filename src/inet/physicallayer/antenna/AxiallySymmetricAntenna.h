@@ -40,7 +40,7 @@ class INET_API AxiallySymmetricAntenna : public AntennaBase
 
         virtual double getMinGain() const override { return minGain; }
         virtual double getMaxGain() const override { return maxGain; }
-        virtual double computeGain(const Quaternion direction) const override;
+        virtual double computeGain(const Quaternion& direction) const override;
     };
 
     Ptr<AntennaGain> gain;

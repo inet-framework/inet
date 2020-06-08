@@ -280,8 +280,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     virtual bool isPotentialReceiver(const IRadio *receiver, const ITransmission *transmission) const;
 
-    virtual bool isInCommunicationRange(const ITransmission *transmission, const Coord startPosition, const Coord endPosition) const;
-    virtual bool isInInterferenceRange(const ITransmission *transmission, const Coord startPosition, const Coord endPosition) const;
+    virtual bool isInCommunicationRange(const ITransmission *transmission, const Coord& startPosition, const Coord& endPosition) const;
+    virtual bool isInInterferenceRange(const ITransmission *transmission, const Coord& startPosition, const Coord& endPosition) const;
 
     virtual bool isInterferingTransmission(const ITransmission *transmission, const IListening *listening) const;
     virtual bool isInterferingTransmission(const ITransmission *transmission, const IReception *reception) const;

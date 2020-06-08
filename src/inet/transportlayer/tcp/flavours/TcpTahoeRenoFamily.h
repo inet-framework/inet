@@ -50,6 +50,8 @@ class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
   public:
     /** Ctor */
     TcpTahoeRenoFamily();
+
+    void initialize() override;
 };
 
 } // namespace tcp

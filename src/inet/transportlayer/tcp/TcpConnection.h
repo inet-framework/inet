@@ -124,7 +124,6 @@ enum TcpEventCode {
 
 #define MAX_SYN_REXMIT_COUNT          12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
 #define TCP_MAX_WIN                   65535  // 65535 bytes, largest value (16 bit) for (unscaled) window size
-#define DUPTHRESH                     3  // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 #define MAX_SACK_BLOCKS               60  // will only be used with SACK
 #define PAWS_IDLE_TIME_THRESH         (24 * 24 * 3600)  // 24 days in seconds (RFC 1323)
 
@@ -274,6 +273,8 @@ class INET_API TcpStateVariables : public cObject
     bool sndAck;               // set if sending Ack packet, used to set relevant info in controlInfo.
     bool rexmit;               // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
+
+    uint32 dupthresh; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 };
 
 /**
@@ -346,6 +347,7 @@ class INET_API TcpConnection : public cSimpleModule
     static simsignal_t sackedBytesSignal;    // current number of received sacked bytes
     static simsignal_t tcpRcvQueueBytesSignal;    // current amount of used bytes in tcp receive queue
     static simsignal_t tcpRcvQueueDropsSignal;    // number of drops in tcp receive queue
+    static simsignal_t tcpRcvPayloadBytesSignal;  // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
 
     // connection identification by apps: socketId
     int socketId = -1;    // identifies connection within the app

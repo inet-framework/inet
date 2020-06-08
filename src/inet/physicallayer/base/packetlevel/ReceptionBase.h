@@ -42,7 +42,7 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     const Quaternion endOrientation;
 
   public:
-    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation);
+    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
