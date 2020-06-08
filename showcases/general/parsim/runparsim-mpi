@@ -1,0 +1,8 @@
+#! /bin/sh
+
+# make sure HOSTNAME is exported as some distros no longer export it by default
+if test "$HOSTNAME" = ""; then
+  export HOSTNAME=`hostname`
+fi
+
+mpiexec -n 4 inet $* --parsim-communications-class=cMPICommunications
