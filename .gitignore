@@ -1,4 +1,5 @@
 # local and generated files not to be committed
+.cproject
 src/Makefile
 src/Makefile.vc
 *_m.h
