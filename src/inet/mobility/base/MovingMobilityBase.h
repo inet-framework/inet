@@ -98,6 +98,8 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual Quaternion getCurrentAngularPosition() override;
     virtual Quaternion getCurrentAngularVelocity() override;
     virtual Quaternion getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
+
+    virtual bool isStationary() const override {return stationary;}
 };
 
 } // namespace inet

@@ -182,6 +182,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
     virtual Coord getConstraintAreaMax() const override { return constraintAreaMax; }
     virtual Coord getConstraintAreaMin() const override { return constraintAreaMin; }
+    virtual bool isStationary() const override {return true;}
 };
 
 } // namespace inet

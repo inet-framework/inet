@@ -102,6 +102,8 @@ class INET_API IMobility
      * Returns the minimum positions along each axes.
      */
     virtual Coord getConstraintAreaMin() const = 0;
+
+    virtual bool isStationary() const = 0;
 };
 
 } // namespace inet
