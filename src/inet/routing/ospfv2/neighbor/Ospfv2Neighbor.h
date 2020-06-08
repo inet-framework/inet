@@ -78,7 +78,7 @@ class INET_API Neighbor
     {
         Ospfv2DdOptions ddOptions;
         Ospfv2Options options;
-        unsigned long sequenceNumber;
+        unsigned long sequenceNumber = 0;
     };
 
   private:
