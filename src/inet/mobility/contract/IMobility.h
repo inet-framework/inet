@@ -58,42 +58,42 @@ class INET_API IMobility
     virtual double getMaxSpeed() const = 0;
 
     /**
-     * Returns the current position at the current simulation time.
+     * Returns the position at the current simulation time.
      */
     virtual const Coord& getCurrentPosition() = 0;
 
     /**
-     * Returns the current velocity at the current simulation time.
+     * Returns the velocity at the current simulation time.
      */
     virtual const Coord& getCurrentVelocity() = 0;
 
     /**
-     * Returns the current acceleration at the current simulation time.
+     * Returns the acceleration at the current simulation time.
      */
     virtual const Coord& getCurrentAcceleration() = 0;
 
     /**
-     * Returns the current angular position at the current simulation time.
+     * Returns the angular position at the current simulation time.
      */
     virtual const Quaternion& getCurrentAngularPosition() = 0;
 
     /**
-     * Returns the current angular velocity at the current simulation time.
+     * Returns the angular velocity at the current simulation time.
      */
     virtual const Quaternion& getCurrentAngularVelocity() = 0;
 
     /**
-     * Returns the current angular acceleration at the current simulation time.
+     * Returns the angular acceleration at the current simulation time.
      */
     virtual const Quaternion& getCurrentAngularAcceleration() = 0;
 
     /**
-     * Returns the maximum positions along each axes.
+     * Returns the maximum position along each axes for.
      */
     virtual const Coord& getConstraintAreaMax() const = 0;
 
     /**
-     * Returns the minimum positions along each axes.
+     * Returns the minimum position along each axes for.
      */
     virtual const Coord& getConstraintAreaMin() const = 0;
 };
