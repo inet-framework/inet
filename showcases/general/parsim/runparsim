@@ -1,0 +1,19 @@
+#! /bin/sh
+echo
+echo '*** Distributed execution of the Closed Queueing Network ***'
+echo 'IMPORTANT: If you'"'"'re running CQN under the GUI, you'"'"'ll have to click [Run]'
+echo 'in all three windows to start the simulation. See Readme.txt for more info.'
+echo
+
+rm -rf comm
+mkdir comm
+mkdir comm/read
+
+# make sure HOSTNAME is exported as some distros no longer export it by default
+if test "$HOSTNAME" = ""; then
+  export HOSTNAME=`hostname`
+fi
+
+#export NEDPATH=..
+inet_dbg -u Qtenv -p0,2 $* > host1.log &
+inet_dbg -u Qtenv -p1,2 $* > host2.log &
