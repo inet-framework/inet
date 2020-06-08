@@ -41,6 +41,7 @@
 #include "inet/networklayer/common/MulticastTag_m.h"
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/common/TosTag_m.h"
+#include "inet/networklayer/common/RouteTrace_m.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4SocketCommand_m.h"
@@ -50,6 +51,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
+#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 
@@ -117,6 +119,15 @@ void Ipv4::initialize(int stage)
         WATCH(numForwarded);
         WATCH_MAP(pendingPackets);
         WATCH_MAP(socketIdToSocketDescriptor);
+    }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+        routeTraceActive = par("routeTag");
+        auto node = getContainingNode(this);
+        auto mob = node->getSubmodule("mobility");
+        if (mob != nullptr) {
+            auto mobility = check_and_cast<IMobility *>(mob);
+            stationaryNode = mobility->isStationary();
+        }
     }
 }
 
@@ -301,6 +312,7 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
             return;
         }
     }
+    setTraceRouteTag(packet);
 
     EV_DETAIL << "Received datagram `" << ipv4Header->getName() << "' with dest=" << ipv4Header->getDestAddress() << "\n";
 
@@ -793,8 +805,12 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
 void Ipv4::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
-    const auto& ipv4Header = packet->popAtFront<Ipv4Header>();
 
+    const auto& ipv4Header = packet->popAtFront<Ipv4Header>();
+    if (routeTraceActive) {
+        auto tag = ipv4Header->getTag<RouteTraceTag>();
+        *packet->addTagIfAbsent<RouteTraceTag>() = *tag;
+    }
     // create and fill in control info
     packet->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv4Header->getDscp());
     packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getEcn());
@@ -1064,6 +1080,7 @@ void Ipv4::encapsulate(Packet *transportPacket)
             throw cRuntimeError("Unknown CRC mode");
     }
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv4, ipv4Header);
+    setTraceRouteTag(transportPacket);
     // setting Ipv4 options is currently not supported
 }
 
@@ -1413,6 +1430,42 @@ void Ipv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
 void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type, IcmpCode code)
 {
     icmp->sendErrorMessage(origPacket, inputInterfaceId, type, code);
+}
+
+
+void Ipv4::setTraceRouteTag(Packet *datagram) {
+    if (!routeTraceActive)
+        return;
+    auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(datagram);
+
+    if (ipv4Header->getSrcAddress().isUnspecified() || rt->isLocalAddress(ipv4Header->getSrcAddress())) {
+        auto tag = ipv4Header->findTag<RouteTraceTag>();
+        if (tag != nullptr)
+            throw cRuntimeError("Route trace tag present in the header but this is the source node");
+        ipv4Header->addTagIfAbsent<RouteTraceTag>()->setSrc(ipv4Header->getSrcAddress());
+        if (stationaryNode)
+            ipv4Header->addTagIfAbsent<RouteTraceTag>()->setFlagSrc(FLAG_STABLE);
+    }
+    else if (rt->isLocalAddress(ipv4Header->getDestAddress())) {
+        auto tag = ipv4Header->getTag<RouteTraceTag>();
+        if (tag == nullptr)
+            throw cRuntimeError("Route trace tag no present present in the packet");
+        ipv4Header->addTagIfAbsent<RouteTraceTag>()->setDst(ipv4Header->getDestAddress());
+        if (stationaryNode)
+            ipv4Header->addTagIfAbsent<RouteTraceTag>()->setFlagDst(FLAG_STABLE);
+    }
+    else  {
+        auto tag = ipv4Header->getTag<RouteTraceTag>();
+        if (tag == nullptr)
+            throw cRuntimeError("Route trace tag no present present in the packet");
+        auto nodeId = rt->getRouterIdAsGeneric();
+        ipv4Header->addTagIfAbsent<RouteTraceTag>()->getRouteForUpdate().push_back(nodeId);
+        if (stationaryNode)
+            ipv4Header->addTagIfAbsent<RouteTraceTag>()->getFlagsForUpdate().push_back(FLAG_STABLE);
+        else
+            ipv4Header->addTagIfAbsent<RouteTraceTag>()->getFlagsForUpdate().push_back(0);
+    }
+    insertNetworkProtocolHeader(datagram, Protocol::ipv4, ipv4Header);
 }
 
 } // namespace inet

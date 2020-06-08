@@ -112,6 +112,9 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
     DatagramQueueForHooks queuedDatagramsForHooks;
 
+    bool routeTraceActive = false;
+    bool stationaryNode = true;
+
   protected:
     // utility: look up interface from getArrivalGate()
     virtual const InterfaceEntry *getSourceInterface(Packet *packet);
@@ -135,6 +138,8 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
     // utility: calculate and set CRC
     void setComputedCrc(Ptr<Ipv4Header>& ipv4Header);
+
+    void setTraceRouteTag(Packet *datagram);
 
   public:
     static void insertCrc(const Ptr<Ipv4Header>& ipv4Header);
