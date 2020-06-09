@@ -77,6 +77,9 @@ class INET_API MoBanLocal : public LineSegmentsMobilityBase
     /** @brief The possible maximum speed at any future time */
     double maxSpeed;
 
+    Coord lastCompositePosition;
+    Coord lastCompositeVelocity;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 

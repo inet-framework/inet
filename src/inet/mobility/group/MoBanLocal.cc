@@ -61,6 +61,8 @@ void MoBanLocal::initialize(int stage)
 
     EV_TRACE << "initializing MoBanLocal stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
+        WATCH(lastCompositePosition);
+        WATCH(lastCompositeVelocity);
         WATCH_PTR(coordinator);
         WATCH(referencePosition);
         WATCH(radius);
@@ -126,14 +128,14 @@ void MoBanLocal::setMoBANParameters(Coord referencePoint, double radius, double 
 
 const Coord& MoBanLocal::getCurrentPosition()
 {
-    lastPosition = LineSegmentsMobilityBase::getCurrentPosition() + coordinator->getCurrentPosition();
-    return lastPosition;
+    lastCompositePosition = LineSegmentsMobilityBase::getCurrentPosition() + coordinator->getCurrentPosition();
+    return lastCompositePosition;
 }
 
 const Coord& MoBanLocal::getCurrentVelocity()
 {
-    lastVelocity = LineSegmentsMobilityBase::getCurrentVelocity() + coordinator->getCurrentVelocity();
-    return lastVelocity;
+    lastCompositeVelocity = LineSegmentsMobilityBase::getCurrentVelocity() + coordinator->getCurrentVelocity();
+    return lastCompositeVelocity;
 }
 
 
