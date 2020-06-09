@@ -123,6 +123,10 @@ class INET_API Packet : public cPacket
     /** @name Other overridden cPacket functions */
     //@{
     virtual bool hasBitError() const override { return cPacket::hasBitError() || content->isIncorrect(); }
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Unsupported cPacket functions */

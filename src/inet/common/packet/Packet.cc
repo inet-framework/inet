@@ -91,6 +91,52 @@ void Packet::forEachChild(cVisitor *v)
         v->visit(tags.getTag(i));
 }
 
+void Packet::parsimPack(cCommBuffer *buffer) const
+{
+    cPacket::parsimPack(buffer);
+    // KLUDGE:
+    const auto& bytesChunk = peekAllAsBytes();
+    auto& bytes = bytesChunk->getBytes();
+    buffer->pack(bytes.size());
+    buffer->pack(bytes.data(), bytes.size());
+    buffer->pack(frontIterator.getIndex());
+    buffer->pack(frontIterator.getPosition().get());
+    buffer->pack(backIterator.getIndex());
+    buffer->pack(backIterator.getPosition().get());
+//    buffer->pack(tags.getNumTags());
+//    for (int i = 0; i < tags.getNumTags(); i++)
+//        buffer->packObject(tags.getTag(i));
+}
+
+void Packet::parsimUnpack(cCommBuffer *buffer)
+{
+    cPacket::parsimUnpack(buffer);
+    // KLUDGE:
+    size_t size;
+    buffer->unpack(size);
+    std::vector<uint8_t> bytes;
+    bytes.resize(size);
+    buffer->unpack(bytes.data(), bytes.size());
+    content = makeShared<BytesChunk>(bytes);
+    int index;
+    buffer->unpack(index);
+    frontIterator.setIndex(index);
+    uint64_t position;
+    buffer->unpack(position);
+    frontIterator.setPosition(b(position));
+    buffer->unpack(index);
+    backIterator.setIndex(index);
+    buffer->unpack(position);
+    backIterator.setPosition(b(position));
+    totalLength = content->getChunkLength();
+//    int count;
+//    buffer->unpack(count);
+//    for (int i = 0; i < count; i++) {
+//        auto object = buffer->unpackObject();
+//        // TODO: tagset parsimpack, etc.
+//    }
+}
+
 void Packet::setFrontOffset(b offset)
 {
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength() - backIterator.getPosition(), "offset is out of range");
