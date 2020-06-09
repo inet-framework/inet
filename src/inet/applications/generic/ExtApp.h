@@ -22,19 +22,35 @@
 #include "inet/common/LinuxUtils.h"
 #include "inet/common/NetworkNamespaceContext.h"
 
+#include <signal.h>
+
 namespace inet {
 
 class INET_API ExtApp : public cSimpleModule
 {
-
+    int pid = -1;
   public:
 
     int numInitStages() const override { return NUM_INIT_STAGES; }
 
     void initialize(int stage) override;
 
+    void finish() override {
+        if (pid >= 0) {
+            kill(pid, SIGTERM); // SIGKILL?
+            pid = -1;
+        }
+    }
+
     void handleMessage(cMessage *msg) override {
         ASSERT(false);
+    }
+
+    virtual ~ExtApp() {
+        if (pid >= 0) {
+            kill(pid, SIGTERM); // SIGKILL?
+            pid = -1;
+        }
     }
 
 };

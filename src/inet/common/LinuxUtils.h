@@ -36,7 +36,7 @@ void makeCapabilitiesInheritable(const std::vector<cap_value_t>& caps = DEFAULT_
 
 void makeCapabilitiesUninheritable(const std::vector<cap_value_t>& caps = DEFAULT_REQUIRED_CAPABILITIES);
 
-int execCommand(const std::vector<const char *>& args, bool waitForExit = true, bool handDownCapabilities = false);
+int execCommand(const std::vector<const char *>& args, int *pid = nullptr, bool waitForExit = true, bool handDownCapabilities = false);
 
 } // namespace inet
 

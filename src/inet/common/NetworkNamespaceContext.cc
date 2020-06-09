@@ -57,7 +57,7 @@ void NetworkNamespaceContext::ensureNamespaceExists(const char *networkNamespace
 {
 #ifdef __linux__
     if (!checkNamespaceExists(networkNamespace))
-        execCommand({"ip", "netns", "add", networkNamespace}, true, true);
+        execCommand({"ip", "netns", "add", networkNamespace}, nullptr, true, true);
 #else
     throw cRuntimeError("Network namespaces are only supported on Linux");
 #endif

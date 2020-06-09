@@ -21,6 +21,7 @@ package inet.examples.inet.tcpclientserver;
 import inet.applications.generic.ExtApp;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;
+import inet.node.inet.ExtAppNode;
 import inet.node.inet.StandardHost;
 
 
@@ -29,22 +30,18 @@ network ClientServer
     parameters:
         double per = default(0);
     submodules:
-        client1: StandardHost {
+        client: StandardHost {
             parameters:
                 @display("p=250,150;i=device/pc3");
-        }
-        server: StandardHost {
-            parameters:
-                @display("p=400,150;i=device/pc2");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
         }
-        extApp: ExtApp {
-            @display("p=348,36");
+        server: ExtAppNode {
+            @display("p=387,150");
         }
     connections:
-        client1.ethg++ <--> Eth1G <--> server.ethg++;
+        client.ethg++ <--> Eth1G <--> server.ethg++;
 }
 

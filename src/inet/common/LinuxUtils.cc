@@ -87,7 +87,7 @@ void makeCapabilitiesUninheritable(const std::vector<cap_value_t>& capabilities)
 */
 }
 
-int execCommand(const std::vector<const char*>& args, bool waitForExit, bool handDownCapabilities)
+int execCommand(const std::vector<const char*>& args, int *pid, bool waitForExit, bool handDownCapabilities)
 {
     ASSERT(args.size() >= 0 && args.front() != nullptr);
 
@@ -110,6 +110,9 @@ int execCommand(const std::vector<const char*>& args, bool waitForExit, bool han
         throw cRuntimeError("Failed to execute '%s': %s", args_z[0], strerror(errno));
     }
     else {
+        if (pid != nullptr)
+            *pid = childPid;
+
         // This is run by the parent.  Wait for the child to terminate if needed.
         if (waitForExit) {
             int childStatus;

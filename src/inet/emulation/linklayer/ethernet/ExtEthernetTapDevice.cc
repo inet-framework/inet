@@ -120,8 +120,8 @@ std::string ExtEthernetTapDevice::openTap(const std::string& dev)
     NetworkNamespaceContext context(par("namespace"));
 
     if (!checkTapDeviceExists(dev)) {
-        execCommand({"ip", "tuntap", "add", "mode", "tap", "dev", dev.c_str()}, true, true);
-        execCommand({"ip", "link", "set", "up", "dev", dev.c_str()}, true, true); // address 2e:6f:c3:7f:6e:cf ?
+        execCommand({"ip", "tuntap", "add", "mode", "tap", "dev", dev.c_str()}, nullptr, true, true);
+        execCommand({"ip", "link", "set", "up", "dev", dev.c_str()}, nullptr, true, true); // address 2e:6f:c3:7f:6e:cf ?
     }
 
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)

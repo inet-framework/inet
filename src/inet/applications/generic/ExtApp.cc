@@ -39,7 +39,7 @@ void ExtApp::initialize(int stage)
             args.push_back(c.c_str());
 
         NetworkNamespaceContext ctxt(netns.c_str());
-        execCommand(args, false, false);
+        execCommand(args, &pid, false, false);
     }
 }
 
