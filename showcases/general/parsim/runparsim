@@ -15,5 +15,5 @@ if test "$HOSTNAME" = ""; then
 fi
 
 #export NEDPATH=..
-inet_dbg -u Qtenv -p0,2 $* > host1.log &
-inet_dbg -u Qtenv -p1,2 $* > host2.log &
+inet -u Qtenv -p0,2 $* > host1.log &
+inet -u Qtenv -p1,2 $* > host2.log &
