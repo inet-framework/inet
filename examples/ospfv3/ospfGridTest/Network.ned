@@ -16,9 +16,9 @@ network GridNetwork
     @display("bgb=400,400");
     submodules:
         Router[numHosts*numHosts]: Router;
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=0,0");
-        }
+//        configurator: Ipv4NetworkConfigurator {
+//            @display("p=0,0");
+//        }
         visualizer: IntegratedVisualizer {
             @display("p=0,10");
         }
