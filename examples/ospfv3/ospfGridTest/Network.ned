@@ -15,7 +15,7 @@ network GridNetwork
 
     @display("bgb=400,400");
     submodules:
-        router[numHosts*numHosts]: Router;
+        Router[numHosts*numHosts]: Router;
         configurator: Ipv4NetworkConfigurator {
             @display("p=0,0");
         }
@@ -29,10 +29,10 @@ network GridNetwork
     connections:
 
         for i=0..numHosts*numHosts-2 {
-            router[i].ethg++ <--> Eth100M <--> router[i+1].ethg++;
+            Router[i].ethg++ <--> Eth100M <--> Router[i+1].ethg++;
         }
         for i=0..numHosts*numHosts-numHosts-1 {
-            router[i].ethg++ <--> Eth100M <--> router[i+numHosts].ethg++;
+            Router[i].ethg++ <--> Eth100M <--> Router[i+numHosts].ethg++;
         }
 }
 
