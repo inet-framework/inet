@@ -153,7 +153,7 @@ MacAddress MacAddress::generateAutoAddress()
     }
     ++autoAddressCtr;
 
-    uint64 intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL);
+    uint64 intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL) + getEnvir()->getParsimProcId() * 0x000100000000ULL;
     MacAddress addr(intAddr);
     return addr;
 }
