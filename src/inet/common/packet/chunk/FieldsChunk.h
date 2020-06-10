@@ -59,6 +59,9 @@ class INET_API FieldsChunk : public Chunk
     FieldsChunk();
     FieldsChunk(const FieldsChunk& other);
     virtual ~FieldsChunk();
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     virtual void handleChange() override;

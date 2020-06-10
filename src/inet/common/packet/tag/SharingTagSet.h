@@ -58,6 +58,9 @@ class INET_API SharingTagSet : public cObject
 
     SharingTagSet& operator=(const SharingTagSet& other);
     SharingTagSet& operator=(SharingTagSet&& other);
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Type independent functions */

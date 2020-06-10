@@ -137,6 +137,8 @@ class INET_API Packet : public cPacket
     virtual Packet *dup() const override { return new Packet(*this); }
     virtual void forEachChild(cVisitor *v) override;
     virtual bool hasBitError() const override { return cPacket::hasBitError() || content->isIncorrect(); }
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Unsupported cPacket interface functions */

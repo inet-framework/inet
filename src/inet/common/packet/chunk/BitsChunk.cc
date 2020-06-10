@@ -18,6 +18,8 @@
 
 namespace inet {
 
+Register_Class(BitsChunk);
+
 BitsChunk::BitsChunk() :
     Chunk()
 {
@@ -33,6 +35,27 @@ BitsChunk::BitsChunk(const std::vector<bool>& bits) :
     Chunk(),
     bits(bits)
 {
+}
+
+void BitsChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(bits.size());
+    for (auto bit : bits)
+        buffer->pack(bit);
+}
+
+void BitsChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    size_t size;
+    buffer->unpack(size);
+    bits.clear();
+    for (size_t i = 0; i < size; i++) {
+        bool bit;
+        buffer->unpack(bit);
+        bits.push_back(bit);
+    }
 }
 
 const Ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const

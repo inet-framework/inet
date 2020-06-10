@@ -17,6 +17,8 @@
 
 namespace inet {
 
+Register_Class(EmptyChunk);
+
 const Ptr<EmptyChunk> EmptyChunk::singleton = makeShared<EmptyChunk>();
 
 EmptyChunk::EmptyChunk() :

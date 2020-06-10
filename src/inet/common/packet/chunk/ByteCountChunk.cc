@@ -18,6 +18,8 @@
 
 namespace inet {
 
+Register_Class(ByteCountChunk);
+
 ByteCountChunk::ByteCountChunk() :
     Chunk(),
     length(-1),
@@ -38,6 +40,22 @@ ByteCountChunk::ByteCountChunk(B length, uint8_t data) :
     data(data)
 {
     CHUNK_CHECK_USAGE(length >= B(0), "length is invalid");
+}
+
+void ByteCountChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(B(length).get());
+    buffer->pack(data);
+}
+
+void ByteCountChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    int64_t l;
+    buffer->unpack(l);
+    length = B(l);
+    buffer->unpack(data);
 }
 
 const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const

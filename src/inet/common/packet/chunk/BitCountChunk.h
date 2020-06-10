@@ -55,6 +55,9 @@ class INET_API BitCountChunk : public Chunk
 
     virtual BitCountChunk *dup() const override { return new BitCountChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return makeShared<BitCountChunk>(*this); }
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Field accessor functions */

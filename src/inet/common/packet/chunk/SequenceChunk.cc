@@ -18,6 +18,8 @@
 
 namespace inet {
 
+Register_Class(SequenceChunk);
+
 SequenceChunk::SequenceChunk() :
     Chunk()
 {
@@ -33,6 +35,26 @@ SequenceChunk::SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks) :
     Chunk(),
     chunks(chunks)
 {
+}
+
+void SequenceChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(chunks.size());
+    for (const auto& chunk : chunks)
+        buffer->packObject(const_cast<Chunk *>(chunk.get()));
+}
+
+void SequenceChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    size_t size;
+    buffer->unpack(size);
+    chunks.clear();
+    for (size_t i = 0; i < size; i++) {
+        const auto& chunk = check_and_cast<Chunk *>(buffer->unpackObject())->shared_from_this();
+        chunks.push_back(chunk);
+    }
 }
 
 void SequenceChunk::forEachChild(cVisitor *v)
