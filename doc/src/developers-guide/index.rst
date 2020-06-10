@@ -1,5 +1,6 @@
 Developer's Guide
 =================
+Release: |release|
 
 .. only:: html
 

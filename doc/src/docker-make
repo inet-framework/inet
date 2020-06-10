@@ -6,4 +6,4 @@
 # so relative symbolic links are working correctly inside the repo
 
 GUEST_COMMAND="cd doc/src && make $*"
-docker run --rm -i -t -p 8000:8000 -v "${PWD}/../..:/docs" -u "$(id -u):$(id -g)" -e GUEST_COMMAND='${GUEST_COMMAND}' omnetpp/docker-sphinx:200521 /bin/bash -c "${GUEST_COMMAND}"
+docker run --rm -i -t -p 8000:8000 -v "${PWD}/../..:/docs" -u "$(id -u):$(id -g)" -e GUEST_COMMAND='${GUEST_COMMAND}' omnetpp/docker-sphinx:200610 /bin/bash -c "${GUEST_COMMAND}"
