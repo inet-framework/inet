@@ -218,6 +218,9 @@ inline std::ostream& operator<<(std::ostream& os, const MacAddress& mac)
     return os << mac.str();
 }
 
+inline void doParsimPacking(cCommBuffer *buffer, const MacAddress& macAddress) { buffer->pack(macAddress.getInt()); }
+inline void doParsimUnpacking(cCommBuffer *buffer, MacAddress& macAddress) { uint64_t address; buffer->unpack(address); macAddress = MacAddress(address); }
+
 } // namespace inet
 
 #endif // ifndef __INET_MACADDRESS_H
