@@ -25,6 +25,9 @@ class INET_API TagBase : public cObject, public SharedBase<TagBase>
   public:
     virtual const Ptr<TagBase> dupShared() const { return Ptr<TagBase>(static_cast<TagBase *>(dup())); };
 
+    virtual void parsimPack(cCommBuffer *buffer) const override { }
+    virtual void parsimUnpack(cCommBuffer *buffer) override { }
+
     virtual std::string str() const override { return getClassName(); }
 };
 
