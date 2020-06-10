@@ -1,23 +1,22 @@
 
 package inet.examples.ospfv2.backbone;
 
-import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
+import ned.TransmissionChannel;
 
 
 network Backbone
 {
     parameters:
         @display("p=10,10;b=736,568");
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel C extends ThruputMeteringChannel
+        channel C extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "#N";
         }
     submodules:
         R1: OspfRouter {

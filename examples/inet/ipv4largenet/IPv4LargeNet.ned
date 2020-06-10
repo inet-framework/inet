@@ -21,20 +21,20 @@ package inet.examples.inet.ipv4largenet;
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
 
 
 //
 // A 100Mb/s Ethernet cable. Part of ~IPv4LargeNet.
 //
-channel cable extends DatarateChannel
+channel cable extends Eth100M
 {
-    parameters:
-        delay = 0.1us;
-        datarate = 100Mbps;
+    length = 20m;
 }
 
 
@@ -107,11 +107,9 @@ module IPv4LargeLAN
     gates:
         inout ethg;
     types:
-        channel cabletobus extends DatarateChannel
+        channel cabletobus extends Eth10M
         {
-            parameters:
-                delay = 0s;
-                datarate = 10Mbps;
+            length = 0m;
         }
     submodules:
         router: Router;
@@ -170,11 +168,9 @@ network IPv4LargeNet
         int dm;  // number of medium LANs on switch D
         int dl;  // number of large LANs on switch D
     types:
-        channel cabletoserver extends DatarateChannel
+        channel cabletoserver extends Eth1G
         {
-            parameters:
-                delay = 0s;
-                datarate = 1Gbps;
+            length = 0m;
         }
     submodules:
         routerBB[n]: Router;
@@ -315,6 +311,5 @@ network IPv4LargeNet
         routerB.ethg++ <--> cable <--> routerBB[0].ethg++;
         routerD.ethg++ <--> cable <--> routerBB[int(n/2)].ethg++;
         routerBB[0].ethg++ <--> cable <--> routerBB[n-1].ethg++;
-
 }
 

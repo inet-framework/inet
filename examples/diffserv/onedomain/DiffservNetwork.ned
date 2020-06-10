@@ -23,6 +23,7 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import ned.TransmissionChannel;
 
 
 network DiffservNetwork
@@ -30,6 +31,7 @@ network DiffservNetwork
     parameters:
         double edgeDatarate @unit(bps);
         double coreDatarate @unit(bps);
+        *.eth[*].bitrate = 100 Mbps;
     types:
         channel edgeline extends ThruputMeteringChannel
         {
@@ -43,11 +45,9 @@ network DiffservNetwork
             datarate = coreDatarate;
             thruputDisplayFormat = "b B U";
         }
-        channel ethernetline extends ThruputMeteringChannel
+        channel ethernetline extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "b B U";
         }
     submodules:
         H1: StandardHost {

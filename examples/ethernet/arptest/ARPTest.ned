@@ -19,45 +19,53 @@ import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network ARPTest
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel fiberline extends DatarateChannel
-        {
+        channel fiberline extends DatarateChannel {
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel ethline extends DatarateChannel
-        {
+        channel ethline extends TransmissionChannel {
             delay = 50ns;
-            datarate = 100Mbps;
         }
     submodules:
         client: StandardHost {
-            @display("p=250,100;i=device/laptop");
+            parameters:
+                @display("p=250,100;i=device/laptop");
         }
         host1: StandardHost {
-            @display("p=250,200;i=device/pc");
+            parameters:
+                @display("p=250,200;i=device/pc");
         }
         host2: StandardHost {
-            @display("p=250,300;i=device/pc");
+            parameters:
+                @display("p=250,300;i=device/pc");
         }
         switch: EtherSwitch {
-            @display("p=400,200");
+            parameters:
+                @display("p=400,200");
         }
         net: Router {
-            @display("p=700,200");
+            parameters:
+                @display("p=700,200");
         }
         router: Router {
-            @display("p=550,200");
+            parameters:
+                @display("p=550,200");
         }
         server: StandardHost {
-            @display("p=850,200;i=device/server");
+            parameters:
+                @display("p=850,200;i=device/server");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
+            parameters:
+                @display("p=100,100;is=s");
         }
     connections:
         client.ethg++ <--> ethline <--> switch.ethg++;

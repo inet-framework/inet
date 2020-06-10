@@ -19,48 +19,22 @@ package inet.examples.inet.redmarker;
 
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-//import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
-//import inet.node.dmpr.DmprRouter;
-//import inet.nodes.inet.Router;
-//import inet.node.ospfv2.OspfRouter;
 import inet.node.inet.StandardHost;
-//import inet.nodes.inet.StandardHost;
-import ned.DatarateChannel;
-
-//import inet.linklayer.queue.REDDropper;
-
-//import inet.queueing.IPacketQueue;
-//import inet.linklayer.queue.DropTailQueue;
-//import inet.queueing.FifoQueue;
-//import inet.queueing.RedDropper;
-//import inet.queueing.RedDropperQueue;
+import ned.TransmissionChannel;
 
 
-
-//import inet.visualizer.integrated.IntegratedCanvasVisualizer;
-
-
-channel NormalP extends DatarateChannel
+channel NormalP extends TransmissionChannel
 {
-    parameters:
-        datarate = default(10Mbps);
-        delay = default(1ms);
-        per = 0;
-        ber = 0;
+    double datarate @unit(bps) = default(10Mbps);
+    delay = default(1ms);
 }
 
-channel FastP extends DatarateChannel
+channel FastP extends TransmissionChannel
 {
-    parameters:
-        datarate = 100Mbps;
-        delay = 1ms;
-        per = 0;
-        ber = 0;
+    double datarate @unit(bps) = 100Mbps;
+    delay = 1ms;
 }
-
-
-
 
 network RedMarkerNetwork
 {
@@ -68,8 +42,6 @@ network RedMarkerNetwork
         @display("bgb=4166.738,3051.564,white;bgl=8");
 
     submodules:
-
-
         routerCore1: Router {
             parameters:
                 @display("p=1026.4801,995.93005;i=abstract/router");
@@ -94,14 +66,8 @@ network RedMarkerNetwork
         }
 
     connections:
-
         sender1.ethg++ <--> FastP <--> routerCore1.ethg++;
         receiver1.ethg++ <--> FastP <--> routerCore2.ethg++;
         routerCore1.ethg++ <--> NormalP <--> routerCore2.ethg++;
-
-
 }
-
-
-
 

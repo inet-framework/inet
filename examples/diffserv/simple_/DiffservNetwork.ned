@@ -24,6 +24,7 @@ import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 //
@@ -44,16 +45,17 @@ network DiffservNetwork
             delay = normal(0.004s, 0.0018s);
             datarate = 128kbps;
         }
-        channel ethernetline extends DatarateChannel
+        channel ethernetline extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 10Mbps;
         }
     submodules:
         router: Router {
+            eth[*].bitrate = 10Mbps;
             @display("p=550,100");
         }
         client[numClients]: StandardHost {
+            eth[*].bitrate = 10Mbps;
             @display("p=250,100,col,100");
         }
         server: StandardHost {
@@ -63,6 +65,7 @@ network DiffservNetwork
             @display("is=s;p=100,100");
         }
         etherSwitch: EtherSwitch {
+            eth[*].bitrate = 10Mbps;
             @display("p=400,100");
         }
     connections:
@@ -72,3 +75,4 @@ network DiffservNetwork
             client[i].ethg++ <--> ethernetline <--> etherSwitch.ethg++;
         }
 }
+

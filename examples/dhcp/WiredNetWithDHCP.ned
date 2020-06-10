@@ -28,6 +28,7 @@ network WiredNetWithDHCP
 {
     parameters:
         int numHosts;
+        *.eth[*].bitrate = 10Mbps;
     submodules:
         server: StandardHost {
             @display("p=400,225");

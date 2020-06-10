@@ -30,7 +30,7 @@ network NClients2
         int numRouters;
         int hostsPerRouter;
     types:
-        channel ethernetline2 extends DatarateChannel
+        channel pppline2 extends DatarateChannel
         {
             delay = 0.1us;
             datarate = 100Mbps;
@@ -55,11 +55,11 @@ network NClients2
         }
     connections:
         for i=0..numRouters-1, for j=0..hostsPerRouter-1 {
-            cli[i*hostsPerRouter+j].pppg++ <--> ethernetline2 <--> r[i].pppg++;
+            cli[i*hostsPerRouter+j].pppg++ <--> pppline2 <--> r[i].pppg++;
         }
         for i=0..numRouters-2 {
             r[i].pppg++ <--> gigabitline2 <--> r[i+1].pppg++;
         }
-        r[numRouters-1].pppg++ <--> ethernetline2 <--> srv.pppg++;
+        r[numRouters-1].pppg++ <--> pppline2 <--> srv.pppg++;
 }
 

@@ -7,11 +7,19 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedMultiVisualizer;
+import ned.DatarateChannel;
 
 
 network PcapRecordingShowcase
 {
     @display("bgb=1214,400");
+    types:
+        channel Ppp100M extends DatarateChannel
+        {
+            double length @unit(m) = default(10m);
+            delay = replaceUnit(length / 2e8, "s");
+            datarate = 100Mbps;
+        }
     submodules:
         configurator: Ipv4NetworkConfigurator {
             @display("p=87,57");
@@ -43,5 +51,6 @@ network PcapRecordingShowcase
     connections:
         ethHost1.ethg++ <--> Eth100M <--> router1.ethg++;
         router2.ethg++ <--> Eth100M <--> ethHost2.ethg++;
-        router1.pppg++ <--> Eth100M <--> router2.pppg++;
+        router1.pppg++ <--> Ppp100M <--> router2.pppg++;
 }
+

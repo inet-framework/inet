@@ -1,13 +1,22 @@
 package inet.examples.inet.tunnel;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherLink;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
 
 
 network Tunnel
 {
+    parameters:
+        *.eth[*].bitrate = 1 Gbps;
+    types:
+        channel ppplink extends DatarateChannel
+        {
+            delay = 1 us;
+            datarate = 1 Gbps;
+        }
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -34,9 +43,9 @@ network Tunnel
                 @display("p=850,100");
         }
     connections:
-        client.ethg++ <--> Eth1G <--> inlet.ethg++;
-        inlet.pppg++ <--> {  delay = 1us; datarate = 1Gbps; } <--> router.pppg++;
-        router.pppg++ <--> {  delay = 1us; datarate = 1Gbps; } <--> outlet.pppg++;
-        outlet.ethg++ <--> Eth1G <--> server.ethg++;
+        client.ethg++ <--> EtherLink <--> inlet.ethg++;
+        inlet.pppg++ <--> ppplink <--> router.pppg++;
+        router.pppg++ <--> ppplink <--> outlet.pppg++;
+        outlet.ethg++ <--> EtherLink <--> server.ethg++;
 }
 

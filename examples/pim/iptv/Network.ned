@@ -18,7 +18,7 @@
 package inet.examples.pim.iptv;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherLink;
 import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
 
@@ -28,6 +28,8 @@ import inet.node.inet.StandardHost;
 //
 network Network
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     submodules:
         R00: MulticastRouter {
             @display("p=400,100");
@@ -124,38 +126,38 @@ network Network
             @display("p=250,100");
         }
     connections allowunconnected:
-        R00.ethg[1] <--> Eth100M <--> R10.ethg[0];
-        R00.ethg[3] <--> Eth100M <--> R01.ethg[2];
-        R01.ethg[1] <--> Eth100M <--> R11.ethg[0];
-        R01.ethg[3] <--> Eth100M <--> R02.ethg[2];
-        R02.ethg[1] <--> Eth100M <--> R12.ethg[0];
-        R02.ethg[3] <--> Eth100M <--> R03.ethg[2];
-        R03.ethg[1] <--> Eth100M <--> R13.ethg[0];
+        R00.ethg[1] <--> EtherLink <--> R10.ethg[0];
+        R00.ethg[3] <--> EtherLink <--> R01.ethg[2];
+        R01.ethg[1] <--> EtherLink <--> R11.ethg[0];
+        R01.ethg[3] <--> EtherLink <--> R02.ethg[2];
+        R02.ethg[1] <--> EtherLink <--> R12.ethg[0];
+        R02.ethg[3] <--> EtherLink <--> R03.ethg[2];
+        R03.ethg[1] <--> EtherLink <--> R13.ethg[0];
 
-        R10.ethg[1] <--> Eth100M <--> R20.ethg[0];
-        R10.ethg[3] <--> Eth100M <--> R11.ethg[2];
-        R11.ethg[1] <--> Eth100M <--> R21.ethg[0];
-        R11.ethg[3] <--> Eth100M <--> R12.ethg[2];
-        R12.ethg[1] <--> Eth100M <--> R22.ethg[0];
-        R12.ethg[3] <--> Eth100M <--> R13.ethg[2];
-        R13.ethg[1] <--> Eth100M <--> R23.ethg[0];
+        R10.ethg[1] <--> EtherLink <--> R20.ethg[0];
+        R10.ethg[3] <--> EtherLink <--> R11.ethg[2];
+        R11.ethg[1] <--> EtherLink <--> R21.ethg[0];
+        R11.ethg[3] <--> EtherLink <--> R12.ethg[2];
+        R12.ethg[1] <--> EtherLink <--> R22.ethg[0];
+        R12.ethg[3] <--> EtherLink <--> R13.ethg[2];
+        R13.ethg[1] <--> EtherLink <--> R23.ethg[0];
 
-        R20.ethg[1] <--> Eth100M <--> R30.ethg[0];
-        R20.ethg[3] <--> Eth100M <--> R21.ethg[2];
-        R21.ethg[1] <--> Eth100M <--> R31.ethg[0];
-        R21.ethg[3] <--> Eth100M <--> R22.ethg[2];
-        R22.ethg[1] <--> Eth100M <--> R32.ethg[0];
-        R22.ethg[3] <--> Eth100M <--> R23.ethg[2];
-        R23.ethg[1] <--> Eth100M <--> R33.ethg[0];
-
-
-        R30.ethg[3] <--> Eth100M <--> R31.ethg[2];
-
-        R31.ethg[3] <--> Eth100M <--> R32.ethg[2];
-
-        R32.ethg[3] <--> Eth100M <--> R33.ethg[2];
+        R20.ethg[1] <--> EtherLink <--> R30.ethg[0];
+        R20.ethg[3] <--> EtherLink <--> R21.ethg[2];
+        R21.ethg[1] <--> EtherLink <--> R31.ethg[0];
+        R21.ethg[3] <--> EtherLink <--> R22.ethg[2];
+        R22.ethg[1] <--> EtherLink <--> R32.ethg[0];
+        R22.ethg[3] <--> EtherLink <--> R23.ethg[2];
+        R23.ethg[1] <--> EtherLink <--> R33.ethg[0];
 
 
-        server.ethg++ <--> Eth100M <--> R00.ethg[0];
-        R33.ethg[1] <--> Eth100M <--> client.ethg++;
+        R30.ethg[3] <--> EtherLink <--> R31.ethg[2];
+
+        R31.ethg[3] <--> EtherLink <--> R32.ethg[2];
+
+        R32.ethg[3] <--> EtherLink <--> R33.ethg[2];
+
+
+        server.ethg++ <--> EtherLink <--> R00.ethg[0];
+        R33.ethg[1] <--> EtherLink <--> client.ethg++;
 }

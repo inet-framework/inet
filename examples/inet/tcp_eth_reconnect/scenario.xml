@@ -7,14 +7,13 @@
     <at t="1.7">
         <connect src-module="server" src-gate="ethg[0]"
                  dest-module="client1" dest-gate="ethg[0]"
-                 channel-type="ned.DatarateChannel">
-            <param name="datarate" value="10Mbps" />
+                 channel-type="ned.TransmissionChannel">
             <param name="delay" value="0.1us" />
         </connect>
     </at>
     <at t="2">
-        <set-channel-param src-module="server" src-gate="ethg$o[0]" par="datarate" value="100Mbps"/>
-        <set-channel-param src-module="client1" src-gate="ethg$o[0]" par="datarate" value="100Mbps"/>
+        <set-param module="server.eth[0]" par="bitrate" value="100Mbps"/>
+        <set-param module="client1.eth[0]" par="bitrate" value="100Mbps"/>
     </at>
     <at t="3.3">
         <disconnect src-module="server" src-gate="ethg$o[0]" />
@@ -25,16 +24,16 @@
     <at t="4.7">
         <connect src-module="server" src-gate="ethg$o[0]"
                  dest-module="client1" dest-gate="ethg$i[0]"
-                 channel-type="ned.DatarateChannel">
-            <param name="datarate" value="10Mbps" />
+                 channel-type="ned.TransmissionChannel">
             <param name="delay" value="0.1us" />
         </connect>
         <connect src-module="client1" src-gate="ethg$o[0]"
                  dest-module="server" dest-gate="ethg$i[0]"
-                 channel-type="ned.DatarateChannel">
-            <param name="datarate" value="10Mbps" />
+                 channel-type="ned.TransmissionChannel">
             <param name="delay" value="0.1us" />
         </connect>
+        <set-param module="server.eth[0]" par="bitrate" value="10Mbps"/>
+        <set-param module="client1.eth[0]" par="bitrate" value="10Mbps"/>
     </at>
 </scenario>
 

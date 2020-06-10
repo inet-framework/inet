@@ -22,17 +22,15 @@ package inet.examples.voipstream.VoIPStreamLargeNet;
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
 
 
-channel cable extends DatarateChannel
+channel cable extends Eth100M
 {
-    parameters:
-        delay = 0.1us;
-        datarate = 100Mbps;
+    length = 20m;
 }
 
 

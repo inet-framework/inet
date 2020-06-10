@@ -25,7 +25,7 @@ import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 //
@@ -33,11 +33,12 @@ import ned.DatarateChannel;
 //
 network MixedLAN
 {
+    parameters:
+        *.eth.bitrate = 100 Mbps;
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel C extends ThruputMeteringChannel
-        {
+        channel C extends TransmissionChannel {
             delay = 01us;
-            datarate = 100Mbps;
         }
     submodules:
         bus: EtherBus {
@@ -136,9 +137,9 @@ network MixedLAN
         switch.ethg[3] <--> C <--> switchHostD.ethg;
 
         //half-duplex:
-        hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
-        hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
-        hub.ethg[2] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
+        hub.ethg[0] <--> TransmissionChannel { delay = 0.1us; } <--> hubHostA.ethg;
+        hub.ethg[1] <--> TransmissionChannel { delay = 0.3us; } <--> hubHostB.ethg;
+        hub.ethg[2] <--> TransmissionChannel { delay = 0.2us; } <--> hubHostC.ethg;
 }
 
 
@@ -148,6 +149,12 @@ network MixedLAN
 //
 network TwoHosts
 {
+    parameters:
+        *.eth.bitrate = 100 Mbps;
+    types:
+        channel C extends TransmissionChannel {
+            delay = 0.5us;
+        }
     submodules:
         hostA: EtherHost {
             parameters:
@@ -158,7 +165,7 @@ network TwoHosts
                 @display("p=300,100");
         }
     connections:
-        hostA.ethg <--> {  delay = 0.5us; datarate = 100Mbps; } <--> hostB.ethg;
+        hostA.ethg <--> C <--> hostB.ethg;
 }
 
 
@@ -167,11 +174,12 @@ network TwoHosts
 //
 network SwitchedLAN
 {
+    parameters:
+        *.eth.bitrate = 100 Mbps;
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel C extends DatarateChannel
-        {
+        channel C extends TransmissionChannel {
             delay = 0.1us;
-            datarate = 100Mbps;
         }
     submodules:
         hostA: EtherHost {
@@ -217,6 +225,8 @@ network SwitchedLAN
 //
 network HubLAN
 {
+    parameters:
+        *.eth.bitrate = 100 Mbps;
     submodules:
         hostA: EtherHost {
             parameters:
@@ -245,10 +255,10 @@ network HubLAN
                 ethg[4];
         }
     connections:
-        hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hostA.ethg;
-        hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hostB.ethg;
-        hub.ethg[2] <--> {  delay = 0.4us; datarate = 100Mbps; } <--> hostC.ethg;
-        hub.ethg[3] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hostD.ethg;
+        hub.ethg[0] <--> TransmissionChannel { delay = 0.1us; } <--> hostA.ethg;
+        hub.ethg[1] <--> TransmissionChannel { delay = 0.3us; } <--> hostB.ethg;
+        hub.ethg[2] <--> TransmissionChannel { delay = 0.4us; } <--> hostC.ethg;
+        hub.ethg[3] <--> TransmissionChannel { delay = 0.2us; } <--> hostD.ethg;
 }
 
 
@@ -257,11 +267,11 @@ network HubLAN
 //
 network BusLAN
 {
+    parameters:
+        *.eth.bitrate = 10 Mbps;
     types:
-        channel C extends DatarateChannel
-        {
+        channel C extends TransmissionChannel {
             delay = 0s;
-            datarate = 10Mbps;
         }
     submodules:
         hostA: EtherHost {
@@ -301,37 +311,34 @@ network BusLAN
 
 network SwitchedDuplexLAN
 {
+    parameters:
+        *.eth.bitrate = 10 Mbps;
+        *.eth[*].bitrate = 10 Mbps;
     types:
-        channel ethernetline extends DatarateChannel
-        {
+        channel ethernetline extends TransmissionChannel {
             parameters:
                 delay = 0.1us;
-                datarate = 10Mbps;
         }
 
     submodules:
         hostA: EtherHost {
             parameters:
                 csmacdSupport = false;
-                eth.duplexMode = true;
                 @display("p=250,100");
         }
         hostB: EtherHost {
             parameters:
                 csmacdSupport = false;
-                eth.duplexMode = true;
                 @display("p=400,200");
         }
         hostC: EtherHost {
             parameters:
                 csmacdSupport = false;
-                eth.duplexMode = true;
                 @display("p=250,300");
         }
         hostD: EtherHost {
             parameters:
                 csmacdSupport = false;
-                eth.duplexMode = true;
                 @display("p=100,200");
         }
         switch: EtherSwitch {

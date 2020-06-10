@@ -8,7 +8,7 @@ import inet.networklayer.common.NetfilterInfoHook;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 module MyHost extends StandardHost
@@ -35,10 +35,11 @@ module MyRouter extends Router
 //
 network Ipv4hook
 {
+    parameters:
+        *.eth[*].bitrate = 10 Mbps;
     types:
-        channel C extends DatarateChannel
+        channel C extends TransmissionChannel
         {
-            datarate = 10Mbps;
             delay = 0.1us;
         }
     submodules:
@@ -58,3 +59,4 @@ network Ipv4hook
         host1.ethg++ <--> C <--> router.ethg++;
         host2.ethg++ <--> C <--> router.ethg++;
 }
+

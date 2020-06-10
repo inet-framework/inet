@@ -29,6 +29,7 @@ network CloudAndRouters
 {
     parameters:
         int numSenders;
+        *.eth[*].bitrate = 100 Mbps;
 
     types:
         channel C extends DatarateChannel

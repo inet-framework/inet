@@ -22,20 +22,20 @@ import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 network Traceroute
 {
+    parameters:
+        *.eth[*].bitrate = 1 Gbps;
     types:
-        channel pppline extends DatarateChannel
-        {
+        channel pppline extends DatarateChannel {
             delay = 100ms;
             datarate = 1 Gbps;
         }
 
-        channel ethline extends DatarateChannel
-        {
+        channel ethline extends TransmissionChannel {
             delay = 100ms;
-            datarate = 1 Gbps;
         }
     submodules:
         cli1: StandardHost {

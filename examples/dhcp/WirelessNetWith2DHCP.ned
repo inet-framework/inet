@@ -28,7 +28,9 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 
 network WirelessNetWith2DHCP
 {
-    int numHosts;
+    parameters:
+        int numHosts;
+        *.eth[*].bitrate = 100 Mbps;
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             @display("p=100,300;is=s");

@@ -21,13 +21,15 @@
 package inet.examples.pim.dm.basic;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherLink;
 import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
 
 
 network pimDMFinal
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     submodules:
         R1: MulticastRouter {
             @display("p=425,190");
@@ -63,13 +65,13 @@ network pimDMFinal
     //            script = xmldoc("scenario.xml");
     //        }
     connections allowunconnected:
-        R1.ethg++ <--> Eth100M <--> R2.ethg++;
-        R1.ethg++ <--> Eth100M <--> R3.ethg++;
-        R1.ethg++ <--> Eth100M <--> Source1.ethg++;
+        R1.ethg++ <--> EtherLink <--> R2.ethg++;
+        R1.ethg++ <--> EtherLink <--> R3.ethg++;
+        R1.ethg++ <--> EtherLink <--> Source1.ethg++;
 
-        R2.ethg++ <--> Eth100M <--> Host1.ethg++;
-        R2.ethg++ <--> Eth100M <--> Host2.ethg++;
+        R2.ethg++ <--> EtherLink <--> Host1.ethg++;
+        R2.ethg++ <--> EtherLink <--> Host2.ethg++;
 
-        R3.ethg++ <--> Eth100M <--> Source2.ethg++;
-        R3.ethg++ <--> Eth100M <--> Host3.ethg++;
+        R3.ethg++ <--> EtherLink <--> Source2.ethg++;
+        R3.ethg++ <--> EtherLink <--> Host3.ethg++;
 }

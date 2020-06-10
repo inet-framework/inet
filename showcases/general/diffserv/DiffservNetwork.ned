@@ -29,7 +29,7 @@ import ned.DatarateChannel;
 network DiffservNetwork
 {
     types:
-        channel line extends DatarateChannel
+        channel PppLine extends DatarateChannel
         {
             delay = normal(0.004s, 0.0018s);
             datarate = 128kbps;
@@ -63,7 +63,7 @@ network DiffservNetwork
         voipPhone1.ethg++ <--> Eth10M <--> etherSwitch.ethg++;
         client.ethg++ <--> Eth10M <--> etherSwitch.ethg++;
         etherSwitch.ethg++ <--> Eth10M <--> router.ethg++;
-        router.pppg++ <--> line <--> internet.pppg++;
-        internet.pppg++ <--> line <--> server.pppg++;
-        internet.pppg++ <--> line <--> voipPhone2.pppg++;
+        router.pppg++ <--> PppLine <--> internet.pppg++;
+        internet.pppg++ <--> PppLine <--> server.pppg++;
+        internet.pppg++ <--> PppLine <--> voipPhone2.pppg++;
 }

@@ -2,12 +2,14 @@
 
 package inet.examples.ospfv2.areas;
 
-import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import ned.TransmissionChannel;
 
 
 network OSPF_AreaTest
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     submodules:
         Area1: TwoNetsArea {
             parameters:
@@ -39,6 +41,6 @@ network OSPF_AreaTest
                 @display("p=100,100;is=s");
         }
     connections:
-        Area1.ethg[0] <--> ThruputMeteringChannel {  delay = 0.1us; datarate = 100 Mbps; thruputDisplayFormat = "#N"; } <--> Area2.ethg[0];
+        Area1.ethg[0] <--> TransmissionChannel {  delay = 0.1us; } <--> Area2.ethg[0];
 }
 

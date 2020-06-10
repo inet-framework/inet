@@ -6,10 +6,8 @@
     <at t="400">
         <connect src-module="RA" src-gate="ethg[0]"
                  dest-module="R1" dest-gate="ethg[1]"
-                 channel-type="inet.common.misc.ThruputMeteringChannel">
+                 channel-type="ned.TransmissionChannel">
             <param name="delay" value="0.1us" />
-            <param name="datarate" value="100Mbps" />
-            <param name="thruputDisplayFormat" value='"#N"' />
         </connect>
     </at>
 </scenario>

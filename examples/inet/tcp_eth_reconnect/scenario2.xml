@@ -7,12 +7,12 @@
     <at t="1.7">
         <set-channel-param src-module="server" src-gate="ethg$o[0]" par="disabled" value="false"/>
         <set-channel-param src-module="client1" src-gate="ethg$o[0]" par="disabled" value="false"/>
-        <set-channel-param src-module="server" src-gate="ethg$o[0]" par="datarate" value="10Mbps"/>
-        <set-channel-param src-module="client1" src-gate="ethg$o[0]" par="datarate" value="10Mbps"/>
+        <set-param module="server.eth[0]" par="bitrate" value="10Mbps"/>
+        <set-param module="client1.eth[0]" par="bitrate" value="10Mbps"/>
     </at>
     <at t="2">
-        <set-channel-param src-module="server" src-gate="ethg$o[0]" par="datarate" value="100Mbps"/>
-        <set-channel-param src-module="client1" src-gate="ethg$o[0]" par="datarate" value="100Mbps"/>
+        <set-param module="server.eth[0]" par="bitrate" value="100Mbps"/>
+        <set-param module="client1.eth[0]" par="bitrate" value="100Mbps"/>
     </at>
     <at t="3.3">
         <set-channel-param src-module="server" src-gate="ethg$o[0]" par="disabled" value="true"/>
@@ -23,7 +23,7 @@
     <at t="4.7">
         <set-channel-param src-module="server" src-gate="ethg$o[0]" par="disabled" value="false"/>
         <set-channel-param src-module="client1" src-gate="ethg$o[0]" par="disabled" value="false"/>
-        <set-channel-param src-module="server" src-gate="ethg$o[0]" par="datarate" value="10Mbps"/>
-        <set-channel-param src-module="client1" src-gate="ethg$o[0]" par="datarate" value="10Mbps"/>
+        <set-param module="server.eth[0]" par="bitrate" value="10Mbps"/>
+        <set-param module="client1.eth[0]" par="bitrate" value="10Mbps"/>
     </at>
 </scenario>

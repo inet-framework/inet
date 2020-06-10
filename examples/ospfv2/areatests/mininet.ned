@@ -2,11 +2,11 @@
 
 package inet.examples.ospfv2.areatests;
 
-import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
+import ned.TransmissionChannel;
 
 
 network OSPF_mininet
@@ -15,12 +15,11 @@ network OSPF_mininet
         int numBBr = 2;
         int numSBr = 2;
         int numHst = 2;
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel C extends ThruputMeteringChannel
+        channel C extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "#N";
         }
     submodules:
         BBR[numBBr]: OspfRouter {

@@ -3,7 +3,7 @@ package inet.tests.ethernet;
 import inet.linklayer.ethernet.EtherBus;
 import inet.node.ethernet.EtherHost2;
 import inet.common.scenario.ScenarioManager;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 //
 // Sample Ethernet LAN: hosts connected via bus
@@ -39,8 +39,8 @@ network HostsWithBus
                 @display("p=184,180");
         }
     connections:
-        bus.ethg++ <--> DatarateChannel <--> hostA.ethg;
-        bus.ethg++ <--> DatarateChannel <--> hostB.ethg;
-        bus.ethg++ <--> DatarateChannel <--> hostC.ethg;
+        bus.ethg++ <--> TransmissionChannel <--> hostA.ethg;
+        bus.ethg++ <--> TransmissionChannel <--> hostB.ethg;
+        bus.ethg++ <--> TransmissionChannel <--> hostC.ethg;
 }
 

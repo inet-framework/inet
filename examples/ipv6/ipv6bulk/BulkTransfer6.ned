@@ -25,15 +25,16 @@ package inet.examples.ipv6.ipv6bulk;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network BulkTransfer6
 {
+    parameters:
+        *.eth[*].bitrate = 10 Mbps;
     types:
-        channel C extends DatarateChannel
+        channel C extends TransmissionChannel
         {
-            datarate = 10Mbps;
             delay = 0.1us;
         }
     submodules:

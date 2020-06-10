@@ -18,13 +18,15 @@ package inet.examples.ieee8021d;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
-import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherLink;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 
 
 network SwitchNetwork
 {
+    parameters:
+        *.eth[*].bitrate = 1 Gbps;
     submodules:
         stpTester: StpTester {
             @display("p=100,300;is=s");
@@ -78,19 +80,22 @@ network SwitchNetwork
                 ethg[];
         }
     connections:
-        switch1.ethg++ <--> Eth1G <--> switch4.ethg++;
-        switch1.ethg++ <--> Eth1G <--> switch3.ethg++;
-        switch2.ethg++ <--> Eth1G <--> switch4.ethg++;
-        switch2.ethg++ <--> Eth1G <--> switch6.ethg++;
-        switch2.ethg++ <--> Eth1G <--> switch7.ethg++;
-        switch3.ethg++ <--> Eth1G <--> switch7.ethg++;
-        switch4.ethg++ <--> Eth1G <--> switch6.ethg++;
-        switch4.ethg++ <--> Eth1G <--> switch7.ethg++;
-        switch5.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch1.ethg++ <--> EtherLink <--> switch4.ethg++;
+        switch1.ethg++ <--> EtherLink <--> switch3.ethg++;
+        switch2.ethg++ <--> EtherLink <--> switch4.ethg++;
+        switch2.ethg++ <--> EtherLink <--> switch6.ethg++;
+        switch2.ethg++ <--> EtherLink <--> switch7.ethg++;
+        switch3.ethg++ <--> EtherLink <--> switch7.ethg++;
+        switch4.ethg++ <--> EtherLink <--> switch6.ethg++;
+        switch4.ethg++ <--> EtherLink <--> switch7.ethg++;
+        switch5.ethg++ <--> EtherLink <--> switch7.ethg++;
 }
 
 network LargeNet extends SwitchNetwork
 {
+    parameters:
+        *.eth.bitrate = 1 Gbps;
+        *.eth[*].bitrate = 1 Gbps;
     submodules:
         host1: EtherHost {
             parameters:
@@ -142,18 +147,18 @@ network LargeNet extends SwitchNetwork
             @display("p=625,370");
         }
     connections:
-        switch11.ethg++ <--> Eth1G <--> switch9.ethg++;
-        switch11.ethg++ <--> Eth1G <--> switch10.ethg++;
-        switch11.ethg++ <--> Eth1G <--> switch5.ethg++;
-        switch9.ethg++ <--> Eth1G <--> switch10.ethg++;
-        switch8.ethg++ <--> Eth1G <--> switch9.ethg++;
-        switch8.ethg++ <--> Eth1G <--> switch11.ethg++;
-        switch8.ethg++ <--> Eth1G <--> switch5.ethg++;
-        switch8.ethg++ <--> Eth1G <--> switch2.ethg++;
-        switch3.ethg++ <--> Eth1G <--> host3.ethg;
-        switch5.ethg++ <--> Eth1G <--> host2.ethg;
-        switch6.ethg++ <--> Eth1G <--> host1.ethg;
-        host5.ethg <--> Eth1G <--> switch9.ethg++;
-        host4.ethg <--> Eth1G <--> switch10.ethg++;
-        host6.ethg <--> Eth1G <--> switch8.ethg++;
+        switch11.ethg++ <--> EtherLink <--> switch9.ethg++;
+        switch11.ethg++ <--> EtherLink <--> switch10.ethg++;
+        switch11.ethg++ <--> EtherLink <--> switch5.ethg++;
+        switch9.ethg++ <--> EtherLink <--> switch10.ethg++;
+        switch8.ethg++ <--> EtherLink <--> switch9.ethg++;
+        switch8.ethg++ <--> EtherLink <--> switch11.ethg++;
+        switch8.ethg++ <--> EtherLink <--> switch5.ethg++;
+        switch8.ethg++ <--> EtherLink <--> switch2.ethg++;
+        switch3.ethg++ <--> EtherLink <--> host3.ethg;
+        switch5.ethg++ <--> EtherLink <--> host2.ethg;
+        switch6.ethg++ <--> EtherLink <--> host1.ethg;
+        host5.ethg <--> EtherLink <--> switch9.ethg++;
+        host4.ethg <--> EtherLink <--> switch10.ethg++;
+        host6.ethg <--> EtherLink <--> switch8.ethg++;
 }

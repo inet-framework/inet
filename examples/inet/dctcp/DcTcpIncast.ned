@@ -7,8 +7,7 @@ package inet.examples.inet.dctcp;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
-
+import ned.TransmissionChannel;
 
 network DcTcpIncast
 {
@@ -16,11 +15,12 @@ network DcTcpIncast
         @display("bgb=740,580");
 
     types:
-        channel NormalP extends DatarateChannel
+        channel NormalP extends TransmissionChannel
         {
             parameters:
                 per = 0;
                 ber = 0;
+                double datarate @unit(bps);
         }
 
     submodules:

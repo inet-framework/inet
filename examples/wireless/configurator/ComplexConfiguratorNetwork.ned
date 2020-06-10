@@ -19,7 +19,7 @@
 package inet.examples.wireless.configurator;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherLink;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -29,6 +29,7 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 network ComplexConfiguratorNetwork
 {
     parameters:
+        *.eth[*].bitrate = 1 Gbps;
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
@@ -83,11 +84,11 @@ network ComplexConfiguratorNetwork
             @display("p=1069,271;i=device/laptop");
         }
     connections:
-        source.ethg++ <--> Eth1G <--> wiredA1.ethg++;
-        wiredA1.ethg++ <--> Eth1G <--> wiredA2.ethg++;
-        wiredA2.ethg++ <--> Eth1G <--> shared1.ethg++;
-        shared1.ethg++ <--> Eth1G <--> shared2.ethg++;
-        shared2.ethg++ <--> Eth1G <--> wiredB1.ethg++;
-        wiredB1.ethg++ <--> Eth1G <--> wiredB2.ethg++;
-        wiredB2.ethg++ <--> Eth1G <--> destination.ethg++;
+        source.ethg++ <--> EtherLink <--> wiredA1.ethg++;
+        wiredA1.ethg++ <--> EtherLink <--> wiredA2.ethg++;
+        wiredA2.ethg++ <--> EtherLink <--> shared1.ethg++;
+        shared1.ethg++ <--> EtherLink <--> shared2.ethg++;
+        shared2.ethg++ <--> EtherLink <--> wiredB1.ethg++;
+        wiredB1.ethg++ <--> EtherLink <--> wiredB2.ethg++;
+        wiredB2.ethg++ <--> EtherLink <--> destination.ethg++;
 }

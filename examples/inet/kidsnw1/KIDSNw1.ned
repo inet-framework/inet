@@ -30,7 +30,7 @@ import ned.DatarateChannel;
 network KIDSNw1
 {
     types:
-        channel ethernet extends DatarateChannel
+        channel pppline extends DatarateChannel
         {
             delay = normal(0.00015s, 0.00005s);
             datarate = 10Mbps;
@@ -82,9 +82,9 @@ network KIDSNw1
         }
     connections:
         // host connections
-        host1.pppg++ <--> ethernet <--> fhrouter1.pppg++;
-        host2.pppg++ <--> ethernet <--> fhrouter1.pppg++;
-        host3.pppg++ <--> ethernet <--> fhrouter2.pppg++;
+        host1.pppg++ <--> pppline <--> fhrouter1.pppg++;
+        host2.pppg++ <--> pppline <--> fhrouter1.pppg++;
+        host3.pppg++ <--> pppline <--> fhrouter2.pppg++;
 
         // router connections
         fhrouter1.pppg++ <--> fiberrouterline <--> irouter.pppg++;

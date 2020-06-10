@@ -19,16 +19,17 @@ import inet.linklayer.ethernet.EtherBus;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network ARPTest
 {
+    parameters:
+        *.eth[*].bitrate = 10 Mbps;
     types:
-        channel ethline extends DatarateChannel
+        channel ethline extends TransmissionChannel
         {
             delay = 500ns;
-            datarate = 10Mbps;
         }
     submodules:
         client: StandardHost {
