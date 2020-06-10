@@ -140,6 +140,9 @@ class INET_API Protocol
 
 inline std::ostream& operator << (std::ostream& o, const Protocol& t) { o << t.str(); return o; }
 
+inline void doParsimPacking(cCommBuffer *buffer, const Protocol* protocol) { buffer->pack(protocol->getId()); }
+inline void doParsimUnpacking(cCommBuffer *buffer, const Protocol*& protocol) { int id; buffer->unpack(id); protocol = Protocol::getProtocol(id); }
+
 } // namespace inet
 
 #endif // ifndef __INET_PROTOCOL_H

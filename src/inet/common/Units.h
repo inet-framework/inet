@@ -109,6 +109,11 @@ class value
         return m_rep;
     }
 
+    void set(const value_type& v)
+    {
+        m_rep = v;
+    }
+
     template<typename OtherValue, typename OtherUnits>
     value& operator=(const value<OtherValue, OtherUnits>& other)
     {
@@ -272,6 +277,20 @@ template<int Num, int Den, typename Value, typename Unit>
 value<Value, pow<Unit, Num, Den> > raise(const value<Value, Unit>& a)
 {
     return value<Value, pow<Unit, Num, Den> >(internal::fixed_power<Num, Den>::pow(a.get()));
+}
+
+template<typename Value, typename Units>
+inline void doParsimPacking(cCommBuffer *buffer, const value<Value, Units>& a)
+{
+    buffer->pack(a.get());
+}
+
+template<typename Value, typename Units>
+inline void doParsimUnpacking(cCommBuffer *buffer, value<Value, Units>& a)
+{
+    Value v;
+    buffer->unpack(v);
+    a.set(v);
 }
 
 } // namespace units
