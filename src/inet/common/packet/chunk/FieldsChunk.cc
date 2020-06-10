@@ -38,6 +38,22 @@ FieldsChunk::~FieldsChunk()
     delete serializedBytes;
 }
 
+void FieldsChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(chunkLength.get());
+}
+
+void FieldsChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    int64_t l;
+    buffer->unpack(l);
+    chunkLength = b(l);
+    delete serializedBytes;
+    serializedBytes = nullptr;
+}
+
 void FieldsChunk::handleChange()
 {
     Chunk::handleChange();

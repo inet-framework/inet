@@ -37,12 +37,15 @@ class INET_API cPacketChunk : public Chunk
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    cPacketChunk(cPacket *packet);
+    cPacketChunk(cPacket *packet = nullptr);
     cPacketChunk(const cPacketChunk& other);
     ~cPacketChunk();
 
     virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return makeShared<cPacketChunk>(*this); }
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Field accessor functions */

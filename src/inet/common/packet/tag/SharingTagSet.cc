@@ -67,5 +67,24 @@ void SharingTagSet::prepareTagsVectorForUpdate()
     }
 }
 
+void SharingTagSet::parsimPack(cCommBuffer *buffer) const
+{
+    buffer->pack(getNumTags());
+    if (tags != nullptr)
+        for (auto tag : *tags)
+            buffer->packObject(const_cast<TagBase *>(tag.get()));
+}
+
+void SharingTagSet::parsimUnpack(cCommBuffer *buffer)
+{
+    clearTags();
+    int size;
+    buffer->unpack(size);
+    for (int i = 0; i < size; i++) {
+        auto tag = check_and_cast<TagBase *>(buffer->unpackObject());
+        addTag(tag->shared_from_this());
+    }
+}
+
 } // namespace
 

@@ -19,6 +19,8 @@
 
 namespace inet {
 
+Register_Class(BytesChunk);
+
 BytesChunk::BytesChunk() :
     Chunk()
 {
@@ -34,6 +36,22 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
     Chunk(),
     bytes(bytes)
 {
+}
+
+void BytesChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(bytes.size());
+    buffer->pack(bytes.data(), bytes.size());
+}
+
+void BytesChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    size_t size;
+    buffer->unpack(size);
+    bytes.resize(size);
+    buffer->unpack(bytes.data(), bytes.size());
 }
 
 const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const

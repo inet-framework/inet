@@ -92,6 +92,37 @@ void Packet::forEachChild(cVisitor *v)
         v->visit(const_cast<TagBase *>(regionTags.getTag(i).get()));
 }
 
+void Packet::parsimPack(cCommBuffer *buffer) const
+{
+    cPacket::parsimPack(buffer);
+    buffer->packObject(const_cast<Chunk *>(content.get()));
+    buffer->pack(frontIterator.getIndex());
+    buffer->pack(frontIterator.getPosition().get());
+    buffer->pack(backIterator.getIndex());
+    buffer->pack(backIterator.getPosition().get());
+    tags.parsimPack(buffer);
+    regionTags.parsimPack(buffer);
+}
+
+void Packet::parsimUnpack(cCommBuffer *buffer)
+{
+    cPacket::parsimUnpack(buffer);
+    content = check_and_cast<Chunk *>(buffer->unpackObject())->shared_from_this();
+    totalLength = content->getChunkLength();
+    int index;
+    buffer->unpack(index);
+    frontIterator.setIndex(index);
+    uint64_t position;
+    buffer->unpack(position);
+    frontIterator.setPosition(b(position));
+    buffer->unpack(index);
+    backIterator.setIndex(index);
+    buffer->unpack(position);
+    backIterator.setPosition(b(position));
+    tags.parsimUnpack(buffer);
+    regionTags.parsimUnpack(buffer);
+}
+
 void Packet::setFrontOffset(b offset)
 {
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength() - backIterator.getPosition(), "offset is out of range");

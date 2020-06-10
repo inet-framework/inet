@@ -128,6 +128,9 @@ class INET_API SharingRegionTagSet : public cObject
 
     SharingRegionTagSet& operator=(const SharingRegionTagSet& other);
     SharingRegionTagSet& operator=(SharingRegionTagSet&& other);
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Type independent functions */

@@ -19,6 +19,8 @@
 
 namespace inet {
 
+Register_Class(cPacketChunk);
+
 cPacketChunk::cPacketChunk(cPacket *packet) :
     Chunk(),
     packet(packet)
@@ -36,6 +38,19 @@ cPacketChunk::cPacketChunk(const cPacketChunk& other) :
 cPacketChunk::~cPacketChunk()
 {
     dropAndDelete(packet);
+}
+
+void cPacketChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->packObject(packet);
+}
+
+void cPacketChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    packet = check_and_cast<cPacket *>(buffer->unpackObject());
+    take(packet);
 }
 
 const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const

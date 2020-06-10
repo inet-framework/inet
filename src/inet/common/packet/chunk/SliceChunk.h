@@ -68,6 +68,9 @@ class INET_API SliceChunk : public Chunk
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return makeShared<SliceChunk>(*this); }
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     virtual void forEachChild(cVisitor *v) override;
