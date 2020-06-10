@@ -40,9 +40,10 @@ void OrdinalBasedDropper::initialize(int stage)
 
         if (dropsVector.size() == 0)
             EV_WARN << "Empty dropsVector" << endl;
-        else
+        else {
             EV_DEBUG << "dropsVector=" << vector << endl;
             generateFurtherDrops = true;
+        }
     }
 }
 
