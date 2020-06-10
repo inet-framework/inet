@@ -42,6 +42,20 @@ void Chunk::forEachChild(cVisitor *v)
         v->visit(const_cast<TagBase *>(regionTags.getTag(i).get()));
 }
 
+void Chunk::parsimPack(cCommBuffer *buffer) const
+{
+    buffer->pack(id);
+    buffer->pack(flags);
+    regionTags.parsimPack(buffer);
+}
+
+void Chunk::parsimUnpack(cCommBuffer *buffer)
+{
+    buffer->unpack(id);
+    buffer->unpack(flags);
+    regionTags.parsimUnpack(buffer);
+}
+
 void Chunk::handleChange()
 {
     checkMutable();

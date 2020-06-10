@@ -442,6 +442,9 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>
      */
     virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
     virtual void forEachChild(cVisitor *v) override;
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Mutability related functions */

@@ -74,6 +74,9 @@ class INET_API SequenceChunk : public Chunk
 
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return makeShared<SequenceChunk>(*this); }
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     virtual void forEachChild(cVisitor *v) override;

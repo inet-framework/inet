@@ -18,6 +18,8 @@
 
 namespace inet {
 
+Register_Class(SliceChunk);
+
 SliceChunk::SliceChunk() :
     Chunk(),
     chunk(nullptr),
@@ -47,6 +49,26 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->length && this->offset + this->length <= chunkLength);
 #endif
     regionTags.copyTags(chunk->regionTags, offset, b(0), length);
+}
+
+void SliceChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->packObject(chunk.get());
+    buffer->pack(b(offset).get());
+    buffer->pack(b(length).get());
+}
+
+void SliceChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    chunk = check_and_cast<Chunk *>(buffer->unpackObject())->shared_from_this();
+    uint64_t o;
+    buffer->unpack(o);
+    offset = b(o);
+    uint64_t l;
+    buffer->unpack(l);
+    length = b(l);
 }
 
 void SliceChunk::forEachChild(cVisitor *v)

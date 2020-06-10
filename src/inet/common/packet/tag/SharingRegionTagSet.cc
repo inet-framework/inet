@@ -17,6 +17,34 @@
 
 namespace inet {
 
+void SharingRegionTagSet::parsimPack(cCommBuffer *buffer) const
+{
+    buffer->pack(getNumTags());
+    if (regionTags != nullptr) {
+        for (auto regionTag : *regionTags) {
+            buffer->pack(regionTag.getOffset().get());
+            buffer->pack(regionTag.getLength().get());
+            buffer->packObject(const_cast<TagBase *>(regionTag.getTag().get()));
+        }
+    }
+}
+
+void SharingRegionTagSet::parsimUnpack(cCommBuffer *buffer)
+{
+    if (regionTags != nullptr)
+        regionTags->clear();
+    int size;
+    buffer->unpack(size);
+    for (int i = 0; i < size; i++) {
+        uint64_t offset;
+        buffer->unpack(offset);
+        uint64_t length;
+        buffer->unpack(length);
+        auto tag = check_and_cast<TagBase *>(buffer->unpackObject());
+        addTag(b(offset), b(length), tag->shared_from_this());
+    }
+}
+
 void SharingRegionTagSet::addTag(b offset, b length, const Ptr<const TagBase>& tag)
 {
     ensureTagsVectorAllocated();
