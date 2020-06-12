@@ -1,11 +1,10 @@
 package inet.showcases.mobility.combining;
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.integrated.IntegratedVisualizer;
-
-
+import inet.node.inet.WirelessHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedMultiVisualizer;
+import inet.visualizer.integrated.IntegratedVisualizer;
 
 
 network MobilityShowcase
@@ -38,7 +37,7 @@ network AntennaOrientation
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=173.664,56.28");
         }
-        drone: StandardHost {
+        drone: WirelessHost {
             @display("p=43,214;i=misc/drone");
         }
         base: StandardHost {
