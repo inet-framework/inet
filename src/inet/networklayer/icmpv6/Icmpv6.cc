@@ -29,6 +29,7 @@
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 
 namespace inet {
 
@@ -165,6 +166,7 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     replyPacket->insertAtBack(requestPacket->peekData());
     insertCrc(replyHeader, replyPacket);
     replyPacket->insertAtFront(replyHeader);
+    replyPacket->addTag<HopLimitReq>()->setHopLimit(5000);
 
     auto addressInd = requestPacket->getTag<L3AddressInd>();
     replyPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);

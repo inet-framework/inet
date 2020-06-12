@@ -486,7 +486,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
              << " bytes from " << src
              << " icmp_seq=" << seqNo << " ttl=" << msgHopCount
              << " time=" << (rtt * 1000) << " msec"
-             << " (" << packet->getName() << ")" << endl;
+             << " (" << packet->getName() << ")" << "at " << simTime() << endl;
     }
 
     // update statistics
