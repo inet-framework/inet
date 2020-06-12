@@ -22,10 +22,10 @@ network GridNetwork
         visualizer: IntegratedVisualizer {
             @display("p=0,10");
         }
-        routingTableRecorder: RoutingTableRecorder {
-            parameters:
-                @display("p=0,20");
-        }
+//        routingTableRecorder: RoutingTableRecorder {
+//            parameters:
+//                @display("p=0,20");
+//        }
     connections:
 
         for i=0..numHosts*numHosts-2 {
