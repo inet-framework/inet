@@ -1,0 +1,3630 @@
+<?xml version="1.0" ?>
+<Devices>
+	<Router id="Router[0]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.0</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1::1/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[1]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.1</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1::2/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3::2/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4::2/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[2]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.2</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3::3/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5::3/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6::3/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[3]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.3</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5::4/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7::4/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8::4/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[4]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.4</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7::5/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9::5/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:a::5/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[5]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.5</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9::6/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:b::6/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:c::6/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[6]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.6</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:b::7/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:d::7/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:e::7/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[7]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.7</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:d::8/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:f::8/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:10::8/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[8]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.8</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:f::9/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:11::9/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:12::9/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[9]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.9</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:11::a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:13::a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2::a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:15::a/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[10]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.10</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:13::b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:15::b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4::b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:17::b/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[11]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.11</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:15::c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:17::c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6::c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:19::c/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[12]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.12</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:17::d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:19::d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8::d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1b::d/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[13]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.13</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:19::e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1b::e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:a::e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1d::e/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[14]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.14</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1b::f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1d::f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:c::f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1f::f/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[15]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.15</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1d::10/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1f::10/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:e::10/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:21::10/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[16]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.16</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1f::11/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:21::11/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:10::11/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:23::11/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[17]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.17</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:21::12/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:23::12/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:24::12/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:25::12/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[18]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.18</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:23::13/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:25::13/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:14::13/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:27::13/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[19]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.19</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:25::14/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:27::14/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:16::14/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:29::14/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[20]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.20</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:27::15/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:29::15/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:18::15/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2b::15/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[21]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.21</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:29::16/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2b::16/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1a::16/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2d::16/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[22]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.22</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2b::17/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2d::17/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1c::17/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2f::17/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[23]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.23</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2d::18/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2f::18/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:1e::18/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:31::18/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[24]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.24</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2f::19/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:31::19/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:20::19/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:33::19/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[25]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.25</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:31::1a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:33::1a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:22::1a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:35::1a/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[26]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.26</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:33::1b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:35::1b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:36::1b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:37::1b/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[27]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.27</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:35::1c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:37::1c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:26::1c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:39::1c/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[28]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.28</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:37::1d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:39::1d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:28::1d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3b::1d/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[29]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.29</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:39::1e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3b::1e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2a::1e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3d::1e/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[30]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.30</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3b::1f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3d::1f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2c::1f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3f::1f/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[31]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.31</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3d::20/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3f::20/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:2e::20/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:41::20/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[32]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.32</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3f::21/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:41::21/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:30::21/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:43::21/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[33]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.33</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:41::22/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:43::22/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:32::22/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:45::22/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[34]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.34</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:43::23/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:45::23/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:34::23/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:47::23/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[35]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.35</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:45::24/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:47::24/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:48::24/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:49::24/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[36]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.36</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:47::25/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:49::25/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:38::25/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4b::25/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[37]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.37</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:49::26/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4b::26/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3a::26/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4d::26/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[38]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.38</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4b::27/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4d::27/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3c::27/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4f::27/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[39]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.39</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4d::28/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4f::28/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:3e::28/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:51::28/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[40]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.40</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4f::29/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:51::29/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:40::29/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:53::29/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[41]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.41</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:51::2a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:53::2a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:42::2a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:55::2a/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[42]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.42</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:53::2b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:55::2b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:44::2b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:57::2b/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[43]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.43</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:55::2c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:57::2c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:46::2c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:59::2c/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[44]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.44</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:57::2d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:59::2d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5a::2d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5b::2d/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[45]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.45</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:59::2e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5b::2e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4a::2e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5d::2e/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[46]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.46</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5b::2f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5d::2f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4c::2f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5f::2f/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[47]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.47</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5d::30/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5f::30/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:4e::30/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:61::30/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[48]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.48</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5f::31/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:61::31/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:50::31/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:63::31/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[49]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.49</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:61::32/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:63::32/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:52::32/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:65::32/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[50]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.50</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:63::33/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:65::33/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:54::33/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:67::33/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[51]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.51</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:65::34/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:67::34/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:56::34/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:69::34/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[52]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.52</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:67::35/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:69::35/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:58::35/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6b::35/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[53]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.53</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:69::36/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6b::36/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6c::36/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6d::36/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[54]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.54</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6b::37/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6d::37/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5c::37/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6f::37/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[55]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.55</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6d::38/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6f::38/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:5e::38/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:71::38/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[56]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.56</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6f::39/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:71::39/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:60::39/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:73::39/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[57]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.57</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:71::3a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:73::3a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:62::3a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:75::3a/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[58]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.58</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:73::3b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:75::3b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:64::3b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:77::3b/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[59]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.59</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:75::3c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:77::3c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:66::3c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:79::3c/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[60]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.60</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:77::3d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:79::3d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:68::3d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7b::3d/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[61]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.61</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:79::3e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7b::3e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6a::3e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7d::3e/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[62]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.62</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7b::3f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7d::3f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7e::3f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7f::3f/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[63]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.63</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7d::40/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7f::40/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:6e::40/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:81::40/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[64]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.64</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7f::41/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:81::41/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:70::41/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:83::41/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[65]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.65</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:81::42/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:83::42/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:72::42/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:85::42/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[66]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.66</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:83::43/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:85::43/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:74::43/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:87::43/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[67]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.67</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:85::44/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:87::44/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:76::44/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:89::44/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[68]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.68</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:87::45/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:89::45/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:78::45/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8b::45/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[69]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.69</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:89::46/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8b::46/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7a::46/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8d::46/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[70]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.70</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8b::47/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8d::47/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:7c::47/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8f::47/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[71]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.71</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8d::48/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8f::48/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:90::48/64</IPv6Address>
+			</Interface>
+			<Interface name="eth3">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:91::48/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[72]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.72</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8f::49/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:91::49/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:80::49/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[73]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.73</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:91::4a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:93::4a/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:82::4a/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[74]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.74</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:93::4b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:95::4b/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:84::4b/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[75]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.75</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:95::4c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:97::4c/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:86::4c/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[76]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.76</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:97::4d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:99::4d/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:88::4d/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[77]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.77</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:99::4e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9b::4e/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8a::4e/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[78]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.78</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9b::4f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9d::4f/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8c::4f/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[79]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.79</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9d::50/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9f::50/64</IPv6Address>
+			</Interface>
+			<Interface name="eth2">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:8e::50/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router[80]">
+		<Routing6>
+			<OSPFv3>
+				<Process id="100">
+					<RouterID>10.0.0.80</RouterID>
+				</Process>
+			</OSPFv3>
+		</Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:9f::51/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100">
+					<Instance AF="IPv6">
+						<InterfaceType>Broadcast</InterfaceType>
+						<Area>0.0.0.0</Area>
+					</Instance>
+				</Process>
+				<IPv6Address>2001:db8:a:90::51/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+</Devices>
