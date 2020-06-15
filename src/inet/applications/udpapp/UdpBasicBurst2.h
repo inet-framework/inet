@@ -43,6 +43,8 @@ class INET_API UdpBasicBurst2 : public UdpBasicBurst
     static int packetMob;
     static int packetStaticRec;
     static int packetMobRec;
+    static int stablePaths;
+    static cHistogram * delay;
     bool isStatic = false;
 
 
@@ -55,6 +57,8 @@ class INET_API UdpBasicBurst2 : public UdpBasicBurst
 
   public:
     UdpBasicBurst2() {}
+    virtual ~UdpBasicBurst2() {if (delay != nullptr) {delete delay; delay = nullptr;}}
+
 };
 
 } // namespace inet

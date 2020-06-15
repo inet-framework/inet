@@ -29,6 +29,7 @@
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/mobility/single/RandomWaypointMobility2.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/RouteTrace_m.h"
 #include <algorithm>    // std::find
 
 namespace inet {
@@ -40,11 +41,12 @@ Define_Module(UdpBasicBurst2);
 int UdpBasicBurst2::numStatics = 0;
 int UdpBasicBurst2::numMobiles = 0;
 std::vector<L3Address> UdpBasicBurst2::staticNodes;
-int UdpBasicBurst2::packetStatic;
-int UdpBasicBurst2::packetMob;
-int UdpBasicBurst2::packetStaticRec;
-int UdpBasicBurst2::packetMobRec;
-
+int UdpBasicBurst2::packetStatic = 0;
+int UdpBasicBurst2::packetMob = 0;
+int UdpBasicBurst2::packetStaticRec = 0;
+int UdpBasicBurst2::packetMobRec = 0;
+cHistogram * UdpBasicBurst2::delay = nullptr;
+int UdpBasicBurst2::stablePaths = 0;
 
 void UdpBasicBurst2::initialize(int stage)
 {
@@ -59,6 +61,8 @@ void UdpBasicBurst2::initialize(int stage)
         packetMob = 0;
         packetStaticRec = 0;
         packetMobRec = 0;
+        stablePaths = 0;
+        delay = nullptr;
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         auto node = getContainingNode(this);
@@ -68,6 +72,8 @@ void UdpBasicBurst2::initialize(int stage)
             numStatics++;
             staticNodes.push_back(L3AddressResolver().addressOf(node));
             isStatic = true;
+            if (delay == nullptr)
+                delay = new cHistogram("Global delay");
         }
         else {
             isStatic = false;
@@ -136,6 +142,20 @@ void UdpBasicBurst2::processPacket(Packet *pk)
         packetStaticRec++;
     else
         packetMobRec++;
+    if (delay != nullptr)
+        delay->collect(simTime() - pk->getTimestamp());
+
+
+    auto tag = pk->findTag<RouteTraceTag>();
+    if (tag != nullptr) {
+        bool stable = true;
+        for (auto elem : tag->getFlags()) {
+            stable = stable && ((elem & FLAG_STABLE) != 0);
+        }
+        stable = stable && ((tag->getFlagDst() & FLAG_STABLE) != 0) && ((tag->getFlagSrc() & FLAG_STABLE) != 0);
+        if (stable)
+            stablePaths++;
+    }
 
     numReceived++;
     delete pk;
@@ -219,11 +239,11 @@ void UdpBasicBurst2::finish()
     }
 
     if (packetStatic != 0) {
-        recordScalar("Global pkt Rec static-static", packetStatic);
+        recordScalar("Global pkt rec static-static", packetStatic);
     }
 
     if (packetMob != 0) {
-        recordScalar("Global pkt Rec no static", packetMob);
+        recordScalar("Global pkt rec no static", packetMob);
     }
 
 
@@ -236,6 +256,27 @@ void UdpBasicBurst2::finish()
 
     }
 
+    if (stablePaths != 0) {
+        recordScalar("Global stable paths", stablePaths);
+
+    }
+    if (packetStaticRec + packetMobRec > 0) {
+          recordScalar("Global no stable paths", packetStaticRec + packetMobRec - stablePaths);
+    }
+
+    if (delay != nullptr) {
+        delay->record();
+        delete delay;
+        delay = nullptr;
+    }
+
+    if ((packetStaticRec + packetMobRec)  > 0) {
+        recordScalar("Global pkt total rec", (packetStaticRec + packetMobRec));
+        recordScalar("Global pkt total send", (packetStatic + packetMob));
+        recordScalar("Global Pdr", (packetStaticRec + packetMobRec)/(packetStatic + packetMob));
+    }
+
+    stablePaths = 0;
     packetMob = 0;
     packetStatic = 0;
     packetMobRec = 0;
