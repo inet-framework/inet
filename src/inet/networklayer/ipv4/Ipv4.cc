@@ -1439,9 +1439,16 @@ void Ipv4::setTraceRouteTag(Packet *datagram) {
     auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(datagram);
 
     if (ipv4Header->getSrcAddress().isUnspecified() || rt->isLocalAddress(ipv4Header->getSrcAddress())) {
-        auto tag = ipv4Header->findTag<RouteTraceTag>();
-        if (tag != nullptr)
-            throw cRuntimeError("Route trace tag present in the header but this is the source node");
+        //auto tag = ipv4Header->findTag<RouteTraceTag>();
+        //if (tag != nullptr){
+        // Loop,
+        //    throw cRuntimeError("Route trace tag present in the header but this is the source node");
+        //}
+        ipv4Header->addTagIfAbsent<RouteTraceTag>()->setSrc(ipv4Header->getSrcAddress());
+        ipv4Header->addTagIfAbsent<RouteTraceTag>()->getRouteForUpdate().clear();
+        ipv4Header->addTagIfAbsent<RouteTraceTag>()->getFlagsForUpdate().clear();
+        ipv4Header->addTagIfAbsent<RouteTraceTag>()->setDst(L3Address());
+
         ipv4Header->addTagIfAbsent<RouteTraceTag>()->setSrc(ipv4Header->getSrcAddress());
         if (stationaryNode)
             ipv4Header->addTagIfAbsent<RouteTraceTag>()->setFlagSrc(FLAG_STABLE);
