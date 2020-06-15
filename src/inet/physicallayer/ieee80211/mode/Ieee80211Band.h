@@ -32,6 +32,7 @@ class INET_API IIeee80211Band : public cObject, public IPrintableObject
     virtual int getNumChannels() const = 0;
     virtual Hz getCenterFrequency(int channelNumber) const = 0;
     virtual Hz getSpacing() const = 0;
+    virtual Hz getBandwith() const = 0;
 };
 
 class INET_API Ieee80211BandBase : public IIeee80211Band
@@ -56,6 +57,7 @@ class INET_API Ieee80211EnumeratedBand : public Ieee80211BandBase
     virtual int getNumChannels() const override { return centers.size(); }
     virtual Hz getCenterFrequency(int channelNumber) const override;
     virtual Hz getSpacing() const override { return Hz(NaN); }
+    virtual Hz getBandwith() const override { return Hz(NaN); }
 };
 
 class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase
@@ -63,14 +65,16 @@ class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase
   protected:
     Hz start;
     Hz spacing;
+    Hz bandwith;
     int numChannels;
 
   public:
-    Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, int numChannels);
+    Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, Hz bandwith, int numChannels);
 
     virtual int getNumChannels() const override { return numChannels; }
     virtual Hz getCenterFrequency(int channelNumber) const override;
     virtual Hz getSpacing() const override { return spacing; }
+    virtual Hz getBandwith() const override { return bandwith; }
 };
 
 class INET_API Ieee80211CompliantBands
