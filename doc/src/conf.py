@@ -14,6 +14,7 @@
 #
 import os
 import sys
+import re
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('_themes'))
 
@@ -24,10 +25,10 @@ project = 'INET'
 copyright = 'INET community'
 author = 'INET community'
 
-# The short X.Y version
-version = '4.2'
-# The full version, including alpha/beta/rc tags
-release = '4.2'
+# The short X.Y version this doc refers to (last tagged release)
+release = re.sub('^v', '', os.popen('git describe --tags --abbrev=0 --match=v[0-9].*').read().strip())
+# Git version this documentation built from (including last release tag, number of commints since then and git hash)
+version = re.sub('^v', '', os.popen('git describe --tags --abbrev=4 --match=v[0-9].*').read().strip())
 
 # -- General configuration ---------------------------------------------------
 
@@ -63,7 +64,6 @@ source_suffix = [ '.rst',
 source_parsers = {
 #   '.md': 'recommonmark.parser.CommonMarkParser',
 }
-
 
 # The master toctree document.
 master_doc = 'index'

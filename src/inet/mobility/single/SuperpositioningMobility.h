@@ -30,6 +30,7 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
         PC_ZERO,
         PC_SUM,
         PC_AVERAGE,
+        PC_ELEMENT,
     };
 
     enum class OrientationComposition {
@@ -37,7 +38,8 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
         OC_ZERO,
         OC_SUM,
         OC_AVERAGE,
-        OC_FACE_FORWARD
+        OC_FACE_FORWARD,
+        OC_ELEMENT,
     };
 
     Coord lastVelocity;
@@ -48,6 +50,8 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
   protected:
     PositionComposition positionComposition = PositionComposition::PC_UNDEFINED;
     OrientationComposition orientationComposition = OrientationComposition::OC_UNDEFINED;
+    int positionElementIndex = -1;
+    int orientationElementIndex = -1;
     std::vector<IMobility *> elements;
 
   protected:

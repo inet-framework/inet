@@ -1,5 +1,6 @@
 INET Framework Documentation
 ============================
+Version: |version|
 
 Table of Contents
 -----------------

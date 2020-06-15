@@ -697,7 +697,6 @@ RouterLSA* Ospfv3Area::originateRouterLSA()
     Ospfv3LsaHeader& lsaHeader = routerLSA->getHeaderForUpdate();
     long interfaceCount = this->interfaceList.size();
     Ospfv3Options lsOptions;
-    memset(&lsOptions, 0, sizeof(Ospfv3Options));
 
     //First set the LSA Header
     lsaHeader.setLsaAge(0);
@@ -724,7 +723,6 @@ RouterLSA* Ospfv3Area::originateRouterLSA()
         }
 
         Ospfv3RouterLsaBody routerLSABody;
-        memset(&routerLSABody, 0, sizeof(Ospfv3RouterLsaBody));
 
         switch (intf->getType()) {
             case Ospfv3Interface::POINTTOPOINT_TYPE: {
@@ -1005,7 +1003,6 @@ NetworkLSA* Ospfv3Area::originateNetworkLSA(Ospfv3Interface* interface)
         NetworkLSA* networkLsa = new NetworkLSA();
         Ospfv3LsaHeader& lsaHeader = networkLsa->getHeaderForUpdate();
         Ospfv3Options lsOptions;
-        memset(&lsOptions, 0, sizeof(Ospfv3Options));
         //TODO - LSA Options for NetworkLSA is not set.
 
         //First set the LSA Header

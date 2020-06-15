@@ -67,7 +67,7 @@ Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
     waitTimer->setContextPointer(this);
     acknowledgementTimer = new cMessage("Interface::InterfaceAcknowledgementTimer", INTERFACE_ACKNOWLEDGEMENT_TIMER);
     acknowledgementTimer->setContextPointer(this);
-    memset(authenticationKey.bytes, 0, 8 * sizeof(char));
+    memset(authenticationKey.bytes, 0, sizeof(authenticationKey.bytes));
 }
 
 Ospfv2Interface::~Ospfv2Interface()
@@ -180,7 +180,6 @@ void Ospfv2Interface::reset()
 
 void Ospfv2Interface::sendHelloPacket(Ipv4Address destination, short ttl)
 {
-    Ospfv2Options options;
     const auto& helloPacket = makeShared<Ospfv2HelloPacket>();
     std::vector<Ipv4Address> neighbors;
 
@@ -197,7 +196,8 @@ void Ospfv2Interface::sendHelloPacket(Ipv4Address destination, short ttl)
     else {
         helloPacket->setNetworkMask(interfaceAddressRange.mask);
     }
-    memset(&options, 0, sizeof(Ospfv2Options));
+
+    Ospfv2Options options;
     options.E_ExternalRoutingCapability = parentArea->getExternalRoutingCapability();
     helloPacket->setOptions(options);
     helloPacket->setHelloInterval(helloInterval);

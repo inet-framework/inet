@@ -498,7 +498,6 @@ AsExternalLsa *Router::originateASExternalLSA(AsExternalLsa *lsa)
     Ospfv2Options lsaOptions;
 
     lsaHeader.setLsAge(0);
-    memset(&lsaOptions, 0, sizeof(Ospfv2Options));
     lsaOptions.E_ExternalRoutingCapability = true;
     lsaHeader.setLsOptions(lsaOptions);
     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
@@ -1417,7 +1416,6 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const Ospfv2AsExter
     Ospfv2Options lsaOptions;
 
     lsaHeader.setLsAge(0);
-    memset(&lsaOptions, 0, sizeof(Ospfv2Options));
     lsaOptions.E_ExternalRoutingCapability = true;
     lsaHeader.setLsOptions(lsaOptions);
     lsaHeader.setLsType(AS_EXTERNAL_LSA_TYPE);

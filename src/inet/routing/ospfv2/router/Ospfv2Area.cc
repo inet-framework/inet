@@ -747,7 +747,6 @@ RouterLsa *Ospfv2Area::originateRouterLSA()
     Ospfv2Options lsOptions;
 
     lsaHeader.setLsAge(0);
-    memset(&lsOptions, 0, sizeof(Ospfv2Options));
     lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
     lsaHeader.setLsOptions(lsOptions);
     lsaHeader.setLsType(ROUTERLSA_TYPE);
@@ -995,7 +994,6 @@ NetworkLsa *Ospfv2Area::originateNetworkLSA(const Ospfv2Interface *intf)
         Ospfv2Options lsOptions;
 
         lsaHeader.setLsAge(0);
-        memset(&lsOptions, 0, sizeof(Ospfv2Options));
         lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
         lsaHeader.setLsOptions(lsOptions);
         lsaHeader.setLsType(NETWORKLSA_TYPE);
@@ -1128,7 +1126,6 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
             Ospfv2Options lsOptions;
 
             lsaHeader.setLsAge(0);
-            memset(&lsOptions, 0, sizeof(Ospfv2Options));
             lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
             lsaHeader.setLsOptions(lsOptions);
             lsaHeader.setLsType(SUMMARYLSA_ASBOUNDARYROUTERS_TYPE);
@@ -1191,7 +1188,6 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                 Ospfv2Options lsOptions;
 
                 lsaHeader.setLsAge(0);
-                memset(&lsOptions, 0, sizeof(Ospfv2Options));
                 lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
                 lsaHeader.setLsOptions(lsOptions);
                 lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);
@@ -1259,7 +1255,6 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                     Ospfv2Options lsOptions;
 
                     lsaHeader.setLsAge(0);
-                    memset(&lsOptions, 0, sizeof(Ospfv2Options));
                     lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
                     lsaHeader.setLsOptions(lsOptions);
                     lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);
@@ -1345,7 +1340,6 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                         Ospfv2Options lsOptions;
 
                         lsaHeader.setLsAge(0);
-                        memset(&lsOptions, 0, sizeof(Ospfv2Options));
                         lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
                         lsaHeader.setLsOptions(lsOptions);
                         lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);
@@ -1381,7 +1375,6 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA_Stub()
     Ospfv2Options lsOptions;
 
     lsaHeader.setLsAge(0);
-    memset(&lsOptions, 0, sizeof(Ospfv2Options));
     lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
     lsaHeader.setLsOptions(lsOptions);
     lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);

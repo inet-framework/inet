@@ -2,6 +2,7 @@
 
 Migrating Code from INET 3.x
 ============================
+Release: |release|
 
 .. _mg:sec:migrationguide:architecture:
 

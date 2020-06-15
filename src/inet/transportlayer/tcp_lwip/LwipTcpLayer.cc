@@ -49,7 +49,7 @@ LwipTcpLayer::LwipTcpLayer(LwipTcpStackIf& stackIfP) :
     tcp_timer(0)
 {
     tcp_listen_pcbs.pcbs = nullptr;
-    memset(&inseg, 0, sizeof(inseg));
+    memset((void*)&inseg, 0, sizeof(inseg));
 }
 
 void LwipTcpLayer::if_receive_packet(int interfaceId, void *data, int datalen)

@@ -248,7 +248,6 @@ Packet* Ospfv3Interface::prepareHello()
     //Hello content
     helloPacket->setInterfaceID(this->interfaceId);
     helloPacket->setRouterPriority(this->getRouterPriority());
-    memset(&options, 0, sizeof(Ospfv3Options));
 
     options.rBit = true;
     options.v6Bit = true;
@@ -1766,7 +1765,6 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     linkLSA->setRouterPriority(this->getRouterPriority());
     //TODO - LSA Options for LinkLSA is not set.
     Ospfv3Options lsOptions;
-    memset(&lsOptions, 0, sizeof(Ospfv3Options));
     linkLSA->setOspfOptions(lsOptions);
 
     InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));

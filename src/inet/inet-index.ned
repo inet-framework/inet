@@ -19,7 +19,7 @@
 // @titlepage
 //
 // <center><h1>INET Framework</h1></center>
-// <center>release ##BUILDID##</center>
+// <center>Release: ##BUILDID## (see <a href="../../api-old">older versions</a>)</center>
 //
 // INET Framework is an open-source model library for the OMNeT++ simulation
 // environment. It provides protocols, agents and other models for researchers

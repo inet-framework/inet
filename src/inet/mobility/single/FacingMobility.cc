@@ -43,5 +43,16 @@ const Quaternion& FacingMobility::getCurrentAngularPosition()
     return lastOrientation;
 }
 
+void FacingMobility::handleParameterChange(const char *name)
+{
+    if (name == nullptr || !strcmp(name, "displayStringTextFormat"))
+        format.parseFormat(par("displayStringTextFormat"));
+
+    if (name == nullptr || !strcmp(name, "targetMobility")) {
+        targetMobility = getModuleFromPar<IMobility>(par("targetMobility"), this);
+        emitMobilityStateChangedSignal();
+    }
+}
+
 } // namespace inet
 
