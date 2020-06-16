@@ -76,54 +76,6 @@ module OmittedSocketLayer like ISocketLayer
         lowerLayerIn --> upperLayerOut;
 }
 
-simple EthernetSocketTable {
-    parameters:
-	    @display("i=block/table");
-}
-
-simple EthernetSocketCommandProcessor {
-    parameters:
-	    @display("i=block/cogwheel");
-    gates:
-        input in;
-        output out;
-}
-
-simple EthernetSocketPacketProcessor {
-    parameters:
-	    @display("i=block/cogwheel");
-    gates:
-        input in;
-        output out;
-}
-
-module EthernetSocketLayer like ISocketLayer
-{
-    parameters:
-        @display("i=block/layer");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
-    submodules:
-        socketTable: EthernetSocketTable {
-            @display("p=100,100;is=s");
-        }
-        commandProcessor: EthernetSocketCommandProcessor {
-            @display("p=300,100");
-        }
-        packetProcessor: EthernetSocketPacketProcessor {
-            @display("p=500,100");
-        }
-    connections:
-        upperLayerIn --> { @display("m=n"); } --> commandProcessor.in;
-        commandProcessor.out --> { @display("m=s"); } --> lowerLayerOut;
-
-        lowerLayerIn --> { @display("m=s"); } --> packetProcessor.in;
-        packetProcessor.out --> { @display("m=n"); } --> upperLayerOut; 
-}
-
 moduleinterface IMeasurementLayer
 {
     parameters:
