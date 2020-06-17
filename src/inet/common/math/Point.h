@@ -34,13 +34,13 @@ template<>
 inline void printUnit(std::ostream& os, Quaternion v) { os << "quaternion"; }
 
 template<typename T>
-inline double toDouble(T v) { return v.get(); }
+inline double toDouble(const T v) { return v.get(); }
 template<>
-inline double toDouble(simsec v) { return v.get().dbl(); }
+inline double toDouble(const simsec v) { return v.get().dbl(); }
 template<>
-inline double toDouble(double v) { return v; }
+inline double toDouble(const double v) { return v; }
 template<>
-inline double toDouble(simtime_t v) { return v.dbl(); }
+inline double toDouble(const simtime_t v) { return v.dbl(); }
 
 template<typename T>
 inline T getLowerBound() { return T(-INFINITY); }
