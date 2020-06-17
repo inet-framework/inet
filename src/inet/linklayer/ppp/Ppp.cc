@@ -167,11 +167,10 @@ void Ppp::startTransmitting()
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
     emit(transmissionStateChangedSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
-    auto oldPacketProtocolTag = pppFrame->removeTag<PacketProtocolTag>();
+    auto& oldPacketProtocolTag = pppFrame->removeTag<PacketProtocolTag>();
     pppFrame->clearTags();
     auto newPacketProtocolTag = pppFrame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
     if (sendRawBytes) {
         auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekAllAsBytes());
         rawFrame->copyTags(*pppFrame);

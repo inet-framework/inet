@@ -145,7 +145,7 @@ void PacketDissector::doDissectPacket(Packet *packet, const Protocol *protocol) 
 
 void PacketDissector::dissectPacket(Packet *packet) const
 {
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     if (packetProtocolTag != nullptr)
         dissectPacket(packet, protocol, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset());

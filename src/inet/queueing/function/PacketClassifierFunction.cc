@@ -51,7 +51,7 @@ Register_Packet_Classifier_Function(PacketUserPriorityReqClassifier, classifyPac
 
 static int classifyPacketByUserPriorityInd(Packet *packet)
 {
-    auto userPriorityInd = packet->findTag<UserPriorityInd>();
+    const auto& userPriorityInd = packet->findTag<UserPriorityInd>();
     return userPriorityInd != nullptr ? userPriorityInd->getUserPriority() : 0;
 }
 

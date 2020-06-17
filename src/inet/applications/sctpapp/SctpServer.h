@@ -93,7 +93,7 @@ class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
     void sendOrSchedule(Message *msg);
     void sendOrSchedule(Packet *pkt);
 
-    Message *makeAbortNotification(SctpCommandReq *msg);
+    Message *makeAbortNotification(const SctpCommandReq *msg);
     Message *makeReceiveRequest(cMessage *msg);
     Message *makeDefaultReceive();
     void generateAndSend();

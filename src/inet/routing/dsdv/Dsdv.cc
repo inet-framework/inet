@@ -103,7 +103,7 @@ void Dsdv::start()
                 rt->deleteRoute(entry);
         }
     }
-    CHK(interface80211ptr->getProtocolData<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
+    CHK(interface80211ptr->getProtocolDataForUpdate<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
 
     // schedules a random periodic event: the hello message broadcast from DSDV module
 

@@ -301,7 +301,7 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::computeMode(Hz bandwid
 
 const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::getMode(const Packet* packet) const
 {
-    auto modeReq = const_cast<Packet*>(packet)->findTag<Ieee80211ModeReq>();
+    const auto& modeReq = const_cast<Packet*>(packet)->findTag<Ieee80211ModeReq>();
     if (isCompliant)
         return modeReq != nullptr ? check_and_cast<const Ieee80211OfdmMode*>(modeReq->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
     else

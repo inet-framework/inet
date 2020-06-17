@@ -68,8 +68,8 @@ void Ieee8022LlcChecker::processPacket(Packet *packet)
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     }
     else {
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
-        delete packet->removeTagIfPresent<PacketProtocolTag>();
+        packet->removeTagIfPresent<DispatchProtocolReq>();
+        packet->removeTagIfPresent<PacketProtocolTag>();
     }
 }
 

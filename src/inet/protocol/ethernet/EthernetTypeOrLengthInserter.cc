@@ -33,7 +33,7 @@ void EthernetTypeOrLengthInserter::processPacket(Packet *packet)
     else
         header->setTypeOrLength(ProtocolGroup::ethertype.findProtocolNumber(protocol));
     packet->insertAtFront(header);
-    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    auto packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
 }
 

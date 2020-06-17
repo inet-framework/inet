@@ -114,7 +114,7 @@ void ExtInterface::copyNetworkAddressFromExt()
     close(fd);
 
     if (ipv4Address.isUnspecified() && ipv4Netmask.isUnspecified()) {
-        auto interfaceData = findProtocolData<Ipv4InterfaceData>();
+        auto& interfaceData = findProtocolDataForUpdate<Ipv4InterfaceData>();
         if (interfaceData != nullptr) {
             interfaceData->setIPAddress(Ipv4Address());
             interfaceData->setNetmask(Ipv4Address());
@@ -159,7 +159,7 @@ void ExtInterface::copyNetworkAddressToExt()
     ifr.ifr_addr.sa_family = AF_INET;
     strncpy(ifr.ifr_name , device.c_str() , IFNAMSIZ-1);
 
-    Ipv4InterfaceData *interfaceData = findProtocolData<Ipv4InterfaceData>();
+    const auto& interfaceData = findProtocolData<Ipv4InterfaceData>();
     if (interfaceData != nullptr) {
         //set the IPv4 address
         ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr = htonl(interfaceData->getIPAddress().getInt());

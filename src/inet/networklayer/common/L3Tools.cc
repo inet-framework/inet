@@ -31,7 +31,7 @@ namespace inet {
 
 const Protocol *findNetworkProtocol(Packet *packet)
 {
-    auto networkProtocolInd = packet->findTag<NetworkProtocolInd>();
+    const auto& networkProtocolInd = packet->findTag<NetworkProtocolInd>();
     return networkProtocolInd == nullptr ? nullptr : networkProtocolInd->getProtocol();
 }
 
@@ -46,7 +46,7 @@ const Protocol& getNetworkProtocol(Packet *packet)
 
 const Ptr<const NetworkHeaderBase> findNetworkProtocolHeader(Packet *packet)
 {
-    auto networkProtocolInd = packet->findTag<NetworkProtocolInd>();
+    const auto& networkProtocolInd = packet->findTag<NetworkProtocolInd>();
     return networkProtocolInd == nullptr ? nullptr : dynamicPtrCast<const NetworkHeaderBase>(networkProtocolInd->getNetworkProtocolHeader());
 }
 

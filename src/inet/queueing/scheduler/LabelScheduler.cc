@@ -65,7 +65,7 @@ int LabelScheduler::schedulePacket()
     for (auto label : labels) {
         for (int i = 0; i < (int)providers.size(); i++) {
             auto packet = providers[i]->canPullPacket(inputGates[i]->getPathStartGate());
-            auto labelsTag = packet->findTag<LabelsTag>();
+            const auto& labelsTag = packet->findTag<LabelsTag>();
             if (labelsTag != nullptr) {
                 for (int j = 0; j < (int)labelsTag->getLabelsArraySize(); j++)
                     if (label == labelsTag->getLabels(j))

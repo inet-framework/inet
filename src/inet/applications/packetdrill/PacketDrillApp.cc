@@ -89,7 +89,7 @@ void PacketDrillApp::initialize(int stage)
         InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByName(interface);
         if (interfaceEntry == nullptr)
             throw cRuntimeError("TUN interface not found: %s", interface);
-        auto *idat = interfaceEntry->getProtocolData<Ipv4InterfaceData>();
+        auto& idat = interfaceEntry->getProtocolDataForUpdate<Ipv4InterfaceData>();
         idat->setIPAddress(localAddress.toIpv4());
         tunSocket.setOutputGate(gate("socketOut"));
         tunSocket.open(interfaceEntry->getInterfaceId());
@@ -210,7 +210,7 @@ void PacketDrillApp::socketDataNotificationArrived(SctpSocket *socket, Message *
 {
     if (recvFromSet) {
         Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
-        SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
+        auto cmd = cmsg->addTag<SctpSendReq>();
         cmd->setSocketId(sctpAssocId);
         cmsg->addTag<SocketReq>()->setSocketId(sctpAssocId);
         cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
@@ -1021,7 +1021,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_RESET_STREAMS: {
             struct sctp_reset_streams_expr *rs = exp->getResetStreams();
             Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_STREAM_RESET);
-            SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
+            auto rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(rs->srs_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1053,7 +1053,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_ADD_STREAMS: {
             struct sctp_add_streams_expr *as = exp->getAddStreams();
             Message *cmsg = new Message("SCTP_C_ADD_STREAMS", SCTP_C_ADD_STREAMS);
-            SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
+            auto rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(as->sas_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1123,7 +1123,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                     break;
                 case SCTP_RESET_ASSOC: {
                     Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_RESET_ASSOC);
-                    SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
+                    auto rinfo = cmsg->addTag<SctpResetReq>();
                     rinfo->setSocketId(-1);
                     rinfo->setFd(value);
                     rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1378,7 +1378,7 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                 }
                 case IP_PROT_SCTP: {
                     Packet* pkt = new Packet("dataRequest", SCTP_C_RECEIVE);
-                    SctpSendReq *sctpcmd = pkt->addTag<SctpSendReq>();
+                    auto sctpcmd = pkt->addTag<SctpSendReq>();
                     sctpcmd->setSocketId(sctpAssocId);
                     sctpcmd->setSid(0);
                     pkt->addTag<SocketReq>()->setSocketId(sctpAssocId);

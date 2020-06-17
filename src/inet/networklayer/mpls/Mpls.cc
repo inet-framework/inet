@@ -119,7 +119,7 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
     packet->addPar("color") = color;
 
     packet->trim();
-    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
     sendToL2(packet);
 
@@ -144,7 +144,7 @@ void Mpls::pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
     packet->trimFront();
     newMplsHeader->setS(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() != Protocol::mpls.getId());
     packet->insertAtFront(newMplsHeader);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
 }
 
 void Mpls::swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
@@ -161,7 +161,7 @@ void Mpls::popLabel(Packet *packet)
     ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
     auto oldMplsHeader = packet->popAtFront<MplsHeader>();
     if(oldMplsHeader->getS()) {
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     }
 }
 
@@ -231,7 +231,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         // Decapsulate the message and pass up to L3
         EV_INFO << ": decapsulating and sending up\n";
         packet->popAtFront<MplsHeader>();
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         sendToL3(packet);
         return;
     }
@@ -264,7 +264,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         }
 
         //ASSERT(labelIf[outgoingPort]);
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
+        packet->removeTagIfPresent<DispatchProtocolReq>();
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
         packet->trim();
         sendToL2(packet);
@@ -277,7 +277,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
         if (outgoingInterface) {
             packet->trim();
-            delete packet->removeTagIfPresent<DispatchProtocolReq>();
+            packet->removeTagIfPresent<DispatchProtocolReq>();
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
             sendToL2(packet);
         }

@@ -60,7 +60,7 @@ void EthernetFragmentFcsInserter::processPacket(Packet *packet)
     header->setFcsMode(fcsMode);
     header->setMCrc(!fragmentTag->getLastFragment());
     packet->insertAtBack(header);
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    auto& packetProtocolTag = packet->findTagForUpdate<PacketProtocolTag>();
     if (packetProtocolTag != nullptr)
         packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() - header->getChunkLength());
 }

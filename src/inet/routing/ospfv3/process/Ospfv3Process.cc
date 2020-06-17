@@ -159,7 +159,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
 
             std::string add6 = addr6c;
             std::string prefix6 = add6.substr(0, add6.find("/"));
-            Ipv6InterfaceData * intfData6 = myInterface->findProtocolData<Ipv6InterfaceData>();
+            auto& intfData6 = myInterface->findProtocolDataForUpdate<Ipv6InterfaceData>();
             int prefLength;
             Ipv6Address address6;
             if (!(address6.tryParseAddrWithPrefix(addr6c, prefLength)))
@@ -194,7 +194,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                 throw cRuntimeError("ipv4 routing table required for current config");
             Ipv4Address addr;
             Ipv4Address mask;
-            Ipv4InterfaceData * intfData = myInterface->getProtocolData<Ipv4InterfaceData>();
+            auto& intfData = myInterface->getProtocolData<Ipv4InterfaceData>();
             for (auto & ipv4Rec : ipv4AddrList) {
                 const char * addr4c = ipv4Rec->getNodeValue(); //from string make ipv4 address and store to interface config
                 addr = (Ipv4Address(addr4c));
@@ -695,7 +695,7 @@ void Ospfv3Process::addInstance(Ospfv3Instance* newInstance)
 void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const char* ifName, short hopLimit)
 {
     InterfaceEntry *ie = CHK(this->ift->findInterfaceByName(ifName));
-    Ipv6InterfaceData *ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
+    const auto& ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

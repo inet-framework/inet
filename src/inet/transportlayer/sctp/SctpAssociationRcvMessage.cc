@@ -2007,7 +2007,7 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
         Indication *msg = new Indication(indicationName(SCTP_I_SENDQUEUE_ABATED), SCTP_I_SENDQUEUE_ABATED);
 
         msg->addTag<SocketInd>()->setSocketId(assocId);
-        SctpSendQueueAbatedReq *sendQueueAbatedIndication = msg->addTag<SctpSendQueueAbatedReq>();
+        auto& sendQueueAbatedIndication = msg->addTag<SctpSendQueueAbatedReq>();
         sendQueueAbatedIndication->setSocketId(assocId);
         sendQueueAbatedIndication->setLocalAddr(localAddr);
         sendQueueAbatedIndication->setRemoteAddr(remoteAddr);

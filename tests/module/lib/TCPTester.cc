@@ -183,7 +183,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
 //    pk->addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
     pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
     pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
-    delete pk->removeTag<L3AddressReq>();
+    pk->removeTag<L3AddressReq>();
 
     // find entry in script
     Command *cmd = NULL;
@@ -289,7 +289,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
 //    pk->addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
     pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
     pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
-    delete pk->removeTag<L3AddressReq>();
+    pk->removeTag<L3AddressReq>();
 
     // decide what to do
     double x = dblrand();

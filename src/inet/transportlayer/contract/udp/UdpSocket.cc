@@ -389,7 +389,7 @@ void UdpSocket::processMessage(cMessage *msg)
 bool UdpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
-    auto socketInd = tags.findTag<SocketInd>();
+    const auto& socketInd = tags.findTag<SocketInd>();
     return socketInd != nullptr && socketInd->getSocketId() == socketId;
 }
 

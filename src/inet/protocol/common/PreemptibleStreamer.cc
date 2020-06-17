@@ -104,7 +104,7 @@ Packet *PreemptibleStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamStart = simTime();
     streamedPacket = remainingPacket == nullptr ? provider->pullPacket(inputGate->getPathStartGate()) : remainingPacket;
     remainingPacket = nullptr;
-    auto fragmentTag = streamedPacket->findTag<FragmentTag>();
+    auto fragmentTag = streamedPacket->findTagForUpdate<FragmentTag>();
     if (fragmentTag == nullptr) {
         fragmentTag = streamedPacket->addTag<FragmentTag>();
         fragmentTag->setFirstFragment(true);
@@ -132,12 +132,12 @@ Packet *PreemptibleStreamer::pullPacketEnd(cGate *gate, bps datarate)
         packet->setName(name.c_str());
         packet->removeTagIfPresent<PacketProtocolTag>();
         const auto& remainingData = packet->removeAtBack(packet->getTotalLength() - preemptedLength);
-        FragmentTag *fragmentTag = packet->getTag<FragmentTag>();
+        auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
         fragmentTag->setLastFragment(false);
         // remaining part
         remainingPacket = new Packet(name.c_str(), remainingData);
         remainingPacket->copyTags(*packet);
-        FragmentTag *remainingPacketFragmentTag = remainingPacket->getTag<FragmentTag>();
+        auto& remainingPacketFragmentTag = remainingPacket->getTagForUpdate<FragmentTag>();
         remainingPacketFragmentTag->setFirstFragment(false);
         remainingPacketFragmentTag->setLastFragment(true);
         remainingPacketFragmentTag->setFragmentNumber(fragmentTag->getFragmentNumber() + 1);

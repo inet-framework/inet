@@ -1519,7 +1519,7 @@ bool Router::isDirectRoute(Ospfv2RoutingTableEntry &entry)
     for(int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *intf = ift->getInterface(i);
         if(intf && !intf->isLoopback()) {
-            Ipv4InterfaceData *ipv4data = intf->findProtocolData<Ipv4InterfaceData>();
+            const auto& ipv4data = intf->findProtocolData<Ipv4InterfaceData>();
             if(ipv4data) {
                 if((entry.getDestination() & ipv4data->getNetmask()) == (ipv4data->getIPAddress() & ipv4data->getNetmask()))
                     return true;

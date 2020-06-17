@@ -465,7 +465,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     // get src, hopCount etc from packet, and print them
     L3Address src = packet->getTag<L3AddressInd>()->getSrcAddress();
     //L3Address dest = msg->getTag<L3AddressInd>()->getDestination();
-    auto msgHopCountTag = packet->findTag<HopLimitInd>();
+    auto& msgHopCountTag = packet->findTag<HopLimitInd>();
     int msgHopCount = msgHopCountTag ? msgHopCountTag->getHopLimit() : -1;
 
     // calculate the RTT time by looking up the the send time of the packet

@@ -113,7 +113,7 @@ bool Ieee8021qTagger::matchesPacket(const Packet *packet) const
 {
     const auto& typeOrLengthHeader = packet->peekAtFront<Ieee8023TypeOrLength>();
     auto oldVlanId = typeOrLengthHeader->getTypeOrLength() == etherType ? packet->peekAtFront<Ieee8021qHeader>()->getVid() : -1;
-    auto vlanReq = packet->findTag<VlanReq>();
+    const auto& vlanReq = packet->findTag<VlanReq>();
     auto newVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : oldVlanId;
     return vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), newVlanId) != vlanIdFilter.end();
 }

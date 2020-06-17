@@ -52,7 +52,7 @@ bool BehaviorAggregateClassifier::PacketDissectorCallback::matches(const Packet 
 {
     dissect = true;
     matches_ = false;
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
     auto copy = packet->dup();
