@@ -143,10 +143,10 @@ void StpBase::refreshDisplay() const
 
 const Ieee8021dInterfaceData *StpBase::getPortInterfaceData(unsigned int interfaceId) const
 {
-    return getPortInterfaceEntry(interfaceId)->getProtocolData<Ieee8021dInterfaceData>().get();
+    return getPortInterfaceEntry(interfaceId)->getProtocolData<Ieee8021dInterfaceData>();
 }
 
-const Ptr<Ieee8021dInterfaceData> StpBase::getPortInterfaceDataForUpdate(unsigned int interfaceId)
+Ieee8021dInterfaceData *StpBase::getPortInterfaceDataForUpdate(unsigned int interfaceId)
 {
     return getPortInterfaceEntry(interfaceId)->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
 }

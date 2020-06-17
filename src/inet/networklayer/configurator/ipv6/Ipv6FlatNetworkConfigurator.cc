@@ -93,7 +93,7 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
         // assign prefix to interfaces
         for (int k = 0; k < ift->getNumInterfaces(); k++) {
             InterfaceEntry *ie = ift->getInterface(k);
-            auto& ipv6Data = ie->findProtocolDataForUpdate<Ipv6InterfaceData>();
+            auto ipv6Data = ie->findProtocolDataForUpdate<Ipv6InterfaceData>();
             if (!ipv6Data || ie->isLoopback())
                 continue;
             if (ipv6Data->getNumAdvPrefixes() > 0)
