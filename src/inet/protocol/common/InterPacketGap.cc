@@ -42,7 +42,7 @@ void InterPacketGap::handleMessage(cMessage *message)
         }
         else if (auto progress = dynamic_cast<cProgress *>(message)) {
             packet = check_and_cast<Packet *>(progress->removePacket());
-            receiveProgress(packet, progress->getArrivalGate(), progress->getKind(), progress->getBitPosition(), progress->getTimePosition(), progress->getExtraProcessableBitLength(), progress->getExtraProcessableDuration());
+            receiveProgress(packet, progress->getArrivalGate(), progress->getKind(), progress->getDatarate(), progress->getBitPosition(), progress->getTimePosition(), progress->getExtraProcessableBitLength(), progress->getExtraProcessableDuration());
             delete progress;
         }
         else
@@ -63,7 +63,7 @@ void InterPacketGap::handleMessage(cMessage *message)
             if (packet == lastPacket) {     //FIXME
                 lastPacketEndTime = now + lastDelay + packet->getDuration() - progress->getTimePosition();
                 if (lastDelay == 0)
-                    receiveProgress(progress->removePacket(), progress->getArrivalGate(), progress->getKind(), progress->getBitPosition(), progress->getTimePosition(), progress->getExtraProcessableBitLength(), progress->getExtraProcessableDuration());
+                    receiveProgress(progress->removePacket(), progress->getArrivalGate(), progress->getKind(), progress->getDatarate(), progress->getBitPosition(), progress->getTimePosition(), progress->getExtraProcessableBitLength(), progress->getExtraProcessableDuration());
                 else
                     scheduleAt(simTime() + lastDelay, message);
             }
@@ -74,7 +74,7 @@ void InterPacketGap::handleMessage(cMessage *message)
                     lastDelay = 0;
                 lastPacketEndTime = now + lastDelay + packet->getDuration() - progress->getTimePosition();
                 if (lastDelay == 0)
-                    receiveProgress(progress->removePacket(), progress->getArrivalGate(), progress->getKind(), progress->getBitPosition(), progress->getTimePosition(), progress->getExtraProcessableBitLength(), progress->getExtraProcessableDuration());
+                    receiveProgress(progress->removePacket(), progress->getArrivalGate(), progress->getKind(), progress->getDatarate(), progress->getBitPosition(), progress->getTimePosition(), progress->getExtraProcessableBitLength(), progress->getExtraProcessableDuration());
                 else {
                     EV_INFO << "Inserting packet gap before " << packet->getName() << "." << endl;
                     scheduleAt(now + lastDelay, message);
@@ -89,14 +89,14 @@ void InterPacketGap::handleMessage(cMessage *message)
     }
 }
 
-void InterPacketGap::receivePacketStart(cPacket *cpacket)
+void InterPacketGap::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     animateSend(packet, outputGate);
     pushOrSendPacketStart(packet, outputGate, consumer, bps(NaN));
 }
 
-void InterPacketGap::receivePacketProgress(cPacket *cpacket, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
+void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     animateSend(packet, outputGate);
@@ -106,7 +106,7 @@ void InterPacketGap::receivePacketProgress(cPacket *cpacket, int bitPosition, si
         lastPacket = nullptr;
 }
 
-void InterPacketGap::receivePacketEnd(cPacket *cpacket)
+void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     animateSend(packet, outputGate);
@@ -170,7 +170,7 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
         pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     }
     else
-        sendPacketStart(packet, nullptr, 0, lastDelay);
+        sendPacketStart(packet, nullptr, lastDelay, packet->getDuration(), bps(datarate).get());
 }
 
 void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)

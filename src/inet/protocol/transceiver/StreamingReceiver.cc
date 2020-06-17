@@ -44,21 +44,21 @@ void StreamingReceiver::sendToUpperLayer(Packet *packet)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void StreamingReceiver::receivePacketStart(cPacket *cpacket)
+void StreamingReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
 {
     ASSERT(rxSignal == nullptr);
     take(cpacket);
     rxSignal = check_and_cast<Signal *>(cpacket);
 }
 
-void StreamingReceiver::receivePacketProgress(cPacket *cpacket, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
+void StreamingReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     take(cpacket);
     delete rxSignal;
     rxSignal = check_and_cast<Signal *>(cpacket);
 }
 
-void StreamingReceiver::receivePacketEnd(cPacket *cpacket)
+void StreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     delete rxSignal;
     rxSignal = check_and_cast<Signal *>(cpacket);

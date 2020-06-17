@@ -35,7 +35,7 @@ void StreamingTransmitter::initialize(int stage)
 void StreamingTransmitter::handleMessage(cMessage *message)
 {
     if (message == txEndTimer) {
-        sendPacketEnd(txSignal, outputGate, txSignal->getDuration());
+        sendPacketEnd(txSignal, outputGate, 0, txSignal->getDuration(), bps(datarate).get());
         txSignal = nullptr;
         producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
         producer->handleCanPushPacket(inputGate->getPathStartGate());
@@ -56,7 +56,7 @@ void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
 //    auto s = new EthernetSignal(packet->getName());
 //    s->setBitrate(datarate.get());
     txSignal = encodePacket(txPacket);
-    sendPacketStart(txSignal->dup(), outputGate, txSignal->getDuration());
+    sendPacketStart(txSignal->dup(), outputGate, 0, txSignal->getDuration(), bps(datarate).get());
     scheduleTxEndTimer(txSignal);
 }
 
