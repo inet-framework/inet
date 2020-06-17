@@ -318,7 +318,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement
        in RAs. The Ipv6 interface data gets overwritten if lines 249 to 262 is uncommented.
        The fix is to create an XML file with all the default values. Customised XML files
        can be used for future protocols that requires different values. (MIPv6)*/
-    auto& d = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
+    auto d = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
 
     // parse basic config (attributes)
     d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));

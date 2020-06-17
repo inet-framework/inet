@@ -230,7 +230,7 @@ void Stp::generateTCN()
 
 bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 {
-    auto& port = getPortInterfaceDataForUpdate(interfaceId);
+    auto port = getPortInterfaceDataForUpdate(interfaceId);
     Ieee8021dInterfaceData *xBpdu = new Ieee8021dInterfaceData();
 
     int result;
@@ -243,7 +243,7 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
     xBpdu->setPortPriority(bpdu->getPortPriority());
     xBpdu->setPortNum(bpdu->getPortNum());
 
-    result = comparePorts(port.get(), xBpdu);
+    result = comparePorts(port, xBpdu);
 
     // port is superior
     if (result > 0) {
@@ -271,7 +271,7 @@ void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())
         return;
 
-    auto& portData = getPortInterfaceDataForUpdate(interfaceId);
+    auto portData = getPortInterfaceDataForUpdate(interfaceId);
 
     portData->setRootPriority(bpdu->getRootPriority());
     portData->setRootAddress(bpdu->getRootAddress());
@@ -309,7 +309,7 @@ void Stp::handleTick()
 
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-        auto& port = getPortInterfaceDataForUpdate(interfaceId);
+        auto port = getPortInterfaceDataForUpdate(interfaceId);
 
         // disabled ports don't count
         if (port->getRole() == Ieee8021dInterfaceData::DISABLED)
@@ -332,7 +332,7 @@ void Stp::handleTick()
 
 void Stp::checkTimers()
 {
-    Ptr<Ieee8021dInterfaceData> port;
+    Ieee8021dInterfaceData *port;
 
     // hello timer check
     if (helloTime >= currentHelloTime) {
@@ -521,12 +521,12 @@ void Stp::selectRootPort()
     unsigned int xRootIdx = 0;
     int result;
     auto best = ifTable->getInterface(0)->getProtocolData<Ieee8021dInterfaceData>();
-    Ptr<Ieee8021dInterfaceData> currentPort = nullptr;
+    Ieee8021dInterfaceData *currentPort = nullptr;
 
     for (unsigned int i = 0; i < numPorts; i++) {
         currentPort = ifTable->getInterface(i)->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
         currentPort->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
-        result = comparePorts(currentPort.get(), best.get());
+        result = comparePorts(currentPort, best);
         if (result > 0) {
             xRootIdx = i;
             best = currentPort;
@@ -572,7 +572,7 @@ void Stp::selectDesignatedPorts()
 
     for (unsigned int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);
-        auto& portData = ie->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
+        auto portData = ie->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
         ASSERT(portData != nullptr);
 
         if (portData->getRole() == Ieee8021dInterfaceData::ROOT || portData->getRole() == Ieee8021dInterfaceData::DISABLED)
@@ -584,7 +584,7 @@ void Stp::selectDesignatedPorts()
 
         bridgeGlobal->setRootPathCost(rootPathCost + portData->getLinkCost());
 
-        result = comparePorts(bridgeGlobal, portData.get());
+        result = comparePorts(bridgeGlobal, portData);
 
         if (result > 0) {
             EV_DETAIL << "Port=" << ie->getFullName() << " is elected as designated portData." << endl;
@@ -609,7 +609,7 @@ void Stp::setAllDesignated()
     desPorts.clear();
     for (unsigned int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);
-        auto& portData = ie->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
+        auto portData = ie->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
         ASSERT(portData != nullptr);
         if (portData->getRole() == Ieee8021dInterfaceData::DISABLED)
             continue;
@@ -677,7 +677,7 @@ void Stp::stop()
 
 void Stp::initInterfacedata(unsigned int interfaceId)
 {
-    auto& ifd = getPortInterfaceDataForUpdate(interfaceId);
+    auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
     ifd->setState(Ieee8021dInterfaceData::DISCARDING);
     ifd->setRootPriority(bridgePriority);

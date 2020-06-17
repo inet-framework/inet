@@ -557,7 +557,7 @@ void DhcpServer::handleStartOperation(LifecycleOperation *operation)
 
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
-    auto& ipv4data = ie->findProtocolData<Ipv4InterfaceData>();
+    auto ipv4data = ie->findProtocolData<Ipv4InterfaceData>();
     if (ipv4data == nullptr)
         throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
     const char *gatewayStr = par("gateway");

@@ -117,7 +117,7 @@ void Rstp::handleUpgrade(cMessage *msg)
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-        auto& iPort = getPortInterfaceDataForUpdate(interfaceId);
+        auto iPort = getPortInterfaceDataForUpdate(interfaceId);
         if (getPortInterfaceEntry(interfaceId)->hasCarrier() && iPort->getNextUpgrade() == simTime()) {
             if (iPort->getRole() == Ieee8021dInterfaceData::NOTASSIGNED) {
                 EV_DETAIL << "MigrateTime. Setting port " << interfaceId << "to designated." << endl;
@@ -149,7 +149,7 @@ void Rstp::handleHelloTime(cMessage *msg)
         // sends hello through all active (learning, forwarding or not assigned) ports
         // increments LostBPDU just from ROOT, ALTERNATE and BACKUP
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-        auto& iPort = getPortInterfaceDataForUpdate(interfaceId);
+        auto iPort = getPortInterfaceDataForUpdate(interfaceId);
         if (!iPort->isEdge()
             && (iPort->getRole() == Ieee8021dInterfaceData::ROOT
                 || iPort->getRole() == Ieee8021dInterfaceData::ALTERNATE
@@ -169,7 +169,7 @@ void Rstp::handleHelloTime(cMessage *msg)
                         // old root gate goes to DESIGNATED and DISCARDING
                         // a new contest should be done to determine the new root path from this LAN
                         // updating root vector.
-                        auto& candidatePort = getPortInterfaceDataForUpdate(candidate);
+                        auto candidatePort = getPortInterfaceDataForUpdate(candidate);
                         iPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                         iPort->setState(Ieee8021dInterfaceData::DISCARDING);    // if there is not a better BPDU, that will become FORWARDING
                         iPort->setNextUpgrade(simTime() + forwardDelay);
@@ -218,7 +218,7 @@ void Rstp::checkTC(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId)
         for (unsigned int i = 0; i < numPorts; i++) {
             int interfaceId = ifTable->getInterface(i)->getInterfaceId();
             if (interfaceId != arrivalInterfaceId) {
-                auto& port2 = getPortInterfaceDataForUpdate(interfaceId);
+                auto port2 = getPortInterfaceDataForUpdate(interfaceId);
                 // flushing other ports
                 // TCN over other ports
                 macTable->flush(interfaceId);
@@ -231,7 +231,7 @@ void Rstp::checkTC(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId)
 void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "More than one port in the same LAN" << endl;
-    auto& port = getPortInterfaceDataForUpdate(arrivalInterfaceId);
+    auto port = getPortInterfaceDataForUpdate(arrivalInterfaceId);
     if ((frame->getPortPriority() < port->getPortPriority())
         || ((frame->getPortPriority() == port->getPortPriority()) && (frame->getPortNum() < arrivalInterfaceId)))
     {
@@ -245,7 +245,7 @@ void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInt
     else if (frame->getPortPriority() > port->getPortPriority()
              || (frame->getPortPriority() == port->getPortPriority() && frame->getPortNum() > arrivalInterfaceId))
     {
-        auto& port2 = getPortInterfaceDataForUpdate(frame->getPortNum());
+        auto port2 = getPortInterfaceDataForUpdate(frame->getPortNum());
         // flushing sender port
         macTable->flush(frame->getPortNum());    // portNum is sender port number, it is not arrival port
         port2->setRole(Ieee8021dInterfaceData::BACKUP);
@@ -254,7 +254,7 @@ void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInt
         EV_DETAIL << "Setting port " << frame->getPortNum() << "to backup" << endl;
     }
     else {
-        auto& port2 = getPortInterfaceDataForUpdate(frame->getPortNum());
+        auto port2 = getPortInterfaceDataForUpdate(frame->getPortNum());
         // unavoidable loop, received its own message at the same port
         // switch to disabled
         EV_DETAIL << "Unavoidable loop. Received its own message at the same port. Setting port " << frame->getPortNum() << " to disabled." << endl;
@@ -313,7 +313,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
     EV_DETAIL << "Better BPDU received than the current best for this port." << endl;
     // update that port rstp info
     updateInterfacedata(frame, arrivalInterfaceId);
-    auto& arrivalPort = getPortInterfaceDataForUpdate(arrivalInterfaceId);
+    auto arrivalPort = getPortInterfaceDataForUpdate(arrivalInterfaceId);
     int r = getRootInterfaceId();
     if (r == -1) {
         EV_DETAIL << "There was no root. Setting the arrival port to root." << endl;
@@ -325,7 +325,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
         return true;
     }
     else {
-        auto& rootPort = getPortInterfaceDataForUpdate(r);
+        auto rootPort = getPortInterfaceDataForUpdate(r);
         // there was a Root -> challenge 2 (compare with the root)
         int case2 = compareInterfacedata(r, frame, arrivalPort->getLinkCost());    // comparing with root port's BPDU
         int case3 = 0;
@@ -363,7 +363,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                 EV_DETAIL << "Better root received than the current root. Setting the arrival port to root." << endl;
                 for (unsigned int i = 0; i < numPorts; i++) {
                     int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-                    auto& iPort = getPortInterfaceDataForUpdate(interfaceId);
+                    auto iPort = getPortInterfaceDataForUpdate(interfaceId);
                     if (!iPort->isEdge()) {    // avoiding clients reseting
                         if (arrivalPort->getState() != Ieee8021dInterfaceData::FORWARDING)
                             iPort->setTCWhile(simTime() + tcWhileTime);
@@ -447,7 +447,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
 bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "BPDU received from the same source than the current best for this port" << endl;
-    auto& arrivalPort = getPortInterfaceDataForUpdate(arrivalInterfaceId);
+    auto arrivalPort = getPortInterfaceDataForUpdate(arrivalInterfaceId);
     int case0 = compareInterfacedata(arrivalInterfaceId, frame, arrivalPort->getLinkCost());
     // source has updated BPDU information
     switch (case0) {
@@ -461,7 +461,7 @@ bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arriv
                 int alternative = getBestAlternate();    // searching for alternate
                 if (alternative >= 0) {
                     EV_DETAIL << "This port was the root, but there is a better alternative. Setting the arrival port to designated and port " << alternative << "to root." << endl;
-                    auto& alternativePort = getPortInterfaceDataForUpdate(alternative);
+                    auto alternativePort = getPortInterfaceDataForUpdate(alternative);
                     arrivalPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                     arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                     arrivalPort->setNextUpgrade(simTime() + forwardDelay);
@@ -512,7 +512,7 @@ bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arriv
                 arrivalPort->setLostBPDU(0);
                 int alternative = getBestAlternate();    // searching for alternate
                 if (alternative >= 0) {
-                    auto& alternativePort = getPortInterfaceDataForUpdate(alternative);
+                    auto alternativePort = getPortInterfaceDataForUpdate(alternative);
                     int case2 = 0;
                     case2 = compareInterfacedata(alternative, frame, arrivalPort->getLinkCost());
                     if (case2 < 0) {    // if alternate is better, change
@@ -711,7 +711,7 @@ void Rstp::printState()
 
 void Rstp::initInterfacedata(unsigned int interfaceId)
 {
-    auto& ifd = getPortInterfaceDataForUpdate(interfaceId);
+    auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setRootPriority(bridgePriority);
     ifd->setRootAddress(bridgeAddress);
     ifd->setRootPathCost(0);
@@ -727,7 +727,7 @@ void Rstp::initPorts()
 {
     for (unsigned int j = 0; j < numPorts; j++) {
         int interfaceId = ifTable->getInterface(j)->getInterfaceId();
-        auto& jPort = getPortInterfaceDataForUpdate(interfaceId);
+        auto jPort = getPortInterfaceDataForUpdate(interfaceId);
         if (!jPort->isEdge()) {
             jPort->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
             jPort->setState(Ieee8021dInterfaceData::DISCARDING);
@@ -745,7 +745,7 @@ void Rstp::initPorts()
 
 void Rstp::updateInterfacedata(const Ptr<const BpduCfg>& frame, unsigned int portNum)
 {
-    auto& ifd = getPortInterfaceDataForUpdate(portNum);
+    auto ifd = getPortInterfaceDataForUpdate(portNum);
     ifd->setRootPriority(frame->getRootPriority());
     ifd->setRootAddress(frame->getRootAddress());
     ifd->setRootPathCost(frame->getRootPathCost() + ifd->getLinkCost());
@@ -866,7 +866,7 @@ void Rstp::flushOtherPorts(unsigned int portId)
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-        auto& iPort = getPortInterfaceDataForUpdate(interfaceId);
+        auto iPort = getPortInterfaceDataForUpdate(interfaceId);
         iPort->setTCWhile(simTime() + tcWhileTime);
         if ((unsigned int)interfaceId != portId)
             macTable->flush(interfaceId);
@@ -885,7 +885,7 @@ void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
             InterfaceEntry *gateIfEntry = getPortInterfaceEntry(interfaceId);
             if (gateIfEntry == changedIE) {
                 if (gateIfEntry->hasCarrier()) {
-                    auto& iPort = getPortInterfaceDataForUpdate(interfaceId);
+                    auto iPort = getPortInterfaceDataForUpdate(interfaceId);
                     if (iPort->getRole() == Ieee8021dInterfaceData::NOTASSIGNED)
                         iPort->setNextUpgrade(simTime() + migrateTime);
                     else if (iPort->getRole() == Ieee8021dInterfaceData::DESIGNATED
