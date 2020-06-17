@@ -75,7 +75,7 @@ void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps
     delete txPacket;
     txPacket = packet;
     auto signal = encodePacket(txPacket);
-    sendPacketProgress(signal, outputGate, signal->getDuration(), bitPosition, timePosition);
+    sendPacketProgress(signal, outputGate, 0, signal->getDuration(), bps(datarate).get(), bitPosition, timePosition);
     scheduleTxEndTimer(signal, timePosition);
 }
 
@@ -88,14 +88,14 @@ void PreemptibleTransmitter::startTx(Packet *packet)
     auto signal = encodePacket(txPacket);
     EV_INFO << "Starting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     scheduleTxEndTimer(signal, 0);
-    sendPacketStart(signal, outputGate, signal->getDuration());
+    sendPacketStart(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
 }
 
 void PreemptibleTransmitter::endTx()
 {
     EV_INFO << "Ending transmission: packetName = " << txPacket->getName() << std::endl;
     auto signal = encodePacket(txPacket);
-    sendPacketEnd(signal, outputGate, signal->getDuration());
+    sendPacketEnd(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
     delete txPacket;
     txPacket = nullptr;
@@ -110,7 +110,7 @@ void PreemptibleTransmitter::abortTx()
     txPacket->eraseAtBack(txPacket->getTotalLength() - transmittedLength);
     auto signal = encodePacket(txPacket);
     EV_INFO << "Aborting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
-    sendPacketEnd(signal, outputGate, signal->getDuration());
+    sendPacketEnd(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
     txPacket = nullptr;
     txStartTime = -1;

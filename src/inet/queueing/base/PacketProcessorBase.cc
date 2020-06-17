@@ -131,7 +131,7 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPa
         consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
     }
     else
-        sendPacketStart(packet, gate, 0);
+        sendPacketStart(packet, gate, 0, packet->getDuration(), bps(datarate).get());
 }
 
 void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate)
@@ -141,7 +141,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPass
         consumer->pushPacketEnd(packet, gate->getPathEndGate(), datarate);
     }
     else
-        sendPacketEnd(packet, gate, 0);
+        sendPacketEnd(packet, gate, 0, packet->getDuration(), bps(datarate).get());
 }
 
 void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength)
@@ -151,7 +151,7 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, 
         consumer->pushPacketProgress(packet, gate->getPathEndGate(), datarate, position, extraProcessableLength);
     }
     else
-        sendPacketProgress(packet, gate, 0, b(position).get(), 0, b(extraProcessableLength).get(), 0);
+        sendPacketProgress(packet, gate, 0, packet->getDuration(), bps(datarate).get(), b(position).get(), 0, b(extraProcessableLength).get());
 }
 
 void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)

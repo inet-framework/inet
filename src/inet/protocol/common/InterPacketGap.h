@@ -37,9 +37,9 @@ class INET_API InterPacketGap : public PacketPusherBase
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void receivePacketStart(cPacket *packet) override;
-    virtual void receivePacketProgress(cPacket *packet, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
-    virtual void receivePacketEnd(cPacket *packet) override;
+    virtual void receivePacketStart(cPacket *packet, cGate *gate, double datarate) override;
+    virtual void receivePacketProgress(cPacket *packet, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
+    virtual void receivePacketEnd(cPacket *packet, cGate *gate, double datarate) override;
 
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
