@@ -21,9 +21,10 @@ package inet.linklayer.ethernet;
 import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.ITrafficConditioner;
 import inet.linklayer.ieee8021q.IIeee8021qEncap;
 import inet.networklayer.common.InterfaceEntry;
+import inet.queueing.contract.ITrafficConditioner;
+
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
