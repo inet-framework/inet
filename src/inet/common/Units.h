@@ -121,10 +121,10 @@ class value
         return *this;
     }
 
-    template<typename OtherValue, typename OtherUnits>
-    value operator+(const value<OtherValue, OtherUnits>& other) const
+    template<typename OtherValue, typename OtherUnits, typename ResultValue = typename std::remove_cv<decltype(Value() + OtherValue())>::type>
+    value<ResultValue, Units> operator+(const value<OtherValue, OtherUnits>& other) const
     {
-        return value(get() + value(other).get());
+        return value<ResultValue, Units>(get() + value<OtherValue, Units>(other).get());
     }
 
     template<typename OtherValue, typename OtherUnits>
@@ -141,10 +141,10 @@ class value
         return *this;
     }
 
-    template<typename OtherValue, typename OtherUnits>
-    value operator-(const value<OtherValue, OtherUnits>& other) const
+    template<typename OtherValue, typename OtherUnits, typename ResultValue = typename std::remove_cv<decltype(Value() - OtherValue())>::type>
+    value<ResultValue, Units> operator-(const value<OtherValue, OtherUnits>& other) const
     {
-        return value(get() - value(other).get());
+        return value<ResultValue, Units>(get() - value<OtherValue, Units>(other).get());
     }
 
     value operator-() const
@@ -152,11 +152,11 @@ class value
         return value(-get());
     }
 
-    template<typename OtherValue, typename OtherUnits>
-    value<Value, compose<Units, OtherUnits> >
+    template<typename OtherValue, typename OtherUnits, typename ResultValue = typename std::remove_cv<decltype(Value() * OtherValue())>::type>
+    value<ResultValue, compose<Units, OtherUnits> >
     operator*(const value<OtherValue, OtherUnits>& other) const
     {
-        return value<Value, compose<Units, OtherUnits> >(get() * other.get());
+        return value<ResultValue, compose<Units, OtherUnits> >(get() * other.get());
     }
 
     template<typename OtherValue>
@@ -171,11 +171,11 @@ class value
         return *this;
     }
 
-    template<typename OtherValue, typename OtherUnits>
-    value<Value, compose<Units, pow<OtherUnits, -1> > >
+    template<typename OtherValue, typename OtherUnits, typename ResultValue = typename std::remove_cv<decltype(Value() / OtherValue())>::type>
+    value<ResultValue, compose<Units, pow<OtherUnits, -1> > >
     operator/(const value<OtherValue, OtherUnits>& other) const
     {
-        return value<Value, compose<Units, pow<OtherUnits, -1> > >(get() / other.get());
+        return value<ResultValue, compose<Units, pow<OtherUnits, -1> > >(get() / other.get());
     }
 
     value operator/(const value_type& v) const
