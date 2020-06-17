@@ -1440,7 +1440,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
 
             for (int i=0; i<numPrefixes; i++) {
                 if (this->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-                    const auto& ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+                    const auto& ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
                     Ipv4Address ipAdd = ipv4Data->getIPAddress();
                     Ospfv3LsaPrefixMetric prefix;
                     prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
@@ -1544,7 +1544,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
     int prefixCount = 0;
     for (int i=0; i < numPrefixes; i++) {
         if (this->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-            const auto& ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+            const auto& ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
             Ipv4Address ipAdd = ipv4Data->getIPAddress();
             Ospfv3LsaPrefixMetric prefix;
             prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();

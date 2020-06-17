@@ -1955,11 +1955,11 @@ std::string Ospfv3Interface::detailedInfo() const
     out << "Interface " << this->getIntName() << "\n";
     out << "Link Local Address ";
     InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->getIntName().c_str()));
-    const auto& ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+    const auto& ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
     out << ipv6int->getLinkLocalAddress() << ", Interface ID " << this->interfaceId << "\n";
 
     if (this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-        const auto& ipv4int = ie->findProtocolData<Ipv4InterfaceData>();
+        const auto& ipv4int = ie->getProtocolData<Ipv4InterfaceData>();
         out << "Internet Address " << ipv4int->getIPAddress() << endl;
     }
 
