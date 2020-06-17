@@ -206,7 +206,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
         (nextState != Ospfv3Interface::INTERFACE_STATE_DESIGNATED && nextState != Ospfv3Interface::INTERFACE_STATE_BACKUP))
     {
         InterfaceEntry* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
-        auto ipv6int = ie->findProtocolDataForUpdate<Ipv6InterfaceData>();
+        auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->leaveMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
     }
 }
