@@ -42,8 +42,8 @@ class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public q
   public:
     DscpMarker() {}
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual queueing::IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
     virtual void handleCanPushPacket(cGate *gate) override { }

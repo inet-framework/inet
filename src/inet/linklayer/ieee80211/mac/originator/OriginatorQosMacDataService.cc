@@ -96,7 +96,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
         if (aMsduAggregationPolicy)
             packet = aMsduAggregateIfNeeded(pendingQueue);
         if (!packet) {
-            packet = pendingQueue->popPacket();
+            packet = pendingQueue->pullPacket();
             take(packet);
         }
         // PS Defer Queueing

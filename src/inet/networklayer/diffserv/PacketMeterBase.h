@@ -40,8 +40,8 @@ class INET_API PacketMeterBase : public PassivePacketSinkBase, public IActivePac
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual void handleCanPushPacket(cGate *gate) override;
 };
