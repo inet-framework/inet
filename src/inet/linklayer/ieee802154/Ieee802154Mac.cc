@@ -215,7 +215,7 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_SEND_REQUEST:
-            txQueue->pushPacket(static_cast<Packet *>(msg));
+            txQueue->enqueuePacket(static_cast<Packet *>(msg));
             if (!txQueue->isEmpty()) {
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
@@ -596,7 +596,7 @@ void Ieee802154Mac::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
-    txQueue->pushPacket(static_cast<Packet *>(msg));
+    txQueue->enqueuePacket(static_cast<Packet *>(msg));
 }
 
 /**

@@ -118,7 +118,7 @@ void LMac::configureInterfaceEntry()
 void LMac::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
-    txQueue->pushPacket(packet);
+    txQueue->enqueuePacket(packet);
     EV_DETAIL << "packet put in queue\n  queue size: " << txQueue->getNumPackets() << " macState: " << macState
               << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;
 }
@@ -420,7 +420,7 @@ void LMac::handleSelfMessage(cMessage *msg)
         case SEND_CONTROL:
             if (msg->getKind() == LMAC_SEND_CONTROL) {
                 if (!SETUP_PHASE && currentTxFrame == nullptr && !txQueue->isEmpty())
-                    currentTxFrame = txQueue->pullPacket();
+                    currentTxFrame = txQueue->dequeuePacket();
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacControlFrame>();

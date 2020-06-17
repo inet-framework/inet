@@ -229,7 +229,7 @@ void Ppp::handleUpperPacket(Packet *packet)
         delete packet;
         return;
     }
-    txQueue->pushPacket(packet);
+    txQueue->enqueuePacket(packet);
     if (!endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
         popTxQueue();
         startTransmitting();
