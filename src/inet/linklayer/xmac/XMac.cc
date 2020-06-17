@@ -163,7 +163,7 @@ void XMac::handleUpperPacket(Packet *packet)
     encapsulate(packet);
     EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << packet->peekAtFront<XMacHeaderBase>()->getDestAddr() << endl;
     EV_DETAIL << "pkt encapsulated, length: " << packet->getBitLength() << "\n";
-    txQueue->pushPacket(packet);
+    txQueue->enqueuePacket(packet);
     EV_DEBUG << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue"
               "\n  queue size: " << txQueue->getNumPackets() << " macState: "
               << macState << endl;

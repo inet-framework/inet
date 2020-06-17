@@ -102,7 +102,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     Enter_Method_Silent("processUpperFrame(%s)", packet->getName());
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     auto pendingQueue = channelAccess->getPendingQueue();
-    pendingQueue->pushPacket(packet);
+    pendingQueue->enqueuePacket(packet);
     if (!pendingQueue->isEmpty()) {
         EV_DETAIL << "Requesting channel" << endl;
         channelAccess->requestChannel(this);

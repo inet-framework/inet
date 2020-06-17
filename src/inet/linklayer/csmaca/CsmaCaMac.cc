@@ -168,7 +168,7 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
     EV << "frame " << frame << " received from higher layer, receiver = " << macHeader->getReceiverAddress() << endl;
     ASSERT(!macHeader->getReceiverAddress().isUnspecified());
-    txQueue->pushPacket(frame);
+    txQueue->enqueuePacket(frame);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else if (!txQueue->isEmpty()){
