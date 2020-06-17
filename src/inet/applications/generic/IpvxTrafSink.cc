@@ -75,7 +75,7 @@ void IpvxTrafSink::printPacket(Packet *msg)
     if (ctrl != nullptr) {
         protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
     }
-    L3AddressTagBase *addresses = msg->findTag<L3AddressReq>();
+    Ptr<const L3AddressTagBase> addresses = msg->findTag<L3AddressReq>();
     if (addresses == nullptr)
         addresses = msg->findTag<L3AddressInd>();
     if (addresses != nullptr) {

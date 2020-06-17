@@ -242,19 +242,19 @@ bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
 
 const InterfaceEntry *Ipv4::getSourceInterface(Packet *packet)
 {
-    auto tag = packet->findTag<InterfaceInd>();
+    const auto& tag = packet->findTag<InterfaceInd>();
     return tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr;
 }
 
 const InterfaceEntry *Ipv4::getDestInterface(Packet *packet)
 {
-    auto tag = packet->findTag<InterfaceReq>();
+    const auto& tag = packet->findTag<InterfaceReq>();
     return tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr;
 }
 
 Ipv4Address Ipv4::getNextHop(Packet *packet)
 {
-    auto tag = packet->findTag<NextHopAddressReq>();
+    const auto& tag = packet->findTag<NextHopAddressReq>();
     return tag != nullptr ? tag->getNextHopAddress().toIpv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
@@ -430,7 +430,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
 
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     bool multicastLoop = false;
-    MulticastReq *mcr = packet->findTag<MulticastReq>();
+    const auto& mcr = packet->findTag<MulticastReq>();
     if (mcr != nullptr) {
         multicastLoop = mcr->getMulticastLoop();
     }
@@ -592,7 +592,7 @@ void Ipv4::routeUnicastPacketFinish(Packet *packet)
 
 void Ipv4::routeLocalBroadcastPacket(Packet *packet)
 {
-    auto interfaceReq = packet->findTag<InterfaceReq>();
+    const auto& interfaceReq = packet->findTag<InterfaceReq>();
     const InterfaceEntry *destIE = interfaceReq != nullptr ? ift->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
     // The destination address is 255.255.255.255 or local subnet broadcast address.
     // We always use 255.255.255.255 as nextHopAddress, because it is recognized by ARP,
@@ -973,18 +973,14 @@ void Ipv4::encapsulate(Packet *transportPacket)
     Ipv4Address src = l3AddressReq->getSrcAddress().toIpv4();
     bool nonLocalSrcAddress = l3AddressReq->getNonLocalSrcAddress();
     Ipv4Address dest = l3AddressReq->getDestAddress().toIpv4();
-    delete l3AddressReq;
 
     ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
-    delete hopLimitReq;
     bool dontFragment = false;
-    if (auto dontFragmentReq = transportPacket->removeTagIfPresent<FragmentationReq>()) {
+    if (auto& dontFragmentReq = transportPacket->removeTagIfPresent<FragmentationReq>())
         dontFragment = dontFragmentReq->getDontFragment();
-        delete dontFragmentReq;
-    }
 
     // set source and destination address
     ipv4Header->setDestAddress(dest);
@@ -1001,24 +997,21 @@ void Ipv4::encapsulate(Packet *transportPacket)
     }
 
     // set other fields
-    if (TosReq *tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
+    if (auto& tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
         ipv4Header->setTypeOfService(tosReq->getTos());
-        delete tosReq;
         if (transportPacket->findTag<DscpReq>())
             throw cRuntimeError("TosReq and DscpReq found together");
         if (transportPacket->findTag<EcnReq>())
             throw cRuntimeError("TosReq and EcnReq found together");
         transportPacket->addTag<TosInd>()->setTos(ipv4Header->getTypeOfService());
     }
-    if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
+    if (auto& dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
         ipv4Header->setDscp(dscpReq->getDifferentiatedServicesCodePoint());
         transportPacket->addTag<DscpInd>()->setDifferentiatedServicesCodePoint(ipv4Header->getDscp());
-        delete dscpReq;
     }
-    if (EcnReq *ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
+    if (auto& ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
         ipv4Header->setEcn(ecnReq->getExplicitCongestionNotification());
         transportPacket->addTag<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getEcn());
-        delete ecnReq;
     }
 
     ipv4Header->setIdentification(curFragmentId++);
@@ -1037,13 +1030,12 @@ void Ipv4::encapsulate(Packet *transportPacket)
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
 
-    if (Ipv4OptionsReq *optReq = transportPacket->removeTagIfPresent<Ipv4OptionsReq>()) {
+    if (auto& optReq = transportPacket->removeTagIfPresent<Ipv4OptionsReq>()) {
         for (size_t i = 0; i < optReq->getOptionArraySize(); i++) {
             auto opt = optReq->dropOption(i);
             ipv4Header->addOption(opt);
             ipv4Header->addChunkLength(B(opt->getLength()));
         }
-        delete optReq;
     }
 
     ASSERT(ipv4Header->getChunkLength() <= IPv4_MAX_HEADER_LENGTH);
@@ -1077,7 +1069,6 @@ void Ipv4::sendDatagramToOutput(Packet *packet)
     const InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     auto nextHopAddressReq = packet->removeTag<NextHopAddressReq>();
     Ipv4Address nextHopAddr = nextHopAddressReq->getNextHopAddress().toIpv4();
-    delete nextHopAddressReq;
     if (!ie->isBroadcast() || ie->getMacAddress().isUnspecified()) // we can't do ARP
         sendPacketToNIC(packet);
     else {
@@ -1155,7 +1146,7 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     EV_INFO << "Sending " << packet << " to output interface = " << ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId())->getInterfaceName() << ".\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
-    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     ASSERT(packet->findTag<InterfaceReq>() != nullptr);
     send(packet, "queueOut");
 }

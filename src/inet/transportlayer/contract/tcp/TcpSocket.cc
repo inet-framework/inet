@@ -375,7 +375,7 @@ void TcpSocket::processMessage(cMessage *msg)
 bool TcpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
-    auto socketInd = tags.findTag<SocketInd>();
+    const auto& socketInd = tags.findTag<SocketInd>();
     return socketInd != nullptr && socketInd->getSocketId() == connId;
 }
 

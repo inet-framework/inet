@@ -133,7 +133,7 @@ Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto *msg = dynamic_cast<Packet *>(object)) {
-        L3AddressTagBase *addresses = msg->findTag<L3AddressReq>();
+        Ptr<const L3AddressTagBase> addresses = msg->findTag<L3AddressReq>();
         if (!addresses)
             addresses = msg->findTag<L3AddressInd>();
         if (addresses != nullptr) {
@@ -313,7 +313,7 @@ void MinimumSnirFromSnirIndFilter::receiveSignal(cResultFilter *prev, simtime_t_
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<SnirInd>();
+        const auto& tag = pk->findTag<SnirInd>();
         if (tag)
             fire(this, t, tag->getMinimumSnir(), details);
     }
@@ -327,7 +327,7 @@ void PacketErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<ErrorRateInd>();
+        const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
             fire(this, t, tag->getPacketErrorRate(), details);  //TODO isNaN?
     }
@@ -341,7 +341,7 @@ void BitErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, simt
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<ErrorRateInd>();
+        const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
             fire(this, t, tag->getBitErrorRate(), details);  //TODO isNaN?
     }
@@ -355,7 +355,7 @@ void SymbolErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<ErrorRateInd>();
+        const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
             fire(this, t, tag->getSymbolErrorRate(), details);  //TODO isNaN?
     }

@@ -318,18 +318,18 @@ MacEstimateCostProcess *InterfaceEntry::getEstimateCostProcess(int position)
     return nullptr;
 }
 
-void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
+void InterfaceEntry::joinMulticastGroup(const L3Address& address)
 {
     switch (address.getType()) {
 #ifdef WITH_IPv4
         case L3Address::IPv4:
-            getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(address.toIpv4());
+            getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(address.toIpv4());
             break;
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::IPv6:
-            getProtocolData<Ipv6InterfaceData>()->joinMulticastGroup(address.toIpv6());
+            getProtocolDataForUpdate<Ipv6InterfaceData>()->joinMulticastGroup(address.toIpv6());
             break;
 
 #endif // ifdef WITH_IPv6
@@ -337,7 +337,7 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
-            getProtocolData<NextHopInterfaceData>()->joinMulticastGroup(address);
+            getProtocolDataForUpdate<NextHopInterfaceData>()->joinMulticastGroup(address);
             break;
 
 #endif // ifdef WITH_NEXTHOP
@@ -363,7 +363,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
             std::vector<Ipv4Address> oldIPv4SourceList, newIPv4SourceList;
             toIpv4AddressVector(oldSourceList, oldIPv4SourceList);
             toIpv4AddressVector(newSourceList, newIPv4SourceList);
-            getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(multicastAddress.toIpv4(),
+            getProtocolDataForUpdate<Ipv4InterfaceData>()->changeMulticastGroupMembership(multicastAddress.toIpv4(),
                     oldFilterMode, oldIPv4SourceList, newFilterMode, newIPv4SourceList);
             break;
         }

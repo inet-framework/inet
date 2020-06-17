@@ -52,7 +52,7 @@ void SendToMacAddress::handleCanPushPacket(cGate *outGate)
 
 void SendToMacAddress::processPacket(Packet *packet)
 {
-    auto macAddressReq = packet->findTag<MacAddressReq>();
+    const auto& macAddressReq = packet->findTag<MacAddressReq>();
     auto destinationAddress = macAddressReq != nullptr ? macAddressReq->getDestAddress() : address;
     auto header = makeShared<DestinationMacAddressHeader>();
     header->setDestinationAddress(destinationAddress);

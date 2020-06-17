@@ -78,7 +78,7 @@ void Ieee8021dRelay::handleLowerPacket(Packet *packet)
     // messages from network
     numReceivedNetworkFrames++;
     EV_INFO << "Received " << packet << " from network." << endl;
-    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     handleAndDispatchFrame(packet);
 }
 
@@ -86,9 +86,8 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
 {
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
 
-    InterfaceReq* interfaceReq = packet->findTag<InterfaceReq>();
-    int interfaceId =
-            interfaceReq == nullptr ? -1 : interfaceReq->getInterfaceId();
+    const auto& interfaceReq = packet->findTag<InterfaceReq>();
+    int interfaceId = interfaceReq == nullptr ? -1 : interfaceReq->getInterfaceId();
 
     if (interfaceId != -1) {
         InterfaceEntry *ie = ifTable->getInterfaceById(interfaceId);
@@ -124,11 +123,10 @@ void Ieee8021dRelay::broadcast(Packet *packet, int arrivalInterfaceId)
 {
     EV_DETAIL << "Broadcast frame " << packet << endl;
 
-    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
+    auto& oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
     packet->clearTags();
     auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
     packet->trim();
 
     int numPorts = ifTable->getNumInterfaces();
@@ -160,7 +158,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *arrivalInterface = ifTable->getInterfaceById(arrivalInterfaceId);
-    Ieee8021dInterfaceData *arrivalPortData = arrivalInterface->findProtocolData<Ieee8021dInterfaceData>();
+    const auto& arrivalPortData = arrivalInterface->findProtocolData<Ieee8021dInterfaceData>();
     if (isStpAware && arrivalPortData == nullptr)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", arrivalInterface->getFullName());
     learn(frame->getSrc(), arrivalInterfaceId);
@@ -221,11 +219,10 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
     EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
 
     numDispatchedNonBPDUFrames++;
-    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
+    auto& oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
     packet->clearTags();
     auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->trim();
     emit(packetSentToLowerSignal, packet);
@@ -234,7 +231,7 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
 
 void Ieee8021dRelay::learn(MacAddress srcAddr, int arrivalInterfaceId)
 {
-    Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
+    const Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
 
     if (!isStpAware || port->isLearning())
         macTable->updateTableWithAddress(arrivalInterfaceId, srcAddr);
@@ -246,11 +243,11 @@ void Ieee8021dRelay::sendUp(Packet *packet)
     send(packet, "upperLayerOut");
 }
 
-Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interfaceId)
+const Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interfaceId)
 {
     if (isStpAware) {
         InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
-        Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->getProtocolData<Ieee8021dInterfaceData>() : nullptr;
+        const Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->getProtocolData<Ieee8021dInterfaceData>().get() : nullptr;
 
         if (!portData)
             throw cRuntimeError("Ieee8021dInterfaceData not found for port = %d", interfaceId);

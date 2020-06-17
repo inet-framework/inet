@@ -121,7 +121,7 @@ void Ipv4NodeConfigurator::prepareAllInterfaces()
 void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 {
     // ASSERT(!interfaceEntry->getProtocolData<Ipv4InterfaceData>());
-    Ipv4InterfaceData *interfaceData = interfaceEntry->addProtocolData<Ipv4InterfaceData>();
+    auto interfaceData = interfaceEntry->addProtocolData<Ipv4InterfaceData>();
     if (interfaceEntry->isLoopback()) {
         // we may reconfigure later it to be the routerId
         interfaceData->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);

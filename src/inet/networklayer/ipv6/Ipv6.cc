@@ -279,7 +279,7 @@ void Ipv6::handleMessage(cMessage *msg)
 
 InterfaceEntry *Ipv6::getSourceInterfaceFrom(Packet *packet)
 {
-    auto interfaceInd = packet->findTag<InterfaceInd>();
+    const auto& interfaceInd = packet->findTag<InterfaceInd>();
     return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
@@ -306,7 +306,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
         return;
     }
 
-    auto ifTag = msg->findTag<InterfaceReq>();
+    const auto& ifTag = msg->findTag<InterfaceReq>();
     const InterfaceEntry *destIE = ifTag ? ift->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
     auto packet = check_and_cast<Packet *>(msg);
 
@@ -788,14 +788,12 @@ void Ipv6::encapsulate(Packet *transportPacket)
 {
     auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
 
-    L3AddressReq *addresses = transportPacket->removeTag<L3AddressReq>();
+    auto& addresses = transportPacket->removeTag<L3AddressReq>();
     Ipv6Address src = addresses->getSrcAddress().toIpv6();
     Ipv6Address dest = addresses->getDestAddress().toIpv6();
-    delete addresses;
 
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
-    delete hopLimitReq;
 
     ipv6Header->setPayloadLength(transportPacket->getDataLength());
 
@@ -804,22 +802,17 @@ void Ipv6::encapsulate(Packet *transportPacket)
     ipv6Header->setSrcAddress(src);
 
     // set other fields
-    if (TosReq *tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
+    if (auto& tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
         ipv6Header->setTrafficClass(tosReq->getTos());
-        delete tosReq;
         if (transportPacket->findTag<DscpReq>())
             throw cRuntimeError("TosReq and DscpReq found together");
         if (transportPacket->findTag<EcnReq>())
             throw cRuntimeError("TosReq and EcnReq found together");
     }
-    if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
+    if (auto& dscpReq = transportPacket->removeTagIfPresent<DscpReq>())
         ipv6Header->setDscp(dscpReq->getDifferentiatedServicesCodePoint());
-        delete dscpReq;
-    }
-    if (EcnReq *ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
+    if (auto& ecnReq = transportPacket->removeTagIfPresent<EcnReq>())
         ipv6Header->setEcn(ecnReq->getExplicitCongestionNotification());
-        delete ecnReq;
-    }
 
     ipv6Header->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(ipv6Header->getHopLimit() > 0);
@@ -832,7 +825,6 @@ void Ipv6::encapsulate(Packet *transportPacket)
         ipv6Header->addExtensionHeader(extHeader);
         // EV << "Move extension header to datagram." << endl;
     }
-    delete extHeadersTag;
 
     ipv6Header->setChunkLength(B(ipv6Header->calculateHeaderByteLength()));
     transportPacket->trimFront();
@@ -965,7 +957,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
 void Ipv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MacAddress& macAddr)
 {
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddr);
-    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);

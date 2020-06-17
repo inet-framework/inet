@@ -37,7 +37,7 @@ INET_API void insertNetworkProtocolHeader(Packet *packet, const Protocol& protoc
 template <typename T>
 const Ptr<T> removeNetworkProtocolHeader(Packet *packet)
 {
-    delete packet->removeTagIfPresent<NetworkProtocolInd>();
+    packet->removeTagIfPresent<NetworkProtocolInd>();
     return removeProtocolHeader<T>(packet);
 }
 

@@ -276,7 +276,7 @@ void Sctp::handleMessage(cMessage *msg)
         } else {
         int32 appGateIndex;
             int32 fd;
-                SctpCommandReq *controlInfo = tags.findTag<SctpOpenReq>();
+                Ptr<const SctpCommandReq> controlInfo = tags.findTag<SctpOpenReq>();
                 if (!controlInfo) {
                     controlInfo = tags.findTag<SctpSendReq>();
                     if (!controlInfo) {
@@ -312,7 +312,7 @@ void Sctp::handleMessage(cMessage *msg)
                 if (strcmp(msg->getName(), "PassiveOPEN") == 0 || strcmp(msg->getName(), "Associate") == 0) {
                     if (assocList.size() > 0) {
                         assoc = nullptr;
-                        SctpOpenReq *open = tags.findTag<SctpOpenReq>();
+                        const auto& open = tags.findTag<SctpOpenReq>();
                         EV_INFO << "Looking for assoc with remoteAddr=" << open->getRemoteAddr() << ", remotePort=" << open->getRemotePort() << ", localPort=" << open->getLocalPort() << "\n";
                         for (auto & elem : assocList) {
                             EV_DETAIL << "remoteAddr=" << (elem)->remoteAddr << ", remotePort=" << (elem)->remotePort << ", localPort=" << (elem)->localPort << "\n";
@@ -330,7 +330,7 @@ void Sctp::handleMessage(cMessage *msg)
                         key.assocId = assocId;
                         sctpAppAssocMap[key] = assoc;
                         EV_INFO << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
-                        bool ret = assoc->processAppCommand(msg, controlInfo);
+                        bool ret = assoc->processAppCommand(msg, const_cast<SctpCommandReq *>(controlInfo.get()));
                         if (!ret) {
                             removeAssociation(assoc);
                         }
@@ -338,7 +338,7 @@ void Sctp::handleMessage(cMessage *msg)
                 }
             } else {
                 EV_INFO << "assoc found\n";
-                bool ret = assoc->processAppCommand(msg, controlInfo);
+                bool ret = assoc->processAppCommand(msg, const_cast<SctpCommandReq *>(controlInfo.get()));
                 if (!ret) {
                     removeAssociation(assoc);
                 }

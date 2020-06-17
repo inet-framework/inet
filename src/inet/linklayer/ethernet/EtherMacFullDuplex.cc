@@ -109,11 +109,10 @@ void EtherMacFullDuplex::startFrameTransmission()
     encapsulate(frame);
 
     // send
-    auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
+    auto& oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
     EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);

@@ -495,12 +495,12 @@ void Udp::addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& mu
 
     if (multicastAddr.getType() == L3Address::IPv4) {
 #ifdef WITH_IPv4
-        ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(multicastAddr.toIpv4());
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(multicastAddr.toIpv4());
 #endif // ifdef WITH_IPv4
     }
     else if (multicastAddr.getType() == L3Address::IPv6) {
 #ifdef WITH_IPv6
-        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
 #endif // ifdef WITH_IPv6
     }
     else
@@ -716,9 +716,8 @@ void Udp::handleUpperPacket(Packet *packet)
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
-    auto socketReq = packet->removeTag<SocketReq>();
+    auto& socketReq = packet->removeTag<SocketReq>();
     int socketId = socketReq->getSocketId();
-    delete socketReq;
 
     SockDesc *sd = getOrCreateSocket(socketId);
 
@@ -732,10 +731,9 @@ void Udp::handleUpperPacket(Packet *packet)
     if (destAddr.isUnspecified())
         addressReq->setDestAddress(destAddr = sd->remoteAddr);
 
-    if (auto portsReq = packet->removeTagIfPresent<L4PortReq>()) {
+    if (auto& portsReq = packet->removeTagIfPresent<L4PortReq>()) {
         srcPort = portsReq->getSrcPort();
         destPort = portsReq->getDestPort();
-        delete portsReq;
     }
 
     if (srcPort == -1)
@@ -744,7 +742,7 @@ void Udp::handleUpperPacket(Packet *packet)
     if (destPort == -1)
         destPort = sd->remotePort;
 
-    auto interfaceReq = packet->findTag<InterfaceReq>();
+    const auto& interfaceReq = packet->findTag<InterfaceReq>();
     ASSERT(interfaceReq == nullptr || interfaceReq->getInterfaceId() != -1);
 
     if (interfaceReq == nullptr && destAddr.isMulticast()) {
@@ -928,7 +926,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
-    delete udpPacket->removeTag<PacketProtocolTag>();
+    udpPacket->removeTag<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getFrontOffset();
     auto udpHeader = udpPacket->popAtFront<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
@@ -1144,8 +1142,8 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 
     // send payload with UdpControlInfo up to the application
     payload->setKind(UDP_I_DATA);
-    delete payload->removeTagIfPresent<PacketProtocolTag>();
-    delete payload->removeTagIfPresent<DispatchProtocolReq>();
+    payload->removeTagIfPresent<PacketProtocolTag>();
+    payload->removeTagIfPresent<DispatchProtocolReq>();
     payload->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
     payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     payload->addTagIfAbsent<TransportProtocolInd>()->setTransportProtocolHeader(header);
@@ -1355,8 +1353,8 @@ bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
     else if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
         return false;
     else {
-        auto l3AddressInd = packet->findTag<L3AddressInd>();
-        auto networkProtocolInd = packet->findTag<NetworkProtocolInd>();
+        const auto& l3AddressInd = packet->findTag<L3AddressInd>();
+        const auto& networkProtocolInd = packet->findTag<NetworkProtocolInd>();
         if (l3AddressInd != nullptr && networkProtocolInd != nullptr)
             return verifyCrc(networkProtocolInd->getProtocol(), udpHeader, packet);
         else

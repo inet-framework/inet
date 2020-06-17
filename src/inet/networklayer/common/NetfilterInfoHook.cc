@@ -98,7 +98,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(Packet *datagra
 
 INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(Packet *datagram)
 {
-    auto interfaceInd = datagram->findTag<InterfaceInd>();
+    const auto& interfaceInd = datagram->findTag<InterfaceInd>();
     EV_INFO << "HOOK " << getFullPath() << ": POSTROUTING packet=" << datagram->getName()
             << " inIE=" << (interfaceInd ? std::to_string(interfaceInd->getInterfaceId()) : "undefined")
             << " outIE=" << std::to_string(datagram->getTag<InterfaceReq>()->getInterfaceId())
@@ -117,7 +117,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(Packet *datagra
 
 INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(Packet *datagram)
 {
-    auto interfaceReq = datagram->findTag<InterfaceReq>();
+    const auto& interfaceReq = datagram->findTag<InterfaceReq>();
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL OUT: packet=" << datagram->getName()
             << " outIE=" << (interfaceReq ? std::to_string(interfaceReq->getInterfaceId()) : "undefined")
             << endl;

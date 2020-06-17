@@ -133,7 +133,7 @@ void EtherEncap::refreshDisplay() const
 
 void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 {
-    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
         throw cRuntimeError("packet length from higher layer (%s) exceeds maximum Ethernet payload length (%s)", packet->getDataLength().str().c_str(), MAX_ETHERNET_DATA_BYTES.str().c_str());
 
@@ -148,7 +148,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 
     int typeOrLength = -1;
     if (!useSNAP) {
-        auto protocolTag = packet->findTag<PacketProtocolTag>();
+        const auto& protocolTag = packet->findTag<PacketProtocolTag>();
         if (protocolTag) {
             const Protocol *protocol = protocolTag->getProtocol();
             if (protocol) {

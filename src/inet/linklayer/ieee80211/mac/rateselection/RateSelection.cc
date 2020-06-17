@@ -70,10 +70,10 @@ void RateSelection::initialize(int stage)
 
 const IIeee80211Mode* RateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    auto modeReqTag = packet->findTag<Ieee80211ModeReq>();
+    const auto& modeReqTag = packet->findTag<Ieee80211ModeReq>();
     if (modeReqTag)
         return modeReqTag->getMode();
-    auto modeIndTag = packet->findTag<Ieee80211ModeInd>();
+    const auto& modeIndTag = packet->findTag<Ieee80211ModeInd>();
     if (modeIndTag)
         return modeIndTag->getMode();
     throw cRuntimeError("Missing mode");

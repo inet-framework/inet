@@ -36,7 +36,7 @@ void Ieee8022LlcInserter::initialize(int stage)
 
 void Ieee8022LlcInserter::processPacket(Packet *packet)
 {
-    auto protocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& protocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
     int ethType = -1;
     int snapOui = -1;

@@ -42,7 +42,7 @@ void EthernetAddressInserter::processPacket(Packet *packet)
     header->setSrc(srcAddress);
     header->setDest(macAddressReq->getDestAddress());
     packet->insertAtFront(header);
-    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
 }
 

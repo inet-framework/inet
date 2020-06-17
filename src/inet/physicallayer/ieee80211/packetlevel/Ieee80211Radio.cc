@@ -257,21 +257,21 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         packet->insertAtBack(phyTrailer);
     }
     if (dynamic_cast<Ieee80211FhssPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211FhssPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211FhssPhy);
     else if (dynamic_cast<Ieee80211IrPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211IrPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211IrPhy);
     else if (dynamic_cast<Ieee80211DsssPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211DsssPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211DsssPhy);
     else if (dynamic_cast<Ieee80211HrDsssPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HrDsssPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HrDsssPhy);
     else if (dynamic_cast<Ieee80211OfdmPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
     else if (dynamic_cast<Ieee80211ErpOfdmPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211ErpOfdmPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211ErpOfdmPhy);
     else if (dynamic_cast<Ieee80211HtPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HtPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HtPhy);
     else if (dynamic_cast<Ieee80211VhtPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211VhtPhy);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211VhtPhy);
     else
         throw cRuntimeError("Invalid IEEE 802.11 PHY header type.");
 }
@@ -286,7 +286,7 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
         packet->popAtBack(tailLength + paddingLength, Chunk::PF_ALLOW_INCORRECT);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
 }
 
 const Ptr<const Ieee80211PhyHeader> Ieee80211Radio::popIeee80211PhyHeaderAtFront(Packet *packet, b length, int flags)

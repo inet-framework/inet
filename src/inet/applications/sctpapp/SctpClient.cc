@@ -285,7 +285,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 void SctpClient::sendQueueRequest()
 {
     Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
-    SctpInfoReq *qinfo = cmsg->addTag<SctpInfoReq>();
+    auto qinfo = cmsg->addTag<SctpInfoReq>();
     qinfo->setText(queueSize);
     qinfo->setSocketId(socket.getSocketId());
     socket.sendRequest(cmsg);
@@ -321,7 +321,7 @@ void SctpClient::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
     packetsRcvd++;
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
-    SctpRcvReq *ind = msg->getTag<SctpRcvReq>();
+    auto ind = msg->getTag<SctpRcvReq>();
     emit(packetReceivedSignal, msg);
     bytesRcvd += msg->getByteLength();
 
@@ -472,9 +472,9 @@ void SctpClient::handleTimer(cMessage *msg)
 void SctpClient::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
-    SctpCommandReq *ind = message->findTag<SctpCommandReq>();
+    auto& ind = message->findTag<SctpCommandReq>();
     Request *cmesg = new Request("SCTP_C_RECEIVE", SCTP_C_RECEIVE);
-    SctpSendReq *cmd = cmesg->addTag<SctpSendReq>();
+    auto cmd = cmesg->addTag<SctpSendReq>();
     cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
@@ -486,7 +486,7 @@ void SctpClient::shutdownReceivedArrived(SctpSocket *socket)
 {
     if (numRequestsToSend == 0) {
         Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
-        SctpCommandReq *qinfo = cmsg->addTag<SctpCommandReq>();
+        auto qinfo = cmsg->addTag<SctpCommandReq>();
         qinfo->setSocketId(socket->getSocketId());
         socket->sendNotification(cmsg);
     }
@@ -543,7 +543,7 @@ void SctpClient::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 void SctpClient::setPrimaryPath(const char *str)
 {
     Request *cmsg = new Request("SCTP_C_PRIMARY", SCTP_C_PRIMARY);
-    SctpPathInfoReq *pinfo = cmsg->addTag<SctpPathInfoReq>();
+    auto pinfo = cmsg->addTag<SctpPathInfoReq>();
 
     if (strcmp(str, "") != 0) {
         pinfo->setRemoteAddress(L3Address(str));
@@ -567,7 +567,7 @@ void SctpClient::sendStreamResetNotification()
     unsigned short int type = par("streamResetType");
     if (type >= 6 && type <= 9) {
         Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_STREAM_RESET);
-        SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
+        auto rinfo = cmsg->addTag<SctpResetReq>();
         rinfo->setSocketId(socket.getSocketId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
         rinfo->setRequestType(type);

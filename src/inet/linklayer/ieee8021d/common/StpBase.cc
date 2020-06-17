@@ -141,16 +141,17 @@ void StpBase::refreshDisplay() const
     }
 }
 
-Ieee8021dInterfaceData *StpBase::getPortInterfaceData(unsigned int interfaceId)
+const Ieee8021dInterfaceData *StpBase::getPortInterfaceData(unsigned int interfaceId) const
 {
-    Ieee8021dInterfaceData *portData = getPortInterfaceEntry(interfaceId)->getProtocolData<Ieee8021dInterfaceData>();
-    if (!portData)
-        throw cRuntimeError("Ieee8021dInterfaceData not found!");
-
-    return portData;
+    return getPortInterfaceEntry(interfaceId)->getProtocolData<Ieee8021dInterfaceData>().get();
 }
 
-InterfaceEntry *StpBase::getPortInterfaceEntry(unsigned int interfaceId)
+const Ptr<Ieee8021dInterfaceData> StpBase::getPortInterfaceDataForUpdate(unsigned int interfaceId)
+{
+    return getPortInterfaceEntry(interfaceId)->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
+}
+
+InterfaceEntry *StpBase::getPortInterfaceEntry(unsigned int interfaceId) const
 {
     InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
     if (!gateIfEntry)

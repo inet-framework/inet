@@ -137,18 +137,14 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
     auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
     Ipv4Address src = l3AddressReq->getSrcAddress().toIpv4();
     Ipv4Address dest = l3AddressReq->getDestAddress().toIpv4();
-    delete l3AddressReq;
 
     ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
-    delete hopLimitReq;
     bool dontFragment = false;
-    if (auto dontFragmentReq = transportPacket->removeTagIfPresent<FragmentationReq>()) {
+    if (auto dontFragmentReq = transportPacket->removeTagIfPresent<FragmentationReq>())
         dontFragment = dontFragmentReq->getDontFragment();
-        delete dontFragmentReq;
-    }
 
     // set source and destination address
     ipv4Header->setDestAddress(dest);
@@ -159,22 +155,17 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
         ipv4Header->setSrcAddress(src);
 
     // set other fields
-    if (TosReq *tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
+    if (auto& tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
         ipv4Header->setTypeOfService(tosReq->getTos());
-        delete tosReq;
         if (transportPacket->findTag<DscpReq>())
             throw cRuntimeError("TosReq and DscpReq found together");
         if (transportPacket->findTag<EcnReq>())
             throw cRuntimeError("TosReq and EcnReq found together");
     }
-    if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
+    if (auto& dscpReq = transportPacket->removeTagIfPresent<DscpReq>())
         ipv4Header->setDscp(dscpReq->getDifferentiatedServicesCodePoint());
-        delete dscpReq;
-    }
-    if (EcnReq *ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
+    if (auto& ecnReq = transportPacket->removeTagIfPresent<EcnReq>())
         ipv4Header->setEcn(ecnReq->getExplicitCongestionNotification());
-        delete ecnReq;
-    }
 
     ipv4Header->setMoreFragments(false);
     ipv4Header->setDontFragment(dontFragment);

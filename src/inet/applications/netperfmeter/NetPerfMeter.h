@@ -192,7 +192,7 @@ class INET_API NetPerfMeter : public cSimpleModule
     void sendDataOfTraceFile(const unsigned long long bytesAvailableInQueue);
     void sendDataOfSaturatedStreams(
             const unsigned long long bytesAvailableInQueue,
-            const SctpSendQueueAbatedReq* sendQueueAbatedIndication);
+            const Ptr<const SctpSendQueueAbatedReq>& sendQueueAbatedIndication);
 
     void sendDataOfNonSaturatedStreams( const unsigned long long bytesAvailableInQueue, const unsigned int streamID);
     unsigned long transmitFrame(const unsigned int frameSize, const unsigned int streamID);

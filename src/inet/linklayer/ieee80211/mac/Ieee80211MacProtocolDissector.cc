@@ -33,9 +33,9 @@ Register_Protocol_Dissector(&Protocol::ieee80211Mac, Ieee80211MacProtocolDissect
 
 const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet) const
 {
-    if (const auto llcTag = packet->findTag<ieee80211::LlcProtocolTag>())
+    if (const auto& llcTag = packet->findTag<ieee80211::LlcProtocolTag>())
         return llcTag->getProtocol();
-    else if (const auto channelTag = packet->findTag<physicallayer::Ieee80211ChannelInd>()) {
+    else if (const auto& channelTag = packet->findTag<physicallayer::Ieee80211ChannelInd>()) {
         // EtherType protocol discrimination is mandatory for deployments in the 5.9 GHz band
         if (channelTag->getChannel()->getBand() == &physicallayer::Ieee80211CompliantBands::band5_9GHz)
             return &Protocol::ieee80211EtherType;

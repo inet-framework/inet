@@ -248,7 +248,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
 
     pkt->setChunkLength(B(headerLength));
 
-    auto addrTag = packet->findTag<L3AddressReq>();
+    const auto& addrTag = packet->findTag<L3AddressReq>();
     if (addrTag == nullptr) {
         EV << "WiseRoute warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";

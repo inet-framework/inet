@@ -88,14 +88,14 @@ class INET_API StpBase : public OperationalBase, public cListener
      * @brief Gets Ieee8021dInterfaceData for interface ID.
      * @return The port's Ieee8021dInterfaceData, or throws error if it doesn't exist.
      */
-    Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId);
-    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId) const { return const_cast<StpBase *>(this)->getPortInterfaceData(interfaceId); }
+    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId) const;
+    const Ptr<Ieee8021dInterfaceData> getPortInterfaceDataForUpdate(unsigned int interfaceId);
 
     /**
      * @brief Gets InterfaceEntry for interface ID.
      * @return The port's InterfaceEntry, throws error if it doesn't exist.
      */
-    InterfaceEntry *getPortInterfaceEntry(unsigned int interfaceId);
+    InterfaceEntry *getPortInterfaceEntry(unsigned int interfaceId) const;
 
     /*
      * Returns the first non-loopback interface.

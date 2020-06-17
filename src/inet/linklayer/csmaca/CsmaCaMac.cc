@@ -393,7 +393,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
     macHeader->setNetworkProtocol(networkProtocol);
     macHeader->setTransmitterAddress(interfaceEntry->getMacAddress());
     macHeader->setReceiverAddress(frame->getTag<MacAddressReq>()->getDestAddress());
-    auto userPriorityReq = frame->findTag<UserPriorityReq>();
+    const auto& userPriorityReq = frame->findTag<UserPriorityReq>();
     int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
     macHeader->setPriority(userPriority == -1 ? UP_BE : userPriority);
     frame->insertAtFront(macHeader);
@@ -405,7 +405,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto macAddressInd = frame->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getTransmitterAddress());
     macAddressInd->setDestAddress(macHeader->getReceiverAddress());
-    frame->getTag<PacketProtocolTag>()->setProtocol(&Protocol::csmaCaMac);
+    frame->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::csmaCaMac);
 }
 
 void CsmaCaMac::decapsulate(Packet *frame)

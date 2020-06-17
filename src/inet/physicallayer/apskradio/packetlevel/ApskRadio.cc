@@ -86,7 +86,7 @@ void ApskRadio::encapsulate(Packet *packet) const
     if (paddingLength != b(0))
         packet->insertAtBack(makeShared<BitCountChunk>(paddingLength));
     EV_DEBUG << "ApskRadio::encapsulate: packetLength=" << packet->getDataLength() << ", headerLength=" << headerLength << ", paddingLength=" << paddingLength << endl;
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 }
 
 void ApskRadio::decapsulate(Packet *packet) const

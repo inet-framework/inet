@@ -278,7 +278,7 @@ void L2NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
 void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 {
     InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-    Ieee8021dInterfaceData *interfaceData = interfaceEntry->getProtocolData<Ieee8021dInterfaceData>();
+    auto interfaceData = interfaceEntry->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
 
     interfaceData->setLinkCost(interfaceInfo->portData.linkCost);
     interfaceData->setPriority(interfaceInfo->portData.priority);

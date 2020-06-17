@@ -104,7 +104,7 @@ class INET_API Stp : public StpBase
      * Comparison of all IDs in Ieee8021dInterfaceData::PortInfo structure
      * Invokes: superiorID(), superiorPort()
      */
-    int comparePorts(Ieee8021dInterfaceData *portA, Ieee8021dInterfaceData *portB);
+    int comparePorts(const Ieee8021dInterfaceData *portA, const Ieee8021dInterfaceData *portB);
     int compareBridgeIDs(unsigned int aPriority, MacAddress aAddress, unsigned int bPriority, MacAddress bAddress);
     int comparePortIDs(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum);
 

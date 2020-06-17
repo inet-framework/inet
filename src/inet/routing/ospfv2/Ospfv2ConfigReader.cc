@@ -621,7 +621,7 @@ void Ospfv2ConfigReader::joinMulticastGroups(int interfaceId)
         throw cRuntimeError("Interface id=%d does not exist", interfaceId);
     if (!ie->isMulticast())
         return;
-    Ipv4InterfaceData *ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+    auto& ipv4Data = ie->findProtocolDataForUpdate<Ipv4InterfaceData>();
     if (!ipv4Data)
         throw cRuntimeError("Interface %s (id=%d) does not have Ipv4 data", ie->getInterfaceName(), interfaceId);
     ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);

@@ -22,9 +22,9 @@ namespace inet {
 
 static int comparePacketUserPriorityInd(Packet *packet1, Packet *packet2)
 {
-    auto userPriorityInd1 = packet1->findTag<UserPriorityInd>();
+    const auto& userPriorityInd1 = packet1->findTag<UserPriorityInd>();
     auto userPriority1 = userPriorityInd1 != nullptr ? userPriorityInd1->getUserPriority() : 0;
-    auto userPriorityInd2 = packet2->findTag<UserPriorityInd>();
+    const auto& userPriorityInd2 = packet2->findTag<UserPriorityInd>();
     auto userPriority2 = userPriorityInd2 != nullptr ? userPriorityInd2->getUserPriority() : 0;
     return userPriority2 - userPriority1;
 }

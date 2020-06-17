@@ -53,7 +53,7 @@ bool MultiFieldClassifier::PacketDissectorCallback::matches(const Packet *packet
 {
     matchesL3 = matchesL4 = false;
     dissect = true;
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
     auto copy = packet->dup();

@@ -179,7 +179,7 @@ void RadioMedium::handleMessage(cMessage *message)
 
 bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *packet) const
 {
-    auto macAddressReq = const_cast<Packet *>(packet)->findTag<MacAddressInd>();
+    const auto& macAddressReq = const_cast<Packet *>(packet)->findTag<MacAddressInd>();
     if (macAddressReq == nullptr)
         return true;
     const MacAddress address = macAddressReq->getDestAddress();

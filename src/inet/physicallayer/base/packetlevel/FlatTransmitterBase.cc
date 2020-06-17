@@ -53,25 +53,25 @@ std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level
 
 bps FlatTransmitterBase::computeTransmissionPreambleBitrate(const Packet *packet) const
 {
-    auto signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
+    const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     return signalBitrateReq != nullptr ? signalBitrateReq->getPreambleBitrate() : bitrate;
 }
 
 bps FlatTransmitterBase::computeTransmissionHeaderBitrate(const Packet *packet) const
 {
-    auto signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
+    const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     return signalBitrateReq != nullptr ? signalBitrateReq->getHeaderBitrate() : bitrate;
 }
 
 bps FlatTransmitterBase::computeTransmissionDataBitrate(const Packet *packet) const
 {
-    auto signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
+    const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     return signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
 }
 
 W FlatTransmitterBase::computeTransmissionPower(const Packet *packet) const
 {
-    auto signalPowerReq = const_cast<Packet *>(packet)->findTag<SignalPowerReq>();
+    const auto& signalPowerReq = const_cast<Packet *>(packet)->findTag<SignalPowerReq>();
     return signalPowerReq != nullptr ? signalPowerReq->getPower() : power;
 }
 

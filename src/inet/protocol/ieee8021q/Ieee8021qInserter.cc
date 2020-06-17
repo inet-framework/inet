@@ -57,7 +57,7 @@ void Ieee8021qInserter::processPacket(Packet *packet)
         packet->addTagIfAbsent<VlanInd>()->setVlanId(vlanId);
     }
     packet->insertAtFront(vlanHeader);
-    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + vlanHeader->getChunkLength());
 }
 

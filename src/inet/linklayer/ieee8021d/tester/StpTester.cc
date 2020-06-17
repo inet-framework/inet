@@ -159,7 +159,7 @@ bool StpTester::isForwarding(Topology::Node *node, unsigned int portNum)
 
     cGate *gate = node->getModule()->gate("ethg$o", portNum);
     InterfaceEntry *gateIfEntry = CHK(ifTable->findInterfaceByNodeOutputGateId(gate->getId()));
-    Ieee8021dInterfaceData *portData = gateIfEntry->findProtocolData<Ieee8021dInterfaceData>();
+    auto& portData = gateIfEntry->findProtocolData<Ieee8021dInterfaceData>();
 
     // If portData does not exist, then it implies that
     // the node is not a switch

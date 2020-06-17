@@ -406,14 +406,14 @@ void NetPerfMeter::handleMessage(cMessage* msg)
         case SCTP_I_DATA_NOTIFICATION: {
             // Data has arrived -> request it from the SCTP module.
             auto& tags = getTags(msg);
-            const SctpCommandReq* dataIndication = tags.getTag<SctpCommandReq>();
+            auto dataIndication = tags.getTag<SctpCommandReq>();
             // SctpInfoReq* command = new SctpInfoReq("SendCommand");
             SctpInfoReq* command = new SctpInfoReq();
             command->setSocketId(dataIndication->getSocketId());
             command->setSid(dataIndication->getSid());
             command->setNumMsgs(dataIndication->getNumMsgs());
             Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
-            SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
+            auto cmd = cmsg->addTag<SctpSendReq>();
             cmd->setSocketId(dataIndication->getSocketId());
             cmd->setSid(dataIndication->getSid());
             cmsg->addTag<SocketReq>()->setSocketId(dataIndication->getSocketId());
@@ -439,7 +439,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
         case SCTP_I_ESTABLISHED: {
             Message *message = check_and_cast<Message *>(msg);
             auto& tags = getTags(message);
-            const SctpConnectReq *connectInfo = tags.getTag<SctpConnectReq>();
+            auto connectInfo = tags.getTag<SctpConnectReq>();
             ActualOutboundStreams = connectInfo->getOutboundStreams();
             if (ActualOutboundStreams > RequestedOutboundStreams) {
                 ActualOutboundStreams = RequestedOutboundStreams;
@@ -457,7 +457,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
         case SCTP_I_SENDQUEUE_ABATED: {
             Message *message = check_and_cast<Message *>(msg);
             auto& tags = getTags(message);
-            const SctpSendQueueAbatedReq* sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
+            const auto& sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
             assert(sendQueueAbatedIndication != nullptr);
             // Queue is underfull again -> give it more data.
             SendingAllowed = true;
@@ -1038,7 +1038,7 @@ unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
 
 // ###### Send data of saturated streams ####################################
 void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long   bytesAvailableInQueue,
-                                              const SctpSendQueueAbatedReq* sendQueueAbatedIndication)
+                                              const Ptr<const SctpSendQueueAbatedReq>& sendQueueAbatedIndication)
 {
     if (OnTimer != nullptr) {
         // We are in Off mode -> nothing to send!
@@ -1187,7 +1187,7 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
 
         if (TransportProtocol == SCTP) {
             auto& tags = getTags(msg);
-            SctpRcvReq *receiveCommand = tags.findTag<SctpRcvReq>();
+            auto& receiveCommand = tags.findTag<SctpRcvReq>();
             streamID = receiveCommand->getSid();
         }
 
@@ -1210,7 +1210,7 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
     // SCTP_I_SENDQUEUE_ABATED!
 
     Request* cmsg = new Request("QueueRequest", SCTP_C_QUEUE_BYTES_LIMIT);
-    SctpInfoReq* queueInfo = cmsg->addTag<SctpInfoReq>();
+    auto queueInfo = cmsg->addTag<SctpInfoReq>();
     queueInfo->setText(queueSize);
     queueInfo->setSocketId(ConnectionID);
 
