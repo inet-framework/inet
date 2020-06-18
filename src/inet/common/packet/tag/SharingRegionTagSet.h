@@ -294,10 +294,9 @@ inline const SharingRegionTagSet::RegionTag<TagBase>& SharingRegionTagSet::getRe
 inline const SharingRegionTagSet::RegionTag<TagBase> SharingRegionTagSet::getRegionTagForUpdate(int index)
 {
     const auto& regionTag = getRegionTag(index);
-    if (regionTag.getTag().use_count() != 1) {
-        prepareTagsVectorForUpdate();
+    prepareTagsVectorForUpdate();
+    if (regionTag.getTag().use_count() != 1)
         setTag(index, regionTag.getTag()->dupShared());
-    }
     return regionTag;
 }
 
