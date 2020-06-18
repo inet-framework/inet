@@ -150,7 +150,7 @@ const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Netwo
 
 // Additional wireless protocols
 const Protocol Protocol::lora("lora", "Lora"); //Lora Protocol
-const Protocol Protocol::lte("lte", "LTE", Protocol::LinkLayer); //Lora Protocol
+const Protocol Protocol::lte("lte", "LTE", Protocol::LinkLayer); //LTE Protocol
 
 } // namespace inet
 
