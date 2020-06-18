@@ -169,10 +169,9 @@ inline const Ptr<const TagBase>& SharingTagSet::getTag(int index) const
 inline const Ptr<TagBase> SharingTagSet::getTagForUpdate(int index)
 {
     const Ptr<const TagBase>& tag = getTag(index);
-    if (tag.use_count() != 1) {
-        prepareTagsVectorForUpdate();
+    prepareTagsVectorForUpdate();
+    if (tag.use_count() != 1)
         setTag(index, tag->dupShared());
-    }
     return constPtrCast<TagBase>(getTag(index));
 }
 
