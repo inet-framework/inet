@@ -18,7 +18,7 @@
 #ifndef __INET_ETHERNETADDRESSCHECKER_H
 #define __INET_ETHERNETADDRESSCHECKER_H
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
@@ -29,7 +29,7 @@ class INET_API EthernetAddressChecker : public PacketFilterBase
 {
   protected:
     bool promiscuous = false;
-    InterfaceEntry *interfaceEntry = nullptr;
+    IInterfaceTable *interfaceTable = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

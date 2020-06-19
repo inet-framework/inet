@@ -15,8 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetAddressChecker.h"
@@ -30,7 +32,8 @@ void EthernetAddressChecker::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         promiscuous = par("promiscuous");
-        interfaceEntry = getContainingNicModule(this);
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        registerProtocol(Protocol::ethernetMac, nullptr, inputGate);
     }
 }
 
@@ -47,6 +50,8 @@ void EthernetAddressChecker::processPacket(Packet *packet)
 bool EthernetAddressChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<Ieee8023MacAddresses>();
+    auto interfaceInd = packet->getTag<InterfaceInd>();
+    auto interfaceEntry = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId());
     return promiscuous || interfaceEntry->matchesMacAddress(header->getDest());
 }
 

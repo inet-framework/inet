@@ -23,6 +23,7 @@ import inet.queueing.contract.IPacketFilter;
 simple EthernetAddressChecker extends PacketFilterBase like IPacketFilter
 {
     parameters:
+        string interfaceTableModule;
         bool promiscuous = default(false);
         @class(EthernetAddressChecker);
         @display("i=block/checker");
