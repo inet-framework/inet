@@ -23,6 +23,7 @@ import inet.queueing.contract.IPacketFlow;
 simple EthernetAddressInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
+        string interfaceTableModule;
         @class(EthernetAddressInserter);
         @display("i=block/inserter");
 }
