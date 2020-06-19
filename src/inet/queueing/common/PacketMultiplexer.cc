@@ -152,6 +152,9 @@ void PacketMultiplexer::handleRegisterProtocol(const Protocol& protocol, cGate *
     Enter_Method("handleRegisterProtocol");
     if (g != outputGate)
         registerProtocol(protocol, gate("out"), servicePrimitive);
+    else if (g == outputGate && servicePrimitive == SP_INDICATION)
+        for (int i = 0; i < (int)inputGates.size(); i++)
+            registerProtocol(protocol, inputGates[i], servicePrimitive);
 }
 
 } // namespace queueing
