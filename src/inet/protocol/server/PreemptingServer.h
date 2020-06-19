@@ -29,14 +29,20 @@ class INET_API PreemptingServer : public PacketServerBase
 
     Packet *streamedPacket = nullptr;
 
+    cMessage *timer = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
 
-    virtual void startSendingPacket();
-    virtual void endSendingPacket();
+    virtual bool isStreaming() const { return streamedPacket != nullptr; }
+    virtual bool canStartStreaming() const;
+
+    virtual void startStreaming();
+    virtual void endStreaming();
 
   public:
-    virtual ~PreemptingServer() { delete streamedPacket; }
+    virtual ~PreemptingServer() { delete streamedPacket; cancelAndDelete(timer); }
 
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
