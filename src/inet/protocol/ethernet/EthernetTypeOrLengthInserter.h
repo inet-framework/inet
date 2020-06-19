@@ -27,6 +27,7 @@ using namespace inet::queueing;
 class INET_API EthernetTypeOrLengthInserter : public PacketFlowBase
 {
   protected:
+    virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
 };
 
