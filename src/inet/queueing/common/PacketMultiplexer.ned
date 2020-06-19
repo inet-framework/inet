@@ -17,7 +17,7 @@
 
 package inet.queueing.common;
 
-import inet.queueing.base.PacketSinkBase;
+import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
@@ -25,7 +25,7 @@ import inet.queueing.contract.IActivePacketSource;
 // a packet is pushed by one of the connected packet producers, then the multiplexer
 // simply pushes the packet to the connected packet consumer.
 //
-simple PacketMultiplexer extends PacketSinkBase like IActivePacketSource // TODO: IPassivePacketSink // in gate is vector
+simple PacketMultiplexer extends PacketProcessorBase like IActivePacketSource // TODO: IPassivePacketSink // in gate is vector
 {
     parameters:
         displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packet, %l total length
