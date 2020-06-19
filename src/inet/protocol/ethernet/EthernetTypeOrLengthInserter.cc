@@ -43,6 +43,7 @@ void EthernetTypeOrLengthInserter::processPacket(Packet *packet)
     packet->insertAtFront(header);
     auto packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
+    packet->removeTagIfPresent<DispatchProtocolReq>();
 }
 
 } // namespace inet
