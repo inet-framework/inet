@@ -136,6 +136,7 @@ ProtocolGroup ProtocolGroup::snapOui("snapOui", {
 ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
     { 0x4242, &Protocol::stp },
     { 0xFE00, &Protocol::isis },
+    { 0xAAAA, &Protocol::ieee8022snap },
 });
 
 ProtocolGroup ProtocolGroup::udpprotocol("udpprotocol", {
