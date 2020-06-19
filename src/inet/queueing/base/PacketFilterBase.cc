@@ -123,15 +123,14 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
     if (matchesPacket(packet)) {
         processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
-        pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
         endPacketStreaming(packet);
+        pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
     }
     else {
         EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
         endPacketStreaming(packet);
         dropPacket(packet);
     }
-    pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
     updateDisplayString();
 }
 
