@@ -84,6 +84,27 @@ void MessageDispatcher::pushPacket(Packet *packet, cGate *inGate)
     updateDisplayString();
 }
 
+void MessageDispatcher::pushPacketStart(Packet *packet, cGate *inGate, bps datarate)
+{
+    Enter_Method("pushPacketStart");
+    take(packet);
+    auto outGate = handlePacket(packet, inGate);
+    auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
+    pushOrSendPacketStart(packet, outGate, consumer, datarate);
+    updateDisplayString();
+}
+
+void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate, bps datarate)
+{
+    Enter_Method("pushPacketEnd");
+    take(packet);
+    auto outGate = handlePacket(packet, inGate);
+    auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
+    handlePacketProcessed(packet);
+    pushOrSendPacketEnd(packet, outGate, consumer, datarate);
+    updateDisplayString();
+}
+
 void MessageDispatcher::handleCanPushPacket(cGate *outGate)
 {
     int size = gateSize("in");
