@@ -26,6 +26,7 @@ void PacketDestreamer::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        datarate = bps(par("datarate"));
         inputGate = gate("in");
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
@@ -60,6 +61,7 @@ void PacketDestreamer::pushPacketStart(Packet *packet, cGate *gate, bps datarate
     Enter_Method("pushPacketStart");
     take(packet);
     streamedPacket = packet;
+    streamDatarate = datarate;
     EV_INFO << "Starting destreaming packet " << streamedPacket->getName() << "." << std::endl;
 }
 
@@ -69,6 +71,7 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
     take(packet);
     delete streamedPacket;
     streamedPacket = packet;
+    streamDatarate = datarate;
     auto packetLength = streamedPacket->getTotalLength();
     EV_INFO << "Ending destreaming packet " << streamedPacket->getName() << "." << std::endl;
     pushOrSendPacket(streamedPacket, outputGate, consumer);
@@ -84,6 +87,7 @@ void PacketDestreamer::pushPacketProgress(Packet *packet, cGate *gate, bps datar
     take(packet);
     delete streamedPacket;
     streamedPacket = packet;
+    streamDatarate = datarate;
     EV_INFO << "Progressing destreaming packet " << streamedPacket->getName() << "." << std::endl;
 }
 
@@ -120,11 +124,12 @@ Packet *PacketDestreamer::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
     ASSERT(!isStreaming());
-    auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
+    streamDatarate = datarate;
+    auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), streamDatarate);
     EV_INFO << "Starting destreaming packet " << packet->getName() << "." << std::endl;
     take(packet);
     streamedPacket = packet;
-    packet = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
+    packet = provider->pullPacketEnd(inputGate->getPathStartGate(), streamDatarate);
     EV_INFO << "Ending destreaming packet " << packet->getName() << "." << std::endl;
     take(packet);
     delete streamedPacket;

@@ -26,6 +26,7 @@ import inet.queueing.contract.IPacketFlow;
 simple PacketDestreamer extends PacketProcessorBase like IPacketFlow
 {
     parameters:
+        double datarate @unit(bps) = default(nan bps);
         @class(PacketDestreamer);
         @display("i=block/cogwheel");
     gates:
