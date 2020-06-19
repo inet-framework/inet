@@ -30,7 +30,7 @@ simple PacketMultiplexer extends PacketProcessorBase like IActivePacketSource //
     parameters:
         displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packet, %l total length
         @class(PacketMultiplexer);
-        @display("i=block/join");
+        @display("i=-;b=10,10,oval,grey,,1");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
