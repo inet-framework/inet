@@ -106,7 +106,8 @@ const Protocol Protocol::ieee80211VhtPhy("ieee80211vhtphy", "IEEE 802.11 VHT PHY
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8021QCtag("ieee8021qctag", "IEEE 802.1Q ctag");
 const Protocol Protocol::ieee8021QStag("ieee8021qstag", "IEEE 802.1Q stag");
-const Protocol Protocol::ieee8022("ieee8022", "IEEE 802.2", Protocol::LinkLayer);
+const Protocol Protocol::ieee8022("ieee8022", "IEEE 802.2", Protocol::LinkLayer); // TODO: rename to ieee8022llc
+const Protocol Protocol::ieee8022snap("ieee8022snap", "IEEE 802.2 SNAP", Protocol::LinkLayer);
 const Protocol Protocol::igmp("igmp", "IGMP", Protocol::NetworkLayer);
 const Protocol Protocol::igp("igp", "IGP");
 const Protocol Protocol::ipv4("ipv4", "IPv4", Protocol::NetworkLayer);
