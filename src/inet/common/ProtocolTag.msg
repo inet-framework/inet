@@ -59,7 +59,7 @@ class DispatchProtocolInd extends ProtocolTagBase
 //
 // This tag specifies the protocol of the packet.
 //
-// Packet processing at the senderb
+// Packet processing at the sender
 // ===============================
 //
 // | ApplicationData |
