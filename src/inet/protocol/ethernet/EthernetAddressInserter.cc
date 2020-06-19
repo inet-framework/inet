@@ -17,6 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/protocol/ethernet/EthernetAddressInserter.h"
@@ -29,7 +30,7 @@ void EthernetAddressInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        interfaceEntry = getContainingNicModule(this);
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 }
 
 void EthernetAddressInserter::processPacket(Packet *packet)
@@ -37,6 +38,8 @@ void EthernetAddressInserter::processPacket(Packet *packet)
     const auto& header = makeShared<Ieee8023MacAddresses>();
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto srcAddress = macAddressReq->getSrcAddress();
+    auto interfaceReq = packet->getTag<InterfaceReq>();
+    auto interfaceEntry = interfaceTable->getInterfaceById(interfaceReq->getInterfaceId());
     if (srcAddress.isUnspecified() && interfaceEntry != nullptr)
         srcAddress = interfaceEntry->getMacAddress();
     header->setSrc(srcAddress);
