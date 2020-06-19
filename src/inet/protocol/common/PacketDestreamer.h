@@ -38,6 +38,7 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
     IPassivePacketSink *consumer = nullptr;
     IActivePacketSink *collector = nullptr;
 
+    bps streamDatarate = bps(NaN);
     Packet *streamedPacket = nullptr;
 
   protected:
