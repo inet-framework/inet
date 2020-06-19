@@ -111,7 +111,7 @@ void MessageDispatcher::handleCanPushPacket(cGate *outGate)
     for (int i = 0; i < size; i++) {
         auto inGate = gate("in", i);
         auto producer = findConnectedModule<queueing::IActivePacketSource>(inGate);
-        if (producer != nullptr && !dynamic_cast<MessageDispatcher *>(producer))
+        if (producer != nullptr && !dynamic_cast<MessageDispatcher *>(producer) && outGate->getOwnerModule() != inGate->getOwnerModule())
             producer->handleCanPushPacket(inGate->getPathStartGate());
     }
 }
