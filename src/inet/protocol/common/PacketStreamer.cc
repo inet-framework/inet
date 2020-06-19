@@ -26,6 +26,7 @@ void PacketStreamer::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        datarate = bps(par("datarate"));
         inputGate = gate("in");
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
@@ -61,11 +62,12 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     ASSERT(!isStreaming());
     take(packet);
     streamedPacket = packet;
+    streamDatarate = datarate;
     auto packetLength = packet->getTotalLength();
     EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketStart(packet->dup(), outputGate, consumer, datarate);
+    pushOrSendPacketStart(packet->dup(), outputGate, consumer, streamDatarate);
     EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, datarate);
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, streamDatarate);
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packetLength;
@@ -100,6 +102,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     streamedPacket = provider->pullPacket(inputGate->getPathStartGate());
+    streamDatarate = datarate;
     EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
     updateDisplayString();
     return streamedPacket->dup();
@@ -111,6 +114,7 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate, bps datarate)
     EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
     auto packet = streamedPacket;
     streamedPacket = nullptr;
+    streamDatarate = datarate;
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
     updateDisplayString();
@@ -120,6 +124,7 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate, bps datarate)
 Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
+    streamDatarate = datarate;
     EV_INFO << "Progressing streaming packet " << streamedPacket->getName() << "." << std::endl;
     updateDisplayString();
     return streamedPacket->dup();
