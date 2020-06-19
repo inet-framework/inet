@@ -22,8 +22,8 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
-#include "inet/queueing/contract/IPacketProcessor.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
@@ -31,7 +31,7 @@ namespace inet {
 /**
  * This class implements the corresponding module. See module documentation for more details.
  */
-class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener, public queueing::IActivePacketSource, public queueing::IPassivePacketSink, public queueing::IPacketProcessor
+class INET_API MessageDispatcher : public queueing::PacketProcessorBase, public IProtocolRegistrationListener, public IInterfaceRegistrationListener, public queueing::IActivePacketSource, public queueing::IPassivePacketSink
 {
   public:
     class Key
@@ -61,7 +61,7 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
     std::map<Key, int> protocolToGateIndex;
 
   protected:
-    virtual void initialize() override;
+    virtual void initialize(int stage) override;
     virtual void arrived(cMessage *message, cGate *inGate, simtime_t t) override;
     virtual cGate *handlePacket(Packet *packet, cGate *inGate);
     virtual cGate *handleMessage(Message *request, cGate *inGate);
