@@ -1,4 +1,19 @@
 
+Ethernet features:
+ - priority queueing
+ - gating
+ - transmission selection
+ - preemption
+ - cutthrough
+ - VLAN
+ - MAC security
+ - relaying with proper L2 protocol support
+ - LLC
+
+ - generic TCP/UDP socket tagging, with automatic copying of tags to outgoing packets
+
+ - Complete and review Packet API: insert/replace/update
+
  - temporal and spectral and spatial energy density
    - sampling
    - filling
