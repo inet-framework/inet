@@ -314,6 +314,16 @@ void insertDsrProtocolHeader(Packet *packet, const Ptr<DSRPkt>& header)
     insertProtocolHeader(packet, Protocol::dsr, header);
 }
 
+void insertDsrProtocolHeaderAtBack(Packet *packet, const Ptr<DSRPkt>& header)
+{
+    auto networkProtocolInd = packet->addTagIfAbsent<DsrProtocolInd>();
+    networkProtocolInd->setDsrProtocolHeader(header);
+    // Doesn't insert protocol tag, it should present already
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    //packetProtocolTag->setProtocol(&Protocol::dsr);
+    packet->insertAtBack(header);
+}
+
 const Ptr<DSRPkt> removeDsrProtocolHeader(Packet *packet)
 {
 
