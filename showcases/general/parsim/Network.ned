@@ -1,11 +1,12 @@
 package inet.showcases.general.parsim;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import ned.DelayChannel;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 channel Ethernet100 extends ned.DatarateChannel
@@ -52,7 +53,7 @@ network ParSimNetwork3 extends ParSimNetwork
 
 network ParSimNetwork4
 {
-    @display("bgb=400,400");
+    @display("bgb=538,400");
     submodules:
         host1: StandardHost {
             @display("p=56,44");
@@ -94,10 +95,10 @@ network ParSimNetwork4
             @display("p=268,273");
         }
         configurator1: Ipv4NetworkConfigurator {
-            @display("p=50,50");
+            @display("p=477,44");
         }
         configurator2: Ipv4NetworkConfigurator {
-            @display("p=350,50");
+            @display("p=477,141");
         }
     connections:
         host1.ethg++ <--> Ethernet100 <--> switch1.ethg++;
@@ -112,4 +113,87 @@ network ParSimNetwork4
         switch3.ethg++ <--> Ethernet100 <--> host6.ethg++;
         switch4.ethg++ <--> Ethernet100 <--> host7.ethg++;
         switch4.ethg++ <--> Ethernet100 <--> host8.ethg++;
+}
+
+network ParSimNetwork4FourPartitions extends ParSimNetwork4
+{
+    submodules:
+        configurator3: Ipv4NetworkConfigurator {
+            @display("p=477,44");
+        }
+        configurator4: Ipv4NetworkConfigurator {
+            @display("p=477,141");
+        }
+}
+
+network ParSimNetwork5
+{
+    @display("bgb=538,400");
+    submodules:
+        host1: StandardHost {
+            @display("p=56,44");
+        }
+        host2: StandardHost {
+            @display("p=56,147");
+        }
+        switch1: EtherSwitch {
+            @display("p=130,97");
+        }
+        host3: WirelessHost {
+            @display("p=56,232");
+        }
+        host4: WirelessHost {
+            @display("p=56,335");
+        }
+        AP1: AccessPoint {
+            @display("p=130,285");
+        }
+        router: Router {
+            @display("p=190,194");
+        }
+        host5: WirelessHost {
+            @display("p=350,38");
+        }
+        host6: WirelessHost {
+            @display("p=350,147");
+        }
+        host7: StandardHost {
+            @display("p=350,229");
+        }
+        host8: StandardHost {
+            @display("p=356,318");
+        }
+        AP2: AccessPoint {
+            @display("p=280,90");
+        }
+        switch4: EtherSwitch {
+            @display("p=268,273");
+        }
+        configurator1: Ipv4NetworkConfigurator {
+            @display("p=477,44");
+        }
+        configurator2: Ipv4NetworkConfigurator {
+            @display("p=477,144");
+        }
+        configurator3: Ipv4NetworkConfigurator {
+            @display("p=477,244");
+        }
+        configurator4: Ipv4NetworkConfigurator {
+            @display("p=477,344");
+        }
+        radioMedium1: Ieee80211ScalarRadioMedium {
+            @display("p=204,44");
+        }
+        radioMedium2: Ieee80211ScalarRadioMedium {
+            @display("p=193,340");
+        }
+    connections:
+        host1.ethg++ <--> Ethernet100 <--> switch1.ethg++;
+        host2.ethg++ <--> Ethernet100 <--> switch1.ethg++;
+        switch1.ethg++ <--> Ethernet100 <--> router.ethg++;
+        router.ethg++ <--> Ethernet100 <--> AP2.ethg++;
+        router.ethg++ <--> Ethernet100 <--> switch4.ethg++;
+        switch4.ethg++ <--> Ethernet100 <--> host7.ethg++;
+        switch4.ethg++ <--> Ethernet100 <--> host8.ethg++;
+        AP1.ethg++ <--> Ethernet100 <--> router.ethg++;
 }
