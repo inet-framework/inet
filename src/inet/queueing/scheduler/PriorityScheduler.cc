@@ -25,9 +25,11 @@ Define_Module(PriorityScheduler);
 void PriorityScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         for (auto provider : providers)
             collections.push_back(dynamic_cast<IPacketCollection *>(provider));
+        inversePriorities = par("inversePriorities");
+    }
 }
 
 int PriorityScheduler::getNumPackets() const
@@ -82,9 +84,17 @@ void PriorityScheduler::removePacket(Packet *packet)
 
 int PriorityScheduler::schedulePacket()
 {
-    for (int i = 0; i < (int)providers.size(); i++)
-        if (providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate()))
-            return i;
+    if (!inversePriorities) {
+        for (int i = 0; i < (int)providers.size(); i++)
+            if (providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate()))
+                return i;
+    } else {
+        for (int i = (int)providers.size() - 1; i >= 0; i--) {
+            if (providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate()))
+                return i;
+        }
+    }
+
     return -1;
 }
 
