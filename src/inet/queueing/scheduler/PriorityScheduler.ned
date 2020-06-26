@@ -27,5 +27,6 @@ import inet.queueing.contract.IPacketScheduler;
 simple PriorityScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
+        bool inversePriorities = default(false);
         @class(PriorityScheduler);
 }
