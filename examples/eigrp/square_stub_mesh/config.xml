@@ -1,0 +1,136 @@
+<Devices>
+	<!-- R1 -->
+	<Router id="10.0.1.0">       
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.12.1</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.13.1</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.14.1</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.1.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        		
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>
+        </Routing6>
+        
+    </Router>
+    
+    <!-- R2 -->
+    <Router id="10.0.2.0">
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.12.2</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.24.2</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.23.2</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.2.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        		
+	        		<Stub connected='enabled' summary='enabled'/>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>    
+        </Routing6>
+        
+    </Router>
+    
+    <!-- R3 -->
+    <Router id="10.0.3.0">
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.34.0</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.3.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        		
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>    
+        </Routing6>
+        
+    </Router>
+    
+    <!-- R4 -->
+    <Router id="10.0.4.0">
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.24.0</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.34.0</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.14.0</IPAddress>						 
+						 	<Wildcard>255.255.255.252</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.4.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        		
+	        		<Stub connected='enabled' summary='enabled'/>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>    
+        </Routing6>
+        
+    </Router>
+
+</Devices>
