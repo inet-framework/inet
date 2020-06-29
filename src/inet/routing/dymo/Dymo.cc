@@ -315,6 +315,7 @@ void Dymo::processRreqWaitRrepTimer(RreqWaitRrepTimer *message)
     if (message->getRetryCount() == discoveryAttemptsMax - 1) {
         cancelRouteDiscovery(target);
         cancelRreqTimer(target);
+        deleteRreqTimer(target);
         eraseRreqTimer(target);
         scheduleRreqHolddownTimer(createRreqHolddownTimer(target));
     }
@@ -1432,22 +1433,27 @@ void Dymo::handleStartOperation(LifecycleOperation *operation)
 void Dymo::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a RERR to notify peers about broken routes
-    for (auto & elem : targetAddressToRREQTimer){
+    for (auto & elem : targetAddressToRREQTimer) {
         cancelRouteDiscovery(elem.first);
-        cancelRreqTimer(elem.first);
-        eraseRreqTimer(elem.first);
+        cancelAndDelete(elem.second);
     }
-    for (auto & pkt_timer : packetJitterTimers) {
+    targetAddressToRREQTimer.clear();
+    for (auto & pkt_timer : packetJitterTimers)
         cancelAndDelete(pkt_timer);
-    }
     packetJitterTimers.clear();
 }
 
 void Dymo::handleCrashOperation(LifecycleOperation *operation)
 {
     targetAddressToSequenceNumber.clear();
+    for (auto & elem : targetAddressToRREQTimer)
+        cancelAndDelete(elem.second);
     targetAddressToRREQTimer.clear();
+    for (auto & elem : targetAddressToDelayedPackets)
+        delete elem.second;
     targetAddressToDelayedPackets.clear();
+    for (auto & pkt_timer : packetJitterTimers)
+        cancelAndDelete(pkt_timer);
     packetJitterTimers.clear();
 }
 
