@@ -96,15 +96,19 @@ void UdpSocket::send(Packet *pk)
 
 void UdpSocket::close()
 {
+    if(sockState == CLOSED)
+        return;
     auto request = new Request("close", UDP_C_CLOSE);
     UdpCloseCommand *ctrl = new UdpCloseCommand();
     request->setControlInfo(ctrl);
     sendToUDP(request);
-    sockState = CONNECTED;
+    sockState = CLOSED;
 }
 
 void UdpSocket::destroy()
 {
+    if(this->gateToUdp == nullptr)
+        return;
     auto request = new Request("destroy", UDP_C_DESTROY);
     auto ctrl = new UdpDestroyCommand();
     request->setControlInfo(ctrl);
