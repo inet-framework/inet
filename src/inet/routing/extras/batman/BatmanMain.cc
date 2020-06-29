@@ -225,8 +225,9 @@ void Batman::initialize(int stage)
             if (addrPair.size() != 2)
                 throw cRuntimeError("invalid 'announcedNetworks' parameter content: '%s'", token);
 
-            Ipv4Address addr = L3AddressResolver().resolve(addrPair[0].c_str()).toIpv4();
-            Ipv4Address mask = L3AddressResolver().resolve(addrPair[1].c_str(), L3AddressResolver::ADDR_MASK).toIpv4();
+            int maskLen = std::stoi(addrPair[1]);
+            auto addr = Ipv4Address(addrPair[0].c_str());
+            auto mask = Ipv4Address::makeNetmask(maskLen);
             addr.doAnd(mask);
 
             // add to HNA:

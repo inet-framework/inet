@@ -125,6 +125,8 @@ const Ptr<const DSRPkt> getDsrProtocolHeader(Packet *packet);
 
 void insertDsrProtocolHeader(Packet *packet, const Ptr<DSRPkt>& header);
 
+void insertDsrProtocolHeaderAtBack(Packet *packet, const Ptr<DSRPkt>& header);
+
 const Ptr<DSRPkt> removeDsrProtocolHeader(Packet *packet);
 
 

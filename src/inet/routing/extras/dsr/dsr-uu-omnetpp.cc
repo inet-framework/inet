@@ -858,8 +858,9 @@ void DSRUU::packetFailed(const Packet *pktAux)
     //struct in_addr prev_hop;
     /* Cast the packet so that we can touch it */
     /* Do nothing for my own packets... */
+    auto chunk = pktAux->peekAtFront<Chunk>();
 
-    const auto& header80211 = pktAux->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    const auto& header80211 = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(chunk);
     if (header80211 == nullptr)
         return;
 
@@ -891,7 +892,7 @@ void DSRUU::packetFailed(const Packet *pktAux)
     auto packetProtocolTag = ipDgram->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
-    packetDissector.dissectPacket(const_cast<Packet *> (ipDgram), protocol);
+    packetDissector.dissectPacket(ipDgram, protocol);
 
     auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
 
@@ -925,7 +926,7 @@ void DSRUU::packetFailed(const Packet *pktAux)
         return; // nothing more to do
 
     // create a copy of this packet
-    auto pkt = new Packet(ipDgram->getName());
+    auto pkt = new Packet(pktAux->getName());
 
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk)) {
@@ -940,7 +941,7 @@ void DSRUU::packetFailed(const Packet *pktAux)
                         }
                         else if (removed) {
                             if (elementChunk == dsrPkt)
-                                insertDsrProtocolHeader(pkt, dynamicPtrCast<DSRPkt> (networkHeader->dupShared()));
+                                insertDsrProtocolHeaderAtBack(pkt, dynamicPtrCast<DSRPkt> (elementChunk->dupShared()));
                             else
                                 pkt->insertAtBack(elementChunk->dupShared());
                         }
@@ -959,13 +960,13 @@ void DSRUU::packetFailed(const Packet *pktAux)
                 }
                 else
                     if (elementChunk == dsrPkt)
-                        insertDsrProtocolHeader(pkt, dynamicPtrCast<DSRPkt> (networkHeader->dupShared()));
+                        insertDsrProtocolHeaderAtBack(pkt, dynamicPtrCast<DSRPkt> (elementChunk->dupShared()));
                     else
                         pkt->insertAtBack(elementChunk->dupShared());
             }
         }
     }
-    pkt->copyTags(*ipDgram);
+    pkt->copyTags(*pktAux);
     if (isDsr)
         pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::dsr);
     else
