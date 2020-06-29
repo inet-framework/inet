@@ -216,7 +216,7 @@ const char *InterPacketGap::resolveDirective(char directive) const
             result = simtime_t(durationPar->doubleValue()).ustr().c_str();
             break;
         case 'd':
-            result = packetDelay.asSimTime().ustr().c_str();
+            result = CLOCKTIME_AS_SIMTIME(packetDelay).ustr().c_str();
             break;
         default:
             return PacketPusherBase::resolveDirective(directive);
