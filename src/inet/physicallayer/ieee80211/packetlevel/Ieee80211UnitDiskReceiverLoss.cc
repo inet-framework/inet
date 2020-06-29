@@ -65,7 +65,13 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
         auto node = getContainingNode(this);
         mobility = check_and_cast<IMobility *>(node->getSubmodule("mobility"));
         hostId = node->getId();
-        nodes.insert(std::make_pair(hostId, mobility));
+
+
+        if (par("checkMobility") && !mobility->isStationary())
+            checkNeigh = false;
+        if (checkNeigh) {
+            nodes.insert(std::make_pair(hostId, mobility));
+        }
 
         double numUniLink = par("perUniLinks").doubleValue();
         double numLossLinks = par("perLosLinks").doubleValue();
@@ -92,11 +98,16 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
             cTopology::Node *destNode = topo.getNode(i);
             cModule *host = destNode->getModule();
             auto  mod = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
+            if (par("checkMobility") && !mod->isStationary())
+                continue; // this node is not consider
+
             auto cord1 = mod->getCurrentPosition();
             for (int j = i+1; j < topo.getNumNodes(); j++) {
                 cTopology::Node *destNodeAux = topo.getNode(j);
                 cModule *host2 = destNodeAux->getModule();
                 auto  mod2 = check_and_cast<IMobility *>(host2->getSubmodule("mobility"));
+                if (par("checkMobility") && !mod2->isStationary())
+                    continue; // this node is not consider
                 auto cord2 = mod2->getCurrentPosition();
                 if (cord1.distance(cord2) < distance.get()) {
                     links.push_back(std::make_pair(host->getId(), host2->getId()));
@@ -151,6 +162,8 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
     else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
         // register the neighbors nodes
         auto cord1 = mobility->getCurrentPosition();
+        if (!checkNeigh)
+            return;
         for (const auto &elem : nodes) {
             if (elem.first == hostId)
                 continue;
@@ -164,6 +177,8 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
 
 void Ieee80211UnitDiskReceiverLoss::checkNeigChange() const{
     std::vector<int> neig;
+    if (!checkNeigh)
+        return;
     auto cord1 = mobility->getCurrentPosition();
     for (const auto &elem : nodes) {
         if (elem.first == hostId)

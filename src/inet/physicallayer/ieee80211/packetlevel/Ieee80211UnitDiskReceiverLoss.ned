@@ -27,6 +27,7 @@ module Ieee80211UnitDiskReceiverLoss extends Ieee80211UnitDiskReceiver
         double perLosLinks = default(0);
         double errorProb = default(0);
         bool  forceUni = default(true);
+        bool checkMobility = default(false);
         @class(Ieee80211UnitDiskReceiverLoss);
 }
 

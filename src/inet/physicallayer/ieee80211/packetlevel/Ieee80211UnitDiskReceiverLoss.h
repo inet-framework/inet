@@ -32,7 +32,8 @@ class INET_API Ieee80211UnitDiskReceiverLoss : public Ieee80211UnitDiskReceiver
     static std::map<int, Links> lossLinks;
     int hostId;
     m communicationRange;
-    IMobility *mobility;
+    IMobility *mobility = nullptr;
+    bool checkNeigh = true;
     static std::map<int, IMobility *> nodes;
     std::vector<int> neigbors;
 
