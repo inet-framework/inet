@@ -89,7 +89,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     std::map<L3Address, DymoSequenceNumber> targetAddressToSequenceNumber;
     std::map<L3Address, RreqTimer *> targetAddressToRREQTimer;
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;
-    std::map<PacketJitterTimer *, cPacket *> jitterTimerPacketMap;
+    std::set<PacketJitterTimer *> packetJitterTimers;
     std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
 
   public:

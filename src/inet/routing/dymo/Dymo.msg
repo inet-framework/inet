@@ -80,6 +80,7 @@ message RreqHolddownTimer extends RreqTimer {
 }
 
 message PacketJitterTimer{
+    cPacket *jitteredPacket = nullptr @owned;
 }
 
 //

@@ -74,8 +74,8 @@ Dymo::~Dymo()
 {
     for (auto & elem : targetAddressToRREQTimer)
         cancelAndDelete(elem.second);
-    for (auto & pkt_timer : jitterTimerPacketMap){
-        cancelJitterTimerPacket(pkt_timer.first);
+    for (auto & pkt_timer : packetJitterTimers){
+        cancelAndDelete(pkt_timer);
     }
     cancelAndDelete(expungeTimer);
 }
@@ -398,28 +398,22 @@ void Dymo::scheduleJitterTimerPacket(cPacket *packet, double delay)
         sendUdpPacket(packet);
     else{
         PacketJitterTimer* message = new PacketJitterTimer("PacketJitterTimer");
-        jitterTimerPacketMap[message] = packet;
+        message->setJitteredPacket(packet);
         scheduleAt(simTime() + delay, message);
+        packetJitterTimers.insert(message);
     }
 }
 
 void Dymo::processJitterTimerPacket(PacketJitterTimer *msg)
 {
-    sendUdpPacket(jitterTimerPacketMap[msg]);
-    eraseJitterTimerPacket(msg);
+    sendUdpPacket(msg->dropJitteredPacket());
+    packetJitterTimers.erase(msg);
     delete msg;
 }
 
 void Dymo::cancelJitterTimerPacket(PacketJitterTimer *msg){
-    auto tt = jitterTimerPacketMap.find(msg);
-    delete tt->second;
+    packetJitterTimers.erase(msg);
     cancelAndDelete(msg);
-    eraseJitterTimerPacket(msg);
-}
-
-void Dymo::eraseJitterTimerPacket(PacketJitterTimer *msg){
-    auto tt = jitterTimerPacketMap.find(msg);
-    jitterTimerPacketMap.erase(tt);
 }
 
 void Dymo::processUdpPacket(Packet *packet)
@@ -1443,9 +1437,10 @@ void Dymo::handleStopOperation(LifecycleOperation *operation)
         cancelRreqTimer(elem.first);
         eraseRreqTimer(elem.first);
     }
-    for (auto & pkt_timer : jitterTimerPacketMap){
-        cancelJitterTimerPacket(pkt_timer.first);
+    for (auto & pkt_timer : packetJitterTimers) {
+        cancelAndDelete(pkt_timer);
     }
+    packetJitterTimers.clear();
 }
 
 void Dymo::handleCrashOperation(LifecycleOperation *operation)
@@ -1453,7 +1448,7 @@ void Dymo::handleCrashOperation(LifecycleOperation *operation)
     targetAddressToSequenceNumber.clear();
     targetAddressToRREQTimer.clear();
     targetAddressToDelayedPackets.clear();
-    jitterTimerPacketMap.clear();
+    packetJitterTimers.clear();
 }
 
 //
