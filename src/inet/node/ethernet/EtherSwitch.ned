@@ -23,12 +23,11 @@ import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.IExternalInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.ethernet.IEtherEncap;
 import inet.networklayer.common.InterfaceTable;
+import inet.protocol.ethernet.SimpleEthernetLayer;
 
 //
 // Model of an Ethernet switch.
@@ -48,16 +47,18 @@ module EtherSwitch
         int numPcapRecorders = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
+        bool enableCutthrough = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        eth[*].encap.typename = "EtherEncapDummy";
+        eth[*].encap.typename = default("EtherEncapDummy");
         *.fcsMode = fcsMode;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
 
         relayUnit.hasStp = hasStp;
         encap.registerProtocol = true;
+        ethernet.addressChecker.promiscuous = default(true);
 
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
@@ -78,7 +79,7 @@ module EtherSwitch
             @display("p=100,100;is=s");
         }
         relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
-            @display("p=800,300;is=m");
+            @display("p=800,215;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=474,92");
@@ -91,23 +92,27 @@ module EtherSwitch
             parameters:
                 @display("p=800,380;b=1200,5");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
+        eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "LayeredEthernetInterface")> like IEthernetInterface {
             parameters:
-                mac.promiscuous = true;
                 @display("p=250,450,row,150;q=txQueue");
         }
-        encap: <default("EtherEncap")> like IEtherEncap {
-            @display("p=800,220");
+        ethernet: SimpleEthernetLayer {
+            @display("p=800,300");
+        }
+        cutthrough: MessageDispatcher if enableCutthrough {
+            @display("p=800,420;b=1200,5,,,,1");
         }
     connections:
-        relayUnit.ifOut --> down.in++;
-        relayUnit.ifIn <-- down.out++;
+        ethernet.lowerLayerOut --> down.in++;
+        down.out++ --> ethernet.lowerLayerIn;
 
-        encap.lowerLayerIn <-- relayUnit.upperLayerOut;
-        encap.lowerLayerOut --> relayUnit.upperLayerIn;
+        for i=0..sizeof(ethg)-1 {
+            eth[i].cutthroughOut --> cutthrough.in++ if enableCutthrough;
+            eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
+        }
 
-        encap.upperLayerIn <-- up.out++;
-        encap.upperLayerOut --> up.in++;
+        relayUnit.ifOut --> ethernet.upperLayerIn;
+        ethernet.upperLayerOut --> relayUnit.ifIn;
 
         for i=0..sizeof(ethg)-1 {
             down.out++ --> eth[i].upperLayerIn;
@@ -119,5 +124,7 @@ module EtherSwitch
             stp.relayIn <-- up.out++; // relayUnit.stpOut;
             stp.relayOut --> up.in++; // relayUnit.stpIn;
         }
+        relayUnit.upperLayerOut --> up.in++;
+        up.out++ --> relayUnit.upperLayerIn;
 }
 
