@@ -21,6 +21,7 @@ import inet.networklayer.common.InterfaceEntry;
 module LayeredEthernetInterface extends InterfaceEntry like IEthernetInterface
 {
     parameters:
+        string protocol = default("ethernetmac");
         bool broadcast = default(true);
         bool multicast = default(true);
         string address = default("auto");
