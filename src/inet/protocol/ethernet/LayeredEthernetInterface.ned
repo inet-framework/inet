@@ -35,10 +35,10 @@ module LayeredEthernetInterface extends InterfaceEntry like IEthernetInterface
         output upperLayerOut;
         inout phys;
     submodules:
-        macLayer: EthernetMacLayer {
+        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             @display("p=500,100");
         }
-        phyLayer: EthernetPhyLayer {
+        phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
             @display("p=500,200");
         }
     connections:
