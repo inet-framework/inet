@@ -127,20 +127,25 @@ Packet *PreemptibleStreamer::pullPacketEnd(cGate *gate, bps datarate)
     if (preemptedLength < minPacketLength)
         preemptedLength = minPacketLength;
     if (preemptedLength + minPacketLength <= packet->getTotalLength()) {
-        std::string name = std::string(packet->getName()) + "-frag";
         // already pulled part
-        packet->setName(name.c_str());
-        packet->removeTagIfPresent<PacketProtocolTag>();
-        const auto& remainingData = packet->removeAtBack(packet->getTotalLength() - preemptedLength);
-        auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
+        const auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
         fragmentTag->setLastFragment(false);
+        auto fragmentNumber = fragmentTag->getFragmentNumber();
+        std::string basePacketName = packet->getName();
+        if (fragmentNumber != 0)
+            basePacketName = basePacketName.substr(0, basePacketName.find("-frag"));
+        std::string packetName = basePacketName + "-frag" + std::to_string(fragmentNumber);
+        packet->setName(packetName.c_str());
+        packet->removeTagIfPresent<PacketProtocolTag>();
         // remaining part
-        remainingPacket = new Packet(name.c_str(), remainingData);
+        std::string remainingPacketName = basePacketName + "-frag" + std::to_string(fragmentNumber + 1);
+        const auto& remainingData = packet->removeAtBack(packet->getTotalLength() - preemptedLength);
+        remainingPacket = new Packet(remainingPacketName.c_str(), remainingData);
         remainingPacket->copyTags(*packet);
-        auto& remainingPacketFragmentTag = remainingPacket->getTagForUpdate<FragmentTag>();
+        const auto& remainingPacketFragmentTag = remainingPacket->getTagForUpdate<FragmentTag>();
         remainingPacketFragmentTag->setFirstFragment(false);
         remainingPacketFragmentTag->setLastFragment(true);
-        remainingPacketFragmentTag->setFragmentNumber(fragmentTag->getFragmentNumber() + 1);
+        remainingPacketFragmentTag->setFragmentNumber(fragmentNumber + 1);
     }
     streamedPacket = nullptr;
     handlePacketProcessed(packet);
