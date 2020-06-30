@@ -63,7 +63,7 @@ void PacketEmitter::handlePushPacketProcessed(Packet *packet, cGate *gate, bool 
 void PacketEmitter::emitPacket(Packet *packet)
 {
     if (packetFilter.matches(packet)) {
-        auto clone = new Packet(packet->getName(), packet->peekAllAsBytes());
+        auto clone = new Packet(packet->getName(), packet->peekAll());
         clone->copyTags(*packet);
         clone->addTagIfAbsent<DirectionTag>()->setDirection(direction);
         clone->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
