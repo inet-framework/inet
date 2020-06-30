@@ -183,7 +183,9 @@ void Arp::sendArpRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
 
     packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+
     // send out
     EV_INFO << "Sending " << packet << " to network protocol.\n";
     emit(arpRequestSentSignal, packet);
@@ -342,6 +344,7 @@ void Arp::processArpPacket(Packet *packet)
                 outPk->insertAtFront(arpReply);
                 outPk->addTag<MacAddressReq>()->setDestAddress(srcMacAddress);
                 outPk->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+                outPk->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
                 outPk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
                 // send out
@@ -470,6 +473,7 @@ void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Ad
     macAddrReq->setSrcAddress(srcAddr);
     macAddrReq->setDestAddress(MacAddress::BROADCAST_ADDRESS);
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
     ArpCacheEntry *entry = new ArpCacheEntry();
@@ -510,6 +514,7 @@ void Arp::sendArpProbe(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address
     macAddrReq->setSrcAddress(srcAddr);
     macAddrReq->setDestAddress(MacAddress::BROADCAST_ADDRESS);
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
     // send out
