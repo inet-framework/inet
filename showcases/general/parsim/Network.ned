@@ -181,10 +181,10 @@ network ParSimNetwork5
         configurator4: Ipv4NetworkConfigurator {
             @display("p=477,344");
         }
-        radioMedium1: Ieee80211ScalarRadioMedium {
+        radioMedium2: Ieee80211ScalarRadioMedium {
             @display("p=204,44");
         }
-        radioMedium2: Ieee80211ScalarRadioMedium {
+        radioMedium1: Ieee80211ScalarRadioMedium {
             @display("p=193,340");
         }
     connections:
@@ -196,4 +196,84 @@ network ParSimNetwork5
         switch4.ethg++ <--> Ethernet100 <--> host7.ethg++;
         switch4.ethg++ <--> Ethernet100 <--> host8.ethg++;
         AP1.ethg++ <--> Ethernet100 <--> router.ethg++;
+}
+
+network ParSimNetworkBackbone
+{
+    @display("bgb=812,400");
+    submodules:
+        host1: StandardHost {
+            @display("p=56,44");
+        }
+        host2: StandardHost {
+            @display("p=56,147");
+        }
+        switch1: EtherSwitch {
+            @display("p=130,97");
+        }
+        host3: WirelessHost {
+            @display("p=56,232");
+        }
+        host4: WirelessHost {
+            @display("p=56,335");
+        }
+        AP1: AccessPoint {
+            @display("p=130,285");
+        }
+        router: Router {
+            @display("p=229,281");
+        }
+        host5: WirelessHost {
+            @display("p=585,45");
+        }
+        host6: WirelessHost {
+            @display("p=585,154");
+        }
+        host7: StandardHost {
+            @display("p=585,236");
+        }
+        host8: StandardHost {
+            @display("p=591,325");
+        }
+        AP2: AccessPoint {
+            @display("p=515,97");
+        }
+        switch4: EtherSwitch {
+            @display("p=503,280");
+        }
+        configurator1: Ipv4NetworkConfigurator {
+            @display("p=736,47");
+        }
+        configurator2: Ipv4NetworkConfigurator {
+            @display("p=736,147");
+        }
+        configurator3: Ipv4NetworkConfigurator {
+            @display("p=736,247");
+        }
+        configurator4: Ipv4NetworkConfigurator {
+            @display("p=736,347");
+        }
+        radioMedium2: Ieee80211ScalarRadioMedium {
+            @display("p=467,46");
+        }
+        radioMedium1: Ieee80211ScalarRadioMedium {
+            @display("p=193,340");
+        }
+        router1: Router {
+            @display("p=309,186");
+        }
+        router2: Router {
+            @display("p=222,112");
+        }
+        router3: Router {
+            @display("p=371,112");
+        }
+        router4: Router {
+            @display("p=377,290");
+        }
+    connections:
+        host1.ethg++ <--> Ethernet100 <--> switch1.ethg++;
+        host2.ethg++ <--> Ethernet100 <--> switch1.ethg++;
+        switch4.ethg++ <--> Ethernet100 <--> host7.ethg++;
+        switch4.ethg++ <--> Ethernet100 <--> host8.ethg++;
 }

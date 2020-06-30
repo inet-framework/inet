@@ -15,9 +15,9 @@ if test "$HOSTNAME" = ""; then
 fi
 
 #export NEDPATH=..
-inet -p0,4 $* &
-inet -p1,4 $* &
-inet -p2,4 $* &
-inet -p3,4 $* 
+inet -p0 $* &
+inet -p1 $* &
+inet -p2 $* &
+inet -p3 $* 
 
 killall opp_run_dbg
