@@ -228,40 +228,55 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
 {
     Enter_Method("handleRegisterService");
     auto key = Key(protocol.getId(), servicePrimitive);
-    if (serviceToGateIndex.find(key) != serviceToGateIndex.end())
-        throw cRuntimeError("handleRegisterService(): service is already registered: %s", protocol.str().c_str());
-    serviceToGateIndex[key] = g->getIndex();
-    auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-    int size = gateSize(gateName);
-    for (int i = 0; i < size; i++)
-        if (i != g->getIndex())
-            registerService(protocol, gate(gateName, i), servicePrimitive);
+    auto it = serviceToGateIndex.find(key);
+    if (it != serviceToGateIndex.end()) {
+        if (it->second != g->getIndex())
+            throw cRuntimeError("handleRegisterService(): service is already registered: %s", protocol.str().c_str());
+    }
+    else {
+        serviceToGateIndex[key] = g->getIndex();
+        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+        int size = gateSize(gateName);
+        for (int i = 0; i < size; i++)
+            if (i != g->getIndex())
+                registerService(protocol, gate(gateName, i), servicePrimitive);
+    }
 }
 
 void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
     auto key = Key(protocol.getId(), servicePrimitive);
-    if (protocolToGateIndex.find(key) != protocolToGateIndex.end())
-        throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: %s", protocol.str().c_str());
-    protocolToGateIndex[key] = g->getIndex();
-    auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-    int size = gateSize(gateName);
-    for (int i = 0; i < size; i++)
-        if (i != g->getIndex())
-            registerProtocol(protocol, gate(gateName, i), servicePrimitive);
+    auto it = protocolToGateIndex.find(key);
+    if (it != protocolToGateIndex.end()) {
+        if (it->second != g->getIndex())
+            throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: %s", protocol.str().c_str());
+    }
+    else {
+        protocolToGateIndex[key] = g->getIndex();
+        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+        int size = gateSize(gateName);
+        for (int i = 0; i < size; i++)
+            if (i != g->getIndex())
+                registerProtocol(protocol, gate(gateName, i), servicePrimitive);
+    }
 }
 
 void MessageDispatcher::handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in)
 {
     Enter_Method("handleRegisterInterface");
-    if (interfaceIdToGateIndex.find(interface.getInterfaceId()) != interfaceIdToGateIndex.end())
-        throw cRuntimeError("handleRegisterInterface(): Interface is already registered: %s", interface.str().c_str());
-    interfaceIdToGateIndex[interface.getInterfaceId()] = out->getIndex();
-    int size = gateSize("out");
-    for (int i = 0; i < size; i++)
-        if (i != in->getIndex())
-            registerInterface(interface, gate("in", i), gate("out", i));
+    auto it = interfaceIdToGateIndex.find(interface.getInterfaceId());
+    if (it != interfaceIdToGateIndex.end()) {
+        if (it->second != out->getIndex())
+            throw cRuntimeError("handleRegisterInterface(): Interface is already registered: %s", interface.str().c_str());
+    }
+    else {
+        interfaceIdToGateIndex[interface.getInterfaceId()] = out->getIndex();
+        int size = gateSize("out");
+        for (int i = 0; i < size; i++)
+            if (i != in->getIndex())
+                registerInterface(interface, gate("in", i), gate("out", i));
+    }
 }
 
 } // namespace inet
