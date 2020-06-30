@@ -150,8 +150,10 @@ void PacketMultiplexer::handleRegisterService(const Protocol& protocol, cGate *g
 void PacketMultiplexer::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
+    // NOTE: this may be called before initstage local
+    auto outputGate = gate("out");
     if (g != outputGate)
-        registerProtocol(protocol, gate("out"), servicePrimitive);
+        registerProtocol(protocol, outputGate, servicePrimitive);
     else if (g == outputGate && servicePrimitive == SP_INDICATION)
         for (int i = 0; i < (int)inputGates.size(); i++)
             registerProtocol(protocol, inputGates[i], servicePrimitive);
