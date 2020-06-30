@@ -90,12 +90,12 @@ void PreemptibleStreamer::handlePushPacketProcessed(Packet *packet, cGate *gate,
 
 bool PreemptibleStreamer::canPullSomePacket(cGate *gate) const
 {
-    return !isStreaming() && provider->canPullSomePacket(inputGate->getPathStartGate());
+    return !isStreaming() && (remainingPacket != nullptr || provider->canPullSomePacket(inputGate->getPathStartGate()));
 }
 
 Packet *PreemptibleStreamer::canPullPacket(cGate *gate) const
 {
-    return isStreaming() ? nullptr : provider->canPullPacket(inputGate->getPathStartGate());
+    return isStreaming() ? nullptr : remainingPacket != nullptr ? remainingPacket : provider->canPullPacket(inputGate->getPathStartGate());
 }
 
 Packet *PreemptibleStreamer::pullPacketStart(cGate *gate, bps datarate)
