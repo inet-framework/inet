@@ -50,6 +50,8 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
     gates:
         input upperLayerIn;
         output upperLayerOut;
+        input cutthroughIn @loose;
+        output cutthroughOut @loose;
         inout phys @labels(EtherFrame);
     submodules:
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {

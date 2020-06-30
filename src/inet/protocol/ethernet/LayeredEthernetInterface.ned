@@ -33,6 +33,8 @@ module LayeredEthernetInterface extends InterfaceEntry like IEthernetInterface
     gates:
         input upperLayerIn;
         output upperLayerOut;
+        input cutthroughIn @loose;
+        output cutthroughOut @loose;
         inout phys;
     submodules:
         macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {

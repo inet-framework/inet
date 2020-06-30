@@ -25,5 +25,8 @@ moduleinterface IEthernetInterface extends IWiredInterface
     parameters:
         double bitrate @unit(bps);
         @display("i=block/ifcard");
+    gates:
+        input cutthroughIn @loose;
+        output cutthroughOut @loose;
 }
 

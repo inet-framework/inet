@@ -32,6 +32,8 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
         @display("i=block/ifcard");
         double bitrate @unit(bps) = default(nan bps);
     gates:
+        input cutthroughIn @loose;
+        output cutthroughOut @loose;
         inout phys @loose;
     submodules:
         encap: <default("EtherEncap")> like IEtherEncap {
