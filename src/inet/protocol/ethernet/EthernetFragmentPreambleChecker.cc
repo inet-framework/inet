@@ -42,7 +42,9 @@ bool EthernetFragmentPreambleChecker::matchesPacket(const Packet *packet) const
 void EthernetFragmentPreambleChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<EthernetFragmentPhyHeader>();
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    const auto& dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
+    dispatchProtocolReq->setProtocol(&Protocol::ethernetMac);
+    dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
     auto fragmentTag = packet->addTag<FragmentTag>();
     if (header->getSmdNumber() == smdNumber) {
         ASSERT(header->getFragmentNumber() == fragmentNumber % 4);
