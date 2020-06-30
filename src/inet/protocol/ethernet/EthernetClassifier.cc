@@ -15,9 +15,11 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 #include "inet/queueing/function/PacketClassifierFunction.h"
 
 namespace inet {
@@ -38,6 +40,14 @@ static int classifyPacketByVlanInd(Packet *packet)
 
 Register_Packet_Classifier_Function(PacketVlanIndClassifier, classifyPacketByVlanInd);
 
+static int classifyPacketByFragmentTag(Packet *packet)
+{
+    auto fragmentTag = packet->findTag<FragmentTag>();
+    return fragmentTag == nullptr ? 0 : 1;
+}
+
+Register_Packet_Classifier_Function(PacketFragmentTagClassifier, classifyPacketByFragmentTag);
+
 static int classifyPacketByEthernetPreambleType(Packet *packet)
 {
     auto header = packet->peekAtFront<EthernetPhyHeaderBase>();
@@ -48,6 +58,14 @@ static int classifyPacketByEthernetPreambleType(Packet *packet)
 }
 
 Register_Packet_Classifier_Function(PacketEthernetPreambleTypeClassifier, classifyPacketByEthernetPreambleType);
+
+static int classifyPacketByLlcProtocol(Packet *packet)
+{
+    auto protocolTag = packet->findTag<PacketProtocolTag>();
+    return (protocolTag != nullptr && *protocolTag->getProtocol() == Protocol::ieee8022) ? 1 : 0;
+}
+
+Register_Packet_Classifier_Function(EthernetLlcClassifier, classifyPacketByLlcProtocol);
 
 } // namespace inet
 
