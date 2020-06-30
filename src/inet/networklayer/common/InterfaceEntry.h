@@ -22,6 +22,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TagBase.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -102,6 +103,7 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     cGate *upperLayerOut = nullptr;
     queueing::IPassivePacketSink *consumer = nullptr;
 
+    const Protocol *protocol = nullptr;
     IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or nullptr
     int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
     std::string interfaceName;
@@ -200,6 +202,7 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
+    const Protocol *getProtocol() const { return protocol; }
     int getInterfaceId() const { return interfaceId; }
     const char *getInterfaceName() const { return interfaceName.c_str(); }
     int getNodeOutputGateId() const { return nodeOutputGateId; }
@@ -218,6 +221,7 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
 
     /** @name Field setters */
     //@{
+    virtual void setProtocol(const Protocol *protocol) { this->protocol = protocol; }
     virtual void setInterfaceName(const char *s) { interfaceName = s; configChanged(F_NAME); }
     virtual void setNodeOutputGateId(int i) { if (nodeOutputGateId != i) { nodeOutputGateId = i; configChanged(F_NODE_OUT_GATEID); } }
     virtual void setNodeInputGateId(int i) { if (nodeInputGateId != i) { nodeInputGateId = i; configChanged(F_NODE_IN_GATEID); } }
