@@ -39,6 +39,7 @@ void DefragmenterBase::startDefragmentation(Packet *fragmentPacket)
 void DefragmenterBase::continueDefragmentation(Packet *fragmentPacket)
 {
     defragmentedPacket->insertAtBack(fragmentPacket->peekData());
+    defragmentedPacket->copyTags(*fragmentPacket);
     expectedFragmentNumber++;
     numProcessedPackets++;
     processedTotalLength += fragmentPacket->getDataLength();
