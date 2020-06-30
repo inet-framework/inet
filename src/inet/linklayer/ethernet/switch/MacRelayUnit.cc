@@ -23,6 +23,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -79,12 +80,6 @@ void MacRelayUnit::broadcast(Packet *packet, int arrivalInterfaceId)
 {
     EV_DETAIL << "Broadcast frame " << packet << endl;
 
-    auto& oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
-    packet->clearTags();
-    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
-    *newPacketProtocolTag = *oldPacketProtocolTag;
-    packet->trim();
-
     int numPorts = ifTable->getNumInterfaces();
     for (int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);
@@ -105,47 +100,51 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 {
     //FIXME : should handle multicast mac addresses correctly
 
-    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
+    auto macAddressInd = packet->getTag<MacAddressInd>();
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+
+    auto& oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
+    packet->clearTags();
+    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    auto& macAddressReq = packet->addTag<MacAddressReq>();
+    macAddressReq->setSrcAddress(macAddressInd->getSrcAddress());
+    macAddressReq->setDestAddress(macAddressInd->getDestAddress());
+    packet->trim();
 
     numProcessedFrames++;
 
     // update address table
-    learn(frame->getSrc(), arrivalInterfaceId);
+    learn(macAddressInd->getSrcAddress(), arrivalInterfaceId);
 
     // handle broadcast frames first
-    if (frame->getDest().isBroadcast()) {
-        EV << "Broadcasting broadcast frame " << frame << endl;
+    if (macAddressInd->getDestAddress().isBroadcast()) {
+        EV << "Broadcasting broadcast frame " << packet->getName() << endl;
         broadcast(packet, arrivalInterfaceId);
         return;
     }
 
     // Finds output port of destination address and sends to output port
     // if not found then broadcasts to all other ports instead
-    int outputInterfaceId = macTable->getInterfaceIdForAddress(frame->getDest());
+    int outputInterfaceId = macTable->getInterfaceIdForAddress(macAddressInd->getDestAddress());
     // should not send out the same frame on the same ethernet port
     // (although wireless ports are ok to receive the same message)
     if (arrivalInterfaceId == outputInterfaceId) {
         EV << "Output port is same as input port, " << packet->getFullName()
-           << " dest " << frame->getDest() << ", discarding frame\n";
+           << " dest " << macAddressInd->getDestAddress() << ", discarding frame\n";
         numDiscardedFrames++;
         delete packet;
         return;
     }
 
     if (outputInterfaceId >= 0) {
-        EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
-        auto& oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
-        packet->clearTags();
-        auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
-        *newPacketProtocolTag = *oldPacketProtocolTag;
+        EV << "Sending frame " << packet->getName() << " with dest address " << macAddressInd->getDestAddress() << " to port " << outputInterfaceId << endl;
         packet->addTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
-        packet->trim();
         emit(packetSentToLowerSignal, packet);
         send(packet, "ifOut");
     }
     else {
-        EV << "Dest address " << frame->getDest() << " unknown, broadcasting frame " << packet << endl;
+        EV << "Dest address " << macAddressInd->getDestAddress() << " unknown, broadcasting frame " << packet << endl;
         broadcast(packet, arrivalInterfaceId);
     }
 }
