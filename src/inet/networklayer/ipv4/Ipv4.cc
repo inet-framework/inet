@@ -1143,10 +1143,11 @@ MacAddress Ipv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAd
 
 void Ipv4::sendPacketToNIC(Packet *packet)
 {
-    EV_INFO << "Sending " << packet << " to output interface = " << ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId())->getInterfaceName() << ".\n";
+    auto interfaceEntry = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
+    EV_INFO << "Sending " << packet << " to output interface = " << interfaceEntry->getInterfaceName() << ".\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
-    packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(interfaceEntry->getProtocol());
     ASSERT(packet->findTag<InterfaceReq>() != nullptr);
     send(packet, "queueOut");
 }
