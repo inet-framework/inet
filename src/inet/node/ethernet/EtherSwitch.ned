@@ -92,7 +92,7 @@ module EtherSwitch
             parameters:
                 @display("p=800,380;b=1200,5");
         }
-        eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "LayeredEthernetInterface")> like IEthernetInterface {
+        eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=250,450,row,150;q=txQueue");
         }
