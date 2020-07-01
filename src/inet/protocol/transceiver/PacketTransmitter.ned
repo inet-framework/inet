@@ -26,4 +26,6 @@ simple PacketTransmitter extends PacketTransmitterBase like IPacketTransmitter
         double datarate @unit(bps);
         @class(PacketTransmitter);
         @display("i=block/wtx");
+        @signal[transmissionStarted](type=inet::physicallayer::Signal);
+        @signal[transmissionEnded](type=inet::physicallayer::Signal);
 }

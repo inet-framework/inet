@@ -56,6 +56,7 @@ void StreamerReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double 
     ASSERT(rxSignal == nullptr);
     take(cpacket);
     rxSignal = check_and_cast<Signal *>(cpacket);
+    emit(receptionStartedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
     pushOrSendPacketStart(packet, outputGate, consumer, bps(datarate));
 }
@@ -77,6 +78,7 @@ void StreamerReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double da
 {
     take(cpacket);
     auto signal = check_and_cast<Signal *>(cpacket);
+    emit(receptionEndedSignal, signal);
     if (rxSignal) {
         delete rxSignal;
         rxSignal = nullptr;

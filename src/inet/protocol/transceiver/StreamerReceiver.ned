@@ -23,5 +23,7 @@ simple StreamerReceiver extends PacketReceiverBase like IPacketReceiver
     parameters:
         double datarate @unit(bps);
         @class(StreamerReceiver);
+        @signal[receptionStarted](type=inet::physicallayer::Signal);
+        @signal[receptionEnded](type=inet::physicallayer::Signal);
 }
 

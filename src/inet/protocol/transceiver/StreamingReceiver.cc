@@ -61,6 +61,7 @@ void StreamingReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double
     ASSERT(rxSignal == nullptr);
     take(cpacket);
     rxSignal = check_and_cast<Signal *>(cpacket);
+    emit(receptionStartedSignal, rxSignal);
 }
 
 void StreamingReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
@@ -74,6 +75,7 @@ void StreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double d
 {
     delete rxSignal;
     rxSignal = check_and_cast<Signal *>(cpacket);
+    emit(receptionEndedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
     sendToUpperLayer(packet);
     delete rxSignal;

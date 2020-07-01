@@ -28,7 +28,8 @@ class INET_API PacketTransmitter : public PacketTransmitterBase
     bps datarate = bps(NaN);
 
     cMessage *txEndTimer = nullptr;
-    Packet *txPacket = nullptr;
+
+    Signal *txSignal = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

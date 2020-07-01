@@ -24,7 +24,8 @@ Define_Module(PacketTransmitter);
 PacketTransmitter::~PacketTransmitter()
 {
     cancelAndDelete(txEndTimer);
-    delete txPacket;
+    delete txSignal;
+    txSignal = nullptr;
 }
 
 void PacketTransmitter::initialize(int stage)
@@ -53,18 +54,20 @@ void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
 
 void PacketTransmitter::startTx(Packet *packet)
 {
-    ASSERT(txPacket == nullptr);
-    txPacket = packet;
-    auto signal = encodePacket(txPacket);
-    sendDelayed(signal, 0, outputGate, signal->getDuration());
-    scheduleTxEndTimer(signal);
+    ASSERT(txSignal == nullptr);
+    txSignal = encodePacket(packet);
+    emit(transmissionStartedSignal, txSignal);
+    sendDelayed(txSignal->dup(), 0, outputGate, txSignal->getDuration());
+    scheduleTxEndTimer(txSignal);
 }
 
 void PacketTransmitter::endTx()
 {
-    producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
-    delete txPacket;
-    txPacket = nullptr;
+    emit(transmissionStartedSignal, txSignal);
+    auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
+    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
+    delete txSignal;
+    txSignal = nullptr;
     producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
