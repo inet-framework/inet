@@ -47,8 +47,8 @@ class INET_API EtherEncap : public Ieee8022Llc
     struct Socket
     {
         int socketId = -1;
-        MacAddress sourceAddress;
-        MacAddress destinationAddress;
+        MacAddress localAddress;
+        MacAddress remoteAddress;
         const Protocol *protocol = nullptr;
         int vlanId = -1;
 

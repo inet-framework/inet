@@ -50,9 +50,9 @@ EtherEncap::~EtherEncap()
 
 bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader)
 {
-    if (!sourceAddress.isUnspecified() && !ethernetMacHeader->getSrc().isBroadcast() && ethernetMacHeader->getSrc() != sourceAddress)
+    if (!remoteAddress.isUnspecified() && !ethernetMacHeader->getSrc().isBroadcast() && ethernetMacHeader->getSrc() != remoteAddress)
         return false;
-    if (!destinationAddress.isUnspecified() && !ethernetMacHeader->getDest().isBroadcast() && ethernetMacHeader->getDest() != destinationAddress)
+    if (!localAddress.isUnspecified() && !ethernetMacHeader->getDest().isBroadcast() && ethernetMacHeader->getDest() != localAddress)
         return false;
     if (protocol != nullptr && packet->getTag<PacketProtocolTag>()->getProtocol() != protocol)
         return false;
@@ -92,8 +92,8 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
     else if (auto bindCommand = dynamic_cast<EthernetBindCommand *>(ctrl)) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         Socket *socket = new Socket(socketId);
-        socket->sourceAddress = bindCommand->getLocalAddress();
-        socket->destinationAddress = bindCommand->getRemoteAddress();
+        socket->localAddress = bindCommand->getLocalAddress();
+        socket->remoteAddress = bindCommand->getRemoteAddress();
         socket->protocol = bindCommand->getProtocol();
         socket->vlanId = bindCommand->getVlanId();
         socketIdToSocketMap[socketId] = socket;
