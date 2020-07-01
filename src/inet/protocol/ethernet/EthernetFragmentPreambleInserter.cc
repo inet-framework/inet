@@ -38,10 +38,8 @@ void EthernetFragmentPreambleInserter::processPacket(Packet *packet)
     packetProtocolTag->setBackOffset(b(0));
 }
 
-// TODO: is this correct?
-Packet *EthernetFragmentPreambleInserter::pullPacketEnd(cGate *gate, bps datarate)
+void EthernetFragmentPreambleInserter::handlePacketProcessed(Packet *packet)
 {
-    auto packet = PacketFlowBase::pullPacketEnd(gate, datarate);
     auto fragmentTag = packet->getTag<FragmentTag>();
     if (!fragmentTag->getFirstFragment())
         fragmentNumber++;
@@ -49,7 +47,6 @@ Packet *EthernetFragmentPreambleInserter::pullPacketEnd(cGate *gate, bps datarat
         fragmentNumber = 0;
         smdNumber = (smdNumber + 1) % 4;
     }
-    return packet;
 }
 
 } // namespace inet
