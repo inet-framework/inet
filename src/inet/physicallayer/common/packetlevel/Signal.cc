@@ -20,6 +20,8 @@
 namespace inet {
 namespace physicallayer {
 
+Register_Class(Signal);
+
 Signal::Signal(const char *name, short kind, int64_t bitLength) :
     cPacket(name, kind, bitLength)
 {
