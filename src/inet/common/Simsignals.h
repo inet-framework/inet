@@ -117,7 +117,12 @@ extern INET_API simsignal_t    // admin
     packetPulledSignal,
 
     packetFlowStartedSignal,
-    packetFlowEndedSignal;
+    packetFlowEndedSignal,
+
+    transmissionStartedSignal,
+    transmissionEndedSignal,
+    receptionStartedSignal,
+    receptionEndedSignal;
 
 /**
  * Utility function

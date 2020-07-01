@@ -109,6 +109,11 @@ simsignal_t packetPulledSignal = cComponent::registerSignal("packetPulled");
 simsignal_t packetFlowStartedSignal = cComponent::registerSignal("packetFlowStarted");
 simsignal_t packetFlowEndedSignal = cComponent::registerSignal("packetFlowEnded");
 
+simsignal_t transmissionStartedSignal = cComponent::registerSignal("transmissionStarted");
+simsignal_t transmissionEndedSignal = cComponent::registerSignal("transmissionEnded");
+simsignal_t receptionStartedSignal = cComponent::registerSignal("receptionStarted");
+simsignal_t receptionEndedSignal = cComponent::registerSignal("receptionEnded");
+
 void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *details)
 {
     EV << "** Signal at T=" << simTime()

@@ -29,10 +29,6 @@ simsignal_t IRadio::receptionStateChangedSignal = cComponent::registerSignal("re
 simsignal_t IRadio::transmissionStateChangedSignal = cComponent::registerSignal("transmissionStateChanged");
 simsignal_t IRadio::receivedSignalPartChangedSignal = cComponent::registerSignal("receivedSignalPartChanged");
 simsignal_t IRadio::transmittedSignalPartChangedSignal = cComponent::registerSignal("transmittedSignalPartChanged");
-simsignal_t IRadio::transmissionStartedSignal = cComponent::registerSignal("transmissionStarted");
-simsignal_t IRadio::transmissionEndedSignal = cComponent::registerSignal("transmissionEnded");
-simsignal_t IRadio::receptionStartedSignal = cComponent::registerSignal("receptionStarted");
-simsignal_t IRadio::receptionEndedSignal = cComponent::registerSignal("receptionEnded");
 
 cEnum *IRadio::radioModeEnum = nullptr;
 cEnum *IRadio::receptionStateEnum = nullptr;

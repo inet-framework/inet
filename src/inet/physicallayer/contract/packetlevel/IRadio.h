@@ -83,30 +83,6 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
     static simsignal_t transmittedSignalPartChangedSignal;
 
     /**
-     * This signal is emitted when a transmission is started by the radio.
-     * The source is the radio and the emitted value is the transmission.
-     */
-    static simsignal_t transmissionStartedSignal;
-
-    /**
-     * This signal is emitted when a transmission is ended by the radio.
-     * The source is the radio and the emitted value is the transmission.
-     */
-    static simsignal_t transmissionEndedSignal;
-
-    /**
-     * This signal is emitted when an attempted reception is started by the radio.
-     * The source is the radio and the emitted value is the reception.
-     */
-    static simsignal_t receptionStartedSignal;
-
-    /**
-     * This signal is emitted when an attempted reception is ended by the radio.
-     * The source is the radio and the emitted value is the reception.
-     */
-    static simsignal_t receptionEndedSignal;
-
-    /**
      * This enumeration specifies the requested operational mode of the radio.
      * NOTE: Some parts of the code base may be sensitive to the order of the
      * enum items because they may be used as an array index.
