@@ -1,3 +1,21 @@
+1. The queue submodule of the MAC layer module should probably go one level up into the network interface module.
+   This can either be the default architecture or it can be optional. We are going to decide later when we have
+   more examples working. In any case, it should work either way.
+
+   The reasoning is that having two separate queue modules when preemption is used with priority queueing either
+   unnecessarily complicates the configuration (by shifting subqueue indices due to optional subqueues) or contains
+   a bunch of unused subqueues and gating components. There can also be central components in the queueing part
+   which has to look at all queues at once (transmission selection).
+
+2. The transmitter submodule of the PHY layer should signal transmission started/ended so that the credit based
+   shaper can stop decreasing the credits for the currently used category. The priority category can be determined
+   from packet tags.
+
+3. The PacketStreamer is not necessary for the MAC layer which is not preemptible. I'm not sure if this would work
+   out of the box, although I have the feeling that it should.
+
+4. We should create a list of examples for the set of features we want to support with the new Ethernet architecture.
+   This would give a clear goal for development and simplify automated testing.
 
 Ethernet features:
  - priority queueing
