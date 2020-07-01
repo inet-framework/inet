@@ -37,6 +37,7 @@ void PacketReceiver::handleMessage(cMessage *message)
 void PacketReceiver::receiveSignal(Signal *signal)
 {
     auto packet = decodePacket(signal);
+    emit(receptionEndedSignal, signal);
     pushOrSendPacket(packet, outputGate, consumer);
     delete signal;
 }

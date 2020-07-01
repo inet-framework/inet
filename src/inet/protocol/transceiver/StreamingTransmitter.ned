@@ -25,5 +25,7 @@ simple StreamingTransmitter extends PacketTransmitterBase like IPacketTransmitte
     parameters:
         volatile double datarate @unit(bps);
         @class(StreamingTransmitter);
+        @signal[transmissionStarted](type=inet::physicallayer::Signal);
+        @signal[transmissionEnded](type=inet::physicallayer::Signal);
 }
 

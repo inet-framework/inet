@@ -93,6 +93,7 @@ void PreemptibleTransmitter::startTx(Packet *packet)
     auto signal = encodePacket(txPacket);
     EV_INFO << "Starting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     scheduleTxEndTimer(signal);
+    emit(transmissionStartedSignal, signal);
     sendPacketStart(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
 }
 
@@ -100,6 +101,7 @@ void PreemptibleTransmitter::endTx()
 {
     EV_INFO << "Ending transmission: packetName = " << txPacket->getName() << std::endl;
     auto signal = encodePacket(txPacket);
+    emit(transmissionEndedSignal, signal);
     sendPacketEnd(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), true);
     delete txPacket;
@@ -115,6 +117,7 @@ void PreemptibleTransmitter::abortTx()
     txPacket->eraseAtBack(txPacket->getTotalLength() - transmittedLength);
     auto signal = encodePacket(txPacket);
     EV_INFO << "Aborting transmission: packetName = " << txPacket->getName() << ", length = " << txPacket->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
+    emit(transmissionEndedSignal, signal);
     sendPacketEnd(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
     producer->handlePushPacketProcessed(txPacket, inputGate->getPathStartGate(), false);
     delete txPacket;

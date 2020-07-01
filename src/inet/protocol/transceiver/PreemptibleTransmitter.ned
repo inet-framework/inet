@@ -23,5 +23,7 @@ simple PreemptibleTransmitter extends PacketTransmitterBase like IPacketTransmit
     parameters:
         volatile double datarate @unit(bps);
         @class(PreemptibleTransmitter);
+        @signal[transmissionStarted](type=inet::physicallayer::Signal);
+        @signal[transmissionEnded](type=inet::physicallayer::Signal);
 }
 
