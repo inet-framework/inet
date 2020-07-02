@@ -18,11 +18,11 @@ package inet.protocol.transceiver;
 import inet.protocol.transceiver.base.PacketReceiverBase;
 import inet.protocol.transceiver.contract.IPacketReceiver;
 
-simple StreamerReceiver extends PacketReceiverBase like IPacketReceiver
+simple StreamThroughReceiver extends PacketReceiverBase like IPacketReceiver
 {
     parameters:
         double datarate @unit(bps);
-        @class(StreamerReceiver);
+        @class(StreamThroughReceiver);
         @signal[receptionStarted](type=inet::physicallayer::Signal);
         @signal[receptionEnded](type=inet::physicallayer::Signal);
 }

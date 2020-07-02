@@ -29,7 +29,7 @@ module EthernetCutthroughInterface extends InterfaceEntry like IEthernetInterfac
         string macTableModule;
         *.bitrate = default(bitrate);
         *.macTableModule = default(macTableModule);
-        phyLayer.receiver.typename = default("StreamerReceiver");
+        phyLayer.receiver.typename = default("StreamThroughReceiver");
         @class(EthernetCutthroughInterface);
         @display("i=block/ifcard;bgb=700,400");
     gates:

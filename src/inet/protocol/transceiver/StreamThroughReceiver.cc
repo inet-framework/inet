@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/protocol/transceiver/StreamerReceiver.h"
+#include "inet/protocol/transceiver/StreamThroughReceiver.h"
 
 namespace inet {
 
-Define_Module(StreamerReceiver);
+Define_Module(StreamThroughReceiver);
 
-void StreamerReceiver::initialize(int stage)
+void StreamThroughReceiver::initialize(int stage)
 {
     PacketReceiverBase::initialize(stage);
     OperationalMixin::initialize(stage);
@@ -27,12 +27,12 @@ void StreamerReceiver::initialize(int stage)
         datarate = bps(par("datarate"));
 }
 
-StreamerReceiver::~StreamerReceiver()
+StreamThroughReceiver::~StreamThroughReceiver()
 {
     delete rxSignal;
 }
 
-void StreamerReceiver::handleMessageWhenUp(cMessage *message)
+void StreamThroughReceiver::handleMessageWhenUp(cMessage *message)
 {
     if (message->getArrivalGate() == inputGate)
         receiveFromMedium(message);
@@ -40,7 +40,7 @@ void StreamerReceiver::handleMessageWhenUp(cMessage *message)
         PacketReceiverBase::handleMessage(message);
 }
 
-void StreamerReceiver::handleMessageWhenDown(cMessage *msg)
+void StreamThroughReceiver::handleMessageWhenDown(cMessage *msg)
 {
     if (!msg->isSelfMessage()) {
         // received on input gate from another network node
@@ -51,7 +51,7 @@ void StreamerReceiver::handleMessageWhenDown(cMessage *msg)
         OperationalMixin::handleMessageWhenDown(msg);
 }
 
-void StreamerReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
+void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
 {
     ASSERT(rxSignal == nullptr);
     take(cpacket);
@@ -61,7 +61,7 @@ void StreamerReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double 
     pushOrSendPacketStart(packet, outputGate, consumer, bps(datarate));
 }
 
-void StreamerReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
+void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     take(cpacket);
     if (rxSignal) {
@@ -74,7 +74,7 @@ void StreamerReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, doub
     }
 }
 
-void StreamerReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
+void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     take(cpacket);
     auto signal = check_and_cast<Signal *>(cpacket);
@@ -93,17 +93,17 @@ void StreamerReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double da
     }
 }
 
-void StreamerReceiver::handleStartOperation(LifecycleOperation *operation)
+void StreamThroughReceiver::handleStartOperation(LifecycleOperation *operation)
 {
 }
 
-void StreamerReceiver::handleStopOperation(LifecycleOperation *operation)
+void StreamThroughReceiver::handleStopOperation(LifecycleOperation *operation)
 {
     delete rxSignal;
     rxSignal = nullptr;
 }
 
-void StreamerReceiver::handleCrashOperation(LifecycleOperation *operation)
+void StreamThroughReceiver::handleCrashOperation(LifecycleOperation *operation)
 {
     delete rxSignal;
     rxSignal = nullptr;
