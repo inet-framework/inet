@@ -220,7 +220,7 @@ network ParSimNetworkBackbone
         AP1: AccessPoint {
             @display("p=130,285");
         }
-        router: Router {
+        router2: Router {
             @display("p=229,281");
         }
         host5: WirelessHost {
@@ -260,9 +260,6 @@ network ParSimNetworkBackbone
             @display("p=193,340");
         }
         router1: Router {
-            @display("p=309,186");
-        }
-        router2: Router {
             @display("p=222,112");
         }
         router3: Router {
@@ -276,4 +273,14 @@ network ParSimNetworkBackbone
         host2.ethg++ <--> Ethernet100 <--> switch1.ethg++;
         switch4.ethg++ <--> Ethernet100 <--> host7.ethg++;
         switch4.ethg++ <--> Ethernet100 <--> host8.ethg++;
+        router1.ethg++ <--> Ethernet100 <--> router3.ethg++;
+        router3.ethg++ <--> Ethernet100 <--> router4.ethg++;
+        router4.ethg++ <--> Ethernet100 <--> router2.ethg++;
+        router2.ethg++ <--> Ethernet100 <--> router1.ethg++;
+        router1.ethg++ <--> Ethernet100 <--> router4.ethg++;
+        router2.ethg++ <--> Ethernet100 <--> router3.ethg++;
+        switch1.ethg++ <--> Ethernet100 <--> router1.ethg++;
+        router3.ethg++ <--> Ethernet100 <--> AP2.ethg++;
+        AP1.ethg++ <--> Ethernet100 <--> router2.ethg++;
+        router4.ethg++ <--> Ethernet100 <--> switch4.ethg++;
 }
