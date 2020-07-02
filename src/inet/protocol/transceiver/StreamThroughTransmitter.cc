@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/protocol/transceiver/PreemptibleTransmitter.h"
+#include "inet/protocol/transceiver/StreamThroughTransmitter.h"
 
 namespace inet {
 
-Define_Module(PreemptibleTransmitter);
+Define_Module(StreamThroughTransmitter);
 
-void PreemptibleTransmitter::initialize(int stage)
+void StreamThroughTransmitter::initialize(int stage)
 {
     PacketTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -28,13 +28,13 @@ void PreemptibleTransmitter::initialize(int stage)
     }
 }
 
-PreemptibleTransmitter::~PreemptibleTransmitter()
+StreamThroughTransmitter::~StreamThroughTransmitter()
 {
     delete txPacket;
     cancelAndDelete(txEndTimer);
 }
 
-void PreemptibleTransmitter::handleMessage(cMessage *message)
+void StreamThroughTransmitter::handleMessage(cMessage *message)
 {
     if (message == txEndTimer)
         endTx();
@@ -42,7 +42,7 @@ void PreemptibleTransmitter::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void PreemptibleTransmitter::pushPacket(Packet *packet, cGate *gate)
+void StreamThroughTransmitter::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -51,14 +51,14 @@ void PreemptibleTransmitter::pushPacket(Packet *packet, cGate *gate)
     startTx(packet);
 }
 
-void PreemptibleTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void StreamThroughTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
     startTx(packet);
 }
 
-void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -70,7 +70,7 @@ void PreemptibleTransmitter::pushPacketEnd(Packet *packet, cGate *gate, bps data
     delete signal;
 }
 
-void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void StreamThroughTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -84,7 +84,7 @@ void PreemptibleTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps
     scheduleTxEndTimer(signal);
 }
 
-void PreemptibleTransmitter::startTx(Packet *packet)
+void StreamThroughTransmitter::startTx(Packet *packet)
 {
     ASSERT(txPacket == nullptr);
     datarate = bps(*dataratePar);
@@ -97,7 +97,7 @@ void PreemptibleTransmitter::startTx(Packet *packet)
     sendPacketStart(signal, outputGate, 0, signal->getDuration(), bps(datarate).get());
 }
 
-void PreemptibleTransmitter::endTx()
+void StreamThroughTransmitter::endTx()
 {
     EV_INFO << "Ending transmission: packetName = " << txPacket->getName() << std::endl;
     auto signal = encodePacket(txPacket);
@@ -110,7 +110,7 @@ void PreemptibleTransmitter::endTx()
     producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
-void PreemptibleTransmitter::abortTx()
+void StreamThroughTransmitter::abortTx()
 {
     cancelEvent(txEndTimer);
     b transmittedLength = getPushPacketProcessedLength(txPacket, inputGate);
@@ -126,18 +126,18 @@ void PreemptibleTransmitter::abortTx()
     producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
-clocktime_t PreemptibleTransmitter::calculateDuration(const Packet *packet) const
+clocktime_t StreamThroughTransmitter::calculateDuration(const Packet *packet) const
 {
     return packet->getTotalLength().get() / datarate.get();
 }
 
-void PreemptibleTransmitter::scheduleTxEndTimer(Signal *signal)
+void StreamThroughTransmitter::scheduleTxEndTimer(Signal *signal)
 {
     ASSERT(txStartTime != -1);
     scheduleClockEvent(txStartTime + SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
 }
 
-b PreemptibleTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
+b StreamThroughTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
 {
     if (txPacket == nullptr)
         return b(0);

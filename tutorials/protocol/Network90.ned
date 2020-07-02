@@ -26,7 +26,7 @@ import inet.protocol.ordering.SequenceNumbering;
 import inet.protocol.queue.InProgressQueue;
 import inet.protocol.server.PreemptingServer;
 import inet.protocol.transceiver.PacketReceiver;
-import inet.protocol.transceiver.PreemptibleTransmitter;
+import inet.protocol.transceiver.StreamThroughTransmitter;
 import inet.queueing.classifier.ContentBasedClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.marker.PacketTagger;
@@ -93,7 +93,7 @@ module SenderHost
         interPacketGap: InterPacketGap {
             @display("p=200,1200");
         }
-        transmitter: PreemptibleTransmitter {
+        transmitter: StreamThroughTransmitter {
             @display("p=200,1300");
         }
     connections:

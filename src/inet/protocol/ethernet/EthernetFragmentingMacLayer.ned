@@ -27,7 +27,7 @@ module EthernetFragmentingMacLayer extends EthernetMacLayer
         streamer.minPacketLength = 60B;
         fcsInserter.typename = default("EthernetFragmentFcsInserter");
         preambleInserter.typename = default("EthernetFragmentPreambleInserter");
-        transmitter.typename = default("PreemptibleTransmitter");
+        transmitter.typename = default("StreamThroughTransmitter");
         fcsChecker.typename = default("EthernetFragmentFcsChecker");
         preambleChecker.typename = default("EthernetFragmentPreambleChecker");
     submodules:
