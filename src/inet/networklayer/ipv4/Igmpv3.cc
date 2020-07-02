@@ -72,10 +72,6 @@ void Igmpv3::initialize(int stage)
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
-        cModule *host = getContainingNode(this);
-        host->subscribe(interfaceDeletedSignal, this);
-        host->subscribe(ipv4MulticastChangeSignal, this);
-
         enabled = par("enabled");
         robustness = par("robustnessVariable");
         queryInterval = par("queryInterval");
@@ -94,16 +90,27 @@ void Igmpv3::initialize(int stage)
         addWatches();
     }
     // TODO: INITSTAGE
-    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
+    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
-        host->subscribe(interfaceCreatedSignal, this);
         registerService(Protocol::igmp, nullptr, gate("ipIn"));
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
-            if (ie->isMulticast())
+            if (ie->isMulticast()) {
                 configureInterface(ie);
+                auto ipv4interfaceData = ie->getProtocolData<Ipv4InterfaceData>();
+                int n = ipv4interfaceData->getNumOfJoinedMulticastGroups();
+                for (int j = 0; j < n; j++) {
+                    auto groupAddress = ipv4interfaceData->getJoinedMulticastGroup(j);
+                    const auto& sourceList = ipv4interfaceData->getJoinedMulticastSources(j);
+                    multicastSourceListChanged(ie, groupAddress, sourceList);
+                }
+            }
         }
+
+        host->subscribe(interfaceCreatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(ipv4MulticastChangeSignal, this);
 
         // in multicast routers: join to ALL_IGMPv3_ROUTERS_MCAST address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled()) {

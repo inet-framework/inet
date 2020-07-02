@@ -103,12 +103,6 @@ void Ipv4::initialize(int stage)
         queuedDatagramsForHooks.clear();
 
         pendingPackets.clear();
-        cModule *arpModule = check_and_cast<cModule *>(arp);
-        arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
-        arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
-
-        registerService(Protocol::ipv4, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("transportOut"));
 
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
@@ -117,6 +111,14 @@ void Ipv4::initialize(int stage)
         WATCH(numForwarded);
         WATCH_MAP(pendingPackets);
         WATCH_MAP(socketIdToSocketDescriptor);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        cModule *arpModule = check_and_cast<cModule *>(arp);
+        arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
+        arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
+
+        registerService(Protocol::ipv4, gate("transportIn"), gate("queueIn"));
+        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("transportOut"));
     }
 }
 
