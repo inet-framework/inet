@@ -15,15 +15,20 @@
 
 package inet.protocol.transceiver;
 
-import inet.protocol.transceiver.base.PacketReceiverBase;
-import inet.protocol.transceiver.contract.IPacketReceiver;
+import inet.protocol.transceiver.base.PacketTransmitterBase;
+import inet.protocol.transceiver.contract.IPacketTransmitter;
 
-simple StreamThroughReceiver extends PacketReceiverBase like IPacketReceiver
+//
+// This module receives packets from the upper layer as a stream and also
+// sends signals to the transmission medium as a stream. The stream start and
+// stream end are sent seperately allowing the preemption of signals.
+//
+simple StreamThroughTransmitter extends PacketTransmitterBase like IPacketTransmitter
 {
     parameters:
-        double datarate @unit(bps);
-        @class(StreamThroughReceiver);
-        @signal[receptionStarted](type=inet::physicallayer::Signal);
-        @signal[receptionEnded](type=inet::physicallayer::Signal);
+        volatile double datarate @unit(bps);
+        @class(StreamThroughTransmitter);
+        @signal[transmissionStarted](type=inet::physicallayer::Signal);
+        @signal[transmissionEnded](type=inet::physicallayer::Signal);
 }
 

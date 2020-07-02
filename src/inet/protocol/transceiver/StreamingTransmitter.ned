@@ -20,6 +20,11 @@ package inet.protocol.transceiver;
 import inet.protocol.transceiver.base.PacketTransmitterBase;
 import inet.protocol.transceiver.contract.IPacketTransmitter;
 
+//
+// This module receives packets from the upper layer as a whole. It sends signals
+// to the transmission medium (wire) as a stream, it sends the signal start and
+// signal end separately.
+//
 simple StreamingTransmitter extends PacketTransmitterBase like IPacketTransmitter
 {
     parameters:
