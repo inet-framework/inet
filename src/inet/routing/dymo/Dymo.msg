@@ -79,6 +79,10 @@ message RreqBackoffTimer extends RreqTimer {
 message RreqHolddownTimer extends RreqTimer {
 }
 
+message PacketJitterTimer{
+    cPacket *jitteredPacket = nullptr @owned;
+}
+
 //
 // Dymo packets
 //

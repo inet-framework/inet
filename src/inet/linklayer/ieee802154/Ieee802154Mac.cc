@@ -103,13 +103,10 @@ void Ieee802154Mac::initialize(int stage)
         macState = IDLE_1;
         txAttempts = 0;
         txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        radio = getModuleFromPar<IRadio>(par("radioModule"), this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
-        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
-        radio = check_and_cast<IRadio *>(radioModule);
-
+        cModule *radioModule = check_and_cast<cModule *>(radio);
         //check parameters for consistency
         //aTurnaroundTime should match (be equal or bigger) the RX to TX
         //switching time of the radio
@@ -117,8 +114,8 @@ void Ieee802154Mac::initialize(int stage)
             simtime_t rxToTx = radioModule->par("timeRXToTX");
             if (rxToTx > aTurnaroundTime) {
                 throw cRuntimeError("Parameter \"aTurnaroundTime\" (%f) does not match"
-                            " the radios RX to TX switching time (%f)! It"
-                            " should be equal or bigger",
+                        " the radios RX to TX switching time (%f)! It"
+                        " should be equal or bigger",
                         SIMTIME_DBL(aTurnaroundTime), SIMTIME_DBL(rxToTx));
             }
         }
@@ -126,8 +123,6 @@ void Ieee802154Mac::initialize(int stage)
 
         EV_DETAIL << " bitrate = " << bitrate
                   << " backoff method = " << par("backoffMethod").stringValue() << endl;
-
-        EV_DETAIL << "finished csma init stage 1." << endl;
     }
 }
 
@@ -449,7 +444,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
 
 void Ieee802154Mac::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
 {
-    if (event == EV_FRAME_TRANSMITTED) {
+    if (event == EV_FRAME_TRANSMITTED && currentTxFrame != nullptr) {
         //    delete msg;
         Packet *packet = currentTxFrame;
         const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
@@ -907,6 +902,47 @@ void Ieee802154Mac::decapsulate(Packet *packet)
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+}
+
+void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation)
+{
+    updateMacState(IDLE_1);
+    //manageQueue() to see waiting packets or set to idle if none
+    MacProtocolBase::handleStartOperation(operation);
+
+    cModule *radioModule = check_and_cast<cModule *>(radio);
+    radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+    radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+}
+
+void Ieee802154Mac::handleStopOperation(LifecycleOperation *operation)
+{
+    //TODO: More gracefully allow current Tx to end (delay operation)
+    //Cancel all self message timers
+    cancelEvent(backoffTimer);
+    cancelEvent(ccaTimer);
+    cancelEvent(sifsTimer);
+    cancelEvent(rxAckTimer);
+
+    cModule *radioModule = check_and_cast<cModule *>(radio);
+    radioModule->unsubscribe(IRadio::radioModeChangedSignal, this);
+    radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
+
+    MacProtocolBase::handleStopOperation(operation);
+}
+
+void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelEvent(backoffTimer);
+    cancelEvent(ccaTimer);
+    cancelEvent(sifsTimer);
+    cancelEvent(rxAckTimer);
+
+    cModule *radioModule = check_and_cast<cModule *>(radio);
+    radioModule->unsubscribe(IRadio::radioModeChangedSignal, this);
+    radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
+
+    MacProtocolBase::handleCrashOperation(operation);
 }
 
 } // namespace inet
