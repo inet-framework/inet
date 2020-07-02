@@ -83,7 +83,7 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
         inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=600,500");
         }
-        receiver: <default("StreamingReceiver")> like IPacketReceiver {
+        receiver: <default("DestreamingReceiver")> like IPacketReceiver {
             datarate = default(bitrate);
             @display("p=600,600");
         }

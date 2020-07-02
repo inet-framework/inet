@@ -195,5 +195,5 @@ module EthernetStreamingMacLayer extends EthernetMacLayer
         server.typename = default("OmittedPacketServer");
         streamer.typename = default("PacketStreamer");
         transmitter.typename = default("StreamingTransmitter");
-        receiver.typename = default("StreamingReceiver");
+        receiver.typename = default("DestreamingReceiver");
 }
