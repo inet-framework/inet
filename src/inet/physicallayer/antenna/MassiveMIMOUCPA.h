@@ -87,7 +87,7 @@ class INET_API MassiveMIMOUCPA : public AntennaBase, protected cListener
                virtual m getLength() const {return length;}
                virtual double getMinGain() const override {return 0;}
                virtual double getMaxGain() const override;
-               virtual double computeGain(const Quaternion direction) const override;
+               virtual double computeGain(const Quaternion &direction) const override;
                virtual double getAngolo(Coord p1, Coord p2)const;
                virtual double getPhizero() {return phiz; }
                virtual void setPhizero(double o) {phiz = o; }

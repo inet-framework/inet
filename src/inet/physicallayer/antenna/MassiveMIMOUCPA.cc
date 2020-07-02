@@ -119,8 +119,7 @@ double MassiveMIMOUCPA::AntennaGain::getMaxGain() const {
 }
 
 
-double MassiveMIMOUCPA::AntennaGain::computeGain(
-        const Quaternion direction) const {
+double MassiveMIMOUCPA::AntennaGain::computeGain(const Quaternion &direction) const {
 
     double gain;
     double maxGain = getMaxGain();

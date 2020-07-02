@@ -99,7 +99,7 @@ double MassiveMIMOURPA::AntennaGain::getMaxGain() const {
 }
 
 
-double  MassiveMIMOURPA::AntennaGain::computeGain(const Quaternion direction) const {
+double  MassiveMIMOURPA::AntennaGain::computeGain(const Quaternion &direction) const {
        double gain;
        double maxGain = getMaxGain();
        if (phiz == -1) {
