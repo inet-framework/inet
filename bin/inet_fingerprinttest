@@ -43,6 +43,8 @@ exitCode = 0
 writeOutfile = True
 useColors = sys.stdout.isatty()
 
+defaultFingerprintCalculator = 'inet::FingerprintCalculator'
+
 txtPASS = "PASS"
 txtPASS_unexpected = "PASS (unexpected)"
 txtFAILED = "FAILED"
@@ -700,6 +702,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug', action='store_true', help='Run debug executables: use the debug version of the executable (appends _dbg to the executable name)')
     parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
     parser.add_argument('-q', '--disable_outfile', dest='writeOutfile', action='store_false', help='disable the writing standard output of simulations to result directory')
+    parser.add_argument('-c', '--calculator', default=defaultFingerprintCalculator, help='Set the fingerprintcalculator-class. Empty value means the original OmNET++ fingerprint calculator')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
     parser.add_argument('-n', type=int, default=1, help='Split the selected test cases into n sets, and only run one of these sets')
     parser.add_argument('-i', type=int, default=0, help='Which set of test cases to run [0..n-1]')
@@ -711,6 +714,9 @@ if __name__ == "__main__":
 
     if not args.testspecfiles:
         args.testspecfiles = glob.glob('*.csv')
+
+    if args.calculator:
+        extraOppRunArgs += " --fingerprintcalculator-class=" + args.calculator
 
     if args.oppargs:
         for oppArgList in args.oppargs:
