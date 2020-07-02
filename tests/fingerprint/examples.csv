@@ -100,7 +100,7 @@
 /examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            07e8-fc83/tplx, PASS,
 
 /examples/ethernet/cutthrough/,      -f omnetpp.ini -c General -r 0,                1s,              488a-1f03/tplx, PASS, ethernet layered
-/examples/ethernet/preemption/,      -f omnetpp.ini -c General -r 0,                1s,              257b-48af/tplx, PASS, ethernet layered
+/examples/ethernet/preemption/,      -f omnetpp.ini -c General -r 0,                1s,              f8e2-50a4/tplx, PASS, ethernet layered
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx, PASS, wireless
 
