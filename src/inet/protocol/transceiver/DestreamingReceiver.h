@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_STREAMINGRECEIVER_H
-#define __INET_STREAMINGRECEIVER_H
+#ifndef __INET_DESTREAMINGRECEIVER_H
+#define __INET_DESTREAMINGRECEIVER_H
 
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
@@ -26,7 +26,7 @@ namespace inet {
 using namespace inet::units::values;
 using namespace inet::physicallayer;
 
-class INET_API StreamingReceiver : public OperationalMixin<PacketReceiverBase>
+class INET_API DestreamingReceiver : public OperationalMixin<PacketReceiverBase>
 {
   protected:
     bps datarate = bps(NaN);
@@ -54,13 +54,13 @@ class INET_API StreamingReceiver : public OperationalMixin<PacketReceiverBase>
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    StreamingReceiver() {}
-    virtual ~StreamingReceiver();
+    DestreamingReceiver() {}
+    virtual ~DestreamingReceiver();
 
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_STREAMINGRECEIVER_H
+#endif // ifndef __INET_DESTREAMINGRECEIVER_H
 
