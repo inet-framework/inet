@@ -104,7 +104,7 @@ class INET_API IPacketProcessor
      * A streamed packet is handed over from one module to another using several
      * method calls and potentially exending to a non-zero simulation duration.
      *
-     * For example, packets are streamed to a preemptible signal transmitter module.
+     * For example, packets are streamed to a preemptable signal transmitter module.
      *
      * Connecting incompatible gates raises an error during initialize. The gate
      * parameter must be a valid gate of this module. The gate should be marked

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PREEMPTIBLESTREAMER_H
-#define __INET_PREEMPTIBLESTREAMER_H
+#ifndef __INET_PREEMPTABLESTREAMER_H
+#define __INET_PREEMPTABLESTREAMER_H
 
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
@@ -25,7 +25,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API PreemptibleStreamer : public PacketProcessorBase, public virtual IPacketFlow
+class INET_API PreemptableStreamer : public PacketProcessorBase, public virtual IPacketFlow
 {
   protected:
     bps datarate = bps(NaN);
@@ -86,5 +86,5 @@ class INET_API PreemptibleStreamer : public PacketProcessorBase, public virtual 
 
 } // namespace inet
 
-#endif // ifndef __INET_PREEMPTIBLESTREAMER_H
+#endif // ifndef __INET_PREEMPTABLESTREAMER_H
 

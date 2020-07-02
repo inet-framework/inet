@@ -24,12 +24,12 @@ import inet.queueing.contract.IPacketFlow;
 //
 // This module takes packets passed to its input and streams them to its output.
 //
-simple PreemptibleStreamer extends PacketProcessorBase like IPacketFlow
+simple PreemptableStreamer extends PacketProcessorBase like IPacketFlow
 {
     parameters:
         int minPacketLength @unit(b);
         int roundingLength @unit(b) = default(1B);
-        @class(PreemptibleStreamer);
+        @class(PreemptableStreamer);
         @display("i=block/cogwheel");
     gates:
         input in @labels(send,push,pull,pass);

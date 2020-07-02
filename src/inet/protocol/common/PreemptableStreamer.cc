@@ -17,14 +17,14 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/common/PreemptibleStreamer.h"
+#include "inet/protocol/common/PreemptableStreamer.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 
-Define_Module(PreemptibleStreamer);
+Define_Module(PreemptableStreamer);
 
-void PreemptibleStreamer::initialize(int stage)
+void PreemptableStreamer::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -43,23 +43,23 @@ void PreemptibleStreamer::initialize(int stage)
     }
 }
 
-void PreemptibleStreamer::handleMessage(cMessage *message)
+void PreemptableStreamer::handleMessage(cMessage *message)
 {
     auto packet = check_and_cast<Packet *>(message);
     pushPacket(packet, packet->getArrivalGate());
 }
 
-bool PreemptibleStreamer::canPushSomePacket(cGate *gate) const
+bool PreemptableStreamer::canPushSomePacket(cGate *gate) const
 {
     return !isStreaming() && consumer->canPushSomePacket(outputGate->getPathEndGate());
 }
 
-bool PreemptibleStreamer::canPushPacket(Packet *packet, cGate *gate) const
+bool PreemptableStreamer::canPushPacket(Packet *packet, cGate *gate) const
 {
     return !isStreaming() && consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }
 
-void PreemptibleStreamer::pushPacket(Packet *packet, cGate *gate)
+void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     ASSERT(!isStreaming());
@@ -74,31 +74,31 @@ void PreemptibleStreamer::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PreemptibleStreamer::handleCanPushPacket(cGate *gate)
+void PreemptableStreamer::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
-void PreemptibleStreamer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PreemptableStreamer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
-bool PreemptibleStreamer::canPullSomePacket(cGate *gate) const
+bool PreemptableStreamer::canPullSomePacket(cGate *gate) const
 {
     return !isStreaming() && (remainingPacket != nullptr || provider->canPullSomePacket(inputGate->getPathStartGate()));
 }
 
-Packet *PreemptibleStreamer::canPullPacket(cGate *gate) const
+Packet *PreemptableStreamer::canPullPacket(cGate *gate) const
 {
     return isStreaming() ? nullptr : remainingPacket != nullptr ? remainingPacket : provider->canPullPacket(inputGate->getPathStartGate());
 }
 
-Packet *PreemptibleStreamer::pullPacketStart(cGate *gate, bps datarate)
+Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     streamStart = simTime();
@@ -117,7 +117,7 @@ Packet *PreemptibleStreamer::pullPacketStart(cGate *gate, bps datarate)
     return streamedPacket->dup();
 }
 
-Packet *PreemptibleStreamer::pullPacketEnd(cGate *gate, bps datarate)
+Packet *PreemptableStreamer::pullPacketEnd(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
@@ -153,7 +153,7 @@ Packet *PreemptibleStreamer::pullPacketEnd(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PreemptibleStreamer::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
+Packet *PreemptableStreamer::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     EV_INFO << "Progressing streaming packet " << streamedPacket->getName() << "." << std::endl;
@@ -161,19 +161,19 @@ Packet *PreemptibleStreamer::pullPacketProgress(cGate *gate, bps datarate, b pos
     return streamedPacket->dup();
 }
 
-b PreemptibleStreamer::getPullPacketProcessedLength(Packet *packet, cGate *gate)
+b PreemptableStreamer::getPullPacketProcessedLength(Packet *packet, cGate *gate)
 {
     return streamedPacket->getTotalLength();
 }
 
-void PreemptibleStreamer::handleCanPullPacket(cGate *gate)
+void PreemptableStreamer::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
     if (collector != nullptr && !isStreaming())
         collector->handleCanPullPacket(outputGate->getPathEndGate());
 }
 
-void PreemptibleStreamer::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PreemptableStreamer::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketConfirmation");
     if (collector != nullptr)
