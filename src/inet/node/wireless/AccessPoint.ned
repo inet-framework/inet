@@ -87,9 +87,10 @@ module AccessPoint
             parameters:
                 @display("p=250,300,row,150;q=queue");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterfaceEnc")> like IEthernetInterface {
             parameters:
                 mac.promiscuous = true;
+                promiscuous = true;
                 @display("p=850,300,row;q=txQueue");
         }
     connections allowunconnected:

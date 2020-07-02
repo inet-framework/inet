@@ -1,3 +1,12 @@
+end-to-end delay
+jitter
+numPackets
+numBytes
+
+TimeTag vs FlowTag vs many small/large tags
+handling different ethernet frame representations
+TimingMeasurementMaker kludge
+
 considerations for generic modular packet processing elements:
  - modules implement the same set of interfaces
  - gates are either passive or active

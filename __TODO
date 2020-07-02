@@ -29,6 +29,7 @@ Ethernet features:
  - LLC
 
  - generic TCP/UDP socket tagging, with automatic copying of tags to outgoing packets
+ - have a separate stage for service/protocol/interface registration and signal subscription?
 
  - Complete and review Packet API: insert/replace/update
 

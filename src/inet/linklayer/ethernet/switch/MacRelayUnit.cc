@@ -48,6 +48,7 @@ void MacRelayUnit::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("ifIn"));
+        registerProtocol(Protocol::ipv4, gate("ifOut"), gate("ifIn"));
     }
 }
 

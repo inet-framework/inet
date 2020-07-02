@@ -140,10 +140,10 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     }
 };
 
-static int compareEthernetFrameType(Packet *a, Packet *b)
+static int compareEthernetFrameType(Packet *pa, Packet *pb)
 {
-    const auto& ah = a->peekAtFront<EthernetMacHeader>();
-    const auto& bh = b->peekAtFront<EthernetMacHeader>();
+    const auto& ah = pa->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_SERIALIZATION);
+    const auto& bh = pb->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_SERIALIZATION);
     int ac = (ah->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     int bc = (bh->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     return ac - bc;

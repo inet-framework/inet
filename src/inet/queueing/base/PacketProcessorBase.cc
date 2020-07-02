@@ -191,7 +191,7 @@ void PacketProcessorBase::updateDisplayString() const
     }
 }
 
-void PacketProcessorBase::animateSend(cMessage *message, cGate *gate) const
+void PacketProcessorBase::animateSend(cMessage *message, cGate *gate, simtime_t duration) const
 {
     auto endGate = gate->getPathEndGate();
     message->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
@@ -201,7 +201,7 @@ void PacketProcessorBase::animateSend(cMessage *message, cGate *gate) const
         if (gate->getNextGate() != nullptr) {
             envir->beginSend(message);
             while (gate->getNextGate() != nullptr) {
-                envir->messageSendHop(message, gate);
+                envir->messageSendHop(message, gate, 0, duration, false);
                 gate = gate->getNextGate();
             }
             envir->endSend(message);
@@ -212,7 +212,8 @@ void PacketProcessorBase::animateSend(cMessage *message, cGate *gate) const
 void PacketProcessorBase::animateSendPacket(Packet *packet, cGate *gate) const
 {
     if (getEnvir()->isGUI())
-        animateSend(packet, gate);
+        // NOTE: the duration is zero because this is animating a packet that is passed as a whole
+        animateSend(packet, gate, 0);
 }
 
 void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const
@@ -234,7 +235,8 @@ void PacketProcessorBase::animateSendProgress(Packet *packet, cGate *gate, int p
 {
     if (getEnvir()->isGUI()) {
         auto progressMessage = createProgressMessage(packet, progressKind, datarate, position, extraProcessableLength);
-        animateSend(progressMessage, gate);
+        auto duration = std::isnan(datarate.get()) ? 0 : s((packet->getTotalLength() - position) / datarate).get();
+        animateSend(progressMessage, gate, duration);
         delete progressMessage;
     }
 }

@@ -56,8 +56,10 @@ void ProtocolChecker::handleRegisterService(const Protocol& protocol, cGate *gat
 void ProtocolChecker::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (gate == outputGate && servicePrimitive == SP_INDICATION)
+    if (gate == outputGate && servicePrimitive == SP_INDICATION) {
         protocols.insert(&protocol);
+        registerProtocol(protocol, nullptr, inputGate);
+    }
 }
 
 } // namespace inet

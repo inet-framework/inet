@@ -19,20 +19,29 @@
 #define __INET_TXCONNECTIONMANAGER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 
 namespace inet {
 
 class INET_API TxConnectionManager : public cSimpleModule, public cListener
 {
   protected:
+    InterfaceEntry *interfaceEntry;
     cGate *physOutGate = nullptr;    // pointer to the output gate
     cChannel *txTransmissionChannel = nullptr;    // tx transmission channel
+    double bitrate = NAN;
     bool connected = false;
     bool disabled = true;
+    simtime_t txStartTime = -1;
+    physicallayer::Signal *txSignal = nullptr;
+
   public:
+    ~TxConnectionManager();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void propagateDatarate();
     virtual void propagateStatus();
     virtual void propagatePreChannelOff();
     void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
