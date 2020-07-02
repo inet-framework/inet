@@ -18,6 +18,10 @@ package inet.protocol.transceiver;
 import inet.protocol.transceiver.base.PacketReceiverBase;
 import inet.protocol.transceiver.contract.IPacketReceiver;
 
+//
+// This module receives signals from the physical medium (wire) as a whole. It
+// also sends up packets to the upper layer as a whole.
+//
 simple PacketReceiver extends PacketReceiverBase like IPacketReceiver
 {
     parameters:

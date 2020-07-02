@@ -18,11 +18,16 @@ package inet.protocol.transceiver;
 import inet.protocol.transceiver.base.PacketReceiverBase;
 import inet.protocol.transceiver.contract.IPacketReceiver;
 
-simple DestreamingReceiver extends PacketReceiverBase like IPacketReceiver
+//
+// This module receives signals from the transmission medium as a stream and
+// also sends packets to the upper layer as a stream. The stream start and stream
+// end are sent seperately allowing the preemption of signals.
+//
+simple StreamThroughReceiver extends PacketReceiverBase like IPacketReceiver
 {
     parameters:
         double datarate @unit(bps);
-        @class(DestreamingReceiver);
+        @class(StreamThroughReceiver);
         @signal[receptionStarted](type=inet::physicallayer::Signal);
         @signal[receptionEnded](type=inet::physicallayer::Signal);
 }
