@@ -40,7 +40,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
         expressMacLayer: <default("EthernetStreamingMacLayer")> like IEthernetMacLayer {
             @display("p=300,200");
         }
-        normalMacLayer: <default("EthernetFragmentingMacLayer")> like IEthernetMacLayer {
+        preemptableMacLayer: <default("EthernetFragmentingMacLayer")> like IEthernetMacLayer {
             @display("p=500,200");
         }
         scheduler: PriorityScheduler {
@@ -60,16 +60,16 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
     connections:
         upperLayerIn --> { @display("m=n"); } --> outboundClassifier.in;
         outboundClassifier.out++ --> expressMacLayer.upperLayerIn;
-        outboundClassifier.out++ --> normalMacLayer.upperLayerIn;
+        outboundClassifier.out++ --> preemptableMacLayer.upperLayerIn;
         expressMacLayer.lowerLayerOut --> scheduler.in++;
-        normalMacLayer.lowerLayerOut --> scheduler.in++;
+        preemptableMacLayer.lowerLayerOut --> scheduler.in++;
         scheduler.out --> preemptingServer.in;
         preemptingServer.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> inboundClassifier.in;
         inboundClassifier.out++ --> expressMacLayer.lowerLayerIn;
-        inboundClassifier.out++ --> normalMacLayer.lowerLayerIn;
+        inboundClassifier.out++ --> preemptableMacLayer.lowerLayerIn;
         expressMacLayer.upperLayerOut --> multiplexer.in++;
-        normalMacLayer.upperLayerOut --> multiplexer.in++;
+        preemptableMacLayer.upperLayerOut --> multiplexer.in++;
         multiplexer.out --> { @display("m=n"); } --> upperLayerOut;
 }
