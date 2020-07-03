@@ -24,17 +24,17 @@ Define_Module(PriorityClassifier);
 
 int PriorityClassifier::classifyPacket(Packet *packet)
 {
-    for (int i = 0; i < (int)consumers.size(); i++) {
-        auto outputConsumer = consumers[i];
-        if (outputConsumer->canPushSomePacket(outputGates[i]))
-            return i;
+    for (size_t i = 0; i < consumers.size(); i++) {
+        size_t outputGateIndex = getOutputGateIndex(i);
+        if (consumers[outputGateIndex]->canPushSomePacket(outputGates[outputGateIndex]))
+            return outputGateIndex;
     }
     return -1;
 }
 
 bool PriorityClassifier::canPushSomePacket(cGate *gate) const
 {
-    for (int i = 0; i < (int)consumers.size(); i++) {
+    for (size_t i = 0; i < consumers.size(); i++) {
         auto outputConsumer = consumers[i];
         if (outputConsumer->canPushSomePacket(outputGates[i]))
             return true;
@@ -44,7 +44,7 @@ bool PriorityClassifier::canPushSomePacket(cGate *gate) const
 
 bool PriorityClassifier::canPushPacket(Packet *packet, cGate *gate) const
 {
-    for (int i = 0; i < (int)consumers.size(); i++) {
+    for (size_t i = 0; i < consumers.size(); i++) {
         auto consumer = consumers[i];
         if (consumer->canPushPacket(packet, outputGates[i]))
             return true;
