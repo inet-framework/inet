@@ -26,6 +26,7 @@ void PacketSchedulerBase::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        reverseOrder = par("reverseOrder");
         outputGate = gate("out");
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
