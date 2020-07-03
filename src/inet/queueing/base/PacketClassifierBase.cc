@@ -57,7 +57,7 @@ int PacketClassifierBase::callClassifyPacket(Packet *packet) const
     int index = const_cast<PacketClassifierBase *>(this)->classifyPacket(packet);
     if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
         throw cRuntimeError("Classified packet to invalid output gate: %d", index);
-    return reverseOrder ? outputGates.size() - index - 1 : index;
+    return index;
 }
 
 void PacketClassifierBase::checkPacketStreaming(Packet *packet)

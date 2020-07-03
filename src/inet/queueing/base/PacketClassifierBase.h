@@ -45,6 +45,7 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
+    virtual size_t getOutputGateIndex(size_t i) const { return reverseOrder ? outputGates.size() - i - 1 : i; }
     virtual int classifyPacket(Packet *packet) = 0;
     virtual int callClassifyPacket(Packet *packet) const;
 
