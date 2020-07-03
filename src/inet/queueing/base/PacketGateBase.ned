@@ -29,6 +29,7 @@ simple PacketGateBase extends PacketProcessorBase
         @class(PacketGateBase);
         @display("i=block/cogwheel");
         @signal[gateStateChanged](type=bool);
+        @signal[packetPulled](type=inet::Packet);
         @statistic[gateStateChanged](title="gate states"; record=vector; interpolationmode=sample-hold);
     gates:
         input in;
