@@ -16,8 +16,10 @@
 package inet.protocol.server;
 
 import inet.queueing.base.PacketServerBase;
+import inet.queueing.contract.IPacketServer;
 
-simple PreemptingServer extends PacketServerBase
+
+simple PreemptingServer extends PacketServerBase like IPacketServer
 {
     parameters:
         double datarate @unit(bps);
