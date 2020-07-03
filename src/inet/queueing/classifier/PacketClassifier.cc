@@ -36,7 +36,8 @@ IPacketClassifierFunction *PacketClassifier::createClassifierFunction(const char
 
 int PacketClassifier::classifyPacket(Packet *packet)
 {
-    return packetClassifierFunction->classifyPacket(packet);
+    int index = packetClassifierFunction->classifyPacket(packet);
+    return index == -1 ? index : getOutputGateIndex(index);
 }
 
 } // namespace queueing

@@ -177,23 +177,3 @@ module OmittedIeee8022LlcLayer like IIeee8022LlcLayer
         upperLayerIn --> lowerLayerOut;
         lowerLayerIn --> upperLayerOut;
 }
-
-module EthernetRawMacLayer extends EthernetMacLayer
-{
-    parameters:
-        typeOrLengthInserter.typename = default("OmittedPacketFlow");
-        addressInserter.typename = default("OmittedPacketFlow");
-        paddingInserter.typename = default("OmittedPacketFlow");
-        fcsInserter.typename = default("OmittedPacketFlow");
-        addressChecker.typename = default("OmittedPacketFilter");
-        typeOrLengthChecker.typename = default("OmittedPacketFilter");
-}
-
-module EthernetStreamingMacLayer extends EthernetMacLayer
-{
-    parameters:
-        server.typename = default("OmittedPacketServer");
-        streamer.typename = default("PacketStreamer");
-        transmitter.typename = default("StreamingTransmitter");
-        receiver.typename = default("DestreamingReceiver");
-}

@@ -27,6 +27,7 @@ package inet.queueing.base;
 simple PacketSchedulerBase extends PacketProcessorBase
 {
     parameters:
+        bool reverseOrder = default(false);
         displayStringTextFormat = default("scheduled %p pk (%l)");
         @class(PacketSchedulerBase);
         @display("i=block/join");

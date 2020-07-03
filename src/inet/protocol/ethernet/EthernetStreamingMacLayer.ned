@@ -15,17 +15,13 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.scheduler;
+package inet.protocol.ethernet;
 
-import inet.queueing.base.PacketSchedulerBase;
-import inet.queueing.contract.IPacketScheduler;
-
-//
-// This scheduler pulls packets from the first non-empty among its connected
-// packet providers.
-//
-simple PriorityScheduler extends PacketSchedulerBase like IPacketScheduler
+module EthernetStreamingMacLayer extends EthernetMacLayer
 {
     parameters:
-        @class(PriorityScheduler);
+        server.typename = default("OmittedPacketServer");
+        streamer.typename = default("PacketStreamer");
+        transmitter.typename = default("StreamingTransmitter");
+        receiver.typename = default("DestreamingReceiver");
 }

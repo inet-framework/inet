@@ -36,7 +36,8 @@ IPacketSchedulerFunction *PacketScheduler::createSchedulerFunction(const char *s
 
 int PacketScheduler::schedulePacket()
 {
-    return packetSchedulerFunction->schedulePacket(providers);
+    int index = packetSchedulerFunction->schedulePacket(providers);
+    return index == -1 ? index : getInputGateIndex(index);
 }
 
 } // namespace queueing
