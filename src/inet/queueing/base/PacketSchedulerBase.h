@@ -19,20 +19,22 @@
 #define __INET_PACKETSCHEDULERBASE_H
 
 #include "inet/queueing/base/PacketProcessorBase.h"
-#include "inet/queueing/contract/IActivePacketSink.h"
-#include "inet/queueing/contract/IPassivePacketSource.h"
+#include "inet/queueing/contract/IPacketSink.h"
+#include "inet/queueing/contract/IPacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual IActivePacketSink, public virtual IPassivePacketSource
+class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual IPacketSink, public virtual IPacketSource
 {
   protected:
     std::vector<cGate *> inputGates;
     std::vector<IPassivePacketSource *> providers;
+    std::vector<IActivePacketSource *> producers;
 
     cGate *outputGate = nullptr;
     IActivePacketSink *collector = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
     int inProgressStreamId = -1;
     int inProgressGateIndex = -1;
@@ -41,7 +43,7 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual 
     virtual void initialize(int stage) override;
 
     virtual int schedulePacket() = 0;
-    virtual int callSchedulePacket();
+    virtual int callSchedulePacket() const;
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming();
@@ -49,11 +51,25 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual 
     virtual void checkPacketStreaming(Packet *packet);
 
   public:
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return providers[gate->getIndex()]; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
+
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
+
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("TODO"); }
+
+    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { throw cRuntimeError("TODO"); }
 
     virtual bool canPullSomePacket(cGate *gate) const override;
     virtual Packet *canPullPacket(cGate *gate) const override;

@@ -28,11 +28,14 @@ void PacketSchedulerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
         collector = findConnectedModule<IActivePacketSink>(outputGate);
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
-            auto provider = findConnectedModule<IPassivePacketSource>(inputGate);
             inputGates.push_back(inputGate);
+            auto provider = findConnectedModule<IPassivePacketSource>(inputGate);
             providers.push_back(provider);
+            auto producer = findConnectedModule<IActivePacketSource>(inputGate);
+            producers.push_back(producer);
         }
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -42,9 +45,10 @@ void PacketSchedulerBase::initialize(int stage)
     }
 }
 
-int PacketSchedulerBase::callSchedulePacket()
+int PacketSchedulerBase::callSchedulePacket() const
 {
-    int index = schedulePacket();
+    // KLUDGE:
+    int index = const_cast<PacketSchedulerBase *>(this)->schedulePacket();
     if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
     return index;
@@ -67,6 +71,31 @@ void PacketSchedulerBase::endPacketStreaming(Packet *packet)
     handlePacketProcessed(packet);
     inProgressStreamId = -1;
     inProgressGateIndex = -1;
+}
+
+bool PacketSchedulerBase::canPushSomePacket(cGate *gate) const
+{
+    int index = callSchedulePacket();
+    return index == gate->getIndex();
+}
+
+bool PacketSchedulerBase::canPushPacket(Packet *packet, cGate *gate) const
+{
+    return canPushSomePacket(gate);
+}
+
+void PacketSchedulerBase::pushPacket(Packet *packet, cGate *gate)
+{
+    int index = callSchedulePacket();
+    if (index != gate->getIndex())
+        throw cRuntimeError("Scheduled packet from wrong input gate");
+    consumer->pushPacket(packet, outputGate->getPathEndGate());
+}
+
+void PacketSchedulerBase::handleCanPushPacket(cGate *gate)
+{
+    int index = callSchedulePacket();
+    producers[index]->handleCanPushPacket(inputGates[index]->getPathStartGate());
 }
 
 bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const
