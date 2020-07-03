@@ -48,6 +48,9 @@ void PacketGateBase::close()
     ASSERT(isOpen_);
     EV_DEBUG << "Closing gate.\n";
     isOpen_ = false;
+    if (isStreamingPacket() && collector != nullptr) {
+        collector->handleCanPullPacket(outputGate->getPathEndGate());
+    }
     emit(gateStateChangedSignal, isOpen_);
 }
 
