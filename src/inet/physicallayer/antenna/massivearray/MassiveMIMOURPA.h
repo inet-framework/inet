@@ -3,7 +3,7 @@
 #define __INET_MASSIVEMIMOURPA_H
 
 #include <iostream>
-#include "inet/physicallayer/base/packetlevel/AntennaBase.h"
+#include "inet/physicallayer/antenna/massivearray/MassiveArray.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/power/contract/IEnergySource.h"
 #include "inet/power/contract/IEnergyStorage.h"
@@ -11,48 +11,16 @@
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarReceiver.h"
 
-#include <tuple>
-#include <vector>
 namespace inet {
-
 namespace physicallayer {
 
 using std::cout;
 using namespace inet::power;
 //extern double risInt;
-class INET_API MassiveMIMOURPA : public AntennaBase, protected cListener
+
+//class INET_API MassiveMIMOURPA : public MassiveArray
+class INET_API MassiveMIMOURPA : public MassiveArray
 {
-  public:
-    static int M;
-    static int N;
-  private:
-
-    class Simpson2D
-    {
-
-    public:
-        class limits {
-            std::tuple<double,double> limit;
-        public:
-            void setUpper(double l) {std::get<1>(limit) = l;}
-            void setLower(double l) {std::get<0>(limit) = l;}
-            double getUpper() {return std::get<1>(limit);}
-            double getLower() {return std::get<0>(limit);}
-        };
-
-        typedef std::vector<double> Vec;
-        typedef std::vector<Vec> Mat;
-
-        static double calcolaInt();
-        static void initializeCoeff(Mat &coeff,int size);
-        static double Integral(double (*fun)(double,double), const Mat &coeff, limits xLimit, limits yLimits, int size);
-        static double Integral(double (*fun)(double,double), limits xLimit, limits yLimits,int);
-
-    private:
-         Mat simpsonCoef;
-
-    };
-
    protected:
     class AntennaGain : public IAntennaGain
     {
@@ -94,21 +62,15 @@ class INET_API MassiveMIMOURPA : public AntennaBase, protected cListener
         virtual void setPhizero(double o) {phiz = o; }
         virtual double computeRecGain(const rad &direction) const;
     };
-
     Ptr<AntennaGain> gain;
   protected:
-    static double risInt;
-
     bool pendingConfiguration = false;
-
+    virtual double computeIntegral();
     virtual void initialize(int stage) override;
-    static simsignal_t MassiveMIMOURPAConfigureChange;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
 
   public:
-    static int getM() {return M;}
-    static int getN() {return N;}
     MassiveMIMOURPA();
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

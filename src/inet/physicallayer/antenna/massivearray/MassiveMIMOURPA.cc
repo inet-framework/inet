@@ -1,5 +1,5 @@
 
-#include "inet/physicallayer/antenna/MassiveMIMOURPA.h"
+#include "inet/physicallayer/antenna/massivearray/MassiveMIMOURPA.h"
 #include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -21,48 +21,30 @@ namespace inet {
 namespace physicallayer {
 using std::cout;
 
-double MassiveMIMOURPA::risInt = -1;
-
-int MassiveMIMOURPA::M = NaN;
-int MassiveMIMOURPA::N = NaN;
-simsignal_t MassiveMIMOURPA::MassiveMIMOURPAConfigureChange = registerSignal("MassiveMIMOURPAConfigureChange");
-
 Define_Module(MassiveMIMOURPA);
 
-MassiveMIMOURPA::MassiveMIMOURPA() : AntennaBase()
+MassiveMIMOURPA::MassiveMIMOURPA() : MassiveArray()
 {
 }
 
 void MassiveMIMOURPA::initialize(int stage) {
-    AntennaBase::initialize(stage);
+    MassiveArray::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         auto length = m(par("length"));
         auto freq = (par("freq").doubleValue());
         auto distance = (par("distance").doubleValue());
         auto phiz = (par("phiz").doubleValue());
 
-        if (M == -1)
+        if (std::isnan(M))
             M = (par("M").intValue());
-        if (N == -1)
+        if (std::isnan(N))
             N = (par("N").intValue());
-#ifdef REGISTER_IN_NODE
-		// this code register in the node module
-		cModule *mod = getContainingNode(this);
-		mod->subscribe(MassiveMIMOURPAConfigureChange, this);
-#else
-		// register in the interface module
-		getParentModule()->getParentModule()->subscribe(MassiveMIMOURPAConfigureChange, this);
-#endif
         // cout << "Posizione: " << getMobility()->getCurrentPosition() << endl;
 
-		if (risInt < 0)
-		      risInt =  Simpson2D::calcolaInt();
+		if (std::isnan(risInt))
+		      risInt =  computeIntegral();
         cModule *radioModule = getParentModule();
         IRadio * radio = check_and_cast<IRadio *>(radioModule);
-        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
-        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
-        radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
         gain = makeShared<AntennaGain>(length, M, N, phiz, freq, distance, risInt, this, radio);
 /*
         const char *energySourceModule = par("energySourceModule");
@@ -213,7 +195,7 @@ std::ostream& MassiveMIMOURPA::printToStream(std::ostream& stream, int level) co
 
 void MassiveMIMOURPA::receiveSignal(cComponent *source, simsignal_t signalID, double val, cObject *details)
 {
-    if (signalID == MassiveMIMOURPAConfigureChange)
+    if (signalID == MassiveArrayConfigureChange)
     {
         auto radio =  check_and_cast<IRadio *>(getParentModule());
         if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER &&
@@ -231,7 +213,7 @@ void MassiveMIMOURPA::receiveSignal(cComponent *source, simsignal_t signalID, do
 
 void MassiveMIMOURPA::receiveSignal(cComponent *source, simsignal_t signalID, long val, cObject *details)
 {
-    if (signalID != MassiveMIMOURPAConfigureChange)
+    if (signalID != MassiveArrayConfigureChange)
         // Radio signals
         if (pendingConfiguration)
         {
@@ -247,65 +229,18 @@ void MassiveMIMOURPA::receiveSignal(cComponent *source, simsignal_t signalID, lo
         }
 }
 
-void MassiveMIMOURPA::Simpson2D::initializeCoeff(Mat &coeff,int size) {
-    Vec uniDiCoeff;
-    // check if size is odd or even
-    int correctSize = (size%2 == 0)?size+1:size;
-    uniDiCoeff.push_back(1);
-    for (int i = 0; i < correctSize-2; i++) {
-        if (i%2)
-            uniDiCoeff.push_back(2);
-        else
-            uniDiCoeff.push_back(4);
-    }
-    uniDiCoeff.push_back(1);
-    for (unsigned int i = 0; i < uniDiCoeff.size(); i++) {
-        Vec auxCoeff;
-        for (unsigned int j = 0; j < uniDiCoeff.size(); j++) {
-            auxCoeff.push_back(uniDiCoeff[i] * uniDiCoeff[j]);
-        }
-        coeff.push_back(auxCoeff);
-    }
-}
 
+double MassiveMIMOURPA::computeIntegral() {
 
-double MassiveMIMOURPA::Simpson2D::Integral(double (*fun)(double,double), const Mat &coeff, limits xLimit, limits yLimit, int size) {
-
-    double xInterval = xLimit.getUpper() - xLimit.getLower();
-    double yInterval = yLimit.getUpper() - yLimit.getLower();
-    double xStep = xInterval/(coeff.size()-1);
-    double yStep = yInterval/(coeff.size()-1);
-    double val = 0;
-
-    double x = xLimit.getLower();
-    for (unsigned int i = 0; i < coeff.size(); i++) {
-        double y = yLimit.getLower();
-        for (unsigned int j = 0; j < coeff.size(); j++) {
-            val += fun(x,y)*coeff[i][j];
-            y += yStep;
-        }
-        x += xStep;
-    }
-
-    return val*xStep*yStep/9;
-}
-
-double MassiveMIMOURPA::Simpson2D::Integral(double (*fun)(double,double),limits xLimit, limits yLimits, int tam) {
-    Mat coeff;
-    initializeCoeff(coeff, tam);
-    return Integral(fun,coeff,xLimit, yLimits, tam);
-}
-
-double MassiveMIMOURPA::Simpson2D::calcolaInt(){
     Simpson2D::Mat matrix;
-    Simpson2D::limits limitX,limitY;
+    Simpson2D::limits limitX, limitY;
     limitX.setLower(0);
     limitX.setUpper(M_PI);
     limitY.setLower(0);
-    limitY.setUpper(2* M_PI);
-    double val =  Simpson2D::Integral(getFunc, limitX, limitY, 3999);
-    return val;
+    limitY.setUpper(2 * M_PI);
+    return Simpson2D::Integral(getFunc, limitX, limitY, 1999);
 }
+
 
 } // namespace physicallayer
 

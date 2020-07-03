@@ -12,8 +12,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
+// Vincenzo Inzillo
 
-package inet.physicallayer.antenna;
+package inet.physicallayer.antenna.massivearray;
 
 import inet.physicallayer.base.packetlevel.AntennaBase;
 

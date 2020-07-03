@@ -1,5 +1,5 @@
 
-#include "inet/physicallayer/antenna/MassiveMIMOUCPA.h"
+#include "inet/physicallayer/antenna/massivearray/MassiveMIMOUHPA.h"
 #include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -21,48 +21,31 @@ namespace inet {
 namespace physicallayer {
 using std::cout;
 
-double MassiveMIMOUCPA::risInt = -1;
-
-
-int MassiveMIMOUCPA::M = NaN;
-simsignal_t MassiveMIMOUCPA::MassiveMIMOUCPAConfigureChange = registerSignal(
-        "MassiveMIMOUCPAConfigureChange");
 
 static double overall_sum(EulerAngles direction);
 
-Define_Module(MassiveMIMOUCPA);
+Define_Module(MassiveMIMOUHPA);
 
-MassiveMIMOUCPA::MassiveMIMOUCPA()
+MassiveMIMOUHPA::MassiveMIMOUHPA() : MassiveArray()
 {
+
 }
 
-void MassiveMIMOUCPA::initialize(int stage) {
-    AntennaBase::initialize(stage);
+void MassiveMIMOUHPA::initialize(int stage) {
+    MassiveArray::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         auto length = m(par("length"));
-        double freq = (par("freq"));
-        double distance = (par("distance"));
-        double phiz = (par("phiz"));
-        M = (par("M"));
-#ifdef REGISTER_IN_NODE
-		// this code register in the node module
-		cModule *mod = getContainingNode(this);
-		mod->subscribe(MassiveMIMOUCPAConfigureChange, this);
-#else
-		// register in the interface module
-		getParentModule()->getParentModule()->subscribe(MassiveMIMOUCPAConfigureChange, this);
-		
-#endif
+        auto freq = (par("freq").doubleValue());
+        auto distance = (par("distance").doubleValue());
+        auto phiz = (par("phiz").doubleValue());
+        if (std::isnan(M))
+            M = (par("M"));
         // cout << "Posizione: " << getMobility()->getCurrentPosition() << endl;
 
-		if (risInt < 0)
-		      risInt =  calcolaInt();
+        if (std::isnan(risInt))
+            risInt =  computeIntegral();
         cModule *radioModule = getParentModule();
         IRadio * radio = check_and_cast<IRadio *>(radioModule);
-        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
-        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
-        radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
         gain = makeShared<AntennaGain>(length, M, phiz, freq, distance, risInt, this, radio);
 
 /*
@@ -87,82 +70,104 @@ static double getFunc (double x, double y)
             return 0;
 
         std::complex <double> sum1 = 0 ;
-        std::complex <double> term = 1 ;
+        std::complex <double> sum2 = 0 ;
 
-        int emme = MassiveMIMOUCPA::M;
+        int emme = MassiveMIMOUHPA::M;
         const std::complex<double> i(0, 1);
 
 
-        for ( int m=1; m<=emme ; ++m ){
-            int val = 6*m;
-            for ( int n=1; n<= val; ++n ){
-
-                            double aux2 =  (double)((M_PI*n)/(3*m));
-                            double aux =  (double) (sin(x)* cos (y- aux2));
-                            sum1 += std::exp(-i* (M_PI * m * aux));
+        for ( int m=-emme; m<=emme ; ++m ){
+            int val = (2*emme) - abs(m);
+            sum2 = 0;
+            for ( int n=0; n<= val; ++n ){
+                double aux = n * sin (x)* cos(y);
+                std::complex<double> aux2 = exp(i* M_PI * aux);
+                sum2 += aux2;
             }
-
+            double vx = sin(x) * cos(y);
+            double vy = sin(x) * sin(y);
+            double aux = (m * vy) - ((double)((emme*2.0) - abs(m))/2.0 * vx) - (vx * (double)m/2.0);
+            sum1 += std::exp(i* M_PI *aux) * sum2;
+            //sum1 += exp((i* M_PI *((m * sin (x)* sin(y))))-((0.5*((2* emme) - abs(m))) * sin (x)* cos(y))-((0.5*m * sin (x)* cos(y))))*sum2;
         }
+
+        return std::norm(sum1) * sin(x);
 
   double third = sin(x);
 
-  double afmod = (double) std::norm(term+sum1);
+  double afmod = std::norm(sum1);
   return afmod*third;
 }
 
-double MassiveMIMOUCPA::AntennaGain::getMaxGain() const {
-    double maxG;
-    int numel = ourpa->getNumAntennas();
-    double numer = 4 * M_PI * numel*numel;
-    maxG= 20 * log10 (numer/risInt);
-    return maxG;
+double MassiveMIMOUHPA::AntennaGain::getMaxGain() const
+{
+       double maxG;
+       int numel = ourpa->getNumAntennas();
+       double numer = 4 * M_PI * numel*numel;
+       maxG= 20 * log10 (numer/risInt);
+       return maxG;
 }
 
-
-double MassiveMIMOUCPA::AntennaGain::computeGain(const Quaternion &direction) const {
+double MassiveMIMOUHPA::AntennaGain::computeGain(const Quaternion &direction) const {
 
     double gain;
     double maxGain = getMaxGain();
-    IRadio *radio = check_and_cast<IRadio *>(ourpa->getParentModule());
     if (phiz == -1) {
         // omni
         return 1;
     }
+
     int numel = ourpa->getNumAntennas(); //without energy control
     cout << "ACTIVE ARRAY ELEMENTS:" << numel << endl;
+
     double phizero = phiz * (M_PI / 180);
+
     double heading = direction.toEulerAngles().alpha.get();
     double elevation = direction.toEulerAngles().beta.get();
     double currentangle = heading * 180.0 / M_PI;
+
     if (currentangle == phiz)
         gain = maxGain;
-
-    cout << "Thetazero:" << phiz << endl;
+    cout << "PHI:" << phiz << endl;
     cout << "CurrentAngle(degree):" << currentangle << endl;
 
     std::complex<double> sum1 = 0;
-    std::complex<double> term = 0;
-    int emme = MassiveMIMOUCPA::M;
+    std::complex<double> sum2 = 0;
+    int emme = MassiveMIMOUHPA::M;
     const std::complex<double> i(0, 1);
-    for (int m = 1; m <= emme; ++m) {
-        int val = 6 * m;
-        for (int n = 1; n <= val; ++n) {
-            double aux2 = (double) ((M_PI * n) / (3 * m)); //phin=2pi*n/N
-            double betax = sin(phizero) * cos(elevation - aux2);
-            double auxprova = (double) (sin(heading) * cos(elevation - aux2)
-                    + betax);
-            sum1 += std::exp(-i * (M_PI * m * (auxprova)));
+
+    double betax = sin(phizero) * cos(elevation);
+
+    for (int m = -emme; m <= emme; ++m) {
+        int val = (2 * emme) - abs(m);
+        sum2 = 0;
+        for (int n = 0; n <= val; ++n) {
+            double auxprova = n
+                    * (double) (sin(heading) * cos(elevation) + betax);
+
+            std::complex<double> aux2 = exp(i * M_PI * auxprova);
+            sum2 += aux2;
         }
+
+        double vx = (sin(heading) * cos(elevation));
+        double vy = (sin(heading) * sin(elevation));
+        double aux = (m * vy) - ((double) ((emme * 2.0) - abs(m)) / 2.0 * vx)
+                - (vx * (double) m / 2.0);
+        sum1 += std::exp(i * M_PI * aux) * sum2;
+
     }
-    double afmodu = std::norm(term + sum1);
+
+    double afmodu = std::norm(sum1);
 
     double nume = 4 * M_PI * afmodu;
     gain = 20 * log10(std::abs(nume) / risInt);
+
     //if (phiz==0)gain=1;
     if (gain < 0)
         gain = 1;
     if (gain > maxGain)
         gain = maxGain;
+
     Ieee80211ScalarReceiver * rec =
             dynamic_cast<Ieee80211ScalarReceiver *>(const_cast<IReceiver *>(radio->getReceiver()));
     if (rec != nullptr) {
@@ -180,12 +185,10 @@ double MassiveMIMOUCPA::AntennaGain::computeGain(const Quaternion &direction) co
 
 }
 
-double MassiveMIMOUCPA::AntennaGain::computeRecGain(
-        const rad &direction) const {
+double MassiveMIMOUHPA::AntennaGain::computeRecGain(const rad &direction) const {
 
     double gain;
     double maxGain = getMaxGain();
-
     if (phiz == -1) {
         // omni
         return 1;
@@ -193,7 +196,6 @@ double MassiveMIMOUCPA::AntennaGain::computeRecGain(
 
     int numel = ourpa->getNumAntennas(); //without energy control
     cout << "ACTIVE ARRAY ELEMENTS:" << numel << endl;
-
     double phizero = phiz * (M_PI / 180);
 
     double heading = direction.get();
@@ -203,26 +205,31 @@ double MassiveMIMOUCPA::AntennaGain::computeRecGain(
     if (currentangle == phiz)
         gain = maxGain;
 
-    cout << "Thetazero:" << phiz << endl;
-    cout << "CurrentAngle(degree):" << currentangle << endl;
     std::complex<double> sum1 = 0;
-    std::complex<double> term = 0;
-    int emme = MassiveMIMOUCPA::M;
+    std::complex<double> sum2 = 0;
+    int emme = MassiveMIMOUHPA::M;
     const std::complex<double> i(0, 1);
+    double betax = sin(phizero) * cos(elevation);
+    for (int m = -emme; m <= emme; ++m) {
+        int val = (2 * emme) - abs(m);
+        sum2 = 0;
+        for (int n = 0; n <= val; ++n) {
+            double auxprova = (double) n
+                    * (sin(heading) * cos(elevation) + betax);
 
-    for (int m = 1; m <= emme; ++m) {
-        int val = 6 * m;
-        for (int n = 1; n <= val; ++n) {
-
-            double aux2 = (double) ((M_PI * n) / (3 * m)); //phin=2pi*n/N
-            double betax = sin(phizero) * cos(elevation - aux2);
-            double auxprova = (double) (sin(heading) * cos(elevation - aux2)
-                    + betax);
-            sum1 += std::exp(-i * (M_PI * m * (auxprova)));
+            std::complex<double> aux2 = exp(i * M_PI * auxprova);
+            sum2 += aux2;
         }
 
+        double vx = (sin(heading) * cos(elevation));
+        double vy = (sin(heading) * sin(elevation));
+        double aux = (m * vy) - ((double) ((emme * 2.0) - abs(m)) / 2.0 * vx)
+                - (vx * (double) m / 2.0);
+        sum1 += std::exp(i * M_PI * aux) * sum2;
+        //sum1 += exp((i* M_PI *((m * sin (x)* sin(y))))-((0.5*((2* emme) - abs(m))) * sin (x)* cos(y))-((0.5*m * sin (x)* cos(y))))*sum2;
     }
-    double afmodu = std::norm(term + sum1);
+
+    double afmodu = std::norm(sum1);
 
     double nume = 4 * M_PI * afmodu;
     gain = 20 * log10(std::abs(nume) / risInt);
@@ -233,16 +240,12 @@ double MassiveMIMOUCPA::AntennaGain::computeRecGain(
     if (gain > maxGain)
         gain = maxGain;
 
-    cout << "Gain (dB) at angle (degree): " << currentangle << " is: " << gain
-            << endl;
-
     return gain;
 
 }
 
-double MassiveMIMOUCPA::AntennaGain::getAngolo(Coord p1, Coord p2) const {
+double MassiveMIMOUHPA::AntennaGain::getAngolo(Coord p1, Coord p2) const {
     double angolo;
-    double cangl;
     double x1, y1, x2, y2;
     double dx, dy;
 
@@ -252,14 +255,15 @@ double MassiveMIMOUCPA::AntennaGain::getAngolo(Coord p1, Coord p2) const {
     y2 = p2.y;
     dx = x2 - x1;
     dy = y2 - y1;
-    cangl = dy / dx;
+    double cangl = dy / dx;
     angolo = atan(cangl) * (180 / 3.14);
     return angolo;
 
 }
 
-std::ostream& MassiveMIMOUCPA::printToStream(std::ostream& stream,  int level) const {
-    stream << "MassiveMIMOUCPA";
+std::ostream& MassiveMIMOUHPA::printToStream(std::ostream& stream,
+        int level) const {
+    stream << "MassiveMIMOUHPA";
     if (level >= PRINT_LEVEL_DETAIL) {
 
         stream << ", length = " << gain->getLength();
@@ -274,15 +278,16 @@ std::ostream& MassiveMIMOUCPA::printToStream(std::ostream& stream,  int level) c
     return AntennaBase::printToStream(stream, level);
 }
 
-void MassiveMIMOUCPA::receiveSignal(cComponent *source, simsignal_t signalID,
+void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
         double val, cObject *details) {
-    if (signalID == MassiveMIMOUCPAConfigureChange) {
+    if (signalID == MassiveArrayConfigureChange) {
         auto radio =  check_and_cast<IRadio *>(getParentModule());
         if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
                 && radio->getTransmissionState()
                         == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
             // pending
             pendingConfiguration = true;
+            newConfigurtion = val;
         }
         if (val >= -180 && val <= 180)
             gain->setPhizero(val);
@@ -291,9 +296,9 @@ void MassiveMIMOUCPA::receiveSignal(cComponent *source, simsignal_t signalID,
     }
 }
 
-void MassiveMIMOUCPA::receiveSignal(cComponent *source, simsignal_t signalID,
+void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
         long val, cObject *details) {
-    if (signalID != MassiveMIMOUCPAConfigureChange)
+    if (signalID != MassiveArrayConfigureChange)
         // Radio signals
         if (pendingConfiguration) {
             auto radio =  check_and_cast<IRadio *>(getParentModule());
@@ -309,67 +314,17 @@ void MassiveMIMOUCPA::receiveSignal(cComponent *source, simsignal_t signalID,
         }
 }
 
-void MassiveMIMOUCPA::Simpson2D3::initializeCoeff(Mat &coeff, int size) {
-    Vec uniDiCoeff;
-    // check if size is odd or even
-    int correctSize = (size % 2 == 0) ? size + 1 : size;
-    uniDiCoeff.push_back(1);
-    for (int i = 0; i < correctSize - 2; i++) {
-        if (i % 2)
-            uniDiCoeff.push_back(2);
-        else
-            uniDiCoeff.push_back(4);
-    }
-    uniDiCoeff.push_back(1);
-    for (unsigned int i = 0; i < uniDiCoeff.size(); i++) {
-        Vec auxCoeff;
-        for (unsigned int j = 0; j < uniDiCoeff.size(); j++) {
-            auxCoeff.push_back(uniDiCoeff[i] * uniDiCoeff[j]);
-        }
-        coeff.push_back(auxCoeff);
-    }
-}
+double MassiveMIMOUHPA::computeIntegral() {
 
-double MassiveMIMOUCPA::Simpson2D3::Integral(double (*fun)(double, double), const Mat &coeff,
-        limits xLimit, limits yLimit, int size) {
-
-    double xInterval = xLimit.getUpper() - xLimit.getLower();
-    double yInterval = yLimit.getUpper() - yLimit.getLower();
-    double xStep = xInterval / (coeff.size() - 1);
-    double yStep = yInterval / (coeff.size() - 1);
-    double val = 0;
-
-    double x = xLimit.getLower();
-    for (unsigned int i = 0; i < coeff.size(); i++) {
-        double y = yLimit.getLower();
-        for (unsigned int j = 0; j < coeff.size(); j++) {
-            val += fun(x, y) * coeff[i][j];
-            y += yStep;
-        }
-        x += xStep;
-    }
-
-    return val * xStep * yStep / 9;
-}
-
-double MassiveMIMOUCPA::Simpson2D3::Integral(double (*fun)(double, double), limits xLimit,
-        limits yLimits, int tam) {
-    Mat coeff;
-    initializeCoeff(coeff, tam);
-    return Integral(fun, coeff, xLimit, yLimits, tam);
-}
-
-double MassiveMIMOUCPA::MassiveMIMOUCPA::calcolaInt() {
-
-    Simpson2D3::Mat matrix;
-    Simpson2D3::limits limitX, limitY;
+    Simpson2D::Mat matrix;
+    Simpson2D::limits limitX, limitY;
     limitX.setLower(0);
     limitX.setUpper(M_PI);
     limitY.setLower(0);
     limitY.setUpper(2 * M_PI);
-    return Simpson2D3::Integral(getFunc, limitX, limitY, 1999);
-
+    return Simpson2D::Integral(getFunc, limitX, limitY, 1999);
 }
+
 
 } // namespace physicallayer
 

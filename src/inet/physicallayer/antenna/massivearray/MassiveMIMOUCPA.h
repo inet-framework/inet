@@ -11,6 +11,7 @@
 #include "inet/power/storage/SimpleEpEnergyStorage.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarReceiver.h"
+#include "inet/physicallayer/antenna/massivearray/MassiveArray.h"
 
 #include <tuple>
 #include <vector>
@@ -21,40 +22,9 @@ namespace physicallayer {
 using std::cout;
 using namespace inet::power;
 //extern double risInt;
-class INET_API MassiveMIMOUCPA : public AntennaBase, protected cListener
+class INET_API MassiveMIMOUCPA : public MassiveArray
 {
-    class Simpson2D3
-    {
-
-    public:
-        class limits {
-            std::tuple<double,double> limit;
-        public:
-            void setUpper(double l) {std::get<1>(limit) = l;}
-            void setLower(double l) {std::get<0>(limit) = l;}
-            double getUpper() {return std::get<1>(limit);}
-            double getLower() {return std::get<0>(limit);}
-        };
-         typedef std::vector<double> Vec;
-         typedef std::vector<Vec> Mat;
-         static void initializeCoeff(Mat &coeff,int size);
-         static double Integral(double (*fun)(double,double), const Mat &coeff, limits xLimit, limits yLimits, int size);
-         static double Integral(double (*fun)(double,double), limits xLimit, limits yLimits,int);
     protected:
-
-    private:
-         Mat simpsonCoef;
-
-
-    };
-
-
-    public:
-         static simsignal_t MassiveMIMOUCPAConfigureChange;
-         static int M;
-
-    protected:
-
          class AntennaGain : public IAntennaGain
            {
              protected:
@@ -96,7 +66,6 @@ class INET_API MassiveMIMOUCPA : public AntennaBase, protected cListener
 
 
     Ptr<AntennaGain> gain;
-    static double risInt;
     bool pendingConfiguration = false;
     
   protected:
@@ -109,11 +78,9 @@ class INET_API MassiveMIMOUCPA : public AntennaBase, protected cListener
     ~MassiveMIMOUCPA() {
 
     }
-    static int getM() {return M;}
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
-
-    double calcolaInt();
+    double computeIntegral();
 
 
    // Consumption methods
