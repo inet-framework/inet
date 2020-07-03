@@ -28,11 +28,14 @@ void PacketClassifierBase::initialize(int stage)
         reverseOrder = par("reverseOrder");
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
+        provider = findConnectedModule<IPassivePacketSource>(inputGate);
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
-            auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
             outputGates.push_back(outputGate);
+            auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
             consumers.push_back(consumer);
+            auto collector = findConnectedModule<IActivePacketSink>(outputGate);
+            collectors.push_back(collector);
         }
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -48,9 +51,10 @@ void PacketClassifierBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-int PacketClassifierBase::callClassifyPacket(Packet *packet)
+int PacketClassifierBase::callClassifyPacket(Packet *packet) const
 {
-    int index = classifyPacket(packet);
+    // KLUDGE:
+    int index = const_cast<PacketClassifierBase *>(this)->classifyPacket(packet);
     if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
         throw cRuntimeError("Classified packet to invalid output gate: %d", index);
     return reverseOrder ? outputGates.size() - index - 1 : index;
@@ -162,6 +166,40 @@ void PacketClassifierBase::handleCanPushPacket(cGate *gate)
 void PacketClassifierBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+}
+
+bool PacketClassifierBase::canPullSomePacket(cGate *gate) const
+{
+    return canPullPacket(gate) != nullptr;
+}
+
+Packet *PacketClassifierBase::canPullPacket(cGate *gate) const
+{
+    auto packet = provider->canPullPacket(inputGate->getPathStartGate());
+    if (packet == nullptr)
+        return nullptr;
+    else {
+        int index = callClassifyPacket(packet);
+        return index == gate->getIndex() ? packet : nullptr;
+    }
+}
+
+Packet *PacketClassifierBase::pullPacket(cGate *gate)
+{
+    auto packet = provider->pullPacket(inputGate->getPathStartGate());
+    int index = callClassifyPacket(packet);
+    if (index != gate->getIndex())
+        throw cRuntimeError("Classified packet to wrong output gate");
+    return packet;
+}
+
+void PacketClassifierBase::handleCanPullPacket(cGate *gate)
+{
+    auto packet = provider->canPullPacket(inputGate->getPathStartGate());
+    if (packet != nullptr) {
+        int index = callClassifyPacket(packet);
+        collectors[index]->handleCanPullPacket(outputGates[index]->getPathEndGate());
+    }
 }
 
 } // namespace queueing
