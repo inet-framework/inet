@@ -41,8 +41,13 @@ void MassiveMIMOURPA::initialize(int stage) {
             N = (par("N").intValue());
         // cout << "Posizione: " << getMobility()->getCurrentPosition() << endl;
 
-		if (std::isnan(risInt))
-		      risInt =  computeIntegral();
+        auto it = risValuesUrpa.find(std::make_tuple(M,N));
+        if (it == risValuesUrpa.end()) {
+            risInt =  computeIntegral();
+            risValuesUrpa[std::make_tuple(M,N)] = risInt;
+        }
+        else
+            risInt = it->second;
         cModule *radioModule = getParentModule();
         IRadio * radio = check_and_cast<IRadio *>(radioModule);
         gain = makeShared<AntennaGain>(length, M, N, phiz, freq, distance, risInt, this, radio);
@@ -56,7 +61,7 @@ void MassiveMIMOURPA::initialize(int stage) {
     }
 }
 
-static double getFunc (double x, double y)
+static double getFunc (double x, double y, int M, int N)
 {
     if (x == 0)
         return 0;
@@ -64,8 +69,8 @@ static double getFunc (double x, double y)
         return 0;
     if (y == M_PI/2 || y == M_PI || y == 3/2 * M_PI || y == 2 * M_PI)
         return 0;
-    int emme = MassiveMIMOURPA::M;
-    int enne = MassiveMIMOURPA::N;
+    int emme = M;
+    int enne = N;
     double first = sin(0.5*(emme)*M_PI*sin(x)*cos(y))/sin(0.5*M_PI*sin(x)*cos(y));
     double second = sin(0.5*(enne)*M_PI*sin(x)*sin(y))/sin(0.5*M_PI*sin(x)*sin(y));
     double third = sin(x);
@@ -203,30 +208,78 @@ void MassiveMIMOURPA::receiveSignal(cComponent *source, simsignal_t signalID, do
         {
             // pending
             pendingConfiguration = true;
+            nextValue = val;
+            return;
         }
+        pendingConfiguration = false;
+        nextValue = NaN;
         if (val >= -180 && val <= 180)
             gain->setPhizero(val);
         else if (val == 360)
             gain->setPhizero(360);
     }
-}
-
-void MassiveMIMOURPA::receiveSignal(cComponent *source, simsignal_t signalID, long val, cObject *details)
-{
-    if (signalID != MassiveArrayConfigureChange)
-        // Radio signals
-        if (pendingConfiguration)
-        {
+    else {
+        if (pendingConfiguration) {
             auto radio =  check_and_cast<IRadio *>(getParentModule());
-            if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSMITTER ||
-                    (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER && radio->getTransmissionState() != IRadio::TRANSMISSION_STATE_TRANSMITTING))
-            {
-                if (val >= -180 && val <= 180)
-                    gain->setPhizero(val);
-                else if (val == 360)
+
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSMITTER
+                    || (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
+                            && radio->getTransmissionState()
+                            != IRadio::TRANSMISSION_STATE_TRANSMITTING)) {
+                if (std::isnan(nextValue))
+                    throw cRuntimeError("next value is nan");
+                if (nextValue >= -180 && nextValue <= 180)
+                    gain->setPhizero(nextValue);
+                else if (nextValue == 360)
                     gain->setPhizero(360);
+                nextValue = NaN;
+                pendingConfiguration = false;
             }
         }
+    }
+}
+
+void MassiveMIMOURPA::receiveSignal(cComponent *source, simsignal_t signalID,
+        long val, cObject *details) {
+    if (signalID != MassiveArrayConfigureChange) {
+        // Radio signals
+        if (pendingConfiguration) {
+            auto radio = check_and_cast<IRadio*>(getParentModule());
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSMITTER
+                    || (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
+                            && radio->getTransmissionState()
+                                    != IRadio::TRANSMISSION_STATE_TRANSMITTING)) {
+                if (std::isnan(nextValue))
+                    throw cRuntimeError("next value is nan");
+                if (nextValue >= -180 && nextValue <= 180)
+                    gain->setPhizero(nextValue);
+                else if (nextValue == 360)
+                    gain->setPhizero(360);
+                nextValue = NaN;
+                pendingConfiguration = false;
+            }
+        }
+    }
+}
+
+void MassiveMIMOURPA::setDirection(const double &val)
+{
+    auto radio =  check_and_cast<IRadio *>(getParentModule());
+    if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
+            && radio->getTransmissionState()
+                    == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
+        // pending
+        pendingConfiguration = true;
+        nextValue = val;
+        return;
+    }
+
+    nextValue = NaN;
+    if (val >= -180 && val <= 180)
+        gain->setPhizero(val);
+    else if (val == 360)
+        gain->setPhizero(360);
+    pendingConfiguration = false;
 }
 
 
@@ -238,7 +291,7 @@ double MassiveMIMOURPA::computeIntegral() {
     limitX.setUpper(M_PI);
     limitY.setLower(0);
     limitY.setUpper(2 * M_PI);
-    return Simpson2D::Integral(getFunc, limitX, limitY, 1999);
+    return Simpson2D::Integral(getFunc, limitX, limitY, 1999, M, N);
 }
 
 

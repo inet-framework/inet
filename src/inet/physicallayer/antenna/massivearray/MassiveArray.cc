@@ -24,10 +24,14 @@ namespace inet {
 namespace physicallayer {
 using std::cout;
 
-double MassiveArray::risInt = NaN;
+//double MassiveArray::risInt = NaN;
 
-int MassiveArray::M = NaN;
-int MassiveArray::N = NaN;
+//int MassiveArray::M = NaN;
+//int MassiveArray::N = NaN;
+
+std::map<int, double> MassiveArray::risValuesUcpa;
+std::map<int, double> MassiveArray::risValuesUhpa;
+std::map<MassiveArray::ConfigAntenna, double> MassiveArray::risValuesUrpa;
 simsignal_t MassiveArray::MassiveArrayConfigureChange = registerSignal("MassiveArrayConfigureChange");
 
 
@@ -55,6 +59,7 @@ void MassiveArray::initialize(int stage) {
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
+
     }
 }
 
@@ -80,7 +85,7 @@ void MassiveArray::Simpson2D::initializeCoeff(Mat &coeff,int size) {
 }
 
 
-double MassiveArray::Simpson2D::Integral(double (*fun)(double,double), const Mat &coeff, limits xLimit, limits yLimit, int size) {
+double MassiveArray::Simpson2D::Integral(double (*fun)(double,double, int, int), const Mat &coeff, limits xLimit, limits yLimit, int size, int M, int N) {
 
     double xInterval = xLimit.getUpper() - xLimit.getLower();
     double yInterval = yLimit.getUpper() - yLimit.getLower();
@@ -92,7 +97,7 @@ double MassiveArray::Simpson2D::Integral(double (*fun)(double,double), const Mat
     for (unsigned int i = 0; i < coeff.size(); i++) {
         double y = yLimit.getLower();
         for (unsigned int j = 0; j < coeff.size(); j++) {
-            val += fun(x,y)*coeff[i][j];
+            val += fun(x,y, M, N)*coeff[i][j];
             y += yStep;
         }
         x += xStep;
@@ -101,10 +106,10 @@ double MassiveArray::Simpson2D::Integral(double (*fun)(double,double), const Mat
     return val*xStep*yStep/9;
 }
 
-double MassiveArray::Simpson2D::Integral(double (*fun)(double,double),limits xLimit, limits yLimits, int tam) {
+double MassiveArray::Simpson2D::Integral(double (*fun)(double,double, int, int),limits xLimit, limits yLimits, int tam, int M, int N) {
     Mat coeff;
     initializeCoeff(coeff, tam);
-    return Integral(fun,coeff,xLimit, yLimits, tam);
+    return Integral(fun,coeff,xLimit, yLimits, tam, M, N);
 }
 
 

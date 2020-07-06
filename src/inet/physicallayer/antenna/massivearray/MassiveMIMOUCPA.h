@@ -67,9 +67,13 @@ class INET_API MassiveMIMOUCPA : public MassiveArray
 
     Ptr<AntennaGain> gain;
     bool pendingConfiguration = false;
+    double nextValue = NaN;
     
   protected:
     virtual void initialize(int stage) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
+    double computeIntegral();
 
   public:
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
@@ -78,9 +82,7 @@ class INET_API MassiveMIMOUCPA : public MassiveArray
     ~MassiveMIMOUCPA() {
 
     }
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
-    double computeIntegral();
+    virtual void setDirection(const double &angle) override;
 
 
    // Consumption methods

@@ -42,8 +42,13 @@ void MassiveMIMOUHPA::initialize(int stage) {
             M = (par("M"));
         // cout << "Posizione: " << getMobility()->getCurrentPosition() << endl;
 
-        if (std::isnan(risInt))
+        auto it = risValuesUhpa.find(M);
+        if (it == risValuesUhpa.end()) {
             risInt =  computeIntegral();
+            risValuesUhpa[M] = risInt;
+        }
+        else
+            risInt = it->second;
         cModule *radioModule = getParentModule();
         IRadio * radio = check_and_cast<IRadio *>(radioModule);
         gain = makeShared<AntennaGain>(length, M, phiz, freq, distance, risInt, this, radio);
@@ -59,7 +64,7 @@ void MassiveMIMOUHPA::initialize(int stage) {
     }
 }
 
-static double getFunc (double x, double y)
+static double getFunc (double x, double y, int M, int N)
 {
 
     if (x == 0)
@@ -72,7 +77,7 @@ static double getFunc (double x, double y)
         std::complex <double> sum1 = 0 ;
         std::complex <double> sum2 = 0 ;
 
-        int emme = MassiveMIMOUHPA::M;
+        int emme = M;
         const std::complex<double> i(0, 1);
 
 
@@ -133,7 +138,7 @@ double MassiveMIMOUHPA::AntennaGain::computeGain(const Quaternion &direction) co
 
     std::complex<double> sum1 = 0;
     std::complex<double> sum2 = 0;
-    int emme = MassiveMIMOUHPA::M;
+    int emme = M;
     const std::complex<double> i(0, 1);
 
     double betax = sin(phizero) * cos(elevation);
@@ -207,7 +212,7 @@ double MassiveMIMOUHPA::AntennaGain::computeRecGain(const rad &direction) const 
 
     std::complex<double> sum1 = 0;
     std::complex<double> sum2 = 0;
-    int emme = MassiveMIMOUHPA::M;
+    int emme = M;
     const std::complex<double> i(0, 1);
     double betax = sin(phizero) * cos(elevation);
     for (int m = -emme; m <= emme; ++m) {
@@ -287,18 +292,40 @@ void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
                         == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
             // pending
             pendingConfiguration = true;
-            newConfigurtion = val;
+            nextValue = val;
+            return;
         }
+        nextValue = NaN;
+        pendingConfiguration = false;
         if (val >= -180 && val <= 180)
             gain->setPhizero(val);
         else if (val == 360)
             gain->setPhizero(360);
     }
+    else {
+        if (pendingConfiguration) {
+            auto radio =  check_and_cast<IRadio *>(getParentModule());
+
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSMITTER
+                    || (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
+                            && radio->getTransmissionState()
+                            != IRadio::TRANSMISSION_STATE_TRANSMITTING)) {
+                if (std::isnan(nextValue))
+                    throw cRuntimeError("next value is nan");
+                if (nextValue >= -180 && nextValue <= 180)
+                    gain->setPhizero(nextValue);
+                else if (nextValue == 360)
+                    gain->setPhizero(360);
+                nextValue = NaN;
+                pendingConfiguration = false;
+            }
+        }
+    }
 }
 
 void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
         long val, cObject *details) {
-    if (signalID != MassiveArrayConfigureChange)
+    if (signalID != MassiveArrayConfigureChange) {
         // Radio signals
         if (pendingConfiguration) {
             auto radio =  check_and_cast<IRadio *>(getParentModule());
@@ -306,12 +333,38 @@ void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
                     || (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
                             && radio->getTransmissionState()
                                     != IRadio::TRANSMISSION_STATE_TRANSMITTING)) {
-                if (val >= -180 && val <= 180)
-                    gain->setPhizero(val);
-                else if (val == 360)
+                if (std::isnan(nextValue))
+                    throw cRuntimeError("next value is nan");
+                if (nextValue >= -180 && nextValue <= 180)
+                    gain->setPhizero(nextValue);
+                else if (nextValue == 360)
                     gain->setPhizero(360);
+                nextValue = NaN;
+                pendingConfiguration = false;
             }
         }
+    }
+}
+
+
+void MassiveMIMOUHPA::setDirection(const double &val)
+{
+    auto radio =  check_and_cast<IRadio *>(getParentModule());
+    if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
+            && radio->getTransmissionState()
+                    == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
+        // pending
+        pendingConfiguration = true;
+        nextValue = val;
+        return;
+    }
+
+    nextValue = NaN;
+    if (val >= -180 && val <= 180)
+        gain->setPhizero(val);
+    else if (val == 360)
+        gain->setPhizero(360);
+    pendingConfiguration = false;
 }
 
 double MassiveMIMOUHPA::computeIntegral() {
@@ -322,7 +375,7 @@ double MassiveMIMOUHPA::computeIntegral() {
     limitX.setUpper(M_PI);
     limitY.setLower(0);
     limitY.setUpper(2 * M_PI);
-    return Simpson2D::Integral(getFunc, limitX, limitY, 1999);
+    return Simpson2D::Integral(getFunc, limitX, limitY, 1999, M, N);
 }
 
 

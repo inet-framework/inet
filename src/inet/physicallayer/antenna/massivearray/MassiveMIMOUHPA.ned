@@ -37,6 +37,7 @@ module MassiveMIMOUHPA extends AntennaBase
 
 
         @class(MassiveMIMOUHPA);
+        @signal[MassiveArrayConfigureChange];
         @signal[radioModeChangedSignal](type="long");
         @signal[receptionStateChangedSignal](type="long");
         @signal[transmissionStateChangedSignal](type="long");

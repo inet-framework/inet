@@ -65,12 +65,14 @@ class INET_API MassiveMIMOURPA : public MassiveArray
     Ptr<AntennaGain> gain;
   protected:
     bool pendingConfiguration = false;
+    double nextValue = NaN;
     virtual double computeIntegral();
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
 
   public:
+    virtual void setDirection(const double &angle) override;
     MassiveMIMOURPA();
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

@@ -39,6 +39,7 @@ module MassiveMIMOURPA extends AntennaBase
 
 
         @class(MassiveMIMOURPA);
+        @signal[MassiveArrayConfigureChange];
         @signal[radioModeChangedSignal](type="long");
         @signal[receptionStateChangedSignal](type="long");
         @signal[transmissionStateChangedSignal](type="long");

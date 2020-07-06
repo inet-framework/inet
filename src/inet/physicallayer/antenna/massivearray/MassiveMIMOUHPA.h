@@ -71,8 +71,12 @@ class INET_API MassiveMIMOUHPA : public MassiveArray
          double newConfigurtion = 0;
          W actualConsumption = W(0);
 
+         double nextValue = NaN;
   protected:
     virtual void initialize(int stage) override;
+    double computeIntegral();
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
 
   public:
     MassiveMIMOUHPA();
@@ -81,9 +85,7 @@ class INET_API MassiveMIMOUHPA : public MassiveArray
     }
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
-    double computeIntegral();
+    virtual void setDirection(const double &angle) override;
    // Consumption methods
 //   virtual W getPowerConsumption() const override {return actualConsumption;}
 /*   virtual W getPowerConsumption() const {return actualConsumption;}

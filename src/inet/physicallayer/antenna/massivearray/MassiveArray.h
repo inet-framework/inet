@@ -14,8 +14,8 @@ using std::cout;
 class INET_API MassiveArray : public AntennaBase, protected cListener
 {
   public:
-    static int M;
-    static int N;
+    int M = NaN;
+    int N = NaN;
   protected:
     class Simpson2D
     {
@@ -34,19 +34,25 @@ class INET_API MassiveArray : public AntennaBase, protected cListener
         typedef std::vector<Vec> Mat;
 
         static void initializeCoeff(Mat &coeff,int size);
-        static double Integral(double (*fun)(double,double), const Mat &coeff, limits xLimit, limits yLimits, int size);
-        static double Integral(double (*fun)(double,double), limits xLimit, limits yLimits,int);
+        static double Integral(double (*fun)(double,double, int, int), const Mat &coeff, limits xLimit, limits yLimits, int size, int M, int N);
+        static double Integral(double (*fun)(double,double, int, int), limits xLimit, limits yLimits,int, int M, int N);
         Mat simpsonCoef;
     };
   protected:
-    static double risInt;
+    typedef std::tuple<int,int> ConfigAntenna;
+
+    static std::map<int, double> risValuesUcpa;
+    static std::map<int, double> risValuesUhpa;
+    static std::map<ConfigAntenna, double> risValuesUrpa;
+    double risInt;
     bool pendingConfiguration = false;
     virtual void initialize(int stage) override;
     static simsignal_t MassiveArrayConfigureChange;
 
   public:
-    static int getM() {return M;}
-    static int getN() {return N;}
+    int getM() const {return M;}
+    int getN() const {return N;}
+    virtual void setDirection(const double &angle) = 0;
     MassiveArray();
     virtual Ptr<const IAntennaGain> getGain() const override = 0;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override = 0;
