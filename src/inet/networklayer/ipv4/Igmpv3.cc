@@ -98,12 +98,13 @@ void Igmpv3::initialize(int stage)
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 configureInterface(ie);
-                auto ipv4interfaceData = ie->getProtocolData<Ipv4InterfaceData>();
-                int n = ipv4interfaceData->getNumOfJoinedMulticastGroups();
-                for (int j = 0; j < n; j++) {
-                    auto groupAddress = ipv4interfaceData->getJoinedMulticastGroup(j);
-                    const auto& sourceList = ipv4interfaceData->getJoinedMulticastSources(j);
-                    multicastSourceListChanged(ie, groupAddress, sourceList);
+                if (auto ipv4interfaceData = ie->findProtocolData<Ipv4InterfaceData>()) {
+                    int n = ipv4interfaceData->getNumOfJoinedMulticastGroups();
+                    for (int j = 0; j < n; j++) {
+                        auto groupAddress = ipv4interfaceData->getJoinedMulticastGroup(j);
+                        const auto& sourceList = ipv4interfaceData->getJoinedMulticastSources(j);
+                        multicastSourceListChanged(ie, groupAddress, sourceList);
+                    }
                 }
             }
         }

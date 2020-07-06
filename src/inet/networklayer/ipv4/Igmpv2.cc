@@ -185,11 +185,12 @@ void Igmpv2::initialize(int stage)
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
-                auto ipv4interfaceData = ie->getProtocolData<Ipv4InterfaceData>();
-                int n = ipv4interfaceData->getNumOfJoinedMulticastGroups();
-                for (int j = 0; j < n; j++) {
-                    auto groupAddress = ipv4interfaceData->getJoinedMulticastGroup(j);
-                    multicastGroupJoined(ie, groupAddress);
+                if (auto ipv4interfaceData = ie->findProtocolData<Ipv4InterfaceData>()) {
+                    int n = ipv4interfaceData->getNumOfJoinedMulticastGroups();
+                    for (int j = 0; j < n; j++) {
+                        auto groupAddress = ipv4interfaceData->getJoinedMulticastGroup(j);
+                        multicastGroupJoined(ie, groupAddress);
+                    }
                 }
             }
         }
