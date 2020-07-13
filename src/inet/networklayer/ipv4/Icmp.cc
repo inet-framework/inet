@@ -45,7 +45,7 @@ void Icmp::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         registerService(Protocol::icmpv4, gate("transportIn"), gate("ipIn"));
         registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("transportOut"));
     }

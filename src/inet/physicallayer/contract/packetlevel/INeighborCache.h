@@ -38,7 +38,7 @@ class INET_API INeighborCache : public IPrintableObject
      * Sends the provided frame (using the radio medium) to all neighbors within
      * the given range.
      */
-    virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const = 0;
+    virtual void sendToNeighbors(IRadio *transmitter, const IWirelessSignal *signal, double range) const = 0;
 };
 
 } // namespace physicallayer

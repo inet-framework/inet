@@ -59,7 +59,7 @@ module Ieee80211Interface extends InterfaceEntry like IWirelessInterface
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers
-        input radioIn @labels(ISignal); // to receive signals
+        input radioIn @labels(IWirelessSignal); // to receive signals
     submodules:
         mib: Ieee80211Mib {
             parameters:

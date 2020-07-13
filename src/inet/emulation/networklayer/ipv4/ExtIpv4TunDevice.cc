@@ -52,12 +52,14 @@ void ExtIpv4TunDevice::initialize(int stage)
         device = par("device").stdstringValue();
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
-        registerService(Protocol::ipv4, nullptr, gate("lowerLayerIn"));
-        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), nullptr);
         openTun(device);
         numSent = numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        registerService(Protocol::ipv4, nullptr, gate("lowerLayerIn"));
+        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), nullptr);
     }
 }
 

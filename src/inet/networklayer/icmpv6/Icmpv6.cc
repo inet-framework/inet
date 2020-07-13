@@ -42,7 +42,7 @@ void Icmpv6::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(getContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

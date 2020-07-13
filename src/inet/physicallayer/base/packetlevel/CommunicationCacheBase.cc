@@ -279,12 +279,12 @@ void CommunicationCacheBase::removeCachedInterferenceEndTime(const ITransmission
     getTransmissionCacheEntry(transmission)->interferenceEndTime = -1;
 }
 
-const ISignal *CommunicationCacheBase::getCachedSignal(const ITransmission *transmission)
+const IWirelessSignal *CommunicationCacheBase::getCachedSignal(const ITransmission *transmission)
 {
     return getTransmissionCacheEntry(transmission)->signal;
 }
 
-void CommunicationCacheBase::setCachedSignal(const ITransmission *transmission, const ISignal *signal)
+void CommunicationCacheBase::setCachedSignal(const ITransmission *transmission, const IWirelessSignal *signal)
 {
     getTransmissionCacheEntry(transmission)->signal = signal;
 }
@@ -503,13 +503,13 @@ void CommunicationCacheBase::removeCachedReceptionResult(const IRadio *receiver,
         cacheEntry->receptionResult = nullptr;
 }
 
-const ISignal *CommunicationCacheBase::getCachedSignal(const IRadio *receiver, const ITransmission *transmission)
+const IWirelessSignal *CommunicationCacheBase::getCachedSignal(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->signal : nullptr;
 }
 
-void CommunicationCacheBase::setCachedSignal(const IRadio *receiver, const ITransmission *transmission, const ISignal *signal)
+void CommunicationCacheBase::setCachedSignal(const IRadio *receiver, const ITransmission *transmission, const IWirelessSignal *signal)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)

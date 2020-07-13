@@ -50,6 +50,18 @@ namespace inet {
 Register_Abstract_Class(InterfaceEntryChangeDetails);
 Define_Module(InterfaceEntry);
 
+std::ostream& operator <<(std::ostream& o, InterfaceEntry::State s)
+{
+    switch (s) {
+        case InterfaceEntry::UP: o << "UP"; break;
+        case InterfaceEntry::DOWN: o << "DOWN"; break;
+        case InterfaceEntry::GOING_UP: o << "GOING_UP"; break;
+        case InterfaceEntry::GOING_DOWN: o << "GOING_DOWN"; break;
+        default: o << (int)s;
+    }
+    return o;
+}
+
 void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
 {
     // notify the containing InterfaceEntry that something changed
@@ -90,8 +102,18 @@ void InterfaceEntry::clearProtocolDataSet()
 
 void InterfaceEntry::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
+        WATCH(mtu);
+        WATCH(state);
+        WATCH(carrier);
+        WATCH(broadcast);
+        WATCH(multicast);
+        WATCH(pointToPoint);
+        WATCH(loopback);
+        WATCH(datarate);
+        WATCH(macAddr);
+    }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         if (hasPar("address")) {
             const char *address = par("address");

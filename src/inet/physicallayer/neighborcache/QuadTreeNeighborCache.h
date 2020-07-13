@@ -35,11 +35,11 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
       protected:
         RadioMedium *radioMedium;
         IRadio *transmitter;
-        const ISignal *signal;
+        const IWirelessSignal *signal;
 
       public:
         void visit(const cObject *radio) const override;
-        QuadTreeNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const ISignal *signal) :
+        QuadTreeNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IWirelessSignal *signal) :
             radioMedium(radioMedium), transmitter(transmitter), signal(signal) {}
     };
 
@@ -67,7 +67,7 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
-    virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const override;
+    virtual void sendToNeighbors(IRadio *transmitter, const IWirelessSignal *signal, double range) const override;
 };
 
 } // namespace physicallayer

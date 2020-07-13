@@ -38,11 +38,11 @@ void PhysicalLayerBase::handleLowerMessage(cMessage *message)
         handleLowerCommand(message);
     else {
         emit(packetReceivedFromLowerSignal, message);
-        handleSignal(check_and_cast<Signal *>(message));
+        handleSignal(check_and_cast<WirelessSignal *>(message));
     }
 }
 
-void PhysicalLayerBase::handleSignal(Signal *signal)
+void PhysicalLayerBase::handleSignal(WirelessSignal *signal)
 {
     throw cRuntimeError("Signal '%s' is not handled.", signal->getName());
 }

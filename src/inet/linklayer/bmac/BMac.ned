@@ -67,9 +67,6 @@ module BMac extends MacProtocolBase like IMacProtocol
 
         //should mac send and expect acknowledgments?
         bool useMACAcks = default(false);
-        // maximum number of frame retransmission
-        // only used when usage of MAC acks is enabled
-        int macMaxFrameRetries = default(3);
 
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 

@@ -13,15 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.contract;
+cplusplus {{
+#include "inet/physicallayer/common/packetlevel/WirelessSignal.h"
+}}
 
-//
-// Module interface for wireless network interfaces.
-//
-moduleinterface IWirelessInterface extends INetworkInterface
+import inet.physicallayer.common.packetlevel.Signal;
+
+namespace inet::physicallayer;
+
+class ITransmission { @existingClass; }
+class IArrival { @existingClass; }
+class IListening { @existingClass; }
+class IReception { @existingClass; }
+
+packet WirelessSignal extends Signal
 {
-    parameters:
-        @display("i=block/ifcard");
-    gates:
-        input radioIn @labels(IWirelessSignal); // to receive signals
+    @existingClass;
+    @descriptor(readonly);
+    const ITransmission *transmission;
+    const IArrival *arrival;
+    const IListening *listening;
+    const IReception *reception;
 }
+

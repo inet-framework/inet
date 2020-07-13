@@ -34,7 +34,7 @@ module Ieee802154NarrowbandInterface extends InterfaceEntry like IWirelessInterf
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(ISignal);
+        input radioIn @labels(IWirelessSignal);
     submodules:
         mac: Ieee802154NarrowbandMac {
             parameters:

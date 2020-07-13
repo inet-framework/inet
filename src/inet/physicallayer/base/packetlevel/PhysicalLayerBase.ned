@@ -29,6 +29,6 @@ simple PhysicalLayerBase extends LayeredProtocolBase
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down);
         output upperLayerOut @labels(ILinkLayerFrame/up);
-        input radioIn @labels(ISignal);
+        input radioIn @labels(IWirelessSignal);
 }
 
