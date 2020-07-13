@@ -24,7 +24,7 @@
 #include "inet/physicallayer/contract/packetlevel/IInterference.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "IWirelessSignal.h"
 #include "inet/physicallayer/contract/packetlevel/ISnir.h"
 
 namespace inet {
@@ -65,8 +65,8 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime) = 0;
     virtual void removeCachedInterferenceEndTime(const ITransmission *transmission) = 0;
 
-    virtual const ISignal *getCachedSignal(const ITransmission *transmission) = 0;
-    virtual void setCachedSignal(const ITransmission *transmission, const ISignal *signal) = 0;
+    virtual const IWirelessSignal *getCachedSignal(const ITransmission *transmission) = 0;
+    virtual void setCachedSignal(const ITransmission *transmission, const IWirelessSignal *signal) = 0;
     virtual void removeCachedSignal(const ITransmission *transmission) = 0;
     //@}
 
@@ -108,8 +108,8 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission, const IReceptionResult *receptionResult) = 0;
     virtual void removeCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const ISignal *getCachedSignal(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedSignal(const IRadio *receiver, const ITransmission *transmission, const ISignal *signal) = 0;
+    virtual const IWirelessSignal *getCachedSignal(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual void setCachedSignal(const IRadio *receiver, const ITransmission *transmission, const IWirelessSignal *signal) = 0;
     virtual void removeCachedSignal(const IRadio *receiver, const ITransmission *transmission) = 0;
     //@}
 };

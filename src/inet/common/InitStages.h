@@ -119,34 +119,39 @@ enum InitStages {
     INITSTAGE_STATIC_ROUTING = 7,
 
     /**
-     * Initialization of network layer protocols.
+     * Initialization of network layer protocols. (IPv4, IPv6, ...)
      */
     INITSTAGE_NETWORK_LAYER = 8,
 
     /**
+     * Initialization of network layer protocols over IP. (ICMP, IGMP, ...)
+     */
+    INITSTAGE_NETWORK_LAYER_PROTOCOLS = 9,
+
+    /**
      * Initialization of transport-layer protocols.
      */
-    INITSTAGE_TRANSPORT_LAYER = 9,
+    INITSTAGE_TRANSPORT_LAYER = 10,
 
     /**
      * Initialization of routing protocols.
      */
-    INITSTAGE_ROUTING_PROTOCOLS = 10,
+    INITSTAGE_ROUTING_PROTOCOLS = 11,
 
     /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 11,
+    INITSTAGE_APPLICATION_LAYER = 12,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 12,
+    INITSTAGE_LAST = 13,
 
     /**
      * The number of initialization stages.
      */
-    NUM_INIT_STAGES = 13,
+    NUM_INIT_STAGES = 14,
 };
 
 } // namespace inet

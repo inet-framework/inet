@@ -159,11 +159,6 @@ void Igmpv2::initialize(int stage)
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
-        cModule *host = getContainingNode(this);
-        host->subscribe(interfaceDeletedSignal, this);
-        host->subscribe(ipv4MulticastGroupJoinedSignal, this);
-        host->subscribe(ipv4MulticastGroupLeftSignal, this);
-
         externalRouter = false;
         enabled = par("enabled");
         robustness = par("robustnessVariable");
@@ -183,16 +178,33 @@ void Igmpv2::initialize(int stage)
         addWatches();
     }
     // TODO: INITSTAGE
-    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
+    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
-        host->subscribe(interfaceCreatedSignal, this);
         registerService(Protocol::igmp, nullptr, gate("ipIn"));
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
+        for (int i = 0; i < ift->getNumInterfaces(); ++i) {
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (ie->isMulticast()) {
+                if (auto ipv4interfaceData = ie->findProtocolData<Ipv4InterfaceData>()) {
+                    int n = ipv4interfaceData->getNumOfJoinedMulticastGroups();
+                    for (int j = 0; j < n; j++) {
+                        auto groupAddress = ipv4interfaceData->getJoinedMulticastGroup(j);
+                        multicastGroupJoined(ie, groupAddress);
+                    }
+                }
+            }
+        }
+
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())
                 configureInterface(ie);
         }
+
+        host->subscribe(interfaceCreatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(ipv4MulticastGroupJoinedSignal, this);
+        host->subscribe(ipv4MulticastGroupLeftSignal, this);
     }
 }
 

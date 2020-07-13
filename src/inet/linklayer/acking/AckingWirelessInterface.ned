@@ -51,7 +51,7 @@ module AckingWirelessInterface extends InterfaceEntry like IWirelessInterface
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(Signal);
+        input radioIn @labels(WirelessSignal);
     submodules:
         mac: AckingMac {
             parameters:

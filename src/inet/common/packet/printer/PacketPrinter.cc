@@ -153,7 +153,7 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
     for (auto cpacket = dynamic_cast<cPacket *>(message); cpacket != nullptr; cpacket = cpacket->getEncapsulatedPacket()) {
         if (false) {}
 #ifdef WITH_RADIO
-        else if (auto signal = dynamic_cast<inet::physicallayer::Signal *>(cpacket))
+        else if (auto signal = dynamic_cast<inet::physicallayer::WirelessSignal *>(cpacket))
             printSignal(signal, options, context);
 #endif // WITH_RADIO
         else if (auto packet = dynamic_cast<Packet *>(cpacket))
@@ -165,21 +165,21 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
 }
 
 #ifdef WITH_RADIO
-void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const
+void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::WirelessSignal *signal) const
 {
     Options options;
     options.enabledTags = getDefaultEnabledTags();
     printSignal(stream, signal, &options);
 }
 
-void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const
+void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::WirelessSignal *signal, const Options *options) const
 {
     Context context;
     printSignal(signal, options, context);
     printContext(stream, options, context);
 }
 
-void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const
+void PacketPrinter::printSignal(inet::physicallayer::WirelessSignal *signal, const Options *options, Context& context) const
 {
     context.infoColumn << signal->str();
 }

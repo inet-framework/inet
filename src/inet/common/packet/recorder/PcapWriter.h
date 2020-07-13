@@ -22,12 +22,10 @@
 #define __INET_PCAPWRITER_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/recorder/IPcapWriter.h"
+#include "inet/common/packet/recorder/PcapRecorder.h"
 
 namespace inet {
-
-// Foreign declarations:
-class Ipv4Header;
-class Ipv6Header;
 
 /**
  * Dumps packets into a PCAP file; see the "pcap-savefile" man page or
@@ -35,12 +33,17 @@ class Ipv6Header;
  * Note: The file is currently recorded in the "classic" format,
  * not in the "Next Generation" file format also on tcpdump.org.
  */
-class INET_API PcapWriter
+class INET_API PcapWriter : public IPcapWriter
 {
   protected:
     FILE *dumpfile = nullptr;    // pcap file
     unsigned int snaplen = 0;    // max. length of packets in pcap file
+    PcapLinkType network = LINKTYPE_INVALID;    // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html
     bool flush = false;
+    bool needHeader = true;
+
+  protected:
+    void writeHeader(PcapLinkType linkType);
 
   public:
     /**
@@ -58,28 +61,28 @@ class INET_API PcapWriter
      * is the length that packets will be truncated to. Throws an exception
      * if the file cannot be opened.
      */
-    void openPcap(const char *filename, unsigned int snaplen, uint32 network);
+    void open(const char *filename, unsigned int snaplen) override;
 
     /**
      * Returns true if the pcap file is currently open.
      */
-    bool isOpen() const { return dumpfile != nullptr; }
+    bool isOpen() const override { return dumpfile != nullptr; }
 
     /**
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writePacket(simtime_t time, const Packet *packet);
+    void writePacket(simtime_t time, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.
      */
-    void closePcap();
+    void close() override;
 
     /**
      * Force flushing of pcap dump.
      */
-    void setFlushParameter(bool doFlush) { flush = doFlush; };
+    void setFlush(bool flush) override { this->flush = flush; };
 };
 
 } // namespace inet

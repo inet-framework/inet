@@ -67,7 +67,7 @@ class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighbo
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
-    virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const override;
+    virtual void sendToNeighbors(IRadio *transmitter, const IWirelessSignal *signal, double range) const override;
 };
 
 } // namespace physicallayer

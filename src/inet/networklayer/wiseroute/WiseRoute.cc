@@ -117,7 +117,8 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         pkt->setSeqNum(floodSeqNumber);
         floodSeqNumber++;
         pkt->setIsFlood(1);
-        auto packet = new Packet("route-flood", ROUTE_FLOOD);
+        pkt->setHeaderKind(ROUTE_FLOOD);
+        auto packet = new Packet("route-flood");
         packet->insertAtBack(pkt);
         setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         sendDown(packet);
@@ -153,7 +154,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
     else {
         const cObject *pCtrlInfo = nullptr;
         // If the message is a route flood, update the routing table.
-        if (packet->getKind() == ROUTE_FLOOD)
+        if (wiseRouteHeader->getHeaderKind() == ROUTE_FLOOD)
             updateRouteTable(initialSrcAddr, srcAddr, rssi, ber);
 
         if (finalDestAddr == myNetwAddr || finalDestAddr.isBroadcast()) {
@@ -168,7 +169,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setSourceAddress(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
-                auto p = new Packet(packet->getName(), packet->getKind());
+                auto p = new Packet(packet->getName());
                 packet->popAtFront<WiseRouteHeader>();
                 p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->setPayloadLengthField(p->getDataLength());
@@ -181,7 +182,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
             else {
                 packetCopy = packet;
             }
-            if (packet->getKind() == DATA) {
+            if (wiseRouteHeader->getHeaderKind() == DATA) {
                 decapsulate(packetCopy);
                 sendUp(packetCopy);
                 nbDataPacketsReceived++;
@@ -197,7 +198,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setSourceAddress(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
-                auto p = new Packet(packet->getName(), packet->getKind());
+                auto p = new Packet(packet->getName());
                 packet->popAtFront<WiseRouteHeader>();
                 p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->setPayloadLengthField(p->getDataLength());
@@ -221,7 +222,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 if (nextHopMacAddr.isUnspecified())
                     throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalArp module.");
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
-                auto p = new Packet(packet->getName(), packet->getKind());
+                auto p = new Packet(packet->getName());
                 packet->popAtFront<WiseRouteHeader>();
                 p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->setPayloadLengthField(p->getDataLength());
@@ -289,8 +290,8 @@ void WiseRoute::handleUpperPacket(Packet *packet)
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalArp module.");
     }
     pkt->setPayloadLengthField(packet->getDataLength());
+    pkt->setHeaderKind(DATA);
     packet->insertAtFront(pkt);
-    packet->setKind(DATA);
     setDownControlInfo(packet, nextHopMacAddr);
     sendDown(packet);
     nbDataPacketsSent++;

@@ -33,7 +33,7 @@ module Ieee802154UwbIrInterface extends InterfaceEntry like IWirelessInterface
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(ISignal);
+        input radioIn @labels(IWirelessSignal);
     submodules:
         mac: AckingMac {
             parameters:

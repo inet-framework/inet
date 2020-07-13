@@ -30,6 +30,7 @@ simple PcapFilePacketConsumer extends PacketSinkBase like IPassivePacketSink
         string filename; // the PCAP file to be written
         int networkType; // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
         int snaplen = default(65535);  // maximum number of bytes to record per packet
+        bool outbound;  // direction flag
         bool alwaysFlush = default(false); // flush the PCAP file after each write to ensure that all packets are captured in case of a crash
         @class(PcapFilePacketConsumer);
         @signal[packetPushed](type=inet::Packet);

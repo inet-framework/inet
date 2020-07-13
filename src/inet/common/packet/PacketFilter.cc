@@ -25,6 +25,7 @@ void PacketFilter::setPattern(const char* packetPattern, const char* chunkPatter
 {
     packetMatchExpression.setPattern(packetPattern, false, true, true);
     chunkMatchExpression.setPattern(chunkPattern, false, true, true);
+    matchesAllChunks = !strcmp(chunkPattern, "*");
 }
 
 bool PacketFilter::matches(const cPacket *cpacket) const
@@ -34,8 +35,12 @@ bool PacketFilter::matches(const cPacket *cpacket) const
     if (!const_cast<PacketFilter *>(this)->packetMatchExpression.matches(&matchableObject))
         return false;
     else if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
-        PacketDissectorCallback callback(*this);
-        return callback.matches(packet);
+        if (matchesAllChunks)
+            return true;
+        else {
+            PacketDissectorCallback callback(*this);
+            return callback.matches(packet);
+        }
     }
     else
         return true;

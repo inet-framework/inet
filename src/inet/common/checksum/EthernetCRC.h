@@ -22,7 +22,7 @@ namespace inet {
 
 extern const uint32_t crc32_tab[];
 
-uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize);
+uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize, uint32_t crc = 0);
 
 } // namespace inet
 

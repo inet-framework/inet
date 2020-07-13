@@ -301,6 +301,8 @@ class INET_API InterfaceEntry : public cModule
     //@}
 };
 
+std::ostream& operator <<(std::ostream& o, InterfaceEntry::State);
+
 } // namespace inet
 
 #endif // ifndef __INET_INTERFACEENTRY_H

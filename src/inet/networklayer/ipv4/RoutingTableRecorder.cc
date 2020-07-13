@@ -125,11 +125,11 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
     // action, eventNo, simtime, moduleId, ifname, address
     ensureRoutingLogFileOpen();
     auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
-    fprintf(routingLogFile, "%s  %" PRId64 "  %s  %d  %s %s\n",
+    fprintf(routingLogFile, "%s  #%" PRId64 "  %ss  %s  %s %s\n",
             tag,
             getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),
-            host->getId(),
+            host->getFullPath().c_str(),
             ie->getInterfaceName(),
             (ipv4Data != nullptr ? ipv4Data->getIPAddress().str().c_str() : Ipv4Address().str().c_str())
             );
@@ -152,15 +152,17 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 
     // action, eventNo, simtime, moduleId, routerID, dest, dest netmask, nexthop
     ensureRoutingLogFileOpen();
-    fprintf(routingLogFile, "%s %" PRId64 "  %s  %d  %s  %s  %d  %s\n",
+    auto ie = route->getInterface();
+    fprintf(routingLogFile, "%s #%" PRId64 "  %ss  %s  %s  %s/%d  %s  %s\n",
             tag,
             getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),
-            host->getId(),
+            host->getFullPath().c_str(),
             (rt ? rt->getRouterIdAsGeneric().str().c_str() : "*"),
             route->getDestinationAsGeneric().str().c_str(),
             route->getPrefixLength(),
-            route->getNextHopAsGeneric().str().c_str()
+            route->getNextHopAsGeneric().str().c_str(),
+            (ie ? ie->getInterfaceName() : "*")
             );
     fflush(routingLogFile);
 }

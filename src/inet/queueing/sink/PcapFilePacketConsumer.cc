@@ -29,8 +29,18 @@ void PcapFilePacketConsumer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
-        pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
-        pcapWriter.openPcap(par("filename"), par("snaplen"), par("networkType"));
+        pcapWriter.setFlush(par("alwaysFlush"));
+        pcapWriter.open(par("filename"), par("snaplen"));
+        networkType = static_cast<PcapLinkType>(par("networkType").intValue());
+        const char *dirString = par("direction");
+        if (*dirString == 0)
+            direction = DIRECTION_UNDEFINED;
+        else if (!strcmp(dirString, "outbound"))
+            direction = DIRECTION_OUTBOUND;
+        else if (!strcmp(dirString, "inbound"))
+            direction = DIRECTION_INBOUND;
+        else
+            throw cRuntimeError("invalid direction parameter value: %s", dirString);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPushPacketSupport(inputGate);
@@ -41,7 +51,7 @@ void PcapFilePacketConsumer::initialize(int stage)
 
 void PcapFilePacketConsumer::finish()
 {
-    pcapWriter.closePcap();
+    pcapWriter.close();
 }
 
 void PcapFilePacketConsumer::pushPacket(Packet *packet, cGate *gate)
@@ -49,7 +59,7 @@ void PcapFilePacketConsumer::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     EV_INFO << "Writing packet " << packet->getName() << " to PCAP file." << endl;
     emit(packetPushedSignal, packet);
-    pcapWriter.writePacket(simTime(), packet);
+    pcapWriter.writePacket(simTime(), packet, direction, getContainingNicModule(this), networkType);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     delete packet;

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,39 +18,18 @@
 #ifndef __INET_SIGNAL_H
 #define __INET_SIGNAL_H
 
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API Signal : public cPacket, public ISignal
+class INET_API Signal : public cPacket
 {
-  protected:
-    const int transmissionId;
-    const ITransmission *transmission;
-    const IRadioMedium *radioMedium;
-    mutable const IRadio *receiver = nullptr;
-    mutable const IArrival *arrival = nullptr;
-    mutable const IListening *listening = nullptr;
-    mutable const IReception *reception = nullptr;
-
-  protected:
-    bool isDup() const { return transmission == nullptr; }
-
   public:
-    Signal(const ITransmission *transmission);
+    explicit Signal(const char *name=nullptr, short kind=0, int64_t bitLength=0);
     Signal(const Signal& other);
 
     virtual Signal *dup() const override { return new Signal(*this); }
-
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-
-    virtual const IRadio *getTransmitter() const;
-    virtual const IRadio *getReceiver() const;
-    virtual const ITransmission *getTransmission() const override;
-    virtual const IArrival *getArrival() const override;
-    virtual const IListening *getListening() const override;
-    virtual const IReception *getReception() const override;
 };
 
 } // namespace physicallayer

@@ -49,7 +49,7 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
         *.energySourceModule = default(absPath(energySourceModule));
         @display("i=block/ifcard");
     gates:
-        input radioIn @labels(ISignal); // to receive signals
+        input radioIn @labels(IWirelessSignal); // to receive signals
     submodules:
         mib: Ieee80211Mib {
             parameters:
