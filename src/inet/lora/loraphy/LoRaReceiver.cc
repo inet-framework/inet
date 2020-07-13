@@ -249,7 +249,7 @@ bool LoRaReceiver::computeIsReceptionSuccessful(const IListening *listening, con
     //we don't check the SINR level, it is done in collision checking by P_threshold level evaluation
 }
 
-const IListening *LoRaReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *LoRaReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord &startPosition, const Coord &endPosition) const
 {
     if(iAmGateway == false)
     {

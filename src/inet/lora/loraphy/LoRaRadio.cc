@@ -68,7 +68,7 @@ const ITransmission *LoRaRadio::getTransmissionInProgress() const
     if (!transmissionTimer->isScheduled())
         return nullptr;
     else
-        return static_cast<Signal *>(transmissionTimer->getContextPointer())->getTransmission();
+        return static_cast<WirelessSignal *>(transmissionTimer->getContextPointer())->getTransmission();
 }
 
 const ITransmission *LoRaRadio::getReceptionInProgress() const
@@ -76,7 +76,7 @@ const ITransmission *LoRaRadio::getReceptionInProgress() const
     if (receptionTimer == nullptr)
         return nullptr;
     else
-        return static_cast<Signal *>(receptionTimer->getControlInfo())->getTransmission();
+        return static_cast<WirelessSignal *>(receptionTimer->getControlInfo())->getTransmission();
 }
 
 IRadioSignal::SignalPart LoRaRadio::getTransmittedSignalPart() const
@@ -115,7 +115,7 @@ void LoRaRadio::handleMessageWhenUp(cMessage *message)
             delete message;
         }
         else
-            handleSignal(check_and_cast<Signal *>(message));
+            handleSignal(check_and_cast<WirelessSignal *>(message));
     }
     else
         throw cRuntimeError("Unknown arrival gate '%s'.", message->getArrivalGate()->getFullName());
@@ -216,7 +216,7 @@ void LoRaRadio::handleUpperPacket(Packet *packet)
     }
 }
 
-void LoRaRadio::handleSignal(Signal *radioFrame)
+void LoRaRadio::handleSignal(WirelessSignal *radioFrame)
 {
     auto receptionTimer = createReceptionTimer(radioFrame);
     if (separateReceptionParts)
@@ -325,7 +325,7 @@ void LoRaRadio::abortTransmission()
     updateTransceiverPart();*/
 }
 
-Signal *LoRaRadio::createSignal(Packet *packet) const
+WirelessSignal *LoRaRadio::createSignal(Packet *packet) const
 {
     return FlatRadioBase::createSignal(packet);
     /*
@@ -411,14 +411,14 @@ void LoRaRadio::endReception(cMessage *timer)
 {
 
     auto part = (IRadioSignal::SignalPart)timer->getKind();
-    auto signal = static_cast<Signal *>(timer->getControlInfo());
+    auto signal = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto arrival = signal->getArrival();
     auto reception = signal->getReception();
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime() == simTime()) {
         auto transmission = signal->getTransmission();
         // TODO: this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
-        EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
         decapsulate(macFrame);
         if (isReceptionSuccessful)
@@ -431,7 +431,7 @@ void LoRaRadio::endReception(cMessage *timer)
         emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
     }
     else
-        EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
     delete timer;

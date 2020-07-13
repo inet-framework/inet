@@ -61,7 +61,7 @@ class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, pu
     virtual void handleLowerCommand(cMessage *command) override;
     virtual void handleUpperPacket(Packet *packet) override;
     //virtual void handleLowerPacket(RadioFrame *packet) override;
-    virtual void handleSignal(Signal *signal) override;
+    virtual void handleSignal(WirelessSignal *signal) override;
     //virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     //virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     //virtual void handleNodeCrash() override;
@@ -76,7 +76,7 @@ class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, pu
     virtual void endTransmission() override;
     virtual void abortTransmission() override;
 
-    virtual Signal *createSignal(Packet *packet) const override;
+    virtual WirelessSignal *createSignal(Packet *packet) const override;
 
     virtual void startReception(cMessage *timer, IRadioSignal::SignalPart part) override;
     virtual void continueReception(cMessage *timer) override;

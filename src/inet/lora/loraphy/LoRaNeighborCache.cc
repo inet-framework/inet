@@ -60,7 +60,7 @@ std::ostream& LoRaNeighborCache::printToStream(std::ostream& stream, int level) 
     return stream;
 }
 
-void LoRaNeighborCache::sendToNeighbors(IRadio *transmitter, const ISignal *frame, double range) const
+void LoRaNeighborCache::sendToNeighbors(IRadio *transmitter, const IWirelessSignal *frame, double range) const
 {
     EV << "LoRaMedium->LoRaNeighborCache sendToNeighbors" << endl;
     if (this->range < range)

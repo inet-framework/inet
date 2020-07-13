@@ -38,7 +38,7 @@ protected:
     virtual void finish() override;
     virtual void handleSelfMessage(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
-    void handleSignal(Signal *radioFrame) override;
+    void handleSignal(WirelessSignal *radioFrame) override;
 
     bool iAmTransmiting;
     virtual bool isTransmissionTimer(const cMessage *message) const;

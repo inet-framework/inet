@@ -18,6 +18,7 @@
 #define LORAPHY_LORANEIGHBORCACHE_H_
 
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+
 #include <set>
 #include <vector>
 #include "inet/lora/loraphy/LoRaMedium.h"
@@ -68,7 +69,7 @@ class INET_API LoRaNeighborCache : public cSimpleModule, public INeighborCache
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
-    virtual void sendToNeighbors(IRadio *transmitter, const ISignal *frame, double range) const override;
+    virtual void sendToNeighbors(IRadio *transmitter, const IWirelessSignal *frame, double range) const override;
 };
 
 } // namespace physicallayer
