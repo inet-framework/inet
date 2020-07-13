@@ -221,7 +221,7 @@ network ParSimNetworkBackbone
             @display("p=130,285");
         }
         router2: Router {
-            @display("p=229,281");
+            @display("p=221.34,271.32");
         }
         host5: WirelessHost {
             @display("p=585,45");
@@ -266,7 +266,7 @@ network ParSimNetworkBackbone
             @display("p=371,112");
         }
         router4: Router {
-            @display("p=377,290");
+            @display("p=370.26,271.32");
         }
     connections:
         host1.ethg++ <--> Ethernet100 <--> switch1.ethg++;
