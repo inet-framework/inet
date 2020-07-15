@@ -49,7 +49,7 @@ void Ipv4NodeConfigurator::initialize(int stage)
         if (!networkConfiguratorPath[0])
             networkConfigurator = nullptr;
         else {
-            cModule *module = getModuleByPath(networkConfiguratorPath);
+            cModule *module = findModuleByPath(networkConfiguratorPath);
             if (!module)
                 throw cRuntimeError("Configurator module '%s' not found (check the 'networkConfiguratorModule' parameter)", networkConfiguratorPath);
             networkConfigurator = check_and_cast<Ipv4NetworkConfigurator *>(module);

@@ -29,7 +29,7 @@ void PhysicalEnvironmentVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        physicalEnvironment = dynamic_cast<IPhysicalEnvironment *>(getModuleByPath(par("physicalEnvironmentModule")));
+        physicalEnvironment = dynamic_cast<IPhysicalEnvironment *>(findModuleByPath(par("physicalEnvironmentModule")));
         displayObjects = par("displayObjects");
     }
 }

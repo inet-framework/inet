@@ -70,7 +70,7 @@ T *findModuleFromPar(cPar& par, const cModule *from, bool required)
 {
     const char *path = par;
     if (path && *path) {
-        cModule *mod = from->getModuleByPath(path);
+        cModule *mod = from->findModuleByPath(path);
         if (!mod) {
             if (required)
                 throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
@@ -98,7 +98,7 @@ template<typename T>
 T *getModuleFromPar(cPar& par, const cModule *from, bool required)
 {
     const char *path = par;
-    cModule *mod = from->getModuleByPath(path);
+    cModule *mod = from->findModuleByPath(path);
     if (!mod) {
         if (required)
             throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());

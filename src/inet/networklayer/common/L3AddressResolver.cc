@@ -413,7 +413,7 @@ bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *
     else {
         // find address in the configurator's notebook
         // TODO: how do we know where is the configurator? get the path from a NED parameter?
-        L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(getSimulation()->getModuleByPath("configurator"));
+        L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(getSimulation()->findModuleByPath("configurator"));
         if (configurator)
             return configurator->getInterfaceIpv4Address(ret, ie, netmask);
     }
@@ -480,7 +480,7 @@ IInterfaceTable *L3AddressResolver::findInterfaceTableOf(cModule *host)
 IIpv4RoutingTable *L3AddressResolver::findIpv4RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv4
-    return dynamic_cast<IIpv4RoutingTable *>(host->getModuleByPath(".ipv4.routingTable"));
+    return dynamic_cast<IIpv4RoutingTable *>(host->findModuleByPath(".ipv4.routingTable"));
 #else // ifdef WITH_IPv4
     return nullptr;
 #endif // ifdef WITH_IPv4
@@ -489,7 +489,7 @@ IIpv4RoutingTable *L3AddressResolver::findIpv4RoutingTableOf(cModule *host)
 Ipv6RoutingTable *L3AddressResolver::findIpv6RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv6
-    return dynamic_cast<Ipv6RoutingTable *>(host->getModuleByPath(".ipv6.routingTable"));
+    return dynamic_cast<Ipv6RoutingTable *>(host->findModuleByPath(".ipv6.routingTable"));
 #else // ifdef WITH_IPv6
     return nullptr;
 #endif // ifdef WITH_IPv6
@@ -498,7 +498,7 @@ Ipv6RoutingTable *L3AddressResolver::findIpv6RoutingTableOf(cModule *host)
 NextHopRoutingTable *L3AddressResolver::findNextHopRoutingTableOf(cModule *host)
 {
 #ifdef WITH_NEXTHOP
-    return dynamic_cast<NextHopRoutingTable *>(host->getModuleByPath(".generic.routingTable"));
+    return dynamic_cast<NextHopRoutingTable *>(host->findModuleByPath(".generic.routingTable"));
 #else // ifdef WITH_NEXTHOP
     return nullptr;
 #endif // ifdef WITH_NEXTHOP

@@ -94,7 +94,7 @@ void RadioMedium::initialize(int stage)
         mediumLimitCache = check_and_cast<IMediumLimitCache *>(getSubmodule("mediumLimitCache"));
         neighborCache = dynamic_cast<INeighborCache *>(getSubmodule("neighborCache"));
         communicationCache = check_and_cast<ICommunicationCache *>(getSubmodule("communicationCache"));
-        physicalEnvironment = dynamic_cast<physicalenvironment::IPhysicalEnvironment *>(getModuleByPath(par("physicalEnvironmentModule")));
+        physicalEnvironment = dynamic_cast<physicalenvironment::IPhysicalEnvironment *>(findModuleByPath(par("physicalEnvironmentModule")));
         material = physicalEnvironment != nullptr ? physicalEnvironment->getMaterialRegistry()->getMaterial("air") : nullptr;
         const char *rangeFilterString = par("rangeFilter");
         if (!strcmp(rangeFilterString, ""))
