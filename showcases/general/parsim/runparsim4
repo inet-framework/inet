@@ -1,9 +1,4 @@
 #! /bin/sh
-echo
-echo '*** Distributed execution of the Closed Queueing Network ***'
-echo 'IMPORTANT: If you'"'"'re running CQN under the GUI, you'"'"'ll have to click [Run]'
-echo 'in all three windows to start the simulation. See Readme.txt for more info.'
-echo
 
 rm -rf comm
 mkdir comm
@@ -14,7 +9,6 @@ if test "$HOSTNAME" = ""; then
   export HOSTNAME=`hostname`
 fi
 
-#export NEDPATH=..
 inet -p0 $* &
 inet -p1 $* &
 inet -p2 $* &
