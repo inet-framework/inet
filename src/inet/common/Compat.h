@@ -33,6 +33,10 @@ namespace inet {
 
 #  define EVSTREAM                      EV
 
+#if OMNETPP_BUILDNUM < 1502
+#define findModuleByPath(x)    getModuleByPath(x)
+#endif
+
 #ifdef _MSC_VER
 // complementary error function, not in MSVC
 double INET_API erfc(double x);
