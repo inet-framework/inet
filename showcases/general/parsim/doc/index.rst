@@ -32,12 +32,12 @@ the goals of parallel simulations
 
 Simulation models can take advantage of parallel execution to speed up large simulations, using OMNeT++'s built-in parallel simulation support.
 
-This showcase demonstrates parallel simulation with an example network. In the network, different LANs are simulated with different CPU cores.
+This showcase demonstrates parallel simulation with an example network. Different LANs in the network are simulated with different CPU cores.
 
 About Parallel Simulation in OMNeT++
 ------------------------------------
 
-Any simulation model can be parallelized. To parallelize a simulation, the model is partitioned into several logical processes; each partition contains some of the modules of the simulation, and each process will be run on a different CPU core (on the same machine or another one), and each process will maintain its own simulation time.
+Any simulation model can be parallelized, no additional C++ code is needed. To parallelize a simulation, the model is partitioned into several logical processes; each partition contains some of the modules of the simulation, each process will be run on a different CPU core (on the same machine or another one), and each process will maintain its own simulation time.
 
 .. The logical partitions can be run on different CPUs on the same machine or on another machine.
 
@@ -57,11 +57,11 @@ The main limitation in partitioning is that only messages can be passed between 
 
 .. because an event in one of partitions might affect the trajectory of the simulation in another.
 
-An event in one of the partitions might affect the trajectory of the simulation in another. A partition might receive a message from another partition in its past, i.e. the message might arrive at a partition but the simulation in that partition might have already advanced beyond the message's arrival time. To preserve causality of events, this behavior is prevented; partitions are not allowed to advance too far ahead of the others in simulation time. To this end, partitions have to be synchornized by sending each other sync messages, which contain the current simulation time of the partition and how far other partitions can safely advance in simulation time, called lookahead.
+An event in one of the partitions might affect the trajectory of the simulation in another. A partition might receive a message from another partition in its past, i.e. the message might arrive at a partition but the simulation time in that partition might have already advanced beyond the message's arrival time. To preserve causality of events, this behavior is prevented; partitions are not allowed to advance too far ahead of the others in simulation time. To this end, partitions have to be synchornized by sending each other sync messages, which contain the current simulation time of the partition and how far other partitions can safely advance in simulation time, called lookahead.
 
-Currently, the lookahead is based on the delay of the wired link between partitions.
+Currently, the lookahead is based on the delay of the wired links between partitions.
 
-.. note:: Lookahead could be based on other metrics, TODO it can be implemented refer to the manual
+.. .. note:: Lookahead could be based on other metrics, TODO it can be implemented refer to the manual
 
 The logical processes can send sync messages to each other using either the Message Passing Interface (MPI), or named pipes.
 MPI needs installation, but the processes can be run on different computers; named pipes require no installation, but processes can only be run on the same machine.
