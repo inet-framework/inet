@@ -46,7 +46,7 @@ Any simulation model can be parallelized. To parallelize a simulation, the model
 
 .. **TODO** each partition/process has its own simulation time
 
-To parallelize/partition a simulation model, the modules in the network are assigned to one of the partitions.
+To partition a simulation model, all modules in the network are assigned to one of the partitions.
 The main limitation in partitioning is that only messages can be passed between partitions, i.e. no direct sends or method calls. Thus global modules, such as network configurators, radio medium and visualizer modules need to be included multiple times in the network, one for each partition that needs them.
 
 .. Thus global modules, such as network configurators, radio medium and visualizer modules multiple instances of need to be included
@@ -57,9 +57,9 @@ The main limitation in partitioning is that only messages can be passed between 
 
 .. because an event in one of partitions might affect the trajectory of the simulation in another.
 
-An event in one of the partitions might affect the trajectory of the simulation in another. A partition might receive a message in its past, i.e. the message might arrive at a partition but the simulation in that partition might have already advanced beyond the message's arrival time. To preserve causality of events, this behavior is prevented; partitions are not allowed to advance too far ahead of the others in simulation time. To this end, partitions have to be synchornized by sending each other sync messages, which contain the current simulation time of the partition and how far other partitions can safely advance in simulation time, called lookahead.
+An event in one of the partitions might affect the trajectory of the simulation in another. A partition might receive a message from another partition in its past, i.e. the message might arrive at a partition but the simulation in that partition might have already advanced beyond the message's arrival time. To preserve causality of events, this behavior is prevented; partitions are not allowed to advance too far ahead of the others in simulation time. To this end, partitions have to be synchornized by sending each other sync messages, which contain the current simulation time of the partition and how far other partitions can safely advance in simulation time, called lookahead.
 
-Currently, the lookahead is based on the delay of the wired link between partitions
+Currently, the lookahead is based on the delay of the wired link between partitions.
 
 .. note:: Lookahead could be based on other metrics, TODO it can be implemented refer to the manual
 
@@ -156,7 +156,7 @@ The Network and ini configuration
 
 The example simulation features a mixed wired/wireless network with several LANs and a backbone of routers:
 
-.. figure:: media/Network.png
+.. figure:: media/Network2.png
    :align: center
    :width: 100%
 
