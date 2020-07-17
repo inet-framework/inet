@@ -6,33 +6,33 @@ Parallel Simulation
 Goals
 -----
 
-so
+.. so
 
-- parallel simulation is running parts of a simulation model in one process/cpu and others on others
-- so its about instead of running the simulation in one process, it can be run in multiple processes in a parallel way
-- a process simulates part of the model, i.e. some of the modules
-- it is useful because by parallelizing a simulation it can run faster
-- so the model is divided into logical partitions
-- each module of the network belongs to one of the partitions
-- each logical partition maintains its own simulation time
-- the key is to somehow preserve causality
-- that is, a message might arrive at a partition from another one, but the other might have advanced its simulation time by then
-- to preserve casuality, simulation time cannot advance too far
-- for this, the processes need synchronization
-- currently, this is based on link delay
-- so we know that a message can arrive on a link, and a link has a certain delay
-- so we know that we can get ahead of the source partition in simulation time by the delay
-- the partitions send sync messages
-- this is the lookahead
+  - parallel simulation is running parts of a simulation model in one process/cpu and others on others
+  - so its about instead of running the simulation in one process, it can be run in multiple processes in a parallel way
+  - a process simulates part of the model, i.e. some of the modules
+  - it is useful because by parallelizing a simulation it can run faster
+  - so the model is divided into logical partitions
+  - each module of the network belongs to one of the partitions
+  - each logical partition maintains its own simulation time
+  - the key is to somehow preserve causality
+  - that is, a message might arrive at a partition from another one, but the other might have advanced its simulation time by then
+  - to preserve casuality, simulation time cannot advance too far
+  - for this, the processes need synchronization
+  - currently, this is based on link delay
+  - so we know that a message can arrive on a link, and a link has a certain delay
+  - so we know that we can get ahead of the source partition in simulation time by the delay
+  - the partitions send sync messages
+  - this is the lookahead
 
-so lookahead depends on link delay
-if the lookahead is too small, the partitions stop all the time
+  so lookahead depends on link delay
+  if the lookahead is too small, the partitions stop all the time
 
-the goals of parallel simulations
+  the goals of parallel simulations
 
 Simulation models can take advantage of parallel execution to speed up large simulations, using OMNeT++'s built-in parallel simulation support.
 
-This showcase demonstrates parallel simulation with an example network. Different LANs in the network are simulated with different CPU cores.
+This showcase demonstrates parallel simulation with an example simulation model. Different LANs in the network are simulated with different CPU cores.
 
 About Parallel Simulation in OMNeT++
 ------------------------------------
@@ -151,7 +151,7 @@ When using MPI, the ``mpiexec`` command can be used from the command line. The c
 The Model
 ---------
 
-The Network and ini configuration
+The Network and ini Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The example simulation features a mixed wired/wireless network with several LANs and a backbone of routers:
@@ -217,7 +217,7 @@ Because **TODO**:
 
 .. **TODO** radioMedium
 
-The two wireless LANs have their own radio medium modules/the radio medium modules in their partitions. The radio medium modules don't have the default name ``radioMedium``, so the module hosts and access points belong to needs to be specified:
+The two wireless LANs have radio medium modules in their partitions. The radio medium modules don't have the default name ``radioMedium``, so the module hosts and access points belong to needs to be specified:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: radioMedium1
@@ -289,7 +289,7 @@ The process for configuring addresses and routes per partition is the following:
 
 Now the configurators configure the modules in their own partitions.
 
-.. note:: The per-partition xml configuration files are inlcuded in the showcase's folder.
+.. note:: The per-partition xml configuration files are included in the showcase's folder.
 
 .. TODO example config
 
