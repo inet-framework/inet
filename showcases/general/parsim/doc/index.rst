@@ -34,6 +34,11 @@ Simulation models can take advantage of parallel execution to speed up large sim
 
 This showcase demonstrates parallel simulation with an example simulation model. Different LANs in the network are simulated with different CPU cores.
 
+| INET version: ``4.2``
+| Source files location: `inet/showcases/general/parsim <https://github.com/inet-framework/inet-showcases/tree/master/general/parsim>`__
+
+**TODO** inet 4.2? or is that 4.3? needs omnetpp-6.0?
+
 About Parallel Simulation in OMNeT++
 ------------------------------------
 
@@ -94,6 +99,8 @@ To enable parallel simulation, the ``parallel-simulation`` key needs to be set t
 Also, the number of partitions has to be specified with the ``parsim-num-partitions`` parameter.
 The ``parsim-communications-class`` key selects which communication method to use; either ``cNamedPipeCommunications`` or ``cMPICommunications``.
 
+**TODO** parsim-debug? or just link to the manual ?
+
 .. To run simulations in parallel, the modules need to be assigned to partitions. For example:
 
 Modules can be assigned to partitions by specifying their partition id. For example:
@@ -127,6 +134,8 @@ When using named pipes, the ``-p`` command line option selects which partition t
 .. It takes multiple commands **TODO**
 
 When using MPI, the ``mpiexec`` command can be used from the command line. The command takes the number of partitions with the ``-n`` command line option, followed by the executable to run (in this case ``inet``).
+
+For more information on parallel simulation, see the `Parallel Simulation section <https://doc.omnetpp.org/omnetpp/manual/#cha:parallel-exec>`_ in the OMNeT++ manual.
 
 .. **TODO** mpiexec
 
@@ -315,12 +324,12 @@ Running the Simulations
 
 Two shell scripts in the showcase's folder can be used to run all partitions of the simulation. The ``runparsim`` script uses the named pipes communication method:
 
-.. literalinclude:: ../runparsim4
+.. literalinclude:: ../runparsim
    :language: bash
 
 The ``runparsim-mpi`` script uses MPI:
 
-.. literalinclude:: ../runparsim-mpi4
+.. literalinclude:: ../runparsim-mpi
    :language: bash
 
 **TODO** does mpi need the parsim-num-partitions ?
@@ -364,3 +373,10 @@ The outputs of the four simulations are mixed, but the messages for successfully
 When the simulations are run in Qtenv, all modules are present in all Qtenv windows. However, Qtenv uses placeholder modules for those which are not in the partition the Qtenv instance is running. These placeholder modules are empty.
 
 However, one can observe the messages going between partitions in the Qtenv windows.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Network.ned <../Network.ned>`
+
+Discussion
+----------
+
+Use `this <https://github.com/inet-framework/inet-showcases/issues/TODO>`__ page in the GitHub issue tracker for commenting on this showcase.

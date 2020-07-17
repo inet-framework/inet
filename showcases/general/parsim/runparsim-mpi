@@ -5,4 +5,4 @@ if test "$HOSTNAME" = ""; then
   export HOSTNAME=`hostname`
 fi
 
-mpiexec -n 2 inet $* --parsim-communications-class=cMPICommunications
+mpiexec -n 4 inet $* --parsim-communications-class=cMPICommunications
