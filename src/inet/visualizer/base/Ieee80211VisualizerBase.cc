@@ -87,7 +87,7 @@ void Ieee80211VisualizerBase::subscribe()
 void Ieee80211VisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
     if (visualizationSubjectModule != nullptr) {
         visualizationSubjectModule->unsubscribe(l2AssociatedSignal, this);
         visualizationSubjectModule->unsubscribe(l2DisassociatedSignal, this);

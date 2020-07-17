@@ -63,19 +63,16 @@ INET_API cModule *findModuleUnderContainingNode(const cModule *from);
  * or type mismatch.
  */
 template<typename T>
-INET_API T *findModuleFromPar(cPar& par, const cModule *from, bool required = true);
+INET_API T *findModuleFromPar(cPar& par, const cModule *from);
 
 template<typename T>
-T *findModuleFromPar(cPar& par, const cModule *from, bool required)
+T *findModuleFromPar(cPar& par, const cModule *from)
 {
     const char *path = par;
     if (path && *path) {
         cModule *mod = from->findModuleByPath(path);
         if (!mod) {
-            if (required)
-                throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
-            else
-                return nullptr;
+            return nullptr;
         }
         T *m = dynamic_cast<T *>(mod);
         if (!m)
@@ -92,18 +89,15 @@ T *findModuleFromPar(cPar& par, const cModule *from, bool required)
  * or type mismatch.
  */
 template<typename T>
-INET_API T *getModuleFromPar(cPar& par, const cModule *from, bool required = true);
+INET_API T *getModuleFromPar(cPar& par, const cModule *from);
 
 template<typename T>
-T *getModuleFromPar(cPar& par, const cModule *from, bool required)
+T *getModuleFromPar(cPar& par, const cModule *from)
 {
     const char *path = par;
     cModule *mod = from->findModuleByPath(path);
     if (!mod) {
-        if (required)
-            throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
-        else
-            return nullptr;
+        throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
     }
     T *m = dynamic_cast<T *>(mod);
     if (!m)

@@ -35,7 +35,7 @@ Define_Module(OsgEarthGround);
 
 void OsgEarthGround::initialize()
 {
-    auto sceneVisualizer = getModuleFromPar<SceneOsgEarthVisualizer>(par("osgEarthSceneVisualizerModule"), this, true);
+    auto sceneVisualizer = getModuleFromPar<SceneOsgEarthVisualizer>(par("osgEarthSceneVisualizerModule"), this);
     map = sceneVisualizer->getMapNode()->getMap();
     elevationQuery = new osgEarth::ElevationQuery(map);
     coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);

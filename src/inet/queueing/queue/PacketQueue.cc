@@ -37,7 +37,7 @@ void PacketQueue::initialize(int stage)
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
-        buffer = getModuleFromPar<IPacketBuffer>(par("bufferModule"), this, false);
+        buffer = findModuleFromPar<IPacketBuffer>(par("bufferModule"), this);
         packetComparatorFunction = createComparatorFunction(par("comparatorClass"));
         if (packetComparatorFunction != nullptr)
             queue.setup(packetComparatorFunction);

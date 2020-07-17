@@ -45,7 +45,7 @@ Box SceneVisualizerBase::getSceneBounds()
 {
     Coord min;
     Coord max;
-    auto physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, false);
+    auto physicalEnvironment = findModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
     if (physicalEnvironment == nullptr) {
         auto displayString = visualizationTargetModule->getDisplayString();
         auto width = atof(displayString.getTagArg("bgb", 0));

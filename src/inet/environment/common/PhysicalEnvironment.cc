@@ -52,7 +52,7 @@ void PhysicalEnvironment::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
+        coordinateSystem = findModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
         objectCache = dynamic_cast<IObjectCache *>(getSubmodule("objectCache"));
         ground = dynamic_cast<IGround *>(getSubmodule("ground"));
         temperature = K(par("temperature"));

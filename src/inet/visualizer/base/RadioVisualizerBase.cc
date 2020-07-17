@@ -99,7 +99,7 @@ void RadioVisualizerBase::subscribe()
 void RadioVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
     if (visualizationSubjectModule != nullptr) {
         visualizationSubjectModule->unsubscribe(IRadio::radioModeChangedSignal, this);
         visualizationSubjectModule->unsubscribe(IRadio::receptionStateChangedSignal, this);
