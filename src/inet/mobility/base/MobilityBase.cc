@@ -137,7 +137,7 @@ void MobilityBase::initializePosition()
 void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
-    auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
+    auto coordinateSystem = findModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
     if (subjectModule != nullptr && hasPar("initFromDisplayString") && par("initFromDisplayString")) {
         const char *s = subjectModule->getDisplayString().getTagArg("p", 2);
         if (s && *s)

@@ -92,7 +92,7 @@ void MobilityVisualizerBase::subscribe()
 void MobilityVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
     if (visualizationSubjectModule != nullptr) {
         visualizationSubjectModule->unsubscribe(IMobility::mobilityStateChangedSignal, this);
         visualizationSubjectModule->unsubscribe(PRE_MODEL_CHANGE, this);

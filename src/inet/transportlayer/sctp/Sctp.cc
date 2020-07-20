@@ -119,13 +119,13 @@ void Sctp::initialize(int stage)
         registerProtocol(Protocol::sctp, gate("ipOut"), gate("appOut"));
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
-            auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
+            auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr) {
                 ipv4->registerHook(0, &crcInsertion);
             }
 #endif
 #ifdef WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ipv6"));
+            auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
                 ipv6->registerHook(0, &crcInsertion);
 #endif
@@ -133,12 +133,12 @@ void Sctp::initialize(int stage)
         if (par("udpEncapsEnabled")) {
             EV_INFO << "udpEncapsEnabled" << endl;
 #ifdef WITH_IPv4
-            auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
+            auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
                 ipv4->registerHook(0, &udpHook);
 #endif
 #ifdef WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ipv6"));
+            auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
                 ipv6->registerHook(0, &udpHook);
 #endif

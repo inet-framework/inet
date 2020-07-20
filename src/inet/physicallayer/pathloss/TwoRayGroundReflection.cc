@@ -30,7 +30,7 @@ Define_Module(TwoRayGroundReflection);
 void TwoRayGroundReflection::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, true);
+        physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
     }
 }
 

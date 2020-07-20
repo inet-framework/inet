@@ -36,7 +36,7 @@ using namespace inet::physicallayer;
 MediumVisualizerBase::~MediumVisualizerBase()
 {
     // NOTE: lookup the medium module again because it may have been deleted first
-    auto radioMediumModule = getModuleFromPar<cModule>(par("mediumModule"), this, false);
+    auto radioMediumModule = findModuleFromPar<cModule>(par("mediumModule"), this);
     if (radioMediumModule != nullptr) {
         radioMediumModule->unsubscribe(IRadioMedium::radioAddedSignal, this);
         radioMediumModule->unsubscribe(IRadioMedium::radioRemovedSignal, this);
@@ -140,7 +140,7 @@ void MediumVisualizerBase::initialize(int stage)
         spectrogramPlacementHint = parsePlacement(par("spectrogramPlacementHint"));
         spectrogramPlacementPriority = par("spectrogramPlacementPriority");
         mediumPowerDensityFunction = makeShared<SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
-        radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
+        radioMedium = findModuleFromPar<IRadioMedium>(par("mediumModule"), this);
         if (radioMedium != nullptr) {
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
             radioMediumModule->subscribe(IRadioMedium::radioAddedSignal, this);

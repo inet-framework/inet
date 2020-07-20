@@ -27,7 +27,7 @@ void AttachedMobility::initialize(int stage)
     MobilityBase::initialize(stage);
     EV_TRACE << "initializing AttachedMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        mobility = getModuleFromPar<IMobility>(par("mobilityModule"), this, true);
+        mobility = getModuleFromPar<IMobility>(par("mobilityModule"), this);
         positionOffset.x = par("offsetX");
         positionOffset.y = par("offsetY");
         positionOffset.z = par("offsetZ");

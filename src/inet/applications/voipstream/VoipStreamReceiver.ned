@@ -51,7 +51,7 @@ simple VoipStreamReceiver like IApp
         @statistic[lostPackets](title="lost packets"; interpolationmode=none; record=vector,stats);
         @statistic[packetHasVoice](title="voice or silence packet"; record=mean,vector; interpolationmode=none);
         @statistic[delay](title="delay"; unit=s; record=vector,histogram; interpolationmode=none);
-        @statistic[numActiveSessions](title="number of active sessions"; source="sum(connState)"; record=max,timeavg,vector; interpolationmode=sample-hold; );
+        @statistic[numActiveSessions](title="number of active sessions"; source=warmup(sum(connState)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
         @statistic[numSessions](title="total number of sessions"; source="sum(connState+1)/2"; record=last);
         @display("i=block/arrival");
     gates:

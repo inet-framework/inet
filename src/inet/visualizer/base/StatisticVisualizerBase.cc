@@ -114,7 +114,7 @@ void StatisticVisualizerBase::subscribe()
 void StatisticVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
     if (visualizationSubjectModule != nullptr) {
         if (*signalName != '\0')
             visualizationSubjectModule->unsubscribe(registerSignal(signalName), this);

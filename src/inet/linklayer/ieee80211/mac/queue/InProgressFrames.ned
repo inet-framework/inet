@@ -28,6 +28,6 @@ simple InProgressFrames
         @signal[packetEnqueued](type=inet::Packet);
         @signal[packetDequeued](type=inet::Packet);
         @statistic[queueingTime](title="queueing times"; source=queueingTime(packetDequeued); record=histogram,vector; interpolationmode=none);
-        @statistic[queueLength](title="queue length"; source=count(packetEnqueued) - count(packetDequeued); record=max,timeavg,vector; interpolationmode=sample-hold);
+        @statistic[queueLength](title="queue length"; source=warmup(count(packetEnqueued) - count(packetDequeued)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
 }
 
