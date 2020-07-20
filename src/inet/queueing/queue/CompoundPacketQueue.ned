@@ -41,5 +41,5 @@ module CompoundPacketQueue extends PacketQueueBase like IPacketQueue
         @statistic[packetRemoved](title="packets removed"; source=localSignal(packetRemoved); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packets dropped: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPopped); record=histogram,vector; unit=s; interpolationmode=none);
-        @statistic[queueLength](title="queue length"; source=count(localSignal(packetPushed)) - count(localSignal(packetPopped)) - count(localSignal(packetRemoved)) - count(packetDropped); record=max,timeavg,vector; interpolationmode=sample-hold);
+        @statistic[queueLength](title="queue length"; source=warmup(count(localSignal(packetPushed)) - count(localSignal(packetPopped)) - count(localSignal(packetRemoved)) - count(packetDropped)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
 }
