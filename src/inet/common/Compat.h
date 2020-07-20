@@ -33,7 +33,7 @@ namespace inet {
 
 #  define EVSTREAM                      EV
 
-#if OMNETPP_BUILDNUM < 1502
+#if OMNETPP_BUILDNUM < 1503
 #define findModuleByPath(x)    getModuleByPath(x)
 #endif
 
