@@ -35,11 +35,12 @@ Simulation models can take advantage of parallel execution to speed up large sim
 This showcase demonstrates parallel simulation with an example simulation model. Different LANs in the network are simulated with different CPU cores.
 
 | INET version: ``4.3``
+| OMNeT++ version: ``6.0``
 | Source files location: `inet/showcases/general/parsim <https://github.com/inet-framework/inet-showcases/tree/master/general/parsim>`__
 
 .. **TODO** inet 4.2? or is that 4.3? needs omnetpp-6.0?
 
-**TODO** omnet 6.0
+.. **TODO** omnet 6.0
 
 About Parallel Simulation in OMNeT++
 ------------------------------------
