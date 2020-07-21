@@ -81,9 +81,9 @@ void TokenBasedServer::handleCanPushPacketChanged(cGate *gate)
     Enter_Method("handleCanPushPacketChanged");
 }
 
-void TokenBasedServer::handleCanPullPacket(cGate *gate)
+void TokenBasedServer::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     processPackets();
     updateDisplayString();
 }

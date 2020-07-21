@@ -149,11 +149,11 @@ void PacketDestreamer::handlePullPacketProcessed(Packet *packet, cGate *gate, bo
         collector->handlePullPacketProcessed(packet, gate, successful);
 }
 
-void PacketDestreamer::handleCanPullPacket(cGate *gate)
+void PacketDestreamer::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
 } // namespace inet

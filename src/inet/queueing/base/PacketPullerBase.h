@@ -53,7 +53,7 @@ class INET_API PacketPullerBase : public PacketProcessorBase, public virtual IPa
     virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
     virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { return b(0); }
 
-    virtual void handleCanPullPacket(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 

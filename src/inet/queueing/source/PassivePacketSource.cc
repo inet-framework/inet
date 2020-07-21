@@ -33,7 +33,7 @@ void PassivePacketSource::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (collector != nullptr)
-            collector->handleCanPullPacket(outputGate->getPathEndGate());
+            collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
     }
 }
 
@@ -41,7 +41,7 @@ void PassivePacketSource::handleMessage(cMessage *message)
 {
     if (message == providingTimer) {
         if (collector != nullptr)
-            collector->handleCanPullPacket(outputGate->getPathEndGate());
+            collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
     }
     else
         throw cRuntimeError("Unknown message");

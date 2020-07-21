@@ -110,7 +110,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     }
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
 Packet *PacketQueue::pullPacket(cGate *gate)

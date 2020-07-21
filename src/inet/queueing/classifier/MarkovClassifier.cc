@@ -61,7 +61,7 @@ void MarkovClassifier::initialize(int stage)
             checkPacketOperationSupport(outputGates[i]);
         checkPacketOperationSupport(inputGate);
         if (collectors[state] != nullptr)
-            collectors[state]->handleCanPullPacket(outputGates[state]->getPathEndGate());
+            collectors[state]->handleCanPullPacketChanged(outputGates[state]->getPathEndGate());
         scheduleWaitTimer();
     }
 }
@@ -80,7 +80,7 @@ void MarkovClassifier::handleMessage(cMessage *message)
             }
         }
         if (collectors[state] != nullptr)
-            collectors[state]->handleCanPullPacket(outputGates[state]->getPathEndGate());
+            collectors[state]->handleCanPullPacketChanged(outputGates[state]->getPathEndGate());
         scheduleWaitTimer();
     }
     else
@@ -134,11 +134,11 @@ const char *MarkovClassifier::resolveDirective(char directive) const
     return result.c_str();
 }
 
-void MarkovClassifier::handleCanPullPacket(cGate *gate)
+void MarkovClassifier::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (collectors[state] != nullptr)
-        collectors[state]->handleCanPullPacket(outputGates[state]->getPathEndGate());
+        collectors[state]->handleCanPullPacketChanged(outputGates[state]->getPathEndGate());
 }
 
 void MarkovClassifier::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)

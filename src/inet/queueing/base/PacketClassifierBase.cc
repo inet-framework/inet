@@ -193,12 +193,12 @@ Packet *PacketClassifierBase::pullPacket(cGate *gate)
     return packet;
 }
 
-void PacketClassifierBase::handleCanPullPacket(cGate *gate)
+void PacketClassifierBase::handleCanPullPacketChanged(cGate *gate)
 {
     auto packet = provider->canPullPacket(inputGate->getPathStartGate());
     if (packet != nullptr) {
         int index = callClassifyPacket(packet);
-        collectors[index]->handleCanPullPacket(outputGates[index]->getPathEndGate());
+        collectors[index]->handleCanPullPacketChanged(outputGates[index]->getPathEndGate());
     }
 }
 

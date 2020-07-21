@@ -41,15 +41,15 @@ class INET_API IActivePacketSink
     virtual IPassivePacketSource *getProvider(cGate *gate) = 0;
 
     /**
-     * Notifies about a state change that allows to pull some packet from the
-     * passive packet source at the given gate.
+     * Notifies about a change in the possibility of pulling some packet from
+     * the passive packet source at the given gate.
      *
      * This method is called, for example, when a new packet is inserted into
      * a queue. It allows the sink to pull a new packet from the queue.
      *
      * The gate parameter must be a valid gate of this module.
      */
-    virtual void handleCanPullPacket(cGate *gate) = 0;
+    virtual void handleCanPullPacketChanged(cGate *gate) = 0;
 
     /**
      * Notifies about the completion of the packet processing for a packet that

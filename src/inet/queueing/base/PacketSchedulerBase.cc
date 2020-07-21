@@ -187,11 +187,11 @@ b PacketSchedulerBase::getPullPacketProcessedLength(Packet *packet, cGate *gate)
     return provider->getPullPacketProcessedLength(packet, inputGate->getPathStartGate());
 }
 
-void PacketSchedulerBase::handleCanPullPacket(cGate *gate)
+void PacketSchedulerBase::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
 void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)

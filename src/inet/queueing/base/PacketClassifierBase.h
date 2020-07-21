@@ -85,7 +85,7 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
 
     virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("TODO"); }
 
-    virtual void handleCanPullPacket(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override { throw cRuntimeError("TODO"); }
 };
 

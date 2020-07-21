@@ -31,7 +31,7 @@ class INET_API InstantServer : public PacketServerBase
 
   public:
     virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handleCanPullPacket(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
 };
 
 } // namespace queueing

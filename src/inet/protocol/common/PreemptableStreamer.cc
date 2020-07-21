@@ -166,11 +166,11 @@ b PreemptableStreamer::getPullPacketProcessedLength(Packet *packet, cGate *gate)
     return streamedPacket->getTotalLength();
 }
 
-void PreemptableStreamer::handleCanPullPacket(cGate *gate)
+void PreemptableStreamer::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && !isStreaming())
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
 void PreemptableStreamer::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
