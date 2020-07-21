@@ -44,7 +44,7 @@ class INET_API PreemptingServer : public PacketServerBase
   public:
     virtual ~PreemptingServer() { delete streamedPacket; cancelAndDelete(timer); }
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
 
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

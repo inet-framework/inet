@@ -61,7 +61,7 @@ void MarkovScheduler::initialize(int stage)
             checkPacketOperationSupport(inputGates[i]);
         checkPacketOperationSupport(outputGate);
         if (producers[state] != nullptr)
-            producers[state]->handleCanPushPacket(inputGates[state]->getPathStartGate());
+            producers[state]->handleCanPushPacketChanged(inputGates[state]->getPathStartGate());
         scheduleWaitTimer();
     }
 }
@@ -80,7 +80,7 @@ void MarkovScheduler::handleMessage(cMessage *message)
             }
         }
         if (producers[state] != nullptr)
-            producers[state]->handleCanPushPacket(inputGates[state]->getPathStartGate());
+            producers[state]->handleCanPushPacketChanged(inputGates[state]->getPathStartGate());
         scheduleWaitTimer();
     }
     else
@@ -132,11 +132,11 @@ const char *MarkovScheduler::resolveDirective(char directive) const
     return result.c_str();
 }
 
-void MarkovScheduler::handleCanPushPacket(cGate *gate)
+void MarkovScheduler::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producers[state] != nullptr)
-        producers[state]->handleCanPushPacket(inputGates[state]->getPathStartGate());
+        producers[state]->handleCanPushPacketChanged(inputGates[state]->getPathStartGate());
 }
 
 void MarkovScheduler::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

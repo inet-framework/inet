@@ -28,7 +28,7 @@ class INET_API PacketDuplicator : public PacketPusherBase
   public:
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 

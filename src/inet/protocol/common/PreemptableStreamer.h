@@ -68,7 +68,7 @@ class INET_API PreemptableStreamer : public PacketProcessorBase, public virtual 
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual bool canPullSomePacket(cGate *gate) const override;

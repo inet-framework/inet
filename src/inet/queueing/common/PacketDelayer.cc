@@ -48,11 +48,11 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketDelayer::handleCanPushPacket(cGate *gate)
+void PacketDelayer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketDelayer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

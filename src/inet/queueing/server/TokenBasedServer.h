@@ -47,7 +47,7 @@ class INET_API TokenBasedServer : public PacketServerBase
     virtual int getNumTokens() const { return numTokens; }
     virtual void addTokens(double tokens);
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
 
     virtual const char *resolveDirective(char directive) const override;

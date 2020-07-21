@@ -64,9 +64,9 @@ void ActivePacketSource::producePacket()
     updateDisplayString();
 }
 
-void ActivePacketSource::handleCanPushPacket(cGate *gate)
+void ActivePacketSource::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
         scheduleProductionTimer();
         producePacket();

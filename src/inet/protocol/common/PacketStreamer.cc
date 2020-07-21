@@ -74,11 +74,11 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketStreamer::handleCanPushPacket(cGate *gate)
+void PacketStreamer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketStreamer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

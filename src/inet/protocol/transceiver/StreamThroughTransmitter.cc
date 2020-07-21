@@ -107,7 +107,7 @@ void StreamThroughTransmitter::endTx()
     delete txPacket;
     txPacket = nullptr;
     txStartTime = -1;
-    producer->handleCanPushPacket(inputGate->getPathStartGate());
+    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void StreamThroughTransmitter::abortTx()
@@ -123,7 +123,7 @@ void StreamThroughTransmitter::abortTx()
     delete txPacket;
     txPacket = nullptr;
     txStartTime = -1;
-    producer->handleCanPushPacket(inputGate->getPathStartGate());
+    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 clocktime_t StreamThroughTransmitter::calculateDuration(const Packet *packet) const

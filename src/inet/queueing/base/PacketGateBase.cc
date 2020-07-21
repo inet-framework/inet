@@ -37,7 +37,7 @@ void PacketGateBase::open()
     EV_DEBUG << "Opening gate.\n";
     isOpen_ = true;
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     if (collector != nullptr)
         collector->handleCanPullPacket(outputGate->getPathEndGate());
     emit(gateStateChangedSignal, isOpen_);
@@ -49,7 +49,7 @@ void PacketGateBase::close()
     EV_DEBUG << "Closing gate.\n";
     isOpen_ = false;
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     if (collector != nullptr)
         collector->handleCanPullPacket(outputGate->getPathEndGate());
     emit(gateStateChangedSignal, isOpen_);
@@ -80,11 +80,11 @@ Packet *PacketGateBase::canPullPacket(cGate *gate) const
     return isOpen_ ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
 }
 
-void PacketGateBase::handleCanPushPacket(cGate *gate)
+void PacketGateBase::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (isOpen_)
-        PacketFlowBase::handleCanPushPacket(gate);
+        PacketFlowBase::handleCanPushPacketChanged(gate);
 }
 
 void PacketGateBase::handleCanPullPacket(cGate *gate)

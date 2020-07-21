@@ -93,10 +93,10 @@ void PacketSchedulerBase::pushPacket(Packet *packet, cGate *gate)
     consumer->pushPacket(packet, outputGate->getPathEndGate());
 }
 
-void PacketSchedulerBase::handleCanPushPacket(cGate *gate)
+void PacketSchedulerBase::handleCanPushPacketChanged(cGate *gate)
 {
     int index = callSchedulePacket();
-    producers[index]->handleCanPushPacket(inputGates[index]->getPathStartGate());
+    producers[index]->handleCanPushPacketChanged(inputGates[index]->getPathStartGate());
 }
 
 bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const

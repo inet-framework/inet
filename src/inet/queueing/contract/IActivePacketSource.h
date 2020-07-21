@@ -41,15 +41,15 @@ class INET_API IActivePacketSource
     virtual IPassivePacketSink *getConsumer(cGate *gate) = 0;
 
     /**
-     * Notifies about a state change that allows to push some packet into the
-     * passive packet sink at the given gate.
+     * Notifies about a change in the possibility of pushing some packet into
+     * the passive packet sink at the given gate.
      *
      * This method is called, for example, when a new packet can be inserted
      * into a queue. It allows the source to push a new packet into the queue.
      *
      * The gate parameter must be a valid gate of this module.
      */
-    virtual void handleCanPushPacket(cGate *gate) = 0;
+    virtual void handleCanPushPacketChanged(cGate *gate) = 0;
 
     /**
      * Notifies about the completion of the packet processing for a packet that

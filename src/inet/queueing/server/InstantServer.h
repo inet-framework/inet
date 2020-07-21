@@ -30,7 +30,7 @@ class INET_API InstantServer : public PacketServerBase
     virtual void processPacket();
 
   public:
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
 };
 

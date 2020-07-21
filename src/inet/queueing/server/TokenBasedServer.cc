@@ -76,9 +76,9 @@ void TokenBasedServer::processPackets()
     }
 }
 
-void TokenBasedServer::handleCanPushPacket(cGate *gate)
+void TokenBasedServer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
 }
 
 void TokenBasedServer::handleCanPullPacket(cGate *gate)

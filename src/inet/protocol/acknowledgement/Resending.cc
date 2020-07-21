@@ -53,7 +53,7 @@ void Resending::handlePushPacketProcessed(Packet *p, cGate *gate, bool successfu
         packet = nullptr;
         retry = 0;
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else {
         pushOrSendPacket(packet->dup(), outputGate, consumer);

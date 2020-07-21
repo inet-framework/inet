@@ -37,10 +37,10 @@ void PacketMeterBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-void PacketMeterBase::handleCanPushPacket(cGate *gate)
+void PacketMeterBase::handleCanPushPacketChanged(cGate *gate)
 {
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketMeterBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

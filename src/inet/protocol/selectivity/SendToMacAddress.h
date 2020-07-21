@@ -40,7 +40,7 @@ class INET_API SendToMacAddress : public PacketFlowBase
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return nullptr; }
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
 
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };

@@ -156,11 +156,11 @@ b PacketClassifierBase::getPushPacketProcessedLength(Packet *packet, cGate *gate
     return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
 }
 
-void PacketClassifierBase::handleCanPushPacket(cGate *gate)
+void PacketClassifierBase::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketClassifierBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

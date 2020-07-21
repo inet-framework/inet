@@ -47,7 +47,7 @@ void PacketQueue::initialize(int stage)
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();

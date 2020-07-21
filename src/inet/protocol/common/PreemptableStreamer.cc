@@ -74,11 +74,11 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PreemptableStreamer::handleCanPushPacket(cGate *gate)
+void PreemptableStreamer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PreemptableStreamer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
