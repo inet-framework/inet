@@ -54,7 +54,7 @@ class INET_API PacketPusherBase : public PacketProcessorBase, public virtual IPa
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { return b(0); }
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 

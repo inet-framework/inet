@@ -40,11 +40,11 @@ void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketDuplicator::handleCanPushPacket(cGate *gate)
+void PacketDuplicator::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketDuplicator::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

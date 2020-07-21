@@ -65,7 +65,7 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
     virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;

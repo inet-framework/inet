@@ -53,7 +53,7 @@ void InterPacketGap::handleMessage(cMessage *message)
         if (message == timer) {
             if (canPushSomePacket(inputGate))
                 if (producer != nullptr)
-                    producer->handleCanPushPacket(inputGate->getPathStartGate());
+                    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
         }
         else if (message->isPacket()) {
             auto packet = check_and_cast<Packet *>(message);
@@ -136,12 +136,12 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
     }
 }
 
-void InterPacketGap::handleCanPushPacket(cGate *gate)
+void InterPacketGap::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (packetEndTime + durationPar->doubleValue() <= getClockTime()) {
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else {
         if (timer->isScheduled())

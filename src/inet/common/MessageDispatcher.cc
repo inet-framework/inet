@@ -105,14 +105,14 @@ void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate, bps datarat
     updateDisplayString();
 }
 
-void MessageDispatcher::handleCanPushPacket(cGate *outGate)
+void MessageDispatcher::handleCanPushPacketChanged(cGate *outGate)
 {
     int size = gateSize("in");
     for (int i = 0; i < size; i++) {
         auto inGate = gate("in", i);
         auto producer = findConnectedModule<queueing::IActivePacketSource>(inGate);
         if (producer != nullptr && !dynamic_cast<MessageDispatcher *>(producer) && outGate->getOwnerModule() != inGate->getOwnerModule())
-            producer->handleCanPushPacket(inGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(inGate->getPathStartGate());
     }
 }
 

@@ -68,7 +68,7 @@ void PacketTransmitter::endTx()
     producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
     delete txSignal;
     txSignal = nullptr;
-    producer->handleCanPushPacket(inputGate->getPathStartGate());
+    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 clocktime_t PacketTransmitter::calculateDuration(const Packet *packet) const

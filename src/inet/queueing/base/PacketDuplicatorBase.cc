@@ -50,11 +50,11 @@ void PacketDuplicatorBase::pushPacket(Packet *packet, cGate *gate)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void PacketDuplicatorBase::handleCanPushPacket(cGate *gate)
+void PacketDuplicatorBase::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 } // namespace queueing

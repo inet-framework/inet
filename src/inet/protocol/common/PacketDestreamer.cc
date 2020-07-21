@@ -96,11 +96,11 @@ b PacketDestreamer::getPushPacketProcessedLength(Packet *packet, cGate *gate)
     return packet->getTotalLength();
 }
 
-void PacketDestreamer::handleCanPushPacket(cGate *gate)
+void PacketDestreamer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketDestreamer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

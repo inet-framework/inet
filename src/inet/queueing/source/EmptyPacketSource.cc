@@ -34,9 +34,9 @@ void EmptyPacketSource::initialize(int stage)
         checkPacketOperationSupport(outputGate);
 }
 
-void EmptyPacketSource::handleCanPushPacket(cGate *gate)
+void EmptyPacketSource::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
 }
 
 void EmptyPacketSource::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

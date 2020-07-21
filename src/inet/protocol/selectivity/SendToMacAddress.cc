@@ -45,9 +45,9 @@ void SendToMacAddress::pushPacket(Packet *packet, cGate *inGate)
     handleMessage(packet);
 }
 
-void SendToMacAddress::handleCanPushPacket(cGate *outGate)
+void SendToMacAddress::handleCanPushPacketChanged(cGate *outGate)
 {
-    producer->handleCanPushPacket(inputGate->getPathStartGate());
+    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void SendToMacAddress::processPacket(Packet *packet)

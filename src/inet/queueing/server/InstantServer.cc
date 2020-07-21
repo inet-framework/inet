@@ -49,9 +49,9 @@ void InstantServer::processPacket()
     EV_INFO << "Processing packet " << packetName << " ended.\n";
 }
 
-void InstantServer::handleCanPushPacket(cGate *gate)
+void InstantServer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     while (canProcessPacket())
         processPacket();
     updateDisplayString();

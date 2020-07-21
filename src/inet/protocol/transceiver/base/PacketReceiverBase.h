@@ -43,7 +43,7 @@ class INET_API PacketReceiverBase : public PacketProcessorBase, public virtual I
     virtual bool supportsPacketPushing(cGate *gate) const override { return gate == outputGate; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
-    virtual void handleCanPushPacket(cGate *gate) override { }
+    virtual void handleCanPushPacketChanged(cGate *gate) override { }
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { }
 };
 

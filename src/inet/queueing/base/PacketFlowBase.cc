@@ -134,11 +134,11 @@ b PacketFlowBase::getPushPacketProcessedLength(Packet *packet, cGate *gate)
     return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
 }
 
-void PacketFlowBase::handleCanPushPacket(cGate *gate)
+void PacketFlowBase::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketFlowBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

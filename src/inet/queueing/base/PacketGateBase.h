@@ -53,7 +53,7 @@ class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGat
     virtual bool canPullSomePacket(cGate *gate) const override;
     virtual Packet *canPullPacket(cGate *gate) const override;
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
 };
 

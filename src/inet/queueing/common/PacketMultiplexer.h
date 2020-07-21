@@ -64,7 +64,7 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
 
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;

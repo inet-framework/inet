@@ -73,11 +73,11 @@ void PacketPusherBase::pushPacketProgress(Packet *packet, cGate *gate, bps datar
     throw cRuntimeError("Invalid operation");
 }
 
-void PacketPusherBase::handleCanPushPacket(cGate *gate)
+void PacketPusherBase::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void PacketPusherBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

@@ -62,9 +62,9 @@ void PreemptingServer::endStreaming()
     streamedPacket = nullptr;
 }
 
-void PreemptingServer::handleCanPushPacket(cGate *gate)
+void PreemptingServer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (!isStreaming() && canStartStreaming())
         startStreaming();
 }

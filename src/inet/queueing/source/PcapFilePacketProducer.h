@@ -37,7 +37,7 @@ class INET_API PcapFilePacketProducer : public ActivePacketSourceBase
     virtual void schedulePacket();
 
   public:
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { }
 };
 

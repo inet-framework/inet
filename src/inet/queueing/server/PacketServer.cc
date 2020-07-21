@@ -80,9 +80,9 @@ void PacketServer::endProcessingPacket()
     packet = nullptr;
 }
 
-void PacketServer::handleCanPushPacket(cGate *gate)
+void PacketServer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
         startProcessingPacket();
         scheduleProcessingTimer();

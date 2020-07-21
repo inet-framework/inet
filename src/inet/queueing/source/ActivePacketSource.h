@@ -39,7 +39,7 @@ class INET_API ActivePacketSource : public ActivePacketSourceBase
   public:
     virtual ~ActivePacketSource() { cancelAndDelete(productionTimer); }
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 

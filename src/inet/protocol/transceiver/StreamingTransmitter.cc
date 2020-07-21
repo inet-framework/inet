@@ -45,7 +45,7 @@ void StreamingTransmitter::handleMessageWhenUp(cMessage *message)
 {
     if (message == txEndTimer) {
         endTx();
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else
         PacketTransmitterBase::handleMessage(message);
@@ -135,7 +135,7 @@ b StreamingTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate
 
 void StreamingTransmitter::handleStartOperation(LifecycleOperation *operation)
 {
-    producer->handleCanPushPacket(inputGate->getPathStartGate());
+    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void StreamingTransmitter::handleStopOperation(LifecycleOperation *operation)

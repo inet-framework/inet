@@ -65,7 +65,7 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual bool canPullSomePacket(cGate *gate) const override;

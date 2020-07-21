@@ -72,7 +72,7 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
 
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual bool canPullSomePacket(cGate *gate) const override;
