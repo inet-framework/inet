@@ -22,16 +22,12 @@ package inet.queueing.base;
 //
 // @see ~IPacketGate
 //
-simple PacketGateBase extends PacketProcessorBase
+simple PacketGateBase extends PacketFlowBase
 {
     parameters:
         displayStringTextFormat = default("passed %p pk (%l)");
         @class(PacketGateBase);
         @display("i=block/cogwheel");
         @signal[gateStateChanged](type=bool);
-        @signal[packetPulled](type=inet::Packet);
         @statistic[gateStateChanged](title="gate states"; record=vector; interpolationmode=sample-hold);
-    gates:
-        input in;
-        output out;
 }
