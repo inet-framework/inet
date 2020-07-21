@@ -160,7 +160,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
         throw cRuntimeError("L3AddressResolver: syntax error parsing address spec `%s'", s);
 
     // find module
-    cModule *mod = getSimulation()->getModuleByPath(modname.c_str());
+    cModule *mod = getSimulation()->findModuleByPath(modname.c_str());
     if (!mod)
         throw cRuntimeError("L3AddressResolver: module `%s' not found", modname.c_str());
 
@@ -185,7 +185,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
     // find interface for dest node
     // get address from the given module/interface
     if (!destnodename.empty()) {
-        cModule *destnode = getSimulation()->getModuleByPath(destnodename.c_str());
+        cModule *destnode = getSimulation()->findModuleByPath(destnodename.c_str());
         if (!destnode)
             throw cRuntimeError("L3AddressResolver: destination module `%s' not found", destnodename.c_str());
         result = addressOf(mod, destnode, addrType);
