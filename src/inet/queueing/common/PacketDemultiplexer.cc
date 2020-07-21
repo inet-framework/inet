@@ -57,13 +57,13 @@ Packet *PacketDemultiplexer::pullPacket(cGate *gate)
     return packet;
 }
 
-void PacketDemultiplexer::handleCanPullPacket(cGate *gate)
+void PacketDemultiplexer::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     for (int i = 0; i < (int)outputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pulling
         if (collectors[i] != nullptr && provider->canPullSomePacket(inputGate->getPathStartGate()))
-            collectors[i]->handleCanPullPacket(outputGates[i]->getPathEndGate());
+            collectors[i]->handleCanPullPacketChanged(outputGates[i]->getPathEndGate());
 }
 
 void PacketDemultiplexer::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)

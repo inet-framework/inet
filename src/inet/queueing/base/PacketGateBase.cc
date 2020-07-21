@@ -39,7 +39,7 @@ void PacketGateBase::open()
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
     emit(gateStateChangedSignal, isOpen_);
 }
 
@@ -51,7 +51,7 @@ void PacketGateBase::close()
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
     emit(gateStateChangedSignal, isOpen_);
 }
 
@@ -87,11 +87,11 @@ void PacketGateBase::handleCanPushPacketChanged(cGate *gate)
         PacketFlowBase::handleCanPushPacketChanged(gate);
 }
 
-void PacketGateBase::handleCanPullPacket(cGate *gate)
+void PacketGateBase::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (isOpen_)
-        PacketFlowBase::handleCanPullPacket(gate);
+        PacketFlowBase::handleCanPullPacketChanged(gate);
 }
 
 } // namespace queueing

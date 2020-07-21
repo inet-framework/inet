@@ -54,7 +54,7 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
     virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
-    virtual void handleCanPullPacket(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
 };
 
 } // namespace queueing

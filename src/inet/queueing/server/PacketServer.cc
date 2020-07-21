@@ -89,9 +89,9 @@ void PacketServer::handleCanPushPacketChanged(cGate *gate)
     }
 }
 
-void PacketServer::handleCanPullPacket(cGate *gate)
+void PacketServer::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
         startProcessingPacket();
         scheduleProcessingTimer();

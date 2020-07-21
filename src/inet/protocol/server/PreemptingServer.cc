@@ -69,9 +69,9 @@ void PreemptingServer::handleCanPushPacketChanged(cGate *gate)
         startStreaming();
 }
 
-void PreemptingServer::handleCanPullPacket(cGate *gate)
+void PreemptingServer::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (isStreaming()) {
         endStreaming();
         cancelEvent(timer);

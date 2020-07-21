@@ -57,9 +57,9 @@ void InstantServer::handleCanPushPacketChanged(cGate *gate)
     updateDisplayString();
 }
 
-void InstantServer::handleCanPullPacket(cGate *gate)
+void InstantServer::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     while (canProcessPacket())
         processPacket();
     updateDisplayString();

@@ -67,11 +67,11 @@ Packet *PacketPullerBase::pullPacketProgress(cGate *gate, bps datarate, b positi
     throw cRuntimeError("Invalid operation");
 }
 
-void PacketPullerBase::handleCanPullPacket(cGate *gate)
+void PacketPullerBase::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
 void PacketPullerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)

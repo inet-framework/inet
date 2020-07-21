@@ -65,9 +65,9 @@ void ActivePacketSink::collectPacket()
     dropPacket(packet, OTHER_PACKET_DROP);
 }
 
-void ActivePacketSink::handleCanPullPacket(cGate *gate)
+void ActivePacketSink::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
         scheduleCollectionTimer();
         collectPacket();

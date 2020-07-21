@@ -251,11 +251,11 @@ void PacketFilterBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bo
         collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
 }
 
-void PacketFilterBase::handleCanPullPacket(cGate *gate)
+void PacketFilterBase::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPullPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
 void PacketFilterBase::dropPacket(Packet *packet)

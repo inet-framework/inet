@@ -84,7 +84,7 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual 
 
     virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override;
 
-    virtual void handleCanPullPacket(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
