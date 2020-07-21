@@ -34,15 +34,17 @@ Simulation models can take advantage of parallel execution to speed up large sim
 
 This showcase demonstrates parallel simulation with an example simulation model. Different LANs in the network are simulated with different CPU cores.
 
-| INET version: ``4.2``
+| INET version: ``4.3``
 | Source files location: `inet/showcases/general/parsim <https://github.com/inet-framework/inet-showcases/tree/master/general/parsim>`__
 
-**TODO** inet 4.2? or is that 4.3? needs omnetpp-6.0?
+.. **TODO** inet 4.2? or is that 4.3? needs omnetpp-6.0?
+
+**TODO** omnet 6.0
 
 About Parallel Simulation in OMNeT++
 ------------------------------------
 
-Any simulation model can be parallelized, no additional C++ code is needed. To parallelize a simulation, the model is partitioned into several logical processes; each partition contains some of the modules of the simulation, each process will be run on a different CPU core (on the same machine or another one), and each process will maintain its own simulation time.
+Any simulation model can be parallelized, no additional C++ code is needed TODO not quite. To parallelize a simulation, the model is partitioned into several logical processes; each partition contains some of the modules of the simulation, each process will be run on a different CPU core (on the same machine or another one), and each process will maintain its own simulation time.
 
 .. The logical partitions can be run on different CPUs on the same machine or on another machine.
 
@@ -51,8 +53,8 @@ Any simulation model can be parallelized, no additional C++ code is needed. To p
 
 .. **TODO** each partition/process has its own simulation time
 
-To partition a simulation model, all modules in the network are assigned to one of the partitions.
-The main limitation in partitioning is that only messages can be passed between partitions, i.e. no direct sends or method calls. Thus global modules, such as network configurators, radio medium and visualizer modules need to be included multiple times in the network, one for each partition that needs them.
+To partition a simulation model, all modules in the network are assigned to one of the partitions. **TODO** there are limitations in partitions, e.g. modules in a partition cannot call c++ methods in another partition
+The main limitation in partitioning is that only messages can be passed between partitions, e.g. method calls. **TODO** for all limitations read the documentation? Thus global modules, such as network configurators, radio medium and visualizer modules need to be included multiple times in the network, one for each partition that needs them.
 
 .. Thus global modules, such as network configurators, radio medium and visualizer modules multiple instances of need to be included
 
@@ -64,12 +66,16 @@ The main limitation in partitioning is that only messages can be passed between 
 
 An event in one of the partitions might affect the trajectory of the simulation in another. A partition might receive a message from another partition in its past, i.e. the message might arrive at a partition but the simulation time in that partition might have already advanced beyond the message's arrival time. To preserve causality of events, this behavior is prevented; partitions are not allowed to advance too far ahead of the others in simulation time. To this end, partitions have to be synchornized by sending each other sync messages, which contain the current simulation time of the partition and how far other partitions can safely advance in simulation time, called lookahead.
 
+**TODO** rövidebben ^ -> particiok kulon tekernek de van time sync kozottuk es message-ekkel kommunikalnak
+
 Currently, the lookahead is based on the delay of the wired links between partitions.
 
 .. .. note:: Lookahead could be based on other metrics, TODO it can be implemented refer to the manual
 
 The logical processes can send sync messages to each other using either the Message Passing Interface (MPI), or named pipes.
 MPI needs installation, but the processes can be run on different computers; named pipes require no installation, but processes can only be run on the same machine.
+
+TODO mpi-t engedelyezni kell a configure-ban
 
 .. The logical processes can send sync messages to each other in the following ways:
 
@@ -85,7 +91,7 @@ MPI needs installation, but the processes can be run on different computers; nam
 For good performance, the number of messages between partitions should be as low as possible.
 For example, parts of the network with localized high traffic should be in their own partitions.
 
-Also, if the lookahead is too small, the partitions frequently stop to wait for each other, and it results in larger overhead of sync messages being sent.
+Also, if the lookahead is too small, the partition simulations frequently stop to wait for each other, and it results in larger overhead of sync messages being sent.
 
 .. **TODO** if the lookahead is too small, the partitions stop all the time
 
@@ -99,7 +105,7 @@ To enable parallel simulation, the ``parallel-simulation`` key needs to be set t
 Also, the number of partitions has to be specified with the ``parsim-num-partitions`` parameter.
 The ``parsim-communications-class`` key selects which communication method to use; either ``cNamedPipeCommunications`` or ``cMPICommunications``.
 
-**TODO** parsim-debug? or just link to the manual ?
+**TODO** parsim-debug? or just link to the manual ? -> vannak mas parsim kapcsolok a manualban leirva
 
 .. To run simulations in parallel, the modules need to be assigned to partitions. For example:
 
@@ -110,7 +116,7 @@ Modules can be assigned to partitions by specifying their partition id. For exam
    *.host{1..2}**.partition-id = 0
    *.host{3..4}**.partition-id = 1
 
-These keys assign hosts 1 and 2 to partition 0 and hosts 3 and 4 to partition 1. Note that the ``**`` after the host name is required in order to put all submodules into the same partition as the host.
+These keys assign hosts 1 and 2 to partition 0 and hosts 3 and 4 to partition 1. Note that the ``**`` after the host name is required in order to put all modules recursively into the same partition as the host.
 
 .. To run the simulations, the ``p`` command line argument needs to be specified, selecting which partition to run in a process. TODO or the from the IDE. TODO also the scripts. TODO rewrite
 
@@ -169,10 +175,14 @@ The example simulation features a mixed wired/wireless network with several LANs
    :align: center
    :width: 100%
 
-The network contains two wired and two wireless LANs, each with two hosts connected by a switch or access point.
+The network contains two wired and two wireless LANs, each with two hosts connected by a switch or an access point.
 The LANs are connected to a backbone of routers.
 
+**TODO** X kivesz a backbonebol
+
 The nodes are connected by ``Ethernet100`` connections, defined in the NED file:
+-> the wired connections are ?
+-> routers should be connected by ppp and add delay
 
 .. literalinclude:: ../Network.ned
    :start-at: Ethernet100
@@ -181,8 +191,18 @@ The nodes are connected by ``Ethernet100`` connections, defined in the NED file:
 
 This connection extends :ned:`DatarateChannel`, and adds a delay of 100us.
 
-The network is divided into four partitions. Each LAN, together with its corresponding switch/access point, and the router closest to it is assigned to a different partition.
+TODO: the emphasis is on the router connection delay -> ez lesz a lookahead
+mert a routerek vannak a hataron
+
+The network is divided into four partitions. Each LAN, together with its corresponding switch/access point, and the router closest to it are assigned to a different partition.
 Each partition contains an :ned:`Ipv4NetworkConfigurator` module; wireless LANs also contain a :ned:`Ieee80211ScalarRadioMedium` module.
+
+TODO minden partition külön executable; ha nincs benne configurator nem lesz kitoltve; az egyik particioban levo configurator nem tudja a tobbiben levot konfiguralni -> thats why
+az egyik particioban levo medium nem tud a masikkal kommunkalni mert method call
+de nem akarjuk az interferenciat szimulalni (nem tudjuk de ebben nem is akarjuk)
+(azert lehet kulon particioban, mert nem akarjuk az interferenciat szimulalni)
+a wireless nodeoik nem tudnak kommunikalni a masik particiban levo mediummal mert method call
+amelyik particioban nincs konfigurator ott nem lesznek konfiguralva
 
 Two of the hosts are configured to ping another two hosts (``host1`` pings ``host5``, ``host3`` pings ``host8``).
 
@@ -195,7 +215,7 @@ Two of the hosts are configured to ping another two hosts (``host1`` pings ``hos
   - fcsMode DONE
   - parsim-communications-class = "cNamedPipeCommunications" DONE
 
-The modules are assigned to partitions:
+The modules are assigned to partitions, as follows:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: radioMedium1.partition-id
@@ -203,6 +223,8 @@ The modules are assigned to partitions:
    :language: ini
 
 Also, the priorities of all modules are specified. Setting priorities defines the order of events if multiple events in different partitions happen at the same simulation time. In this case, we assign the same priority to all modules as their partition number, like so:
+
+**TODO** kulonben nem lesz determinisztikus; mi az a priority es miert -> ezzel kene kezdeni; a 2. mondat
 
 ..  **V1** This is needed because if two events in different partitions happen at the same simulation time, their order is defined. **TODO**
 
@@ -212,6 +234,8 @@ Also, the priorities of all modules are specified. Setting priorities defines th
    :language: ini
 
 Because **TODO**:
+
+**TODO** try without this; might not be needed
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: crc
@@ -227,6 +251,8 @@ Because **TODO**:
 .. **TODO** radioMedium
 
 The two wireless LANs have radio medium modules in their partitions. The radio medium modules don't have the default name ``radioMedium``, so the module hosts and access points belong to needs to be specified:
+
+**TODO** rewrite? miert kell kulon medium
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: radioMedium1
@@ -256,9 +282,11 @@ Configuring Addresses and Routes
   - use the modified xml files as the configuration
   - re-enable parsim...the configurators configure the modules in their own partitions
 
-We can't use a global configurator module to configure addresses and routes due to the limitation set by partitioning,
-thus we have four configurators; each needs to deal with only the modules in its own partition.
+We can't use a global configurator module to configure addresses and routes due to the limitation set (?) by partitioning,
+thus we have four configurators; each can deal with only the modules in its own partition. **TODO** ismernie kell a teljes topologiat; global knowledge kell; not possible
 The process for configuring addresses and routes per partition is the following:
+
+**TODO** ezt a usernek kell
 
 .. - run the simulation by disabling parsim
 
@@ -273,6 +301,16 @@ The process for configuring addresses and routes per partition is the following:
      #*.configurator*.*Routes = false
 
 - Dump the configurators' config to xml files (the four configurators produce the same configuration, but we dump all of them now):
+
+**TODO** dump just one ?
+
+**TODO** kulon konfig es kikommentez a parsim
+
+**TODO** try not deleting the lines from the xml; they can use the same file
+
+**TODO** kulon konfig; run from ccmdenv, override parsim
+
+**TODO** a configurator input file eloalittasanak a folyamata a process
 
   .. code-block:: ini
 
@@ -334,7 +372,7 @@ The ``runparsim-mpi`` script uses MPI:
 
 **TODO** does mpi need the parsim-num-partitions ?
 
-**TODO** the scripts only work on linux
+.. **TODO** the scripts only work on linux
 
 To run the simulations, execute one of the scripts from the command line. By default, the simulations are run with Qtenv:
 
@@ -346,7 +384,9 @@ To run the simulations, execute one of the scripts from the command line. By def
 
    $ ./runparsim-mpi
 
-In this case, four Qtenv windows open. Click the run simulation button in all of them to start the simulation. The simulation can only progress by the lookahead period until all of them are started:
+In this case, four Qtenv windows open. Click the run simulation button in all of them/partition simulations to start the parallel simulation. The simulation can only progress by the lookahead period until all of them are started:
+
+**TODO** can only progess if all partition simulations are running; a parittion szimulaciok megallnak / varakozni kezdenek a lookahead mulva
 
 To start the simulations in Cmdenv, append ``-u Cmdenv`` to the command:
 
@@ -363,7 +403,17 @@ Results
 
 Here is a video of running the simulations in Cmdenv:
 
-TODO
+TODO -> need
+
+**TODO** osszehasonlitas a sequential es a nem sequential kozott
+-> lehet hogy a parsim = true a scriptben kene
+-> az eredmenyeknek exact matchnek kene lennie
+
+-> a 4 parallel ping log es a sequential -> diff a 2 -> a sequential csak extra sorokat tartalmaz mert interleave-elodnek
+-> statisztikak -> rtt felrajzol -> exact match -> kivon a 2 es 0nak kell lennie
+
+-> lemer hogy mennyi ideig fut -> on such and such computer this is the result
+-> legalabb legyen 2x gyorsabb
 
 The outputs of the four simulations are mixed, but the messages for successfully received ping replies in host1 and host3 are observable.
 
@@ -372,7 +422,9 @@ The outputs of the four simulations are mixed, but the messages for successfully
 
 When the simulations are run in Qtenv, all modules are present in all Qtenv windows. However, Qtenv uses placeholder modules for those which are not in the partition the Qtenv instance is running. These placeholder modules are empty.
 
-However, one can observe the messages going between partitions in the Qtenv windows.
+However, one can still observe the messages going between partitions in the Qtenv windows.
+
+**TODO** in the packet log / in the qtenv packet log
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Network.ned <../Network.ned>`
 
