@@ -147,13 +147,13 @@ void InterfaceEntry::initialize(int stage)
         layoutSubmodulesWithoutGates(this);
 }
 
-void InterfaceEntry::arrived(cMessage *message, cGate *gate, simtime_t time)
+void InterfaceEntry::arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time)
 {
     if (gate == upperLayerOut && message->isPacket()) {
         auto packet = check_and_cast<Packet *>(message);
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
     }
-    cModule::arrived(message, gate, time);
+    cModule::arrived(message, gate, options, time);
 }
 
 void InterfaceEntry::pushPacket(Packet *packet, cGate *gate)

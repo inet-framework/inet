@@ -159,7 +159,7 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     virtual std::string getFullPath() const override { return cModule::getFullPath(); }
     virtual const char *getName() const override { return cModule::getName(); }
 
-    virtual void arrived(cMessage *message, cGate *gate, simtime_t time) override;
+    virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
 
   public:
     InterfaceEntry();
