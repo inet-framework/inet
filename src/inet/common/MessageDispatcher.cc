@@ -32,7 +32,7 @@ void MessageDispatcher::initialize()
     WATCH_MAP(protocolToGateIndex);
 }
 
-void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t)
+void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOptions& options, simtime_t time)
 {
     Enter_Method_Silent();
     cGate *outGate = nullptr;
@@ -40,7 +40,7 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t)
         outGate = handlePacket(check_and_cast<Packet *>(message), inGate);
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
-    outGate->deliver(message, t);
+    outGate->deliver(message, options, time);
 }
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
