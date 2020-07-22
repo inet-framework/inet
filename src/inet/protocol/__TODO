@@ -11,6 +11,6 @@ considerations for generic modular packet processing elements:
    - streaming packet start, progress, and end
  - processing of a single element can be (input -> output):
    - passing: passing in -> passing out
-   - streamer: passing in -> streaming out
-   - destreamer: streaming in -> passing out
-   - streaming: streaming in -> streaming out
+   - streaming: passing in -> streaming out
+   - destreaming: streaming in -> passing out
+   - streaming through: streaming in -> streaming out
