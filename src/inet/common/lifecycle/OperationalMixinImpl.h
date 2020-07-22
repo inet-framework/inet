@@ -35,6 +35,7 @@ OperationalMixin<T>::~OperationalMixin()
 template <typename T>
 void OperationalMixin<T>::initialize(int stage)
 {
+    T::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         WATCH(operationalState);
         activeOperationTimeout = new cMessage("ActiveOperationTimeout");
