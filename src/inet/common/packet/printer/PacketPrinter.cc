@@ -54,7 +54,7 @@ const char *PacketPrinter::DirectiveResolver::resolveDirective(char directive) c
 
 int PacketPrinter::getScoreFor(cMessage *msg) const
 {
-    return msg->isPacket() || dynamic_cast<cProgress *>(msg) ? 100 : 0;
+    return msg->isPacket() ? 100 : 0;
 }
 
 bool PacketPrinter::isEnabledOption(const Options *options, const char *name) const
@@ -150,8 +150,6 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const Options *options) const
 {
     Context context;
-    if (auto progress = dynamic_cast<cProgress *>(message))
-        message = progress->getPacket();
     for (auto cpacket = dynamic_cast<cPacket *>(message); cpacket != nullptr; cpacket = cpacket->getEncapsulatedPacket()) {
         if (false) {}
 #ifdef WITH_RADIO
