@@ -47,6 +47,22 @@ void InterPacketGap::initialize(int stage)
     }
 }
 
+void InterPacketGap::receiveProgress(cPacket *packet, cGate *gate, int progressKind, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
+{
+    switch (progressKind) {
+        case cProgress::PACKET_START:
+            receivePacketStart(packet, gate, datarate);
+            break;
+        case cProgress::PACKET_END:
+            receivePacketEnd(packet, gate, datarate);
+            break;
+        case cProgress::PACKET_PROGRESS:
+            receivePacketProgress(packet, gate, datarate, bitPosition, timePosition, extraProcessableBitLength, extraProcessableDuration);
+            break;
+        default: throw cRuntimeError("Unknown progress kind");
+    }
+}
+
 void InterPacketGap::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
