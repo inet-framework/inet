@@ -427,7 +427,7 @@ void Dymo::processUdpPacket(Packet *packet)
 // handling Dymo packets
 //
 
-void Dymo::sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay)
+void Dymo::sendDymoPacket(const Ptr<DymoPacket>& packet, const NetworkInterface *networkInterface, const L3Address& nextHop, double delay)
 {
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
@@ -440,8 +440,8 @@ void Dymo::sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
     udpHeader->setDestinationPort(DYMO_UDP_PORT);
     udpHeader->setCrcMode(CRC_DISABLED);
     udpPacket->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    if (interfaceEntry)
-        udpPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    if (networkInterface)
+        udpPacket->addTag<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     auto addresses = udpPacket->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(nextHop);
@@ -902,7 +902,7 @@ void Dymo::sendRerrForUndeliverablePacket(const L3Address& destination)
     sendRerr(createRerr(unreachableAddresses));
 }
 
-void Dymo::sendRerrForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop)
+void Dymo::sendRerrForBrokenLink(const NetworkInterface *networkInterface, const L3Address& nextHop)
 {
     EV_DETAIL << "Sending RERR for broken link: nextHop = " << nextHop << endl;
     // 8.3.2. Case 2: Broken Link
@@ -938,7 +938,7 @@ void Dymo::sendRerrForBrokenLink(const InterfaceEntry *interfaceEntry, const L3A
         if (route->getSource() == this) {
             DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
             DymoRouteState routeState = getRouteState(routeData);
-            if (routeState != BROKEN && route->getInterface() == interfaceEntry && route->getNextHopAsGeneric() == nextHop) {
+            if (routeState != BROKEN && route->getInterface() == networkInterface && route->getNextHopAsGeneric() == nextHop) {
                 EV_DETAIL << "Marking route as broken: " << route << endl;
                 // TODO delete route, but save its data for later update
                 // route->setEnabled(false);
@@ -1162,9 +1162,9 @@ void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const Ad
     L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
     route->setNextHop(srcAddr);
     // Route.NextHopInterface is set to the interface on which RteMsg was received
-    InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById((packet->getTag<InterfaceInd>())->getInterfaceId());
-    if (interfaceEntry)
-        route->setInterface(interfaceEntry);
+    NetworkInterface *networkInterface = interfaceTable->getInterfaceById((packet->getTag<InterfaceInd>())->getInterfaceId());
+    if (networkInterface)
+        route->setInterface(networkInterface);
     // Route.Broken flag := FALSE
     routeData->setBroken(false);
     // If RteMsg.MetricType is included, then Route.MetricType := RteMsg.MetricType.  Otherwise, Route.MetricType := DEFAULT_METRIC_TYPE.
@@ -1186,7 +1186,7 @@ void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const Ad
 }
 
 // TODO: use
-int Dymo::getLinkCost(const InterfaceEntry *interfaceEntry, DymoMetricType metricType)
+int Dymo::getLinkCost(const NetworkInterface *networkInterface, DymoMetricType metricType)
 {
     switch (metricType) {
         case HOP_COUNT:
@@ -1304,12 +1304,12 @@ void Dymo::configureInterfaces()
     // join multicast groups
     cPatternMatcher interfaceMatcher(interfaces, false, true, false);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getInterfaceName()))
+        NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+        if (networkInterface->isMulticast() && interfaceMatcher.matches(networkInterface->getInterfaceName()))
             // Most AODVv2 messages are sent with the IP destination address set to the link-local
             // multicast address LL-MANET-Routers [RFC5498] unless otherwise specified. Therefore,
             // all AODVv2 routers MUST subscribe to LL-MANET-Routers [RFC5498] to receiving AODVv2 messages.
-            interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
+            networkInterface->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
     }
 }
 

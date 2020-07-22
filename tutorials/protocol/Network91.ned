@@ -18,7 +18,7 @@
 package inet.tutorials.protocol;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.protocol.acknowledgement.ReceiveWithAcknowledge;
 import inet.protocol.acknowledgement.Resending;
@@ -183,11 +183,11 @@ module DataService
         deaggregator.out --> { @display("m=n"); } --> upperLayerOut;
 }
 
-module Interface extends InterfaceEntry
+module Interface extends NetworkInterface
 {
     parameters:
         string interfaceTableModule;
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         @display("i=block/ifcard");
     gates:
         input upperLayerIn @loose;

@@ -156,7 +156,7 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
     // if the input interface is unconfigured, we won't recognize network-directed broadcasts because we don't what network we are on
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceId != -1) {
-        InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+        NetworkInterface *ie = ift->getInterfaceById(interfaceId);
         auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
         bool interfaceUnconfigured = (ipv4Data == nullptr) || ipv4Data->getIPAddress().isUnspecified();
         return interfaceUnconfigured;

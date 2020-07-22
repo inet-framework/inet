@@ -18,12 +18,12 @@ import inet.linklayer.common.MacAddress;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 
 cplusplus {{
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 }}
 
 namespace inet;
 
-class InterfaceEntry extends cModule
+class NetworkInterface extends cModule
 {
     @existingClass;
     @descriptor(readonly);

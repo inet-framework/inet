@@ -1261,8 +1261,8 @@
     <filename>src-inet-linklayer-ieee80211-mac-queue-InProgressFrames.html</filename>
   </compound>
   <compound kind="class">
-    <name>InterfaceEntry</name>
-    <filename>src-inet-networklayer-common-InterfaceEntry.html</filename>
+    <name>NetworkInterface</name>
+    <filename>src-inet-networklayer-common-NetworkInterface.html</filename>
   </compound>
   <compound kind="class">
     <name>InterfaceInd</name>

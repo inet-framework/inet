@@ -19,7 +19,7 @@
 
 namespace inet {
 
-void registerInterface(const InterfaceEntry& interface, cGate *in, cGate *out)
+void registerInterface(const NetworkInterface& interface, cGate *in, cGate *out)
 {
     auto outPathEnd = out->getPathEndGate();
     auto inPathStart = in->getPathStartGate();

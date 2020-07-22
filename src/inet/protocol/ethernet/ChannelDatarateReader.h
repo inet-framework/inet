@@ -18,7 +18,7 @@
 #ifndef __INET_ChannelDatarateReader_H
 #define __INET_ChannelDatarateReader_H
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {

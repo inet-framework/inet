@@ -42,7 +42,7 @@ Ieee8021dInterfaceData::PortInfo::PortInfo()
 }
 
 Ieee8021dInterfaceData::Ieee8021dInterfaceData()
-    : InterfaceProtocolData(InterfaceEntry::F_IEEE8021D_DATA)
+    : InterfaceProtocolData(NetworkInterface::F_IEEE8021D_DATA)
 {
 }
 

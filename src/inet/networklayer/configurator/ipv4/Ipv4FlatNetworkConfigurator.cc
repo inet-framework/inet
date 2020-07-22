@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4FlatNetworkConfigurator.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -98,7 +98,7 @@ void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVecto
         // find interface table and assign address to all (non-loopback) interfaces
         IInterfaceTable *ift = nodeInfo[i].ift;
         for (int k = 0; k < ift->getNumInterfaces(); k++) {
-            InterfaceEntry *ie = ift->getInterface(k);
+            NetworkInterface *ie = ift->getInterface(k);
             if (!ie->isLoopback()) {
                 auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
                 ipv4Data->setIPAddress(Ipv4Address(addr));
@@ -123,7 +123,7 @@ void Ipv4FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVect
 
         // count non-loopback interfaces
         int numIntf = 0;
-        InterfaceEntry *ie = nullptr;
+        NetworkInterface *ie = nullptr;
         for (int k = 0; k < ift->getNumInterfaces(); k++)
             if (!ift->getInterface(k)->isLoopback()) {
                 ie = ift->getInterface(k);
@@ -183,7 +183,7 @@ void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVec
             IInterfaceTable *ift = nodeInfo[j].ift;
 
             int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
-            InterfaceEntry *ie = ift->findInterfaceByNodeOutputGateId(outputGateId);
+            NetworkInterface *ie = ift->findInterfaceByNodeOutputGateId(outputGateId);
             if (!ie)
                 throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 

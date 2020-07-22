@@ -22,7 +22,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -53,7 +53,7 @@ class INET_API EthernetSocket : public ISocket
     int socketId;
     ICallback *callback = nullptr;
     void *userData = nullptr;
-    InterfaceEntry *interfaceEntry = nullptr;
+    NetworkInterface *networkInterface = nullptr;
     cGate *gateToEthernet = nullptr;
     bool isOpen_ = false;
 
@@ -96,7 +96,7 @@ class INET_API EthernetSocket : public ISocket
      */
     void setOutputGate(cGate *gate) { gateToEthernet = gate; }
 
-    void setInterfaceEntry(InterfaceEntry *interfaceEntry) { this->interfaceEntry = interfaceEntry; }
+    void setNetworkInterface(NetworkInterface *networkInterface) { this->networkInterface = networkInterface; }
 
     /**
      * Binds the socket to the MAC address.

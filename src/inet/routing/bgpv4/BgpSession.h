@@ -88,7 +88,7 @@ private:
     // setters for creating and editing the information in the Bgp session:
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
-    void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
+    void setlinkIntf(NetworkInterface *intf) { _info.linkIntf = intf; }
     void setNextHopSelf(bool nextHopSelf) { _info.nextHopSelf = nextHopSelf; }
     void setLocalPreference(int localPreference) { _info.localPreference = localPreference; }
     void setSocket(TcpSocket *socket) { delete _info.socket; _info.socket = socket; }
@@ -104,7 +104,7 @@ private:
     SessionId getSessionID() const { return _info.sessionID; }
     BgpSessionType getType() const { return _info.sessionType; }
     static const std::string getTypeString(BgpSessionType sessionType);
-    InterfaceEntry *getLinkIntf() const { return _info.linkIntf; }
+    NetworkInterface *getLinkIntf() const { return _info.linkIntf; }
     bool getCheckConnection() const { return _info.checkConnection; }
     Ipv4Address getPeerAddr() const { return _info.peerAddr; }
     bool getNextHopSelf() const { return _info.nextHopSelf; }

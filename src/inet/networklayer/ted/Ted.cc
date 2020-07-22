@@ -65,7 +65,7 @@ void Ted::initializeTED()
     // i.e. for each physical interface.
     //
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
 
         if (ie->getNodeOutputGateId() == -1) // ignore if it's not a physical interface
             continue;
@@ -99,7 +99,7 @@ void Ted::initializeTED()
             continue;
         Ipv4Address destRouterId = destRt->getRouterId();
         IInterfaceTable *destIft = L3AddressResolver().interfaceTableOf(destNode);
-        InterfaceEntry *destIe = CHK(destIft->findInterfaceByNodeInputGateId(g->getId()));
+        NetworkInterface *destIe = CHK(destIft->findInterfaceByNodeInputGateId(g->getId()));
 
         //
         // fill in and insert TED entry
@@ -128,8 +128,8 @@ void Ted::initializeTED()
 
     // extract list of local interface addresses into interfaceAddrs[]
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
-        InterfaceEntry *ie2 = rt->getInterfaceByAddress(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+        NetworkInterface *ie = ift->getInterface(i);
+        NetworkInterface *ie2 = rt->getInterfaceByAddress(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         if (ie2 != ie)
             throw cRuntimeError("MPLS models assume interfaces to have unique addresses, "
                                 "but address of '%s' (%s) is not unique",

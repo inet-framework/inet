@@ -18,7 +18,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/DirectionTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -219,7 +219,7 @@ class INET_API IPcapWriter
 
     virtual void setFlush(bool flush) = 0;
 
-    virtual void writePacket(simtime_t time, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkType) = 0;
+    virtual void writePacket(simtime_t time, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkType) = 0;
 };
 
 } // namespace inet

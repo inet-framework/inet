@@ -30,7 +30,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -145,7 +145,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     EtherMacBase();
     virtual ~EtherMacBase();
 
-    virtual MacAddress getMacAddress() { return interfaceEntry ? interfaceEntry->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
+    virtual MacAddress getMacAddress() { return networkInterface ? networkInterface->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected; }
@@ -193,7 +193,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     bool verifyCrcAndLength(Packet *packet);
 
     // MacBase
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
 
     // display
     virtual void refreshDisplay() const override;

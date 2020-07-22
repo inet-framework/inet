@@ -75,7 +75,7 @@ class Ospfv2 : public RoutingProtocolBase, protected cListener
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
-    void handleInterfaceDown(const InterfaceEntry *ie);
+    void handleInterfaceDown(const NetworkInterface *ie);
 };
 
 } // namespace ospfv2

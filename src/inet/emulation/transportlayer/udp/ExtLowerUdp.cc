@@ -114,35 +114,35 @@ void ExtLowerUdp::handleMessage(cMessage *message)
 //                leaveMulticastGroups(sd, addresses);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpBlockMulticastSourcesCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                blockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpUnblockMulticastSourcesCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpJoinMulticastSourcesCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                joinMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpLeaveMulticastSourcesCommand *>(ctrl)) {
-//               InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//               NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpSetMulticastSourceFilterCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));

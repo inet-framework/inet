@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
@@ -46,7 +46,7 @@ class INET_API IL3AddressType
     /**
      * Returns the first valid link-local address of the interface, or UNSPECIFIED_ADDRESS if there's none.
      */
-    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
+    virtual L3Address getLinkLocalAddress(const NetworkInterface *ie) const = 0;
 };
 
 } // namespace inet

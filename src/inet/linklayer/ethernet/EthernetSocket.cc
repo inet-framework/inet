@@ -44,7 +44,7 @@ void EthernetSocket::sendToEthernet(cMessage *msg)
     EV_TRACE << endl;
 
     auto& tags = getTags(msg);
-    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(gateToEthernet->getOwnerModule())->send(msg, gateToEthernet);
 }

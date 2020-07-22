@@ -56,8 +56,8 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
         virtual ~QueuedDatagramForHook() {}
 
         Packet *packet = nullptr;
-        const InterfaceEntry *inIE = nullptr;
-        const InterfaceEntry *outIE = nullptr;
+        const NetworkInterface *inIE = nullptr;
+        const NetworkInterface *outIE = nullptr;
         Ipv6Address nextHopAddr;
         const IHook::Type hookType = static_cast<IHook::Type>(-1);
     };
@@ -104,13 +104,13 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
       protected:
         Packet *packet = nullptr;
         const Ipv6Header *ipv6Header = nullptr;
-        const InterfaceEntry *ie = nullptr;
+        const NetworkInterface *ie = nullptr;
         MacAddress macAddr;
         bool fromHL = false;
       public:
-        ScheduledDatagram(Packet *packet, const Ipv6Header *datagram, const InterfaceEntry *ie, MacAddress macAddr, bool fromHL);
+        ScheduledDatagram(Packet *packet, const Ipv6Header *datagram, const NetworkInterface *ie, MacAddress macAddr, bool fromHL);
         ~ScheduledDatagram();
-        const InterfaceEntry *getIE() { return ie; }
+        const NetworkInterface *getIE() { return ie; }
         const Ipv6Address& getSrcAddress() {return ipv6Header->getSrcAddress(); }
         const MacAddress& getMacAddress() { return macAddr; }
         bool getFromHL() { return fromHL; }
@@ -124,7 +124,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual InterfaceEntry *getSourceInterfaceFrom(Packet *msg);
+    virtual NetworkInterface *getSourceInterfaceFrom(Packet *msg);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -134,7 +134,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      */
     virtual void encapsulate(Packet *transportPacket);
 
-    virtual void preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, Ipv6Address nextHopAddr);
+    virtual void preroutingFinish(Packet *packet, const NetworkInterface *fromIE, const NetworkInterface *destIE, Ipv6Address nextHopAddr);
 
     virtual void handleMessage(cMessage *msg) override;
 
@@ -145,7 +145,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(Packet *msg);
-    virtual void datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Address requestedNextHopAddress);
+    virtual void datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress);
 
     /**
      * Handle incoming ICMP messages.
@@ -158,27 +158,27 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL);
+    virtual void routePacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL);
     virtual void resolveMACAddressAndSendPacket(Packet *packet, int interfaceID, Ipv6Address nextHop, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL);
+    virtual void routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, bool fromHL);
 
-    virtual void fragmentPostRouting(Packet *packet, const InterfaceEntry *ie, const MacAddress& nextHopAddr, bool fromHL);
+    virtual void fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL);
 
     /**
      * Performs fragmentation if needed, and sends the original datagram or the fragments
      * through the specified interface.
      */
-    virtual void fragmentAndSend(Packet *packet, const InterfaceEntry *destIE, const MacAddress& nextHopAddr, bool fromHL);
+    virtual void fragmentAndSend(Packet *packet, const NetworkInterface *destIE, const MacAddress& nextHopAddr, bool fromHL);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void localDeliver(Packet *packet, const InterfaceEntry *fromIE);
+    virtual void localDeliver(Packet *packet, const NetworkInterface *fromIE);
 
     /**
      * Decapsulate packet.
@@ -188,7 +188,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     /**
      * Last hoplimit check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MacAddress& macAddr);
+    virtual void sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, const MacAddress& macAddr);
 
     void sendIcmpError(Packet *origPacket, Icmpv6Type type, int code);
 
@@ -208,12 +208,12 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(Packet *packet, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(Packet *packet, const InterfaceEntry *inIE);
+    IHook::Result datagramLocalInHook(Packet *packet, const NetworkInterface *inIE);
 
     /**
      * called before a packet arriving locally is delivered

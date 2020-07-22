@@ -23,7 +23,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee8021d/rstp/Rstp.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -61,7 +61,7 @@ void Rstp::scheduleNextUpgrade()
     const Ieee8021dInterfaceData *nextInterfaceData = nullptr;
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-        if (getPortInterfaceEntry(interfaceId)->hasCarrier()) {
+        if (getPortNetworkInterface(interfaceId)->hasCarrier()) {
             const Ieee8021dInterfaceData *iPort = getPortInterfaceData(interfaceId);
             if (iPort->getRole() == Ieee8021dInterfaceData::NOTASSIGNED) {
                 if (nextInterfaceData == nullptr)
@@ -118,7 +118,7 @@ void Rstp::handleUpgrade(cMessage *msg)
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
         auto iPort = getPortInterfaceDataForUpdate(interfaceId);
-        if (getPortInterfaceEntry(interfaceId)->hasCarrier() && iPort->getNextUpgrade() == simTime()) {
+        if (getPortNetworkInterface(interfaceId)->hasCarrier() && iPort->getNextUpgrade() == simTime()) {
             if (iPort->getRole() == Ieee8021dInterfaceData::NOTASSIGNED) {
                 EV_DETAIL << "MigrateTime. Setting port " << interfaceId << "to designated." << endl;
                 iPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
@@ -879,10 +879,10 @@ void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     Enter_Method_Silent();
 
     if (signalID == interfaceStateChangedSignal) {
-        InterfaceEntry *changedIE = check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry();
+        NetworkInterface *changedIE = check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface();
         for (unsigned int i = 0; i < numPorts; i++) {
             int interfaceId = ifTable->getInterface(i)->getInterfaceId();
-            InterfaceEntry *gateIfEntry = getPortInterfaceEntry(interfaceId);
+            NetworkInterface *gateIfEntry = getPortNetworkInterface(interfaceId);
             if (gateIfEntry == changedIE) {
                 if (gateIfEntry->hasCarrier()) {
                     auto iPort = getPortInterfaceDataForUpdate(interfaceId);

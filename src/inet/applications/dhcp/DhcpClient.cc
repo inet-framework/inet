@@ -79,11 +79,11 @@ void DhcpClient::initialize(int stage)
     }
 }
 
-InterfaceEntry *DhcpClient::chooseInterface()
+NetworkInterface *DhcpClient::chooseInterface()
 {
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
         ie = ift->findInterfaceByName(interfaceName);
@@ -93,7 +93,7 @@ InterfaceEntry *DhcpClient::chooseInterface()
     else {
         // there should be exactly one non-loopback interface that we want to configure
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            InterfaceEntry *current = ift->getInterface(i);
+            NetworkInterface *current = ift->getInterface(i);
             if (!current->isLoopback()) {
                 if (ie)
                     throw cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to configure via DHCP");
@@ -507,7 +507,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
 
     // host associated. link is up. change the state to init.
     if (signalID == l2AssociatedSignal) {
-        InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry *>(obj);
+        NetworkInterface *associatedIE = check_and_cast_nullable<NetworkInterface *>(obj);
         if (associatedIE && ie == associatedIE && clientState != IDLE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             unbindLease();

@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 
 namespace ieee80211 {
 

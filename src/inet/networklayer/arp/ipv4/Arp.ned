@@ -36,7 +36,7 @@ import inet.networklayer.contract.IArp;
 //
 // ARP resolution is used over <i>broadcast</i> interfaces only,
 // that is, over interfaces that have the <tt>isBroadcast()</tt> flag set in
-// <tt>InterfaceEntry</tt> (see ~InterfaceTable). Since routing files
+// <tt>NetworkInterface</tt> (see ~InterfaceTable). Since routing files
 // (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameter to ~Ipv4RoutingTable)
 // may modify the default interface configuration, you must take care that
 // these files don't contain the word <tt>BROADCAST</tt> e.g. for PPP

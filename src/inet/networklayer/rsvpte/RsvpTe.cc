@@ -864,7 +864,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             outInterface = "lo0";
 
             if (!tedmod->isLocalAddress(psb->Session_Object.DestAddress)) {
-                InterfaceEntry *ie = rt->getInterfaceForDestAddr(psb->Session_Object.DestAddress);
+                NetworkInterface *ie = rt->getInterfaceForDestAddr(psb->Session_Object.DestAddress);
                 if (ie)
                     outInterface = ie->getInterfaceName(); // FIXME why use name to identify an interface?
             }
@@ -1060,7 +1060,7 @@ bool RsvpTe::evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ip
         // explicit routing
 
         if (ERO[0].L) {
-            InterfaceEntry *ie = rt->getInterfaceForDestAddr(ERO[0].node);
+            NetworkInterface *ie = rt->getInterfaceForDestAddr(ERO[0].node);
 
             if (!ie) {
                 EV_INFO << "next (loose) hop address " << ERO[0].node << " is currently unroutable" << endl;
@@ -1086,7 +1086,7 @@ bool RsvpTe::evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ip
         // hop-by-hop routing
 
         if (!tedmod->isLocalAddress(destAddr)) {
-            InterfaceEntry *ie = rt->getInterfaceForDestAddr(destAddr);
+            NetworkInterface *ie = rt->getInterfaceForDestAddr(destAddr);
 
             if (!ie) {
                 EV_INFO << "destination address " << destAddr << " is currently unroutable" << endl;

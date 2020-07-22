@@ -26,7 +26,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/Tun.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -41,9 +41,9 @@ void Tun::initialize(int stage)
     }
 }
 
-void Tun::configureInterfaceEntry()
+void Tun::configureNetworkInterface()
 {
-    interfaceEntry->setMtu(par("mtu"));
+    networkInterface->setMtu(par("mtu"));
 }
 
 void Tun::handleUpperMessage(cMessage *message)
@@ -64,7 +64,7 @@ void Tun::handleUpperPacket(Packet *packet)
     if (socketReq != nullptr && contains(socketIds, sId)) {
         // TODO: should we determine the network protocol by looking at the packet?!
         packet->clearTags();
-        packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         emit(packetSentToUpperSignal, packet);
@@ -77,7 +77,7 @@ void Tun::handleUpperPacket(Packet *packet)
             copy->setKind(TUN_I_DATA);
             copy->clearTags();
             copy->addTag<SocketInd>()->setSocketId(socketId);
-            copy->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+            copy->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
             copy->addTag<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
             auto npTag = packet->getTag<NetworkProtocolInd>();
             auto newnpTag = copy->addTag<NetworkProtocolInd>();

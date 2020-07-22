@@ -120,14 +120,14 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen)
     fwrite(&sbt, sizeof(sbt), 1, dumpfile);
 }
 
-void PcapngWriter::writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType linkType)
+void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkType linkType)
 {
     EV << "PcapngWriter::writeInterface()\n";
     if (!dumpfile)
         throw cRuntimeError("Cannot write interface: pcap output file is not open");
 
-    std::string name = interfaceEntry->getInterfaceName();
-    std::string fullPath = interfaceEntry->getInterfaceFullPath();
+    std::string name = networkInterface->getInterfaceName();
+    std::string fullPath = networkInterface->getInterfaceFullPath();
     fullPath = fullPath.substr(fullPath.find('.') + 1);
     uint32_t optionsLength = (4 + roundUp(name.length())) + (4 + roundUp(fullPath.length())) + (4 + 8) + (4 + 4 + 4) + 4;
     uint32_t blockTotalLength = 20 + optionsLength;
@@ -164,7 +164,7 @@ void PcapngWriter::writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType l
     doh.length = 6;
     fwrite(&doh, sizeof(doh), 1, dumpfile);
     uint8_t macAddressBytes[6];
-    interfaceEntry->getMacAddress().getAddressBytes(macAddressBytes);
+    networkInterface->getMacAddress().getAddressBytes(macAddressBytes);
     fwrite(macAddressBytes, 6, 1, dumpfile);
     fwrite(padding, 2, 1, dumpfile);
 
@@ -173,10 +173,10 @@ void PcapngWriter::writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType l
     doh.length = 4 + 4;
     fwrite(&doh, sizeof(doh), 1, dumpfile);
     uint8_t ipAddressBytes[4];
-    auto ipv4Address = interfaceEntry->getIpv4Address();
+    auto ipv4Address = networkInterface->getIpv4Address();
     for (int i = 0; i < 4; i++) ipAddressBytes[i] = ipv4Address.getDByte(i);
     fwrite(ipAddressBytes, 4, 1, dumpfile);
-    auto ipv4Netmask = interfaceEntry->getIpv4Netmask();
+    auto ipv4Netmask = networkInterface->getIpv4Netmask();
     for (int i = 0; i < 4; i++) ipAddressBytes[i] = ipv4Netmask.getDByte(i);
     fwrite(ipAddressBytes, 4, 1, dumpfile);
 
@@ -190,23 +190,23 @@ void PcapngWriter::writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType l
     fwrite(&ibt, sizeof(ibt), 1, dumpfile);
 }
 
-void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, InterfaceEntry *interfaceEntry, PcapLinkType linkType)
+void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, NetworkInterface *networkInterface, PcapLinkType linkType)
 {
     EV << "PcapngWriter::writePacket()\n";
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
-    auto it = interfaceModuleIdToPcapngInterfaceId.find(interfaceEntry->getId());
+    auto it = interfaceModuleIdToPcapngInterfaceId.find(networkInterface->getId());
     int pcapngInterfaceId;
     if (it != interfaceModuleIdToPcapngInterfaceId.end())
         pcapngInterfaceId = it->second;
     else {
-        writeInterface(interfaceEntry, linkType);
+        writeInterface(networkInterface, linkType);
         pcapngInterfaceId = nextPcapngInterfaceId++;
-        interfaceModuleIdToPcapngInterfaceId[interfaceEntry->getId()] = pcapngInterfaceId;
+        interfaceModuleIdToPcapngInterfaceId[networkInterface->getId()] = pcapngInterfaceId;
     }
 
-    if (interfaceEntry == nullptr)
+    if (networkInterface == nullptr)
         throw cRuntimeError("The interface entry not found for packet");
 
     uint32_t optionsLength = (4 + 4) + 4;

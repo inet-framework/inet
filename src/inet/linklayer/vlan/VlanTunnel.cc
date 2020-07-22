@@ -32,33 +32,33 @@ void VlanTunnel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         vlanId = par("vlanId");
-        interfaceEntry = getContainingNicModule(this);
+        networkInterface = getContainingNicModule(this);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        realInterfaceEntry = CHK(interfaceTable->findInterfaceByName(par("realInterfaceName")));
+        realNetworkInterface = CHK(interfaceTable->findInterfaceByName(par("realInterfaceName")));
         const char *addressString = par("address");
         MacAddress address;
         if (!strcmp(addressString, "auto"))
             address = MacAddress::generateAutoAddress();
         else if (!strcmp(addressString, "copy"))
-            address = realInterfaceEntry->getMacAddress();
+            address = realNetworkInterface->getMacAddress();
         else
             address = MacAddress(addressString);
-        interfaceEntry->setMacAddress(address);
-        interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
-        interfaceEntry->setBroadcast(realInterfaceEntry->isBroadcast());
-        interfaceEntry->setMulticast(realInterfaceEntry->isMulticast());
-        interfaceEntry->setPointToPoint(realInterfaceEntry->isPointToPoint());
+        networkInterface->setMacAddress(address);
+        networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
+        networkInterface->setBroadcast(realNetworkInterface->isBroadcast());
+        networkInterface->setMulticast(realNetworkInterface->isMulticast());
+        networkInterface->setPointToPoint(realNetworkInterface->isPointToPoint());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // KLUDGE: depends on other interface
         if (!strcmp(par("address"), "copy"))
-            interfaceEntry->setMacAddress(realInterfaceEntry->getMacAddress());
+            networkInterface->setMacAddress(realNetworkInterface->getMacAddress());
         socket.setCallback(this);
         socket.setOutputGate(gate("upperLayerOut"));
-        socket.setInterfaceEntry(realInterfaceEntry);
-        socket.bind(interfaceEntry->getMacAddress(), MacAddress(), nullptr, vlanId);
+        socket.setNetworkInterface(realNetworkInterface);
+        socket.bind(networkInterface->getMacAddress(), MacAddress(), nullptr, vlanId);
     }
 }
 
@@ -76,7 +76,7 @@ void VlanTunnel::handleMessage(cMessage *message)
 void VlanTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
-    packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     send(packet, "upperLayerOut");
 }
 

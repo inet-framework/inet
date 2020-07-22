@@ -64,10 +64,10 @@ void L2NodeConfigurator::prepareNode()
         prepareInterface(interfaceTable->getInterface(i));
 }
 
-void L2NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
+void L2NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
 {
-    // ASSERT(!interfaceEntry->getProtocolData<Ieee8021dInterfaceData>());
-    interfaceEntry->addProtocolData<Ieee8021dInterfaceData>();
+    // ASSERT(!networkInterface->getProtocolData<Ieee8021dInterfaceData>());
+    networkInterface->addProtocolData<Ieee8021dInterfaceData>();
 }
 
 void L2NodeConfigurator::configureNode()
@@ -84,7 +84,7 @@ void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID,
         return;
 
     if (signalID == interfaceCreatedSignal) {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
+        NetworkInterface *ie = check_and_cast<NetworkInterface *>(obj);
         prepareInterface(ie);
         if (networkConfigurator)
             networkConfigurator->configureInterface(ie);

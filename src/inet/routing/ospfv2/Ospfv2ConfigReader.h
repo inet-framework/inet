@@ -47,12 +47,12 @@ class INET_API Ospfv2ConfigReader
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 
     /**
-     * Search an InterfaceEntry in IInterfaceTable by interface name or toward module name
-     * an returns the InterfaceEntry pointer or throws an error.
+     * Search an NetworkInterface in IInterfaceTable by interface name or toward module name
+     * an returns the NetworkInterface pointer or throws an error.
      */
-    std::vector<InterfaceEntry *> getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
+    std::vector<NetworkInterface *> getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
 
-    cXMLElement * findMatchingConfig(const cXMLElementList& routerConfig, const InterfaceEntry& intf);
+    cXMLElement * findMatchingConfig(const cXMLElementList& routerConfig, const NetworkInterface& intf);
 
     /**
      * Loads a list of OSPF Areas connected to this router from the config XML.
@@ -76,7 +76,7 @@ class INET_API Ospfv2ConfigReader
      * Loads OSPF configuration information for a router interface.
      * Handles POINTTOPOINT, BROADCAST, NBMA and POINTTOMULTIPOINT interfaces.
      */
-    void loadInterfaceParameters(const cXMLElement& ifConfig, InterfaceEntry& intf);
+    void loadInterfaceParameters(const cXMLElement& ifConfig, NetworkInterface& intf);
 
     /**
      * Loads the configuration information of a route outside of the Autonomous System (external route).
@@ -91,7 +91,7 @@ class INET_API Ospfv2ConfigReader
     /**
      * Loads the configuration of a loopback interface.
      */
-    void loadLoopbackParameters(const cXMLElement& loConfig, InterfaceEntry& intf);
+    void loadLoopbackParameters(const cXMLElement& loConfig, NetworkInterface& intf);
 
     /**
      * Loads the configuration of an OSPf virtual link (virtual connection between two backbone routers).

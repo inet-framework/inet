@@ -19,7 +19,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/ieee8021d/common/StpBase.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -69,7 +69,7 @@ void StpBase::stop()
     ie = nullptr;
 }
 
-void StpBase::colorLink(InterfaceEntry *ie, bool forwarding) const
+void StpBase::colorLink(NetworkInterface *ie, bool forwarding) const
 {
     if (visualize) {
         cGate *inGate = switchModule->gate(ie->getNodeInputGateId());
@@ -107,7 +107,7 @@ void StpBase::refreshDisplay() const
 {
     if (visualize) {
         for (unsigned int i = 0; i < numPorts; i++) {
-            InterfaceEntry *ie = ifTable->getInterface(i);
+            NetworkInterface *ie = ifTable->getInterface(i);
             cModule *nicModule = ie;
             if (isUp()) {
                 const Ieee8021dInterfaceData *port = getPortInterfaceData(ie->getInterfaceId());
@@ -143,17 +143,17 @@ void StpBase::refreshDisplay() const
 
 const Ieee8021dInterfaceData *StpBase::getPortInterfaceData(unsigned int interfaceId) const
 {
-    return getPortInterfaceEntry(interfaceId)->getProtocolData<Ieee8021dInterfaceData>();
+    return getPortNetworkInterface(interfaceId)->getProtocolData<Ieee8021dInterfaceData>();
 }
 
 Ieee8021dInterfaceData *StpBase::getPortInterfaceDataForUpdate(unsigned int interfaceId)
 {
-    return getPortInterfaceEntry(interfaceId)->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
+    return getPortNetworkInterface(interfaceId)->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
 }
 
-InterfaceEntry *StpBase::getPortInterfaceEntry(unsigned int interfaceId) const
+NetworkInterface *StpBase::getPortNetworkInterface(unsigned int interfaceId) const
 {
-    InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
+    NetworkInterface *gateIfEntry = ifTable->getInterfaceById(interfaceId);
     if (!gateIfEntry)
         throw cRuntimeError("gate's Interface is nullptr");
 
@@ -163,7 +163,7 @@ InterfaceEntry *StpBase::getPortInterfaceEntry(unsigned int interfaceId) const
 int StpBase::getRootInterfaceId() const
 {
     for (unsigned int i = 0; i < numPorts; i++) {
-        InterfaceEntry *ie = ifTable->getInterface(i);
+        NetworkInterface *ie = ifTable->getInterface(i);
         if (ie->getProtocolData<Ieee8021dInterfaceData>()->getRole() == Ieee8021dInterfaceData::ROOT)
             return ie->getInterfaceId();
     }
@@ -171,13 +171,13 @@ int StpBase::getRootInterfaceId() const
     return -1;
 }
 
-InterfaceEntry *StpBase::chooseInterface()
+NetworkInterface *StpBase::chooseInterface()
 {
     // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since STP and RSTP work on EtherSwitches.
     //       NOTE that, we doesn't check if the returning interface is an Ethernet interface!
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        InterfaceEntry *current = ifTable->getInterface(i);
+        NetworkInterface *current = ifTable->getInterface(i);
         if (!current->isLoopback())
             return current;
     }

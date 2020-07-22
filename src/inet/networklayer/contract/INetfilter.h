@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 
 namespace inet {
@@ -60,7 +60,7 @@ class INET_API INetfilter
         /**
          * This is the first hook called by the network protocol before it routes
          * a datagram that was received from the lower layer. The nextHopAddress
-         * is ignored when the outputInterfaceEntry is nullptr.
+         * is ignored when the outputNetworkInterface is nullptr.
          */
         virtual Result datagramPreRoutingHook(Packet *datagram) = 0;
 
@@ -87,7 +87,7 @@ class INET_API INetfilter
         /**
          * This is the first hook called by the network protocol before it routes
          * a datagram that was received from the upper layer. The nextHopAddress
-         * is ignored when the outputInterfaceEntry is a nullptr. After this is done
+         * is ignored when the outputNetworkInterface is a nullptr. After this is done
          */
         virtual Result datagramLocalOutHook(Packet *datagram) = 0;
     };

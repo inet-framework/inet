@@ -76,7 +76,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
         std::vector<Ipv4Address> multicastGroups;
 
       public:
-        InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+        InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);
 
         Ipv4Address getAddress() const { ASSERT(addressSpecifiedBits == 0xFFFFFFFF); return Ipv4Address(address); }
         Ipv4Address getNetmask() const { ASSERT(netmaskSpecifiedBits == 0xFFFFFFFF); return Ipv4Address(netmask); }
@@ -154,7 +154,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     /**
      * Configures the provided interface based on the current network configuration.
      */
-    virtual void configureInterface(InterfaceEntry *interfaceEntry);
+    virtual void configureInterface(NetworkInterface *networkInterface);
 
     /**
      * Configures all routing tables in the network based on the current network configuration.
@@ -167,9 +167,9 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void configureRoutingTable(IIpv4RoutingTable *routingTable);
 
     /**
-     * Configures the provided routing table based on the current network configuration for specified interfaceEntry.
+     * Configures the provided routing table based on the current network configuration for specified networkInterface.
      */
-    virtual void configureRoutingTable(IIpv4RoutingTable *routingTable, InterfaceEntry *interfaceEntry);
+    virtual void configureRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -221,7 +221,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     void ensureConfigurationComputed(Topology& topology);
     void configureInterface(InterfaceInfo *interfaceInfo);
     void configureRoutingTable(Node *node);
-    void configureRoutingTable(Node *node, InterfaceEntry *interfaceEntry);
+    void configureRoutingTable(Node *node, NetworkInterface *networkInterface);
 
     /**
      * Prints the current network configuration to the module output.
@@ -233,13 +233,13 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void dumpConfig(Topology& topology);
 
     // helper functions
-    virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry) override;
+    virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) override;
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
-    virtual void resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr, InterfaceEntry *& outIE, Ipv4Address& outGateway, Topology& topology);
+    virtual void resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr, NetworkInterface *& outIE, Ipv4Address& outGateway, Topology& topology);
     virtual InterfaceInfo *findInterfaceOnLinkByNode(LinkInfo *linkInfo, cModule *node);
     virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, Ipv4Address address);
-    virtual LinkInfo *findLinkOfInterface(Topology& topology, InterfaceEntry *interfaceEntry);
+    virtual LinkInfo *findLinkOfInterface(Topology& topology, NetworkInterface *networkInterface);
     virtual IRoutingTable *findRoutingTable(NetworkConfiguratorBase::Node *node) override;
     virtual void assignAddresses(std::vector<LinkInfo *> links);
 
@@ -266,7 +266,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
     // address resolver interface
-    bool getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask) override;
+    bool getInterfaceIpv4Address(L3Address& ret, NetworkInterface *networkInterface, bool netmask) override;
 };
 
 } // namespace inet

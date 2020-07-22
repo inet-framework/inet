@@ -126,7 +126,7 @@ class INET_API CsmaCaMac : public MacProtocolBase
     /** @brief Initialization of the module and its variables */
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
     //@}
 
     /**

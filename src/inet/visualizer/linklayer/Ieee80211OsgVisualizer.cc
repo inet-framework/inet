@@ -54,7 +54,7 @@ void Ieee80211OsgVisualizer::initialize(int stage)
     }
 }
 
-Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
+Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createIeee80211Visualization(cModule *networkNode, NetworkInterface *networkInterface, std::string ssid, W power)
 {
     auto path = resolveResourcePath((getIcon(power) + ".png").c_str());
     auto image = inet::osg::createImage(path.c_str());
@@ -77,8 +77,8 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createI
     // TODO: apply tinting
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
-        throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", interfaceEntry->getInterfaceName(), networkNode->getFullPath().c_str());
-    return new Ieee80211OsgVisualization(networkNodeVisualization, geode, networkNode->getId(), interfaceEntry->getInterfaceId());
+        throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", networkInterface->getInterfaceName(), networkNode->getFullPath().c_str());
+    return new Ieee80211OsgVisualization(networkNodeVisualization, geode, networkNode->getId(), networkInterface->getInterfaceId());
 }
 
 void Ieee80211OsgVisualizer::addIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization)

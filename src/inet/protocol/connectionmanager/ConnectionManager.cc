@@ -34,7 +34,7 @@ void ConnectionManager::initialize(int stage)
         physOutGate = gate("physOut");
         connected = physInGate->getPathStartGate()->isConnected() && physOutGate->getPathEndGate()->isConnected();
         disabled = true;
-        interfaceEntry = getContainingNicModule(this);
+        networkInterface = getContainingNicModule(this);
         txTransmissionChannel = physOutGate->findTransmissionChannel();
         rxTransmissionChannel = physInGate->findIncomingTransmissionChannel();
 
@@ -119,14 +119,14 @@ void ConnectionManager::propagatePreChannelOff()
 
 void ConnectionManager::propagateStatus()
 {
-    interfaceEntry->setCarrier(connected && ! disabled);
+    networkInterface->setCarrier(connected && ! disabled);
 }
 
 void ConnectionManager::propagateDatarate()
 {
     //TODO which is the good solution from these?
-    interfaceEntry->par("bitrate").setDoubleValue(bitrate);
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->par("bitrate").setDoubleValue(bitrate);
+    networkInterface->setDatarate(bitrate);
 }
 
 void ConnectionManager::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

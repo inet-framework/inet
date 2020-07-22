@@ -92,7 +92,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         else {
             EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
             packet->setFrontOffset(ipv4HeaderPosition);
-//            const InterfaceEntry* fromIE = getSourceInterface(packet);
+//            const NetworkInterface* fromIE = getSourceInterface(packet);
 //            sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
         send(packet, "upperLayerOut");

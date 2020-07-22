@@ -114,12 +114,12 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual const InterfaceEntry *getSourceInterface(Packet *packet);
-    virtual const InterfaceEntry *getDestInterface(Packet *packet);
+    virtual const NetworkInterface *getSourceInterface(Packet *packet);
+    virtual const NetworkInterface *getDestInterface(Packet *packet);
     virtual Ipv4Address getNextHop(Packet *packet);
 
     // utility: look up route to the source of the datagram and return its interface
-    virtual const InterfaceEntry *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
+    virtual const NetworkInterface *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -186,7 +186,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     /**
      * Determines the output interface for the given multicast datagram.
      */
-    virtual const InterfaceEntry *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption);
+    virtual const NetworkInterface *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const NetworkInterface *multicastIFOption);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
@@ -223,7 +223,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
      */
     virtual void sendDatagramToOutput(Packet *packet);
 
-    virtual MacAddress resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const InterfaceEntry *destIE);
+    virtual MacAddress resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const NetworkInterface *destIE);
 
     virtual void sendPacketToNIC(Packet *packet);
 

@@ -276,7 +276,7 @@ void BindingUpdateList::resetCareOfToken(const Ipv6Address& dest, const Ipv6Addr
     //entry->sentCoTI = 0;
 }
 
-bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
     ASSERT(entry != nullptr);
@@ -285,7 +285,7 @@ bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, InterfaceE
            (entry->sentHoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime()) > simTime();
 }
 
-bool BindingUpdateList::isCareOfTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::isCareOfTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
     ASSERT(entry != nullptr);
@@ -384,7 +384,7 @@ void BindingUpdateList::suspendBinding(const Ipv6Address& dest)
     entry->BAck = false;
 }
 
-bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
@@ -393,7 +393,7 @@ bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry
     return entry->sentCoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > simTime();
 }
 
-bool BindingUpdateList::recentlySentHOTI(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::recentlySentHOTI(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 

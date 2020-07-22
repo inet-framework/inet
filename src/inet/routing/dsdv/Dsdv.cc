@@ -70,8 +70,8 @@ void Dsdv::start()
 {
     /* Search the 80211 interface */
     int  num_80211 = 0;
-    InterfaceEntry *ie;
-    InterfaceEntry *i_face;
+    NetworkInterface *ie;
+    NetworkInterface *i_face;
     const char *name;
     broadcastDelay = &par("broadcastDelay");
     for (int i = 0; i < ift->getNumInterfaces(); i++)
@@ -98,7 +98,7 @@ void Dsdv::start()
         for (int i = rt->getNumRoutes() - 1; i >= 0; i--)
         {
             entry = rt->getRoute(i);
-            const InterfaceEntry *ie = entry->getInterface();
+            const NetworkInterface *ie = entry->getInterface();
             if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
                 rt->deleteRoute(entry);
         }
@@ -144,7 +144,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
 
         // count non-loopback interfaces
         // int numIntf = 0;
-        // InterfaceEntry *ie = nullptr;
+        // NetworkInterface *ie = nullptr;
         //for (int k=0; k<ift->getNumInterfaces(); k++)
         //  if (!ift->getInterface(k)->isLoopback())
         //  {ie = ift->getInterface(k); numIntf++;}

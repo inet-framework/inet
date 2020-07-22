@@ -21,7 +21,7 @@
 #define __INET_PIMNEIGHBORTABLE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -41,7 +41,7 @@ class INET_API PimNeighbor : public cObject
 
   protected:
     PimNeighborTable *nt;
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     Ipv4Address address;
     int version;
     unsigned int generationId;
@@ -49,12 +49,12 @@ class INET_API PimNeighbor : public cObject
     cMessage *livenessTimer;
 
   public:
-    PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version);
+    PimNeighbor(NetworkInterface *ie, Ipv4Address address, int version);
     virtual ~PimNeighbor();
     virtual std::string str() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
-    InterfaceEntry *getInterfacePtr() const { return ie; }
+    NetworkInterface *getInterfacePtr() const { return ie; }
     Ipv4Address getAddress() const { return address; }
     int getVersion() const { return version; }
     unsigned int getGenerationId() const { return generationId; }

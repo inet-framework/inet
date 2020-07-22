@@ -16,9 +16,9 @@
 package inet.protocol.ethernet;
 
 import inet.linklayer.contract.IEthernetInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 
-module EthernetCutthroughInterface extends InterfaceEntry like IEthernetInterface
+module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
         bool broadcast = default(true);

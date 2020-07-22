@@ -24,7 +24,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ieee8021d/stp/Stp.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -571,7 +571,7 @@ void Stp::selectDesignatedPorts()
     bridgeGlobal->setRootPriority(rootPriority);
 
     for (unsigned int i = 0; i < numPorts; i++) {
-        InterfaceEntry *ie = ifTable->getInterface(i);
+        NetworkInterface *ie = ifTable->getInterface(i);
         auto portData = ie->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
         ASSERT(portData != nullptr);
 
@@ -608,7 +608,7 @@ void Stp::setAllDesignated()
 
     desPorts.clear();
     for (unsigned int i = 0; i < numPorts; i++) {
-        InterfaceEntry *ie = ifTable->getInterface(i);
+        NetworkInterface *ie = ifTable->getInterface(i);
         auto portData = ie->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
         ASSERT(portData != nullptr);
         if (portData->getRole() == Ieee8021dInterfaceData::DISABLED)

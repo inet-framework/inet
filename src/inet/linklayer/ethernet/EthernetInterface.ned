@@ -22,7 +22,7 @@ import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ieee8021q.IIeee8021qEncap;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
 
 
@@ -30,10 +30,10 @@ import inet.queueing.contract.ITrafficConditioner;
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
 // with an output queue for QoS and RED support.
 //
-module EthernetInterface extends InterfaceEntry like IEthernetInterface
+module EthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         @lifecycleSupport;
         @display("i=block/ifcard;bgl=2");
         string interfaceTableModule;

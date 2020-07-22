@@ -31,7 +31,7 @@ void EthernetCutthroughSource::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         cutthroughOutputGate = gate("cutthroughOut");
         cutthroughConsumer = findConnectedModule<IPassivePacketSink>(cutthroughOutputGate);
-        interfaceEntry = getContainingNicModule(this);
+        networkInterface = getContainingNicModule(this);
         macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
         cutthroughTimer = new cMessage("CutthroughTimer");
     }
@@ -42,7 +42,7 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
     if (message == cutthroughTimer) {
         const auto& header = streamedPacket->peekAtFront<Ieee8023MacAddresses>();
         int interfaceId = macTable->getInterfaceIdForAddress(header->getDest());
-        macTable->updateTableWithAddress(interfaceEntry->getInterfaceId(), header->getSrc());
+        macTable->updateTableWithAddress(networkInterface->getInterfaceId(), header->getSrc());
         if (interfaceId != -1 && cutthroughConsumer->canPushPacket(streamedPacket, cutthroughOutputGate)) {
             streamedPacket->trim();
             streamedPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
@@ -79,7 +79,7 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate, bps da
         Enter_Method("pushPacketEnd");
         take(packet);
         const auto& header = packet->peekAtFront<Ieee8023MacAddresses>();
-        macTable->updateTableWithAddress(interfaceEntry->getInterfaceId(), header->getSrc());
+        macTable->updateTableWithAddress(networkInterface->getInterfaceId(), header->getSrc());
         int interfaceId = macTable->getInterfaceIdForAddress(header->getDest());
         packet->trim();
         packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);

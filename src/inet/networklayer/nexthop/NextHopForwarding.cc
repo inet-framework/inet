@@ -169,7 +169,7 @@ void NextHopForwarding::handleCommand(Request *request)
         throw cRuntimeError("Invalid command: (%s)%s", request->getClassName(), request->getName());
 }
 
-const InterfaceEntry *NextHopForwarding::getSourceInterfaceFrom(Packet *packet)
+const NetworkInterface *NextHopForwarding::getSourceInterfaceFrom(Packet *packet)
 {
     const auto& interfaceInd = packet->findTag<InterfaceInd>();
     return interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
@@ -205,8 +205,8 @@ void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
         packet->setBackOffset(packet->getFrontOffset() + totalLength);
     }
 
-    const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    const InterfaceEntry *destIE = nullptr;
+    const NetworkInterface *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    const NetworkInterface *destIE = nullptr;
 
     EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getInterfaceName() << "\n";
 
@@ -234,7 +234,7 @@ void NextHopForwarding::handlePacketFromHL(Packet *packet)
     }
 
     // encapsulate and send
-    const InterfaceEntry *destIE;    // will be filled in by encapsulate()
+    const NetworkInterface *destIE;    // will be filled in by encapsulate()
     encapsulate(packet, destIE);
 
     L3Address nextHop;
@@ -249,7 +249,7 @@ void NextHopForwarding::handlePacketFromHL(Packet *packet)
     datagramLocalOut(packet, destIE, nextHop);
 }
 
-void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *destIE, const L3Address& requestedNextHop, bool fromHL)
+void NextHopForwarding::routePacket(Packet *datagram, const NetworkInterface *destIE, const L3Address& requestedNextHop, bool fromHL)
 {
     // TBD add option handling code here
 
@@ -341,7 +341,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
     sendDatagramToOutput(datagram, destIE, nextHop);
 }
 
-void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE)
+void NextHopForwarding::routeMulticastPacket(Packet *datagram, const NetworkInterface *destIE, const NetworkInterface *fromIE)
 {
     const auto& header = datagram->peekAtFront<NextHopForwardingHeader>();
     L3Address destAddr = header->getDestinationAddress();
@@ -370,7 +370,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
     else {
         //TODO
         for (int i = 0; i < interfaceTable->getNumInterfaces(); ++i) {
-            const InterfaceEntry *destIE = interfaceTable->getInterface(i);
+            const NetworkInterface *destIE = interfaceTable->getInterface(i);
             if (!destIE->isLoopback())
                 sendDatagramToOutput(datagram->dup(), destIE, header->getDestinationAddress());
         }
@@ -385,7 +385,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //    // DVMRP: process datagram only if sent locally or arrived on the shortest
 //    // route (provided routing table already contains srcAddr); otherwise
 //    // discard and continue.
-//    const InterfaceEntry *shortestPathIE = rt->getInterfaceForDestinationAddr(datagram->getSourceAddress());
+//    const NetworkInterface *shortestPathIE = rt->getInterfaceForDestinationAddr(datagram->getSourceAddress());
 //    if (fromIE!=nullptr && shortestPathIE!=nullptr && fromIE!=shortestPathIE)
 //    {
 //        // FIXME count dropped
@@ -453,7 +453,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //        // copy original datagram for multiple destinations
 //        for (unsigned int i=0; i<routes.size(); i++)
 //        {
-//            const InterfaceEntry *destIE = routes[i].interf;
+//            const NetworkInterface *destIE = routes[i].interf;
 //
 //            // don't forward to input port
 //            if (destIE && destIE!=fromIE)
@@ -478,7 +478,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 void NextHopForwarding::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
-    const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
+    const NetworkInterface *fromIE = getSourceInterfaceFrom(packet);
     const auto& header = packet->popAtFront<NextHopForwardingHeader>();
 
     // create and fill in control info
@@ -504,7 +504,7 @@ void NextHopForwarding::decapsulate(Packet *packet)
     packet->addTagIfAbsent<HopLimitInd>()->setHopLimit(header->getHopLimit());
 }
 
-void NextHopForwarding::encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE)
+void NextHopForwarding::encapsulate(Packet *transportPacket, const NetworkInterface *& destIE)
 {
     auto header = makeShared<NextHopForwardingHeader>();
     header->setChunkLength(B(par("headerLength")));
@@ -592,7 +592,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     }
 }
 
-void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEntry *ie, L3Address nextHop)
+void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInterface *ie, L3Address nextHop)
 {
     delete datagram->removeControlInfo();
 
@@ -642,7 +642,7 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEn
     }
 }
 
-void NextHopForwarding::datagramPreRouting(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *destIE, const L3Address& nextHop)
+void NextHopForwarding::datagramPreRouting(Packet *datagram, const NetworkInterface *inIE, const NetworkInterface *destIE, const L3Address& nextHop)
 {
     const auto& header = datagram->peekAtFront<NextHopForwardingHeader>();
     // route packet
@@ -652,12 +652,12 @@ void NextHopForwarding::datagramPreRouting(Packet *datagram, const InterfaceEntr
         routeMulticastPacket(datagram, destIE, inIE);
 }
 
-void NextHopForwarding::datagramLocalIn(Packet *packet, const InterfaceEntry *inIE)
+void NextHopForwarding::datagramLocalIn(Packet *packet, const NetworkInterface *inIE)
 {
     sendDatagramToHL(packet);
 }
 
-void NextHopForwarding::datagramLocalOut(Packet *datagram, const InterfaceEntry *destIE, const L3Address& nextHop)
+void NextHopForwarding::datagramLocalOut(Packet *datagram, const NetworkInterface *destIE, const L3Address& nextHop)
 {
     const auto& header = datagram->peekAtFront<NextHopForwardingHeader>();
     // route packet
@@ -697,8 +697,8 @@ void NextHopForwarding::reinjectQueuedDatagram(const Packet *datagram)
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             Packet *datagram = iter->datagram;
-            const InterfaceEntry *inIE = iter->inIE;
-            const InterfaceEntry *outIE = iter->outIE;
+            const NetworkInterface *inIE = iter->inIE;
+            const NetworkInterface *outIE = iter->outIE;
             const L3Address& nextHop = iter->nextHop;
             INetfilter::IHook::Type hookType = iter->hookType;
             switch (hookType) {

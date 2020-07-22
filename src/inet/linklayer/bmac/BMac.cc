@@ -22,7 +22,7 @@
 #include "inet/linklayer/bmac/BMacHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -128,21 +128,21 @@ void BMac::finish()
     //recordScalar("timeTX", timeTX);
 }
 
-void BMac::configureInterfaceEntry()
+void BMac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(false);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(false);
+    networkInterface->setBroadcast(true);
 }
 
 /**
@@ -168,7 +168,7 @@ void BMac::handleUpperPacket(Packet *packet)
 void BMac::sendPreamble()
 {
     auto preamble = makeShared<BMacControlFrame>();
-    preamble->setSrcAddr(interfaceEntry->getMacAddress());
+    preamble->setSrcAddr(networkInterface->getMacAddress());
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(ctrlFrameLength);
 
@@ -188,7 +188,7 @@ void BMac::sendPreamble()
 void BMac::sendMacAck()
 {
     auto ack = makeShared<BMacControlFrame>();
-    ack->setSrcAddr(interfaceEntry->getMacAddress());
+    ack->setSrcAddr(networkInterface->getMacAddress());
     ack->setDestAddr(lastDataPktSrcAddr);
     ack->setChunkLength(ctrlFrameLength);
 
@@ -437,7 +437,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             if (msg->getKind() == BMAC_DATA) {
-                MacAddress address = interfaceEntry->getMacAddress();
+                MacAddress address = networkInterface->getMacAddress();
                 nbRxDataPackets++;
                 auto packet = check_and_cast<Packet *>(msg);
                 const auto bmacHeader = packet->peekAtFront<BMacDataFrameHeader>();
@@ -679,7 +679,7 @@ void BMac::decapsulate(Packet *packet)
 {
     const auto& bmacHeader = packet->popAtFront<BMacDataFrameHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
@@ -703,7 +703,7 @@ void BMac::encapsulate(Packet *packet)
     delete packet->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
-    pkt->setSrcAddr(interfaceEntry->getMacAddress());
+    pkt->setSrcAddr(networkInterface->getMacAddress());
 
     //encapsulate the network packet
     packet->insertAtFront(pkt);

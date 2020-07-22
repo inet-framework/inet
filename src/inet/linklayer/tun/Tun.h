@@ -30,7 +30,7 @@ class INET_API Tun : public MacProtocolBase
         std::vector<int> socketIds;
 
     protected:
-        virtual void configureInterfaceEntry() override;
+        virtual void configureNetworkInterface() override;
 
     public:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

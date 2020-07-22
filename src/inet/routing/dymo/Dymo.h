@@ -151,7 +151,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     void processUdpPacket(Packet *packet);
 
     // handling Dymo packets
-    void sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
+    void sendDymoPacket(const Ptr<DymoPacket>& packet, const NetworkInterface *networkInterface, const L3Address& nextHop, double delay);
     void processDymoPacket(Packet *packet, const Ptr<const DymoPacket>& dymoPacket);
 
     // handling RteMsg packets
@@ -177,7 +177,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     const Ptr<Rerr> createRerr(std::vector<L3Address>& addresses);
     void sendRerr(const Ptr<Rerr>& rerr);
     void sendRerrForUndeliverablePacket(const L3Address& destination);
-    void sendRerrForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
+    void sendRerrForBrokenLink(const NetworkInterface *networkInterface, const L3Address& nextHop);
     void processRerr(Packet *packet, const Ptr<const Rerr>& rerr);
     b computeRerrLength(const Ptr<Rerr>& rerr);
 
@@ -185,7 +185,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     IRoute *createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);
     void updateRoutes(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);
     void updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock, IRoute *route);
-    int getLinkCost(const InterfaceEntry *interfaceEntry, DymoMetricType metricType);
+    int getLinkCost(const NetworkInterface *networkInterface, DymoMetricType metricType);
     bool isLoopFree(const Ptr<const RteMsg>& rteMsg, IRoute *route);
 
     // handling expunge timer

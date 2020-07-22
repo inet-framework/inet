@@ -19,7 +19,7 @@
 #define __INET_INTERFACEMATCHER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -66,7 +66,7 @@ class INET_API InterfaceMatcher
         Matcher towardsMatcher;
         const InterfaceMatcher *parent;
         Selector(const char *hostPattern, const char *namePattern, const char *towardsPattern, const InterfaceMatcher *parent);
-        bool matches(const InterfaceEntry *ie);
+        bool matches(const NetworkInterface *ie);
     };
 
   private:
@@ -75,10 +75,10 @@ class INET_API InterfaceMatcher
   public:
     InterfaceMatcher(const cXMLElementList& selectors);
     ~InterfaceMatcher();
-    int findMatchingSelector(const InterfaceEntry *ie);
+    int findMatchingSelector(const NetworkInterface *ie);
 
   private:
-    bool linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher& hostMatcher) const;
+    bool linkContainsMatchingHost(const NetworkInterface *ie, const Matcher& hostMatcher) const;
     void collectNeighbors(cGate *outGate, std::vector<cModule *>& hostNodes, std::vector<cModule *>& deviceNodes, cModule *exludedNode) const;
 };
 

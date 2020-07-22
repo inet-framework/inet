@@ -26,7 +26,7 @@ namespace inet {
 Register_Abstract_Class(PimNeighbor);
 Define_Module(PimNeighborTable);
 
-PimNeighbor::PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version)
+PimNeighbor::PimNeighbor(NetworkInterface *ie, Ipv4Address address, int version)
     : nt(nullptr), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
 {
     ASSERT(ie);

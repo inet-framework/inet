@@ -19,7 +19,7 @@
 #define __INET_IROUTE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
@@ -104,7 +104,7 @@ class INET_API IRoute
     virtual void setDestination(const L3Address& dest) = 0;
     virtual void setPrefixLength(int l) = 0;
     virtual void setNextHop(const L3Address& nextHop) = 0;
-    virtual void setInterface(InterfaceEntry *ie) = 0;
+    virtual void setInterface(NetworkInterface *ie) = 0;
     virtual void setSource(cObject *source) = 0;
     virtual void setSourceType(SourceType type) = 0;
     virtual void setMetric(int metric) = 0;    //XXX double?
@@ -120,7 +120,7 @@ class INET_API IRoute
     virtual L3Address getNextHopAsGeneric() const = 0;
 
     /** Next hop interface */
-    virtual InterfaceEntry *getInterface() const = 0;
+    virtual NetworkInterface *getInterface() const = 0;
 
     /** Source of route */
     virtual cObject *getSource() const = 0;
@@ -183,27 +183,27 @@ class INET_API IMulticastRoute
     class InInterface
     {
       protected:
-        InterfaceEntry *ie;
+        NetworkInterface *ie;
 
       public:
-        InInterface(InterfaceEntry *ie) : ie(ie) { ASSERT(ie); }
+        InInterface(NetworkInterface *ie) : ie(ie) { ASSERT(ie); }
         virtual ~InInterface() {}
 
-        InterfaceEntry *getInterface() const { return ie; }
+        NetworkInterface *getInterface() const { return ie; }
     };
 
     class OutInterface
     {
       protected:
-        const InterfaceEntry *ie;
+        const NetworkInterface *ie;
         bool _isLeaf;    // for TRPB support
 
       public:
-        OutInterface(const InterfaceEntry *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
+        OutInterface(const NetworkInterface *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
         OutInterface(const OutInterface& other) : ie(other.ie), _isLeaf(other._isLeaf) {}
         virtual ~OutInterface() {}
 
-        const InterfaceEntry *getInterface() const { return ie; }
+        const NetworkInterface *getInterface() const { return ie; }
         bool isLeaf() const { return _isLeaf; }
 
         // to disable forwarding on this interface (e.g. pruned by PIM)
@@ -228,7 +228,7 @@ class INET_API IMulticastRoute
     virtual void setInInterface(InInterface *_inInterface) = 0;
     virtual void clearOutInterfaces() = 0;
     virtual void addOutInterface(OutInterface *outInterface) = 0;
-    virtual bool removeOutInterface(const InterfaceEntry *ie) = 0;
+    virtual bool removeOutInterface(const NetworkInterface *ie) = 0;
     virtual void removeOutInterface(unsigned int i) = 0;
     virtual void setSource(cObject *source) = 0;
     virtual void setSourceType(SourceType type) = 0;

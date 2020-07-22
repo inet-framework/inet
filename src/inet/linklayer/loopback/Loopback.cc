@@ -49,15 +49,15 @@ void Loopback::initialize(int stage)
     }
 }
 
-void Loopback::configureInterfaceEntry()
+void Loopback::configureNetworkInterface()
 {
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setLoopback(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setLoopback(true);
 }
 
 void Loopback::handleUpperPacket(Packet *packet)
@@ -72,7 +72,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     packet->clearTags();
     packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     emit(packetSentToUpperSignal, packet);
     send(packet, upperLayerOutGateId);
 }
@@ -82,7 +82,7 @@ void Loopback::refreshDisplay() const
     MacProtocolBase::refreshDisplay();
 
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
-            Ipv4Address addr = interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+            Ipv4Address addr = networkInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
      */
     char buf[80];

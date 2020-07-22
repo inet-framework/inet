@@ -22,7 +22,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -90,7 +90,7 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
     int interfaceId = interfaceReq == nullptr ? -1 : interfaceReq->getInterfaceId();
 
     if (interfaceId != -1) {
-        InterfaceEntry *ie = ifTable->getInterfaceById(interfaceId);
+        NetworkInterface *ie = ifTable->getInterfaceById(interfaceId);
         dispatch(packet, ie);
     } else if (frame->getDest().isBroadcast()) {    // broadcast address
         broadcast(packet, -1);
@@ -103,13 +103,13 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
                       << endl;
             broadcast(packet, -1);
         } else {
-            InterfaceEntry *ie = ifTable->getInterfaceById(interfaceId);
+            NetworkInterface *ie = ifTable->getInterfaceById(interfaceId);
             dispatch(packet, ie);
         }
     }
 }
 
-bool Ieee8021dRelay::isForwardingInterface(InterfaceEntry *ie)
+bool Ieee8021dRelay::isForwardingInterface(NetworkInterface *ie)
 {
     if (isStpAware) {
         if (!ie->getProtocolData<Ieee8021dInterfaceData>())
@@ -131,7 +131,7 @@ void Ieee8021dRelay::broadcast(Packet *packet, int arrivalInterfaceId)
 
     int numPorts = ifTable->getNumInterfaces();
     for (int i = 0; i < numPorts; i++) {
-        InterfaceEntry *ie = ifTable->getInterface(i);
+        NetworkInterface *ie = ifTable->getInterface(i);
         if (ie->isLoopback() || !ie->isBroadcast())
             continue;
         if (ie->getInterfaceId() != arrivalInterfaceId && isForwardingInterface(ie)) {
@@ -157,7 +157,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
 {
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
-    InterfaceEntry *arrivalInterface = ifTable->getInterfaceById(arrivalInterfaceId);
+    NetworkInterface *arrivalInterface = ifTable->getInterfaceById(arrivalInterfaceId);
     const auto& arrivalPortData = arrivalInterface->findProtocolData<Ieee8021dInterfaceData>();
     if (isStpAware && arrivalPortData == nullptr)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", arrivalInterface->getFullName());
@@ -194,7 +194,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
             broadcast(packet, arrivalInterfaceId);
         }
         else {
-            InterfaceEntry *outputInterface = ifTable->getInterfaceById(outputInterfaceId);
+            NetworkInterface *outputInterface = ifTable->getInterfaceById(outputInterfaceId);
             if (outputInterfaceId != arrivalInterfaceId) {
                 if (isForwardingInterface(outputInterface))
                     dispatch(packet, outputInterface);
@@ -213,7 +213,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
     }
 }
 
-void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
+void Ieee8021dRelay::dispatch(Packet *packet, NetworkInterface *ie)
 {
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
@@ -246,7 +246,7 @@ void Ieee8021dRelay::sendUp(Packet *packet)
 const Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interfaceId)
 {
     if (isStpAware) {
-        InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
+        NetworkInterface *gateIfEntry = ifTable->getInterfaceById(interfaceId);
         const Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->getProtocolData<Ieee8021dInterfaceData>() : nullptr;
 
         if (!portData)
@@ -273,13 +273,13 @@ void Ieee8021dRelay::stop()
     ie = nullptr;
 }
 
-InterfaceEntry *Ieee8021dRelay::chooseInterface()
+NetworkInterface *Ieee8021dRelay::chooseInterface()
 {
     // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since relays work on EtherSwitches.
     //       NOTE that, we don't check if the returning interface is an Ethernet interface!
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        InterfaceEntry *current = ifTable->getInterface(i);
+        NetworkInterface *current = ifTable->getInterface(i);
         if (!current->isLoopback())
             return current;
     }

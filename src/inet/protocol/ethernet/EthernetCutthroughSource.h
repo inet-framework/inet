@@ -19,7 +19,7 @@
 #define __INET_ETHERNETCUTTHROUGHSOURCE_H
 
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/protocol/common/PacketDestreamer.h"
 
 namespace inet {
@@ -32,7 +32,7 @@ class INET_API EthernetCutthroughSource : public PacketDestreamer
     cGate *cutthroughOutputGate = nullptr;
     IPassivePacketSink *cutthroughConsumer = nullptr;
 
-    InterfaceEntry *interfaceEntry = nullptr;
+    NetworkInterface *networkInterface = nullptr;
     IMacAddressTable *macTable = nullptr;
 
     bool cutthroughInProgress = false;

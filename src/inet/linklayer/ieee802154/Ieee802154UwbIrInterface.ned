@@ -20,13 +20,13 @@ package inet.linklayer.ieee802154;
 import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.acking.AckingMac;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module Ieee802154UwbIrInterface extends InterfaceEntry like IWirelessInterface
+module Ieee802154UwbIrInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/ifcard");

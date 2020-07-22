@@ -77,7 +77,7 @@ void PimSplitter::processPIMPacket(Packet *pkt)
 {
     const auto& pimPkt = pkt->peekAtFront<PimPacket>();
     (void)pimPkt;       // unused variable
-    InterfaceEntry *ie = ift->getInterfaceById(pkt->getTag<InterfaceInd>()->getInterfaceId());
+    NetworkInterface *ie = ift->getInterfaceById(pkt->getTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 
     EV_INFO << "Received packet on interface '" << ie->getInterfaceName() << "'" << endl;

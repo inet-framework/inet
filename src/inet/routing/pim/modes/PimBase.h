@@ -81,7 +81,7 @@ class INET_API PimBase : public RoutingProtocolBase
     struct Interface
     {
         RouteEntry *owner;
-        InterfaceEntry *ie;
+        NetworkInterface *ie;
         int flags;
 
         // assert winner state
@@ -90,7 +90,7 @@ class INET_API PimBase : public RoutingProtocolBase
         cMessage *assertTimer;
         AssertMetric winnerMetric;
 
-        Interface(RouteEntry *owner, InterfaceEntry *ie)
+        Interface(RouteEntry *owner, NetworkInterface *ie)
             : owner(owner), ie(ie), flags(0),
             assertState(NO_ASSERT_INFO), assertTimer(nullptr)
         { ASSERT(owner), ASSERT(ie); }

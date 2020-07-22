@@ -80,7 +80,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
       public:
         Node *node = nullptr;
         LinkInfo *linkInfo = nullptr;
-        InterfaceEntry *interfaceEntry = nullptr;
+        NetworkInterface *networkInterface = nullptr;
         int mtu = 0;
         double metric = NaN;
         bool configure = false;    // false means the IP address of the interface will not be modified
@@ -89,9 +89,9 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         bool addSubnetRoute = false;    // add-subnet-route attribute
 
       public:
-        InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+        InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);
 
-        virtual std::string getFullPath() const override { return interfaceEntry->getInterfaceFullPath(); }
+        virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
     /**
@@ -174,20 +174,20 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     virtual void extractTopology(Topology& topology);
 
     // helper functions
-    virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
-    virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
-    virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
+    virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+    virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+    virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
     virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
     virtual double computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters);
     virtual double computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual double computeWiredLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual double computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual bool isBridgeNode(Node *node);
-    virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
-    virtual std::string getWirelessId(InterfaceEntry *interfaceEntry);
-    virtual InterfaceInfo *createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+    virtual bool isWirelessInterface(NetworkInterface *networkInterface);
+    virtual std::string getWirelessId(NetworkInterface *networkInterface);
+    virtual InterfaceInfo *createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
-    virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);
+    virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface);
     virtual IInterfaceTable *findInterfaceTable(Node *node);
     virtual IRoutingTable *findRoutingTable(Node *node);
 

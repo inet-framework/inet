@@ -27,7 +27,7 @@ namespace inet {
 class Ted;
 class IIpv4RoutingTable;
 class IInterfaceTable;
-class InterfaceEntry;
+class NetworkInterface;
 
 /**
  * Implements a minimalistic link state routing protocol that employs flooding.

@@ -49,7 +49,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     simtime_t startTime;    // application start time
     MacAddress macAddress;    // client's MAC address
     cModule *host = nullptr;    // containing host module (@networkNode)
-    InterfaceEntry *ie = nullptr;    // interface to configure
+    NetworkInterface *ie = nullptr;    // interface to configure
     IIpv4RoutingTable *irt = nullptr;    // routing table to update
 
     // state
@@ -167,7 +167,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     /*
      * Selects the first non-loopback interface
      */
-    virtual InterfaceEntry *chooseInterface();
+    virtual NetworkInterface *chooseInterface();
 
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;

@@ -38,11 +38,11 @@ void TunLoopbackApp::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByName(tunInterface);
-        if (interfaceEntry == nullptr)
+        NetworkInterface *networkInterface = interfaceTable->findInterfaceByName(tunInterface);
+        if (networkInterface == nullptr)
             throw cRuntimeError("TUN interface not found: %s", tunInterface);
         tunSocket.setOutputGate(gate("socketOut"));
-        tunSocket.open(interfaceEntry->getInterfaceId());
+        tunSocket.open(networkInterface->getInterfaceId());
     }
 }
 

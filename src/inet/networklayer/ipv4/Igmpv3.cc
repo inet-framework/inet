@@ -94,7 +94,7 @@ void Igmpv3::initialize(int stage)
         cModule *host = getContainingNode(this);
         registerProtocol(Protocol::igmp, gate("ipOut"), gate("ipIn"));
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-            InterfaceEntry *ie = ift->getInterface(i);
+            NetworkInterface *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 configureInterface(ie);
                 if (auto ipv4interfaceData = ie->findProtocolDataForUpdate<Ipv4InterfaceData>()) {
@@ -115,7 +115,7 @@ void Igmpv3::initialize(int stage)
         // in multicast routers: join to ALL_IGMPv3_ROUTERS_MCAST address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled()) {
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-                InterfaceEntry *ie = ift->getInterface(i);
+                NetworkInterface *ie = ift->getInterface(i);
                 if (ie->isMulticast())
                     ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
             }
@@ -148,7 +148,7 @@ void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
 {
     Enter_Method_Silent();
 
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     int interfaceId;
     const Ipv4MulticastGroupSourceInfo *info;
 
@@ -157,12 +157,12 @@ void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
         multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }
     else if (signalID == interfaceCreatedSignal) {
-        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(obj));
+        ie = const_cast<NetworkInterface *>(check_and_cast<const NetworkInterface *>(obj));
         if (ie->isMulticast())
             configureInterface(ie);
     }
     else if (signalID == interfaceDeletedSignal) {
-        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(obj));
+        ie = const_cast<NetworkInterface *>(check_and_cast<const NetworkInterface *>(obj));
         if (ie->isMulticast()) {
             interfaceId = ie->getInterfaceId();
             deleteHostInterfaceData(interfaceId);
@@ -175,7 +175,7 @@ void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
  * This function is sending report message if interface state was changed.
  * See RFC 3376 5.1.
  */
-void Igmpv3::multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, const Ipv4MulticastSourceList& sourceList)
+void Igmpv3::multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group, const Ipv4MulticastSourceList& sourceList)
 {
     ASSERT(ie);
     ASSERT(isSorted(sourceList.sources));
@@ -254,7 +254,7 @@ void Igmpv3::multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, c
     //       the groups of the old report and the new report are to be merged.
 }
 
-void Igmpv3::configureInterface(InterfaceEntry *ie)
+void Igmpv3::configureInterface(NetworkInterface *ie)
 {
     if (enabled && rt->isMulticastForwardingEnabled()) {
         // start querier on this interface
@@ -334,7 +334,7 @@ void Igmpv3::handleMessage(cMessage *msg)
 void Igmpv3::processRouterGeneralQueryTimer(cMessage *msg)
 {
     RouterInterfaceData *interfaceData = (RouterInterfaceData *)msg->getContextPointer();
-    InterfaceEntry *ie = interfaceData->ie;
+    NetworkInterface *ie = interfaceData->ie;
     ASSERT(ie);
     EV_INFO << "General Query timer expired on interface='" << ie->getInterfaceName() << "'.\n";
     RouterState state = interfaceData->state;
@@ -355,7 +355,7 @@ void Igmpv3::processRouterGeneralQueryTimer(cMessage *msg)
 void Igmpv3::processRouterGroupTimer(cMessage *msg)
 {
     RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
-    InterfaceEntry *ie = groupData->parent->ie;
+    NetworkInterface *ie = groupData->parent->ie;
 
     EV_INFO << "Group Timer for group '" << groupData->groupAddr << "' on interface '" << ie->getInterfaceName() << "' has expired.\n";
     EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
@@ -392,7 +392,7 @@ void Igmpv3::processRouterSourceTimer(cMessage *msg)
 {
     SourceRecord *sourceRecord = (SourceRecord *)msg->getContextPointer();
     RouterGroupData *groupData = sourceRecord->parent;
-    InterfaceEntry *ie = groupData->parent->ie;
+    NetworkInterface *ie = groupData->parent->ie;
 
     EV_INFO << "Source timer for group '" << groupData->groupAddr << "' and source '" << sourceRecord->sourceAddr
             << "' on interface '" << ie->getInterfaceName() << "' has expired.\n";
@@ -416,7 +416,7 @@ void Igmpv3::processRouterSourceTimer(cMessage *msg)
 void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
 {
     HostInterfaceData *interfaceData = (HostInterfaceData *)msg->getContextPointer();
-    InterfaceEntry *ie = interfaceData->ie;
+    NetworkInterface *ie = interfaceData->ie;
     ASSERT(ie);
 
     EV_INFO << "Response timer to a General Query on interface '" << ie->getInterfaceName() << "' has expired.\n";
@@ -467,7 +467,7 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
 void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
 {
     HostGroupData *group = (HostGroupData *)msg->getContextPointer();
-    InterfaceEntry *ie = group->parent->ie;
+    NetworkInterface *ie = group->parent->ie;
 
     vector<GroupRecord> records(1);
 
@@ -534,7 +534,7 @@ void Igmpv3::processIgmpMessage(Packet *packet)
 // RFC 3376 5.2
 void Igmpv3::processQuery(Packet *packet)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const auto& msg = packet->peekAtFront<Igmpv3Query>();        //TODO should processing Igmpv1Query and Igmpv2Query, too
     assert(msg != nullptr);
 
@@ -645,7 +645,7 @@ void Igmpv3::processReport(Packet *packet)
 {
     const auto& msg = packet->peekAtFront<Igmpv3Report>();       //FIXME also accept Igmpv1Report and Igmpv2Report
     assert(msg != nullptr);
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
 
     ASSERT(ie->isMulticast());
 
@@ -962,7 +962,7 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
     // TODO retransmission [Last Member Query Count]-1 times
 }
 
-void Igmpv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& records)
+void Igmpv3::sendGroupReport(NetworkInterface *ie, const vector<GroupRecord>& records)
 {
     EV << "Igmpv3: sending Membership Report on iface=" << ie->getInterfaceName() << "\n";
     Packet *packet = new Packet("Igmpv3 report");
@@ -1007,7 +1007,7 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
     }
 }
 
-void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
+void Igmpv3::sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
 
@@ -1026,7 +1026,7 @@ void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
     send(msg, "ipOut");
 }
 
-void Igmpv3::sendQueryToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
+void Igmpv3::sendQueryToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
 
@@ -1063,7 +1063,7 @@ Igmpv3::SourceRecord::~SourceRecord()
 
 // --- Utility Methods for Interface Data ---
 
-Igmpv3::RouterInterfaceData *Igmpv3::getRouterInterfaceData(InterfaceEntry *ie)
+Igmpv3::RouterInterfaceData *Igmpv3::getRouterInterfaceData(NetworkInterface *ie)
 {
     int interfaceId = ie->getInterfaceId();
     auto it = routerData.find(interfaceId);
@@ -1075,12 +1075,12 @@ Igmpv3::RouterInterfaceData *Igmpv3::getRouterInterfaceData(InterfaceEntry *ie)
     return data;
 }
 
-Igmpv3::RouterInterfaceData *Igmpv3::createRouterInterfaceData(InterfaceEntry *ie)
+Igmpv3::RouterInterfaceData *Igmpv3::createRouterInterfaceData(NetworkInterface *ie)
 {
     return new RouterInterfaceData(this, ie);
 }
 
-Igmpv3::HostInterfaceData *Igmpv3::getHostInterfaceData(InterfaceEntry *ie)
+Igmpv3::HostInterfaceData *Igmpv3::getHostInterfaceData(NetworkInterface *ie)
 {
     int interfaceId = ie->getInterfaceId();
     auto it = hostData.find(interfaceId);
@@ -1092,7 +1092,7 @@ Igmpv3::HostInterfaceData *Igmpv3::getHostInterfaceData(InterfaceEntry *ie)
     return data;
 }
 
-Igmpv3::HostInterfaceData *Igmpv3::createHostInterfaceData(InterfaceEntry *ie)
+Igmpv3::HostInterfaceData *Igmpv3::createHostInterfaceData(NetworkInterface *ie)
 {
     return new HostInterfaceData(this, ie);
 }
@@ -1233,7 +1233,7 @@ void Igmpv3::RouterGroupData::collectForwardedSources(Ipv4MulticastSourceList& r
 
 // --- HostInterfaceData structure implementation ---
 
-Igmpv3::HostInterfaceData::HostInterfaceData(Igmpv3 *owner, InterfaceEntry *ie)
+Igmpv3::HostInterfaceData::HostInterfaceData(Igmpv3 *owner, NetworkInterface *ie)
     : owner(owner), ie(ie)
 {
     ASSERT(owner);
@@ -1278,7 +1278,7 @@ void Igmpv3::HostInterfaceData::deleteGroupData(Ipv4Address group)
 
 // --- RouterInterfaceData structure implementation ---
 
-Igmpv3::RouterInterfaceData::RouterInterfaceData(Igmpv3 *owner, InterfaceEntry *ie)
+Igmpv3::RouterInterfaceData::RouterInterfaceData(Igmpv3 *owner, NetworkInterface *ie)
     : owner(owner), ie(ie)
 {
     ASSERT(owner);

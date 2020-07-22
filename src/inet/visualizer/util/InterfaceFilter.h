@@ -19,7 +19,7 @@
 #define __INET_INTERFACEFILTER_H
 
 #include "inet/common/MatchableObject.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -37,7 +37,7 @@ class INET_API InterfaceFilter
   public:
     void setPattern(const char *pattern);
 
-    bool matches(const InterfaceEntry *interfaceEntry) const;
+    bool matches(const NetworkInterface *networkInterface) const;
 };
 
 } // namespace visualizer

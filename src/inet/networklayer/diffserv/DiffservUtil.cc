@@ -17,7 +17,7 @@
 //
 
 #include "inet/common/INETUtils.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/networklayer/diffserv/Dscp_m.h"
 
@@ -182,7 +182,7 @@ std::string colorToString(int color)
 
 double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule)
 {
-    InterfaceEntry *ie = ift ? ift->findInterfaceByInterfaceModule(interfaceModule) : nullptr;
+    NetworkInterface *ie = ift ? ift->findInterfaceByInterfaceModule(interfaceModule) : nullptr;
     return ie ? ie->getDatarate() : -1;
 }
 

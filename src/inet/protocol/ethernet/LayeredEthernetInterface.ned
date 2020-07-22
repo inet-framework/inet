@@ -16,9 +16,9 @@
 package inet.protocol.ethernet;
 
 import inet.linklayer.contract.IEthernetInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 
-module LayeredEthernetInterface extends InterfaceEntry like IEthernetInterface
+module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
         string protocol = default("ethernetmac");
@@ -28,7 +28,7 @@ module LayeredEthernetInterface extends InterfaceEntry like IEthernetInterface
         double bitrate @unit(bps);
         string interfaceTableModule;
         *.bitrate = default(bitrate);
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         @display("i=block/ifcard;bgb=700,300");
     gates:
         input upperLayerIn;

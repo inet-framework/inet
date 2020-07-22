@@ -24,7 +24,7 @@ namespace inet {
 
 class IIpv4RoutingTable;
 class IInterfaceTable;
-class InterfaceEntry;
+class NetworkInterface;
 
 /**
  * Contains the Traffic Engineering Database and provides public methods

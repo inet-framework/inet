@@ -40,7 +40,7 @@ namespace ieee80211 {
 class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener       //TODO add ILifecycle
 {
   protected:
-    InterfaceEntry *myIface = nullptr;
+    NetworkInterface *myIface = nullptr;
     MacAddress prevAP;
     bool activeScan = false;
     std::vector<int> channelsToScan;

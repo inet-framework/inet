@@ -42,7 +42,7 @@ Define_Module(ExtInterface);
 
 void ExtInterface::initialize(int stage)
 {
-    InterfaceEntry::initialize(stage);
+    NetworkInterface::initialize(stage);
     if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         const char *copyConfiguration = par("copyConfiguration");
         if (strcmp("copyFromExt", copyConfiguration))

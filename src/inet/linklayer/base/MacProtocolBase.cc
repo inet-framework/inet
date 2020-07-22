@@ -62,9 +62,9 @@ void MacProtocolBase::initialize(int stage)
 
 void MacProtocolBase::registerInterface()
 {
-    ASSERT(interfaceEntry == nullptr);
-    interfaceEntry = getContainingNicModule(this);
-    configureInterfaceEntry();
+    ASSERT(networkInterface == nullptr);
+    networkInterface = getContainingNicModule(this);
+    configureNetworkInterface();
 }
 
 void MacProtocolBase::sendUp(cMessage *message)
@@ -143,8 +143,8 @@ void MacProtocolBase::handleMessageWhenDown(cMessage *msg)
 
 void MacProtocolBase::handleStartOperation(LifecycleOperation *operation)
 {
-    interfaceEntry->setState(InterfaceEntry::State::UP);
-    interfaceEntry->setCarrier(true);
+    networkInterface->setState(NetworkInterface::State::UP);
+    networkInterface->setCarrier(true);
 }
 
 void MacProtocolBase::handleStopOperation(LifecycleOperation *operation)
@@ -154,23 +154,23 @@ void MacProtocolBase::handleStopOperation(LifecycleOperation *operation)
     if (currentTxFrame)
         dropCurrentTxFrame(details);
     flushQueue(details);
-    interfaceEntry->setCarrier(false);
-    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+    networkInterface->setCarrier(false);
+    networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
 {
     deleteCurrentTxFrame();
     clearQueue();
-    interfaceEntry->setCarrier(false);
-    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+    networkInterface->setCarrier(false);
+    networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 void MacProtocolBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     if (signalID == interfaceDeletedSignal) {
-        if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
-            interfaceEntry = nullptr;
+        if (networkInterface == check_and_cast<const NetworkInterface *>(obj))
+            networkInterface = nullptr;
     }
 }
 

@@ -18,12 +18,12 @@
 package inet.emulation.common;
 
 import inet.linklayer.contract.IExternalInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 
 //
 // This module provides a base module for external network interfaces.
 //
-module ExtInterface extends InterfaceEntry like IExternalInterface
+module ExtInterface extends NetworkInterface like IExternalInterface
 {
     parameters:
         string interfaceTableModule;

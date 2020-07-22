@@ -19,7 +19,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/lmac/LMac.h"
 #include "inet/linklayer/lmac/LMacHeader_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -78,7 +78,7 @@ void LMac::initialize(int stage)
         send_control = new cMessage("send_control", LMAC_SEND_CONTROL);
 
         scheduleAfter(SIMTIME_ZERO, start_lmac);
-        EV_DETAIL << "My Mac address is" << interfaceEntry->getMacAddress() << " and my Id is " << myId << endl;
+        EV_DETAIL << "My Mac address is" << networkInterface->getMacAddress() << " and my Id is " << myId << endl;
     }
 }
 
@@ -94,21 +94,21 @@ LMac::~LMac()
     cancelAndDelete(send_control);
 }
 
-void LMac::configureInterfaceEntry()
+void LMac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(false);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(false);
+    networkInterface->setBroadcast(true);
 }
 
 /**
@@ -133,7 +133,7 @@ void LMac::handleUpperPacket(Packet *packet)
  */
 void LMac::handleSelfMessage(cMessage *msg)
 {
-    MacAddress address = interfaceEntry->getMacAddress();
+    MacAddress address = networkInterface->getMacAddress();
 
     switch (macState) {
         case INIT:
@@ -601,7 +601,7 @@ void LMac::decapsulate(Packet *packet)
 {
     const auto& lmacHeader = packet->popAtFront<LMacDataFrameHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
@@ -629,7 +629,7 @@ void LMac::encapsulate(Packet *netwPkt)
     delete netwPkt->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
-    pkt->setSrcAddr(interfaceEntry->getMacAddress());
+    pkt->setSrcAddr(networkInterface->getMacAddress());
 
     //encapsulate the network packet
     netwPkt->insertAtFront(pkt);

@@ -505,7 +505,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 #ifdef WITH_xMIPv6
     // Alain Tigyo, 21.03.2008
     // The following code is used for triggering RO to a CN
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     if (rt->isMobileNode() && (srcAddr == ie->getProtocolData<Ipv6InterfaceData>()->getHomeAgentAddress())
         && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
     {

@@ -154,7 +154,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 {
     char buf[MAX_ENTRY_STRING_SIZE];
     int charpointer = 0;
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
 
     // parsing of entries in interface definition
     while (ifconfigFile[charpointer] != '\0') {
@@ -289,7 +289,7 @@ char *RoutingTableParser::parseEntry(char *ifconfigFile, const char *tokenStr,
     return destStr;
 }
 
-void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *itf)
+void RoutingTableParser::parseMulticastGroups(char *groupStr, NetworkInterface *itf)
 {
     // Parse string (Ipv4 addresses separated by colons)
     cStringTokenizer tokenizer(groupStr, ":");
@@ -368,7 +368,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         interfaceName.reserve(MAX_ENTRY_STRING_SIZE);
         pos += strcpyword(interfaceName.buffer(), routeFile + pos);
         skipBlanks(routeFile, pos);
-        InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
+        NetworkInterface *ie = ift->findInterfaceByName(interfaceName.c_str());
         if (!ie)
             throw cRuntimeError("Syntax error in routing file: 6th column: `%s' is not an existing interface", interfaceName.c_str());
 

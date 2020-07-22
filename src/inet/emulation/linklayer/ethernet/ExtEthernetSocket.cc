@@ -34,7 +34,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetSocket.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -169,8 +169,8 @@ bool ExtEthernetSocket::notify(int fd)
     memcpy(&buffer[n], &checksum, sizeof(checksum));
     auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n + 4);
     auto packet = new Packet(nullptr, data);
-    auto interfaceEntry = check_and_cast<InterfaceEntry *>(getContainingNicModule(this));
-    packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    auto networkInterface = check_and_cast<NetworkInterface *>(getContainingNicModule(this));
+    packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());

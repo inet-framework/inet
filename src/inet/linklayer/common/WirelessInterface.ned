@@ -19,13 +19,13 @@ package inet.linklayer.common;
 
 import inet.linklayer.contract.IMacProtocol;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module WirelessInterface extends InterfaceEntry like IWirelessInterface
+module WirelessInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         string interfaceTableModule;
         string energySourceModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));

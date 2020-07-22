@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/protocol/forwarding/Forwarding.h"
 #include "inet/protocol/contract/IProtocol.h"
@@ -69,7 +69,7 @@ void Forwarding::pushPacket(Packet *packet, cGate *gate)
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
-        auto interface = check_and_cast<InterfaceEntry *>(getParentModule()->getParentModule()->getSubmodule("interface", interfaceIndex));
+        auto interface = check_and_cast<NetworkInterface *>(getParentModule()->getParentModule()->getSubmodule("interface", interfaceIndex));
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interface->getInterfaceId());
         // TODO: KLUDGE: this is for testing only
         MacAddress destinationMacAddress("00-AA-00-00-00-00");

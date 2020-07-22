@@ -113,21 +113,21 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
     if (!interfaceModule)
         throw cRuntimeError("NIC module not found in the host");
     std::string interfaceName = utils::stripnonalnum(interfaceModule->getFullName());
-    InterfaceEntry *e = ift->findInterfaceByName(interfaceName.c_str());
+    NetworkInterface *e = ift->findInterfaceByName(interfaceName.c_str());
     if (e)
         return e->getMacAddress();
     return MacAddress::UNSPECIFIED_ADDRESS;
 }
 
-void Ieee80211Mac::configureInterfaceEntry()
+void Ieee80211Mac::configureNetworkInterface()
 {
-    //TODO the mib module should use the mac address from InterfaceEntry
-    mib->address = interfaceEntry->getMacAddress();
-    interfaceEntry->setMtu(par("mtu"));
+    //TODO the mib module should use the mac address from NetworkInterface
+    mib->address = networkInterface->getMacAddress();
+    networkInterface->setMtu(par("mtu"));
     // capabilities
-    interfaceEntry->setBroadcast(true);
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setPointToPoint(false);
+    networkInterface->setBroadcast(true);
+    networkInterface->setMulticast(true);
+    networkInterface->setPointToPoint(false);
 }
 
 void Ieee80211Mac::handleMessageWhenUp(cMessage *message)
@@ -306,7 +306,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
         if (tid < 8)
             packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(tid);
     }
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     packet->popAtBack<Ieee80211MacTrailer>(B(4));
 }
 

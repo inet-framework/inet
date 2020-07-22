@@ -46,7 +46,7 @@ class INET_API StpBase : public OperationalBase, public cListener
     cModule *switchModule = nullptr;
     IMacAddressTable *macTable = nullptr;
     IInterfaceTable *ifTable = nullptr;
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
 
   public:
     StpBase();
@@ -70,7 +70,7 @@ class INET_API StpBase : public OperationalBase, public cListener
      * @brief Adds effects to be represented by Tkenv. Colors the link black if forwarding parameter is true
      * and the port to which the link is connected to is also forwarding, otherwise colors the link gray.
      */
-    virtual void colorLink(InterfaceEntry *ie, bool forwarding) const;
+    virtual void colorLink(NetworkInterface *ie, bool forwarding) const;
 
     /**
      * @brief Adds effects to be represented by Tkenv. Inactive links are colored grey.
@@ -92,15 +92,15 @@ class INET_API StpBase : public OperationalBase, public cListener
     Ieee8021dInterfaceData *getPortInterfaceDataForUpdate(unsigned int interfaceId);
 
     /**
-     * @brief Gets InterfaceEntry for interface ID.
-     * @return The port's InterfaceEntry, throws error if it doesn't exist.
+     * @brief Gets NetworkInterface for interface ID.
+     * @return The port's NetworkInterface, throws error if it doesn't exist.
      */
-    InterfaceEntry *getPortInterfaceEntry(unsigned int interfaceId) const;
+    NetworkInterface *getPortNetworkInterface(unsigned int interfaceId) const;
 
     /*
      * Returns the first non-loopback interface.
      */
-    virtual InterfaceEntry *chooseInterface();
+    virtual NetworkInterface *chooseInterface();
 };
 
 } // namespace inet

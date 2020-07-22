@@ -96,9 +96,9 @@ void Ieee80211VisualizerBase::unsubscribe()
     }
 }
 
-const Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211VisualizerBase::getIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry)
+const Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211VisualizerBase::getIeee80211Visualization(cModule *networkNode, NetworkInterface *networkInterface)
 {
-    auto key = std::pair<int, int>(networkNode->getId(), interfaceEntry->getInterfaceId());
+    auto key = std::pair<int, int>(networkNode->getId(), networkInterface->getInterfaceId());
     auto it = ieee80211Visualizations.find(key);
     return it == ieee80211Visualizations.end() ? nullptr : it->second;
 }
@@ -133,17 +133,17 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
     if (signal == l2AssociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            auto interfaceEntry = check_and_cast<InterfaceEntry *>(object);
+            auto networkInterface = check_and_cast<NetworkInterface *>(object);
             auto apInfo = check_and_cast<inet::ieee80211::Ieee80211MgmtSta::ApInfo *>(details);
-            auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, apInfo->ssid, W(apInfo->rxPower));
+            auto ieee80211Visualization = createIeee80211Visualization(networkNode, networkInterface, apInfo->ssid, W(apInfo->rxPower));
             addIeee80211Visualization(ieee80211Visualization);
         }
     }
     else if (signal == l2DisassociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            auto interfaceEntry = check_and_cast<InterfaceEntry *>(object);
-            auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
+            auto networkInterface = check_and_cast<NetworkInterface *>(object);
+            auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);
             if (ieee80211Visualization != nullptr) {
                 removeIeee80211Visualization(ieee80211Visualization);
                 delete ieee80211Visualization;
@@ -155,10 +155,10 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
         if (nodeFilter.matches(networkNode)) {
             // TODO: KLUDGE: this is the wrong way to lookup the interface and the ssid
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
-            auto interfaceEntry = getContainingNicModule(mgmt);
-            auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
+            auto networkInterface = getContainingNicModule(mgmt);
+            auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);
             if (ieee80211Visualization == nullptr) {
-                auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, mgmt->par("ssid"), W(NaN));
+                auto ieee80211Visualization = createIeee80211Visualization(networkNode, networkInterface, mgmt->par("ssid"), W(NaN));
                 addIeee80211Visualization(ieee80211Visualization);
             }
         }
@@ -168,8 +168,8 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
         if (nodeFilter.matches(networkNode)) {
             // TODO: KLUDGE: this is the wrong way to lookup the interface
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
-            auto interfaceEntry = getContainingNicModule(mgmt);
-            auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
+            auto networkInterface = getContainingNicModule(mgmt);
+            auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);
             if (ieee80211Visualization != nullptr) {
                 removeIeee80211Visualization(ieee80211Visualization);
                 delete ieee80211Visualization;

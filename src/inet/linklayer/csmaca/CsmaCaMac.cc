@@ -134,22 +134,22 @@ void CsmaCaMac::finish()
     recordScalar("numReceivedBroadcast", numReceivedBroadcast);
 }
 
-void CsmaCaMac::configureInterfaceEntry()
+void CsmaCaMac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
-    interfaceEntry->setPointToPoint(false);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
+    networkInterface->setPointToPoint(false);
 }
 
 /****************************************************************
@@ -391,7 +391,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto transportProtocol = frame->getTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
-    macHeader->setTransmitterAddress(interfaceEntry->getMacAddress());
+    macHeader->setTransmitterAddress(networkInterface->getMacAddress());
     macHeader->setReceiverAddress(frame->getTag<MacAddressReq>()->getDestAddress());
     const auto& userPriorityReq = frame->findTag<UserPriorityReq>();
     int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
@@ -415,7 +415,7 @@ void CsmaCaMac::decapsulate(Packet *frame)
     auto addressInd = frame->addTagIfAbsent<MacAddressInd>();
     addressInd->setSrcAddress(macHeader->getTransmitterAddress());
     addressInd->setDestAddress(macHeader->getReceiverAddress());
-    frame->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    frame->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     frame->addTagIfAbsent<UserPriorityInd>()->setUserPriority(macHeader->getPriority());
     auto networkProtocol = macHeader->getNetworkProtocol();
     auto transportProtocol = ProtocolGroup::ethertype.getProtocol(networkProtocol);
@@ -612,7 +612,7 @@ bool CsmaCaMac::isBroadcast(Packet *frame)
 bool CsmaCaMac::isForUs(Packet *frame)
 {
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
-    return macHeader->getReceiverAddress() == interfaceEntry->getMacAddress();
+    return macHeader->getReceiverAddress() == networkInterface->getMacAddress();
 }
 
 bool CsmaCaMac::isFcsOk(Packet *frame)

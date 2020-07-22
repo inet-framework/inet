@@ -39,9 +39,9 @@ void EthernetAddressInserter::processPacket(Packet *packet)
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto srcAddress = macAddressReq->getSrcAddress();
     auto interfaceReq = packet->getTag<InterfaceReq>();
-    auto interfaceEntry = interfaceTable->getInterfaceById(interfaceReq->getInterfaceId());
-    if (srcAddress.isUnspecified() && interfaceEntry != nullptr)
-        srcAddress = interfaceEntry->getMacAddress();
+    auto networkInterface = interfaceTable->getInterfaceById(interfaceReq->getInterfaceId());
+    if (srcAddress.isUnspecified() && networkInterface != nullptr)
+        srcAddress = networkInterface->getMacAddress();
     header->setSrc(srcAddress);
     header->setDest(macAddressReq->getDestAddress());
     packet->insertAtFront(header);

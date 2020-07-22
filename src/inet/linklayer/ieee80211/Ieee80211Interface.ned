@@ -23,7 +23,7 @@ import inet.linklayer.ieee80211.llc.IIeee80211Llc;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
@@ -36,10 +36,10 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 //
 // A classifier is needed if you want to use QoS.
 //
-module Ieee80211Interface extends InterfaceEntry like IWirelessInterface
+module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(::inet::InterfaceEntry);
+        @class(::inet::NetworkInterface);
         string interfaceTableModule;
         string energySourceModule = default("");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");

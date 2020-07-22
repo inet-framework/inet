@@ -220,7 +220,7 @@ void Mpls::processPacketFromL2(Packet *packet)
 void Mpls::processMplsPacketFromL2(Packet *packet)
 {
     int incomingInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
-    InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
+    NetworkInterface *ie = ift->getInterfaceById(incomingInterfaceId);
     std::string incomingInterfaceName = ie->getInterfaceName();
     const auto& mplsHeader = packet->peekAtFront<MplsHeader>();
 
@@ -248,7 +248,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         return;
     }
 
-    InterfaceEntry *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
+    NetworkInterface *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
 
     doStackOps(packet, outLabel);
 
@@ -301,7 +301,7 @@ void Mpls::sendToL3(Packet *msg)
     send(msg, "netwOut");
 }
 
-void Mpls::handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in)
+void Mpls::handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in)
 {
     if (!strcmp("ifIn", in->getBaseName()))
         registerInterface(interface, gate("netwIn"), gate("netwOut"));

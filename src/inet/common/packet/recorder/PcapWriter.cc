@@ -88,7 +88,7 @@ void PcapWriter::writeHeader(PcapLinkType linkType)
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 
-void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkTypePar)
+void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkTypePar)
 {
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");

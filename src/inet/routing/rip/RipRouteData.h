@@ -46,7 +46,7 @@ protected:
     L3Address nextHop;              // next hop of the route
     int prefixLength = 0;           // prefix length of the destination
     int metric = 0;                 // the metric of this route, or infinite (16) if invalid
-    InterfaceEntry *ie = nullptr;   // outgoing interface of the route
+    NetworkInterface *ie = nullptr;   // outgoing interface of the route
 
     L3Address from;                 // from which router did we get the route (only for RTE routes)
     simtime_t lastUpdateTime = 0;   // time of the last change (only for RTE routes)
@@ -80,7 +80,7 @@ public:
     L3Address getNextHop() const { return nextHop; }
     int getPrefixLength() const { return prefixLength; }
     int getMetric() const { return metric; }
-    InterfaceEntry *getInterface() const { return ie; }
+    NetworkInterface *getInterface() const { return ie; }
     L3Address getFrom() const { return from; }
     simtime_t getLastUpdateTime() const { return lastUpdateTime; }
     bool isChanged() const { return changed; }
@@ -93,7 +93,7 @@ public:
     void setNextHop(const L3Address& nextHop) { this->nextHop = nextHop; if (route && type == RIP_ROUTE_RTE) route->setNextHop(nextHop); }
     void setPrefixLength(int prefixLength) { this->prefixLength = prefixLength; }
     void setMetric(int metric) { this->metric = metric; if (route && type == RIP_ROUTE_RTE) route->setMetric(metric); }
-    void setInterface(InterfaceEntry *ie) { this->ie = ie; if (route && type == RIP_ROUTE_RTE) route->setInterface(ie); }
+    void setInterface(NetworkInterface *ie) { this->ie = ie; if (route && type == RIP_ROUTE_RTE) route->setInterface(ie); }
     void setFrom(const L3Address& from) { this->from = from; }
     void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
     void setChanged(bool changed) { this->changed = changed; }

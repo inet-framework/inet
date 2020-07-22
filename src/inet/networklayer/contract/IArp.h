@@ -27,7 +27,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 
 /**
  * Represents an Ipv4 ARP module.
@@ -43,10 +43,10 @@ class INET_API IArp
       public:
         L3Address l3Address;
         MacAddress macAddress;
-        const InterfaceEntry *ie;
+        const NetworkInterface *ie;
 
       public:
-        Notification(L3Address l3Address, MacAddress macAddress, const InterfaceEntry *ie)
+        Notification(L3Address l3Address, MacAddress macAddress, const NetworkInterface *ie)
             : l3Address(l3Address), macAddress(macAddress), ie(ie) {}
     };
 
@@ -71,7 +71,7 @@ class INET_API IArp
      * an address resolution procedure. A signal is emitted when the address
      * resolution procedure terminates.
      */
-    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) = 0;
+    virtual MacAddress resolveL3Address(const L3Address& address, const NetworkInterface *ie) = 0;
 };
 
 } // namespace inet

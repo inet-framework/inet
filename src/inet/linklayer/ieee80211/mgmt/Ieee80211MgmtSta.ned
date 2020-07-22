@@ -32,8 +32,8 @@ simple Ieee80211MgmtSta like IIeee80211Mgmt
         string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
-        @signal[l2Associated](type=inet::InterfaceEntry);
-        @signal[l2BeaconLost](type=inet::InterfaceEntry);
+        @signal[l2Associated](type=inet::NetworkInterface);
+        @signal[l2BeaconLost](type=inet::NetworkInterface);
     gates:
         input macIn @labels(Ieee80211MacHeader);
         output macOut @labels(Ieee80211MacHeader);

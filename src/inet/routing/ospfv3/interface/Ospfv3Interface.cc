@@ -31,7 +31,7 @@ Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3
     this->containingProcess = processModule;
     this->ift = check_and_cast<IInterfaceTable *>(containingModule->getSubmodule("interfaceTable"));
 
-    InterfaceEntry *ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
+    NetworkInterface *ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     const auto& ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
     this->interfaceId = ift->getInterfaceById(ie->getInterfaceId())->getInterfaceId();
     this->interfaceLLIP = ipv6int->getLinkLocalAddress();
@@ -81,7 +81,7 @@ void Ospfv3Interface::processEvent(Ospfv3Interface::Ospfv3InterfaceEvent event)
 
 int Ospfv3Interface::getInterfaceMTU() const
 {
-    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
+    NetworkInterface* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     return ie->getMtu();
 }
 
@@ -1767,7 +1767,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     Ospfv3Options lsOptions;
     linkLSA->setOspfOptions(lsOptions);
 
-    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
+    NetworkInterface* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     if (this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE) {
         const auto& ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
         Ipv4Address ipAdd = ipv4Data->getIPAddress();
@@ -1954,7 +1954,7 @@ std::string Ospfv3Interface::detailedInfo() const
 
     out << "Interface " << this->getIntName() << "\n";
     out << "Link Local Address ";
-    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->getIntName().c_str()));
+    NetworkInterface* ie = CHK(this->ift->findInterfaceByName(this->getIntName().c_str()));
     const auto& ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
     out << ipv6int->getLinkLocalAddress() << ", Interface ID " << this->interfaceId << "\n";
 

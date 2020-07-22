@@ -33,7 +33,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/emulation/networklayer/ipv4/ExtIpv4Socket.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 

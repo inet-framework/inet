@@ -251,8 +251,8 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto packet = check_and_cast<Packet *>(object);
             mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) { if (getLastModule(id) != nullptr) removeLastModule(id); });
             auto networkNode = getContainingNode(module);
-            auto interfaceEntry = getContainingNicModule(module);
-            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
+            auto networkInterface = getContainingNicModule(module);
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(networkInterface) && packetFilter.matches(packet)) {
                 mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) { setLastModule(id, module); });
             }
         }
@@ -265,8 +265,8 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);
             auto networkNode = getContainingNode(module);
-            auto interfaceEntry = getContainingNicModule(module);
-            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
+            auto networkInterface = getContainingNicModule(module);
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(networkInterface) && packetFilter.matches(packet)) {
                 mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) {
                     auto lastModule = getLastModule(id);
                     if (lastModule != nullptr)

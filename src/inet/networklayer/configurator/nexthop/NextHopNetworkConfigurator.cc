@@ -89,31 +89,31 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
             InterfaceInfo *nextHopInterfaceInfo = nullptr;
             while (node != sourceNode) {
                 link = (Link *)node->getPath(0);
-                if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->findProtocolData<NextHopInterfaceData>())
+                if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo && link->sourceInterfaceInfo->networkInterface->findProtocolData<NextHopInterfaceData>())
                     nextHopInterfaceInfo = static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
                 node = (Node *)node->getPath(0)->getRemoteNode();
             }
 
             // determine source interface
             if (nextHopInterfaceInfo && link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute) {
-                InterfaceEntry *nextHopInterfaceEntry = nextHopInterfaceInfo->interfaceEntry;
-                InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
+                NetworkInterface *nextHopNetworkInterface = nextHopInterfaceInfo->networkInterface;
+                NetworkInterface *sourceNetworkInterface = link->destinationInterfaceInfo->networkInterface;
                 // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                 for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++) {
-                    InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
-                    auto destIeNextHopInterfaceData = destinationInterfaceEntry->findProtocolData<NextHopInterfaceData>();
+                    NetworkInterface *destinationNetworkInterface = destinationInterfaceTable->getInterface(j);
+                    auto destIeNextHopInterfaceData = destinationNetworkInterface->findProtocolData<NextHopInterfaceData>();
                     if (destIeNextHopInterfaceData == nullptr)
                         continue;
                     L3Address destinationAddress = destIeNextHopInterfaceData->getAddress();
-                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->findProtocolData<NextHopInterfaceData>()) {
+                    if (!destinationNetworkInterface->isLoopback() && !destinationAddress.isUnspecified() && nextHopNetworkInterface->findProtocolData<NextHopInterfaceData>()) {
                         NextHopRoute *route = new NextHopRoute();
                         route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destinationAddress);
-                        route->setInterface(sourceInterfaceEntry);
-                        L3Address nextHopAddress = nextHopInterfaceEntry->getProtocolData<NextHopInterfaceData>()->getAddress();
+                        route->setInterface(sourceNetworkInterface);
+                        L3Address nextHopAddress = nextHopNetworkInterface->getProtocolData<NextHopInterfaceData>()->getAddress();
                         if (nextHopAddress != destinationAddress)
                             route->setNextHop(nextHopAddress);
-                        EV_DEBUG << "Adding route " << sourceInterfaceEntry->getInterfaceFullPath() << " -> " << destinationInterfaceEntry->getInterfaceFullPath() << " as " << route->str() << endl;
+                        EV_DEBUG << "Adding route " << sourceNetworkInterface->getInterfaceFullPath() << " -> " << destinationNetworkInterface->getInterfaceFullPath() << " as " << route->str() << endl;
                         sourceRoutingTable->addRoute(route);
                     }
                 }

@@ -22,7 +22,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/queueing/contract/IPacketQueue.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -37,7 +37,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     int lowerLayerOutGateId = -1;
     //@}
 
-    InterfaceEntry *interfaceEntry = nullptr;
+    NetworkInterface *networkInterface = nullptr;
 
     /** Currently transmitted frame if any */
     Packet *currentTxFrame = nullptr;
@@ -54,7 +54,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual void initialize(int stage) override;
 
     virtual void registerInterface();
-    virtual void configureInterfaceEntry() = 0;
+    virtual void configureNetworkInterface() = 0;
 
     virtual MacAddress parseMacAddressParameter(const char *addrstr);
 

@@ -17,7 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
@@ -360,7 +360,7 @@ int Rtp::resolveMTU()
     // and udp headers
     // TODO: How to do get the valid length of IP and ETHERNET header?
     IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-    const InterfaceEntry *rtie = rt->getInterfaceForDestAddr(_destinationAddress);
+    const NetworkInterface *rtie = rt->getInterfaceForDestAddr(_destinationAddress);
 
     if (rtie == nullptr)
         throw cRuntimeError("No interface for remote address %s found!", _destinationAddress.str().c_str());

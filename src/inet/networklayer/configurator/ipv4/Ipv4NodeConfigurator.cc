@@ -118,25 +118,25 @@ void Ipv4NodeConfigurator::prepareAllInterfaces()
         prepareInterface(interfaceTable->getInterface(i));
 }
 
-void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
+void Ipv4NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
 {
-    // ASSERT(!interfaceEntry->getProtocolData<Ipv4InterfaceData>());
-    auto interfaceData = interfaceEntry->addProtocolData<Ipv4InterfaceData>();
-    if (interfaceEntry->isLoopback()) {
+    // ASSERT(!networkInterface->getProtocolData<Ipv4InterfaceData>());
+    auto interfaceData = networkInterface->addProtocolData<Ipv4InterfaceData>();
+    if (networkInterface->isLoopback()) {
         // we may reconfigure later it to be the routerId
         interfaceData->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);
         interfaceData->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
         interfaceData->setMetric(1);
     }
     else {
-        auto datarate = interfaceEntry->getDatarate();
+        auto datarate = networkInterface->getDatarate();
         // TODO: KLUDGE: how do we set the metric correctly for both wired and wireless interfaces even if datarate is unknown
         if (datarate == 0)
             interfaceData->setMetric(1);
         else
             // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
             interfaceData->setMetric((int)ceil(2e9 / datarate));    // use OSPF cost as default
-        if (interfaceEntry->isMulticast()) {
+        if (networkInterface->isMulticast()) {
             interfaceData->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
             if (routingTable->isForwardingEnabled())
                 interfaceData->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
@@ -167,7 +167,7 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
     printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {
-        auto *entry = check_and_cast<InterfaceEntry *>(obj);
+        auto *entry = check_and_cast<NetworkInterface *>(obj);
         prepareInterface(entry);
         // TODO
     }
@@ -175,10 +175,10 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
         // The RoutingTable deletes routing entries of interface
     }
     else if (signalID == interfaceStateChangedSignal) {
-        const auto *ieChangeDetails = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        const auto *ieChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = ieChangeDetails->getFieldId();
-        if (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER) {
-            auto *entry = ieChangeDetails->getInterfaceEntry();
+        if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
+            auto *entry = ieChangeDetails->getNetworkInterface();
             if (entry->isUp() && networkConfigurator) {
                 networkConfigurator->configureInterface(entry);
                 if (par("configureRoutingTable"))

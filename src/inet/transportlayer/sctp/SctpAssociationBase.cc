@@ -38,7 +38,7 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
     confirmed = false;
     primaryPathCandidate = false;
     pathErrorCount = 0;
-    const InterfaceEntry *rtie;
+    const NetworkInterface *rtie;
     pathErrorThreshold = assoc->getSctpMain()->getPathMaxRetrans();
 
     if (!pathErrorThreshold) {

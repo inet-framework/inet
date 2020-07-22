@@ -90,7 +90,7 @@ std::string NextHopMulticastRoute::detailedInfo() const
     return "";    //TODO
 }
 
-bool NextHopMulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
+bool NextHopMulticastRoute::addChild(NetworkInterface *ie, bool isLeaf)
 {
     //TODO:
     children.push_back(Child());
@@ -99,7 +99,7 @@ bool NextHopMulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
     child.isLeaf = isLeaf;
 }
 
-bool NextHopMulticastRoute::removeChild(InterfaceEntry *ie)
+bool NextHopMulticastRoute::removeChild(NetworkInterface *ie)
 {
     //TODO:
 }

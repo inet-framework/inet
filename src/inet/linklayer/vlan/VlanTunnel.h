@@ -19,7 +19,7 @@
 #define __INET_VLANTUNNEL_H
 
 #include "inet/linklayer/ethernet/EthernetSocket.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -27,8 +27,8 @@ class VlanTunnel : public cSimpleModule, public EthernetSocket::ICallback
 {
   protected:
     int vlanId = -1;
-    InterfaceEntry *realInterfaceEntry = nullptr;
-    InterfaceEntry *interfaceEntry = nullptr;
+    NetworkInterface *realNetworkInterface = nullptr;
+    NetworkInterface *networkInterface = nullptr;
     EthernetSocket socket;
 
   protected:

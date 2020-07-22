@@ -70,7 +70,7 @@ void EtherEncap::initialize(int stage)
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         useSNAP = par("useSNAP");
-        interfaceEntry = findContainingNicModule(this);     //TODO or getContainingNicModule() ? or use a macaddresstable?
+        networkInterface = findContainingNicModule(this);     //TODO or getContainingNicModule() ? or use a macaddresstable?
 
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
@@ -165,8 +165,8 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     auto macAddressReq = packet->getTag<MacAddressReq>();
     const auto& ethHeader = makeShared<EthernetMacHeader>();
     auto srcAddr = macAddressReq->getSrcAddress();
-    if (srcAddr.isUnspecified() && interfaceEntry != nullptr)
-        srcAddr = interfaceEntry->getMacAddress();
+    if (srcAddr.isUnspecified() && networkInterface != nullptr)
+        srcAddr = networkInterface->getMacAddress();
     ethHeader->setSrc(srcAddr);
     ethHeader->setDest(macAddressReq->getDestAddress());
     ethHeader->setTypeOrLength(typeOrLength);

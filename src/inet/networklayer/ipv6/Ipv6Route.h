@@ -27,7 +27,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 class Ipv6RoutingTable;
 
 /**
@@ -63,7 +63,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     Ipv6Address _destPrefix;
     short _prefixLength;
     SourceType _sourceType;
-    InterfaceEntry *_interfacePtr;
+    NetworkInterface *_interfacePtr;
     Ipv6Address _nextHop;    // unspecified means "direct"
     simtime_t _expiryTime;    // if route is an advertised prefix: prefix lifetime
     int _metric;
@@ -124,8 +124,8 @@ class INET_API Ipv6Route : public cObject, public IRoute
     const char* getSourceTypeAbbreviation() const;
     virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); }    //TODO rename Ipv6 method
     virtual L3Address getNextHopAsGeneric() const override { return getNextHop(); }
-    virtual InterfaceEntry *getInterface() const override { return _interfacePtr; }
-    virtual void setInterface(InterfaceEntry *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
+    virtual NetworkInterface *getInterface() const override { return _interfacePtr; }
+    virtual void setInterface(NetworkInterface *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
     virtual cObject *getSource() const override { return _source; }
     virtual cObject *getProtocolData() const override { return _protocolData; }
     virtual void setProtocolData(cObject *protocolData) override { _protocolData = protocolData; }

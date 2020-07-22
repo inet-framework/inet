@@ -40,7 +40,7 @@ class INET_API ShortcutMac : public MacProtocolBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
 
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;

@@ -27,7 +27,7 @@ Ipv6AddressType Ipv6AddressType::INSTANCE;
 
 const Ipv6Address Ipv6AddressType::ALL_RIP_ROUTERS_MCAST("FF02::9");
 
-L3Address Ipv6AddressType::getLinkLocalAddress(const InterfaceEntry *ie) const
+L3Address Ipv6AddressType::getLinkLocalAddress(const NetworkInterface *ie) const
 {
 #ifdef WITH_IPv6
     if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>())

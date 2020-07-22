@@ -26,7 +26,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -42,16 +42,16 @@
 
 namespace inet {
 
-Register_Abstract_Class(InterfaceEntryChangeDetails);
-Define_Module(InterfaceEntry);
+Register_Abstract_Class(NetworkInterfaceChangeDetails);
+Define_Module(NetworkInterface);
 
-std::ostream& operator <<(std::ostream& o, InterfaceEntry::State s)
+std::ostream& operator <<(std::ostream& o, NetworkInterface::State s)
 {
     switch (s) {
-        case InterfaceEntry::UP: o << "UP"; break;
-        case InterfaceEntry::DOWN: o << "DOWN"; break;
-        case InterfaceEntry::GOING_UP: o << "GOING_UP"; break;
-        case InterfaceEntry::GOING_DOWN: o << "GOING_DOWN"; break;
+        case NetworkInterface::UP: o << "UP"; break;
+        case NetworkInterface::DOWN: o << "DOWN"; break;
+        case NetworkInterface::GOING_UP: o << "GOING_UP"; break;
+        case NetworkInterface::GOING_DOWN: o << "GOING_DOWN"; break;
         default: o << (int)s;
     }
     return o;
@@ -59,28 +59,28 @@ std::ostream& operator <<(std::ostream& o, InterfaceEntry::State s)
 
 void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
 {
-    // notify the containing InterfaceEntry that something changed
+    // notify the containing NetworkInterface that something changed
     if (ownerp)
         ownerp->changed(signalID, fieldId);
 }
 
-std::string InterfaceEntryChangeDetails::str() const
+std::string NetworkInterfaceChangeDetails::str() const
 {
     std::stringstream out;
     out << ie->str() << " changed field: " << field << "\n";
     return out.str();
 }
 
-InterfaceEntry::InterfaceEntry()
+NetworkInterface::NetworkInterface()
 {
 }
 
-InterfaceEntry::~InterfaceEntry()
+NetworkInterface::~NetworkInterface()
 {
     resetInterface();
 }
 
-void InterfaceEntry::clearProtocolDataSet()
+void NetworkInterface::clearProtocolDataSet()
 {
     std::vector<int> ids;
     int n = protocolDataSet.getNumTags();
@@ -92,7 +92,7 @@ void InterfaceEntry::clearProtocolDataSet()
         changed(interfaceConfigChangedSignal, ids[i]);
 }
 
-void InterfaceEntry::initialize(int stage)
+void NetworkInterface::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOut = gate("upperLayerOut");
@@ -147,7 +147,7 @@ void InterfaceEntry::initialize(int stage)
         layoutSubmodulesWithoutGates(this);
 }
 
-void InterfaceEntry::arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time)
+void NetworkInterface::arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time)
 {
     if (gate == upperLayerOut && message->isPacket()) {
         auto packet = check_and_cast<Packet *>(message);
@@ -156,19 +156,19 @@ void InterfaceEntry::arrived(cMessage *message, cGate *gate, const SendOptions& 
     cModule::arrived(message, gate, options, time);
 }
 
-void InterfaceEntry::pushPacket(Packet *packet, cGate *gate)
+void NetworkInterface::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
     consumer->pushPacket(packet, upperLayerOut->getPathEndGate());
 }
 
-void InterfaceEntry::refreshDisplay() const
+void NetworkInterface::refreshDisplay() const
 {
     updateDisplayString();
 }
 
-void InterfaceEntry::updateDisplayString() const
+void NetworkInterface::updateDisplayString() const
 {
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
@@ -193,7 +193,7 @@ void InterfaceEntry::updateDisplayString() const
     getDisplayString().setTagArg("t", 0, text);
 }
 
-std::string InterfaceEntry::str() const
+std::string NetworkInterface::str() const
 {
     std::stringstream out;
     out << getInterfaceName();
@@ -220,31 +220,31 @@ std::string InterfaceEntry::str() const
     return out.str();
 }
 
-std::string InterfaceEntry::getInterfaceFullPath() const
+std::string NetworkInterface::getInterfaceFullPath() const
 {
     return ownerp == nullptr ? getInterfaceName() : ownerp->getHostModule()->getFullPath() + "." + getInterfaceName();
 }
 
-void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
+void NetworkInterface::changed(simsignal_t signalID, int fieldId)
 {
     if (ownerp) {
-        InterfaceEntryChangeDetails details(this, fieldId);
+        NetworkInterfaceChangeDetails details(this, fieldId);
         ownerp->interfaceChanged(signalID, &details);
     }
 }
 
-void InterfaceEntry::resetInterface()
+void NetworkInterface::resetInterface()
 {
     protocolDataSet.clearTags();
 }
 
-bool InterfaceEntry::matchesMacAddress(const MacAddress& address) const
+bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 {
     // TODO: add real support for multicast MAC addresses
     return address.isBroadcast() || address.isMulticast() || macAddr == address;
 }
 
-const L3Address InterfaceEntry::getNetworkAddress() const
+const L3Address NetworkInterface::getNetworkAddress() const
 {
 #ifdef WITH_IPv4
     if (auto ipv4data = findProtocolData<Ipv4InterfaceData>())
@@ -261,7 +261,7 @@ const L3Address InterfaceEntry::getNetworkAddress() const
     return getModulePathAddress();
 }
 
-bool InterfaceEntry::hasNetworkAddress(const L3Address& address) const
+bool NetworkInterface::hasNetworkAddress(const L3Address& address) const
 {
     switch(address.getType()) {
     case L3Address::NONE:
@@ -301,7 +301,7 @@ bool InterfaceEntry::hasNetworkAddress(const L3Address& address) const
     return false;
 }
 
-bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
+bool NetworkInterface::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
 {
     ASSERT(position >= 0);
     if (estimateCostProcessArray.size() <= (size_t)position) {
@@ -313,7 +313,7 @@ bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess
     return true;
 }
 
-MacEstimateCostProcess *InterfaceEntry::getEstimateCostProcess(int position)
+MacEstimateCostProcess *NetworkInterface::getEstimateCostProcess(int position)
 {
     ASSERT(position >= 0);
     if ((size_t)position < estimateCostProcessArray.size()) {
@@ -322,7 +322,7 @@ MacEstimateCostProcess *InterfaceEntry::getEstimateCostProcess(int position)
     return nullptr;
 }
 
-void InterfaceEntry::joinMulticastGroup(const L3Address& address)
+void NetworkInterface::joinMulticastGroup(const L3Address& address)
 {
     switch (address.getType()) {
 #ifdef WITH_IPv4
@@ -357,7 +357,7 @@ static void toIpv4AddressVector(const std::vector<L3Address>& addresses, std::ve
         result.push_back(addresse.toIpv4());
 }
 
-void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAddress,
+void NetworkInterface::changeMulticastGroupMembership(const L3Address& multicastAddress,
         McastSourceFilterMode oldFilterMode, const std::vector<L3Address>& oldSourceList,
         McastSourceFilterMode newFilterMode, const std::vector<L3Address>& newSourceList)
 {
@@ -392,7 +392,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
     }
 }
 
-Ipv4Address InterfaceEntry::getIpv4Address() const {
+Ipv4Address NetworkInterface::getIpv4Address() const {
 #ifdef WITH_IPv4
     auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
@@ -401,7 +401,7 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #endif // ifdef WITH_IPv4
 }
 
-Ipv4Address InterfaceEntry::getIpv4Netmask() const {
+Ipv4Address NetworkInterface::getIpv4Netmask() const {
 #ifdef WITH_IPv4
     auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getNetmask();
@@ -410,7 +410,7 @@ Ipv4Address InterfaceEntry::getIpv4Netmask() const {
 #endif // ifdef WITH_IPv4
 }
 
-void InterfaceEntry::setState(State s)
+void NetworkInterface::setState(State s)
 {
     if (state != s)
     {
@@ -421,7 +421,7 @@ void InterfaceEntry::setState(State s)
     }
 }
 
-void InterfaceEntry::setCarrier(bool b)
+void NetworkInterface::setCarrier(bool b)
 {
     ASSERT(!(b && (state == DOWN)));
     if (carrier != b)
@@ -431,7 +431,7 @@ void InterfaceEntry::setCarrier(bool b)
     }
 }
 
-bool InterfaceEntry::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
+bool NetworkInterface::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -459,19 +459,19 @@ bool InterfaceEntry::handleOperationStage(LifecycleOperation *operation, IDoneCa
     return true;
 }
 
-void InterfaceEntry::handleStartOperation(LifecycleOperation *operation)
+void NetworkInterface::handleStartOperation(LifecycleOperation *operation)
 {
     setState(State::UP);
     setCarrier(true);
 }
 
-void InterfaceEntry::handleStopOperation(LifecycleOperation *operation)
+void NetworkInterface::handleStopOperation(LifecycleOperation *operation)
 {
     setState(State::DOWN);
     setCarrier(false);
 }
 
-void InterfaceEntry::handleCrashOperation(LifecycleOperation *operation)
+void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
 {
     setState(State::DOWN);
     setCarrier(false);

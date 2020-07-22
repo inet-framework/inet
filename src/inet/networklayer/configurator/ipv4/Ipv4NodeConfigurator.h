@@ -53,7 +53,7 @@ class INET_API Ipv4NodeConfigurator : public cSimpleModule, public ILifecycle, p
     virtual void initialize(int stage) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
     virtual void prepareAllInterfaces();
-    virtual void prepareInterface(InterfaceEntry *interfaceEntry);
+    virtual void prepareInterface(NetworkInterface *networkInterface);
     virtual void configureAllInterfaces();
     virtual void configureRoutingTable();
 

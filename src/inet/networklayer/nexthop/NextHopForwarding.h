@@ -57,8 +57,8 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
         virtual ~QueuedDatagramForHook() {}
 
         Packet *datagram;
-        const InterfaceEntry *inIE;
-        const InterfaceEntry *outIE;
+        const NetworkInterface *inIE;
+        const NetworkInterface *outIE;
         const L3Address nextHop;
         const INetfilter::IHook::Type hookType;
     };
@@ -97,7 +97,7 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual const InterfaceEntry *getSourceInterfaceFrom(Packet *packet);
+    virtual const NetworkInterface *getSourceInterfaceFrom(Packet *packet);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -120,18 +120,18 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(Packet *datagram, const InterfaceEntry *destIE, const L3Address& nextHop, bool fromHL);
+    virtual void routePacket(Packet *datagram, const NetworkInterface *destIE, const L3Address& nextHop, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using sendDatagramToOutput().
      */
-    virtual void routeMulticastPacket(Packet *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE);
+    virtual void routeMulticastPacket(Packet *datagram, const NetworkInterface *destIE, const NetworkInterface *fromIE);
 
     /**
      * Encapsulate packet coming from higher layers into NextHopDatagram, using
      * the control info attached to the packet.
      */
-    virtual void encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE);
+    virtual void encapsulate(Packet *transportPacket, const NetworkInterface *& destIE);
 
     /**
      * Decapsulate and return encapsulated packet.
@@ -146,11 +146,11 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     /**
      * Last TTL check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(Packet *datagram, const InterfaceEntry *ie, L3Address nextHop);
+    virtual void sendDatagramToOutput(Packet *datagram, const NetworkInterface *ie, L3Address nextHop);
 
-    virtual void datagramPreRouting(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *destIE, const L3Address& nextHop);
-    virtual void datagramLocalIn(Packet *datagram, const InterfaceEntry *inIE);
-    virtual void datagramLocalOut(Packet *datagram, const InterfaceEntry *destIE, const L3Address& nextHop);
+    virtual void datagramPreRouting(Packet *datagram, const NetworkInterface *inIE, const NetworkInterface *destIE, const L3Address& nextHop);
+    virtual void datagramLocalIn(Packet *datagram, const NetworkInterface *inIE);
+    virtual void datagramLocalOut(Packet *datagram, const NetworkInterface *destIE, const L3Address& nextHop);
 
     virtual IHook::Result datagramPreRoutingHook(Packet *datagram);
     virtual IHook::Result datagramForwardHook(Packet *datagram);

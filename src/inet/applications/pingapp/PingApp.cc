@@ -30,7 +30,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/EchoPacket_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -547,7 +547,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(getSimulation()->getModule(i));
         if (ift) {
             for (int j = 0; j < ift->getNumInterfaces(); j++) {
-                InterfaceEntry *ie = ift->getInterface(j);
+                NetworkInterface *ie = ift->getInterface(j);
                 if (ie && !ie->isLoopback()) {
 #ifdef WITH_IPv4
                     auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();

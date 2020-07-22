@@ -18,13 +18,13 @@
 #ifndef __INET_ETHERNETINTERFACE_H
 #define __INET_ETHERNETINTERFACE_H
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EthernetCutthroughInterface : public InterfaceEntry
+class INET_API EthernetCutthroughInterface : public NetworkInterface
 {
   protected:
     cGate *cutthroughOutputGate = nullptr;

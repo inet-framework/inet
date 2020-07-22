@@ -18,7 +18,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/recorder/IPcapWriter.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -59,13 +59,13 @@ class INET_API PcapngWriter : public IPcapWriter
     /**
      * Records the interface into the output file.
      */
-    void writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType linkType);
+    void writeInterface(NetworkInterface *networkInterface, PcapLinkType linkType);
 
     /**
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writePacket(simtime_t time, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkType) override;
+    void writePacket(simtime_t time, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.

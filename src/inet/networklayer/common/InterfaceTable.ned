@@ -37,13 +37,13 @@ simple InterfaceTable
     parameters:
         bool displayAddresses = default(false);  // whether to display IP addresses on links
         @display("i=block/table");
-        @signal[interfaceCreated](type=inet::InterfaceEntry);
-        @signal[interfaceDeleted](type=inet::InterfaceEntry);
-        @signal[interfaceStateChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceConfigChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceIpv4ConfigChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceIpv6ConfigChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceGnpConfigChanged](type=inet::InterfaceEntryChangeDetails);
+        @signal[interfaceCreated](type=inet::NetworkInterface);
+        @signal[interfaceDeleted](type=inet::NetworkInterface);
+        @signal[interfaceStateChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceConfigChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceIpv4ConfigChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceIpv6ConfigChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceGnpConfigChanged](type=inet::NetworkInterfaceChangeDetails);
         @signal[ipv4MulticastGroupJoined](type=inet::Ipv4MulticastGroupInfo);
         @signal[ipv4MulticastGroupLeft](type=inet::Ipv4MulticastGroupInfo);
         @signal[ipv4McastChange](type=inet::Ipv4MulticastGroupSourceInfo);

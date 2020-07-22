@@ -37,8 +37,8 @@ package inet.visualizer.base;
 //  - %g generic address
 //  - %n network address
 //  - %t up or down state
-//  - %i InterfaceEntry::info()
-//  - %s InterfaceEntry::str()
+//  - %i NetworkInterface::info()
+//  - %s NetworkInterface::str()
 //  - %\ conditional newline for wired interfaces
 //
 // @see ~InterfaceTableCanvasVisualizer, ~InterfaceTableOsgVisualizer, ~IInterfaceTableVisualizer, ~VisualizerBase

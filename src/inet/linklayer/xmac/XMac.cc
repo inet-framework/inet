@@ -136,21 +136,21 @@ void XMac::finish()
     }
 }
 
-void XMac::configureInterfaceEntry()
+void XMac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(false);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(false);
+    networkInterface->setBroadcast(true);
 }
 
 /**
@@ -180,7 +180,7 @@ void XMac::sendPreamble(MacAddress preamble_address)
 {
     //~ diff with XMAC, @ in preamble!
     auto preamble = makeShared<XMacControlFrame>();
-    preamble->setSrcAddr(interfaceEntry->getMacAddress());
+    preamble->setSrcAddr(networkInterface->getMacAddress());
     preamble->setDestAddr(preamble_address);
     preamble->setChunkLength(ctrlFrameLength);
     preamble->setType(XMAC_PREAMBLE);
@@ -197,7 +197,7 @@ void XMac::sendPreamble(MacAddress preamble_address)
 void XMac::sendMacAck()
 {
     auto ack = makeShared<XMacControlFrame>();
-    ack->setSrcAddr(interfaceEntry->getMacAddress());
+    ack->setSrcAddr(networkInterface->getMacAddress());
     //~ diff with XMAC, ack_preamble_based
     ack->setDestAddr(lastPreamblePktSrcAddr);
     ack->setChunkLength(ctrlFrameLength);
@@ -214,7 +214,7 @@ void XMac::sendMacAck()
  */
 void XMac::handleSelfMessage(cMessage *msg)
 {
-    MacAddress address = interfaceEntry->getMacAddress();
+    MacAddress address = networkInterface->getMacAddress();
 
     switch (macState)
     {
@@ -628,7 +628,7 @@ void XMac::decapsulate(Packet *packet)
 {
     const auto& xmacHeader = packet->popAtFront<XMacDataFrameHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(xmacHeader->getSrcAddr());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(xmacHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
@@ -651,7 +651,7 @@ void XMac::encapsulate(Packet *packet)
     delete packet->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
-    pkt->setSrcAddr(interfaceEntry->getMacAddress());
+    pkt->setSrcAddr(networkInterface->getMacAddress());
 
     pkt->setType(XMAC_DATA);
     packet->setKind(XMAC_DATA);

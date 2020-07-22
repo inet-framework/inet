@@ -36,7 +36,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee802154/Ieee802154Mac.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -155,21 +155,21 @@ Ieee802154Mac::~Ieee802154Mac()
         delete ackMessage;
 }
 
-void Ieee802154Mac::configureInterfaceEntry()
+void Ieee802154Mac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
 }
 
 /**
@@ -187,7 +187,7 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     macPkt->setDestAddr(dest);
     delete packet->removeControlInfo();
-    macPkt->setSrcAddr(interfaceEntry->getMacAddress());
+    macPkt->setSrcAddr(networkInterface->getMacAddress());
 
     if (useMACAcks) {
         if (SeqNrParent.find(dest) == SeqNrParent.end()) {
@@ -793,7 +793,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
     const MacAddress& src = csmaHeader->getSrcAddr();
     const MacAddress& dest = csmaHeader->getDestAddr();
     long ExpectedNr = 0;
-    MacAddress address = interfaceEntry->getMacAddress();
+    MacAddress address = networkInterface->getMacAddress();
 
     EV_DETAIL << "Received frame name= " << csmaHeader->getName()
               << ", myState=" << macState << " src=" << src
@@ -898,7 +898,7 @@ void Ieee802154Mac::decapsulate(Packet *packet)
 {
     const auto& csmaHeader = packet->popAtFront<Ieee802154MacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);

@@ -71,11 +71,11 @@ void TunnelApp::initialize(int stage)
             socketMap.addSocket(&serverSocket);
         }
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByName(interface);
-        if (interfaceEntry == nullptr)
+        NetworkInterface *networkInterface = interfaceTable->findInterfaceByName(interface);
+        if (networkInterface == nullptr)
             throw cRuntimeError("TUN interface not found: %s", interface);
         tunSocket.setOutputGate(gate("socketOut"));
-        tunSocket.open(interfaceEntry->getInterfaceId());
+        tunSocket.open(networkInterface->getInterfaceId());
         tunSocket.setCallback(this);
         socketMap.addSocket(&tunSocket);
     }

@@ -37,16 +37,16 @@ void SctpNatHook::initialize()
     ipv4->registerHook(0, this);
 }
 
-/*INetfilter::IHook::Result SctpNatHook::datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)*/
+/*INetfilter::IHook::Result SctpNatHook::datagramForwardHook(INetworkHeader *datagram, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr)*/
 INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
 {
     SctpNatEntry *entry;
     SctpChunk *chunk;
     const auto& tag = datagram->findTag<InterfaceReq>();
-    const InterfaceEntry *outIE = (tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr);
+    const NetworkInterface *outIE = (tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr);
 
     const auto& inIeTag = datagram->findTag<InterfaceInd>();
-    const InterfaceEntry *inIE = (inIeTag != nullptr ? ift->getInterfaceById(inIeTag->getInterfaceId()) : nullptr);
+    const NetworkInterface *inIE = (inIeTag != nullptr ? ift->getInterfaceById(inIeTag->getInterfaceId()) : nullptr);
 
     const auto& dgram = removeNetworkProtocolHeader<Ipv4Header>(datagram);
 
@@ -141,7 +141,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
     return INetfilter::IHook::ACCEPT;
 }
 
-/*INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)*/
+/*INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(INetworkHeader *datagram, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr)*/
 INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
 {
     SctpNatEntry *entry;

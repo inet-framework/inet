@@ -86,14 +86,14 @@ void PacketDrillApp::initialize(int stage)
         const char *interface = par("interface");
         //const char *interfaceTableModule = par("interfaceTableModule");
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByName(interface);
-        if (interfaceEntry == nullptr)
+        NetworkInterface *networkInterface = interfaceTable->findInterfaceByName(interface);
+        if (networkInterface == nullptr)
             throw cRuntimeError("TUN interface not found: %s", interface);
-        auto idat = interfaceEntry->getProtocolDataForUpdate<Ipv4InterfaceData>();
+        auto idat = networkInterface->getProtocolDataForUpdate<Ipv4InterfaceData>();
         idat->setIPAddress(localAddress.toIpv4());
         tunSocket.setOutputGate(gate("socketOut"));
-        tunSocket.open(interfaceEntry->getInterfaceId());
-        tunInterfaceId = interfaceEntry->getInterfaceId();
+        tunSocket.open(networkInterface->getInterfaceId());
+        tunInterfaceId = networkInterface->getInterfaceId();
         tunSocketId = tunSocket.getSocketId();
 
         cMessage* timeMsg = new cMessage("PacketDrillAppTimer", MSGKIND_START);

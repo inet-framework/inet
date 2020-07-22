@@ -78,7 +78,7 @@ std::string Ipv6InterfaceData::RouterMulticastData::detailedInfo()
 }
 
 Ipv6InterfaceData::Ipv6InterfaceData()
-    : InterfaceProtocolData(InterfaceEntry::F_IPV6_DATA)
+    : InterfaceProtocolData(NetworkInterface::F_IPV6_DATA)
 {
 #ifdef WITH_xMIPv6
     // rt6 = IPv6RoutingTableAccess().get();

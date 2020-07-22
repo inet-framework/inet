@@ -66,7 +66,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
 
     virtual void refreshDisplay() const override;
 
-    virtual void configureInterface(InterfaceEntry *ie);
+    virtual void configureInterface(NetworkInterface *ie);
 
     virtual void configureLoopback();
 
@@ -109,7 +109,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override;    //XXX should be find..., see next one
+    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override;    //XXX should be find..., see next one
 
     /**
      * To be called from route objects whenever a field changes. Used for
@@ -134,7 +134,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
      * Returns the output interface for the packets with dest as destination
      * address, or nullptr if the destination is not in routing table.
      */
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override;    //XXX redundant
+    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override;    //XXX redundant
 
     /**
      * Convenience function based on findBestMatchingRoute().

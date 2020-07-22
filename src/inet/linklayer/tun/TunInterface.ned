@@ -19,12 +19,12 @@
 package inet.linklayer.tun;
 
 import inet.linklayer.contract.ITunnelInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 
-module TunInterface extends InterfaceEntry like ITunnelInterface
+module TunInterface extends NetworkInterface like ITunnelInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         string interfaceTableModule;    // The path to the InterfaceTable module
         int mtu @unit(B) = default(1500B);
         @display("i=block/tunnel");

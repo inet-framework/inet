@@ -83,12 +83,12 @@ void Ieee80211CanvasVisualizer::refreshDisplay() const
 #endif
 }
 
-Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
+Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, NetworkInterface *networkInterface, std::string ssid, W power)
 {
     std::string icon = getIcon(power);
     auto labeledIconFigure = new LabeledIconFigure("ieee80211Association");
     labeledIconFigure->setTags((std::string("ieee80211_association ") + tags).c_str());
-    labeledIconFigure->setAssociatedObject(interfaceEntry);
+    labeledIconFigure->setAssociatedObject(networkInterface);
     labeledIconFigure->setZIndex(zIndex);
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents an IEEE 802.11 association");
@@ -104,8 +104,8 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
-        throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", interfaceEntry->getInterfaceName(), networkNode->getFullPath().c_str());
-    return new Ieee80211CanvasVisualization(networkNodeVisualization, labeledIconFigure, networkNode->getId(), interfaceEntry->getInterfaceId());
+        throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", networkInterface->getInterfaceName(), networkNode->getFullPath().c_str());
+    return new Ieee80211CanvasVisualization(networkNodeVisualization, labeledIconFigure, networkNode->getId(), networkInterface->getInterfaceId());
 }
 
 void Ieee80211CanvasVisualizer::addIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization)

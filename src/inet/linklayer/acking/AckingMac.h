@@ -29,7 +29,7 @@
 namespace inet {
 
 class AckingMacHeader;
-class InterfaceEntry;
+class NetworkInterface;
 
 /**
  * Implements a simplified ideal MAC.
@@ -55,7 +55,7 @@ class INET_API AckingMac : public MacProtocolBase
   protected:
     /** implements MacBase functions */
     //@{
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
     //@}
 
     virtual void startTransmitting();

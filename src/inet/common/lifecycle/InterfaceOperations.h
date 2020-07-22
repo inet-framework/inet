@@ -22,7 +22,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 
 /**
  * Base class for lifecycle operations that manipulate a network interface.
@@ -32,12 +32,12 @@ class INET_API InterfaceOperationBase : public LifecycleOperation
   public:
     enum Stage { STAGE_LOCAL, STAGE_LAST };
   private:
-    InterfaceEntry *ie; // the interface to be operated on
+    NetworkInterface *ie; // the interface to be operated on
   public:
     InterfaceOperationBase() : ie(nullptr) {}
     virtual void initialize(cModule *module, StringMap& params);
     virtual int getNumStages() const {return STAGE_LAST+1;}
-    InterfaceEntry *getInterface() const {return ie;}
+    NetworkInterface *getInterface() const {return ie;}
 };
 
 /**

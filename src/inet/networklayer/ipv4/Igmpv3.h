@@ -27,7 +27,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -102,12 +102,12 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     struct HostInterfaceData
     {
         Igmpv3 *owner;
-        InterfaceEntry *ie;
+        NetworkInterface *ie;
 //        int multicastRouterVersion;
         GroupToHostDataMap groups;
         cMessage *generalQueryTimer;    // for scheduling responses to General Queries
 
-        HostInterfaceData(Igmpv3 *owner, InterfaceEntry *ie);
+        HostInterfaceData(Igmpv3 *owner, NetworkInterface *ie);
         virtual ~HostInterfaceData();
         HostGroupData *getOrCreateGroupData(Ipv4Address group);
         void deleteGroupData(Ipv4Address group);
@@ -173,12 +173,12 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     struct RouterInterfaceData
     {
         Igmpv3 *owner;
-        InterfaceEntry *ie;
+        NetworkInterface *ie;
         GroupToRouterDataMap groups;
         RouterState state;
         cMessage *generalQueryTimer;
 
-        RouterInterfaceData(Igmpv3 *owner, InterfaceEntry *ie);
+        RouterInterfaceData(Igmpv3 *owner, NetworkInterface *ie);
         virtual ~RouterInterfaceData();
         RouterGroupData *getOrCreateGroupData(Ipv4Address group);
         void deleteGroupData(Ipv4Address group);
@@ -265,23 +265,23 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
   protected:
     void addWatches();
 
-    virtual HostInterfaceData *createHostInterfaceData(InterfaceEntry *ie);
-    virtual RouterInterfaceData *createRouterInterfaceData(InterfaceEntry *ie);
-    virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
-    virtual RouterInterfaceData *getRouterInterfaceData(InterfaceEntry *ie);
+    virtual HostInterfaceData *createHostInterfaceData(NetworkInterface *ie);
+    virtual RouterInterfaceData *createRouterInterfaceData(NetworkInterface *ie);
+    virtual HostInterfaceData *getHostInterfaceData(NetworkInterface *ie);
+    virtual RouterInterfaceData *getRouterInterfaceData(NetworkInterface *ie);
     virtual void deleteHostInterfaceData(int interfaceId);
     virtual void deleteRouterInterfaceData(int interfaceId);
 
-    virtual void configureInterface(InterfaceEntry *ie);
+    virtual void configureInterface(NetworkInterface *ie);
 
     virtual void startTimer(cMessage *timer, double interval);
 
     virtual void sendGeneralQuery(RouterInterfaceData *interface, double maxRespTime);
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv4AddressVector& sources);
-    virtual void sendGroupReport(InterfaceEntry *ie, const std::vector<GroupRecord>& records);
-    virtual void sendQueryToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest);
-    virtual void sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest);
+    virtual void sendGroupReport(NetworkInterface *ie, const std::vector<GroupRecord>& records);
+    virtual void sendQueryToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
+    virtual void sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
 
     virtual void processHostGeneralQueryTimer(cMessage *msg);
     virtual void processHostGroupQueryTimer(cMessage *msg);
@@ -293,7 +293,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     virtual void processQuery(Packet *msg);
     virtual void processReport(Packet *msg);
 
-    virtual void multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, const Ipv4MulticastSourceList& sourceList);
+    virtual void multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group, const Ipv4MulticastSourceList& sourceList);
 
   public:
     static void insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);

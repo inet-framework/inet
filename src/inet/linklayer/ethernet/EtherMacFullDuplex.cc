@@ -23,7 +23,7 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -344,8 +344,8 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
 
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-    if (interfaceEntry)
-        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    if (networkInterface)
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, packet);

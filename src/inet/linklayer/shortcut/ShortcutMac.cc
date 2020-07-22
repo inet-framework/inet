@@ -54,15 +54,15 @@ void ShortcutMac::initialize(int stage)
     }
 }
 
-void ShortcutMac::configureInterfaceEntry()
+void ShortcutMac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
     shortcutMacs[address] = this;
-    interfaceEntry->setDatarate(bitrate);
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
-    interfaceEntry->setMulticast(false);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setDatarate(bitrate);
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMulticast(false);
+    networkInterface->setBroadcast(true);
 }
 
 void ShortcutMac::handleMessageWhenUp(cMessage *message)
@@ -140,7 +140,7 @@ void ShortcutMac::receiveFromPeer(Packet *packet)
         packetProtocolTag->setProtocol(packetProtocol);
     }
     packet->addTag<DispatchProtocolReq>()->setProtocol(packetProtocol);
-    packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     sendUp(packet);
 }
 

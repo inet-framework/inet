@@ -76,25 +76,25 @@ void Ppp::initialize(int stage)
     }
 }
 
-void Ppp::configureInterfaceEntry()
+void Ppp::configureNetworkInterface()
 {
     // data rate
     bool connected = datarateChannel != nullptr;
     double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
-    interfaceEntry->setDatarate(datarate);
-    interfaceEntry->setCarrier(connected);
+    networkInterface->setDatarate(datarate);
+    networkInterface->setCarrier(connected);
 
     // generate a link-layer address to be used as interface token for IPv6
     InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
-    interfaceEntry->setInterfaceToken(token);
+    networkInterface->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    interfaceEntry->setMtu(par("mtu"));
+    networkInterface->setMtu(par("mtu"));
 
     // capabilities
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setPointToPoint(true);
+    networkInterface->setMulticast(true);
+    networkInterface->setPointToPoint(true);
 }
 
 void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -160,9 +160,9 @@ void Ppp::refreshOutGateConnection(bool connected)
         datarateChannel->subscribe(POST_MODEL_CHANGE, this);
 
     // update interface state if it is in use
-    if (interfaceEntry) {
-        interfaceEntry->setCarrier(connected);
-        interfaceEntry->setDatarate(datarate);
+    if (networkInterface) {
+        networkInterface->setCarrier(connected);
+        networkInterface->setDatarate(datarate);
     }
 
     if (connected && !endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
@@ -206,8 +206,8 @@ void Ppp::handleMessageWhenUp(cMessage *message)
     MacProtocolBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
         if (txQueue->isEmpty()) {
-            interfaceEntry->setCarrier(false);
-            interfaceEntry->setState(InterfaceEntry::State::DOWN);
+            networkInterface->setCarrier(false);
+            networkInterface->setState(NetworkInterface::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
     }
@@ -351,7 +351,7 @@ void Ppp::decapsulate(Packet *packet)
     if (pppHeader == nullptr || pppTrailer == nullptr)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
     //TODO check CRC
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
 
     auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
@@ -361,12 +361,12 @@ void Ppp::decapsulate(Packet *packet)
 void Ppp::handleStopOperation(LifecycleOperation *operation)
 {
     if (!txQueue->isEmpty()) {
-        interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
+        networkInterface->setState(NetworkInterface::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
     else {
-        interfaceEntry->setCarrier(false);
-        interfaceEntry->setState(InterfaceEntry::State::DOWN);
+        networkInterface->setCarrier(false);
+        networkInterface->setState(NetworkInterface::State::DOWN);
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }

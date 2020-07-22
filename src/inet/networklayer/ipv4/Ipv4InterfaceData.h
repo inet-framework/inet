@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
@@ -59,9 +59,9 @@ struct INET_API Ipv4MulticastSourceList
  */
 struct INET_API Ipv4MulticastGroupInfo : public cObject
 {
-    Ipv4MulticastGroupInfo(InterfaceEntry *const ie, const Ipv4Address& groupAddress)
+    Ipv4MulticastGroupInfo(NetworkInterface *const ie, const Ipv4Address& groupAddress)
         : ie(ie), groupAddress(groupAddress) {}
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     Ipv4Address groupAddress;
 };
 
@@ -72,17 +72,17 @@ struct INET_API Ipv4MulticastGroupSourceInfo : public Ipv4MulticastGroupInfo
 {
     typedef std::vector<Ipv4Address> Ipv4AddressVector;
 
-    Ipv4MulticastGroupSourceInfo(InterfaceEntry *const ie, const Ipv4Address& groupAddress, const Ipv4MulticastSourceList& sourceList)
+    Ipv4MulticastGroupSourceInfo(NetworkInterface *const ie, const Ipv4Address& groupAddress, const Ipv4MulticastSourceList& sourceList)
         : Ipv4MulticastGroupInfo(ie, groupAddress), sourceList(sourceList) {}
 
     Ipv4MulticastSourceList sourceList;
 };
 
 /**
- * Ipv4-specific data in an InterfaceEntry. Stores interface Ipv4 address,
+ * Ipv4-specific data in an NetworkInterface. Stores interface Ipv4 address,
  * netmask, metric, etc.
  *
- * @see InterfaceEntry
+ * @see NetworkInterface
  */
 // XXX pass Ipv4Address parameters as values
 class INET_API Ipv4InterfaceData : public InterfaceProtocolData

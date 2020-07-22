@@ -15,8 +15,8 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INTERFACEENTRY_H
-#define __INET_INTERFACEENTRY_H
+#ifndef __INET_NETWORKINTERFACE_H
+#define __INET_NETWORKINTERFACE_H
 
 #include <vector>
 #include "inet/common/INETDefs.h"
@@ -35,7 +35,7 @@ namespace inet {
 
 // Forward declarations. Do NOT #include the corresponding header files
 // since that would create dependence on Ipv4 and Ipv6 stuff!
-class InterfaceEntry;
+class NetworkInterface;
 class IInterfaceTable;
 
 enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
@@ -56,10 +56,10 @@ class INET_API MacEstimateCostProcess
  */
 class INET_API InterfaceProtocolData : public TagBase
 {
-    friend class InterfaceEntry;    //only this guy is allowed to set ownerp
+    friend class NetworkInterface;    //only this guy is allowed to set ownerp
 
   protected:
-    InterfaceEntry *ownerp = nullptr;    // the interface entry this object belongs to
+    NetworkInterface *ownerp = nullptr;    // the interface entry this object belongs to
     int id;
 
   protected:
@@ -70,19 +70,19 @@ class INET_API InterfaceProtocolData : public TagBase
     InterfaceProtocolData(int id) : id(id) { }
 
     /**
-     * Returns the InterfaceEntry that contains this data object, or nullptr
+     * Returns the NetworkInterface that contains this data object, or nullptr
      */
-    InterfaceEntry *getInterfaceEntry() const { return ownerp; }
+    NetworkInterface *getNetworkInterface() const { return ownerp; }
 };
 
-class INET_API InterfaceEntryChangeDetails : public cObject
+class INET_API NetworkInterfaceChangeDetails : public cObject
 {
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     int field;
 
   public:
-    InterfaceEntryChangeDetails(InterfaceEntry *ie, int field) : ie(ie), field(field) { ASSERT(ie); }
-    InterfaceEntry *getInterfaceEntry() const { return ie; }
+    NetworkInterfaceChangeDetails(NetworkInterface *ie, int field) : ie(ie), field(field) { ASSERT(ie); }
+    NetworkInterface *getNetworkInterface() const { return ie; }
     int getFieldId() const { return field; }
     virtual std::string str() const override;
 };
@@ -92,7 +92,7 @@ class INET_API InterfaceEntryChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle
+class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle
 {
     friend class InterfaceProtocolData;    // to call protocolDataChanged()
 
@@ -125,8 +125,8 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
 
   private:
     // copying not supported: following are private and also left undefined
-    InterfaceEntry(const InterfaceEntry& obj);
-    InterfaceEntry& operator=(const InterfaceEntry& obj);
+    NetworkInterface(const NetworkInterface& obj);
+    NetworkInterface& operator=(const NetworkInterface& obj);
 
   public:
     // field ids for change notifications
@@ -162,8 +162,8 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
 
   public:
-    InterfaceEntry();
-    virtual ~InterfaceEntry();
+    NetworkInterface();
+    virtual ~NetworkInterface();
     virtual std::string str() const override;
     virtual std::string getInterfaceFullPath() const;
 
@@ -352,9 +352,9 @@ class INET_API InterfaceEntry : public cSimpleModule, public queueing::IPassiveP
     //@}
 };
 
-std::ostream& operator <<(std::ostream& o, InterfaceEntry::State);
+std::ostream& operator <<(std::ostream& o, NetworkInterface::State);
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACEENTRY_H
+#endif // ifndef __INET_NETWORKINTERFACE_H
 

@@ -21,7 +21,7 @@ package inet.linklayer.acking;
 
 import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
@@ -37,10 +37,10 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 //
 // This module requires an ~UnitDiskRadioMedium instance in the network.
 //
-module AckingWirelessInterface extends InterfaceEntry like IWirelessInterface
+module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         @display("i=block/ifcard");
         string interfaceTableModule;
         string energySourceModule = default("");

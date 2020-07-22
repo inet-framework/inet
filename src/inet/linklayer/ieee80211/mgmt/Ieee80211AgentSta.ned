@@ -42,9 +42,9 @@ simple Ieee80211AgentSta like IIeee80211Agent
         @signal[sentRequest](type=long); // ENUM! ~Ieee80211PrimRequestCode
         @signal[acceptConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode
         @signal[dropConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode
-        @signal[l2AssociatedNewAp](type=inet::InterfaceEntry);
-        @signal[l2AssociatedOldAp](type=inet::InterfaceEntry);
-        @signal[l2Disassociated](type=inet::InterfaceEntry);
+        @signal[l2AssociatedNewAp](type=inet::NetworkInterface);
+        @signal[l2AssociatedOldAp](type=inet::NetworkInterface);
+        @signal[l2Disassociated](type=inet::NetworkInterface);
         @statistic[sentRequest](title="sent requests"; record=count,vector); // ENUM! ~Ieee80211PrimRequestCode
         @statistic[acceptConfirm](title="accepted confirms"; record=count,vector); // ENUM! ~Ieee80211PrimConfirmCode
         @statistic[dropConfirm](title="dropped confirms"; record=count,vector); // ENUM! ~Ieee80211PrimConfirmCode

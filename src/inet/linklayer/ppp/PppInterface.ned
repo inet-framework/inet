@@ -18,7 +18,7 @@
 package inet.linklayer.ppp;
 
 import inet.linklayer.contract.IPppInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
 
 
@@ -26,10 +26,10 @@ import inet.queueing.contract.ITrafficConditioner;
 // PPP interface. Complements the ~Ppp module with an output queue
 // for QoS and RED support.
 //
-module PppInterface extends InterfaceEntry like IPppInterface
+module PppInterface extends NetworkInterface like IPppInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;
         string protocol = default("ppp");

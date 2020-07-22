@@ -42,7 +42,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase
     // configuration
     Ieee80211Mib *mib = nullptr;
     IInterfaceTable *interfaceTable = nullptr;
-    InterfaceEntry *myIface = nullptr;
+    NetworkInterface *myIface = nullptr;
 
     // statistics
     long numMgmtFramesReceived;

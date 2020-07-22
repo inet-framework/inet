@@ -2758,7 +2758,7 @@ void SctpAssociation::pmDataIsSentOn(SctpPathVariables *path)
 void SctpAssociation::pmStartPathManagement()
 {
     SctpPathVariables *path;
-    const InterfaceEntry *rtie;
+    const NetworkInterface *rtie;
     int32 i = 0;
     /* populate path structures !!! */
     /* set a high start value...this is appropriately decreased later (below) */

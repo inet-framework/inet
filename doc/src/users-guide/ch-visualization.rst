@@ -280,7 +280,7 @@ takes a format string, which can contain the following directives:
 -  %\: conditional newline for wired interfaces. The ’\’ needs to be
    escaped with another ’\’, i.e. ’%\\’
 
--  %i and %s: the info() and str() functions for the interfaceEntry
+-  %i and %s: the info() and str() functions for the networkInterface
    class, respectively
 
 The default format string is ``"%N %\\%n/%l"``, i.e. interface name, IP

@@ -27,19 +27,19 @@ class INET_API TestIGMP : public Igmpv2, public IScriptable
     typedef Ipv4InterfaceData::Ipv4AddressVector Ipv4AddressVector;
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void configureInterface(InterfaceEntry *ie) override;
+    virtual void configureInterface(NetworkInterface *ie) override;
     virtual void processIgmpMessage(Packet *packet) override;
     virtual void processHostGroupTimer(cMessage *msg) override;
     virtual void processQueryTimer(cMessage *msg) override;
     virtual void processLeaveTimer(cMessage *msg) override;
     virtual void processRexmtTimer(cMessage *msg) override;
     virtual void processCommand(const cXMLElement &node) override;
-    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest) override;
+    virtual void sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& dest) override;
   private:
     void dumpMulticastGroups(const char* name, const char *ifname, Ipv4AddressVector groups);
-    void startEvent(const char *event, int stateMask, InterfaceEntry *ie, const Ipv4Address *group = NULL);
-    void endEvent(int stateMask, InterfaceEntry *ie, const Ipv4Address *group = NULL);
-    void printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address *group);
+    void startEvent(const char *event, int stateMask, NetworkInterface *ie, const Ipv4Address *group = NULL);
+    void endEvent(int stateMask, NetworkInterface *ie, const Ipv4Address *group = NULL);
+    void printStates(int stateMask, NetworkInterface *ie, const Ipv4Address *group);
 };
 
 Define_Module(TestIGMP);
@@ -79,7 +79,7 @@ void TestIGMP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *
     }
 }
 
-void TestIGMP::configureInterface(InterfaceEntry *ie)
+void TestIGMP::configureInterface(NetworkInterface *ie)
 {
     startEvent("configure interface", ROUTER_IF_STATE, ie);
     Igmpv2::configureInterface(ie);
@@ -89,7 +89,7 @@ void TestIGMP::configureInterface(InterfaceEntry *ie)
 
 void TestIGMP::processIgmpMessage(Packet *packet)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const auto& igmp = packet->peekAtFront<IgmpMessage>();
     Ipv4Address group = Ipv4Address::UNSPECIFIED_ADDRESS;
     switch (igmp->getType()) {
@@ -147,7 +147,7 @@ void TestIGMP::processHostGroupTimer(cMessage *msg)
 
 void TestIGMP::processQueryTimer(cMessage *msg)
 {
-    InterfaceEntry *ie = (InterfaceEntry*)msg->getContextPointer();
+    NetworkInterface *ie = (NetworkInterface*)msg->getContextPointer();
     RouterInterfaceData *routerData = getRouterInterfaceData(ie);
     const char *event = routerData && routerData->igmpRouterState == IGMP_RS_QUERIER ? "gen. query timer expired" :
                                                                                        "other querier present timer expired";
@@ -159,7 +159,7 @@ void TestIGMP::processQueryTimer(cMessage *msg)
 void TestIGMP::processLeaveTimer(cMessage *msg)
 {
     IgmpRouterTimerContext *ctx = (IgmpRouterTimerContext*)msg->getContextPointer();
-    InterfaceEntry *ie = ctx->ie;
+    NetworkInterface *ie = ctx->ie;
     Ipv4Address group = ctx->routerGroup->groupAddr;
     startEvent("timer expired", ROUTER_GROUP_STATE, ie, &group);
     Igmpv2::processLeaveTimer(msg);
@@ -174,7 +174,7 @@ void TestIGMP::processRexmtTimer(cMessage *msg)
     endEvent(ROUTER_GROUP_STATE, ctx->ie, &ctx->routerGroup->groupAddr);
 }
 
-void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest)
+void TestIGMP::sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& dest)
 {
     if (out.is_open()) {
         const auto& igmp = CHK(msg->peekAtFront<IgmpMessage>());
@@ -198,7 +198,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
 
     const char *tag = node.getTagName();
     const char *ifname = node.getAttribute("ifname");
-    InterfaceEntry *ie = ifname ? CHK(ift->findInterfaceByName(ifname)) : nullptr;
+    NetworkInterface *ie = ifname ? CHK(ift->findInterfaceByName(ifname)) : nullptr;
 
     if (!strcmp(tag, "join")) {
         if (!ie)
@@ -251,7 +251,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
     }
 }
 
-void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
+void TestIGMP::startEvent(const char * event, int stateMask, NetworkInterface *ie, const Ipv4Address *group)
 {
     if (out.is_open()) {
         out << "t=" << simTime() << " " << node->getFullName() << "/" << ie->getInterfaceName();
@@ -263,7 +263,7 @@ void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie,
     }
 }
 
-void TestIGMP::endEvent(int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
+void TestIGMP::endEvent(int stateMask, NetworkInterface *ie, const Ipv4Address *group)
 {
     if (out.is_open()) {
         out << "> -->";
@@ -273,7 +273,7 @@ void TestIGMP::endEvent(int stateMask, InterfaceEntry *ie, const Ipv4Address *gr
     }
 }
 
-void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
+void TestIGMP::printStates(int stateMask, NetworkInterface *ie, const Ipv4Address *group)
 {
     if (stateMask & ROUTER_IF_STATE) {
         RouterInterfaceData *routerIfData = getRouterInterfaceData(ie);

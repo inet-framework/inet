@@ -70,7 +70,7 @@ class INET_API PimDm : public PimBase, protected cListener
         cMessage *stateRefreshTimer;    // scheduled in ORIGINATOR state for sending the next StateRefresh message
         unsigned short maxTtlSeen;
 
-        UpstreamInterface(Route *owner, InterfaceEntry *ie, Ipv4Address neighbor, bool isSourceDirectlyConnected)
+        UpstreamInterface(Route *owner, NetworkInterface *ie, Ipv4Address neighbor, bool isSourceDirectlyConnected)
             : Interface(owner, ie), nextHop(neighbor),
             graftPruneState(FORWARDING), graftRetryTimer(nullptr), overrideTimer(nullptr), lastPruneSentTime(0.0),
             originatorState(NOT_ORIGINATOR), sourceActiveTimer(nullptr), stateRefreshTimer(nullptr), maxTtlSeen(0)
@@ -116,7 +116,7 @@ class INET_API PimDm : public PimBase, protected cListener
         cMessage *pruneTimer;         // scheduled when entering into PRUNED state, when expires the interface goes to NO_INFO (forwarding) state
         cMessage *prunePendingTimer;  // scheduled when a Prune is received, when expires the interface goes to PRUNED state
 
-        DownstreamInterface(Route *owner, InterfaceEntry *ie)
+        DownstreamInterface(Route *owner, NetworkInterface *ie)
             : Interface(owner, ie),
             pruneState(NO_INFO), pruneTimer(nullptr), prunePendingTimer(nullptr)
         { ASSERT(owner), ASSERT(ie); }
@@ -144,7 +144,7 @@ class INET_API PimDm : public PimBase, protected cListener
             : RouteEntry(owner, source, group), upstreamInterface(nullptr) {}
         virtual ~Route();
         DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
-        DownstreamInterface *createDownstreamInterface(InterfaceEntry *ie);
+        DownstreamInterface *createDownstreamInterface(NetworkInterface *ie);
         DownstreamInterface *removeDownstreamInterface(int interfaceId);
         bool isOilistNull();
     };
@@ -159,7 +159,7 @@ class INET_API PimDm : public PimBase, protected cListener
         DownstreamInterface *downstream;
 
       public:
-        PimDmOutInterface(InterfaceEntry *ie, DownstreamInterface *downstream)
+        PimDmOutInterface(NetworkInterface *ie, DownstreamInterface *downstream)
             : IMulticastRoute::OutInterface(ie), downstream(downstream) {}
         virtual bool isEnabled() override { return downstream->isInOlist(); }
     };
@@ -204,8 +204,8 @@ class INET_API PimDm : public PimBase, protected cListener
     void unroutableMulticastPacketArrived(Ipv4Address srcAddress, Ipv4Address destAddress, unsigned short ttl);
     void multicastPacketArrivedOnNonRpfInterface(Ipv4Address group, Ipv4Address source, int interfaceId);
     void multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address group, Ipv4Address source, unsigned short ttl);
-    void multicastReceiverAdded(InterfaceEntry *ie, Ipv4Address newAddr);
-    void multicastReceiverRemoved(InterfaceEntry *ie, Ipv4Address oldAddr);
+    void multicastReceiverAdded(NetworkInterface *ie, Ipv4Address newAddr);
+    void multicastReceiverRemoved(NetworkInterface *ie, Ipv4Address oldAddr);
     void rpfInterfaceHasChanged(Ipv4MulticastRoute *route, Ipv4Route *routeToSource);
 
     // process timers
@@ -239,13 +239,13 @@ class INET_API PimDm : public PimBase, protected cListener
     void sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp, int intId);
     void sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacket);
     void sendStateRefreshPacket(Ipv4Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl);
-    void sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric metric, InterfaceEntry *ie);
+    void sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric metric, NetworkInterface *ie);
     void sendToIP(Packet *packet, Ipv4Address source, Ipv4Address dest, int outInterfaceId);
 
     // helpers
     void restartTimer(cMessage *timer, double interval);
     void cancelAndDeleteTimer(cMessage *& timer);
-    PimInterface *getIncomingInterface(InterfaceEntry *fromIE);
+    PimInterface *getIncomingInterface(NetworkInterface *fromIE);
     Ipv4MulticastRoute *findIpv4MulticastRoute(Ipv4Address group, Ipv4Address source);
     Route *findRoute(Ipv4Address source, Ipv4Address group);
     void deleteRoute(Ipv4Address source, Ipv4Address group);

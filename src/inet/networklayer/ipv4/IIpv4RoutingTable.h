@@ -55,7 +55,7 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const Ipv4Address& address) const = 0;
+    virtual NetworkInterface *getInterfaceByAddress(const Ipv4Address& address) const = 0;
     using IRoutingTable::getInterfaceByAddress;
     //@}
 
@@ -89,7 +89,7 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
      * Returns the interface entry having the specified address
      * as its local broadcast address.
      */
-    virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const Ipv4Address& dest) const = 0;
+    virtual NetworkInterface *findInterfaceByLocalBroadcastAddress(const Ipv4Address& dest) const = 0;
 
     /**
      * The routing function. Performs longest prefix match for the given
@@ -105,7 +105,7 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
      * Returns the output interface for the packets with dest as destination
      * address, or nullptr if the destination is not in routing table.
      */
-    virtual InterfaceEntry *getInterfaceForDestAddr(const Ipv4Address& dest) const = 0;
+    virtual NetworkInterface *getInterfaceForDestAddr(const Ipv4Address& dest) const = 0;
 
     /**
      * Convenience function based on findBestMatchingRoute().

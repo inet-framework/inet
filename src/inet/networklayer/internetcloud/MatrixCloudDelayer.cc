@@ -220,7 +220,7 @@ MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int sr
 
 std::string MatrixCloudDelayer::getPathOfConnectedNodeOnIfaceID(int id)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(id);
+    NetworkInterface *ie = ift->getInterfaceById(id);
     if (!ie)
         throw cRuntimeError("The interface id=%i not found in interfacetable", id);
 

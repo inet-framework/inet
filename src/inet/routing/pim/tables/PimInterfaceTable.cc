@@ -63,7 +63,7 @@ void PimInterfaceTable::configureInterfaces(cXMLElement *config)
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
     for (int k = 0; k < ift->getNumInterfaces(); ++k) {
-        InterfaceEntry *ie = ift->getInterface(k);
+        NetworkInterface *ie = ift->getInterface(k);
         if (ie->isMulticast() && !ie->isLoopback()) {
             int i = matcher.findMatchingSelector(ie);
             if (i >= 0) {
@@ -75,7 +75,7 @@ void PimInterfaceTable::configureInterfaces(cXMLElement *config)
     }
 }
 
-PimInterface *PimInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement *config)
+PimInterface *PimInterfaceTable::createInterface(NetworkInterface *ie, cXMLElement *config)
 {
     const char *modeAttr = config->getAttribute("mode");
     if (!modeAttr)
@@ -110,18 +110,18 @@ void PimInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, 
     printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
+        NetworkInterface *ie = check_and_cast<NetworkInterface *>(obj);
         if (ie->isMulticast() && !ie->isLoopback())
             addInterface(ie);
     }
     else if (signalID == interfaceDeletedSignal) {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
+        NetworkInterface *ie = check_and_cast<NetworkInterface *>(obj);
         if (ie->isMulticast() && !ie->isLoopback())
             removeInterface(ie);
     }
 }
 
-PimInterfaceTable::PimInterfaceVector::iterator PimInterfaceTable::findInterface(InterfaceEntry *ie)
+PimInterfaceTable::PimInterfaceVector::iterator PimInterfaceTable::findInterface(NetworkInterface *ie)
 {
     for (auto it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         if ((*it)->getInterfacePtr() == ie)
@@ -130,7 +130,7 @@ PimInterfaceTable::PimInterfaceVector::iterator PimInterfaceTable::findInterface
     return pimInterfaces.end();
 }
 
-void PimInterfaceTable::addInterface(InterfaceEntry *ie)
+void PimInterfaceTable::addInterface(NetworkInterface *ie)
 {
     ASSERT(findInterface(ie) == pimInterfaces.end());
 
@@ -146,7 +146,7 @@ void PimInterfaceTable::addInterface(InterfaceEntry *ie)
     }
 }
 
-void PimInterfaceTable::removeInterface(InterfaceEntry *ie)
+void PimInterfaceTable::removeInterface(NetworkInterface *ie)
 {
     auto it = findInterface(ie);
     if (it != pimInterfaces.end())

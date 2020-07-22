@@ -139,7 +139,7 @@ void Ospfv2Interface::setIfIndex(IInterfaceTable *ift, int index)
 {
     ifIndex = index;
     if (interfaceType == Ospfv2Interface::UNKNOWN_TYPE) {
-        InterfaceEntry *routingInterface = ift->getInterfaceById(ifIndex);
+        NetworkInterface *routingInterface = ift->getInterfaceById(ifIndex);
         interfaceAddressRange.address = routingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
         interfaceAddressRange.mask = routingInterface->getProtocolData<Ipv4InterfaceData>()->getNetmask();
         mtu = routingInterface->getMtu();

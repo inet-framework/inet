@@ -142,7 +142,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
     cXMLElementList intList = interfaceConfig->getElementsByTagName("Interface");
     for (auto interfaceIt=intList.begin(); interfaceIt!=intList.end(); interfaceIt++) {
         const char* interfaceName = (*interfaceIt)->getAttribute("name");
-        InterfaceEntry *myInterface = CHK(ift->findInterfaceByName(interfaceName));
+        NetworkInterface *myInterface = CHK(ift->findInterfaceByName(interfaceName));
 
         if (rt4 != nullptr && myInterface->isLoopback()) {
             static const Ipv4Address tmpipv4("127.0.0.0");
@@ -694,7 +694,7 @@ void Ospfv3Process::addInstance(Ospfv3Instance* newInstance)
 
 void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const char* ifName, short hopLimit)
 {
-    InterfaceEntry *ie = CHK(this->ift->findInterfaceByName(ifName));
+    NetworkInterface *ie = CHK(this->ift->findInterfaceByName(ifName));
     const auto& ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospf);

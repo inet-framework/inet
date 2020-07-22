@@ -288,9 +288,9 @@ void Gpsr::configureInterfaces()
     // join multicast groups
     cPatternMatcher interfaceMatcher(interfaces, false, true, false);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getInterfaceName()))
-            interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
+        NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+        if (networkInterface->isMulticast() && interfaceMatcher.matches(networkInterface->getInterfaceName()))
+            networkInterface->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
     }
 }
 
@@ -386,7 +386,7 @@ L3Address Gpsr::getSelfAddress() const
 #ifdef WITH_IPv6
     if (ret.getType() == L3Address::IPv6) {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-            InterfaceEntry *ie = interfaceTable->getInterface(i);
+            NetworkInterface *ie = interfaceTable->getInterface(i);
             if ((!ie->isLoopback())) {
                 if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
                     ret = ipv6Data->getPreferredAddress();
@@ -606,8 +606,8 @@ INetfilter::IHook::Result Gpsr::routeDatagram(Packet *datagram, GpsrOption *gpsr
     else {
         EV_INFO << "Next hop found: source = " << source << ", destination = " << destination << ", nextHop: " << nextHop << endl;
         gpsrOption->setSenderAddress(getSelfAddress());
-        auto interfaceEntry = CHK(interfaceTable->findInterfaceByName(outputInterface));
-        datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        auto networkInterface = CHK(interfaceTable->findInterfaceByName(outputInterface));
+        datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
         return ACCEPT;
     }
 }

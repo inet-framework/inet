@@ -54,7 +54,7 @@ Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(const Ospfv2RoutingTableEntry& 
 void Ospfv2RoutingTableEntry::addNextHop(NextHop hop)
 {
     if (nextHops.size() == 0) {
-        InterfaceEntry *routingInterface = ift->getInterfaceById(hop.ifIndex);
+        NetworkInterface *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
         // TODO: this used to be commented out, but it seems we need it

@@ -104,25 +104,25 @@ void Ospfv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
 {
     Enter_Method("Ospf::receiveSignal");
 
-    const InterfaceEntry *ie;
-    const InterfaceEntryChangeDetails *change;
+    const NetworkInterface *ie;
+    const NetworkInterfaceChangeDetails *change;
 
     if (signalID == interfaceCreatedSignal) {
         // configure interface for RIP
-        ie = check_and_cast<const InterfaceEntry *>(obj);
+        ie = check_and_cast<const NetworkInterface *>(obj);
         if (ie->isMulticast() && !ie->isLoopback()) {
             // TODO
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        ie = check_and_cast<const InterfaceEntry *>(obj);
+        ie = check_and_cast<const NetworkInterface *>(obj);
         // TODO
     }
     else if (signalID == interfaceStateChangedSignal) {
-        change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        change = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = change->getFieldId();
-        if (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER) {
-            ie = change->getInterfaceEntry();
+        if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
+            ie = change->getNetworkInterface();
             if (!ie->isUp())
                 handleInterfaceDown(ie);
             else {
@@ -198,7 +198,7 @@ int Ospfv2::checkExternalRoute(const Ipv4Address& route)
     return 0;
 }
 
-void Ospfv2::handleInterfaceDown(const InterfaceEntry *ie)
+void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
 {
     EV_DEBUG << "interface " << ie->getInterfaceId() << " went down. \n";
 

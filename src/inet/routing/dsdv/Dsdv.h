@@ -54,7 +54,7 @@ class INET_API Dsdv : public RoutingProtocolBase
     cMessage *event = nullptr;
     cPar *broadcastDelay = nullptr;
     std::list<ForwardEntry *> *forwardList  = nullptr;
-    InterfaceEntry *interface80211ptr = nullptr;
+    NetworkInterface *interface80211ptr = nullptr;
     int interfaceId = -1;
     unsigned int sequencenumber = 0;
     simtime_t routeLifetime;

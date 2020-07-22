@@ -102,7 +102,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
   protected:
     /** implements MacBase functions */
     //@{
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
     //@}
 
     /** @name Different tracked statistics.*/

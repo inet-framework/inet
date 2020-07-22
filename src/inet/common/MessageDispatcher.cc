@@ -270,7 +270,7 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
     }
 }
 
-void MessageDispatcher::handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in)
+void MessageDispatcher::handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in)
 {
     Enter_Method("handleRegisterInterface");
     auto it = interfaceIdToGateIndex.find(interface.getInterfaceId());

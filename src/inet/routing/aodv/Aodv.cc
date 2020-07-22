@@ -998,7 +998,7 @@ IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
     newRoute->setNextHop(nextHop);
     newRoute->setPrefixLength(addressType->getMaxPrefixLength());    // TODO:
     newRoute->setMetric(hopCount);
-    InterfaceEntry *ifEntry = interfaceTable->findInterfaceByName(par("interface"));    // TODO: IMPLEMENT: multiple interfaces
+    NetworkInterface *ifEntry = interfaceTable->findInterfaceByName(par("interface"));    // TODO: IMPLEMENT: multiple interfaces
     if (ifEntry)
         newRoute->setInterface(ifEntry);
     newRoute->setSourceType(IRoute::AODV);

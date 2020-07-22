@@ -19,13 +19,13 @@
 package inet.linklayer.ieee802154;
 
 import inet.linklayer.contract.IWirelessInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module Ieee802154NarrowbandInterface extends InterfaceEntry like IWirelessInterface
+module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         string interfaceTableModule;
         string energySourceModule = default("");
         *.interfaceTableModule = default(absPath(interfaceTableModule));

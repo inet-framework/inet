@@ -29,7 +29,7 @@
 namespace inet {
 
 class IInterfaceTable;
-class InterfaceEntry;
+class NetworkInterface;
 class Ipv6RoutingTable;
 
 /**
@@ -100,15 +100,15 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     bool routeLessThan(const Ipv6Route *a, const Ipv6Route *b) const;
 
     // internal
-    virtual void configureInterfaceForIpv6(InterfaceEntry *ie);
+    virtual void configureInterfaceForIpv6(NetworkInterface *ie);
     /**
      *  RFC 3513: Section 2.8 A Node's Required Address
      *  Assign the various addresses to the node's respective interface. This
      *  should be done when the Ipv6 Protocol stack is created.
      */
-    virtual void assignRequiredNodeAddresses(InterfaceEntry *ie);
+    virtual void assignRequiredNodeAddresses(NetworkInterface *ie);
     // internal
-    virtual void configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement *cfg);
+    virtual void configureInterfaceFromXml(NetworkInterface *ie, cXMLElement *cfg);
 
     // internal
     virtual void configureTunnelFromXml(cXMLElement *cfg);
@@ -147,7 +147,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const Ipv6Address& address) const;
+    virtual NetworkInterface *getInterfaceByAddress(const Ipv6Address& address) const;
     //@}
 
     /**
@@ -318,7 +318,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Deletes the routes that are using the specified interface.
      */
-    virtual void deleteInterfaceRoutes(const InterfaceEntry *entry);
+    virtual void deleteInterfaceRoutes(const NetworkInterface *entry);
 
     /**
      * Return the number of routes.
@@ -390,10 +390,10 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address());    /*TODO getRouterId();*/ }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false;    /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override;
-    virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
+    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override;
+    virtual NetworkInterface *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>((const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6()); return e ? e->getInterface() : nullptr; }
+    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6()); return e ? e->getInterface() : nullptr; }
     virtual L3Address getNextHopForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
     virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return false;    /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
     virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return nullptr;    /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }

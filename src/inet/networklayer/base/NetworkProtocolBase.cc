@@ -106,12 +106,12 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     }
     else {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-            InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-            if (interfaceEntry && !interfaceEntry->isLoopback()) {
+            NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+            if (networkInterface && !networkInterface->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
                 auto& tags = getTags(duplicate);
                 tags.removeTagIfPresent<DispatchProtocolReq>();
-                tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
                 send(duplicate, "queueOut");
             }
         }

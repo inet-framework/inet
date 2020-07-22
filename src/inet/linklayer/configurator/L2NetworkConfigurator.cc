@@ -25,7 +25,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/configurator/L2NetworkConfigurator.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -50,10 +50,10 @@ void L2NetworkConfigurator::initialize(int stage)
         ensureConfigurationComputed(topology);
 }
 
-L2NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, Node *childNode, InterfaceEntry *interfaceEntry)
+L2NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, Node *childNode, NetworkInterface *networkInterface)
 {
     this->node = node;
-    this->interfaceEntry = interfaceEntry;
+    this->networkInterface = networkInterface;
     this->childNode = childNode;
 }
 
@@ -77,7 +77,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
     }
 
     // extract links and interfaces
-    std::set<InterfaceEntry *> interfacesSeen;
+    std::set<NetworkInterface *> interfacesSeen;
     std::queue<Node *> Q;    // unvisited nodes in the graph
 
     rootNode = (Node *)topology.getNode(0);
@@ -91,12 +91,12 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
         if (interfaceTable) {
             // push neighbors to the queue
             for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-                InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-                if (interfacesSeen.count(interfaceEntry) == 0) {
+                NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+                if (interfacesSeen.count(networkInterface) == 0) {
                     // visiting this interface
-                    interfacesSeen.insert(interfaceEntry);
+                    interfacesSeen.insert(networkInterface);
 
-                    Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
+                    Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
 
                     Node *childNode = nullptr;
 
@@ -105,7 +105,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
                         Q.push(childNode);
                     }
 
-                    InterfaceInfo *info = new InterfaceInfo(node, childNode, interfaceEntry);
+                    InterfaceInfo *info = new InterfaceInfo(node, childNode, networkInterface);
                     node->interfaceInfos.push_back(info);
                 }
             }
@@ -115,11 +115,11 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
 
 void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
 {
-    std::set<InterfaceEntry *> matchedBefore;
+    std::set<NetworkInterface *> matchedBefore;
     cXMLElementList interfaceElements = configuration->getChildrenByTagName("interface");
 
     for (auto & interfaceElements_i : interfaceElements) {
-        std::set<InterfaceEntry *> interfacesSeen;
+        std::set<NetworkInterface *> interfacesSeen;
         cXMLElement *interfaceElement = interfaceElements_i;
 
         const char *hostAttr = interfaceElement->getAttribute("hosts");    // "host* router[0..3]"
@@ -157,7 +157,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
                 Q.pop();
 
                 for (unsigned int i = 0; i < currentNode->interfaceInfos.size(); i++) {
-                    InterfaceEntry *ifEntry = currentNode->interfaceInfos[i]->interfaceEntry;
+                    NetworkInterface *ifEntry = currentNode->interfaceInfos[i]->networkInterface;
                     if (interfacesSeen.count(ifEntry) == 0 && matchedBefore.count(ifEntry) == 0) {
                         cModule *hostModule = currentNode->module;
                         std::string hostFullPath = hostModule->getFullPath();
@@ -258,17 +258,17 @@ bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo *curren
     return false;
 }
 
-void L2NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
+void L2NetworkConfigurator::configureInterface(NetworkInterface *networkInterface)
 {
     ensureConfigurationComputed(topology);
-    cModule *networkNodeModule = findContainingNode(interfaceEntry);
+    cModule *networkNodeModule = findContainingNode(networkInterface);
     // TODO: avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->module == networkNodeModule) {
             for (auto & elem : node->interfaceInfos) {
                 InterfaceInfo *interfaceInfo = elem;
-                if (interfaceInfo->interfaceEntry == interfaceEntry)
+                if (interfaceInfo->networkInterface == networkInterface)
                     return configureInterface(interfaceInfo);
             }
         }
@@ -277,8 +277,8 @@ void L2NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
 
 void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 {
-    InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-    auto interfaceData = interfaceEntry->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
+    NetworkInterface *networkInterface = interfaceInfo->networkInterface;
+    auto interfaceData = networkInterface->getProtocolDataForUpdate<Ieee8021dInterfaceData>();
 
     interfaceData->setLinkCost(interfaceInfo->portData.linkCost);
     interfaceData->setPriority(interfaceInfo->portData.priority);

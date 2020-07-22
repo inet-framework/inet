@@ -22,7 +22,7 @@
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 
 namespace inet {
@@ -63,7 +63,7 @@ InterfaceMatcher::Selector::Selector(const char *hostPattern, const char *namePa
 }
 
 // Note: "hosts", "interfaces" and "towards" must ALL match on the interface
-bool InterfaceMatcher::Selector::matches(const InterfaceEntry *ie)
+bool InterfaceMatcher::Selector::matches(const NetworkInterface *ie)
 {
     cModule *hostModule = ie->getInterfaceTable()->getHostModule();
     std::string hostFullPath = hostModule->getFullPath();
@@ -108,7 +108,7 @@ InterfaceMatcher::~InterfaceMatcher()
 /**
  * Returns the index of the first selector that matches the interface.
  */
-int InterfaceMatcher::findMatchingSelector(const InterfaceEntry *ie)
+int InterfaceMatcher::findMatchingSelector(const NetworkInterface *ie)
 {
     for (int i = 0; i < (int)selectors.size(); i++)
         if (selectors[i]->matches(ie))
@@ -131,7 +131,7 @@ static cGate *findRemoteGate(cGate *startGate)
     return nullptr;
 }
 
-bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher& hostMatcher) const
+bool InterfaceMatcher::linkContainsMatchingHost(const NetworkInterface *ie, const Matcher& hostMatcher) const
 {
     int outGateId = ie->getNodeOutputGateId();
     cModule *node = ie->getInterfaceTable()->getHostModule();

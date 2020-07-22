@@ -104,7 +104,7 @@ enum InitStages {
     /**
      * Initialization of network configuration (e.g. Ipv4NetworkConfigurator) includes:
      *  - determining IP addresses and static routes
-     *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to InterfaceEntry
+     *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to NetworkInterface
      */
     INITSTAGE_NETWORK_CONFIGURATION = 4,
 

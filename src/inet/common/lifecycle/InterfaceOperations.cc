@@ -32,7 +32,7 @@ void InterfaceOperationBase::initialize(cModule *module, StringMap& params)
 
     LifecycleOperation::initialize(module, params);
 
-    // note: these operations cannot be generic, because their ctor requires InterfaceEntry as parameter
+    // note: these operations cannot be generic, because their ctor requires NetworkInterface as parameter
     IInterfaceTable *ift = L3AddressResolver().findInterfaceTableOf(module);
     if (!ift)
         throw cRuntimeError("Interface table of network node '%s' not found, required for operation %s", module->getFullPath().c_str(), getClassName());
@@ -40,7 +40,7 @@ void InterfaceOperationBase::initialize(cModule *module, StringMap& params)
     params.erase("interfacename");  //TODO implement "towards=..."
     if (interfaceName.empty())
         throw cRuntimeError("interfacename attribute missing, required for operation %s", getClassName());
-    InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
+    NetworkInterface *ie = ift->findInterfaceByName(interfaceName.c_str());
     if (!ie)
         throw cRuntimeError("No interface named '%s', required for operation %s", interfaceName.c_str(), getClassName());
 }

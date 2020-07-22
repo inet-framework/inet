@@ -190,7 +190,7 @@ void PimBase::processHelloPacket(Packet *packet)
         }
     }
 
-    InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+    NetworkInterface *ie = ift->getInterfaceById(interfaceId);
 
     EV_INFO << "Received PIM Hello from neighbor: interface=" << ie->getInterfaceName() << " address=" << address << "\n";
 

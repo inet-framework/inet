@@ -19,11 +19,11 @@
 #define __INET_EXTINTERFACE_H
 
 #include "inet/common/IInterfaceRegistrationListener.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
-class INET_API ExtInterface : public InterfaceEntry
+class INET_API ExtInterface : public NetworkInterface
 {
   protected:
     virtual void configureInterface();

@@ -29,7 +29,7 @@
 namespace inet {
 
 // Foreign declarations:
-class InterfaceEntry;
+class NetworkInterface;
 
 // used for the RR tokens
 #define UNDEFINED_TOKEN             0
@@ -205,12 +205,12 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Returns true if a home keygen token is available.
      */
-    virtual bool isHomeTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie);
+    virtual bool isHomeTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie);
 
     /**
      * Returns true if a care-of keygen token is available.
      */
-    virtual bool isCareOfTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie);
+    virtual bool isCareOfTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie);
 
     //
     // Additional methods
@@ -271,8 +271,8 @@ class INET_API BindingUpdateList : public cSimpleModule
      * These two methods indicate whether a CoTI or HoTI message
      * has been recently sent to the CN identified by parameter dest.
      */
-    virtual bool recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry *ie);
-    virtual bool recentlySentHOTI(const Ipv6Address& dest, InterfaceEntry *ie);
+    virtual bool recentlySentCOTI(const Ipv6Address& dest, NetworkInterface *ie);
+    virtual bool recentlySentHOTI(const Ipv6Address& dest, NetworkInterface *ie);
 
   protected:
     /**

@@ -49,7 +49,7 @@ class INET_API CLNSAddressType : public IL3AddressType
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::clns; }
 
-    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalAddress(const NetworkInterface *ie) const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
 };
 
 } /* namespace inet */

@@ -50,10 +50,10 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry) override;
+    virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, NetworkInterface *networkInterface) override;
     virtual void addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
-    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry) override;
+    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) override;
 
   public:
     virtual ~InterfaceTableOsgVisualizer();
@@ -63,8 +63,8 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry) override { return nullptr; }
-    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry) override { }
+    virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, NetworkInterface *networkInterface) override { return nullptr; }
+    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) override { }
 
 #endif // ifdef WITH_OSG
 };

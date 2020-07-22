@@ -21,15 +21,15 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
 /**
- * Next hop forwarding protocol specific data for an InterfaceEntry, stores generic network address.
+ * Next hop forwarding protocol specific data for an NetworkInterface, stores generic network address.
  *
- * @see InterfaceEntry
+ * @see NetworkInterface
  */
 class INET_API NextHopInterfaceData : public InterfaceProtocolData
 {
@@ -50,7 +50,7 @@ class INET_API NextHopInterfaceData : public InterfaceProtocolData
     NextHopInterfaceData& operator=(const NextHopInterfaceData& obj);
 
   public:
-    NextHopInterfaceData() : InterfaceProtocolData(InterfaceEntry::F_NEXTHOP_DATA) { metric = 0; }
+    NextHopInterfaceData() : InterfaceProtocolData(NetworkInterface::F_NEXTHOP_DATA) { metric = 0; }
     virtual std::string str() const override;
     virtual std::string detailedInfo() const;
 

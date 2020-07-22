@@ -82,7 +82,7 @@ void MacRelayUnit::broadcast(Packet *packet, int arrivalInterfaceId)
 
     int numPorts = ifTable->getNumInterfaces();
     for (int i = 0; i < numPorts; i++) {
-        InterfaceEntry *ie = ifTable->getInterface(i);
+        NetworkInterface *ie = ifTable->getInterface(i);
         if (ie->isLoopback() || !ie->isBroadcast())
             continue;
         int ifId = ie->getInterfaceId();

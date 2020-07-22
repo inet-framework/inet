@@ -28,7 +28,7 @@
 #include "inet/linklayer/ethernet/EtherMac.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -777,8 +777,8 @@ void EtherMac::processReceivedDataFrame(Packet *packet)
 
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-    if (interfaceEntry)
-        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    if (networkInterface)
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, packet);

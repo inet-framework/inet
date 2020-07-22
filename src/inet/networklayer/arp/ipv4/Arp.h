@@ -36,7 +36,7 @@ namespace inet {
 // Forward declarations:
 class ArpPacket;
 class IInterfaceTable;
-class InterfaceEntry;
+class NetworkInterface;
 class IIpv4RoutingTable;
 
 /**
@@ -50,12 +50,12 @@ class INET_API Arp : public OperationalBase, public IArp
     typedef std::vector<cMessage *> MsgPtrVector;
 
     // Ipv4Address -> MacAddress table
-    // TBD should we key it on (Ipv4Address, InterfaceEntry*)?
+    // TBD should we key it on (Ipv4Address, NetworkInterface*)?
     class ArpCacheEntry
     {
       public:
         Arp *owner = nullptr;    // owner ARP module of this cache entry
-        const InterfaceEntry *ie = nullptr;    // NIC to send the packet to
+        const NetworkInterface *ie = nullptr;    // NIC to send the packet to
         bool pending = false;    // true if resolution is pending
         MacAddress macAddress;    // MAC address
         simtime_t lastUpdate;    // entries should time out after cacheTimeout
@@ -94,12 +94,12 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /// IArp implementation  @{
-    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
+    virtual MacAddress resolveL3Address(const L3Address& address, const NetworkInterface *ie) override;
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
     /// @}
 
-    void sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode = ARP_REQUEST);
-    void sendArpProbe(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address probedAddr);
+    void sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode = ARP_REQUEST);
+    void sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr);
 
   protected:
     virtual void initialize(int stage) override;
@@ -116,13 +116,13 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual void flush();
 
     virtual void initiateArpResolution(ArpCacheEntry *entry);
-    virtual void sendArpRequest(const InterfaceEntry *ie, Ipv4Address ipAddress);
+    virtual void sendArpRequest(const NetworkInterface *ie, Ipv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
-    virtual bool addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie);
+    virtual bool addressRecognized(Ipv4Address destAddr, NetworkInterface *ie);
     virtual void processArpPacket(Packet *packet);
     virtual void updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress);
 
-    virtual MacAddress resolveMacAddressForArpReply(const InterfaceEntry *ie, const ArpPacket *arp);
+    virtual MacAddress resolveMacAddressForArpReply(const NetworkInterface *ie, const ArpPacket *arp);
 
     virtual void dumpArpPacket(const ArpPacket *arp);
     virtual void refreshDisplay() const override;

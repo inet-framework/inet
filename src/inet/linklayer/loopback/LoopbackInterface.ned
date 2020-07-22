@@ -20,15 +20,15 @@
 package inet.linklayer.loopback;
 
 import inet.linklayer.contract.ILoopbackInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 
 //
 // Loopback interface. Complements the ~Loopback module.
 //
-module LoopbackInterface extends InterfaceEntry like ILoopbackInterface
+module LoopbackInterface extends NetworkInterface like ILoopbackInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
         @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));

@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211VISUALIZERBASE_H
 #define __INET_IEEE80211VISUALIZERBASE_H
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/Placement.h"
@@ -67,8 +67,8 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
-    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power) = 0;
-    virtual const Ieee80211Visualization *getIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry);
+    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, NetworkInterface *networkInterface, std::string ssid, W power) = 0;
+    virtual const Ieee80211Visualization *getIeee80211Visualization(cModule *networkNode, NetworkInterface *networkInterface);
     virtual void addIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization);
     virtual void removeIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization);
     virtual void removeAllIeee80211Visualizations();

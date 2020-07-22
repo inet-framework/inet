@@ -26,7 +26,7 @@ Define_Module(EthernetCutthroughInterface);
 
 void EthernetCutthroughInterface::initialize(int stage)
 {
-    InterfaceEntry::initialize(stage);
+    NetworkInterface::initialize(stage);
     if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         cutthroughOutputGate = gate("cutthroughOut");
         cutthroughConsumer = findConnectedModule<IPassivePacketSink>(cutthroughOutputGate);

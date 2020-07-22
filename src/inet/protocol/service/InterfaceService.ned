@@ -18,7 +18,7 @@
 package inet.protocol.service;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.protocol.acknowledgement.ReceiveWithAcknowledge;
 import inet.protocol.acknowledgement.Resending;
 import inet.protocol.acknowledgement.SendWithAcknowledge;
@@ -32,11 +32,11 @@ import inet.protocol.transceiver.PacketTransmitter;
 import inet.queueing.common.PacketMultiplexer;
 
 
-module InterfaceService extends InterfaceEntry
+module InterfaceService extends NetworkInterface
 {
     parameters:
         string interfaceTableModule;
-        @class(inet::InterfaceEntry);
+        @class(inet::NetworkInterface);
         @display("i=block/ifcard");
     gates:
         input upperLayerIn @loose;

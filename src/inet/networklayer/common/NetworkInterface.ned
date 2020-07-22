@@ -20,7 +20,7 @@ package inet.networklayer.common;
 import inet.clock.contract.IClock;
 import inet.common.packet.recorder.PcapRecorder;
 
-module InterfaceEntry
+module NetworkInterface
 {
     parameters:
         bool recordPcap = default(false);

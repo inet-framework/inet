@@ -162,7 +162,7 @@ void Arp::initiateArpResolution(ArpCacheEntry *entry)
     emit(arpResolutionInitiatedSignal, &signal);
 }
 
-void Arp::sendArpRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
+void Arp::sendArpRequest(const NetworkInterface *ie, Ipv4Address ipAddress)
 {
     // find our own IPv4 address and MAC address on the given interface
     MacAddress myMACAddress = ie->getMacAddress();
@@ -218,7 +218,7 @@ void Arp::requestTimedOut(cMessage *selfmsg)
     numFailedResolutions++;
 }
 
-bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
+bool Arp::addressRecognized(Ipv4Address destAddr, NetworkInterface *ie)
 {
     if (rt->isLocalAddress(destAddr))
         return true;
@@ -227,7 +227,7 @@ bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
         if (proxyArpInterfacesMatcher.matches(ie->getInterfaceName())) {
             // if we can route this packet, and the output port is
             // different from this one, then say yes
-            InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
+            NetworkInterface *rtie = rt->getInterfaceForDestAddr(destAddr);
             return rtie != nullptr && rtie != ie;
         }
         else
@@ -249,7 +249,7 @@ void Arp::processArpPacket(Packet *packet)
     dumpArpPacket(arp.get());
 
     // extract input port
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
 
     //
     // Recipe a'la RFC 826:
@@ -377,7 +377,7 @@ void Arp::processArpPacket(Packet *packet)
     delete packet;
 }
 
-MacAddress Arp::resolveMacAddressForArpReply(const InterfaceEntry *ie, const ArpPacket *arp)
+MacAddress Arp::resolveMacAddressForArpReply(const NetworkInterface *ie, const ArpPacket *arp)
 {
     return ie->getMacAddress();
 }
@@ -399,7 +399,7 @@ void Arp::updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress)
     emit(arpResolutionCompletedSignal, &signal);
 }
 
-MacAddress Arp::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
+MacAddress Arp::resolveL3Address(const L3Address& address, const NetworkInterface *ie)
 {
     Enter_Method("resolveMACAddress(%s,%s)", address.str().c_str(), ie->getInterfaceName());
 
@@ -451,7 +451,7 @@ L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
 }
 
 // Also known as ARP Announcement
-void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode)
+void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode)
 {
     Enter_Method_Silent();
 
@@ -493,7 +493,7 @@ void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Ad
 
 // A client should send out 'ARP Probe' to probe the newly received IPv4 address.
 // Refer to RFC 5227, IPv4 Address Conflict Detection
-void Arp::sendArpProbe(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address probedAddr)
+void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr)
 {
     Enter_Method_Silent();
 

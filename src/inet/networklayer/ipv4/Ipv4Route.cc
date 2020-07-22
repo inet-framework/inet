@@ -19,7 +19,7 @@
 #include <sstream>
 #include <stdio.h>
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
@@ -218,7 +218,7 @@ void Ipv4MulticastRoute::addOutInterface(OutInterface *outInterface)
     changed(F_OUT);
 }
 
-bool Ipv4MulticastRoute::removeOutInterface(const InterfaceEntry *ie)
+bool Ipv4MulticastRoute::removeOutInterface(const NetworkInterface *ie)
 {
     for (auto it = outInterfaces.begin(); it != outInterfaces.end(); ++it) {
         if ((*it)->getInterface() == ie) {

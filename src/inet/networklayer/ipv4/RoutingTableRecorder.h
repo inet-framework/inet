@@ -47,7 +47,7 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
     virtual void hookListeners();
     virtual void ensureRoutingLogFileOpen();
     virtual void receiveChangeNotification(cComponent *source, simsignal_t signalID, cObject *details);
-    virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID);
+    virtual void recordInterfaceChange(cModule *host, const NetworkInterface *ie, simsignal_t signalID);
     virtual void recordRouteChange(cModule *host, const IRoute *route, simsignal_t signalID);
 };
 

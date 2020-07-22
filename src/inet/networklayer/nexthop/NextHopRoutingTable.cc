@@ -147,7 +147,7 @@ void NextHopRoutingTable::configureRouterId()
         if (!strcmp(routerIdStr, "auto")) {    // non-"auto" cases already handled in earlier stage
             // choose highest interface address as routerId
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-                InterfaceEntry *ie = ift->getInterface(i);
+                NetworkInterface *ie = ift->getInterface(i);
                 if (!ie->isLoopback()) {
                     L3Address interfaceAddr = ie->getProtocolData<NextHopInterfaceData>()->getAddress();
                     if (routerId.isUnspecified() || routerId < interfaceAddr)
@@ -162,13 +162,13 @@ void NextHopRoutingTable::configureRouterId()
 //        // TODO find out if this is a good practice, in which situations it is useful etc.
 //        if (getInterfaceByAddress(routerId)==nullptr)
 //        {
-//            InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
+//            NetworkInterface *lo0 = ift->getFirstLoopbackInterface();
 //            lo0->getNextHopProtocolData()->setAddress(routerId);
 //        }
 //    }
 }
 
-void NextHopRoutingTable::configureInterface(InterfaceEntry *ie)
+void NextHopRoutingTable::configureInterface(NetworkInterface *ie)
 {
     int metric = (int)(ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
     int interfaceModuleId = ie->getId();
@@ -186,7 +186,7 @@ void NextHopRoutingTable::configureInterface(InterfaceEntry *ie)
 void NextHopRoutingTable::configureLoopback()
 {
 //TODO needed???
-//    InterfaceEntry *ie = ift->getFirstLoopbackInterface()
+//    NetworkInterface *ie = ift->getFirstLoopbackInterface()
 //    // add Ipv4 info. Set 127.0.0.1/8 as address by default --
 //    // we may reconfigure later it to be the routerId
 //    Ipv4InterfaceData *d = new Ipv4InterfaceData();
@@ -249,11 +249,11 @@ bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
     return false;
 }
 
-InterfaceEntry *NextHopRoutingTable::getInterfaceByAddress(const L3Address& address) const
+NetworkInterface *NextHopRoutingTable::getInterfaceByAddress(const L3Address& address) const
 {
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
         L3Address interfaceAddr = ie->getProtocolData<NextHopInterfaceData>()->getAddress();
         if (interfaceAddr == address)
             return ie;
@@ -278,7 +278,7 @@ NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) 
     return bestRoute;
 }
 
-InterfaceEntry *NextHopRoutingTable::getOutputInterfaceForDestination(const L3Address& dest) const
+NetworkInterface *NextHopRoutingTable::getOutputInterfaceForDestination(const L3Address& dest) const
 {
     //TODO Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 

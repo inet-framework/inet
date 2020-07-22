@@ -75,24 +75,24 @@ void AckingMac::initialize(int stage)
     }
 }
 
-void AckingMac::configureInterfaceEntry()
+void AckingMac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    interfaceEntry->setMtu(par("mtu"));
+    networkInterface->setMtu(par("mtu"));
 
     // capabilities
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
 }
 
 void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
@@ -239,7 +239,7 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
     // All frames must be passed to the upper layer if the interface is
     // in promiscuous mode.
 
-    if (macHeader->getDest().equals(interfaceEntry->getMacAddress()))
+    if (macHeader->getDest().equals(networkInterface->getMacAddress()))
         return false;
 
     if (macHeader->getDest().isBroadcast())
@@ -262,7 +262,7 @@ void AckingMac::decapsulate(Packet *packet)
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getSrc());
     macAddressInd->setDestAddress(macHeader->getDest());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);

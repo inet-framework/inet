@@ -199,10 +199,10 @@ void PcapRecorder::recordPacket(const cPacket *msg, Direction direction, cCompon
                 direction = directionTag->getDirection();
         }
 
-        // get InterfaceEntry
+        // get NetworkInterface
         auto srcModule = check_and_cast<cModule *>(source);
-        auto interfaceEntry = findContainingNicModule(srcModule);
-        if (interfaceEntry == nullptr) {
+        auto networkInterface = findContainingNicModule(srcModule);
+        if (networkInterface == nullptr) {
             int ifaceId = -1;
             if (direction == DIRECTION_OUTBOUND) {
                 if (auto ifaceTag = packet->findTag<InterfaceReq>())
@@ -214,7 +214,7 @@ void PcapRecorder::recordPacket(const cPacket *msg, Direction direction, cCompon
             }
             if (ifaceId != -1) {
                 auto ift = check_and_cast_nullable<InterfaceTable *>(getContainingNode(srcModule)->getSubmodule("interfaceTable"));
-                interfaceEntry = ift->getInterfaceById(ifaceId);
+                networkInterface = ift->getInterfaceById(ifaceId);
             }
         }
 
@@ -229,13 +229,13 @@ void PcapRecorder::recordPacket(const cPacket *msg, Direction direction, cCompon
             }
 
             if (matchesLinkType(pcapLinkType, protocol)) {
-                pcapWriter->writePacket(simTime(), packet, direction, interfaceEntry, pcapLinkType);
+                pcapWriter->writePacket(simTime(), packet, direction, networkInterface, pcapLinkType);
                 numRecorded++;
                 emit(packetRecordedSignal, packet);
             }
             else {
                 if (auto convertedPacket = tryConvertToLinkType(packet, pcapLinkType, protocol)) {
-                    pcapWriter->writePacket(simTime(), convertedPacket, direction, interfaceEntry, pcapLinkType);
+                    pcapWriter->writePacket(simTime(), convertedPacket, direction, networkInterface, pcapLinkType);
                     numRecorded++;
                     emit(packetRecordedSignal, packet);
                     delete convertedPacket;

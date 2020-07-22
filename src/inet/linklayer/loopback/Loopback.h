@@ -25,7 +25,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 
 /**
  * Loopback interface implementation.
@@ -38,7 +38,7 @@ class INET_API Loopback : public MacProtocolBase
     long numRcvdOK = 0;
 
   protected:
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
 
   public:
     Loopback() {}

@@ -49,7 +49,7 @@ const cModule *PacketDrop::getNetworkNode() const
     return module != nullptr ? findContainingNode(module) : nullptr;
 }
 
-const InterfaceEntry *PacketDrop::getNetworkInterface() const
+const NetworkInterface *PacketDrop::getNetworkInterface() const
 {
     auto module = getModule();
     return module != nullptr ? findContainingNicModule(module) : nullptr;
@@ -198,8 +198,8 @@ void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t sig
         auto packet = check_and_cast<cPacket *>(object);
         auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
         auto networkNode = findContainingNode(module);
-        auto interfaceEntry = findContainingNicModule(module);
-        if ((networkNode == nullptr || nodeFilter.matches(networkNode)) && (interfaceEntry == nullptr || interfaceFilter.matches(interfaceEntry)) &&
+        auto networkInterface = findContainingNicModule(module);
+        if ((networkNode == nullptr || nodeFilter.matches(networkNode)) && (networkInterface == nullptr || interfaceFilter.matches(networkInterface)) &&
             packetFilter.matches(packet) && detailsFilter.matches(packetDropDetails))
         {
             auto position = networkNode != nullptr ? getPosition(networkNode) : Coord::NIL;

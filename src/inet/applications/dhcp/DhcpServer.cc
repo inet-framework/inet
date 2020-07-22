@@ -82,7 +82,7 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
 
     if (signalID == interfaceDeletedSignal) {
         if (isUp()) {
-            InterfaceEntry *nie = check_and_cast<InterfaceEntry *>(obj);
+            NetworkInterface *nie = check_and_cast<NetworkInterface *>(obj);
             if (ie == nie)
                 throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
         }
@@ -91,11 +91,11 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-InterfaceEntry *DhcpServer::chooseInterface()
+NetworkInterface *DhcpServer::chooseInterface()
 {
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
         ie = ift->findInterfaceByName(interfaceName);
@@ -105,7 +105,7 @@ InterfaceEntry *DhcpServer::chooseInterface()
     else {
         // there should be exactly one non-loopback interface that we want to serve DHCP requests on
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            InterfaceEntry *current = ift->getInterface(i);
+            NetworkInterface *current = ift->getInterface(i);
             if (!current->isLoopback()) {
                 if (ie)
                     throw cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to serve DHCP requests on");

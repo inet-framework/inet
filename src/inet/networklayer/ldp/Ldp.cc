@@ -101,7 +101,7 @@ void Ldp::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     //FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
-    //FIXME register to InterfaceEntry changes, for detecting the interface add/delete, and detecting multicast config changes:
+    //FIXME register to NetworkInterface changes, for detecting the interface add/delete, and detecting multicast config changes:
     //      should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
 
     if (stage == INITSTAGE_LOCAL) {
@@ -127,7 +127,7 @@ void Ldp::initialize(int stage)
         udpSocket.setOutputGate(gate("socketOut"));
         udpSocket.bind(LDP_PORT);
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-            InterfaceEntry *ie = ift->getInterface(i);
+            NetworkInterface *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 udpSockets.push_back(UdpSocket());
                 udpSockets.back().setOutputGate(gate("socketOut"));
@@ -398,7 +398,7 @@ void Ldp::rebuildFecList()
     // our own addresses (XXX is it needed?)
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
 
 //TODO should replace to ie->isUp() or drop this code:
 //        if (ie->getNetworkLayerGateIndex() < 0)
@@ -785,7 +785,7 @@ Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
     //if (i == rt->getNumRoutes())
     //    return Ipv4Address();  // Signal an NOTIFICATION of NO ROUTE
     //
-    InterfaceEntry *ie = rt->getInterfaceForDestAddr(dest);
+    NetworkInterface *ie = rt->getInterfaceForDestAddr(dest);
     if (!ie)
         return Ipv4Address(); // no route
 
@@ -799,7 +799,7 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
 {
     int i = 0;
     int k = 0;
-    InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
+    NetworkInterface *ie = ift->findInterfaceByName(interfaceName.c_str());
     if (ie == nullptr)
         return Ipv4Address();
 
@@ -848,7 +848,7 @@ std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     if (rt->isLocalAddress(peerIP))
         return "lo0";
 
-    InterfaceEntry *ie = rt->getInterfaceForDestAddr(peerIP);
+    NetworkInterface *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
         throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
     return ie->getInterfaceName();

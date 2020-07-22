@@ -66,12 +66,12 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
       public:
         Node *node;
         Node *childNode;
-        InterfaceEntry *interfaceEntry;
+        NetworkInterface *networkInterface;
         PortInfo portData;
 
       public:
-        InterfaceInfo(Node *node, Node *childNode, InterfaceEntry *interfaceEntry);
-        virtual std::string getFullPath() const override { return interfaceEntry->getInterfaceFullPath(); }
+        InterfaceInfo(Node *node, Node *childNode, NetworkInterface *networkInterface);
+        virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
     class Matcher
@@ -142,7 +142,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     /**
      * Configures the provided interface based on the current network configuration.
      */
-    virtual void configureInterface(InterfaceEntry *interfaceEntry);
+    virtual void configureInterface(NetworkInterface *networkInterface);
 };
 
 } // namespace inet

@@ -45,7 +45,7 @@ class INET_API L2NodeConfigurator : public cSimpleModule, public ILifecycle, pub
     virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
 
     virtual void prepareNode();
-    virtual void prepareInterface(InterfaceEntry *interfaceEntry);
+    virtual void prepareInterface(NetworkInterface *networkInterface);
     virtual void configureNode();
 
     // cListener:

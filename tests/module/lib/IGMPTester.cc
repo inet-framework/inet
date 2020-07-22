@@ -25,7 +25,7 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
 {
   private:
     IInterfaceTable *ift;
-    InterfaceEntry *interfaceEntry;
+    NetworkInterface *networkInterface;
     map<Ipv4Address, Ipv4MulticastSourceList> socketState;
 
     //crcMode
@@ -39,14 +39,14 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
     virtual void processCommand(const cXMLElement &node) override;
   private:
     void processSendCommand(const cXMLElement &node);
-    void processJoinCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry* ie);
-    void processLeaveCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry* ie);
-    void processBlockCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie);
-    void processAllowCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie);
-    void processSetFilterCommand(Ipv4Address group, McastSourceFilterMode filterMode, const Ipv4AddressVector &sources, InterfaceEntry *ie);
-    void processDumpCommand(string what, InterfaceEntry *ie);
+    void processJoinCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface* ie);
+    void processLeaveCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface* ie);
+    void processBlockCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie);
+    void processAllowCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie);
+    void processSetFilterCommand(Ipv4Address group, McastSourceFilterMode filterMode, const Ipv4AddressVector &sources, NetworkInterface *ie);
+    void processDumpCommand(string what, NetworkInterface *ie);
     void parseIPv4AddressVector(const char *str, Ipv4AddressVector &result);
-    void sendIGMP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest);
+    void sendIGMP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
 };
 
 Define_Module(IGMPTester);
@@ -109,20 +109,20 @@ void IGMPTester::initialize(int stage)
 {
     if (stage == INITSTAGE_LINK_LAYER) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        interfaceEntry = getContainingNicModule(this);
-        interfaceEntry->setInterfaceName("eth0");
+        networkInterface = getContainingNicModule(this);
+        networkInterface->setInterfaceName("eth0");
         MacAddress address("AA:00:00:00:00:01");
-        interfaceEntry->setMacAddress(address);
-        interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
-        interfaceEntry->setMtu(par("mtu"));
-        interfaceEntry->setMulticast(true);
-        interfaceEntry->setBroadcast(true);
+        networkInterface->setMacAddress(address);
+        networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
+        networkInterface->setMtu(par("mtu"));
+        networkInterface->setMulticast(true);
+        networkInterface->setBroadcast(true);
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
-        interfaceEntry->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
-        interfaceEntry->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.0.0"));
+        networkInterface->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
+        networkInterface->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.0.0"));
     }
 }
 
@@ -140,7 +140,7 @@ void IGMPTester::processCommand(const cXMLElement &node)
 
     string tag = node.getTagName();
     const char *ifname = node.getAttribute("ifname");
-    InterfaceEntry *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
+    NetworkInterface *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
 
     if (tag == "join") {
         const char *group = node.getAttribute("group");
@@ -188,7 +188,7 @@ void IGMPTester::processCommand(const cXMLElement &node)
 void IGMPTester::processSendCommand(const cXMLElement &node)
 {
     const char *ifname = node.getAttribute("ifname");
-    InterfaceEntry *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
+    NetworkInterface *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
     string type = node.getAttribute("type");
 
     if (type == "Igmpv1Query") {
@@ -259,7 +259,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
     }
 }
 
-void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie)
+void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie)
 {
     if (sources.empty()) {
         ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(group);
@@ -276,7 +276,7 @@ void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &
     }
 }
 
-void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie)
+void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie)
 {
     if (sources.empty()) {
         ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(group);
@@ -295,7 +295,7 @@ void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector 
     }
 }
 
-void IGMPTester::processBlockCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie)
+void IGMPTester::processBlockCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie)
 {
     map<Ipv4Address, Ipv4MulticastSourceList>::iterator it = socketState.find(group);
     ASSERT(it != socketState.end());
@@ -307,7 +307,7 @@ void IGMPTester::processBlockCommand(Ipv4Address group, const Ipv4AddressVector 
         ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
 }
 
-void IGMPTester::processAllowCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie)
+void IGMPTester::processAllowCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie)
 {
     map<Ipv4Address, Ipv4MulticastSourceList>::iterator it = socketState.find(group);
     ASSERT(it != socketState.end());
@@ -319,7 +319,7 @@ void IGMPTester::processAllowCommand(Ipv4Address group, const Ipv4AddressVector 
         ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
 }
 
-void IGMPTester::processSetFilterCommand(Ipv4Address group, McastSourceFilterMode filterMode, const Ipv4AddressVector &sources, InterfaceEntry *ie)
+void IGMPTester::processSetFilterCommand(Ipv4Address group, McastSourceFilterMode filterMode, const Ipv4AddressVector &sources, NetworkInterface *ie)
 {
     Ipv4MulticastSourceList &sourceList = socketState[group];
     McastSourceFilterMode oldFilterMode = sourceList.filterMode;
@@ -334,7 +334,7 @@ void IGMPTester::processSetFilterCommand(Ipv4Address group, McastSourceFilterMod
         socketState.erase(group);
 }
 
-void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
+void IGMPTester::processDumpCommand(string what, NetworkInterface *ie)
 {
     EV << "IGMPTester: " << ie->getInterfaceName() << ": " << what << " = ";
 
@@ -357,7 +357,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
     EV << ".\n";
 }
 
-void IGMPTester::sendIGMP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
+void IGMPTester::sendIGMP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
 

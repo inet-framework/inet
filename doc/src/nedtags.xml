@@ -1481,8 +1481,8 @@
     <filename>inet.visualizer.integrated.IntegratedVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.networklayer.common.InterfaceEntry</name>
-    <filename>inet.networklayer.common.InterfaceEntry.html</filename>
+    <name>inet.networklayer.common.NetworkInterface</name>
+    <filename>inet.networklayer.common.NetworkInterface.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.common.InterfaceTable</name>

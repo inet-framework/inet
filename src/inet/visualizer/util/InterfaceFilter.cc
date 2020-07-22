@@ -26,9 +26,9 @@ void InterfaceFilter::setPattern(const char* pattern)
     matchExpression.setPattern(pattern, false, true, true);
 }
 
-bool InterfaceFilter::matches(const InterfaceEntry *interfaceEntry) const
+bool InterfaceFilter::matches(const NetworkInterface *networkInterface) const
 {
-    MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, interfaceEntry);
+    MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, networkInterface);
     // TODO: eliminate const_cast when cMatchExpression::matches becomes const
     return const_cast<InterfaceFilter *>(this)->matchExpression.matches(&matchableObject);
 }

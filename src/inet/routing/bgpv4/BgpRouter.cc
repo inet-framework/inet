@@ -326,7 +326,7 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
     if (_BGPSessions[sessionID]->getSocketListen()->getState() != TcpSocket::LISTENING) {
         _BGPSessions[sessionID]->getSocketListen()->setOutputGate(bgpModule->gate("socketOut"));
         if(_BGPSessions[sessionID]->getType() == EGP) {
-            InterfaceEntry *intf = _BGPSessions[sessionID]->getLinkIntf();
+            NetworkInterface *intf = _BGPSessions[sessionID]->getLinkIntf();
             ASSERT(intf);
             Ipv4Address localAddr = intf->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             _BGPSessions[sessionID]->getSocketListen()->bind(localAddr, TCP_PORT);
@@ -360,7 +360,7 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     socket->setUserData((void *)(uintptr_t)sessionID);
     socket->setOutputGate(bgpModule->gate("socketOut"));
     if(_BGPSessions[sessionID]->getType() == EGP) {
-        InterfaceEntry *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
+        NetworkInterface *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
         if (intfEntry == nullptr)
             throw cRuntimeError("No configuration interface for external peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
         socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), 0);
@@ -374,7 +374,7 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
             throw cRuntimeError("ebgpMultihop should be >=1");
     }
     else if(_BGPSessions[sessionID]->getType() == IGP) {
-        InterfaceEntry *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
+        NetworkInterface *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
         if(!intfEntry)
             intfEntry = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
         if (intfEntry == nullptr)
@@ -647,7 +647,7 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
         // The OSPF module then floods AS-External LSA into the AS and lets other routers know
         // about the new external route.
         if (ospfExist(rt) && redistributeInternal) {
-            InterfaceEntry *ie = entry->getInterface();
+            NetworkInterface *ie = entry->getInterface();
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is nullptr");
             ospfv2::Ipv4AddressRange OSPFnetAddr;
@@ -764,7 +764,7 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
             auto nextHopAttr = new BgpUpdatePathAttributesNextHop;
             content.push_back(nextHopAttr);
             if(sType == EGP || _BGPSessions[sessionIndex]->getNextHopSelf()) {
-                InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
+                NetworkInterface *iftEntry = (elem).second->getLinkIntf();
                 nextHopAttr->setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             }
             else
@@ -883,7 +883,7 @@ SessionId BgpRouter::findNextSession(BgpSessionType type, bool startSession)
     if (startSession == true && type == IGP && sessionID != static_cast<SessionId>(-1)) {
         // note: if the internal peer is not directly-connected to us, then we should know how to reach it.
         // this is done with the help of an intra-AS routing protocol (RIP, OSPF, EIGRP).
-        InterfaceEntry *linkIntf = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
+        NetworkInterface *linkIntf = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
         if (linkIntf == nullptr)
             throw cRuntimeError("No configuration interface for peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
 
@@ -1078,7 +1078,7 @@ bool BgpRouter::isExternalAddress(const Ipv4Route &rtEntry)
 {
     for(auto &session : _BGPSessions) {
         if(session.second->getType() == EGP) {
-            InterfaceEntry *exIntf = rt->getInterfaceForDestAddr(session.second->getPeerAddr());
+            NetworkInterface *exIntf = rt->getInterfaceForDestAddr(session.second->getPeerAddr());
             if(exIntf == rtEntry.getInterface())
                 return true;
         }

@@ -23,7 +23,7 @@
 
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -44,7 +44,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     {
       public:
         GlobalArp *owner = nullptr;    // owner module of this cache entry
-        const InterfaceEntry *interfaceEntry = nullptr;    // NIC to send the packet to
+        const NetworkInterface *networkInterface = nullptr;    // NIC to send the packet to
     };
 
   protected:
@@ -55,7 +55,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     static int globalArpCacheRefCnt;
 
   protected:
-    void ensureCacheEntry(const L3Address& address, const InterfaceEntry *interfaceEntry);
+    void ensureCacheEntry(const L3Address& address, const NetworkInterface *networkInterface);
     MacAddress mapUnicastAddress(L3Address address);
     MacAddress mapMulticastAddress(L3Address address);
 
@@ -67,7 +67,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     /** @name IArp implementation */
     //@{
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
-    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *interfaceEntry) override;
+    virtual MacAddress resolveL3Address(const L3Address& address, const NetworkInterface *networkInterface) override;
     // @}
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

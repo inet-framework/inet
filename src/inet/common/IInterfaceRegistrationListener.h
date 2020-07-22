@@ -18,16 +18,16 @@
 #ifndef __INET_IINTERFACEREGISTRATIONLISTENER_H
 #define __INET_IINTERFACEREGISTRATIONLISTENER_H
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
-INET_API void registerInterface(const InterfaceEntry& interface, cGate *in, cGate *out);
+INET_API void registerInterface(const NetworkInterface& interface, cGate *in, cGate *out);
 
 class INET_API IInterfaceRegistrationListener
 {
   public:
-    virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in) = 0;
+    virtual void handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in) = 0;
 };
 
 } // namespace inet

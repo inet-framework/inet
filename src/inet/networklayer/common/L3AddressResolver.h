@@ -28,7 +28,7 @@ namespace inet {
 
 // Forward declarations:
 class IInterfaceTable;
-class InterfaceEntry;
+class NetworkInterface;
 class IIpv4RoutingTable;
 class Ipv6RoutingTable;
 class NextHopRoutingTable;
@@ -64,15 +64,15 @@ class INET_API L3AddressResolver
     // internal
     virtual bool getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv4Address(L3Address& ret, NetworkInterface *ie, bool mask);
     // internal
-    virtual bool getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv6Address(L3Address& ret, NetworkInterface *ie, bool mask);
     // internal
-    virtual bool getInterfaceMacAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceMacAddress(L3Address& ret, NetworkInterface *ie, bool mask);
     // internal
-    virtual bool getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceModulePathAddress(L3Address& ret, NetworkInterface *ie, bool mask);
     // internal
-    virtual bool getInterfaceModuleIdAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceModuleIdAddress(L3Address& ret, NetworkInterface *ie, bool mask);
     // internal
     virtual void doCollectNetworkNodes(cModule *parent, std::vector<cModule*>& result);
 
@@ -154,7 +154,7 @@ class INET_API L3AddressResolver
     /**
      * Returns the Ipv4 or Ipv6 address of the given interface (of a host or router).
      */
-    virtual L3Address getAddressFrom(InterfaceEntry *ie, int addrType = DEFAULT_ADDR_TYPE);
+    virtual L3Address getAddressFrom(NetworkInterface *ie, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * The function tries to look up the IInterfaceTable module as submodule
@@ -210,7 +210,7 @@ class INET_API L3AddressResolver
     /**
      * Find the interface with the specified MAC address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *findInterfaceWithMacAddress(const MacAddress& addr);
+    virtual NetworkInterface *findInterfaceWithMacAddress(const MacAddress& addr);
 
     /**
      * Find the host with the specified MAC address. Returns nullptr if not found.

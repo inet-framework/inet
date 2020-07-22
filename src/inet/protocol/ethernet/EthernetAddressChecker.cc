@@ -51,8 +51,8 @@ bool EthernetAddressChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<Ieee8023MacAddresses>();
     auto interfaceInd = packet->getTag<InterfaceInd>();
-    auto interfaceEntry = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId());
-    return promiscuous || interfaceEntry->matchesMacAddress(header->getDest());
+    auto networkInterface = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId());
+    return promiscuous || networkInterface->matchesMacAddress(header->getDest());
 }
 
 void EthernetAddressChecker::dropPacket(Packet *packet)

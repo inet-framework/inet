@@ -188,7 +188,7 @@ bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *pac
     cModule *host = getContainingNode(check_and_cast<const cModule *>(radio));
     IInterfaceTable *interfaceTable = check_and_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-        const InterfaceEntry *interface = interfaceTable->getInterface(i);
+        const NetworkInterface *interface = interfaceTable->getInterface(i);
         if (interface && interface->getMacAddress() == address)
             return true;
     }
@@ -742,9 +742,9 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, cObject 
 {
     if (signal == interfaceConfigChangedSignal) {
         Enter_Method("interfaceConfigChanged");
-        auto interfaceChange = check_and_cast<InterfaceEntryChangeDetails *>(value);
-        if (interfaceChange->getFieldId() == InterfaceEntry::F_MACADDRESS) {
-            auto radio = check_and_cast<Radio *>(interfaceChange->getInterfaceEntry()->getSubmodule("radio"));
+        auto interfaceChange = check_and_cast<NetworkInterfaceChangeDetails *>(value);
+        if (interfaceChange->getFieldId() == NetworkInterface::F_MACADDRESS) {
+            auto radio = check_and_cast<Radio *>(interfaceChange->getNetworkInterface()->getSubmodule("radio"));
             pickUpSignals(radio);
         }
     }

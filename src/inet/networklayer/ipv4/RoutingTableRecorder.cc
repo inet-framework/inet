@@ -100,12 +100,12 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsig
     if (signalID == routeAddedSignal || signalID == routeDeletedSignal || signalID == routeChangedSignal)
         recordRouteChange(host, check_and_cast<const IRoute *>(obj), signalID);
     else if (signalID == interfaceCreatedSignal || signalID == interfaceDeletedSignal)
-        recordInterfaceChange(host, check_and_cast<const InterfaceEntry *>(obj), signalID);
+        recordInterfaceChange(host, check_and_cast<const NetworkInterface *>(obj), signalID);
     else if (signalID == interfaceConfigChangedSignal || signalID == interfaceIpv4ConfigChangedSignal)
-        recordInterfaceChange(host, check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry(), signalID);
+        recordInterfaceChange(host, check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface(), signalID);
 }
 
-void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID)
+void RoutingTableRecorder::recordInterfaceChange(cModule *host, const NetworkInterface *ie, simsignal_t signalID)
 {
     // Note: ie->getInterfaceTable() may be nullptr (entry already removed from its table)
 

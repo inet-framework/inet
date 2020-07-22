@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 class IIpv4RoutingTable;
 
 /**
@@ -39,7 +39,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     Ipv4Address dest;    ///< Destination
     Ipv4Address netmask;    ///< Route mask
     Ipv4Address gateway;    ///< Next hop
-    InterfaceEntry *interfacePtr;    ///< interface
+    NetworkInterface *interfacePtr;    ///< interface
     SourceType sourceType;    ///< manual, routing prot, etc.
     unsigned int adminDist;    ///< Cisco like administrative distance
     int metric;    ///< Metric ("cost" to reach the destination)
@@ -75,7 +75,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setDestination(Ipv4Address _dest) { if (dest != _dest) { dest = _dest; changed(F_DESTINATION); } }
     virtual void setNetmask(Ipv4Address _netmask) { if (netmask != _netmask) { netmask = _netmask; changed(F_PREFIX_LENGTH); } }
     virtual void setGateway(Ipv4Address _gateway) { if (gateway != _gateway) { gateway = _gateway; changed(F_NEXTHOP); } }
-    virtual void setInterface(InterfaceEntry *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
+    virtual void setInterface(NetworkInterface *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
     virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
     const char* getSourceTypeAbbreviation() const;
     virtual void setAdminDist(unsigned int _adminDist) override { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
@@ -91,7 +91,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     Ipv4Address getGateway() const { return gateway; }
 
     /** Next hop interface */
-    InterfaceEntry *getInterface() const override { return interfacePtr; }
+    NetworkInterface *getInterface() const override { return interfacePtr; }
 
     /** Convenience method */
     const char *getInterfaceName() const;
@@ -193,7 +193,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void setInInterface(InInterface *_inInterface) override;
     virtual void clearOutInterfaces() override;
     virtual void addOutInterface(OutInterface *outInterface) override;
-    virtual bool removeOutInterface(const InterfaceEntry *ie) override;
+    virtual bool removeOutInterface(const NetworkInterface *ie) override;
     virtual void removeOutInterface(unsigned int i) override;
     virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
     virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }

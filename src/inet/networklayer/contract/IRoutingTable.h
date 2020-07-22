@@ -62,7 +62,7 @@ class INET_API IRoutingTable
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const = 0;    //XXX should be find..., see next one
+    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const = 0;    //XXX should be find..., see next one
 
     /**
      * Prints the routing table.
@@ -85,7 +85,7 @@ class INET_API IRoutingTable
      * Returns the output interface for the packets with dest as destination
      * address, or nullptr if the destination is not in routing table.
      */
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const = 0;    //XXX redundant
+    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const = 0;    //XXX redundant
 
     /**
      * Convenience function based on findBestMatchingRoute().
