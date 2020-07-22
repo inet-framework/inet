@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/protocol/common/cProgress.h"
 #include "inet/protocol/connectionmanager/ConnectionManager.h"
 
 namespace inet {
