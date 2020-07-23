@@ -65,18 +65,20 @@ The main limitation in partitioning is that only messages can be passed between 
 
 .. because an event in one of partitions might affect the trajectory of the simulation in another.
 
-An event in one of the partitions might affect the trajectory of the simulation in another. A partition might receive a message from another partition in its past, i.e. the message might arrive at a partition but the simulation time in that partition might have already advanced beyond the message's arrival time. To preserve causality of events, this behavior is prevented; partitions are not allowed to advance too far ahead of the others in simulation time. To this end, partitions have to be synchornized by sending each other sync messages, which contain the current simulation time of the partition and how far other partitions can safely advance in simulation time, called lookahead.
+.. An event in one of the partitions might affect the trajectory of the simulation in another. A partition might receive a message from another partition in its past, i.e. the message might arrive at a partition but the simulation time in that partition might have already advanced beyond the message's arrival time. To preserve causality of events, this behavior is prevented; partitions are not allowed to advance too far ahead of the others in simulation time. To this end, partitions have to be synchornized by sending each other sync messages, which contain the current simulation time of the partition and how far other partitions can safely advance in simulation time, called lookahead.
 
-**TODO** rövidebben ^ -> particiok kulon tekernek de van time sync kozottuk es message-ekkel kommunikalnak
+To preserve causality of events, the partition simulations are not allowed to advance too far ahead of the others in simulation time. To this end, partition simulations have to be synchornized by sending each other sync messages, which contain the current simulation time of the simulation and how far other partition simulations can safely advance in simulation time, called lookahead.
+
+.. **TODO** rövidebben ^ -> particiok kulon tekernek de van time sync kozottuk es message-ekkel kommunikalnak
 
 Currently, the lookahead is based on the delay of the wired links between partitions.
 
 .. .. note:: Lookahead could be based on other metrics, TODO it can be implemented refer to the manual
 
 The logical processes can send sync messages to each other using either the Message Passing Interface (MPI), or named pipes.
-MPI needs installation, but the processes can be run on different computers; named pipes require no installation, but processes can only be run on the same machine.
+MPI needs installation and it needs to be enabled in ``configure.user`` in OMNeT++, but the processes can be run on different computers; named pipes require no installation, but processes can only be run on the same machine.
 
-TODO mpi-t engedelyezni kell a configure-ban
+.. TODO mpi-t engedelyezni kell a configure-ban
 
 .. The logical processes can send sync messages to each other in the following ways:
 
@@ -179,7 +181,7 @@ The example simulation features a mixed wired/wireless network with several LANs
 The network contains two wired and two wireless LANs, each with two hosts connected by a switch or an access point.
 The LANs are connected to a backbone of routers.
 
-**TODO** X kivesz a backbonebol
+.. **TODO** X kivesz a backbonebol
 
 The nodes are connected by ``Ethernet100`` connections, defined in the NED file:
 -> the wired connections are ?
@@ -286,6 +288,18 @@ Configuring Addresses and Routes
 We can't use a global configurator module to configure addresses and routes due to the limitation set (?) by partitioning,
 thus we have four configurators; each can deal with only the modules in its own partition. **TODO** ismernie kell a teljes topologiat; global knowledge kell; not possible
 The process for configuring addresses and routes per partition is the following:
+
+so
+
+- we can't use a global configurator module to configure addresses and routes due to the limitation of parallel simulation (no method calls to modules in another partition)
+- thus we need a configurator module in each partition, if we want to have the addresses and routes in that partition configured
+- but the configurator needs information about the whole network topology to configure addresses and routes
+- so we run the simulation without parsim
+- dump the configuration
+- and use that file as the config file of each configurator module
+- it contains entries for modules in other partitions but the configurator ignores them
+
+We can't have a global configurator module due to the limitation of parallel simulation (no method calls to modules in other partitions). Thus to configure addresses and routes, each partition needs to contain
 
 **TODO** ezt a usernek kell
 

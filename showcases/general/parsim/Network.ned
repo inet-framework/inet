@@ -7,9 +7,16 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
 
 
 channel Ethernet100 extends ned.DatarateChannel
+{
+    datarate = 100Mbps;
+    delay = 100us;
+}
+
+channel PppChannel extends ned.DatarateChannel
 {
     datarate = 100Mbps;
     delay = 100us;
@@ -90,14 +97,19 @@ network ParSimNetworkBackbone
         host2.ethg++ <--> Ethernet100 <--> switch1.ethg++;
         switch4.ethg++ <--> Ethernet100 <--> host7.ethg++;
         switch4.ethg++ <--> Ethernet100 <--> host8.ethg++;
-        router1.ethg++ <--> Ethernet100 <--> router3.ethg++;
-        router3.ethg++ <--> Ethernet100 <--> router4.ethg++;
-        router4.ethg++ <--> Ethernet100 <--> router2.ethg++;
-        router2.ethg++ <--> Ethernet100 <--> router1.ethg++;
-        router1.ethg++ <--> Ethernet100 <--> router4.ethg++;
-        router2.ethg++ <--> Ethernet100 <--> router3.ethg++;
+        router1.pppg++ <--> PppChannel <--> router3.pppg++;
+        router3.pppg++ <--> PppChannel <--> router4.pppg++;
+        router4.pppg++ <--> PppChannel <--> router2.pppg++;
+        router2.pppg++ <--> PppChannel <--> router1.pppg++;
         switch1.ethg++ <--> Ethernet100 <--> router1.ethg++;
         router3.ethg++ <--> Ethernet100 <--> AP2.ethg++;
         AP1.ethg++ <--> Ethernet100 <--> router2.ethg++;
         router4.ethg++ <--> Ethernet100 <--> switch4.ethg++;
 }
+
+network DebugNetwork extends ParSimNetworkBackbone
+{
+    submodules:
+        visualizer: IntegratedVisualizer;
+}
+
