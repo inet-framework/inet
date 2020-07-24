@@ -288,44 +288,46 @@ void Ppp::refreshDisplay() const
 {
     MacProtocolBase::refreshDisplay();
 
-    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 's':
-                result = std::to_string(numSent);
-                break;
-            case 'r':
-                result = std::to_string(numRcvdOK);
-                break;
-            case 'd':
-                result = std::to_string(numDroppedIfaceDown + numDroppedBitErr);
-                break;
-            case 'q':
-                result = std::to_string(txQueue->getNumPackets());
-                break;
-            case 'b':
-                if (datarateChannel == nullptr)
-                    result = "not connected";
-                else {
-                    char datarateText[40];
-                    double datarate = datarateChannel->getNominalDatarate();
-                    if (datarate >= 1e9)
-                        sprintf(datarateText, "%gGbps", datarate / 1e9);
-                    else if (datarate >= 1e6)
-                        sprintf(datarateText, "%gMbps", datarate / 1e6);
-                    else if (datarate >= 1e3)
-                        sprintf(datarateText, "%gkbps", datarate / 1e3);
-                    else
-                        sprintf(datarateText, "%gbps", datarate);
-                    result = datarateText;
-                }
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+    if (displayStringTextFormat != nullptr) {
+        auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
+            static std::string result;
+            switch (directive) {
+                case 's':
+                    result = std::to_string(numSent);
+                    break;
+                case 'r':
+                    result = std::to_string(numRcvdOK);
+                    break;
+                case 'd':
+                    result = std::to_string(numDroppedIfaceDown + numDroppedBitErr);
+                    break;
+                case 'q':
+                    result = std::to_string(txQueue->getNumPackets());
+                    break;
+                case 'b':
+                    if (datarateChannel == nullptr)
+                        result = "not connected";
+                    else {
+                        char datarateText[40];
+                        double datarate = datarateChannel->getNominalDatarate();
+                        if (datarate >= 1e9)
+                            sprintf(datarateText, "%gGbps", datarate / 1e9);
+                        else if (datarate >= 1e6)
+                            sprintf(datarateText, "%gMbps", datarate / 1e6);
+                        else if (datarate >= 1e3)
+                            sprintf(datarateText, "%gkbps", datarate / 1e3);
+                        else
+                            sprintf(datarateText, "%gbps", datarate);
+                        result = datarateText;
+                    }
+                    break;
+                default:
+                    throw cRuntimeError("Unknown directive: %c", directive);
+            }
+            return result.c_str();
+        });
+        getDisplayString().setTagArg("t", 0, text);
+    }
 
     const char *color = "";
     if (datarateChannel != nullptr) {
