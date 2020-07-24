@@ -32,6 +32,7 @@ module PppInterface extends InterfaceEntry like IPppInterface
         @class(InterfaceEntry);
         @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;
+        string protocol = default("ppp");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;
