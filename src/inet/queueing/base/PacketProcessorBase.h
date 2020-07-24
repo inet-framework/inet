@@ -45,21 +45,16 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate);
     virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate);
     virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength);
-    virtual void pushOrSendProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, int progressKind, bps datarate, b position, b extraProcessableLength);
-    virtual void pushProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, int progressKind, bps datarate, b position, b extraProcessableLength);
 
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
 
     virtual void updateDisplayString() const;
 
-    virtual void animateSend(cMessage *message, cGate *gate) const;
+    virtual void animateSend(cMessage *message, cGate *gate, simtime_t duration) const;
     virtual void animateSendPacket(Packet *packet, cGate *gate) const;
     virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const;
     virtual void animateSendPacketEnd(Packet *packet, cGate *gate, bps datarate) const;
     virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength) const;
-    virtual void animateSendProgress(Packet *packet, cGate *gate, int progressKind, bps datarate, b position, b extraProcessableLength) const;
-
-    virtual cMessage *createProgressMessage(Packet *packet, int progressKind, bps datarate, b position, b extraProcessableLength) const;
 
   public:
     virtual bool supportsPacketSending(cGate *gate) const override { return true; }
