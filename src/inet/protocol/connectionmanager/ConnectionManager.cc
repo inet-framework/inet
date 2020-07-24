@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocol/common/cProgress.h"
 #include "inet/protocol/connectionmanager/ConnectionManager.h"
 
 namespace inet {
@@ -63,50 +62,50 @@ void ConnectionManager::initialize(int stage)
 
 void ConnectionManager::handleMessage(cMessage *msg)
 {
-    cProgress *progress = check_and_cast<cProgress *>(msg);
-    auto now = simTime();
-    if (connected && !disabled) {
-        if (progress->arrivedOn("in")) {
-            switch(progress->getKind()) {
-                case cProgress::PACKET_START:
-                    ASSERT(txSignal == nullptr);
-                    txSignal = check_and_cast<physicallayer::Signal *>(progress->getPacket()->dup());
-                    txStartTime = now;
-                    EV << "Received PACKET_START " << progress << " from upper, send to phy\n";
-                    send(progress, physOutGate);
-                    break;
-                case cProgress::PACKET_PROGRESS:
-                    ASSERT(txSignal != nullptr);
-                    ASSERT(now == txStartTime + progress->getTimePosition());
-                    delete txSignal;
-                    txSignal = check_and_cast<physicallayer::Signal *>(progress->getPacket()->dup());
-                    EV << "Received PACKET_PROGRESS " << progress << " from upper, send to phy\n";
-                    send(progress, physOutGate);
-                    break;
-                case cProgress::PACKET_END:
-                    ASSERT(txSignal != nullptr);
-                    ASSERT(now == txStartTime + progress->getTimePosition());
-                    delete txSignal;
-                    txSignal = nullptr;
-                    txStartTime = -1;
-                    EV << "Received PACKET_END " << progress << " from upper, send to phy\n";
-                    send(progress, physOutGate);
-                    break;
-                default:
-                    throw cRuntimeError("Unknown progress kind %d", progress->getKind());
-            }
-        }
-        else if (progress->arrivedOn("physIn")) {
-            EV << "Received " << progress << " from phy, send up\n";
-            send(progress, "out");
-        }
-        else
-            throw cRuntimeError("unknown gate");
-    }
-    else {
-        EV << "Received " << progress << ", dropped\n";
-        delete msg;
-    }
+//    cProgress *progress = check_and_cast<cProgress *>(msg);
+//    auto now = simTime();
+//    if (connected && !disabled) {
+//        if (progress->arrivedOn("in")) {
+//            switch(progress->getKind()) {
+//                case cProgress::PACKET_START:
+//                    ASSERT(txSignal == nullptr);
+//                    txSignal = check_and_cast<physicallayer::Signal *>(progress->getPacket()->dup());
+//                    txStartTime = now;
+//                    EV << "Received PACKET_START " << progress << " from upper, send to phy\n";
+//                    send(progress, physOutGate);
+//                    break;
+//                case cProgress::PACKET_PROGRESS:
+//                    ASSERT(txSignal != nullptr);
+//                    ASSERT(now == txStartTime + progress->getTimePosition());
+//                    delete txSignal;
+//                    txSignal = check_and_cast<physicallayer::Signal *>(progress->getPacket()->dup());
+//                    EV << "Received PACKET_PROGRESS " << progress << " from upper, send to phy\n";
+//                    send(progress, physOutGate);
+//                    break;
+//                case cProgress::PACKET_END:
+//                    ASSERT(txSignal != nullptr);
+//                    ASSERT(now == txStartTime + progress->getTimePosition());
+//                    delete txSignal;
+//                    txSignal = nullptr;
+//                    txStartTime = -1;
+//                    EV << "Received PACKET_END " << progress << " from upper, send to phy\n";
+//                    send(progress, physOutGate);
+//                    break;
+//                default:
+//                    throw cRuntimeError("Unknown progress kind %d", progress->getKind());
+//            }
+//        }
+//        else if (progress->arrivedOn("physIn")) {
+//            EV << "Received " << progress << " from phy, send up\n";
+//            send(progress, "out");
+//        }
+//        else
+//            throw cRuntimeError("unknown gate");
+//    }
+//    else {
+//        EV << "Received " << progress << ", dropped\n";
+//        delete msg;
+//    }
 }
 
 void ConnectionManager::propagatePreChannelOff()
