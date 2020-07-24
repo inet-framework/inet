@@ -45,7 +45,9 @@ This showcase demonstrates parallel simulation with an example simulation model.
 About Parallel Simulation in OMNeT++
 ------------------------------------
 
-Any simulation model can be parallelized, no additional C++ code is needed TODO not quite. To parallelize a simulation, the model is partitioned into several logical processes; each partition contains some of the modules of the simulation, each process will be run on a different CPU core (on the same machine or another one), and each process will maintain its own simulation time.
+Any simulation model can be parallelized. To parallelize a simulation, the model is partitioned into several logical processes; each partition contains some of the modules of the simulation, each process will be run on a different CPU core (on the same machine or another one), and each process will maintain its own simulation time.
+
+.. , no additional C++ code is needed TODO not quite.
 
 .. The logical partitions can be run on different CPUs on the same machine or on another machine.
 
@@ -54,8 +56,12 @@ Any simulation model can be parallelized, no additional C++ code is needed TODO 
 
 .. **TODO** each partition/process has its own simulation time
 
-To partition a simulation model, all modules in the network are assigned to one of the partitions. **TODO** there are limitations in partitions, e.g. modules in a partition cannot call c++ methods in another partition
-The main limitation in partitioning is that only messages can be passed between partitions, e.g. method calls. **TODO** for all limitations read the documentation? Thus global modules, such as network configurators, radio medium and visualizer modules need to be included multiple times in the network, one for each partition that needs them.
+To partition a simulation model, all modules in the network are assigned to one of the partitions. There are limitations in partitions, e.g. modules in a partition cannot call c++ methods in another partition.
+The main limitation in partitioning is that only messages can be passed between partitions, e.g. method calls. Thus global modules, such as network configurators, radio medium and visualizer modules need to be included multiple times in the network, one for each partition that needs them.
+
+**TODO**
+
+**TODO** for all limitations read the documentation?
 
 .. Thus global modules, such as network configurators, radio medium and visualizer modules multiple instances of need to be included
 
@@ -106,9 +112,11 @@ Also, if the lookahead is too small, the partition simulations frequently stop t
 
 To enable parallel simulation, the ``parallel-simulation`` key needs to be set to ``true`` in the ini file.
 Also, the number of partitions has to be specified with the ``parsim-num-partitions`` parameter.
-The ``parsim-communications-class`` key selects which communication method to use; either ``cNamedPipeCommunications`` or ``cMPICommunications``.
+The ``parsim-communications-class`` key selects which communication method to use; either ``cNamedPipeCommunications`` or ``cMPICommunications`` (For the other keys, check the manual **TODO** link).
 
-**TODO** parsim-debug? or just link to the manual ? -> vannak mas parsim kapcsolok a manualban leirva
+.. `Parallel Simulation section <https://doc.omnetpp.org/omnetpp/manual/#cha:parallel-exec>`_
+
+.. **TODO** parsim-debug? or just link to the manual ? -> vannak mas parsim kapcsolok a manualban leirva
 
 .. To run simulations in parallel, the modules need to be assigned to partitions. For example:
 
@@ -183,29 +191,42 @@ The LANs are connected to a backbone of routers.
 
 .. **TODO** X kivesz a backbonebol
 
-The nodes are connected by ``Ethernet100`` connections, defined in the NED file:
--> the wired connections are ?
--> routers should be connected by ppp and add delay
+.. The nodes are connected by ``Ethernet100`` connections, defined in the NED file:
+   -> the wired connections are ?
+   -> routers should be connected by ppp and add delay
 
-.. literalinclude:: ../Network.ned
+.. .. literalinclude:: ../Network.ned
    :start-at: Ethernet100
    :end-at: }
    :language: ned
 
-This connection extends :ned:`DatarateChannel`, and adds a delay of 100us.
+All wired connections are ``Ethernet100``, except the ones between the routers, which are ``PppChannel``, defined in the NED file:
 
-TODO: the emphasis is on the router connection delay -> ez lesz a lookahead
-mert a routerek vannak a hataron
+.. literalinclude:: ../Network.ned
+   :start-at: Ethernet100
+   :end-before: ParSimNetworkBackbone
+   :language: ned
+
+The connections extend :ned:`DatarateChannel`, and add a delay of 100us.
+Since only the connections between the routers cross partitions, the delay of these connections is the lookahead.
+
+.. TODO: the emphasis is on the router connection delay -> ez lesz a lookahead
+   mert a routerek vannak a hataron
 
 The network is divided into four partitions. Each LAN, together with its corresponding switch/access point, and the router closest to it are assigned to a different partition.
 Each partition contains an :ned:`Ipv4NetworkConfigurator` module; wireless LANs also contain a :ned:`Ieee80211ScalarRadioMedium` module.
 
-TODO minden partition külön executable; ha nincs benne configurator nem lesz kitoltve; az egyik particioban levo configurator nem tudja a tobbiben levot konfiguralni -> thats why
-az egyik particioban levo medium nem tud a masikkal kommunkalni mert method call
-de nem akarjuk az interferenciat szimulalni (nem tudjuk de ebben nem is akarjuk)
-(azert lehet kulon particioban, mert nem akarjuk az interferenciat szimulalni)
-a wireless nodeoik nem tudnak kommunikalni a masik particiban levo mediummal mert method call
-amelyik particioban nincs konfigurator ott nem lesznek konfiguralva
+The network is divided into four partitions. Each LAN, together with its corresponding switch/access point, and the router closest to it are assigned to a different partition.
+Each partition contains an :ned:`Ipv4NetworkConfigurator` module; wireless LANs also contain a :ned:`Ieee80211ScalarRadioMedium` module.
+
+The extra modules are needed due to the limitation of partitioning, i.e. no method calls to modules in other partitions.
+
+.. TODO minden partition külön executable; ha nincs benne configurator nem lesz kitoltve; az egyik particioban levo configurator nem tudja a tobbiben levot konfiguralni -> thats why
+   az egyik particioban levo medium nem tud a masikkal kommunkalni mert method call
+   de nem akarjuk az interferenciat szimulalni (nem tudjuk de ebben nem is akarjuk)
+   (azert lehet kulon particioban, mert nem akarjuk az interferenciat szimulalni)
+   a wireless nodeoik nem tudnak kommunikalni a masik particiban levo mediummal mert method call
+   amelyik particioban nincs konfigurator ott nem lesznek konfiguralva
 
 Two of the hosts are configured to ping another two hosts (``host1`` pings ``host5``, ``host3`` pings ``host8``).
 
@@ -225,22 +246,22 @@ The modules are assigned to partitions, as follows:
    :end-at: configurator4**.partition-id
    :language: ini
 
-Also, the priorities of all modules are specified. Setting priorities defines the order of events if multiple events in different partitions happen at the same simulation time. In this case, we assign the same priority to all modules as their partition number, like so:
+.. Also, the priorities of all modules are specified. Setting priorities defines the order of events if multiple events in different partitions happen at the same simulation time. In this case, we assign the same priority to all modules as their partition number, like so:
 
-**TODO** kulonben nem lesz determinisztikus; mi az a priority es miert -> ezzel kene kezdeni; a 2. mondat
+.. **TODO** kulonben nem lesz determinisztikus; mi az a priority es miert -> ezzel kene kezdeni; a 2. mondat
 
 ..  **V1** This is needed because if two events in different partitions happen at the same simulation time, their order is defined. **TODO**
 
-.. literalinclude:: ../omnetpp.ini
+.. .. literalinclude:: ../omnetpp.ini
    :start-at: priority = 0
    :end-at: priority = 3
    :language: ini
 
-Because **TODO**:
+.. Because **TODO**:
 
-**TODO** try without this; might not be needed
+   **TODO** try without this; might not be needed
 
-.. literalinclude:: ../omnetpp.ini
+   .. literalinclude:: ../omnetpp.ini
    :start-at: crc
    :end-at: fcs
    :language: ini
@@ -254,6 +275,8 @@ Because **TODO**:
 .. **TODO** radioMedium
 
 The two wireless LANs have radio medium modules in their partitions. The radio medium modules don't have the default name ``radioMedium``, so the module hosts and access points belong to needs to be specified:
+
+For example, wireless nodes can only use the radio medium module in their partition, so they can't send signals to nodes in another partition. This limitation needs to be considered when simulating interference; the interfering nodes need to be in the same partition. **TODO** not sure if needed / in this case, we don't want to simulate the interference between the two wireless LANs, so they can be in different partitions.
 
 **TODO** rewrite? miert kell kulon medium
 
@@ -285,27 +308,56 @@ Configuring Addresses and Routes
   - use the modified xml files as the configuration
   - re-enable parsim...the configurators configure the modules in their own partitions
 
-We can't use a global configurator module to configure addresses and routes due to the limitation set (?) by partitioning,
-thus we have four configurators; each can deal with only the modules in its own partition. **TODO** ismernie kell a teljes topologiat; global knowledge kell; not possible
-The process for configuring addresses and routes per partition is the following:
+.. We can't use a global configurator module to configure addresses and routes due to the limitation set (?) by partitioning,
+   thus we have four configurators; each can deal with only the modules in its own partition. **TODO** ismernie kell a teljes topologiat; global knowledge kell; not possible
+   The process for configuring addresses and routes per partition is the following:
 
-so
+We can't use a global configurator module due to the limitation set by partitioning, thus, we need a configurator module in each partition, otherwise addresses and routes wouldn't be configured. However, the configurator needs knowledge of the complete network topology to configure addresses and routes.
 
-- we can't use a global configurator module to configure addresses and routes due to the limitation of parallel simulation (no method calls to modules in another partition)
-- thus we need a configurator module in each partition, if we want to have the addresses and routes in that partition configured
-- but the configurator needs information about the whole network topology to configure addresses and routes
-- so we run the simulation without parsim
-- dump the configuration
-- and use that file as the config file of each configurator module
-- it contains entries for modules in other partitions but the configurator ignores them
+To overcome this limitation, we run the simulation sequentially, dump the address and route configuration created
+by the configurator to an xml file, and use that file as the configuration for each configurator module.
 
-We can't have a global configurator module due to the limitation of parallel simulation (no method calls to modules in other partitions). Thus to configure addresses and routes, each partition needs to contain
+To do this, we need to run the simulation sequentially and with the configurator set to add static routes.
+All four configurator's would create the same xml file, so we just dump one of them.
+The ``GenerateConfiguratorConfig`` configuration in omnetpp.ini can be used for this purpose:
 
-**TODO** ezt a usernek kell
+.. literalinclude:: ../omnetpp.ini
+   :start-at: GenerateConfiguratorConfig
+   :end-at: Routes
+   :language: ini
+
+The ``config.xml`` file is used by configurations in the ``General`` configuration:
+
+.. TODO
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: configurator*
+   :end-at: configurator*
+   :language: ini
+
+To generate ``config.xml``, run the simulation sequentially/with parallel simulation disabled from the command line:
+
+.. code-block:: bash
+
+   $ inet -c GenerateConfiguratorConfig --parallel-simulation=false
+
+.. so
+
+  - we can't use a global configurator module to configure addresses and routes due to the limitation of parallel simulation (no method calls to modules in another partition)
+  - thus we need a configurator module in each partition, if we want to have the addresses and routes in that partition configured
+  - but the configurator needs information about the whole network topology to configure addresses and routes
+  - so we run the simulation without parsim
+  - dump the configuration
+  - and use that file as the config file of each configurator module
+  - it contains entries for modules in other partitions but the configurator ignores them
+
+.. We can't have a global configurator module due to the limitation of parallel simulation (no method calls to modules in other partitions). Thus to configure addresses and routes, each partition needs to contain a configurator module. However, the configurator needs to know the complete network topology to configure routes.
+
+.. **TODO** ezt a usernek kell
 
 .. - run the simulation by disabling parsim
 
-- Make sure the configurators are set to add static routes and run the simulation with parsim disabled. The configurators automatically configure addresses and routes in the network:
+.. - Make sure the configurators are set to add static routes and run the simulation with parsim disabled. The configurators automatically configure addresses and routes in the network:
 
   .. code-block:: ini
 
@@ -315,43 +367,43 @@ We can't have a global configurator module due to the limitation of parallel sim
 
      #*.configurator*.*Routes = false
 
-- Dump the configurators' config to xml files (the four configurators produce the same configuration, but we dump all of them now):
+  - Dump the configurators' config to xml files (the four configurators produce the same configuration, but we dump all of them now):
 
-**TODO** dump just one ?
+  **TODO** dump just one ?
 
-**TODO** kulon konfig es kikommentez a parsim
+  **TODO** kulon konfig es kikommentez a parsim
 
-**TODO** try not deleting the lines from the xml; they can use the same file
+  **TODO** try not deleting the lines from the xml; they can use the same file
 
-**TODO** kulon konfig; run from ccmdenv, override parsim
+  **TODO** kulon konfig; run from ccmdenv, override parsim
 
-**TODO** a configurator input file eloalittasanak a folyamata a process
+  **TODO** a configurator input file eloalittasanak a folyamata a process
 
-  .. code-block:: ini
+    .. code-block:: ini
 
-     *.configurator1.dumpConfig = "configurator1backbonedump.xml"
-     *.configurator2.dumpConfig = "configurator2backbonedump.xml"
-     *.configurator3.dumpConfig = "configurator3backbonedump.xml"
-     *.configurator4.dumpConfig = "configurator4backbonedump.xml"
+       *.configurator1.dumpConfig = "configurator1backbonedump.xml"
+       *.configurator2.dumpConfig = "configurator2backbonedump.xml"
+       *.configurator3.dumpConfig = "configurator3backbonedump.xml"
+       *.configurator4.dumpConfig = "configurator4backbonedump.xml"
 
-- Duplicate each dump to a new xml config file and delete all address and route assignments not pertaining to the modules in the partition the configurator belongs to.
+  - Duplicate each dump to a new xml config file and delete all address and route assignments not pertaining to the modules in the partition the configurator belongs to.
 
-- Use the modified xml files as the configuration:
+  - Use the modified xml files as the configuration:
 
-  .. code-block:: ini
+    .. code-block:: ini
 
-     *.configurator1.config = xmldoc("configurator1backbone.xml")
-     *.configurator2.config = xmldoc("configurator2backbone.xml")
-     *.configurator3.config = xmldoc("configurator3backbone.xml")
-     *.configurator4.config = xmldoc("configurator4backbone.xml")
+       *.configurator1.config = xmldoc("configurator1backbone.xml")
+       *.configurator2.config = xmldoc("configurator2backbone.xml")
+       *.configurator3.config = xmldoc("configurator3backbone.xml")
+       *.configurator4.config = xmldoc("configurator4backbone.xml")
 
-.. - Disable adding static routes in the configurator
+  .. - Disable adding static routes in the configurator
 
-- Re-enable parsim and make sure adding static routes is disabled.
+  - Re-enable parsim and make sure adding static routes is disabled.
 
 Now the configurators configure the modules in their own partitions.
 
-.. note:: The per-partition xml configuration files are included in the showcase's folder.
+.. note:: The generated xml configuration file is included in the showcase's folder.
 
 .. TODO example config
 
@@ -385,7 +437,7 @@ The ``runparsim-mpi`` script uses MPI:
 .. literalinclude:: ../runparsim-mpi
    :language: bash
 
-**TODO** does mpi need the parsim-num-partitions ?
+.. **TODO** does mpi need the parsim-num-partitions ?
 
 .. **TODO** the scripts only work on linux
 
@@ -399,9 +451,9 @@ To run the simulations, execute one of the scripts from the command line. By def
 
    $ ./runparsim-mpi
 
-In this case, four Qtenv windows open. Click the run simulation button in all of them/partition simulations to start the parallel simulation. The simulation can only progress by the lookahead period until all of them are started:
+In this case, four Qtenv windows open. Click the run simulation button in all of them/partition simulations to start the parallel simulation. The simulation can only progress if all partition simulations are running; the partition simulations stop and wait after a lookahead duration until all of them are started:
 
-**TODO** can only progess if all partition simulations are running; a parittion szimulaciok megallnak / varakozni kezdenek a lookahead mulva
+.. **TODO** can only progess if all partition simulations are running; a parittion szimulaciok megallnak / varakozni kezdenek a lookahead mulva
 
 To start the simulations in Cmdenv, append ``-u Cmdenv`` to the command:
 
@@ -437,9 +489,9 @@ The outputs of the four simulations are mixed, but the messages for successfully
 
 When the simulations are run in Qtenv, all modules are present in all Qtenv windows. However, Qtenv uses placeholder modules for those which are not in the partition the Qtenv instance is running. These placeholder modules are empty.
 
-However, one can still observe the messages going between partitions in the Qtenv windows.
+However, one can still observe the messages going between partitions in the Qtenv packet log.
 
-**TODO** in the packet log / in the qtenv packet log
+.. **TODO** in the packet log / in the qtenv packet log
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Network.ned <../Network.ned>`
 

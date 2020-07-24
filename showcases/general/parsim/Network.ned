@@ -18,7 +18,7 @@ channel Ethernet100 extends ned.DatarateChannel
 
 channel PppChannel extends ned.DatarateChannel
 {
-    datarate = 100Mbps;
+    datarate = 1Gbps;
     delay = 100us;
 }
 
