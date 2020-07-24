@@ -56,7 +56,7 @@ void Dcaf::refreshDisplay() const
     std::string text;
     if (owning)
         text = "Owning";
-    else if (contention->isContentionInProgress())
+    else if (contention != nullptr && contention->isContentionInProgress())
         text = "Contending";
     else
         text = "Idle";
