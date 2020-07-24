@@ -43,8 +43,8 @@ class INET_API PcapFilePacketProducer : public PacketQueueingElementBase, public
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual void handleCanPushPacket(cGate *gate) override;
 };

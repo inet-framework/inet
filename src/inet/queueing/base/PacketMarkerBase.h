@@ -43,18 +43,18 @@ class INET_API PacketMarkerBase : public PacketProcessorBase, public IPacketMark
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
     virtual bool canPushSomePacket(cGate *gate) const override { return true; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
-    virtual bool canPopSomePacket(cGate *gate) const override;
-    virtual Packet *canPopPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *popPacket(cGate *gate) override;
+    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
+    virtual bool canPullSomePacket(cGate *gate) const override;
+    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacket(cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
-    virtual void handleCanPopPacket(cGate *gate) override;
+    virtual void handleCanPullPacket(cGate *gate) override;
 };
 
 } // namespace queueing

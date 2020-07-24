@@ -34,13 +34,13 @@ void ActivePacketSink::initialize(int stage)
         collectionTimer = new cMessage("CollectionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING)
-        checkPopPacketSupport(inputGate);
+        checkPacketPullingSupport(inputGate);
 }
 
 void ActivePacketSink::handleMessage(cMessage *message)
 {
     if (message == collectionTimer) {
-        if (provider->canPopSomePacket(inputGate->getPathStartGate())) {
+        if (provider->canPullSomePacket(inputGate->getPathStartGate())) {
             scheduleCollectionTimer();
             collectPacket();
         }
@@ -56,7 +56,7 @@ void ActivePacketSink::scheduleCollectionTimer()
 
 void ActivePacketSink::collectPacket()
 {
-    auto packet = provider->popPacket(inputGate->getPathStartGate());
+    auto packet = provider->pullPacket(inputGate->getPathStartGate());
     EV_INFO << "Collecting packet " << packet->getName() << "." << endl;
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
@@ -64,9 +64,9 @@ void ActivePacketSink::collectPacket()
     dropPacket(packet, OTHER_PACKET_DROP);
 }
 
-void ActivePacketSink::handleCanPopPacket(cGate *gate)
+void ActivePacketSink::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     if (gate->getPathEndGate() == inputGate && !collectionTimer->isScheduled()) {
         scheduleCollectionTimer();
         collectPacket();

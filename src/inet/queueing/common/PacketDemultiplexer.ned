@@ -22,8 +22,8 @@ import inet.queueing.contract.IActivePacketSink;
 
 //
 // This module connects multiple packet collectors to one packet provider. When
-// a packet is popped by one of the connected packet collectors, then the demultiplexer
-// simply pops a packet from the connected packet provider.
+// a packet is pulled by one of the connected packet collectors, then the demultiplexer
+// simply pulls a packet from the connected packet provider.
 //
 simple PacketDemultiplexer extends PacketProcessorBase like IActivePacketSink // TODO: , IPassivePacketSource // out gate is vector
 {
@@ -32,6 +32,6 @@ simple PacketDemultiplexer extends PacketProcessorBase like IActivePacketSink //
         @class(PacketDemultiplexer);
         @display("i=block/fork");
     gates:
-        input in @labels(pop);
-        output out[] @labels(pop);
+        input in @labels(pull);
+        output out[] @labels(pull);
 }

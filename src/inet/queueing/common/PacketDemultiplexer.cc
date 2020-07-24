@@ -38,17 +38,17 @@ void PacketDemultiplexer::initialize(int stage)
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPopPacketSupport(inputGate);
+        checkPacketPullingSupport(inputGate);
         for (auto outputGate : outputGates)
-            checkPopPacketSupport(outputGate);
+            checkPacketPullingSupport(outputGate);
     }
 }
 
-Packet *PacketDemultiplexer::popPacket(cGate *gate)
+Packet *PacketDemultiplexer::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
-    auto packet = provider->popPacket(inputGate->getPathStartGate());
-    EV_INFO << "Forwarding popped packet " << packet->getName() << "." << endl;
+    Enter_Method("pullPacket");
+    auto packet = provider->pullPacket(inputGate->getPathStartGate());
+    EV_INFO << "Forwarding pulled packet " << packet->getName() << "." << endl;
     animateSend(packet, gate);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
@@ -56,13 +56,13 @@ Packet *PacketDemultiplexer::popPacket(cGate *gate)
     return packet;
 }
 
-void PacketDemultiplexer::handleCanPopPacket(cGate *gate)
+void PacketDemultiplexer::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     for (int i = 0; i < (int)outputGates.size(); i++)
-        // NOTE: notifying a listener may prevent others from popping
-        if (provider->canPopSomePacket(inputGate->getPathStartGate()))
-            collectors[i]->handleCanPopPacket(outputGates[i]);
+        // NOTE: notifying a listener may prevent others from pulling
+        if (provider->canPullSomePacket(inputGate->getPathStartGate()))
+            collectors[i]->handleCanPullPacket(outputGates[i]);
 }
 
 } // namespace queueing

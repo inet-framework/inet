@@ -30,7 +30,7 @@ module QueueFiller like IActivePacketSource
     parameters:
         @display("i=block/source");
     gates:
-        output out @labels(pop);
+        output out @labels(pull);
     submodules:
         provider: <default("PassivePacketSource")> like IPassivePacketSource {
             parameters:

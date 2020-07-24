@@ -42,7 +42,7 @@ import inet.queueing.contract.IPacketQueue;
 //
 // The queue can also keep the packets sorted according to a comparator function.
 // If a comparator is not configured, then packets are pushed at the back of the
-// queue and they are kept in this order. Packets are always popped at the front
+// queue and they are kept in this order. Packets are always pulled at the front
 // of the queue.
 //
 // It's also possible to use an external buffer, which can be shared among multiple
@@ -60,17 +60,17 @@ simple PacketQueue extends PacketQueueBase like IPacketQueue
         string dropperClass = default(""); // determines which packets are dropped when the queue is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
         string comparatorClass = default(""); // determines the order of packets in the queue, insertion order by default; the parameter must be the name of a C++ class which implements the IPacketComparatorFunction C++ interface and is registered via Register_Class
         string bufferModule = default(""); // relative module path to the IPacketBuffer module used by this queue, implicit buffer by default
-        displayStringTextFormat = default("contains %p pk (%l) pushed %u\npopped %o removed %r dropped %d");
+        displayStringTextFormat = default("contains %p pk (%l) pushed %u\npulled %o removed %r dropped %d");
         @class(PacketQueue);
         @signal[packetPushed](type=inet::Packet);
-        @signal[packetPopped](type=inet::Packet);
+        @signal[packetPulled](type=inet::Packet);
         @signal[packetRemoved](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetPushed](title="packet pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetPopped](title="packet popped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPulled](title="packet pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetRemoved](title="packets removed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drops: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPopped); record=histogram,vector; unit=s; interpolationmode=none);
-        @statistic[queueLength](title="queue length"; type=int; source=warmup(count(packetPushed) - count(packetPopped) - count(packetRemoved) - count(packetDropped)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPulled); record=histogram,vector; unit=s; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; type=int; source=warmup(count(packetPushed) - count(packetPulled) - count(packetRemoved) - count(packetDropped)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
         @defaultStatistic(queueLength:vector);
 }

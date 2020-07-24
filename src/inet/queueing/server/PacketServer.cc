@@ -54,13 +54,13 @@ void PacketServer::scheduleProcessingTimer()
 
 bool PacketServer::canStartProcessingPacket()
 {
-    return provider->canPopSomePacket(inputGate->getPathStartGate()) &&
+    return provider->canPullSomePacket(inputGate->getPathStartGate()) &&
            consumer->canPushSomePacket(outputGate->getPathEndGate());
 }
 
 void PacketServer::startProcessingPacket()
 {
-    packet = provider->popPacket(inputGate->getPathStartGate());
+    packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
     packet->setArrival(getId(), inputGate->getId(), simTime());
     EV_INFO << "Processing packet " << packet->getName() << " started." << endl;
@@ -85,9 +85,9 @@ void PacketServer::handleCanPushPacket(cGate *gate)
     }
 }
 
-void PacketServer::handleCanPopPacket(cGate *gate)
+void PacketServer::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
         startProcessingPacket();
         scheduleProcessingTimer();

@@ -29,17 +29,17 @@ module CompoundPacketQueue extends PacketQueueBase like IPacketQueue
     parameters:
         int packetCapacity = default(-1); // maximum number of packets in the queue, no limit by default
         int dataCapacity @unit(b) = default(-1b); // maximum total length of packets in the queue, no limit by default
-        displayStringTextFormat = default("contains %p pk (%l) pushed %u created %c\n popped %o removed %r dropped %d");
+        displayStringTextFormat = default("contains %p pk (%l) pushed %u created %c\n pulled %o removed %r dropped %d");
         @class(CompoundPacketQueue);
         @defaultStatistic(queueLength);
         @signal[packetPushed](type=inet::Packet);
-        @signal[packetPopped](type=inet::Packet);
+        @signal[packetPulled](type=inet::Packet);
         @signal[packetRemoved](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; source=localSignal(packetPushed); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetPopped](title="packets popped"; source=localSignal(packetPopped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPulled](title="packets pulled"; source=localSignal(packetPulled); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetRemoved](title="packets removed"; source=localSignal(packetRemoved); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packets dropped: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPopped); record=histogram,vector; unit=s; interpolationmode=none);
-        @statistic[queueLength](title="queue length"; source=warmup(count(localSignal(packetPushed)) - count(localSignal(packetPopped)) - count(localSignal(packetRemoved)) - count(packetDropped)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPulled); record=histogram,vector; unit=s; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; source=warmup(count(localSignal(packetPushed)) - count(localSignal(packetPulled)) - count(localSignal(packetRemoved)) - count(packetDropped)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
 }

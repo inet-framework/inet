@@ -71,7 +71,7 @@ int WrrScheduler::schedulePacket()
 {
     bool isEmpty = true;
     for (int i = 0; i < (int)providers.size(); ++i) {
-        if (providers[i]->canPopSomePacket(inputGates[i]->getPathStartGate())) {
+        if (providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate())) {
             isEmpty = false;
             if (buckets[i] > 0) {
                 buckets[i]--;
@@ -86,7 +86,7 @@ int WrrScheduler::schedulePacket()
     int result = -1;
     for (int i = 0; i < (int)providers.size(); ++i) {
         buckets[i] = weights[i];
-        if (result == -1 && buckets[i] > 0 && providers[i]->canPopSomePacket(inputGates[i]->getPathStartGate())) {
+        if (result == -1 && buckets[i] > 0 && providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate())) {
             buckets[i]--;
             result = i;
         }

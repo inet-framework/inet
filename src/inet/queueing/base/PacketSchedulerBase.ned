@@ -20,7 +20,7 @@ package inet.queueing.base;
 //
 // This is a base module for various packet scheduler modules. Derived modules
 // must implement a single packet scheduler function which determines the index
-// of the input gate for the popped packet.
+// of the input gate for the pulled packet.
 //
 // @see ~IPacketScheduler
 //
@@ -29,8 +29,8 @@ simple PacketSchedulerBase extends PacketProcessorBase
     parameters:
         displayStringTextFormat = default("scheduled %p pk (%l)");
         @display("i=block/join");
-        @signal[packetPopped](type=inet::Packet);
-        @statistic[packetPopped](title="packets popped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @signal[packetPulled](type=inet::Packet);
+        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in[];
         output out;

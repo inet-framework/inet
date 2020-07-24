@@ -38,16 +38,16 @@ class INET_API IPacketQueueingElement
      * must push packets into this module. Connecting incompatible gates raises
      * an error during initialize. The gate must not be nullptr.
      */
-    virtual bool supportsPushPacket(cGate *gate) const = 0;
+    virtual bool supportsPacketPushing(cGate *gate) const = 0;
 
     /**
-     * Returns true if the element supports popping packets at the given gate.
-     * For output gates, true means that the connected module must pop packets
-     * from this module. For input gates, true means that this module must pop
+     * Returns true if the element supports pulling packets at the given gate.
+     * For output gates, true means that the connected module must pull packets
+     * from this module. For input gates, true means that this module must pull
      * packets from the connected module. Connecting incompatible gates raises
      * an error during initialize. The gate must not be nullptr.
      */
-    virtual bool supportsPopPacket(cGate *gate) const = 0;
+    virtual bool supportsPacketPulling(cGate *gate) const = 0;
 };
 
 } // namespace queueing

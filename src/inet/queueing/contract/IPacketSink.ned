@@ -28,5 +28,5 @@ moduleinterface IPacketSink
     parameters:
         @display("i=block/sink");
     gates:
-        input in @labels(push,pop);
+        input in @labels(push,pull);
 }

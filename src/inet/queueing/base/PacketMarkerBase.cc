@@ -34,8 +34,8 @@ void PacketMarkerBase::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushOrPopPacketSupport(inputGate);
-        checkPushOrPopPacketSupport(outputGate);
+        checkPackingPushingOrPullingSupport(inputGate);
+        checkPackingPushingOrPullingSupport(outputGate);
     }
 }
 
@@ -50,15 +50,15 @@ void PacketMarkerBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketMarkerBase::canPopSomePacket(cGate *gate) const
+bool PacketMarkerBase::canPullSomePacket(cGate *gate) const
 {
-    return provider->canPopPacket(inputGate->getPathStartGate());
+    return provider->canPullPacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketMarkerBase::popPacket(cGate *gate)
+Packet *PacketMarkerBase::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
-    auto packet = provider->popPacket(inputGate->getPathStartGate());
+    Enter_Method("pullPacket");
+    auto packet = provider->pullPacket(inputGate->getPathStartGate());
     EV_INFO << "Marking packet " << packet->getName() << "." << endl;
     markPacket(packet);
     numProcessedPackets++;
@@ -75,11 +75,11 @@ void PacketMarkerBase::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate);
 }
 
-void PacketMarkerBase::handleCanPopPacket(cGate *gate)
+void PacketMarkerBase::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacket(outputGate);
 }
 
 } // namespace queueing

@@ -34,8 +34,8 @@ void PacketMeterBase::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushOrPopPacketSupport(inputGate);
-        checkPushOrPopPacketSupport(outputGate);
+        checkPackingPushingOrPullingSupport(inputGate);
+        checkPackingPushingOrPullingSupport(outputGate);
     }
 }
 
@@ -50,15 +50,15 @@ void PacketMeterBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketMeterBase::canPopSomePacket(cGate *gate) const
+bool PacketMeterBase::canPullSomePacket(cGate *gate) const
 {
-    return provider->canPopPacket(inputGate->getPathStartGate());
+    return provider->canPullPacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketMeterBase::popPacket(cGate *gate)
+Packet *PacketMeterBase::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
-    auto packet = provider->popPacket(inputGate->getPathStartGate());
+    Enter_Method("pullPacket");
+    auto packet = provider->pullPacket(inputGate->getPathStartGate());
     EV_INFO << "Metering packet " << packet->getName() << "." << endl;
     meterPacket(packet);
     numProcessedPackets++;
@@ -75,11 +75,11 @@ void PacketMeterBase::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate);
 }
 
-void PacketMeterBase::handleCanPopPacket(cGate *gate)
+void PacketMeterBase::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacket(outputGate);
 }
 
 } // namespace queueing

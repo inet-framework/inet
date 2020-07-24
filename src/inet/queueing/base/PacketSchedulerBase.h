@@ -42,14 +42,14 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public IActiveP
   public:
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return providers[gate->getIndex()]; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
 
-    virtual bool canPopSomePacket(cGate *gate) const override;
-    virtual Packet *canPopPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *popPacket(cGate *gate) override;
+    virtual bool canPullSomePacket(cGate *gate) const override;
+    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacket(cGate *gate) override;
 
-    virtual void handleCanPopPacket(cGate *gate) override;
+    virtual void handleCanPullPacket(cGate *gate) override;
 };
 
 } // namespace queueing

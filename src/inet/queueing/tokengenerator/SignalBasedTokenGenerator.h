@@ -33,8 +33,8 @@ class INET_API SignalBasedTokenGenerator : public TokenGeneratorBase, public cLi
     virtual void generateTokens();
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
