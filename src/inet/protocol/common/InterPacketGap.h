@@ -20,7 +20,6 @@
 
 #include "inet/common/base/ClockUsingModuleMixin.h"
 #include "inet/queueing/base/PacketPusherBase.h"
-#include "inet/protocol/common/cProgress.h"
 
 namespace inet {
 
@@ -30,8 +29,8 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
 {
   protected:
     cPar *durationPar = nullptr;
-    cProgress *progress = nullptr;
     cMessage *timer = nullptr;
+    Packet *progress = nullptr;
 
     simclocktime_t packetDelay;
     simclocktime_t packetStartTime;
@@ -41,12 +40,11 @@ class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void receiveProgress(cPacket *packet, cGate *gate, int progressKind, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration);
     virtual void receivePacketStart(cPacket *packet, cGate *gate, double datarate);
     virtual void receivePacketProgress(cPacket *packet, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration);
     virtual void receivePacketEnd(cPacket *packet, cGate *gate, double datarate);
 
-    virtual void pushOrSendOrScheduleProgress(Packet *packet, cGate *gate, int progressKind, bps datarate, b position, b extraProcessableLength = b(0));
+    virtual void pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0));
 
     virtual const char *resolveDirective(char directive) const override;
 
