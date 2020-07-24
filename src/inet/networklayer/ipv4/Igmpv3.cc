@@ -97,7 +97,7 @@ void Igmpv3::initialize(int stage)
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 configureInterface(ie);
-                if (auto ipv4interfaceData = ie->findProtocolData<Ipv4InterfaceData>()) {
+                if (auto ipv4interfaceData = ie->findProtocolDataForUpdate<Ipv4InterfaceData>()) {
                     int n = ipv4interfaceData->getNumOfJoinedMulticastGroups();
                     for (int j = 0; j < n; j++) {
                         auto groupAddress = ipv4interfaceData->getJoinedMulticastGroup(j);
