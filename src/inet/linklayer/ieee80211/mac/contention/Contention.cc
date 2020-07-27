@@ -154,7 +154,7 @@ void Contention::handleWithFSM(EventType event)
     }
     emit(stateChangedSignal, fsm.getState());
     if (finallyReportChannelAccessGranted)
-        scheduleAt(simTime(), channelGrantedEvent);
+        scheduleAfter(SIMTIME_ZERO, channelGrantedEvent);
     if (hasGUI()) {
         if (startTxEvent->isScheduled())
             updateDisplayString(startTxEvent->getArrivalTime());

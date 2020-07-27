@@ -1356,7 +1356,7 @@ void RsvpTe::processHelloMsg(Packet *pk)
 
         // if peer was considered down, we have stopped sending hellos: resume now
         if (!h->timer->isScheduled())
-            scheduleAt(simTime(), h->timer);
+            scheduleAfter(SIMTIME_ZERO, h->timer);
     }
 
     if (request) {
@@ -1365,7 +1365,7 @@ void RsvpTe::processHelloMsg(Packet *pk)
         h->request = false;
 
         cancelEvent(h->timer);
-        scheduleAt(simTime(), h->timer);
+        scheduleAfter(SIMTIME_ZERO, h->timer);
     }
     else {
         // next message will be regular
@@ -1940,7 +1940,7 @@ void RsvpTe::scheduleCommitTimer(ResvStateBlock *rsbEle)
     if (rsbEle->commitTimerMsg->isScheduled())
         cancelEvent(rsbEle->commitTimerMsg);
 
-    scheduleAt(simTime(), rsbEle->commitTimerMsg);
+    scheduleAfter(SIMTIME_ZERO, rsbEle->commitTimerMsg);
 }
 
 RsvpTe::ResvStateBlock *RsvpTe::findRSB(const SessionObj& session, const SenderTemplateObj& sender, unsigned int& index)

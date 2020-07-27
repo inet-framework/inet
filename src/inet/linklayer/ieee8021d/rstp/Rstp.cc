@@ -903,7 +903,7 @@ void Rstp::start()
 {
     StpBase::start();
     initPorts();
-    scheduleAt(simTime(), helloTimer);
+    scheduleAfter(SIMTIME_ZERO, helloTimer);
 }
 
 void Rstp::stop()

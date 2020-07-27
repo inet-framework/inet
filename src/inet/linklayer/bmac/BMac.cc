@@ -94,7 +94,7 @@ void BMac::initialize(int stage)
         resend_data = new cMessage("resend_data", BMAC_RESEND_DATA);
         resend_data->setSchedulingPriority(100);
 
-        scheduleAt(simTime(), start_bmac);
+        scheduleAfter(SIMTIME_ZERO, start_bmac);
     }
 }
 
@@ -283,7 +283,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 macState = WAIT_DATA;
                 cancelEvent(cca_timeout);
                 scheduleAfter(slotDuration + checkInterval, data_timeout);
-                scheduleAt(simTime(), msg);
+                scheduleAfter(SIMTIME_ZERO, msg);
                 return;
             }
             //in case we get an ACK, we simply dicard it, because it means the end
@@ -568,13 +568,13 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
             // we just switched to TX after CCA, so simply send the first
             // sendPremable self message
             if (macState == SEND_PREAMBLE)
-                scheduleAt(simTime(), send_preamble);
+                scheduleAfter(SIMTIME_ZERO, send_preamble);
             else if (macState == SEND_ACK)
-                scheduleAt(simTime(), send_ack);
+                scheduleAfter(SIMTIME_ZERO, send_ack);
             // we were waiting for acks, but none came. we switched to TX and now
             // need to resend data
             else if (macState == SEND_DATA)
-                scheduleAt(simTime(), resend_data);
+                scheduleAfter(SIMTIME_ZERO, resend_data);
         }
     }
     // Transmission of one packet is over
@@ -582,9 +582,9 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             if (macState == WAIT_TX_DATA_OVER)
-                scheduleAt(simTime(), data_tx_over);
+                scheduleAfter(SIMTIME_ZERO, data_tx_over);
             else if (macState == WAIT_ACK_TX)
-                scheduleAt(simTime(), ack_tx_over);
+                scheduleAfter(SIMTIME_ZERO, ack_tx_over);
         }
         transmissionState = newRadioTransmissionState;
     }

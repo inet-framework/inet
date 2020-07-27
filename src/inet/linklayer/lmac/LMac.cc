@@ -77,7 +77,7 @@ void LMac::initialize(int stage)
         start_lmac = new cMessage("start_lmac", LMAC_START_LMAC);
         send_control = new cMessage("send_control", LMAC_SEND_CONTROL);
 
-        scheduleAt(simTime(), start_lmac);
+        scheduleAfter(SIMTIME_ZERO, start_lmac);
         EV_DETAIL << "My Mac address is" << interfaceEntry->getMacAddress() << " and my Id is " << myId << endl;
     }
 }
@@ -396,7 +396,7 @@ void LMac::handleSelfMessage(cMessage *msg)
 
                 macState = SLEEP;
                 EV_DETAIL << "Old state: WAIT_DATA, New state: SLEEP" << endl;
-                scheduleAt(simTime(), wakeup);
+                scheduleAfter(SIMTIME_ZERO, wakeup);
             }
             else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
                 EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
@@ -521,7 +521,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             else if (msg->getKind() == LMAC_WAKEUP) {
                 macState = SLEEP;
                 EV_DETAIL << "Unlikely transition. Old state: WAIT_DATA, New state: SLEEP" << endl;
-                scheduleAt(simTime(), wakeup);
+                scheduleAfter(SIMTIME_ZERO, wakeup);
             }
             else {
                 EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
@@ -580,7 +580,7 @@ void LMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
         IRadio::RadioMode radioMode = (IRadio::RadioMode)value;
         if (macState == SEND_CONTROL && radioMode == IRadio::RADIO_MODE_TRANSMITTER) {
             // we just switched to TX after CCA, so simply send the first sendPremable self message
-            scheduleAt(simTime(), send_control);
+            scheduleAfter(SIMTIME_ZERO, send_control);
         }
     }
 }

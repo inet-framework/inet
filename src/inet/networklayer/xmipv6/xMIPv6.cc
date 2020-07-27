@@ -405,7 +405,7 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, InterfaceEntry *ie, const 
 
     // send BU now
     //scheduleAt(buIfEntry->initScheduledBUTime, buTriggerMsg); //Scheduling a message which will trigger a BU towards buIfEntry->dest
-    scheduleAt(simTime(), buTriggerMsg);    //Scheduling a message which will trigger a BU towards buIfEntry->dest
+    scheduleAfter(SIMTIME_ZERO, buTriggerMsg);    //Scheduling a message which will trigger a BU towards buIfEntry->dest
 }
 
 void xMIPv6::sendPeriodicBU(cMessage *msg)

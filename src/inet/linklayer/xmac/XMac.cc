@@ -95,7 +95,7 @@ void XMac::initialize(int stage)
         delay_for_ack_within_remote_rx = new cMessage("delay_for_ack_within_remote_rx", DELAY_FOR_ACK_WITHIN_REMOTE_RX);
         switching_done = new cMessage("switching_done", XMAC_SWITCHING_FINISHED);
 
-        scheduleAt(simTime(), start_xmac);
+        scheduleAfter(SIMTIME_ZERO, start_xmac);
     }
 }
 
@@ -324,7 +324,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 cancelEvent(switch_preamble_phase);
                 cancelEvent(stop_preambles);
                 macState = WAIT_DATA;
-                scheduleAt(simTime(), msg);
+                scheduleAfter(SIMTIME_ZERO, msg);
             }
             return;
         }
@@ -556,10 +556,10 @@ void XMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             // Transmission of one packet is over
             if (macState == WAIT_TX_DATA_OVER) {
-                scheduleAt(simTime(), data_tx_over);
+                scheduleAfter(SIMTIME_ZERO, data_tx_over);
             }
             if (macState == WAIT_ACK_TX) {
-                scheduleAt(simTime(), ack_tx_over);
+                scheduleAfter(SIMTIME_ZERO, ack_tx_over);
             }
         }
         transmissionState = newRadioTransmissionState;
@@ -567,13 +567,13 @@ void XMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
     else if (signalID ==IRadio::radioModeChangedSignal) {
         // Radio switching (to RX or TX) is over, ignore switching to SLEEP.
         if (macState == SEND_PREAMBLE) {
-            scheduleAt(simTime(), switching_done);
+            scheduleAfter(SIMTIME_ZERO, switching_done);
         }
         else if (macState == SEND_ACK) {
             scheduleAfter(0.5f * checkInterval, delay_for_ack_within_remote_rx);
         }
         else if (macState == SEND_DATA) {
-            scheduleAt(simTime(), switching_done);
+            scheduleAfter(SIMTIME_ZERO, switching_done);
         }
     }
 }

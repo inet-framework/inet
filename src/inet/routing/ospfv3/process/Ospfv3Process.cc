@@ -665,7 +665,7 @@ void Ospfv3Process::activateProcess()
     this->isActive=true;
     cMessage* init = new cMessage();
     init->setKind(HELLO_TIMER_INIT);
-    scheduleAt(simTime(), init);
+    scheduleAfter(SIMTIME_ZERO, init);
 }//activateProcess
 
 void Ospfv3Process::debugDump()
