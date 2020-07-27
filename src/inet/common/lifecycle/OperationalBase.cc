@@ -130,7 +130,7 @@ void OperationalBase::scheduleOperationTimeout(simtime_t timeout)
     ASSERT(activeOperation.isDelayedFinish);
     ASSERT(!activeOperationTimeout->isScheduled());
     activeOperationTimeout->setContextPointer(activeOperation.operation);
-    scheduleAt(simTime() + timeout, activeOperationTimeout);
+    scheduleAfter(timeout, activeOperationTimeout);
     // TODO: schedule timer and use module parameter
 }
 
@@ -172,7 +172,7 @@ void OperationalBase::startActiveOperationExtraTime(simtime_t extraTime)
     ASSERT(!activeOperationExtraTimer->isScheduled());
     activeOperation.delayFinish();
     setOperationalState(activeOperation.endState);
-    scheduleAt(simTime() + extraTime, activeOperationExtraTimer);
+    scheduleAfter(extraTime, activeOperationExtraTimer);
 }
 
 void OperationalBase::startActiveOperationExtraTimeOrFinish(simtime_t extraTime)

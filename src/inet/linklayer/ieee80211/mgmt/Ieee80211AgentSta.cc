@@ -60,7 +60,7 @@ void Ieee80211AgentSta::initialize(int stage)
         simtime_t startingTime = par("startingTime");
         if (startingTime < SIMTIME_ZERO)
             startingTime = uniform(SIMTIME_ZERO, maxChannelTime);
-        scheduleAt(simTime() + startingTime, new cMessage("startUp", MK_STARTUP));
+        scheduleAfter(startingTime, new cMessage("startUp", MK_STARTUP));
 
         myIface = nullptr;
     }

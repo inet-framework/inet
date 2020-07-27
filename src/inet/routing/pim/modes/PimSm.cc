@@ -1916,7 +1916,7 @@ void PimSm::cancelAndDeleteTimer(cMessage *& timer)
 void PimSm::restartTimer(cMessage *timer, double interval)
 {
     cancelEvent(timer);
-    scheduleAt(simTime() + interval, timer);
+    scheduleAfter(interval, timer);
 }
 
 PimSm::Route::Route(PimSm *owner, RouteType type, Ipv4Address origin, Ipv4Address group)
@@ -1942,21 +1942,21 @@ void PimSm::Route::startKeepAliveTimer(double keepAlivePeriod)
     ASSERT(this->type == SG);
     keepAliveTimer = new cMessage("PIMKeepAliveTimer", KeepAliveTimer);
     keepAliveTimer->setContextPointer(this);
-    owner->scheduleAt(simTime() + keepAlivePeriod, keepAliveTimer);
+    owner->scheduleAfter(keepAlivePeriod, keepAliveTimer);
 }
 
 void PimSm::Route::startRegisterStopTimer(double interval)
 {
     registerStopTimer = new cMessage("PIMRegisterStopTimer", RegisterStopTimer);
     registerStopTimer->setContextPointer(this);
-    owner->scheduleAt(simTime() + interval, registerStopTimer);
+    owner->scheduleAfter(interval, registerStopTimer);
 }
 
 void PimSm::Route::startJoinTimer(double joinPrunePeriod)
 {
     joinTimer = new cMessage("PIMJoinTimer", JoinTimer);
     joinTimer->setContextPointer(this);
-    owner->scheduleAt(simTime() + joinPrunePeriod, joinTimer);
+    owner->scheduleAfter(joinPrunePeriod, joinTimer);
 }
 
 PimSm::DownstreamInterface *PimSm::Route::findDownstreamInterfaceByInterfaceId(int interfaceId)
@@ -2051,7 +2051,7 @@ void PimSm::PimsmInterface::startExpiryTimer(double holdTime)
 {
     expiryTimer = new cMessage("PIMExpiryTimer", ExpiryTimer);
     expiryTimer->setContextPointer(this);
-    pimsm()->scheduleAt(simTime() + holdTime, expiryTimer);
+    pimsm()->scheduleAfter(holdTime, expiryTimer);
 }
 
 PimSm::DownstreamInterface::~DownstreamInterface()
@@ -2161,7 +2161,7 @@ void PimSm::DownstreamInterface::startPrunePendingTimer(double joinPruneOverride
     ASSERT(!prunePendingTimer);
     prunePendingTimer = new cMessage("PIMPrunePendingTimer", PrunePendingTimer);
     prunePendingTimer->setContextPointer(this);
-    pimsm()->scheduleAt(simTime() + joinPruneOverrideInterval, prunePendingTimer);
+    pimsm()->scheduleAfter(joinPruneOverrideInterval, prunePendingTimer);
 }
 
 std::ostream& operator<<(std::ostream& out, const PimSm::Route& route)

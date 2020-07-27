@@ -118,7 +118,7 @@ void AckingMac::startTransmitting()
     Packet *msg = currentTxFrame;
     if (useAck && !dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
         msg = currentTxFrame->dup();
-        scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
+        scheduleAfter(ackTimeout, ackTimeoutMsg);
     }
     else
         currentTxFrame = nullptr;

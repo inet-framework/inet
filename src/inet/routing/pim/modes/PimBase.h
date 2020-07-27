@@ -106,7 +106,7 @@ class INET_API PimBase : public RoutingProtocolBase
             ASSERT(assertTimer == nullptr);
             assertTimer = new cMessage("PimAssertTimer", AssertTimer);
             assertTimer->setContextPointer(this);
-            owner->owner->scheduleAt(simTime() + assertTime, assertTimer);
+            owner->owner->scheduleAfter(assertTime, assertTimer);
         }
 
         void deleteAssertInfo()

@@ -29,11 +29,11 @@ bool TestRadio::handleOperationStage(LifecycleOperation *operation, int stage, I
     Enter_Method_Silent();
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {
         if (stage == 0) {
-            scheduleAt(simTime() + 1, &turnOnTransmitter);
+            scheduleAfter(1, &turnOnTransmitter);
             EV << getFullPath() << " turning on transmitter" << endl;
         }
         else if (stage == 1) {
-            scheduleAt(simTime() + 2, &turnOnReceiver);
+            scheduleAfter(2, &turnOnReceiver);
             EV << getFullPath() << " turning on receiver" << endl;
         }
         else if (stage == 2 || stage == 3)
@@ -47,11 +47,11 @@ bool TestRadio::handleOperationStage(LifecycleOperation *operation, int stage, I
         if (stage == 0 || stage == 3)
             return true;
         else if (stage == 1) {
-            scheduleAt(simTime() + 2, &turnOffReceiver);
+            scheduleAfter(2, &turnOffReceiver);
             EV << getFullPath() << " turning off receiver" << endl;
         }
         else if (stage == 2) {
-            scheduleAt(simTime() + 1, &turnOffTransmitter);
+            scheduleAfter(1, &turnOffTransmitter);
             EV << getFullPath() << " turning off transmitter" << endl;
         }
         else

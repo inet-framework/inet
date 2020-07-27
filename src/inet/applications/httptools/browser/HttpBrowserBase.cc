@@ -159,7 +159,7 @@ void HttpBrowserBase::initialize(int stage)
                 activationTime += std::max(0.0, 86400.0 - rdActivityLength->draw()) / 2.0; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
-            scheduleAt(simTime() + activationTime, eventTimer);
+            scheduleAfter(activationTime, eventTimer);
         }
     }
 }
@@ -219,7 +219,7 @@ void HttpBrowserBase::handleSelfActivityStart()
     double activityPeriodLength = (rdActivityLength != nullptr) ? rdActivityLength->draw() : 0.0;    // Get the length of the activity period
     acitivityPeriodEnd = simTime() + activityPeriodLength;    // The end of the activity period
     EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << (activityPeriodLength / 3600.0) << " hours." << endl;
-    scheduleAt(simTime() + simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
+    scheduleAfter(simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
 }
 
 void HttpBrowserBase::handleSelfStartSession()
@@ -368,7 +368,7 @@ void HttpBrowserBase::handleDataMessage(Ptr<const HttpReplyMessage> appmsg)
                 }
                 else {
                     reqmsg->setKind(HTTPT_DELAYED_REQUEST_MESSAGE);
-                    scheduleAt(simTime() + delay, reqmsg);    // Schedule the message as a self message
+                    scheduleAfter(delay, reqmsg);    // Schedule the message as a self message
                 }
             }
             // Iterate through the list of queues (one for each recipient encountered) and submit each queue.

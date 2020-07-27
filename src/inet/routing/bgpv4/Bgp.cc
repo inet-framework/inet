@@ -55,7 +55,7 @@ void Bgp::initialize(int stage)
             if (startupTime == 0)
                 createBgpRouter();
             else
-                scheduleAt(simTime() + startupTime, startupTimer);
+                scheduleAfter(startupTime, startupTimer);
         }
     }
 }

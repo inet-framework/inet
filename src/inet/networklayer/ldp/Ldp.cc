@@ -163,7 +163,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         sendHelloTo(Ipv4Address::ALL_ROUTERS_MCAST);
 
         // schedule next hello
-        scheduleAt(simTime() + helloInterval, sendHelloMsg);
+        scheduleAfter(helloInterval, sendHelloMsg);
     }
     else if (msg->isSelfMessage()) {
         EV_INFO << "Timer " << msg->getName() << " expired\n";
@@ -235,7 +235,7 @@ void Ldp::socketClosed(UdpSocket *socket)
 
 void Ldp::handleStartOperation(LifecycleOperation *operation)
 {
-    scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
+    scheduleAfter(exponential(0.1), sendHelloMsg);
 }
 
 void Ldp::handleStopOperation(LifecycleOperation *operation)
@@ -593,7 +593,7 @@ void Ldp::processLDPHello(Packet *msg)
         EV_DETAIL << "already in my peer table, rescheduling timeout" << endl;
         ASSERT(myPeers[i].timeout);
         cancelEvent(myPeers[i].timeout);
-        scheduleAt(simTime() + holdTime, myPeers[i].timeout);
+        scheduleAfter(holdTime, myPeers[i].timeout);
         return;
     }
 
@@ -604,7 +604,7 @@ void Ldp::processLDPHello(Packet *msg)
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = nullptr;
     info.timeout = new cMessage("HelloTimeout");
-    scheduleAt(simTime() + holdTime, info.timeout);
+    scheduleAfter(holdTime, info.timeout);
     myPeers.push_back(info);
     int peerIndex = myPeers.size() - 1;
 
@@ -951,7 +951,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
                     if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
                         auto pk = new Packet(0, ldpPacket);
-                        scheduleAt(simTime() + 1.0    /* XXX FIXME */, pk);
+                        scheduleAfter(1.0    /* XXX FIXME */, pk);
                         return;
                     }
                     else {

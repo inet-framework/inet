@@ -68,7 +68,7 @@ void TcpGenericServerApp::sendOrSchedule(cMessage *msg, simtime_t delay)
     if (delay == 0)
         sendBack(msg);
     else
-        scheduleAt(simTime() + delay, msg);
+        scheduleAfter(delay, msg);
 }
 
 void TcpGenericServerApp::sendBack(cMessage *msg)

@@ -34,7 +34,7 @@ void SignalSource::handleMessage(cMessage *msg)
     if (endTime < 0 || simTime() < endTime) {
         double value = par("value");
         emit(signal, value);
-        scheduleAt(simTime()+par("interval"), msg);
+        scheduleAfter(par("interval"), msg);
     }
     else {
         delete msg;

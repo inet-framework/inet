@@ -135,9 +135,9 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
         //We want routers to boot up faster!
         if (rt6->isRouter())
-            scheduleAt(simTime() + uniform(0, 0.3), msg); //Random Router bootup time
+            scheduleAfter(uniform(0, 0.3), msg); //Random Router bootup time
         else
-            scheduleAt(simTime() + uniform(0.4, 1), msg); //Random Host bootup time
+            scheduleAfter(uniform(0.4, 1), msg); //Random Host bootup time
     }
 }
 
@@ -493,7 +493,7 @@ void Ipv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(Neighbour 
     cMessage *msg = new cMessage("NUDTimeout", MK_NUD_TIMEOUT);
     msg->setContextPointer(nce);
     nce->nudTimeoutEvent = msg;
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getDelayFirstProbeTime(), msg);
+    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->_getDelayFirstProbeTime(), msg);
 }
 
 void Ipv6NeighbourDiscovery::processNudTimeout(cMessage *timeoutMsg)
@@ -538,7 +538,7 @@ void Ipv6NeighbourDiscovery::processNudTimeout(cMessage *timeoutMsg)
        every RetransTimer milliseconds until reachability confirmation is obtained.
        Probes are retransmitted even if no additional packets are sent to the
        neighbor.*/
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), timeoutMsg);
+    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), timeoutMsg);
 }
 
 Ipv6Address Ipv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
@@ -686,7 +686,7 @@ void Ipv6NeighbourDiscovery::initiateAddressResolution(const Ipv6Address& dgSrcA
     cMessage *msg = new cMessage("arTimeout", MK_AR_TIMEOUT);    //AR msg timer
     nce->arTimer = msg;
     msg->setContextPointer(nce);
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), msg);
+    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), msg);
 }
 
 void Ipv6NeighbourDiscovery::processArTimeout(cMessage *arTimeoutMsg)
@@ -704,7 +704,7 @@ void Ipv6NeighbourDiscovery::processArTimeout(cMessage *arTimeoutMsg)
         Ipv6Address nsDestAddr = nsTargetAddr.formSolicitedNodeMulticastAddress();
         createAndSendNsPacket(nsTargetAddr, nsDestAddr, nce->nsSrcAddr, ie);
         nce->numOfARNSSent++;
-        scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), arTimeoutMsg);
+        scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), arTimeoutMsg);
         return;
     }
 
@@ -834,11 +834,11 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Inter
     msg->setContextPointer(dadEntry);
 
 #ifndef WITH_xMIPv6
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
+    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
 #else /* WITH_xMIPv6 */
     // update: added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
     // group which is delay up to one 1 second (RFC 4862, 5.4.2) - 16.01.08, CB
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
+    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
 #endif /* WITH_xMIPv6 */
 
     emit(startDadSignal, 1);
@@ -860,7 +860,7 @@ void Ipv6NeighbourDiscovery::processDadTimeout(cMessage *msg)
         createAndSendNsPacket(dadEntry->address, destAddr, Ipv6Address::UNSPECIFIED_ADDRESS, ie);
         dadEntry->numNSSent++;
         //Reuse the received msg
-        scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
+        scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
     }
     else {
         bubble("Max number of DAD messages for interface sent. Address is unique.");
@@ -949,7 +949,7 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);
         rtrDisMsg->setContextPointer(ie);
         simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay());    // random delay
-        scheduleAt(simTime() + interval, rtrDisMsg);
+        scheduleAfter(interval, rtrDisMsg);
     }
 }
 
@@ -1019,7 +1019,7 @@ void Ipv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
        of Duplicate Address Detection [ADDRCONF]) there is no need to delay
        again before sending the first Router Solicitation message.*/
     //simtime_t rndInterval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay());
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), rdTimeoutMsg);
+    scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), rdTimeoutMsg);
 }
 
 void Ipv6NeighbourDiscovery::cancelRouterDiscovery(InterfaceEntry *ie)
@@ -1048,9 +1048,9 @@ void Ipv6NeighbourDiscovery::processRdTimeout(cMessage *msg)
 
         //Need to find out if this is the last RS we are sending out.
         if (rdEntry->numRSSent == ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitations())
-            scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay(), msg);
+            scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay(), msg);
         else
-            scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), msg);
+            scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), msg);
     }
     else {
         //RFC 2461, Section 6.3.7
@@ -1704,7 +1704,7 @@ void Ipv6NeighbourDiscovery::resetRaTimer(InterfaceEntry *ie)
             cancelEvent(msg);//Cancel the next scheduled msg.
             simtime_t interval
                 = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(),ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
-            scheduleAt(simTime()+interval, msg);
+            scheduleAfter(interval, msg);
         }
     }
  */

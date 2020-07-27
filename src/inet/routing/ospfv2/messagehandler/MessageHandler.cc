@@ -384,7 +384,7 @@ void MessageHandler::clearTimer(cMessage *timer)
 
 void MessageHandler::startTimer(cMessage *timer, simtime_t delay)
 {
-    ospfModule->scheduleAt(simTime() + delay, timer);
+    ospfModule->scheduleAfter(delay, timer);
 }
 
 void MessageHandler::printEvent(const char *eventString, const Ospfv2Interface *onInterface, const Neighbor *forNeighbor    /*= nullptr*/) const

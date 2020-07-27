@@ -115,7 +115,7 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
         if (echoAppModule->delay == 0)
             echoAppModule->sendDown(outPkt);
         else
-            scheduleAt(simTime() + echoAppModule->delay, outPkt); // send after a delay
+            scheduleAfter(echoAppModule->delay, outPkt); // send after a delay
     }
     delete rcvdPkt;
 }

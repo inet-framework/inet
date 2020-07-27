@@ -87,7 +87,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         mac->sendDownFrame(frame->dup());
     }
     else
-        scheduleAt(simTime() + ifs, endIfsTimer);
+        scheduleAfter(ifs, endIfsTimer);
 }
 
 void Tx::radioTransmissionFinished()

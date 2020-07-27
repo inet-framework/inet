@@ -109,7 +109,7 @@ void MpduGen::handleMessageWhenUp(cMessage *msg)
 
 void MpduGen::handleStartOperation(LifecycleOperation *operation)
 {
-    scheduleAt(simTime() + par("startTime"), selfMsg);
+    scheduleAfter(par("startTime"), selfMsg);
 }
 
 void MpduGen::handleStopOperation(LifecycleOperation *operation)

@@ -338,7 +338,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
         assert(StopTimer == nullptr);
         if (StopTime > 0.0) {
             StopTimer = new cMessage("StopTimer", TIMER_STOP);
-            scheduleAt(simTime() + StopTime, StopTimer);
+            scheduleAfter(StopTime, StopTimer);
         }
     }
 
@@ -686,7 +686,7 @@ void NetPerfMeter::startSending()
     const simtime_t onTime = par("onTime");
     if (onTime.dbl() > 0.0) {
         OffTimer = new cMessage("OffTimer", TIMER_OFF);
-        scheduleAt(simTime() + onTime, OffTimer);
+        scheduleAfter(onTime, OffTimer);
     }
 }
 
@@ -705,7 +705,7 @@ void NetPerfMeter::stopSending()
     if ((offDuration.dbl() > 0.0)
             && ((MaxOnOffCycles < 0) || (OnOffCycleCounter <= (unsigned int) MaxOnOffCycles))) {
         OnTimer = new cMessage("OnTimer", TIMER_ON);
-        scheduleAt(simTime() + offDuration, OnTimer);
+        scheduleAfter(offDuration, OnTimer);
     }
 }
 
@@ -1140,7 +1140,7 @@ void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesA
      EV << simTime() << ", " << getFullPath()
      << ": Next on stream #" << streamID << " in " << nextFrameTime << "s" << endl;
      */
-    scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[streamID]);
+    scheduleAfter(nextFrameTime, TransmitTimerVector[streamID]);
 }
 
 
@@ -1174,7 +1174,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
         // std::cout << simTime() << ", " << getFullPath()
         //           << ": Next in " << nextFrameTime << "s" << endl;
 
-        scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[0]);
+        scheduleAfter(nextFrameTime, TransmitTimerVector[0]);
     }
 }
 

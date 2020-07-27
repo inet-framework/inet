@@ -500,7 +500,7 @@ void Igmpv3::startTimer(cMessage *timer, double interval)
 {
     ASSERT(timer);
     cancelEvent(timer);
-    scheduleAt(simTime() + interval, timer);
+    scheduleAfter(interval, timer);
 }
 
 // --- Methods for processing IGMP messages ---

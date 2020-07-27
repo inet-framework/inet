@@ -87,7 +87,7 @@ void SomeUDPApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("sendInterval"), msg);
+        scheduleAfter((double)par("sendInterval"), msg);
     }
     else
     {

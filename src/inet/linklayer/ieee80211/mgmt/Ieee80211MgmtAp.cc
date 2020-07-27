@@ -81,7 +81,7 @@ void Ieee80211MgmtAp::handleTimer(cMessage *msg)
 {
     if (msg == beaconTimer) {
         sendBeacon();
-        scheduleAt(simTime() + beaconInterval, beaconTimer);
+        scheduleAfter(beaconInterval, beaconTimer);
     }
     else {
         throw cRuntimeError("internal error: unrecognized timer '%s'", msg->getName());
@@ -350,7 +350,7 @@ void Ieee80211MgmtAp::sendDisAssocNotification(const MacAddress& addr)
 void Ieee80211MgmtAp::start()
 {
     Ieee80211MgmtApBase::start();
-    scheduleAt(simTime() + uniform(0, beaconInterval), beaconTimer);
+    scheduleAfter(uniform(0, beaconInterval), beaconTimer);
 }
 
 void Ieee80211MgmtAp::stop()

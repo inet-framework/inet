@@ -550,7 +550,7 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void signalConnectionTimeout();
 
     /** Utility: start a timer */
-    void scheduleTimeout(cMessage *msg, simtime_t timeout) { scheduleAt(simTime() + timeout, msg); }
+    void scheduleTimeout(cMessage *msg, simtime_t timeout) { scheduleAfter(timeout, msg); }
 
   protected:
     /** Utility: cancel a timer */

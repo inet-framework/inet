@@ -83,7 +83,7 @@ void Stp::handleMessageWhenUp(cMessage *msg)
     else {
         if (msg == tick) {
             handleTick();
-            scheduleAt(simTime() + 1, tick);
+            scheduleAfter(1, tick);
         }
         else
             throw cRuntimeError("Unknown self-message received");
@@ -665,7 +665,7 @@ void Stp::start()
     helloTime = 0;
     setAllDesignated();
 
-    scheduleAt(simTime() + tickInterval, tick);
+    scheduleAfter(tickInterval, tick);
 }
 
 void Stp::stop()

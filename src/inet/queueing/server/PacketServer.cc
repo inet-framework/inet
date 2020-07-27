@@ -49,7 +49,7 @@ void PacketServer::scheduleProcessingTimer()
     simtime_t processingTime = par("processingTime");
     auto processingBitrate = bps(par("processingBitrate"));
     processingTime += s(packet->getTotalLength() / processingBitrate).get();
-    scheduleAt(simTime() + processingTime, processingTimer);
+    scheduleAfter(processingTime, processingTimer);
 }
 
 bool PacketServer::canStartProcessingPacket()

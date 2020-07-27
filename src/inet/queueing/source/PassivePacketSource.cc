@@ -55,7 +55,7 @@ void PassivePacketSource::scheduleProvidingTimer()
 {
     simtime_t interval = providingIntervalParameter->doubleValue();
     if (interval != 0 || providingTimer->getArrivalModule() == nullptr)
-        scheduleAt(simTime() + interval, providingTimer);
+        scheduleAfter(interval, providingTimer);
 }
 
 Packet *PassivePacketSource::canPopPacket(cGate *gate) const

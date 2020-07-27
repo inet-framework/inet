@@ -80,7 +80,7 @@ void RtpApplication::initialize(int stage)
                   << "payloadType" << payloadType << endl;
 
         cMessage *selfMsg = new cMessage("enterSession", RTPAPP_ENTER_SESSION);
-        scheduleAt(simTime() + sessionEnterDelay, selfMsg);
+        scheduleAfter(sessionEnterDelay, selfMsg);
     }
 }
 
@@ -123,7 +123,7 @@ void RtpApplication::handleMessage(cMessage *msgIn)
                     send(msg, "rtpOut");
 
                     cMessage *selfMsg = new cMessage("stopTransmission", RTPAPP_STOP_TRANSMISSION);
-                    scheduleAt(simTime() + transmissionStopDelay, selfMsg);
+                    scheduleAfter(transmissionStopDelay, selfMsg);
                 }
                 break;
 
@@ -181,7 +181,7 @@ void RtpApplication::handleMessage(cMessage *msgIn)
                     else {
                         cMessage *selfMsg = new cMessage("leaveSession", RTPAPP_LEAVE_SESSION);
                         EV_INFO << "Receiver Module : leaveSession" << endl;
-                        scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
+                        scheduleAfter(sessionLeaveDelay, selfMsg);
                     }
                 }
                 break;
@@ -189,7 +189,7 @@ void RtpApplication::handleMessage(cMessage *msgIn)
                 case RTP_IFP_SENDER_MODULE_CREATED: {
                     EV_INFO << "Sender Module Created" << endl;
                     cMessage *selfMsg = new cMessage("startTransmission", RTPAPP_START_TRANSMISSION);
-                    scheduleAt(simTime() + transmissionStartDelay, selfMsg);
+                    scheduleAfter(transmissionStartDelay, selfMsg);
                 }
                 break;
 
@@ -204,13 +204,13 @@ void RtpApplication::handleMessage(cMessage *msgIn)
                         case RTP_SENDER_STATUS_FINISHED:
                             EV_INFO << "FINISHED" << endl;
                             selfMsg = new cMessage("leaveSession", RTPAPP_LEAVE_SESSION);
-                            scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
+                            scheduleAfter(sessionLeaveDelay, selfMsg);
                             break;
 
                         case RTP_SENDER_STATUS_STOPPED:
                             EV_INFO << "STOPPED" << endl;
                             selfMsg = new cMessage("leaveSession", RTPAPP_LEAVE_SESSION);
-                            scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
+                            scheduleAfter(sessionLeaveDelay, selfMsg);
                             break;
 
                         default:

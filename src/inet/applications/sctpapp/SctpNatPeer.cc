@@ -122,7 +122,7 @@ void SctpNatPeer::sendOrSchedule(cMessage *msg)
         send(msg, "socketOut");
     }
     else {
-        scheduleAt(simTime() + delay, msg);
+        scheduleAfter(delay, msg);
     }
 }
 
@@ -172,7 +172,7 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
     else if (streamReset == true) {
         cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
         EV << "StreamReset Timer scheduled at " << simTime() << "\n";
-        scheduleAt(simTime() + par("streamRequestTime").doubleValue(), cmsg);
+        scheduleAfter(par("streamRequestTime").doubleValue(), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities"));
@@ -200,7 +200,7 @@ void SctpNatPeer::connect(L3Address connectAddress, int32 connectPort)
     else if (streamReset == true) {
         cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
         EV << "StreamReset Timer scheduled at " << simTime() << "\n";
-        scheduleAt(simTime() + par("streamRequestTime").doubleValue(), cmsg);
+        scheduleAfter(par("streamRequestTime").doubleValue(), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities"));
@@ -283,7 +283,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                         if (par("thinkTime").doubleValue() > 0.0) {
                             generateAndSend();
                             timeoutMsg->setKind(SCTP_C_SEND);
-                            scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                            scheduleAfter(par("thinkTime"), timeoutMsg);
                             numRequestsToSend--;
                             i->second = numRequestsToSend;
                         }
@@ -316,7 +316,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                                 char as[5];
                                 sprintf(as, "%d", serverAssocId);
                                 cMessage *abortMsg = new cMessage(as, SCTP_I_ABORT);
-                                scheduleAt(simTime() + par("waitToClose"), abortMsg);
+                                scheduleAfter(par("waitToClose"), abortMsg);
                             }
                             else {
                                 EV << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
@@ -347,7 +347,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 cmd->setNumMsgs(ind->getNumMsgs());
                 delete msg;
                 if (!cmsg->isScheduled() && schedule == false) {
-                    scheduleAt(simTime() + par("delayFirstRead"), cmsg);
+                    scheduleAfter(par("delayFirstRead"), cmsg);
                 }
                 else if (schedule == true)
                     sendOrSchedule(cmsg);
@@ -500,7 +500,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
             if (numRequestsToSend > 0) {
                 generateAndSend();
                 if (par("thinkTime").doubleValue() > 0.0)
-                    scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                    scheduleAfter(par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -618,7 +618,7 @@ void SctpNatPeer::socketFailure(SctpSocket *socket, int32 code)
 
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
+    scheduleAfter(par("reconnectInterval"), timeMsg);
 }
 
 void SctpNatPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
@@ -728,7 +728,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
                     numRequestsToSend--;
                 }
                 timeMsg->setKind(MSGKIND_SEND);
-                scheduleAt(simTime() + par("thinkTime"), timeMsg);
+                scheduleAfter(par("thinkTime"), timeMsg);
             }
             else {
                 if (queueSize > 0) {
@@ -751,7 +751,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
 
                 if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0.0) {
                     timeMsg->setKind(MSGKIND_ABORT);
-                    scheduleAt(simTime() + par("waitToClose"), timeMsg);
+                    scheduleAfter(par("waitToClose"), timeMsg);
                 }
                 if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0.0) {
                     EV << "socketEstablished:no more packets to send, call shutdown\n";

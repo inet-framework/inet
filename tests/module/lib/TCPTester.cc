@@ -221,7 +221,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
             else
             {
                 segcopy->setContextPointer(cmd);
-                scheduleAt(simTime()+d, segcopy);
+                scheduleAfter(d, segcopy);
             }
         }
         delete pk;
@@ -305,7 +305,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
         dump(seg, pk->getByteLength(), fromA, "delay: removing original");
         double d = *delay;
         pk->setContextPointer((void*)fromA);
-        scheduleAt(simTime()+d, pk);
+        scheduleAfter(d, pk);
     }
     else if (x-=pdelay, x<=pcopy)
     {
@@ -317,7 +317,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
             double d = *delay;
             Packet *segcopy = pk->dup();
             segcopy->setContextPointer((void *)fromA);
-            scheduleAt(simTime()+d, segcopy);
+            scheduleAfter(d, segcopy);
         }
         delete pk;
     }

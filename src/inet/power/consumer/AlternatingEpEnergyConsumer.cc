@@ -64,7 +64,7 @@ void AlternatingEpEnergyConsumer::updatePowerConsumption()
 
 void AlternatingEpEnergyConsumer::scheduleIntervalTimer()
 {
-    scheduleAt(simTime() + (isSleeping ? par("sleepInterval") : par("consumptionInterval")), timer);
+    scheduleAfter((isSleeping ? par("sleepInterval") : par("consumptionInterval")), timer);
 }
 
 } // namespace power

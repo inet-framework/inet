@@ -29,7 +29,7 @@ bool TestMobility::handleOperationStage(LifecycleOperation *operation, int stage
     Enter_Method_Silent();
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {
         if (stage == 0) {
-            scheduleAt(simTime() + 9, &startMoving);
+            scheduleAfter(9, &startMoving);
             EV << getFullPath() << " starting to move" << endl;
             return true;
         }
@@ -44,7 +44,7 @@ bool TestMobility::handleOperationStage(LifecycleOperation *operation, int stage
     }
     else if (dynamic_cast<TestNodeShutdownOperation *>(operation)) {
         if (stage == 0) {
-            scheduleAt(simTime() + 9, &stopMoving);
+            scheduleAfter(9, &stopMoving);
             EV << getFullPath() << " stopping to move" << endl;
             return true;
         }

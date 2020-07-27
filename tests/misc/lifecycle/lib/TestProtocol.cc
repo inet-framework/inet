@@ -31,11 +31,11 @@ bool TestProtocol::handleOperationStage(LifecycleOperation *operation, int stage
         if (stage == 0 || stage == 3)
             return true;
         else if (stage == 1) {
-            scheduleAt(simTime() + 3, &sendOpen);
+            scheduleAfter(3, &sendOpen);
             EV << getFullPath() << " opening connection" << endl;
         }
         else if (stage == 2) {
-            scheduleAt(simTime() + 2, &sendData);
+            scheduleAfter(2, &sendData);
             EV << getFullPath() << " sending initial data" << endl;
         }
         else
@@ -45,11 +45,11 @@ bool TestProtocol::handleOperationStage(LifecycleOperation *operation, int stage
     }
     else if (dynamic_cast<TestNodeShutdownOperation *>(operation)) {
         if (stage == 0) {
-            scheduleAt(simTime() + 2, &sendData);
+            scheduleAfter(2, &sendData);
             EV << getFullPath() << " sending final data" << endl;
         }
         else if (stage == 1) {
-            scheduleAt(simTime() + 3, &sendClose);
+            scheduleAfter(3, &sendClose);
             EV << getFullPath() << " closing connection" << endl;
         }
         else if (stage == 2 || stage == 3)

@@ -184,7 +184,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "Old state: SLEEP, New state: CCA" << endl;
 
                     double small_delay = controlDuration * dblrand();
-                    scheduleAt(simTime() + small_delay, checkChannel);
+                    scheduleAfter(small_delay, checkChannel);
                     EV_DETAIL << "Checking for channel for " << small_delay << " time.\n";
                 }
                 else {
@@ -193,21 +193,21 @@ void LMac::handleSelfMessage(cMessage *msg)
                     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                     EV_DETAIL << "Old state: SLEEP, New state: WAIT_CONTROL" << endl;
                     if (!SETUP_PHASE) //in setup phase do not sleep
-                        scheduleAt(simTime() + 2.f * controlDuration, timeout);
+                        scheduleAfter(2.f * controlDuration, timeout);
                 }
                 if (SETUP_PHASE) {
-                    scheduleAt(simTime() + 2.f * controlDuration, wakeup);
+                    scheduleAfter(2.f * controlDuration, wakeup);
                     EV_DETAIL << "setup phase slot duration:" << 2.f * controlDuration << "while controlduration is" << controlDuration << endl;
                 }
                 else
-                    scheduleAt(simTime() + slotDuration, wakeup);
+                    scheduleAfter(slotDuration, wakeup);
             }
             else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
                 EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
                 if (wakeup->isScheduled())
                     cancelEvent(wakeup);
 
-                scheduleAt(simTime() + slotDuration, wakeup);
+                scheduleAfter(slotDuration, wakeup);
 
                 SETUP_PHASE = false;
             }
@@ -315,7 +315,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 if (wakeup->isScheduled())
                     cancelEvent(wakeup);
 
-                scheduleAt(simTime() + slotDuration, wakeup);
+                scheduleAfter(slotDuration, wakeup);
 
                 SETUP_PHASE = false;
             }
@@ -403,7 +403,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 if (wakeup->isScheduled())
                     cancelEvent(wakeup);
 
-                scheduleAt(simTime() + slotDuration, wakeup);
+                scheduleAfter(slotDuration, wakeup);
 
                 SETUP_PHASE = false;
             }
@@ -442,7 +442,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 sendDown(packet);
                 if ((currentTxFrame != nullptr) && (!SETUP_PHASE))
-                    scheduleAt(simTime() + controlDuration, sendData);
+                    scheduleAfter(controlDuration, sendData);
             }
             else if (msg->getKind() == LMAC_SEND_DATA) {
                 // we should be in our own slot and the control packet should be already sent. receiving neighbors should wait for the data now.
@@ -475,7 +475,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 if (wakeup->isScheduled())
                     cancelEvent(wakeup);
 
-                scheduleAt(simTime() + slotDuration, wakeup);
+                scheduleAfter(slotDuration, wakeup);
 
                 SETUP_PHASE = false;
             }

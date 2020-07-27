@@ -51,7 +51,7 @@ void ActivePacketSink::handleMessage(cMessage *message)
 
 void ActivePacketSink::scheduleCollectionTimer()
 {
-    scheduleAt(simTime() + collectionIntervalParameter->doubleValue(), collectionTimer);
+    scheduleAfter(collectionIntervalParameter->doubleValue(), collectionTimer);
 }
 
 void ActivePacketSink::collectPacket()

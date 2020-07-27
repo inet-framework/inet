@@ -159,7 +159,7 @@ void BMac::handleUpperPacket(Packet *packet)
     // force wakeup now
     if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
         cancelEvent(wakeup);
-        scheduleAt(simTime() + dblrand() * 0.1f, wakeup);
+        scheduleAfter(dblrand() * 0.1f, wakeup);
     }
 }
 
@@ -224,7 +224,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State INIT, message BMAC_START, new state SLEEP" << endl;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 macState = SLEEP;
-                scheduleAt(simTime() + dblrand() * slotDuration, wakeup);
+                scheduleAfter(dblrand() * slotDuration, wakeup);
                 return;
             }
             break;
@@ -232,7 +232,7 @@ void BMac::handleSelfMessage(cMessage *msg)
         case SLEEP:
             if (msg->getKind() == BMAC_WAKE_UP) {
                 EV_DETAIL << "State SLEEP, message BMAC_WAKEUP, new state CCA" << endl;
-                scheduleAt(simTime() + checkInterval, cca_timeout);
+                scheduleAfter(checkInterval, cca_timeout);
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                 macState = CCA;
                 return;
@@ -248,14 +248,14 @@ void BMac::handleSelfMessage(cMessage *msg)
                                  " SEND_PREAMBLE" << endl;
                     macState = SEND_PREAMBLE;
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    scheduleAt(simTime() + slotDuration, stop_preambles);
+                    scheduleAfter(slotDuration, stop_preambles);
                     return;
                 }
                 // if not, go back to sleep and wake up after a full period
                 else {
                     EV_DETAIL << "State CCA, message CCA_TIMEOUT, new state SLEEP"
                               << endl;
-                    scheduleAt(simTime() + slotDuration, wakeup);
+                    scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     return;
@@ -269,7 +269,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                              " WAIT_DATA" << endl;
                 macState = WAIT_DATA;
                 cancelEvent(cca_timeout);
-                scheduleAt(simTime() + slotDuration + checkInterval, data_timeout);
+                scheduleAfter(slotDuration + checkInterval, data_timeout);
                 delete msg;
                 return;
             }
@@ -282,7 +282,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                           << endl;
                 macState = WAIT_DATA;
                 cancelEvent(cca_timeout);
-                scheduleAt(simTime() + slotDuration + checkInterval, data_timeout);
+                scheduleAfter(slotDuration + checkInterval, data_timeout);
                 scheduleAt(simTime(), msg);
                 return;
             }
@@ -300,7 +300,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State SEND_PREAMBLE, message BMAC_SEND_PREAMBLE, new"
                              " state SEND_PREAMBLE" << endl;
                 sendPreamble();
-                scheduleAt(simTime() + 0.5f * checkInterval, send_preamble);
+                scheduleAfter(0.5f * checkInterval, send_preamble);
                 macState = SEND_PREAMBLE;
                 return;
             }
@@ -338,7 +338,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                                  " new state WAIT_ACK" << endl;
                     macState = WAIT_ACK;
                     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-                    scheduleAt(simTime() + checkInterval, ack_timeout);
+                    scheduleAfter(checkInterval, ack_timeout);
                 }
                 else {
                     EV_DETAIL << "State WAIT_TX_DATA_OVER, message BMAC_DATA_TX_OVER,"
@@ -346,9 +346,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                     deleteCurrentTxFrame();
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 }
@@ -364,7 +364,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                                  " SEND_DATA" << endl;
                     txAttempts++;
                     macState = SEND_PREAMBLE;
-                    scheduleAt(simTime() + slotDuration, stop_preambles);
+                    scheduleAfter(slotDuration, stop_preambles);
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 }
                 else {
@@ -378,9 +378,9 @@ void BMac::handleSelfMessage(cMessage *msg)
 
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     nbMissedAcks++;
@@ -409,9 +409,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                     deleteCurrentTxFrame();
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
@@ -472,9 +472,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                               << endl;
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 }
@@ -485,9 +485,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                              " SLEEP" << endl;
                 // if something in the queue, wakeup soon.
                 if (!txQueue->isEmpty())
-                    scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                    scheduleAfter(dblrand() * checkInterval, wakeup);
                 else
-                    scheduleAt(simTime() + slotDuration, wakeup);
+                    scheduleAfter(slotDuration, wakeup);
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 return;
@@ -512,9 +512,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                 // ack sent, go to sleep now.
                 // if something in the queue, wakeup soon.
                 if (!txQueue->isEmpty())
-                    scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                    scheduleAfter(dblrand() * checkInterval, wakeup);
                 else
-                    scheduleAt(simTime() + slotDuration, wakeup);
+                    scheduleAfter(slotDuration, wakeup);
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;

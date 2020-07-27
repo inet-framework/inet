@@ -77,12 +77,12 @@ void NoiseSource::endTransmission()
 
 void NoiseSource::scheduleSleepTimer()
 {
-    scheduleAt(simTime() + par("sleepInterval"), sleepTimer);
+    scheduleAfter(par("sleepInterval"), sleepTimer);
 }
 
 void NoiseSource::scheduleTransmissionTimer(const ITransmission *transmission)
 {
-    scheduleAt(simTime() + transmission->getDuration(), transmissionTimer);
+    scheduleAfter(transmission->getDuration(), transmissionTimer);
 }
 
 const ITransmission *NoiseSource::getTransmissionInProgress() const

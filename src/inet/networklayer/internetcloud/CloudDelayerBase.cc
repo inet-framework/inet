@@ -98,7 +98,7 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram
         EV_INFO << "Message " << datagram->str() << " delayed with " << propDelay * 1000.0 << "ms in cloud.\n";
         cMessage *selfmsg = new cMessage("Delay");
         selfmsg->setContextPointer(datagram);     // datagram owned by INetfilter module (Ipv4, Ipv6, ...)
-        scheduleAt(simTime() + propDelay, selfmsg);
+        scheduleAfter(propDelay, selfmsg);
         return INetfilter::IHook::QUEUE;
     }
     return INetfilter::IHook::ACCEPT;

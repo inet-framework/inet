@@ -66,7 +66,7 @@ void AlternatingEpEnergyGenerator::updatePowerGeneration()
 
 void AlternatingEpEnergyGenerator::scheduleIntervalTimer()
 {
-    scheduleAt(simTime() + (isSleeping ? par("sleepInterval") : par("generationInterval")), timer);
+    scheduleAfter((isSleeping ? par("sleepInterval") : par("generationInterval")), timer);
 }
 
 } // namespace power

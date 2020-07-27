@@ -696,17 +696,17 @@ void Ieee802154Mac::startTimer(t_mac_timer timer)
         EV_DETAIL << "(startTimer) ccaTimer value=" << ccaTime
                   << "(rxSetupTime,ccaDetectionTime:" << rxSetupTime
                   << "," << ccaDetectionTime << ")." << endl;
-        scheduleAt(simTime() + rxSetupTime + ccaDetectionTime, ccaTimer);
+        scheduleAfter(rxSetupTime + ccaDetectionTime, ccaTimer);
     }
     else if (timer == TIMER_SIFS) {
         assert(useMACAcks);
         EV_DETAIL << "(startTimer) sifsTimer value=" << sifs << endl;
-        scheduleAt(simTime() + sifs, sifsTimer);
+        scheduleAfter(sifs, sifsTimer);
     }
     else if (timer == TIMER_RX_ACK) {
         assert(useMACAcks);
         EV_DETAIL << "(startTimer) rxAckTimer value=" << macAckWaitDuration << endl;
-        scheduleAt(simTime() + macAckWaitDuration, rxAckTimer);
+        scheduleAfter(macAckWaitDuration, rxAckTimer);
     }
     else {
         EV << "Unknown timer requested to start:" << timer << endl;

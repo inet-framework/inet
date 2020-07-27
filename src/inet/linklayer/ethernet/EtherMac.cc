@@ -751,7 +751,7 @@ void EtherMac::handleRetransmission()
     int slotNumber = intuniform(0, backoffRange - 1);
     EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange -1 << "]" << endl;
 
-    scheduleAt(simTime() + slotNumber * curEtherDescr->slotTime, endBackoffMsg);
+    scheduleAfter(slotNumber * curEtherDescr->slotTime, endBackoffMsg);
     changeTransmissionState(BACKOFF_STATE);
     emit(backoffSlotsGeneratedSignal, slotNumber);
 
@@ -963,7 +963,7 @@ void EtherMac::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->txrate;
-    scheduleAt(simTime() + pausePeriod, endPauseMsg);
+    scheduleAfter(pausePeriod, endPauseMsg);
     changeTransmissionState(PAUSE_STATE);
 }
 

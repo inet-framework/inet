@@ -362,7 +362,7 @@ void RsvpTe::startHello(Ipv4Address peer, simtime_t delay)
     h->request = true;
     h->ack = false;
 
-    scheduleAt(simTime() + delay, h->timer);
+    scheduleAfter(delay, h->timer);
 }
 
 void RsvpTe::removeHello(HelloState *h)
@@ -399,7 +399,7 @@ void RsvpTe::sendPathNotify(int handler, const SessionObj& session, const Sender
     msg->setStatus(status);
 
     if (handler == getId())
-        scheduleAt(simTime() + delay, msg);
+        scheduleAfter(delay, msg);
     else
         sendDirect(msg, delay, 0, mod, "from_rsvp");
 }
@@ -461,7 +461,7 @@ void RsvpTe::processHELLO_TIMER(HelloTimerMsg *msg)
 
     h->ack = false;
 
-    scheduleAt(simTime() + helloInterval, msg);
+    scheduleAfter(helloInterval, msg);
 }
 
 void RsvpTe::processPSB_TIMER(PsbTimerMsg *msg)
@@ -1377,7 +1377,7 @@ void RsvpTe::processHelloMsg(Packet *pk)
     }
 
     cancelEvent(h->timeout);
-    scheduleAt(simTime() + helloTimeout, h->timeout);
+    scheduleAfter(helloTimeout, h->timeout);
 }
 
 void RsvpTe::processPathErrMsg(Packet *pk)
@@ -1892,7 +1892,7 @@ void RsvpTe::scheduleTimeout(PathStateBlock *psbEle)
     if (psbEle->timeoutMsg->isScheduled())
         cancelEvent(psbEle->timeoutMsg);
 
-    scheduleAt(simTime() + PSB_TIMEOUT_INTERVAL, psbEle->timeoutMsg);
+    scheduleAfter(PSB_TIMEOUT_INTERVAL, psbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
@@ -1910,7 +1910,7 @@ void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
 
     EV_DETAIL << "scheduling PSB " << psbEle->id << " refresh " << (simTime() + delay) << endl;
 
-    scheduleAt(simTime() + delay, psbEle->timerMsg);
+    scheduleAfter(delay, psbEle->timerMsg);
 }
 
 void RsvpTe::scheduleTimeout(ResvStateBlock *rsbEle)
@@ -1920,7 +1920,7 @@ void RsvpTe::scheduleTimeout(ResvStateBlock *rsbEle)
     if (rsbEle->timeoutMsg->isScheduled())
         cancelEvent(rsbEle->timeoutMsg);
 
-    scheduleAt(simTime() + RSB_TIMEOUT_INTERVAL, rsbEle->timeoutMsg);
+    scheduleAfter(RSB_TIMEOUT_INTERVAL, rsbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(ResvStateBlock *rsbEle, simtime_t delay)
@@ -1930,7 +1930,7 @@ void RsvpTe::scheduleRefreshTimer(ResvStateBlock *rsbEle, simtime_t delay)
     if (rsbEle->refreshTimerMsg->isScheduled())
         cancelEvent(rsbEle->refreshTimerMsg);
 
-    scheduleAt(simTime() + delay, rsbEle->refreshTimerMsg);
+    scheduleAfter(delay, rsbEle->refreshTimerMsg);
 }
 
 void RsvpTe::scheduleCommitTimer(ResvStateBlock *rsbEle)

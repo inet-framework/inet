@@ -655,7 +655,7 @@ void TcpNsc::handleMessage(cMessage *msgP)
            NSC timer processing
            ...
            Timers are ordinary cMessage objects that are started by
-           scheduleAt(simTime()+timeout, msg), and can be cancelled
+           scheduleAfter(timeout, msg), and can be cancelled
            via cancelEvent(msg); when they expire (fire) they are delivered
            to the module via handleMessage(), i.e. they end up here.
          */

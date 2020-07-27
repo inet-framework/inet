@@ -157,7 +157,7 @@ void Radio::startRadioModeSwitch(RadioMode newRadioMode, simtime_t switchingTime
     radioMode = RADIO_MODE_SWITCHING;
     nextRadioMode = newRadioMode;
     emit(radioModeChangedSignal, radioMode);
-    scheduleAt(simTime() + switchingTime, switchTimer);
+    scheduleAfter(switchingTime, switchTimer);
 }
 
 void Radio::completeRadioModeSwitch(RadioMode newRadioMode)

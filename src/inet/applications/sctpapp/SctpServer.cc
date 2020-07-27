@@ -108,7 +108,7 @@ void SctpServer::sendOrSchedule(cMessage *msg)
     if (delay == 0)
         send(msg, "socketOut");
     else
-        scheduleAt(simTime() + delay, msg);
+        scheduleAfter(delay, msg);
 }
 
 void SctpServer::sendOrSchedule(Message *msg)
@@ -118,7 +118,7 @@ void SctpServer::sendOrSchedule(Message *msg)
     if (delay == 0)
         send(msg, "socketOut");
     else
-        scheduleAt(simTime() + delay, msg);
+        scheduleAfter(delay, msg);
 }
 
 void SctpServer::sendOrSchedule(Packet *pkt)
@@ -128,7 +128,7 @@ void SctpServer::sendOrSchedule(Packet *pkt)
     if (delay == 0)
         send(pkt, "socketOut");
     else
-        scheduleAt(simTime() + delay, pkt);
+        scheduleAfter(delay, pkt);
 }
 
 void SctpServer::generateAndSend()
@@ -274,7 +274,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     if (par("thinkTime").doubleValue() > 0) {
                         generateAndSend();
                         timeoutMsg->setKind(SCTP_C_SEND);
-                        scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                        scheduleAfter(par("thinkTime"), timeoutMsg);
                         numRequestsToSend--;
                         i->second.sentPackets = numRequestsToSend;
                     }
@@ -304,7 +304,7 @@ void SctpServer::handleMessage(cMessage *msg)
                             char as[5];
                             sprintf(as, "%d", assocId);
                             cMessage *abortMsg = new cMessage(as, SCTP_I_ABORT);
-                            scheduleAt(simTime() + par("waitToClose"), abortMsg);
+                            scheduleAfter(par("waitToClose"), abortMsg);
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << assocId << "\n";
@@ -324,13 +324,13 @@ void SctpServer::handleMessage(cMessage *msg)
                 if (schedule == false) {
                     if (delayFirstRead > 0 && !delayFirstReadTimer->isScheduled()) {
                         cmsg = makeReceiveRequest(msg);
-                        scheduleAt(simTime() + delayFirstRead, cmsg);
-                        scheduleAt(simTime() + delayFirstRead, delayFirstReadTimer);
+                        scheduleAfter(delayFirstRead, cmsg);
+                        scheduleAfter(delayFirstRead, delayFirstReadTimer);
                     }
                     else if (readInt && firstData) {
                         firstData = false;
                         cmsg = makeReceiveRequest(msg);
-                        scheduleAt(simTime() + par("readingInterval"), delayTimer);
+                        scheduleAfter(par("readingInterval"), delayTimer);
                         sendOrSchedule(cmsg);
                     }
                     else if (delayFirstRead == 0 && readInt == false) {
@@ -468,7 +468,7 @@ void SctpServer::handleTimer(cMessage *msg)
     if (msg == delayTimer) {
         if (delayFirstRead == 0) {
             sendOrSchedule(makeDefaultReceive());
-            scheduleAt(simTime() + par("readingInterval"), delayTimer);
+            scheduleAfter(par("readingInterval"), delayTimer);
         }
         return;
     }
@@ -476,8 +476,8 @@ void SctpServer::handleTimer(cMessage *msg)
         delayFirstRead = 0;
         if (readInt && !delayTimer->isScheduled()) {
             simtime_t tempInterval = par("readingInterval");
-            scheduleAt(simTime() + tempInterval, delayTimer);
-            scheduleAt(simTime() + tempInterval, makeDefaultReceive());
+            scheduleAfter(tempInterval, delayTimer);
+            scheduleAfter(tempInterval, makeDefaultReceive());
         }
         return;
     }
@@ -487,7 +487,7 @@ void SctpServer::handleTimer(cMessage *msg)
             if (numRequestsToSend > 0) {
                 generateAndSend();
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                    scheduleAfter(par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;

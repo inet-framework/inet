@@ -150,7 +150,7 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         delete msg;
         sendProbeRequest();
         cMessage *timerMsg = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
-        scheduleAt(simTime() + scanning.minChannelTime, timerMsg);    //XXX actually, we should start waiting after ProbeReq actually got transmitted
+        scheduleAfter(scanning.minChannelTime, timerMsg);    //XXX actually, we should start waiting after ProbeReq actually got transmitted
     }
     else if (msg->getKind() == MK_SCAN_MINCHANNELTIME) {
         // Active Scan: after minChannelTime, possibly listen for the remaining time until maxChannelTime
@@ -158,7 +158,7 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         if (scanning.busyChannelDetected) {
             EV << "Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
             cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-            scheduleAt(simTime() + scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
+            scheduleAfter(scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
         }
         else {
             EV << "Channel was empty during minChannelTime, going to next channel\n";
@@ -264,7 +264,7 @@ void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
     ASSERT(ap->authTimeoutMsg == nullptr);
     ap->authTimeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
     ap->authTimeoutMsg->setContextPointer(ap);
-    scheduleAt(simTime() + timeout, ap->authTimeoutMsg);
+    scheduleAfter(timeout, ap->authTimeoutMsg);
 }
 
 void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
@@ -291,7 +291,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     ASSERT(assocTimeoutMsg == nullptr);
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
     assocTimeoutMsg->setContextPointer(ap);
-    scheduleAt(simTime() + timeout, assocTimeoutMsg);
+    scheduleAfter(timeout, assocTimeoutMsg);
 }
 
 void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
@@ -371,12 +371,12 @@ bool Ieee80211MgmtSta::scanNextChannel()
     if (scanning.activeScan) {
         // Active Scan: first wait probeDelay, then send a probe. Listening
         // for minChannelTime or maxChannelTime takes place after that. (11.1.3.2)
-        scheduleAt(simTime() + scanning.probeDelay, new cMessage("sendProbe", MK_SCAN_SENDPROBE));
+        scheduleAfter(scanning.probeDelay, new cMessage("sendProbe", MK_SCAN_SENDPROBE));
     }
     else {
         // Passive Scan: spend maxChannelTime on the channel (11.1.3.1)
         cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-        scheduleAt(simTime() + scanning.maxChannelTime, timerMsg);
+        scheduleAfter(scanning.maxChannelTime, timerMsg);
     }
 
     return false;
@@ -669,7 +669,7 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
         emit(l2AssociatedSignal, myIface, ap);
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
-        scheduleAt(simTime() + MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        scheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
     }
 
     // report back to agent
@@ -720,7 +720,7 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
         EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
         ASSERT(assocAP.beaconTimeoutMsg != nullptr);
         cancelEvent(assocAP.beaconTimeoutMsg);
-        scheduleAt(simTime() + MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        scheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
 
         //ApInfo *ap = lookupAP(frame->getTransmitterAddress());
         //ASSERT(ap!=nullptr);

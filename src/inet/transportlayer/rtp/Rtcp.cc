@@ -197,7 +197,7 @@ void Rtcp::connectRet()
     // schedule first rtcp packet
     double intervalLength = 2.5 * (dblrand() + 0.5);
     cMessage *reminderMessage = new cMessage("Interval");
-    scheduleAt(simTime() + intervalLength, reminderMessage);
+    scheduleAfter(intervalLength, reminderMessage);
 }
 
 void Rtcp::readRet(Packet *sifpIn)
@@ -230,7 +230,7 @@ void Rtcp::scheduleInterval()
     intervalLength /= (double)(2.71828 - 1.5);    // [RFC 3550] , by Ahmed ayadi
 
     cMessage *reminderMessage = new cMessage("Interval");
-    scheduleAt(simTime() + intervalLength, reminderMessage);
+    scheduleAfter(intervalLength, reminderMessage);
 }
 
 void Rtcp::chooseSSRC()

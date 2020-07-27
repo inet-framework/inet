@@ -156,7 +156,7 @@ void PimNeighborTable::restartLivenessTimer(PimNeighbor *neighbor, double holdTi
 {
     Enter_Method_Silent();
     cancelEvent(neighbor->getLivenessTimer());
-    scheduleAt(simTime() + holdTime, neighbor->getLivenessTimer());
+    scheduleAfter(holdTime, neighbor->getLivenessTimer());
 }
 
 PimNeighbor *PimNeighborTable::findNeighbor(int interfaceId, Ipv4Address addr)

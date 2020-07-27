@@ -173,8 +173,8 @@ void VoipStreamSender::handleMessage(cMessage *msg)
 
             if (packet) {
                 // reschedule trigger message
-                scheduleAt(simTime() + packetTimeLength, packet);
-                scheduleAt(simTime() + packetTimeLength, msg);
+                scheduleAfter(packetTimeLength, packet);
+                scheduleAfter(packetTimeLength, msg);
             }
         }
         else {

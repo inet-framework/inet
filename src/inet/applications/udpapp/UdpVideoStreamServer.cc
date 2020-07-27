@@ -142,7 +142,7 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
     // reschedule timer if there's bytes left to send
     if (d->bytesLeft > 0) {
         simtime_t interval = (*sendInterval);
-        scheduleAt(simTime() + interval, timer);
+        scheduleAfter(interval, timer);
     }
     else {
         streams.erase(it);

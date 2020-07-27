@@ -168,7 +168,7 @@ void SctpClient::connect()
     if (streamReset) {
         cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
         EV_INFO << "StreamReset Timer scheduled at " << simTime() + par("streamRequestTime") << "\n";
-        scheduleAt(simTime() + par("streamRequestTime"), cmsg);
+        scheduleAfter(par("streamRequestTime"), cmsg);
     }
 
     for (unsigned int i = 0; i < outStreams; i++) {
@@ -232,7 +232,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
             }
 
             timeMsg->setKind(MSGKIND_SEND);
-            scheduleAt(simTime() + par("thinkTime"), timeMsg);
+            scheduleAfter(par("thinkTime"), timeMsg);
         }
         else {
             if (queueSize > 0) {
@@ -265,7 +265,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 
         if ((!timer && numPacketsToReceive == 0) && par("waitToClose").doubleValue() > 0) {
             timeMsg->setKind(MSGKIND_ABORT);
-            scheduleAt(simTime() + par("waitToClose"), timeMsg);
+            scheduleAfter(par("waitToClose"), timeMsg);
         }
 
         if ((!timer && numRequestsToSend == 0) && par("waitToClose").doubleValue() == 0) {
@@ -413,7 +413,7 @@ void SctpClient::handleTimer(cMessage *msg)
                         numRequestsToSend--;
                 }
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simTime() + par("thinkTime"), timeMsg);
+                    scheduleAfter(par("thinkTime"), timeMsg);
 
                 if ((!timer && numRequestsToSend == 0) && par("waitToClose").doubleValue() == 0) {
                     socket.shutdown();
@@ -520,7 +520,7 @@ void SctpClient::socketFailure(SctpSocket *socket, int code)
     numBroken++;
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
+    scheduleAfter(par("reconnectInterval"), timeMsg);
 }
 
 void SctpClient::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)

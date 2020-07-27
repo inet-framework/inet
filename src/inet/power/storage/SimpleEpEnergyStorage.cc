@@ -170,7 +170,7 @@ void SimpleEpEnergyStorage::scheduleTimer()
         cancelEvent(timer);
     // don't schedule if there's no progress
     if (remainingTime > 0)
-        scheduleAt(simTime() + remainingTime, timer);
+        scheduleAfter(remainingTime, timer);
 }
 
 } // namespace power

@@ -145,7 +145,7 @@ void Ospfv2::handleStartOperation(LifecycleOperation *operation)
         subscribe();
     }
     else
-        scheduleAt(simTime() + startupTime, startupTimer);
+        scheduleAfter(startupTime, startupTimer);
 }
 
 void Ospfv2::handleStopOperation(LifecycleOperation *operation)

@@ -115,7 +115,7 @@ void SimpleEpEnergyManagement::scheduleLifecycleOperationTimer()
         cancelEvent(lifecycleOperationTimer);
     // don't schedule if there's no progress
     if (remainingTime > 0)
-        scheduleAt(simTime() + remainingTime, lifecycleOperationTimer);
+        scheduleAfter(remainingTime, lifecycleOperationTimer);
 }
 
 J SimpleEpEnergyManagement::getEstimatedEnergyCapacity() const

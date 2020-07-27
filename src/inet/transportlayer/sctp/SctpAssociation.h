@@ -1195,7 +1195,7 @@ class INET_API SctpAssociation : public cObject
     /** Utility: start a timer */
     void scheduleTimeout(cMessage *msg, const simtime_t& timeout)
     {
-        sctpMain->scheduleAt(simTime() + timeout, msg);
+        sctpMain->scheduleAfter(timeout, msg);
     }
 
     /** Utility: cancel a timer */

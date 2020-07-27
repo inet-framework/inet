@@ -140,7 +140,7 @@ void Rip::handleMessageWhenUp(cMessage *msg)
     if (msg->isSelfMessage()) {
         if (msg == updateTimer) {
             processUpdate(false);
-            scheduleAt(simTime() + updateInterval, msg);
+            scheduleAfter(updateInterval, msg);
         }
         else if (msg == triggeredUpdateTimer) {
             processUpdate(true);
@@ -232,7 +232,7 @@ void Rip::startRIPRouting()
             sendRIPRequest(elem);
 
     // set update timer
-    scheduleAt(simTime() + updateInterval, updateTimer);
+    scheduleAfter(updateInterval, updateTimer);
 }
 
 void Rip::stopRIPRouting()
@@ -415,7 +415,7 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 void Rip::handleStartOperation(LifecycleOperation *operation)
 {
     cancelEvent(startupTimer);
-    scheduleAt(simTime() + par("startupTime"), startupTimer);
+    scheduleAfter(par("startupTime"), startupTimer);
 }
 
 void Rip::handleStopOperation(LifecycleOperation *operation)
@@ -430,7 +430,7 @@ void Rip::handleStopOperation(LifecycleOperation *operation)
     stopRIPRouting();
 
     // wait a few seconds before calling doneCallback, so that UDP can send the messages
-    scheduleAt(simTime() + shutdownTime, shutdownTimer);
+    scheduleAfter(shutdownTime, shutdownTimer);
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 

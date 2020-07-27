@@ -54,7 +54,7 @@ void PassivePacketSink::scheduleConsumptionTimer()
 {
     simtime_t interval = consumptionIntervalParameter->doubleValue();
     if (interval != 0 || consumptionTimer->getArrivalModule() == nullptr)
-        scheduleAt(simTime() + interval, consumptionTimer);
+        scheduleAfter(interval, consumptionTimer);
 }
 
 void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)

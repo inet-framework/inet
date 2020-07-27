@@ -164,7 +164,7 @@ void SimpleVoipSender::sendVoIPPacket()
     ++packetID;
 
     if (packetID < talkspurtNumPackets)
-        scheduleAt(simTime() + packetizationInterval, selfSender);
+        scheduleAfter(packetizationInterval, selfSender);
 }
 
 } // namespace inet

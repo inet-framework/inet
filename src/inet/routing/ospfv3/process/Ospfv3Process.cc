@@ -48,7 +48,7 @@ void Ospfv3Process::initialize(int stage)
 
         cMessage* init = new cMessage();
         init->setKind(INIT_PROCESS);
-        scheduleAt(simTime()+ OSPFV3_START, init);
+        scheduleAfter( OSPFV3_START, init);
         WATCH_PTRVECTOR(this->instances);
         WATCH_PTRVECTOR(this->routingTableIPv6);
         WATCH_PTRVECTOR(this->routingTableIPv4);
@@ -656,7 +656,7 @@ void Ospfv3Process::handleTimer(cMessage* msg)
 
 void Ospfv3Process::setTimer(cMessage* msg, double delay = 0)
 {
-    scheduleAt(simTime()+delay, msg);
+    scheduleAfter(delay, msg);
 }
 
 void Ospfv3Process::activateProcess()

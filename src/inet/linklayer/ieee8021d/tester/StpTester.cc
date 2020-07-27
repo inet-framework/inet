@@ -38,7 +38,7 @@ void StpTester::initialize()
 {
     checkTimer = new cMessage("checktime");
     checkTime = par("checkTime");
-    scheduleAt(simTime() + checkTime, checkTimer);
+    scheduleAfter(checkTime, checkTimer);
 }
 
 void StpTester::handleMessage(cMessage *msg)
@@ -55,7 +55,7 @@ void StpTester::handleMessage(cMessage *msg)
             EV_DEBUG << "Not all nodes are connected with each other" << endl;
         if (isTreeGraph())
             EV_DEBUG << "The network topology is a tree topology" << endl;
-        scheduleAt(simTime() + checkTime, msg);
+        scheduleAfter(checkTime, msg);
     }
     else {
         throw cRuntimeError("This module only handle selfmessages");

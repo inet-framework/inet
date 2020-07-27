@@ -354,7 +354,7 @@ void DhcpClient::bindLease()
 
     // update the routing table
     cancelEvent(leaseTimer);
-    scheduleAt(simTime() + lease->leaseTime, leaseTimer);
+    scheduleAfter(lease->leaseTime, leaseTimer);
 }
 
 void DhcpClient::unbindLease()
@@ -687,21 +687,21 @@ void DhcpClient::scheduleTimerTO(DhcpTimerType type)
     // cancel the previous timeout
     cancelEvent(timerTo);
     timerTo->setKind(type);
-    scheduleAt(simTime() + responseTimeout, timerTo);
+    scheduleAfter(responseTimeout, timerTo);
 }
 
 void DhcpClient::scheduleTimerT1()
 {
     // cancel the previous T1
     cancelEvent(timerT1);
-    scheduleAt(simTime() + (lease->renewalTime), timerT1);    // RFC 2131 4.4.5
+    scheduleAfter((lease->renewalTime), timerT1);    // RFC 2131 4.4.5
 }
 
 void DhcpClient::scheduleTimerT2()
 {
     // cancel the previous T2
     cancelEvent(timerT2);
-    scheduleAt(simTime() + (lease->rebindTime), timerT2);    // RFC 2131 4.4.5
+    scheduleAfter((lease->rebindTime), timerT2);    // RFC 2131 4.4.5
 }
 
 void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)

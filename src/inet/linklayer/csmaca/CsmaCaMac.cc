@@ -430,13 +430,13 @@ void CsmaCaMac::scheduleSifsTimer(Packet *frame)
 {
     EV << "scheduling SIFS timer\n";
     endSifs->setContextPointer(frame);
-    scheduleAt(simTime() + sifsTime, endSifs);
+    scheduleAfter(sifsTime, endSifs);
 }
 
 void CsmaCaMac::scheduleDifsTimer()
 {
     EV << "scheduling DIFS timer\n";
-    scheduleAt(simTime() + difsTime, endDifs);
+    scheduleAfter(difsTime, endDifs);
 }
 
 void CsmaCaMac::cancelDifsTimer()
@@ -448,7 +448,7 @@ void CsmaCaMac::cancelDifsTimer()
 void CsmaCaMac::scheduleAckTimeout(Packet *frameToSend)
 {
     EV << "scheduling ACK timeout\n";
-    scheduleAt(simTime() + ackTimeout, endAckTimeout);
+    scheduleAfter(ackTimeout, endAckTimeout);
 }
 
 void CsmaCaMac::cancelAckTimer()
@@ -496,7 +496,7 @@ void CsmaCaMac::scheduleBackoffTimer()
     EV << "scheduling backoff timer\n";
     if (isInvalidBackoffPeriod())
         generateBackoffPeriod();
-    scheduleAt(simTime() + backoffPeriod, endBackoff);
+    scheduleAfter(backoffPeriod, endBackoff);
 }
 
 void CsmaCaMac::cancelBackoffTimer()

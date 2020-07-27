@@ -89,7 +89,7 @@ void MeterTestApp::handleMessage(cMessage *msg)
 
       if ((numPackets == 0 || counter < numPackets) &&
           (stopTime < SIMTIME_ZERO || simTime() < stopTime))
-          scheduleAt(simTime() + par("iaTime"), msg);
+          scheduleAfter(par("iaTime"), msg);
       else
           delete msg;
     }

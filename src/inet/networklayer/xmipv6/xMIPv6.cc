@@ -1508,7 +1508,7 @@ void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6A
 
     // scheduling a message which will trigger the Test Init for sendTime seconds
     // if not called with a parameter for sendTime, the message will be scheduled for NOW
-    scheduleAt(simTime() + sendTime, testInitTriggerMsg);
+    scheduleAfter(sendTime, testInitTriggerMsg);
 }
 
 void xMIPv6::sendTestInit(cMessage *msg)
@@ -2435,7 +2435,7 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, InterfaceEntry *ie, const
     brTriggerMsg->setContextPointer(brIfEntry);    // attaching the brIfEntry info corresponding to a particular address ith message
 
     // Scheduling a message which will trigger a BRR towards brIfEntry->dest
-    scheduleAt(simTime() + scheduledTime, brTriggerMsg);
+    scheduleAfter(scheduledTime, brTriggerMsg);
     EV_DETAIL << "\n++++++++++BRR TIMER CREATED FOR SIM TIME: " << simTime() + scheduledTime
               << " seconds+++++++++++++++++ \n";
 }
@@ -2458,7 +2458,7 @@ void xMIPv6::sendPeriodicBRR(cMessage *msg)
         createAndSendBRRMessage(brDest, ie);
 
         // retransmit the Binding Refresh Message
-        scheduleAt(simTime() + BRR_TIMEOUT_THRESHOLD, msg);
+        scheduleAfter(BRR_TIMEOUT_THRESHOLD, msg);
     }
     else {
         // we've tried often enough - remove the timer

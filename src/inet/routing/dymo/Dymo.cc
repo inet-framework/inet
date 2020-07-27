@@ -305,7 +305,7 @@ void Dymo::scheduleRreqWaitRrepTimer(RreqWaitRrepTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ wait RREP timer" << endl;
     targetAddressToRREQTimer[message->getTarget()] = message;
-    scheduleAt(simTime() + routeRREQWaitTime, message);
+    scheduleAfter(routeRREQWaitTime, message);
 }
 
 void Dymo::processRreqWaitRrepTimer(RreqWaitRrepTimer *message)
@@ -340,7 +340,7 @@ void Dymo::scheduleRreqBackoffTimer(RreqBackoffTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ backoff timer" << endl;
     targetAddressToRREQTimer[message->getTarget()] = message;
-    scheduleAt(simTime() + computeRreqBackoffTime(message->getRetryCount()), message);
+    scheduleAfter(computeRreqBackoffTime(message->getRetryCount()), message);
 }
 
 void Dymo::processRreqBackoffTimer(RreqBackoffTimer *message)
@@ -370,7 +370,7 @@ void Dymo::scheduleRreqHolddownTimer(RreqHolddownTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ holddown timer" << endl;
     targetAddressToRREQTimer[message->getTarget()] = message;
-    scheduleAt(simTime() + rreqHolddownTime, message);
+    scheduleAfter(rreqHolddownTime, message);
 }
 
 void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
@@ -400,7 +400,7 @@ void Dymo::scheduleJitterTimerPacket(cPacket *packet, double delay)
     else{
         PacketJitterTimer* message = new PacketJitterTimer("PacketJitterTimer");
         message->setJitteredPacket(packet);
-        scheduleAt(simTime() + delay, message);
+        scheduleAfter(delay, message);
         packetJitterTimers.insert(message);
     }
 }

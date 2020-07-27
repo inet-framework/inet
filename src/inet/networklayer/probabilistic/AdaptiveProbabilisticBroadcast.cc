@@ -55,7 +55,7 @@ void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcast
         cMessage *removeEvent = new cMessage("removeEvent", NEIGHBOR_TIMER);
 
         // schedule the event to remove the entry after initT seconds
-        scheduleAt(simTime() + timeInNeighboursTable, removeEvent);
+        scheduleAfter(timeInNeighboursTable, removeEvent);
 
         NeighborMap::value_type pairToInsert = make_pair(nodeAddress, removeEvent);
         pair<NeighborMap::iterator, bool> ret = neighMap.insert(pairToInsert);
@@ -74,7 +74,7 @@ void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcast
         // the node to be removed when the corresponding event occurs
         it->second->setContextPointer((void *)(&it->first));
 
-        scheduleAt(simTime() + timeInNeighboursTable, it->second);
+        scheduleAfter(timeInNeighboursTable, it->second);
     }
     updateBeta();
 }

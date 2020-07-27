@@ -146,7 +146,7 @@ void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
 void Dcf::scheduleStartRxTimer(simtime_t timeout)
 {
     Enter_Method_Silent();
-    scheduleAt(simTime() + timeout, startRxTimer);
+    scheduleAfter(timeout, startRxTimer);
 }
 
 void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
