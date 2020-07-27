@@ -12,6 +12,6 @@ fi
 inet -p0 $* &
 inet -p1 $* &
 inet -p2 $* &
-inet -p3 $* 
+inet -p3 $*
 
 killall opp_run_dbg
