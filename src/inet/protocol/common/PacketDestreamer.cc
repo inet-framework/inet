@@ -80,6 +80,7 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
     streamDatarate = datarate;
     auto packetLength = streamedPacket->getTotalLength();
     EV_INFO << "Ending destreaming packet " << streamedPacket->getName() << "." << std::endl;
+    streamedPacket->setOrigPacketId(-1);
     pushOrSendPacket(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
     numProcessedPackets++;

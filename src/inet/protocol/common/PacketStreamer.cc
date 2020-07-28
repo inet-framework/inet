@@ -61,13 +61,15 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     ASSERT(!isStreaming());
     take(packet);
-    streamedPacket = packet;
     streamDatarate = datarate;
+    streamedPacket = packet->dup();
+    streamedPacket->setOrigPacketId(packet->getId());
     auto packetLength = packet->getTotalLength();
     EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketStart(packet->dup(), outputGate, consumer, streamDatarate);
+    pushOrSendPacketStart(packet, outputGate, consumer, streamDatarate);
     EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer, streamDatarate);
+    streamDatarate = bps(NaN);
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packetLength;
@@ -101,11 +103,13 @@ Packet *PacketStreamer::canPullPacket(cGate *gate) const
 Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
-    streamedPacket = provider->pullPacket(inputGate->getPathStartGate());
+    auto packet = provider->pullPacket(inputGate->getPathStartGate());
     streamDatarate = datarate;
+    streamedPacket = packet->dup();
+    streamedPacket->setOrigPacketId(packet->getOrigPacketId());
     EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
     updateDisplayString();
-    return streamedPacket->dup();
+    return packet;
 }
 
 Packet *PacketStreamer::pullPacketEnd(cGate *gate, bps datarate)
@@ -113,8 +117,8 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate, bps datarate)
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
     auto packet = streamedPacket;
+    streamDatarate = bps(NaN);
     streamedPacket = nullptr;
-    streamDatarate = datarate;
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
     updateDisplayString();

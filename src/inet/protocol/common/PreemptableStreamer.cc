@@ -64,9 +64,10 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     ASSERT(!isStreaming());
     take(packet);
-    streamedPacket = packet;
+    streamedPacket = packet->dup();
+    streamedPacket->setOrigPacketId(packet->getId());
     EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketStart(packet->dup(), outputGate, consumer, datarate);
+    pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer, datarate);
     streamedPacket = nullptr;
@@ -101,20 +102,22 @@ Packet *PreemptableStreamer::canPullPacket(cGate *gate) const
 Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
-    streamStart = simTime();
-    streamedPacket = remainingPacket == nullptr ? provider->pullPacket(inputGate->getPathStartGate()) : remainingPacket;
+    auto packet = remainingPacket == nullptr ? provider->pullPacket(inputGate->getPathStartGate()) : remainingPacket;
     remainingPacket = nullptr;
-    auto fragmentTag = streamedPacket->findTagForUpdate<FragmentTag>();
+    auto fragmentTag = packet->findTagForUpdate<FragmentTag>();
     if (fragmentTag == nullptr) {
-        fragmentTag = streamedPacket->addTag<FragmentTag>();
+        fragmentTag = packet->addTag<FragmentTag>();
         fragmentTag->setFirstFragment(true);
         fragmentTag->setLastFragment(true);
         fragmentTag->setFragmentNumber(0);
         fragmentTag->setNumFragments(-1);
     }
+    streamStart = simTime();
+    streamedPacket = packet->dup();
+    streamedPacket->setOrigPacketId(packet->getId());
     EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
     updateDisplayString();
-    return streamedPacket->dup();
+    return packet;
 }
 
 Packet *PreemptableStreamer::pullPacketEnd(cGate *gate, bps datarate)

@@ -65,6 +65,7 @@ void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bp
     rxSignal = check_and_cast<Signal *>(cpacket);
     emit(receptionStartedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
+    origPacketId = packet->getId();
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);
 }
 
@@ -90,6 +91,7 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
         delete rxSignal;
         rxSignal = nullptr;
         auto packet = decodePacket(signal);
+        packet->setOrigPacketId(origPacketId);
         pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
         delete signal;
     }
