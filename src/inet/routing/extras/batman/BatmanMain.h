@@ -151,6 +151,7 @@ class Batman : public ManetRoutingBase
     virtual void processLinkBreak(const Packet*) override{};
     virtual void packetFailed(const Packet*) {}
     virtual void scheduleNextEvent();
+    virtual void processChangeInterface(simsignal_t signalID, const cObject *details) override;
 
   public:
     Batman();

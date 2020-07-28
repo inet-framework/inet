@@ -110,6 +110,38 @@ Batman::~Batman()
     hna_chg_list.clear();
 }
 
+void Batman::processChangeInterface(simsignal_t signalID,const cObject *obj)
+{
+    // reconfigure interfaces
+    const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+    InterfaceEntry *interfaceEntry = iecd->getInterfaceEntry();
+
+    for (auto &elem : if_list)
+    {
+        if (elem->dev == interfaceEntry) {
+            BatmanIf *batman_if = elem;
+            auto oldAddress = batman_if->address;
+            if (isInMacLayer())
+            {
+                batman_if->address = L3Address(interfaceEntry->getMacAddress());
+                batman_if->broad = L3Address(MacAddress::BROADCAST_ADDRESS);
+            }
+            else
+            {
+                batman_if->address = L3Address(interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+                batman_if->broad = L3Address(Ipv4Address::ALLONES_ADDRESS);
+            }
+            if_list.push_back(batman_if);
+            if (batman_if->if_num > 0) {
+                hna_local_task_add_ip(oldAddress, 32, ROUTE_DEL);
+                hna_local_task_add_ip(batman_if->address, 32, ROUTE_ADD);  // XXX why is it sending an HNA record at all? HNA should be sent only for networks
+            }
+            return;
+        }
+    }
+}
+
+
 void Batman::initialize(int stage)
 {
     ManetRoutingBase::initialize(stage);
