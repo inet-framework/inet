@@ -169,7 +169,7 @@ void UdpBasicApp::processSend()
     }
     else {
         selfMsg->setKind(STOP);
-        scheduleClockEventAfter(stopTime, selfMsg);
+        scheduleClockEventAt(stopTime, selfMsg);
     }
 }
 
