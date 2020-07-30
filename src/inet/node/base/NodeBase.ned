@@ -17,12 +17,14 @@
 
 package inet.node.base;
 
+import inet.clock.contract.IClock;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.node.inet.INetworkNode;
 import inet.power.contract.IEnergyGenerator;
 import inet.power.contract.IEnergyManagement;
 import inet.power.contract.IEnergyStorage;
+
 
 //
 // This module contains the most basic infrastructure for network nodes that is
@@ -50,17 +52,21 @@ module NodeBase like INetworkNode
             parameters:
                 @display("p=125,80;is=s");
         }
-        energyStorage: <default("")> like IEnergyStorage if typename != "" {
+        clock: <default("")> like IClock if typename != "" {
             parameters:
                 @display("p=125,320;is=s");
         }
-        energyManagement: <default("")> like IEnergyManagement if typename != "" {
+        energyStorage: <default("")> like IEnergyStorage if typename != "" {
             parameters:
                 @display("p=125,400;is=s");
         }
-        energyGenerator: <default("")> like IEnergyGenerator if typename != "" {
+        energyManagement: <default("")> like IEnergyManagement if typename != "" {
             parameters:
                 @display("p=125,480;is=s");
+        }
+        energyGenerator: <default("")> like IEnergyGenerator if typename != "" {
+            parameters:
+                @display("p=125,560;is=s");
         }
         // TODO: move mobility right after status to have it in the same order as in their positions, changes fingerprints 
         mobility: <default("")> like IMobility if typename != "" {

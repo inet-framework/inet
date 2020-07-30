@@ -51,7 +51,7 @@ module LinkLayerNodeBase extends NodeBase
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:
-                @display("p=125,560;is=s");
+                @display("p=125,640;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:
