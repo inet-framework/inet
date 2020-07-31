@@ -58,14 +58,14 @@ void ThruputMeteringChannel::initialize()
     fmt = par("thruputDisplayFormat");
 }
 
-void ThruputMeteringChannel::processMessage(cMessage *msg, simtime_t t, result_t& result)
+cChannel::Result ThruputMeteringChannel::processMessage(cMessage *msg, const SendOptions& options, simtime_t t)
 {
-    cDatarateChannel::processMessage(msg, t, result);
+    cChannel::Result result = cDatarateChannel::processMessage(msg, options, t);
 
     cPacket *pkt = dynamic_cast<cPacket *>(msg);
     // TODO handle disabled state (show with different style?/color? or print "disabled"?)
     if (!pkt || !fmt || *fmt == 0 || result.discard)
-        return;
+        return result;
 
     // count packets and bits
     numPackets++;
@@ -78,6 +78,7 @@ void ThruputMeteringChannel::processMessage(cMessage *msg, simtime_t t, result_t
     intvlNumPackets++;
     intvlNumBits += pkt->getBitLength();
     intvlLastPkTime = t;
+    return result;
 }
 
 void ThruputMeteringChannel::beginNewInterval(simtime_t now)
