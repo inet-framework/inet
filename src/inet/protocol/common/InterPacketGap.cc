@@ -27,23 +27,24 @@ Define_Module(InterPacketGap);
 
 InterPacketGap::~InterPacketGap()
 {
-    cancelAndDelete(progress);
     cancelAndDelete(timer);
+    cancelAndDeleteClockEvent(progress);
 }
 
 void InterPacketGap::initialize(int stage)
 {
-    ClockUsingModuleMixin::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         durationPar = &par("duration");
         packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
-        timer = new cMessage("IFG-timer");
+        timer = new ClockEvent("IfgTimer");
+        progress = new ClockEvent("ProgressTimer");
         WATCH(packetStartTime);
         WATCH(packetEndTime);
     }
     else if (stage == INITSTAGE_LAST) {
         if (packetEndTime + durationPar->doubleValue() > getClockTime())
-            scheduleClockEvent(packetEndTime + durationPar->doubleValue(), timer);
+            scheduleClockEventAt(packetEndTime + durationPar->doubleValue(), timer);
     }
 }
 
@@ -55,8 +56,8 @@ void InterPacketGap::handleMessage(cMessage *message)
                 if (producer != nullptr)
                     producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
         }
-        else if (message->isPacket()) {
-            auto packet = check_and_cast<Packet *>(message);
+        else if (message == progress) {
+            auto packet = static_cast<Packet *>(message->getContextPointer());
             if (packet->getOrigPacketId() != -1) {
                 auto progressTag = packet->getTag<ProgressTag>();
                 pushOrSendPacketProgress(packet, outputGate, consumer, progressTag->getDatarate(), progressTag->getPosition(), progressTag->getExtraProcessableLength());
@@ -133,7 +134,8 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
         pushOrSendPacket(packet, outputGate, consumer);
     else {
         EV_INFO << "Inserting packet gap before " << packet->getName() << "." << endl;
-        scheduleClockEvent(now + packetDelay, packet);
+        progress->setContextPointer(packet);
+        scheduleClockEventAt(now + packetDelay, progress);
     }
 }
 
@@ -146,8 +148,8 @@ void InterPacketGap::handleCanPushPacketChanged(cGate *gate)
     }
     else {
         if (timer->isScheduled())
-            cancelEvent(timer);
-        scheduleClockEvent(packetEndTime + durationPar->doubleValue(), timer);
+            cancelClockEvent(timer);
+        scheduleClockEventAt(packetEndTime + durationPar->doubleValue(), timer);
     }
 }
 
@@ -199,14 +201,13 @@ void InterPacketGap::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *g
         pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
     else {
         EV_INFO << "Inserting packet gap before " << packet->getName() << "." << endl;
-        cancelEvent(progress);
-        delete progress;
-        progress = packet;
+        cancelClockEvent(progress);
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
         progressTag->setDatarate(datarate);
         progressTag->setPosition(position);
         progressTag->setExtraProcessableLength(extraProcessableLength);
-        scheduleClockEvent(packetStartTime, progress);
+        progress->setContextPointer(packet);
+        scheduleClockEventAt(packetStartTime, progress);
     }
 }
 

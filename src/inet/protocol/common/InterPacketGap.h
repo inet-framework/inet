@@ -18,23 +18,23 @@
 #ifndef __INET_INTERPACKETGAP_H
 #define __INET_INTERPACKETGAP_H
 
-#include "inet/common/base/ClockUsingModuleMixin.h"
+#include "inet/common/base/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API InterPacketGap : public ClockUsingModuleMixin<PacketPusherBase>
+class INET_API InterPacketGap : public ClockUserModuleMixin<PacketPusherBase>
 {
   protected:
     cPar *durationPar = nullptr;
-    cMessage *timer = nullptr;
-    Packet *progress = nullptr;
+    ClockEvent *timer = nullptr;
+    ClockEvent *progress = nullptr;
 
-    simclocktime_t packetDelay;
-    simclocktime_t packetStartTime;
-    simclocktime_t packetEndTime;
+    clocktime_t packetDelay;
+    clocktime_t packetStartTime;
+    clocktime_t packetEndTime;
 
   protected:
     virtual void initialize(int stage) override;

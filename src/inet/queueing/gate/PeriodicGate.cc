@@ -25,7 +25,7 @@ Define_Module(PeriodicGate);
 
 void PeriodicGate::initialize(int stage)
 {
-    ClockUsingModuleMixin::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         isOpen_ = par("initiallyOpen");
         offset = par("offset");
@@ -42,7 +42,7 @@ void PeriodicGate::initialize(int stage)
             else
                 break;
         }
-        changeTimer = new cMessage("ChangeTimer");
+        changeTimer = new ClockEvent("ChangeTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (index < (int)durations.size())
@@ -63,7 +63,7 @@ void PeriodicGate::handleMessage(cMessage *message)
 void PeriodicGate::scheduleChangeTimer()
 {
     ASSERT(0 <= index && index < (int)durations.size());
-    scheduleClockEvent(getClockTime() + durations[index] - offset, changeTimer);
+    scheduleClockEventAfter(durations[index] - offset, changeTimer);
     index = (index + 1) % durations.size();
     offset = 0;
 }

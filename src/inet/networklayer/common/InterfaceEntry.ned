@@ -17,7 +17,7 @@
 
 package inet.networklayer.common;
 
-import inet.common.clock.contract.IClock;
+import inet.clock.contract.IClock;
 import inet.common.packet.recorder.PcapRecorder;
 
 module InterfaceEntry

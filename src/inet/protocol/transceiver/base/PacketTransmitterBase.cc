@@ -25,7 +25,7 @@ namespace inet {
 
 PacketTransmitterBase::~PacketTransmitterBase()
 {
-    cancelAndDelete(txEndTimer);
+    cancelAndDeleteClockEvent(txEndTimer);
     txEndTimer = nullptr;
     delete txSignal;
     txSignal = nullptr;
@@ -33,14 +33,14 @@ PacketTransmitterBase::~PacketTransmitterBase()
 
 void PacketTransmitterBase::initialize(int stage)
 {
-    ClockUsingModuleMixin::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dataratePar = &par("datarate");
         datarate = bps(*dataratePar);
         inputGate = gate("in");
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
-        txEndTimer = new cMessage("TxEndTimer");
+        txEndTimer = new ClockEvent("TxEndTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

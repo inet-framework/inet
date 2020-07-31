@@ -77,7 +77,7 @@ void StreamingTransmitter::endTx()
 void StreamingTransmitter::abortTx()
 {
     ASSERT(txSignal != nullptr);
-    cancelEvent(txEndTimer);
+    cancelClockEvent(txEndTimer);
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
     b transmittedLength = getPushPacketProcessedLength(packet, inputGate);
     packet->eraseAtBack(packet->getTotalLength() - transmittedLength);
@@ -93,8 +93,8 @@ void StreamingTransmitter::abortTx()
 void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
 {
     if (txEndTimer->isScheduled())
-        cancelEvent(txEndTimer);
-    scheduleClockEvent(getClockTime() + SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
+        cancelClockEvent(txEndTimer);
+    scheduleClockEventAfter(SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
 }
 
 void StreamingTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)

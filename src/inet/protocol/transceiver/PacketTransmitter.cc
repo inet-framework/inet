@@ -65,7 +65,7 @@ void PacketTransmitter::endTx()
 
 void PacketTransmitter::scheduleTxEndTimer(Signal *signal)
 {
-    scheduleClockEvent(getClockTime() + SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
+    scheduleClockEventAfter(SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
 }
 
 } // namespace inet

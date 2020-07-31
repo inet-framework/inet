@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETTRANSMITTERBASE_H
 #define __INET_PACKETTRANSMITTERBASE_H
 
-#include "inet/common/base/ClockUsingModuleMixin.h"
+#include "inet/common/base/ClockUserModuleMixin.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
@@ -31,7 +31,7 @@ namespace inet {
 using namespace inet::queueing;
 using namespace inet::physicallayer;
 
-class INET_API PacketTransmitterBase : public ClockUsingModuleMixin<OperationalMixin<PacketProcessorBase>>, public virtual IPassivePacketSink
+class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMixin<PacketProcessorBase>>, public virtual IPassivePacketSink
 {
   protected:
     cPar *dataratePar = nullptr;
@@ -43,7 +43,7 @@ class INET_API PacketTransmitterBase : public ClockUsingModuleMixin<OperationalM
 
     int txId = -1;
     Signal *txSignal = nullptr;
-    cMessage *txEndTimer = nullptr;
+    ClockEvent *txEndTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
