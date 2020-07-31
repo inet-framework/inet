@@ -51,7 +51,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
         outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=200,300");
         }
-        transmitter: <default("PreemptibleTransmitter")> like IPacketTransmitter {
+        transmitter: <default("StreamThroughTransmitter")> like IPacketTransmitter {
             datarate = default(bitrate);
             @display("p=200,400");
         }

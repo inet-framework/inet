@@ -13,14 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PREEMPTIBLETRANSMITTER_H
-#define __INET_PREEMPTIBLETRANSMITTER_H
+#ifndef __INET_STREAMTHROUGHTRANSMITTER_H
+#define __INET_STREAMTHROUGHTRANSMITTER_H
 
 #include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
 
 namespace inet {
 
-class INET_API PreemptibleTransmitter : public PacketTransmitterBase
+class INET_API StreamThroughTransmitter : public PacketTransmitterBase
 {
   protected:
     cPar *dataratePar = nullptr;
@@ -45,7 +45,7 @@ class INET_API PreemptibleTransmitter : public PacketTransmitterBase
     virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
-    virtual ~PreemptibleTransmitter();
+    virtual ~StreamThroughTransmitter();
 
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
 
@@ -61,5 +61,5 @@ class INET_API PreemptibleTransmitter : public PacketTransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PREEMPTIBLETRANSMITTER_H
+#endif // ifndef __INET_STREAMTHROUGHTRANSMITTER_H
 
