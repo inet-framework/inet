@@ -173,13 +173,11 @@ void Ppp::startTransmitting()
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
     if (sendRawBytes) {
-        auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekAllAsBytes());
-        rawFrame->copyTags(*pppFrame);
-        send(rawFrame, physOutGate);
-        delete pppFrame;
+        auto bytes = pppFrame->peekDataAsBytes();
+        pppFrame->eraseAll();
+        pppFrame->insertAtFront(bytes);
     }
-    else
-        send(pppFrame, physOutGate);
+    send(pppFrame, physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
 

@@ -119,11 +119,11 @@ void EtherMacFullDuplex::startFrameTransmission()
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr->txrate);
     if (sendRawBytes) {
-        signal->encapsulate(new Packet(frame->getName(), frame->peekAllAsBytes()));
-        delete frame;
+        auto bytes = frame->peekDataAsBytes();
+        frame->eraseAll();
+        frame->insertAtFront(bytes);
     }
-    else
-        signal->encapsulate(frame);
+    signal->encapsulate(frame);
     send(signal, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);

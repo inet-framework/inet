@@ -541,13 +541,11 @@ void EtherMac::startFrameTransmission()
     signal->setBitrate(curEtherDescr->txrate);
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
-        auto rawFrame = new Packet(frame->getName(), frame->peekAllAsBytes());
-        rawFrame->copyTags(*frame);
-        signal->encapsulate(rawFrame);
-        delete frame;
+        auto bytes = frame->peekDataAsBytes();
+        frame->eraseAll();
+        frame->insertAtFront(bytes);
     }
-    else
-        signal->encapsulate(frame);
+    signal->encapsulate(frame);
     signal->addByteLength(extensionLength.get());
     send(signal, physOutGate);
 
