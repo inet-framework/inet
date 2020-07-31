@@ -23,13 +23,24 @@
 
 namespace inet {
 
+PacketTransmitterBase::~PacketTransmitterBase()
+{
+    cancelAndDelete(txEndTimer);
+    txEndTimer = nullptr;
+    delete txSignal;
+    txSignal = nullptr;
+}
+
 void PacketTransmitterBase::initialize(int stage)
 {
     ClockUsingModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        dataratePar = &par("datarate");
+        datarate = bps(*dataratePar);
         inputGate = gate("in");
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
+        txEndTimer = new cMessage("TxEndTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -38,22 +49,26 @@ void PacketTransmitterBase::initialize(int stage)
     }
 }
 
-void PacketTransmitterBase::handleMessage(cMessage *message)
+void PacketTransmitterBase::handleMessageWhenUp(cMessage *message)
 {
     auto packet = check_and_cast<Packet *>(message);
     pushPacket(packet, packet->getArrivalGate());
 }
 
-Signal *PacketTransmitterBase::encodePacket(const Packet *txPacket) const
+void PacketTransmitterBase::handleStartOperation(LifecycleOperation *operation)
 {
-    auto packet = txPacket->dup();
+    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+}
+
+Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
+{
     auto duration = calculateDuration(packet);
     auto bitTransmissionTime = CLOCKTIME_AS_SIMTIME(duration / packet->getBitLength());
     auto packetEvent = new PacketTransmittedEvent();
     packetEvent->setDatarate(packet->getTotalLength() / s(duration.dbl()));
     insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, packetEvent);
     increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime);
-    if (auto channel = dynamic_cast<cTransmissionChannel *>(outputGate->findTransmissionChannel())) {
+    if (auto channel = dynamic_cast<cDatarateChannel *>(outputGate->findTransmissionChannel())) {
         insertPacketEvent(this, packet, PEK_PROPAGATED, channel->getDelay());
         increaseTimeTag<PropagationTimeTag>(packet, channel->getDelay());
     }
@@ -67,6 +82,28 @@ Signal *PacketTransmitterBase::encodePacket(const Packet *txPacket) const
     signal->encapsulate(packet);
     signal->setDuration(CLOCKTIME_AS_SIMTIME(duration));
     return signal;
+}
+
+void PacketTransmitterBase::sendPacketStart(Signal *signal)
+{
+    txId = signal->getId();
+    send(signal, SendOptions().duration(signal->getDuration()), outputGate);
+}
+
+void PacketTransmitterBase::sendPacketProgress(Signal *signal, b bitPosition, clocktime_t timePosition)
+{
+    simtime_t remainingDuration = signal->getDuration() - CLOCKTIME_AS_SIMTIME(timePosition);
+    send(signal, SendOptions().duration(signal->getDuration()).updateTx(txId, remainingDuration), outputGate);
+}
+
+void PacketTransmitterBase::sendPacketEnd(Signal *signal)
+{
+    send(signal, SendOptions().duration(signal->getDuration()).updateTx(txId, 0), outputGate);
+}
+
+clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const
+{
+    return packet->getTotalLength().get() / datarate.get();
 }
 
 } // namespace inet

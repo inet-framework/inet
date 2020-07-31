@@ -22,33 +22,29 @@ Define_Module(DestreamingReceiver);
 void DestreamingReceiver::initialize(int stage)
 {
     PacketReceiverBase::initialize(stage);
-    OperationalMixin::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        datarate = bps(par("datarate"));
-}
-
-DestreamingReceiver::~DestreamingReceiver()
-{
-    delete rxSignal;
+    if (stage == INITSTAGE_LOCAL) {
+        setTxUpdateSupport(true);
+        inputGate->setDeliverImmediately(true);
+    }
 }
 
 void DestreamingReceiver::handleMessageWhenUp(cMessage *message)
 {
-    if (message->getArrivalGate() == inputGate)
-        receiveFromMedium(message);
-    else
-        PacketReceiverBase::handleMessage(message);
-}
-
-void DestreamingReceiver::handleMessageWhenDown(cMessage *msg)
-{
-    if (!msg->isSelfMessage()) {
-        // received on input gate from another network node
-        EV << "Interface is turned off, dropping message (" << msg->getClassName() << ")" << msg->getName() << "\n";
-        delete msg;
+    if (message->getArrivalGate() == inputGate) {
+        auto signal = check_and_cast<Signal *>(message);
+        if (!signal->isUpdate())
+            receivePacketStart(signal, inputGate, datarate);
+        else if (signal->getRemainingDuration() == 0)
+            receivePacketEnd(signal, inputGate, datarate);
+        else {
+            auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
+            simtime_t timePosition = signal->getDuration() - signal->getRemainingDuration();
+            b position = packet->getTotalLength() * timePosition.dbl() / signal->getDuration().dbl();
+            receivePacketProgress(signal, inputGate, datarate, position, timePosition, b(0), 0);
+        }
     }
     else
-        OperationalMixin::handleMessageWhenDown(msg);
+        PacketReceiverBase::handleMessage(message);
 }
 
 void DestreamingReceiver::sendToUpperLayer(Packet *packet)
@@ -56,7 +52,7 @@ void DestreamingReceiver::sendToUpperLayer(Packet *packet)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void DestreamingReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
+void DestreamingReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bps datarate)
 {
     ASSERT(rxSignal == nullptr);
     take(cpacket);
@@ -64,14 +60,7 @@ void DestreamingReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, doub
     emit(receptionStartedSignal, rxSignal);
 }
 
-void DestreamingReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
-{
-    take(cpacket);
-    delete rxSignal;
-    rxSignal = check_and_cast<Signal *>(cpacket);
-}
-
-void DestreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
+void DestreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps datarate)
 {
     delete rxSignal;
     rxSignal = check_and_cast<Signal *>(cpacket);
@@ -82,20 +71,11 @@ void DestreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double
     rxSignal = nullptr;
 }
 
-void DestreamingReceiver::handleStartOperation(LifecycleOperation *operation)
+void DestreamingReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration)
 {
-}
-
-void DestreamingReceiver::handleStopOperation(LifecycleOperation *operation)
-{
+    take(cpacket);
     delete rxSignal;
-    rxSignal = nullptr;
-}
-
-void DestreamingReceiver::handleCrashOperation(LifecycleOperation *operation)
-{
-    delete rxSignal;
-    rxSignal = nullptr;
+    rxSignal = check_and_cast<Signal *>(cpacket);
 }
 
 } // namespace inet

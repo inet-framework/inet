@@ -26,9 +26,6 @@ import inet.protocol.transceiver.contract.IPacketReceiver;
 simple DestreamingReceiver extends PacketReceiverBase like IPacketReceiver
 {
     parameters:
-        double datarate @unit(bps);
         @class(DestreamingReceiver);
-        @signal[receptionStarted](type=inet::physicallayer::Signal);
-        @signal[receptionEnded](type=inet::physicallayer::Signal);
 }
 

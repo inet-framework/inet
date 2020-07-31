@@ -23,39 +23,27 @@ namespace inet {
 class INET_API StreamThroughTransmitter : public PacketTransmitterBase
 {
   protected:
-    cPar *dataratePar = nullptr;
-    bps datarate = bps(NaN);
-
-    simclocktime_t txStartTime = -1;
-    cMessage *txEndTimer = nullptr;
-    Packet *txPacket = nullptr;
+    clocktime_t txStartTime = -1;
 
   protected:
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-
-    virtual bool isTransmitting() const { return txPacket != nullptr; }
+    virtual void handleMessageWhenUp(cMessage *message) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void startTx(Packet *packet);
     virtual void endTx();
-    virtual void abortTx();
-
-    virtual simclocktime_t calculateDuration(const Packet *packet) const override;
 
     virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
-    virtual ~StreamThroughTransmitter();
-
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return txPacket == nullptr; };
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return txPacket == nullptr; };
+    virtual bool canPushSomePacket(cGate *gate) const override { return txSignal == nullptr; };
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return txSignal == nullptr; };
     virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
     virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
-
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 };
 

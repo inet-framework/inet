@@ -26,9 +26,6 @@ import inet.protocol.transceiver.contract.IPacketTransmitter;
 simple StreamThroughTransmitter extends PacketTransmitterBase like IPacketTransmitter
 {
     parameters:
-        volatile double datarate @unit(bps);
         @class(StreamThroughTransmitter);
-        @signal[transmissionStarted](type=inet::physicallayer::Signal);
-        @signal[transmissionEnded](type=inet::physicallayer::Signal);
 }
 

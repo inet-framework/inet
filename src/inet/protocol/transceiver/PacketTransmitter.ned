@@ -27,9 +27,5 @@ import inet.protocol.transceiver.contract.IPacketTransmitter;
 simple PacketTransmitter extends PacketTransmitterBase like IPacketTransmitter
 {
     parameters:
-        double datarate @unit(bps);
         @class(PacketTransmitter);
-        @display("i=block/wtx");
-        @signal[transmissionStarted](type=inet::physicallayer::Signal);
-        @signal[transmissionEnded](type=inet::physicallayer::Signal);
 }

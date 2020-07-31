@@ -22,20 +22,27 @@ Define_Module(StreamThroughReceiver);
 void StreamThroughReceiver::initialize(int stage)
 {
     PacketReceiverBase::initialize(stage);
-    OperationalMixin::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        datarate = bps(par("datarate"));
-}
-
-StreamThroughReceiver::~StreamThroughReceiver()
-{
-    delete rxSignal;
+    if (stage == INITSTAGE_LOCAL) {
+        setTxUpdateSupport(true);
+        inputGate->setDeliverImmediately(true);
+    }
 }
 
 void StreamThroughReceiver::handleMessageWhenUp(cMessage *message)
 {
-    if (message->getArrivalGate() == inputGate)
-        receiveFromMedium(message);
+    if (message->getArrivalGate() == inputGate) {
+        auto signal = check_and_cast<Signal *>(message);
+        if (!signal->isUpdate())
+            receivePacketStart(signal, inputGate, datarate);
+        else if (signal->getRemainingDuration() == 0)
+            receivePacketEnd(signal, inputGate, datarate);
+        else {
+            auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
+            simtime_t timePosition = signal->getDuration() - signal->getRemainingDuration();
+            b position = packet->getTotalLength() * timePosition.dbl() / signal->getDuration().dbl();
+            receivePacketProgress(signal, inputGate, datarate, position, timePosition, b(0), 0);
+        }
+    }
     else
         PacketReceiverBase::handleMessage(message);
 }
@@ -51,17 +58,17 @@ void StreamThroughReceiver::handleMessageWhenDown(cMessage *msg)
         OperationalMixin::handleMessageWhenDown(msg);
 }
 
-void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
+void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bps datarate)
 {
     ASSERT(rxSignal == nullptr);
     take(cpacket);
     rxSignal = check_and_cast<Signal *>(cpacket);
     emit(receptionStartedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
-    pushOrSendPacketStart(packet, outputGate, consumer, bps(datarate));
+    pushOrSendPacketStart(packet, outputGate, consumer, datarate);
 }
 
-void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
+void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration)
 {
     take(cpacket);
     if (rxSignal) {
@@ -69,12 +76,12 @@ void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate,
         rxSignal = check_and_cast<Signal *>(cpacket);
     }
     else {
-        EV_WARN << "Signal start doesn't received, drop it";
+        EV_WARN << "Signal start not received, drop it";
         delete cpacket;
     }
 }
 
-void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
+void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps datarate)
 {
     take(cpacket);
     auto signal = check_and_cast<Signal *>(cpacket);
@@ -83,30 +90,13 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, doub
         delete rxSignal;
         rxSignal = nullptr;
         auto packet = decodePacket(signal);
-        pushOrSendPacketEnd(packet, outputGate, consumer, bps(datarate));
+        pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
         delete signal;
     }
     else {
-        EV_WARN << "Signal start doesn't received, drop it";
-        //TODO drop signal
+        EV_WARN << "Signal start not received, drop it";
         delete signal;
     }
-}
-
-void StreamThroughReceiver::handleStartOperation(LifecycleOperation *operation)
-{
-}
-
-void StreamThroughReceiver::handleStopOperation(LifecycleOperation *operation)
-{
-    delete rxSignal;
-    rxSignal = nullptr;
-}
-
-void StreamThroughReceiver::handleCrashOperation(LifecycleOperation *operation)
-{
-    delete rxSignal;
-    rxSignal = nullptr;
 }
 
 } // namespace inet

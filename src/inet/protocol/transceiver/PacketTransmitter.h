@@ -25,29 +25,19 @@ namespace inet {
 class INET_API PacketTransmitter : public PacketTransmitterBase
 {
   protected:
-    bps datarate = bps(NaN);
-
-    cMessage *txEndTimer = nullptr;
-
-    Signal *txSignal = nullptr;
-
-  protected:
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-
-    virtual simclocktime_t calculateDuration(const Packet *packet) const override;
-    virtual void scheduleTxEndTimer(Signal *signal);
+    virtual void handleMessageWhenUp(cMessage *message) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void startTx(Packet *packet);
     virtual void endTx();
 
-  public:
-    virtual ~PacketTransmitter();
+    virtual void scheduleTxEndTimer(Signal *signal);
 
+  public:
     virtual bool canPushSomePacket(cGate *gate) const override { return !txEndTimer->isScheduled(); }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return canPushSomePacket(gate); }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 };

@@ -16,22 +16,14 @@
 #ifndef __INET_PACKETRECEIVER_H
 #define __INET_PACKETRECEIVER_H
 
-#include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/protocol/transceiver/base/PacketReceiverBase.h"
 
 namespace inet {
 
-using namespace inet::units::values;
-using namespace inet::physicallayer;
-
 class INET_API PacketReceiver : public PacketReceiverBase
 {
   protected:
-    bps datarate = bps(NaN);
-
-  protected:
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void handleMessageWhenUp(cMessage *message) override;
 
     virtual void receiveSignal(Signal *signal);
 };

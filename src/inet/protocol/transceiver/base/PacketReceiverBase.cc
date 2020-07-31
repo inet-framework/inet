@@ -18,16 +18,55 @@
 
 namespace inet {
 
+PacketReceiverBase::~PacketReceiverBase()
+{
+    delete rxSignal;
+    rxSignal = nullptr;
+}
+
 void PacketReceiverBase::initialize(int stage)
 {
+    OperationalMixin::initialize(stage);
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        datarate = bps(par("datarate"));
         inputGate = gate("in");
         outputGate = gate("out");
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(outputGate);
+}
+
+void PacketReceiverBase::handleMessageWhenUp(cMessage *message)
+{
+    throw cRuntimeError("Invalid operation");
+}
+
+void PacketReceiverBase::handleMessageWhenDown(cMessage *msg)
+{
+    if (!msg->isSelfMessage()) {
+        EV << "Received message from the network while the receiver is turned off, dropping it (" << msg->getClassName() << ")" << msg->getName() << "\n";
+        delete msg;
+    }
+    else
+        OperationalMixin::handleMessageWhenDown(msg);
+}
+
+void PacketReceiverBase::handleStartOperation(LifecycleOperation *operation)
+{
+}
+
+void PacketReceiverBase::handleStopOperation(LifecycleOperation *operation)
+{
+    delete rxSignal;
+    rxSignal = nullptr;
+}
+
+void PacketReceiverBase::handleCrashOperation(LifecycleOperation *operation)
+{
+    delete rxSignal;
+    rxSignal = nullptr;
 }
 
 Packet *PacketReceiverBase::decodePacket(Signal *signal) const

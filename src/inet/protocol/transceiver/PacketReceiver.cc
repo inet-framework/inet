@@ -19,19 +19,12 @@ namespace inet {
 
 Define_Module(PacketReceiver);
 
-void PacketReceiver::initialize(int stage)
-{
-    PacketReceiverBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        datarate = bps(par("datarate"));
-}
-
-void PacketReceiver::handleMessage(cMessage *message)
+void PacketReceiver::handleMessageWhenUp(cMessage *message)
 {
     if (message->isPacket())
         receiveSignal(check_and_cast<Signal *>(message));
     else
-        throw cRuntimeError("Unknown message");
+        PacketReceiverBase::handleMessageWhenUp(message);
 }
 
 void PacketReceiver::receiveSignal(Signal *signal)

@@ -19,6 +19,8 @@
 #define __INET_PACKETTRANSMITTERBASE_H
 
 #include "inet/common/base/ClockUsingModuleMixin.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
@@ -29,22 +31,41 @@ namespace inet {
 using namespace inet::queueing;
 using namespace inet::physicallayer;
 
-class INET_API PacketTransmitterBase : public ClockUsingModuleMixin<PacketProcessorBase>, public virtual IPassivePacketSink
+class INET_API PacketTransmitterBase : public ClockUsingModuleMixin<OperationalMixin<PacketProcessorBase>>, public virtual IPassivePacketSink
 {
   protected:
+    cPar *dataratePar = nullptr;
+    bps datarate = bps(NaN);
+
     cGate *inputGate = nullptr;
     cGate *outputGate = nullptr;
     IActivePacketSource *producer = nullptr;
 
+    int txId = -1;
+    Signal *txSignal = nullptr;
+    cMessage *txEndTimer = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void handleMessageWhenUp(cMessage *message) override;
 
-    virtual Signal *encodePacket(const Packet *packet) const;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
 
-    virtual simclocktime_t calculateDuration(const Packet *packet) const = 0;
+    virtual Signal *encodePacket(Packet *packet) const;
+
+    virtual void sendPacketStart(Signal *signal);
+    virtual void sendPacketProgress(Signal *signal, b bitPosition, clocktime_t timePosition);
+    virtual void sendPacketEnd(Signal *signal);
+
+    virtual clocktime_t calculateDuration(const Packet *packet) const;
+    virtual bool isTransmitting() const { return txSignal != nullptr; }
 
   public:
+    virtual ~PacketTransmitterBase();
+
     virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 

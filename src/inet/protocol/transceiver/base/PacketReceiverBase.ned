@@ -20,7 +20,10 @@ import inet.queueing.base.PacketProcessorBase;
 simple PacketReceiverBase extends PacketProcessorBase
 {
     parameters:
+        double datarate @unit(bps);
         @display("i=block/wrx");
+        @signal[receptionStarted](type=inet::physicallayer::Signal);
+        @signal[receptionEnded](type=inet::physicallayer::Signal);
     gates:
         input in;
         output out;

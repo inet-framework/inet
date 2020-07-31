@@ -21,28 +21,20 @@ namespace inet {
 
 Define_Module(PacketTransmitter);
 
-PacketTransmitter::~PacketTransmitter()
-{
-    cancelAndDelete(txEndTimer);
-    delete txSignal;
-    txSignal = nullptr;
-}
-
-void PacketTransmitter::initialize(int stage)
-{
-    PacketTransmitterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        datarate = bps(par("datarate"));
-        txEndTimer = new cMessage("endTimer");
-    }
-}
-
-void PacketTransmitter::handleMessage(cMessage *message)
+void PacketTransmitter::handleMessageWhenUp(cMessage *message)
 {
     if (message == txEndTimer)
         endTx();
     else
-        PacketTransmitterBase::handleMessage(message);
+        PacketTransmitterBase::handleMessageWhenUp(message);
+}
+
+void PacketTransmitter::handleStopOperation(LifecycleOperation *operation)
+{
+}
+
+void PacketTransmitter::handleCrashOperation(LifecycleOperation *operation)
+{
 }
 
 void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
@@ -57,7 +49,7 @@ void PacketTransmitter::startTx(Packet *packet)
     ASSERT(txSignal == nullptr);
     txSignal = encodePacket(packet);
     emit(transmissionStartedSignal, txSignal);
-    sendDelayed(txSignal->dup(), 0, outputGate, txSignal->getDuration());
+    send(txSignal->dup(), SendOptions().duration(txSignal->getDuration()), outputGate);
     scheduleTxEndTimer(txSignal);
 }
 
@@ -69,11 +61,6 @@ void PacketTransmitter::endTx()
     delete txSignal;
     txSignal = nullptr;
     producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
-}
-
-simclocktime_t PacketTransmitter::calculateDuration(const Packet *packet) const
-{
-    return packet->getDataLength().get() / datarate.get();
 }
 
 void PacketTransmitter::scheduleTxEndTimer(Signal *signal)

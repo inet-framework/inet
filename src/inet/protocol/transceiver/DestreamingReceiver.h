@@ -16,48 +16,24 @@
 #ifndef __INET_DESTREAMINGRECEIVER_H
 #define __INET_DESTREAMINGRECEIVER_H
 
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/lifecycle/OperationalMixin.h"
-#include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/protocol/transceiver/base/PacketReceiverBase.h"
 
 namespace inet {
 
-using namespace inet::units::values;
-using namespace inet::physicallayer;
-
-class INET_API DestreamingReceiver : public OperationalMixin<PacketReceiverBase>
+class INET_API DestreamingReceiver : public PacketReceiverBase
 {
   protected:
-    bps datarate = bps(NaN);
-
-    Signal *rxSignal = nullptr;
-
-  protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override { OperationalMixin::handleMessage(msg); }
     virtual void handleMessageWhenUp(cMessage *message) override;
-    virtual void handleMessageWhenDown(cMessage *message) override;
 
     virtual void sendToUpperLayer(Packet *packet);
 
-    virtual void receivePacketStart(cPacket *packet, cGate *gate, double datarate) override;
-    virtual void receivePacketProgress(cPacket *packet, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
-    virtual void receivePacketEnd(cPacket *packet, cGate *gate, double datarate) override;
-
-    // for lifecycle:
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
-    virtual void handleStartOperation(LifecycleOperation *operation) override;
-    virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual void receivePacketStart(cPacket *packet, cGate *gate, bps datarate);
+    virtual void receivePacketEnd(cPacket *packet, cGate *gate, bps datarate);
+    virtual void receivePacketProgress(cPacket *packet, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration);
 
   public:
-    DestreamingReceiver() {}
-    virtual ~DestreamingReceiver();
-
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(cGate *gate) const override { return gate == inputGate; }
 };
 
 } // namespace inet

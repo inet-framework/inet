@@ -25,9 +25,6 @@ import inet.protocol.transceiver.contract.IPacketReceiver;
 simple PacketReceiver extends PacketReceiverBase like IPacketReceiver
 {
     parameters:
-        double datarate @unit(bps);
         @class(PacketReceiver);
-        @signal[receptionStarted](type=inet::physicallayer::Signal);
-        @signal[receptionEnded](type=inet::physicallayer::Signal);
 }
 
