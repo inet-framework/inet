@@ -43,6 +43,11 @@ enum InitStages {
     INITSTAGE_LOCAL = 0,
 
     /**
+     * Initialization of clocks.
+     */
+    INITSTAGE_CLOCK = 1,
+
+    /**
      * Initialization of the physical environment.
      */
     INITSTAGE_PHYSICAL_ENVIRONMENT = 1,
