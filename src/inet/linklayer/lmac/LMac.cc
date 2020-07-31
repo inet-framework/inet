@@ -140,12 +140,12 @@ void LMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == LMAC_START_LMAC) {
                 // the first 5 full slots we will be waking up every controlDuration to setup the network first
                 // normal packets will be queued, but will be send only after the setup phase
-                scheduleAt(slotDuration * 5 * numSlots, initChecker);
+                scheduleAfter(slotDuration * 5 * numSlots, initChecker);
                 EV << "Startup time =" << slotDuration * 5 * numSlots << endl;
 
                 EV_DETAIL << "Scheduling the first wakeup at : " << slotDuration << endl;
 
-                scheduleAt(slotDuration, wakeup);
+                scheduleAfter(slotDuration, wakeup);
 
                 for (int i = 0; i < numSlots; i++) {
                     occSlotsDirect[i] = LMAC_FREE_SLOT;

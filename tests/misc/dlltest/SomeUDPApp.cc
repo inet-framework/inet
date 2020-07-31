@@ -58,7 +58,7 @@ void SomeUDPApp::initialize(int stage)
     bindToPort(localPort);
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("sendInterval"), timer);
+    scheduleAfter((double)par("sendInterval"), timer);
 }
 
 Address SomeUDPApp::chooseDestAddr()

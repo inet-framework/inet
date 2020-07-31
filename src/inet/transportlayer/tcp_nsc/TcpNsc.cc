@@ -762,7 +762,7 @@ void TcpNsc::loadStack(const char *stacknameP, int bufferSizeP)
 
     // set timer for 1.0 / pStackM->get_hz()
     pNsiTimerM = new cMessage("nsc_nsi_timer");
-    scheduleAt(1.0 / (double)pStackM->get_hz(), pNsiTimerM);
+    scheduleAfter(1.0 / (double)pStackM->get_hz(), pNsiTimerM);
 }
 
 /** Called from the stack when a packet needs to be output to the wire. */
