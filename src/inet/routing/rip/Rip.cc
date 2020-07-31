@@ -897,13 +897,12 @@ void Rip::triggerUpdate()
 {
     if (triggeredUpdate && !triggeredUpdateTimer->isScheduled()) {
         double delay = par("triggeredUpdateDelay");
-        simtime_t updateTime = simTime() + delay;
         // Triggered updates may be suppressed if a regular
         // update is due by the time the triggered update would be sent.
-        if (!updateTimer->isScheduled() || updateTimer->getArrivalTime() > updateTime)
+        if (!updateTimer->isScheduled() || updateTimer->getArrivalTime() > simTime() + delay)
         {
             EV_DETAIL << "scheduling triggered update \n";
-            scheduleAt(updateTime, triggeredUpdateTimer);
+            scheduleAfter(delay, triggeredUpdateTimer);
         }
     }
 }

@@ -689,7 +689,7 @@ void Ieee802154Mac::fsmError(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::startTimer(t_mac_timer timer)
 {
     if (timer == TIMER_BACKOFF) {
-        scheduleAt(scheduleBackoff(), backoffTimer);
+        scheduleAfter(scheduleBackoff(), backoffTimer);
     }
     else if (timer == TIMER_CCA) {
         simtime_t ccaTime = rxSetupTime + ccaDetectionTime;
@@ -752,7 +752,7 @@ simtime_t Ieee802154Mac::scheduleBackoff()
     nbBackoffs = nbBackoffs + 1;
     backoffValues = backoffValues + SIMTIME_DBL(backoffTime);
 
-    return backoffTime + simTime();
+    return backoffTime;
 }
 
 /*

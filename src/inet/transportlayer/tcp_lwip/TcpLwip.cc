@@ -488,7 +488,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
 
     if (!pLwipFastTimerM->isScheduled()) {    // lwip fast timer
         if (nullptr != pLwipTcpLayerM->tcp_active_pcbs || nullptr != pLwipTcpLayerM->tcp_tw_pcbs)
-            scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
+            scheduleAfter(roundTime(simTime() + 0.250, 4) - simTime(), pLwipFastTimerM);
     }
 }
 

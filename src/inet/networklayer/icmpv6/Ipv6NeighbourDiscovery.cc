@@ -1121,12 +1121,9 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
         cMessage *msg = new cMessage("sendSolicitedRA", MK_SEND_SOL_RTRADV);
         msg->setContextPointer(ie);
         simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRaDelayTime());
-
         if (interval < advIfEntry->nextScheduledRATime) {
-            simtime_t nextScheduledTime;
-            nextScheduledTime = simTime() + interval;
-            scheduleAt(nextScheduledTime, msg);
-            advIfEntry->nextScheduledRATime = nextScheduledTime;
+            scheduleAfter(interval, msg);
+            advIfEntry->nextScheduledRATime = simTime() + interval;
         }
         //else we ignore the generate interval and send it at the next scheduled time.
 
@@ -1686,7 +1683,7 @@ void Ipv6NeighbourDiscovery::createRaTimer(InterfaceEntry *ie)
     EV_DETAIL << "Interval: " << interval << endl;
     EV_DETAIL << "Next scheduled time: " << nextScheduledTime << endl;
     //now we schedule the msg for whatever time that was derived
-    scheduleAt(nextScheduledTime, msg);
+    scheduleAfter(interval, msg);
 }
 
 void Ipv6NeighbourDiscovery::resetRaTimer(InterfaceEntry *ie)
@@ -1717,7 +1714,6 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
     Ipv6Address destAddr = Ipv6Address("FF02::1");
     createAndSendRaPacket(destAddr, ie);
     advIfEntry->numRASent++;
-    simtime_t nextScheduledTime;
 
     //RFC 2461, Section 6.2.4
     /*Whenever a multicast advertisement is sent from an interface, the timer is
@@ -1725,19 +1721,15 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
        configured MinRtrAdvInterval and MaxRtrAdvInterval; expiration of the timer
        causes the next advertisement to be sent and a new random value to be chosen.*/
 
-    simtime_t interval;
-
 #ifdef WITH_xMIPv6
     EV_DEBUG << "\n+=+=+= MIPv6 Feature: " << rt6->hasMipv6Support() << " +=+=+=\n";
 #endif /* WITH_xMIPv6 */
 
-    interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
+    simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
 
 #ifdef WITH_xMIPv6
     EV_DETAIL << "\n +=+=+= The random calculated interval is: " << interval << " +=+=+=\n";
 #endif /* WITH_xMIPv6 */
-
-    nextScheduledTime = simTime() + interval;
 
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
        sent from an interface when it becomes an advertising interface,*/
@@ -1748,17 +1740,18 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
         if (interval > ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval()) {
             //if the randomly chosen interval is greater than MAX_INITIAL_RTR_ADVERT_INTERVAL,
             //the timer SHOULD be set to MAX_INITIAL_RTR_ADVERT_INTERVAL instead.
-            nextScheduledTime = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval();
+            interval = ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval();
             EV_INFO << "Sending initial RA but interval is too long. Using default value." << endl;
         }
         else
             EV_INFO << "Sending initial RA. Using randomly generated interval." << endl;
     }
 
+    simtime_t nextScheduledTime = simTime() + interval;
     EV_DETAIL << "Next scheduled time: " << nextScheduledTime << endl;
     advIfEntry->nextScheduledRATime = nextScheduledTime;
     ASSERT(nextScheduledTime > simTime());
-    scheduleAt(nextScheduledTime, msg);
+    scheduleAfter(interval, msg);
 }
 
 void Ipv6NeighbourDiscovery::sendSolicitedRa(cMessage *msg)

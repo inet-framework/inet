@@ -325,10 +325,9 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
                     double waitTime = intuniform(1, 50);
                     waitTime = waitTime/100;
                     EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";
-                    waitTime = SIMTIME_DBL(simTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime <<" And host is " << source << "\n";
                     fhp->event = new cMessage("event2");
-                    scheduleAt(waitTime, fhp->event);
+                    scheduleAfter(waitTime, fhp->event);
                     forwardList->push_back(fhp);
                     fhp = nullptr;
                 }
