@@ -13,32 +13,41 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-cplusplus {{
-#include "inet/clock/common/SimClockTime.h"
+cplusplus{{
+namespace inet { class IClock; }
 }}
+
+import inet.common.INETDefs;
+import inet.clock.common.ClockTime;
+import inet.clock.contract.IClock;
 
 namespace inet;
 
-class SimClockTime
-{
-    @existingClass;
-    @overwritePreviousDefinition;
-    @descriptor(false);
-    @opaque;
-    @byValue;
-    @cppType(inet::common::SimClockTime);
-    @fromString(inet::common::SimClockTime::parse($)); @toString($.str());
-    @defaultValue(SIMCLOCKTIME_ZERO);
+enum OverdueClockEventHandlingMode {
+    UNSPECIFIED = -1;
+    EXECUTE = 0;
+    SKIP    = 1;
+    ERROR   = 2;
 }
 
-class simclocktime_t
+message ClockEvent
 {
-    @existingClass;
-    @overwritePreviousDefinition;
-    @descriptor(false);
-    @opaque;
-    @byValue;
-    @cppType(inet::simclocktime_t);
-    @fromString(inet::common::SimClockTime::parse($)); @toString($.str());
-    @defaultValue(SIMCLOCKTIME_ZERO);
+    IClock *clock = nullptr;
+    bool relative = false;
+    clocktime_t arrivalClockTime = -1;
+    OverdueClockEventHandlingMode overdueClockEventHandlingMode = UNSPECIFIED;
 }
+
+cplusplus(ClockEvent) {{
+    virtual void execute() override;
+}}
+
+cplusplus(cc) {{
+    void ClockEvent::execute()
+    {
+        if (clock != nullptr)
+        	clock->handleClockEventOccurred(this);
+        cMessage::execute();
+    }
+}}
+

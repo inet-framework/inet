@@ -13,25 +13,32 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/clock/base/PredictableClockBase.h"
+cplusplus {{
+#include "inet/clock/contract/ClockTime.h"
+}}
 
-namespace inet {
+namespace inet;
 
-simclocktime_t PredictableClockBase::getClockTime() const
+class ClockTime
 {
-    return fromSimTime(simTime());
+    @existingClass;
+    @overwritePreviousDefinition;
+    @descriptor(false);
+    @opaque;
+    @byValue;
+    @cppType(inet::ClockTime);
+    @fromString(inet::ClockTime::parse($)); @toString($.str());
+    @defaultValue(CLOCKTIME_ZERO);
 }
 
-void PredictableClockBase::scheduleClockEvent(simclocktime_t t, cMessage *msg)
+class clocktime_t
 {
-    getTargetModule()->scheduleAt(toSimTime(t), msg);
+    @existingClass;
+    @overwritePreviousDefinition;
+    @descriptor(false);
+    @opaque;
+    @byValue;
+    @cppType(inet::clocktime_t);
+    @fromString(inet::ClockTime::parse($)); @toString($.str());
+    @defaultValue(CLOCKTIME_ZERO);
 }
-
-cMessage *PredictableClockBase::cancelClockEvent(cMessage *msg)
-{
-    return getTargetModule()->cancelEvent(msg);
-}
-
-
-} // namespace inet
-

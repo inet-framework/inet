@@ -13,31 +13,28 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/clock/LinearClock.h"
+#include "inet/clock/oscillator/RandomDriftOscillator.h"
 
 namespace inet {
 
-Define_Module(LinearClock);
+Define_Module(RandomDriftOscillator);
 
-void LinearClock::initialize()
+void RandomDriftOscillator::initialize(int stage)
 {
-    origin = par("origin");
-    driftRate = par("driftRate").doubleValue() / 1e6;
+    ConstantDriftOscillator::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        scheduleAfter(par("changeInterval"), timer);
 }
 
-simclocktime_t LinearClock::fromSimTime(simtime_t t) const
+void RandomDriftOscillator::handleMessage(cMessage *message)
 {
-    return SimClockTime::from((t-origin) / (1 + driftRate));
-}
-
-simtime_t LinearClock::toSimTime(simclocktime_t clock) const
-{
-    return clock.asSimTime() * (1 + driftRate) + origin;
-}
-
-simclocktime_t LinearClock::getArrivalClockTime(cMessage *msg) const
-{
-    return fromSimTime(msg->getArrivalTime()); // note: imprecision due to conversion to simtime and forth
+    if (message == timer) {
+        double driftRateChange = par("driftRateChange").doubleValue() / 1E+6;
+        setDriftRate(driftRate + driftRateChange);
+        scheduleAfter(par("changeInterval"), timer);
+    }
+    else
+        throw cRuntimeError("Unknown message");
 }
 
 } // namespace inet

@@ -13,30 +13,32 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_LINEARCLOCK_H
-#define __INET_LINEARCLOCK_H
+#ifndef __INET_IDEALOSCILLATOR_H
+#define __INET_IDEALOSCILLATOR_H
 
-#include "inet/clock/base/PredictableClockBase.h"
+#include "inet/clock/base/OscillatorBase.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
-/**
- * Models a clock with a constant clock drift rate.
- */
-class INET_API LinearClock : public PredictableClockBase
+class INET_API IdealOscillator : public OscillatorBase
 {
-  private:
+  protected:
     simtime_t origin;
-    double driftRate;
+    simtime_t tickLength;
+
+  protected:
+    virtual void initialize(int stage) override;
 
   public:
-    virtual void initialize() override;
-    virtual simclocktime_t fromSimTime(simtime_t t) const override;
-    virtual simtime_t toSimTime(simclocktime_t t) const override;
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const override; // note: imprecise (may not be exactly equal to simclocktime passed into scheduleClockEvent())
+    virtual simtime_t getComputationOrigin() const override { return origin; }
+    virtual simtime_t getNominalTickLength() const override { return tickLength; }
+
+    virtual int64_t computeTicksForInterval(simtime_t timeInterval) const override;
+    virtual simtime_t computeIntervalForTicks(int64_t numTicks) const override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_LINEARCLOCK_H
+#endif // ifndef __INET_IDEALOSCILLATOR_H
 

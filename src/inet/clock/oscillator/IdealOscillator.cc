@@ -13,25 +13,30 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/clock/IdealClock.h"
+#include "inet/clock/oscillator/IdealOscillator.h"
 
 namespace inet {
 
-Define_Module(IdealClock);
+Define_Module(IdealOscillator);
 
-simclocktime_t IdealClock::fromSimTime(simtime_t t) const
+void IdealOscillator::initialize(int stage)
 {
-    return SimClockTime::from(t);
+    OscillatorBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        origin = simTime();
+        tickLength = par("tickLength");
+        WATCH(tickLength);
+    }
 }
 
-simtime_t IdealClock::toSimTime(simclocktime_t clock) const
+int64_t IdealOscillator::computeTicksForInterval(simtime_t timeInterval) const
 {
-    return clock.asSimTime();
+    return (int64_t)floor(timeInterval / tickLength);
 }
 
-simclocktime_t IdealClock::getArrivalClockTime(cMessage *msg) const
+simtime_t IdealOscillator::computeIntervalForTicks(int64_t numTicks) const
 {
-    return SimClockTime::from(msg->getArrivalTime());
+    return tickLength * numTicks;
 }
 
 } // namespace inet

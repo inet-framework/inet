@@ -13,25 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IDEALCLOCK_H
-#define __INET_IDEALCLOCK_H
+package inet.clock.base;
 
-#include "inet/clock/base/PredictableClockBase.h"
-
-namespace inet {
-
-/**
- * Models a clock where the clock time is identical to the simulation time.
- */
-class INET_API IdealClock : public PredictableClockBase
+module ClockBase
 {
-  public:
-    virtual simclocktime_t fromSimTime(simtime_t t) const override;
-    virtual simtime_t toSimTime(simclocktime_t t) const override;
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const override;
-};
-
-} // namespace inet
-
-#endif // ifndef __INET_IDEALCLOCK_H
+    parameters:
+        string displayStringTextFormat = default("%t"); // determines the text that is written on top of the submodule
+        @class(ClockBase);
+        @display("i=block/timer");
+}
 

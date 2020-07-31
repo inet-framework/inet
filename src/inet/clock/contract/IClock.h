@@ -16,13 +16,18 @@
 #ifndef __INET_ICLOCK_H
 #define __INET_ICLOCK_H
 
-#include "inet/clock/common/SimClockTime.h"
+#include "inet/clock/contract/ClockTime.h"
+#include "inet/clock/contract/ClockEvent.h"
 
 namespace inet {
 
 /**
- * This class defines the interface for clocks.
- * See the corresponding NED file for details.
+ * This class defines the interface for clocks. See the corresponding NED file for details.
+ *
+ * The typical way to use a clock is to derive your class or module from either
+ * ClockUserModuleBase or ClockUserModuleMixin. Then you can use the inherited
+ * clock related methods or the methods of this interface on the inherited clock
+ * field.
  */
 class INET_API IClock
 {
@@ -30,24 +35,56 @@ class INET_API IClock
     virtual ~IClock() {}
 
     /**
-     * Return the current time.
+     * Returns the current clock time. Note that the clock time is not necessarily
+     * monotonous in execution order. For example, the clock time may decrease
+     * even at the same simulation time.
      */
-    virtual simclocktime_t getClockTime() const = 0;
+    virtual clocktime_t getClockTime() const = 0;
 
     /**
-     * Schedule an event to be delivered to the context module at the given time.
+     * Returns the clock time interval in clock ticks for the specified simulation
+     * time duration according to the current clock speed. The result depends on
+     * clock drift but not on the actual clock value.
      */
-    virtual void scheduleClockEvent(simclocktime_t t, cMessage *msg) = 0;
+    virtual clocktime_t convertIntervalToClockTime(simtime_t time) const = 0;
 
     /**
-     * Cancels an event.
+     * Returns the simulation time interval for the specified clock time duration
+     * in clock ticks according to the current clock speed. The result depends on
+     * clock drift but not on the actual clock value.
      */
-    virtual cMessage *cancelClockEvent(cMessage *msg) = 0;
+    virtual simtime_t convertClockTimeToInterval(clocktime_t time) const = 0;
 
     /**
-     * Returns the arrival time of a message scheduled via scheduleClockEvent().
+     * Schedules an event to be delivered to the caller module (i.e. the context
+     * module) at the specified clock time. The event is anchored to a specific
+     * clock time value, so the actual simulation time when this event is executed
+     * will be affected if the clock time is set later.
      */
-    virtual simclocktime_t getArrivalClockTime(cMessage *msg) const = 0;
+    virtual void scheduleClockEventAt(clocktime_t time, ClockEvent *event) = 0;
+
+    /**
+     * Schedules an event to be delivered to the caller module (i.e. the context
+     * module) after the given clock time delay has elapsed. The event is anchored
+     * to a specific clock time duration, so the actual simulation time when this
+     * event is executed is not affected if the clock time is set later. On the
+     * other hand, setting the clock drift still affects the simulation time of
+     * the event execution.
+     */
+    virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) = 0;
+
+    /**
+     * Cancels a previously scheduled clock event. The clock event ownership is
+     * transferred to the caller.
+     */
+    virtual ClockEvent *cancelClockEvent(ClockEvent *event) = 0;
+
+    /**
+     * Internally used method to notify the clock before a clock event is executed.
+     * This method is primarily useful for clock implementations to update their
+     * internal data structures related to individual clock events.
+     */
+    virtual void handleClockEventOccurred(ClockEvent *event) = 0;
 };
 
 } // namespace inet

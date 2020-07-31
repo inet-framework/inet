@@ -13,16 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.clock;
+package inet.clock.model;
 
+import inet.clock.base.ClockBase;
 import inet.clock.contract.IClock;
 
 //
 // Models a clock where the clock time is identical to the simulation time.
 //
-simple IdealClock like IClock
+module IdealClock extends ClockBase like IClock
 {
     parameters:
-        @display("i=block/timer");
+        @class(IdealClock);
 }
 
