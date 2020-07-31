@@ -100,7 +100,7 @@ void EtherMac::initializeFlags()
 
     duplexMode = par("duplexMode");
     frameBursting = !duplexMode && par("frameBursting");
-    physInGate->setDeliverOnReceptionStart(true);
+    physInGate->setDeliverImmediately(true);
 }
 
 void EtherMac::processConnectDisconnect()

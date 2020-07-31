@@ -95,7 +95,7 @@ void EtherBus::initialize()
 
     // ensure we receive frames when their first bits arrive
     for (int i = 0; i < numTaps; i++)
-        gate(inputGateBaseId + i)->setDeliverOnReceptionStart(true);
+        gate(inputGateBaseId + i)->setDeliverImmediately(true);
     subscribe(POST_MODEL_CHANGE, this);    // we'll need to do the same for dynamically added gates as well
 
     checkConnections(true);

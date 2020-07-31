@@ -40,7 +40,7 @@ void EtherHub::initialize()
 
     // ensure we receive frames when their first bits arrive
     for (int i = 0; i < numPorts; i++)
-        gate(inputGateBaseId + i)->setDeliverOnReceptionStart(true);
+        gate(inputGateBaseId + i)->setDeliverImmediately(true);
     subscribe(POST_MODEL_CHANGE, this);    // we'll need to do the same for dynamically added gates as well
 
     checkConnections(true);
@@ -106,7 +106,7 @@ void EtherHub::receiveSignal(cComponent *source, simsignal_t signalID, cObject *
         if (strcmp(notif->gateName, "ethg") == 0) {
             int newSize = gateSize("ethg");
             for (int i = notif->oldSize; i < newSize; i++)
-                gate(inputGateBaseId + i)->setDeliverOnReceptionStart(true);
+                gate(inputGateBaseId + i)->setDeliverImmediately(true);
         }
         return;
     }

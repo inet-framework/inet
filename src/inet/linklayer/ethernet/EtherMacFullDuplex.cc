@@ -62,7 +62,7 @@ void EtherMacFullDuplex::initializeFlags()
     EtherMacBase::initializeFlags();
 
     duplexMode = true;
-    physInGate->setDeliverOnReceptionStart(false);
+    physInGate->setDeliverImmediately(false);
 }
 
 void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
