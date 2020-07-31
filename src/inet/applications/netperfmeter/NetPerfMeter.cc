@@ -665,7 +665,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
     else {
         // ====== Restart transmission immediately ============================
         StartTimer = new cMessage("StartTimer");
-        scheduleAt(simTime(), StartTimer);
+        scheduleAfter(SIMTIME_ZERO, StartTimer);
     }
 }
 

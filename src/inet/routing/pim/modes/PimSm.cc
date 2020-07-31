@@ -1915,8 +1915,7 @@ void PimSm::cancelAndDeleteTimer(cMessage *& timer)
 
 void PimSm::restartTimer(cMessage *timer, double interval)
 {
-    cancelEvent(timer);
-    scheduleAfter(interval, timer);
+    rescheduleAfter(interval, timer);
 }
 
 PimSm::Route::Route(PimSm *owner, RouteType type, Ipv4Address origin, Ipv4Address group)

@@ -1228,8 +1228,7 @@ void Dymo::scheduleExpungeTimer()
             scheduleAt(nextExpungeTime, expungeTimer);
         else {
             if (expungeTimer->getArrivalTime() != nextExpungeTime) {
-                cancelEvent(expungeTimer);
-                scheduleAt(nextExpungeTime, expungeTimer);
+                rescheduleAt(nextExpungeTime, expungeTimer);
             }
         }
     }

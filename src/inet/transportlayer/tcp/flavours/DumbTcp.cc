@@ -69,7 +69,7 @@ void DumbTcp::processTimer(cMessage *timer, TcpEventCode& event)
         throw cRuntimeError(timer, "unrecognized timer");
 
     conn->retransmitData();
-    conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
+    conn->scheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
 }
 
 void DumbTcp::sendCommandInvoked()
@@ -116,10 +116,7 @@ void DumbTcp::ackSent()
 
 void DumbTcp::dataSent(uint32 fromseq)
 {
-    if (rexmitTimer->isScheduled())
-        conn->cancelEvent(rexmitTimer);
-
-    conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
+    conn->rescheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
 }
 
 void DumbTcp::segmentRetransmitted(uint32 fromseq, uint32 toseq)

@@ -158,8 +158,7 @@ void BMac::handleUpperPacket(Packet *packet)
               << "  queue size: " << txQueue->getNumPackets() << " macState: " << macState << endl;
     // force wakeup now
     if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
-        cancelEvent(wakeup);
-        scheduleAfter(dblrand() * 0.1f, wakeup);
+        rescheduleAfter(dblrand() * 0.1f, wakeup);
     }
 }
 

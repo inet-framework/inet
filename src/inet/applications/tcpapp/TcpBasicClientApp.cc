@@ -140,16 +140,14 @@ void TcpBasicClientApp::socketEstablished(TcpSocket *socket)
     numRequestsToSend--;
 }
 
-void TcpBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
+void TcpBasicClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
 {
-    cancelEvent(timeoutMsg);
-
     if (stopTime < SIMTIME_ZERO || d < stopTime) {
         timeoutMsg->setKind(msgKind);
-        scheduleAt(d, timeoutMsg);
+        rescheduleAfter(d, timeoutMsg);
     }
     else {
-        delete timeoutMsg;
+        cancelAndDelete(timeoutMsg);
         timeoutMsg = nullptr;
     }
 }
@@ -162,8 +160,8 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
         EV_INFO << "reply arrived\n";
 
         if (timeoutMsg) {
-            simtime_t d = simTime() + par("thinkTime");
-            rescheduleOrDeleteTimer(d, MSGKIND_SEND);
+            simtime_t d = par("thinkTime");
+            rescheduleAfterOrDeleteTimer(d, MSGKIND_SEND);
         }
     }
     else if (socket->getState() != TcpSocket::LOCALLY_CLOSED) {
@@ -184,8 +182,8 @@ void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 
     // start another session after a delay
     if (timeoutMsg) {
-        simtime_t d = simTime() + par("idleInterval");
-        rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
+        simtime_t d = par("idleInterval");
+        rescheduleAfterOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
 
@@ -195,8 +193,8 @@ void TcpBasicClientApp::socketFailure(TcpSocket *socket, int code)
 
     // reconnect after a delay
     if (timeoutMsg) {
-        simtime_t d = simTime() + par("reconnectInterval");
-        rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
+        simtime_t d = par("reconnectInterval");
+        rescheduleAfterOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
 

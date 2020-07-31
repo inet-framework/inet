@@ -549,13 +549,7 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: signal to user that connection timed out */
     virtual void signalConnectionTimeout();
 
-    /** Utility: start a timer */
-    void scheduleTimeout(cMessage *msg, simtime_t timeout) { scheduleAfter(timeout, msg); }
-
   protected:
-    /** Utility: cancel a timer */
-    // cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
-
     /** Utility: send IP packet */
     virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
 

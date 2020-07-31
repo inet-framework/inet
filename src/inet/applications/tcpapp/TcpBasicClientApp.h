@@ -39,7 +39,7 @@ class INET_API TcpBasicClientApp : public TcpAppBase
     simtime_t stopTime;
 
     virtual void sendRequest();
-    virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
+    virtual void rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind);
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

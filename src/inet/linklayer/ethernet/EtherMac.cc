@@ -287,8 +287,7 @@ void EtherMac::addReceptionInReconnectState(long packetTreeId, simtime_t endRxTi
     // adjust endRxMsg if needed (we'll exit reconnect mode when endRxMsg expires)
     simtime_t maxRxTime = endRxTimeList.back().endTime;
     if (endRxMsg->getArrivalTime() != maxRxTime) {
-        cancelEvent(endRxMsg);
-        scheduleAt(maxRxTime, endRxMsg);
+        rescheduleAt(maxRxTime, endRxMsg);
     }
 }
 
@@ -297,8 +296,7 @@ void EtherMac::addReception(simtime_t endRxTime)
     numConcurrentTransmissions++;
 
     if (endRxMsg->getArrivalTime() < endRxTime) {
-        cancelEvent(endRxMsg);
-        scheduleAt(endRxTime, endRxMsg);
+        rescheduleAt(endRxTime, endRxMsg);
     }
 }
 
@@ -312,8 +310,7 @@ void EtherMac::processReceivedJam(EthernetJamSignal *jam)
         throw cRuntimeError("Received JAM without message");
 
     if (numConcurrentTransmissions == 0 || endRxMsg->getArrivalTime() < endRxTime) {
-        cancelEvent(endRxMsg);
-        scheduleAt(endRxTime, endRxMsg);
+        rescheduleAt(endRxTime, endRxMsg);
     }
 
     processDetectedCollision();
@@ -938,8 +935,7 @@ void EtherMac::fillIFGIfInBurst()
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);
         changeTransmissionState(SEND_IFG_STATE);
-        cancelEvent(endIFGMsg);
-        scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
+        rescheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
     }
     else {
         bytesSentInBurst = B(0);

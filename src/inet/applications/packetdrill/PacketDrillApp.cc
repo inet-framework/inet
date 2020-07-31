@@ -383,9 +383,8 @@ void PacketDrillApp::scheduleEvent()
     PacketDrillEvent *event = check_and_cast<PacketDrillEvent *>(script->getEventList()->get(eventCounter));
     event->setEventNumber(eventCounter);
     adjustTimes(event);
-    cancelEvent(eventTimer);
     eventTimer->setContextPointer(event);
-    scheduleAt(event->getEventTime(), eventTimer);
+    rescheduleAt(event->getEventTime(), eventTimer);
 }
 
 void PacketDrillApp::runEvent(PacketDrillEvent* event)

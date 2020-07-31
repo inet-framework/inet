@@ -154,9 +154,7 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
 void Hcf::scheduleInactivityTimer(simtime_t timeout)
 {
     Enter_Method_Silent();
-    if (inactivityTimer->isScheduled())
-        cancelEvent(inactivityTimer);
-    scheduleAfter(timeout, inactivityTimer);
+    rescheduleAfter(timeout, inactivityTimer);
 }
 
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)

@@ -66,7 +66,7 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
             selectInitialSeqNum();
             sendSyn();
             startSynRexmitTimer();
-            scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
+            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
             break;
 
         default:
@@ -134,7 +134,7 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             selectInitialSeqNum();
             sendSyn();
             startSynRexmitTimer();
-            scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
+            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
             sendQueue->enqueueAppData(packet);    // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;

@@ -592,8 +592,7 @@ void Ldp::processLDPHello(Packet *msg)
     if (i != -1) {
         EV_DETAIL << "already in my peer table, rescheduling timeout" << endl;
         ASSERT(myPeers[i].timeout);
-        cancelEvent(myPeers[i].timeout);
-        scheduleAfter(holdTime, myPeers[i].timeout);
+        rescheduleAfter(holdTime, myPeers[i].timeout);
         return;
     }
 

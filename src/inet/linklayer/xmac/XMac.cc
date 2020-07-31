@@ -169,8 +169,7 @@ void XMac::handleUpperPacket(Packet *packet)
               << macState << endl;
     // force wakeup now
     if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
-        cancelEvent(wakeup);
-        scheduleAfter(dblrand()*0.01f, wakeup);
+        rescheduleAfter(dblrand()*0.01f, wakeup);
     }
 }
 

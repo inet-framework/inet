@@ -666,7 +666,7 @@ void TcpNsc::handleMessage(cMessage *msgP)
 
             pStackM->timer_interrupt();
 
-            scheduleAt(msgP->getArrivalTime() + 1.0 / (double)pStackM->get_hz(), msgP);
+            scheduleAfter(1.0 / (double)pStackM->get_hz(), msgP);
         }
     }
     else if (msgP->arrivedOn("ipIn")) {

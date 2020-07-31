@@ -376,10 +376,7 @@ void Aodv::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned i
 
         failedNextHop = nextHop;
 
-        if (rrepAckTimer->isScheduled())
-            cancelEvent(rrepAckTimer);
-
-        scheduleAfter(nextHopWait, rrepAckTimer);
+        rescheduleAfter(nextHopWait, rrepAckTimer);
     }
     sendAODVPacket(rrep, nextHop, timeToLive, 0);
 }
@@ -1508,8 +1505,7 @@ void Aodv::scheduleExpungeRoutes()
             scheduleAt(nextExpungeTime, expungeTimer);
         else {
             if (expungeTimer->getArrivalTime() != nextExpungeTime) {
-                cancelEvent(expungeTimer);
-                scheduleAt(nextExpungeTime, expungeTimer);
+                rescheduleAt(nextExpungeTime, expungeTimer);
             }
         }
     }

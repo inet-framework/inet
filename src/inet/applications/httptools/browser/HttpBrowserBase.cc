@@ -468,9 +468,7 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
 
 void HttpBrowserBase::scheduleNextBrowseEvent()
 {
-    if (eventTimer->isScheduled())
-        cancelEvent(eventTimer);
-    simtime_t nextEventTime;    // MIGRATE40: kvj
+    simtime_t nextEventTime;
     if (++reqInCurSession >= reqNoInCurSession) {
         // The requests in the current round are done. Lets check what to do next.
         if (rdActivityLength == nullptr || simTime() < acitivityPeriodEnd) {
@@ -479,7 +477,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             EV_INFO << "Scheduling a new session start @ T=" << nextEventTime << endl;
             messagesInCurrentSession = 0;
             eventTimer->setKind(MSGKIND_START_SESSION);
-            scheduleAt(nextEventTime, eventTimer);
+            rescheduleAt(nextEventTime, eventTimer);
         }
         else {
             // Schedule the next activity period start. This corresponds to to a working day or home time, ie. time
@@ -488,7 +486,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             simtime_t activationTime = simTime() + std::max(0.0, 86400.0 - rdActivityLength->draw());    // Sleep for a while
             EV_INFO << "Terminating current activity @ T=" << simTime() << ". Next activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
-            scheduleAt(activationTime, eventTimer);
+            rescheduleAt(activationTime, eventTimer);
         }
     }
     else {
@@ -497,7 +495,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
         EV_INFO << "Scheduling a browse event @ T=" << nextEventTime
                 << ". Request " << reqInCurSession << " of " << reqNoInCurSession << endl;
         eventTimer->setKind(MSGKIND_NEXT_MESSAGE);
-        scheduleAt(nextEventTime, eventTimer);
+        rescheduleAt(nextEventTime, eventTimer);
     }
 }
 

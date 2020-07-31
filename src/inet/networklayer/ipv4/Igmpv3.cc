@@ -499,8 +499,7 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
 void Igmpv3::startTimer(cMessage *timer, double interval)
 {
     ASSERT(timer);
-    cancelEvent(timer);
-    scheduleAfter(interval, timer);
+    rescheduleAfter(interval, timer);
 }
 
 // --- Methods for processing IGMP messages ---

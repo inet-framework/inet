@@ -1005,13 +1005,9 @@ void RsvpTe::removeRSB(ResvStateBlock *rsb)
 
     EV_INFO << "removing empty RSB " << rsb->id << endl;
 
-    cancelEvent(rsb->refreshTimerMsg);
-    cancelEvent(rsb->commitTimerMsg);
-    cancelEvent(rsb->timeoutMsg);
-
-    delete rsb->refreshTimerMsg;
-    delete rsb->commitTimerMsg;
-    delete rsb->timeoutMsg;
+    cancelAndDelete(rsb->refreshTimerMsg);
+    cancelAndDelete(rsb->commitTimerMsg);
+    cancelAndDelete(rsb->timeoutMsg);
 
     if (rsb->Flowspec_Object.req_bandwidth > 0) {
         // deallocate resources
@@ -1364,8 +1360,7 @@ void RsvpTe::processHelloMsg(Packet *pk)
         h->ack = true;
         h->request = false;
 
-        cancelEvent(h->timer);
-        scheduleAfter(SIMTIME_ZERO, h->timer);
+        rescheduleAfter(SIMTIME_ZERO, h->timer);
     }
     else {
         // next message will be regular
@@ -1376,8 +1371,7 @@ void RsvpTe::processHelloMsg(Packet *pk)
         ASSERT(h->timer->isScheduled());
     }
 
-    cancelEvent(h->timeout);
-    scheduleAfter(helloTimeout, h->timeout);
+    rescheduleAfter(helloTimeout, h->timeout);
 }
 
 void RsvpTe::processPathErrMsg(Packet *pk)
@@ -1888,11 +1882,7 @@ void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
 void RsvpTe::scheduleTimeout(PathStateBlock *psbEle)
 {
     ASSERT(psbEle);
-
-    if (psbEle->timeoutMsg->isScheduled())
-        cancelEvent(psbEle->timeoutMsg);
-
-    scheduleAfter(PSB_TIMEOUT_INTERVAL, psbEle->timeoutMsg);
+    rescheduleAfter(PSB_TIMEOUT_INTERVAL, psbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
@@ -1905,42 +1895,27 @@ void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
     if (!tedmod->isLocalAddress(psbEle->OutInterface))
         return;
 
-    if (psbEle->timerMsg->isScheduled())
-        cancelEvent(psbEle->timerMsg);
-
     EV_DETAIL << "scheduling PSB " << psbEle->id << " refresh " << (simTime() + delay) << endl;
 
-    scheduleAfter(delay, psbEle->timerMsg);
+    rescheduleAfter(delay, psbEle->timerMsg);
 }
 
 void RsvpTe::scheduleTimeout(ResvStateBlock *rsbEle)
 {
     ASSERT(rsbEle);
-
-    if (rsbEle->timeoutMsg->isScheduled())
-        cancelEvent(rsbEle->timeoutMsg);
-
-    scheduleAfter(RSB_TIMEOUT_INTERVAL, rsbEle->timeoutMsg);
+    rescheduleAfter(RSB_TIMEOUT_INTERVAL, rsbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(ResvStateBlock *rsbEle, simtime_t delay)
 {
     ASSERT(rsbEle);
-
-    if (rsbEle->refreshTimerMsg->isScheduled())
-        cancelEvent(rsbEle->refreshTimerMsg);
-
-    scheduleAfter(delay, rsbEle->refreshTimerMsg);
+    rescheduleAfter(delay, rsbEle->refreshTimerMsg);
 }
 
 void RsvpTe::scheduleCommitTimer(ResvStateBlock *rsbEle)
 {
     ASSERT(rsbEle);
-
-    if (rsbEle->commitTimerMsg->isScheduled())
-        cancelEvent(rsbEle->commitTimerMsg);
-
-    scheduleAfter(SIMTIME_ZERO, rsbEle->commitTimerMsg);
+    rescheduleAfter(SIMTIME_ZERO, rsbEle->commitTimerMsg);
 }
 
 RsvpTe::ResvStateBlock *RsvpTe::findRSB(const SessionObj& session, const SenderTemplateObj& sender, unsigned int& index)

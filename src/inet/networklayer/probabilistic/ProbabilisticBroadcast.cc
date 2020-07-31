@@ -252,8 +252,7 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
     // the broadcast timer to the message's broadcast instant.
     if (pos == msgQueue.begin()) {
         EV << "PBr: " << simTime() << " n" << myNetwAddr << "         message inserted in the front, reschedule it." << endl;
-        cancelEvent(broadcastTimer);
-        scheduleAt(bcastTime, broadcastTimer);
+        rescheduleAt(bcastTime, broadcastTimer);
     }
 }
 

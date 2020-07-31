@@ -185,8 +185,7 @@ void Gpsr::schedulePurgeNeighborsTimer()
             scheduleAt(nextExpiration, purgeNeighborsTimer);
         else {
             if (purgeNeighborsTimer->getArrivalTime() != nextExpiration) {
-                cancelEvent(purgeNeighborsTimer);
-                scheduleAt(nextExpiration, purgeNeighborsTimer);
+                rescheduleAt(nextExpiration, purgeNeighborsTimer);
             }
         }
     }

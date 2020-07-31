@@ -1678,15 +1678,12 @@ void xMIPv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t 
     TimerIfEntry *entry = (pos->second);
     ASSERT(entry);
 
-    // first we cancel the current retransmission timer
-    cancelEvent(entry->timer);
-    // then we reset the timeout value to the initial value
+    // reset the timeout value to the initial value
     entry->ackTimeout = entry->ifEntry->getProtocolData<Ipv6InterfaceData>()->_getInitialBindAckTimeout();
     // and then we reschedule again for BU expiry time
     // (with correct offset for scheduling)
     entry->nextScheduledTime = retransmissionTime;
-
-    scheduleAt(entry->nextScheduledTime, entry->timer);
+    rescheduleAt(entry->nextScheduledTime, entry->timer);
 
     EV_INFO << "Updated BuTransmitIfEntry and corresponding timer.\n";
 }

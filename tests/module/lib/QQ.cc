@@ -56,8 +56,7 @@ void QQ::handleMessage(cMessage *msg)
     {
         if (ch && ch->isBusy())
         {
-            cancelEvent(timer);
-            scheduleAt(ch->getTransmissionFinishTime(), timer);
+            rescheduleAt(ch->getTransmissionFinishTime(), timer);
         }
         else
         {

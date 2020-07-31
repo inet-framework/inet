@@ -1692,8 +1692,7 @@ void PimDm::processOlistNonEmptyEvent(Route *route)
 
 void PimDm::restartTimer(cMessage *timer, double interval)
 {
-    cancelEvent(timer);
-    scheduleAfter(interval, timer);
+    rescheduleAfter(interval, timer);
 }
 
 void PimDm::cancelAndDeleteTimer(cMessage *& timer)

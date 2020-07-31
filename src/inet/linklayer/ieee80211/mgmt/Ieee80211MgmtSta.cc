@@ -210,7 +210,7 @@ void Ieee80211MgmtSta::clearAPList()
 {
     for (auto & elem : apList)
         if (elem.authTimeoutMsg)
-            delete cancelEvent(elem.authTimeoutMsg);
+            cancelAndDelete(elem.authTimeoutMsg);
 
     apList.clear();
 }
@@ -318,7 +318,7 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     }
     else if (assocTimeoutMsg) {
         EV << "Cancelling ongoing association process\n";
-        delete cancelEvent(assocTimeoutMsg);
+        cancelAndDelete(assocTimeoutMsg);
         assocTimeoutMsg = nullptr;
     }
 
@@ -438,7 +438,7 @@ void Ieee80211MgmtSta::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
 
     // cancel possible pending authentication timer
     if (ap->authTimeoutMsg) {
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
     }
 
@@ -473,7 +473,7 @@ void Ieee80211MgmtSta::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     }
     else if (assocTimeoutMsg) {
         // pending association
-        delete cancelEvent(assocTimeoutMsg);
+        cancelAndDelete(assocTimeoutMsg);
         assocTimeoutMsg = nullptr;
     }
 
@@ -488,7 +488,7 @@ void Ieee80211MgmtSta::disassociate()
     EV << "Disassociating from AP address=" << assocAP.address << "\n";
     ASSERT(mib->bssStationData.isAssociated);
     mib->bssStationData.isAssociated = false;
-    delete cancelEvent(assocAP.beaconTimeoutMsg);
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo();    // clear it
 }
@@ -556,7 +556,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
         delete packet;
 
         // cancel timeout, send error to agent
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
         sendAuthenticationConfirm(ap, PRC_REFUSED);    //XXX or what resultCode?
         return;
@@ -584,7 +584,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
 
         // authentication completed
         ap->isAuthenticated = (statusCode == SC_SUCCESSFUL);
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
         sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
     }
@@ -603,7 +603,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
         return;
     }
     if (ap->authTimeoutMsg) {
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
         EV << "Cancelling pending authentication\n";
         delete packet;
@@ -646,12 +646,12 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
     if (mib->bssStationData.isAssociated) {
         EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
         mib->bssStationData.isAssociated = false;
-        delete cancelEvent(assocAP.beaconTimeoutMsg);
+        cancelAndDelete(assocAP.beaconTimeoutMsg);
         assocAP.beaconTimeoutMsg = nullptr;
         assocAP = AssociatedApInfo();
     }
 
-    delete cancelEvent(assocTimeoutMsg);
+    cancelAndDelete(assocTimeoutMsg);
     assocTimeoutMsg = nullptr;
 
     if (statusCode != SC_SUCCESSFUL) {
@@ -694,7 +694,7 @@ void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const
 
     if (assocTimeoutMsg) {
         // pending association
-        delete cancelEvent(assocTimeoutMsg);
+        cancelAndDelete(assocTimeoutMsg);
         assocTimeoutMsg = nullptr;
     }
     if (!mib->bssStationData.isAssociated || address != assocAP.address) {
@@ -705,7 +705,7 @@ void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const
 
     EV << "Setting isAssociated flag to false\n";
     mib->bssStationData.isAssociated = false;
-    delete cancelEvent(assocAP.beaconTimeoutMsg);
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
 }
 
@@ -719,8 +719,7 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
     if (mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
         EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
         ASSERT(assocAP.beaconTimeoutMsg != nullptr);
-        cancelEvent(assocAP.beaconTimeoutMsg);
-        scheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        rescheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
 
         //ApInfo *ap = lookupAP(frame->getTransmitterAddress());
         //ASSERT(ap!=nullptr);

@@ -414,8 +414,7 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 
 void Rip::handleStartOperation(LifecycleOperation *operation)
 {
-    cancelEvent(startupTimer);
-    scheduleAfter(par("startupTime"), startupTimer);
+    rescheduleAfter(par("startupTime"), startupTimer);
 }
 
 void Rip::handleStopOperation(LifecycleOperation *operation)

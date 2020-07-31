@@ -439,8 +439,7 @@ void Igmpv2::processRexmtTimer(cMessage *msg)
 void Igmpv2::startTimer(cMessage *timer, double interval)
 {
     ASSERT(timer);
-    cancelEvent(timer);
-    scheduleAfter(interval, timer);
+    rescheduleAfter(interval, timer);
 }
 
 void Igmpv2::startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime)

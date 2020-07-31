@@ -386,7 +386,7 @@ void Arp::updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress)
     // update entry
     if (entry->pending) {
         entry->pending = false;
-        delete cancelEvent(entry->timer);
+        cancelAndDelete(entry->timer);
         entry->timer = nullptr;
         entry->numRetries = 0;
     }

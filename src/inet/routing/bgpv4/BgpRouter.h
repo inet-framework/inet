@@ -126,7 +126,7 @@ private:
     friend class BgpSession;
     // functions used by the BgpSession class
     void getScheduleAt(simtime_t t, cMessage *msg) { bgpModule->scheduleAt(t, msg); }
-    void getCancelAndDelete(cMessage *msg) { return bgpModule->cancelAndDelete(msg); }
+    void getCancelAndDelete(cMessage *msg) { bgpModule->cancelAndDelete(msg); }
     cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
     IIpv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }

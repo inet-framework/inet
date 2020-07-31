@@ -204,11 +204,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
                 EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-                if (wakeup->isScheduled())
-                    cancelEvent(wakeup);
-
-                scheduleAfter(slotDuration, wakeup);
-
+                rescheduleAfter(slotDuration, wakeup);
                 SETUP_PHASE = false;
             }
             else {
@@ -312,11 +308,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
                 EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-                if (wakeup->isScheduled())
-                    cancelEvent(wakeup);
-
-                scheduleAfter(slotDuration, wakeup);
-
+                rescheduleAfter(slotDuration, wakeup);
                 SETUP_PHASE = false;
             }
             else {
@@ -400,10 +392,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
                 EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-                if (wakeup->isScheduled())
-                    cancelEvent(wakeup);
-
-                scheduleAfter(slotDuration, wakeup);
+                rescheduleAfter(slotDuration, wakeup);
 
                 SETUP_PHASE = false;
             }
@@ -472,11 +461,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
                 EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-                if (wakeup->isScheduled())
-                    cancelEvent(wakeup);
-
-                scheduleAfter(slotDuration, wakeup);
-
+                rescheduleAfter(slotDuration, wakeup);
                 SETUP_PHASE = false;
             }
             else {
