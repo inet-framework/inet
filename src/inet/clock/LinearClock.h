@@ -16,7 +16,7 @@
 #ifndef __INET_LINEARCLOCK_H
 #define __INET_LINEARCLOCK_H
 
-#include "inet/common/clock/base/PredictableClockBase.h"
+#include "inet/clock/base/PredictableClockBase.h"
 
 namespace inet {
 

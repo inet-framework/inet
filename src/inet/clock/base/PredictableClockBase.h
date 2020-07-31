@@ -16,8 +16,8 @@
 #ifndef __INET_PREDICTABLECLOCKBASE_H
 #define __INET_PREDICTABLECLOCKBASE_H
 
-#include "inet/common/clock/base/ClockBase.h"
-#include "inet/common/clock/contract/IClock.h"
+#include "inet/clock/base/ClockBase.h"
+#include "inet/clock/contract/IClock.h"
 
 namespace inet {
 

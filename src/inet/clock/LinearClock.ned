@@ -13,9 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.clock;
+package inet.clock;
 
-import inet.common.clock.contract.IClock;
+import inet.clock.contract.IClock;
 
 //
 // Models a clock where the clock time is identical to the simulation time.

@@ -16,7 +16,7 @@
 #ifndef __INET_ICLOCK_H
 #define __INET_ICLOCK_H
 
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/clock/common/SimClockTime.h"
 
 namespace inet {
 

@@ -16,10 +16,10 @@
 #ifndef __INET_CLOCKUSINGMODULEBASE_H
 #define __INET_CLOCKUSINGMODULEBASE_H
 
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/clock/common/SimClockTime.h"
 
 #ifdef WITH_CLOCK_SUPPORT
-#include "inet/common/clock/contract/IClock.h"
+#include "inet/clock/contract/IClock.h"
 #endif
 
 namespace inet {

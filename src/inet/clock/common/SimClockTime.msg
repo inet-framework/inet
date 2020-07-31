@@ -14,7 +14,7 @@
 //
 
 cplusplus {{
-#include "inet/common/clock/common/SimClockTime.h"
+#include "inet/clock/common/SimClockTime.h"
 }}
 
 namespace inet;

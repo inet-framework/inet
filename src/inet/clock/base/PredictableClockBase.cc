@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/clock/base/PredictableClockBase.h"
+#include "inet/clock/base/PredictableClockBase.h"
 
 namespace inet {
 

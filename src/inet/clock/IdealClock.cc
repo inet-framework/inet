@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/clock/IdealClock.h"
+#include "inet/clock/IdealClock.h"
 
 namespace inet {
 

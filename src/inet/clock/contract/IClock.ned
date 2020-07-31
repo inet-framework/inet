@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.clock.contract;
+package inet.clock.contract;
 
 //
 // This module interface is implemented by clock models. For example, having a
