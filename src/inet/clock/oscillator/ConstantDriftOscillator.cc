@@ -33,17 +33,12 @@ void ConstantDriftOscillator::initialize(int stage)
         simtime_t tickOffset = par("tickOffset");
         if (tickOffset < 0 || tickOffset >= currentTickLength)
             throw cRuntimeError("First tick offset must be in the range [0, currentTickLength)");
-        if (tickOffset == 0) {
-            baseTickTime = origin;
+        if (tickOffset == 0)
             nextTickFromOrigin = 0;
-        }
-        else {
-            baseTickTime = origin - tickOffset;
+        else
             nextTickFromOrigin = currentTickLength - tickOffset;
-        }
         WATCH(nominalTickLength);
         WATCH(driftRate);
-        WATCH(baseTickTime);
         WATCH(nextTickFromOrigin);
     }
 }
@@ -56,8 +51,8 @@ void ConstantDriftOscillator::setDriftRate(double newDriftRate)
         simtime_t currentSimTime = simTime();
         EV_DEBUG << "Setting oscillator drift rate from " << driftRate << " to " << newDriftRate << " at simtime " << currentSimTime << ".\n";
         simtime_t currentTickLength = getCurrentTickLength();
+        simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
-        baseTickTime = currentSimTime - elapsedTickTime;
         if (elapsedTickTime == SIMTIME_ZERO)
             nextTickFromOrigin = 0;
         else
@@ -75,21 +70,16 @@ void ConstantDriftOscillator::setTickOffset(simtime_t newTickOffset)
     Enter_Method("setTickOffset");
     simtime_t currentSimTime = simTime();
     simtime_t currentTickLength = getCurrentTickLength();
+    simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
     simtime_t oldTickOffset = fmod(currentSimTime - baseTickTime, currentTickLength);
     if (newTickOffset != oldTickOffset) {
         emit(preOscillatorStateChangedSignal, this);
         EV_DEBUG << "Setting oscillator tick offset from " << oldTickOffset << " to " << newTickOffset << " at simtime " << currentSimTime << ".\n";
-        simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
-        baseTickTime = currentSimTime - elapsedTickTime;
         origin = currentSimTime;
-        if (newTickOffset == 0) {
-            baseTickTime = origin;
+        if (newTickOffset == 0)
             nextTickFromOrigin = 0;
-        }
-        else {
-            baseTickTime = origin - newTickOffset;
+        else
             nextTickFromOrigin = currentTickLength - newTickOffset;
-        }
         emit(postOscillatorStateChangedSignal, this);
         updateDisplayString();
     }

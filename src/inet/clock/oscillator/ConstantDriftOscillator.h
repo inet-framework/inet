@@ -30,7 +30,6 @@ class INET_API ConstantDriftOscillator : public OscillatorBase, public IScriptab
     double driftRate = NaN;
 
     simtime_t origin; // simulation time from which the computeClockTicksForInterval and computeIntervalForClockTicks is measured
-    simtime_t baseTickTime; // simulation time of an imaginary tick from which all future ticks are computed, this may or may not be an actual tick that happened in the past
     simtime_t nextTickFromOrigin; // simulation time interval from the computation origin to the next tick
 
   protected:
