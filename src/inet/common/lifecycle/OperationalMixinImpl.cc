@@ -22,8 +22,11 @@
 namespace inet {
 
 template class OperationalMixin<cSimpleModule>;
+
+#ifdef WITH_PROTOCOL
 template class OperationalMixin<PacketTransmitterBase>;
 template class OperationalMixin<PacketReceiverBase>;
+#endif // #ifdef WITH_PROTOCOL
 
 } // namespace inet
 
