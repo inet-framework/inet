@@ -50,7 +50,7 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
 
     virtual void updateDisplayString() const;
 
-    virtual void animateSend(cMessage *message, cGate *gate, simtime_t duration) const;
+    virtual void animateSend(Packet *packet, cGate *gate, simtime_t duration, simtime_t remainingDuration) const;
     virtual void animateSendPacket(Packet *packet, cGate *gate) const;
     virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const;
     virtual void animateSendPacketEnd(Packet *packet, cGate *gate, bps datarate) const;
