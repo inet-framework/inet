@@ -38,8 +38,7 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     EV_INFO << "Delaying packet " << packet->getName() << "." << endl;
-    packet->setArrival(getId(), inputGate->getId(), simTime());
-    scheduleAfter(par("delay"), packet);
+    scheduleAt(simTime() + par("delay"), packet);
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
     updateDisplayString();

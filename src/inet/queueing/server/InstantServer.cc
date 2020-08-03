@@ -39,7 +39,6 @@ void InstantServer::processPacket()
 {
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
-    packet->setArrival(getId(), inputGate->getId(), simTime());
     std::string packetName = packet->getName();
     auto packetLength = packet->getDataLength();
     EV_INFO << "Processing packet " << packetName << " started." << endl;
