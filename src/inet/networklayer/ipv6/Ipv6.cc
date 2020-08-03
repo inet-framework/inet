@@ -111,20 +111,20 @@ void Ipv6::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        registerService(Protocol::ipv6, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("transportOut"));
+        registerService(Protocol::ipv6, gate("transportIn"), gate("transportOut"));
+        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("queueIn"));
     }
 }
 
-void Ipv6::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Ipv6::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (in->isName("transportIn"))
+    if (gate->isName("transportOut"))
         upperProtocols.insert(&protocol);
 }
 

@@ -58,8 +58,7 @@ void ExtIpv4TunDevice::initialize(int stage)
         WATCH(numReceived);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::ipv4, nullptr, gate("lowerLayerIn"));
-        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), nullptr);
+        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), gate("lowerLayerIn"));
     }
 }
 

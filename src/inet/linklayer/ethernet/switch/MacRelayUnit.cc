@@ -46,8 +46,7 @@ void MacRelayUnit::initialize(int stage)
         WATCH(numDiscardedFrames);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
-        registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("ifIn"));
     }
 }
 

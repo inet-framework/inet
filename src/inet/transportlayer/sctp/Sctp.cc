@@ -115,8 +115,8 @@ void Sctp::initialize(int stage)
         crcInsertion.setCrcMode(crcMode);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::sctp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::sctp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::sctp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::sctp, gate("ipOut"), gate("ipIn"));
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));

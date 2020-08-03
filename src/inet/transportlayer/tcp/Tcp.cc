@@ -74,8 +74,8 @@ void Tcp::initialize(int stage)
         WATCH_PTRMAP(tcpAppConnMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));

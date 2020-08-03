@@ -31,8 +31,8 @@ void ReceiveAtL3Address::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         address = Ipv4Address(par("address").stringValue());
-        registerService(IProtocol::destinationL3Address, inputGate, inputGate);
-        registerProtocol(IProtocol::destinationL3Address, outputGate, outputGate);
+        registerService(IProtocol::destinationL3Address, nullptr, inputGate);
+        registerProtocol(IProtocol::destinationL3Address, nullptr, outputGate);
     }
 }
 

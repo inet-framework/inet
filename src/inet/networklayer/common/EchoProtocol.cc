@@ -31,8 +31,7 @@ void EchoProtocol::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::echo, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::echo, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::echo, gate("ipOut"), gate("ipIn"));
     }
 }
 

@@ -180,8 +180,6 @@ void Igmpv2::initialize(int stage)
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
-        registerService(Protocol::igmp, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
@@ -373,12 +371,12 @@ void Igmpv2::handleMessage(cMessage *msg)
     }
 }
 
-void Igmpv2::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Igmpv2::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Igmpv2::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Igmpv2::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
     if (protocol.getId() == Protocol::igmp.getId() && servicePrimitive == SP_INDICATION)

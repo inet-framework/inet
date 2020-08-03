@@ -80,8 +80,7 @@ void EtherEncap::initialize(int stage)
     {
         if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
             //register service and protocol
-            registerService(Protocol::ethernetMac, gate("upperLayerIn"), nullptr);
-            registerProtocol(Protocol::ethernetMac, nullptr, gate("upperLayerOut"));
+            registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
         }
     }
 }

@@ -43,8 +43,7 @@ void Ipv4Encap::initialize(int stage)
         crcMode = CRC_COMPUTED;
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::ipv4, gate("upperLayerIn"), nullptr);
-        registerProtocol(Protocol::ipv4, nullptr, gate("upperLayerOut"));
+        registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }
 

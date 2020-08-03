@@ -33,8 +33,8 @@ void SendToMacAddress::initialize(int stage)
         const char *addressAsString = par("address");
         if (strlen(addressAsString) != 0)
             address = MacAddress(addressAsString);
-        registerService(IProtocol::destinationMacAddress, inputGate, inputGate);
-        registerProtocol(IProtocol::destinationMacAddress, outputGate, outputGate);
+        registerService(IProtocol::destinationMacAddress, inputGate, nullptr);
+        registerProtocol(IProtocol::destinationMacAddress, outputGate, nullptr);
     }
 }
 

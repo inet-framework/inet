@@ -46,8 +46,8 @@ void Icmp::initialize(int stage)
         crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
-        registerService(Protocol::icmpv4, gate("transportIn"), gate("ipIn"));
-        registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("transportOut"));
+        registerService(Protocol::icmpv4, gate("transportIn"), gate("transportOut"));
+        registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -286,15 +286,15 @@ void Icmp::sendToIP(Packet *msg)
     send(msg, "ipOut");
 }
 
-void Icmp::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Icmp::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", in->getBaseName())) {
+    if (!strcmp("transportOut", gate->getBaseName())) {
         int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
         if (protocolNumber != -1)
             transportProtocols.insert(protocolNumber);

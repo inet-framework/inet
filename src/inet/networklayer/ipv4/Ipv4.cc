@@ -117,21 +117,21 @@ void Ipv4::initialize(int stage)
         arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
         arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
 
-        registerService(Protocol::ipv4, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("transportOut"));
+        registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
+        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("queueIn"));
     }
 }
 
-void Ipv4::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Ipv4::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (in->isName("transportIn"))
-            upperProtocols.insert(&protocol);
+    if (gate->isName("transportOut"))
+        upperProtocols.insert(&protocol);
 }
 
 void Ipv4::refreshDisplay() const

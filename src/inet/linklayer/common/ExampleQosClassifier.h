@@ -30,8 +30,8 @@ class INET_API ExampleQosClassifier : public cSimpleModule, public IProtocolRegi
 {
   protected:
     virtual int getUserPriority(cMessage *msg);
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     ExampleQosClassifier() {}

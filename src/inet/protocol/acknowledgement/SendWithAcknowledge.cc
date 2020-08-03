@@ -32,8 +32,8 @@ void SendWithAcknowledge::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         acknowledgeTimeout = par("acknowledgeTimeout");
         sequenceNumber = 0;
-        registerService(IProtocol::withAcknowledge, inputGate, inputGate);
-        registerProtocol(IProtocol::withAcknowledge, outputGate, outputGate);
+        registerService(IProtocol::withAcknowledge, inputGate, nullptr);
+        registerProtocol(IProtocol::withAcknowledge, outputGate, nullptr);
         registerService(IProtocol::acknowledge, gate("ackIn"), gate("ackIn"));
     }
 }

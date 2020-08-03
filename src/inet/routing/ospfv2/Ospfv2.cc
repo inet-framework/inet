@@ -55,8 +55,7 @@ void Ospfv2::initialize(int stage)
         startupTimer = new cMessage("OSPF-startup");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {  // interfaces and static routes are already initialized
-        registerService(Protocol::ospf, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
     }
 }
 

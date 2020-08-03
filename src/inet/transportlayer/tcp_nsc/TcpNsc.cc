@@ -235,8 +235,8 @@ void TcpNsc::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4

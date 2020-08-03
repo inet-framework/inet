@@ -63,9 +63,8 @@ void LinkStateRouting::initialize(int stage)
 
         // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
-        scheduleAfter(exponential(0.01), announceMsg);
-        registerService(Protocol::linkStateRouting, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::linkStateRouting, gate("ipOut"), nullptr);
+        scheduleAt(simTime() + exponential(0.01), announceMsg);
+        registerProtocol(Protocol::linkStateRouting, gate("ipOut"), gate("ipIn"));
     }
 }
 

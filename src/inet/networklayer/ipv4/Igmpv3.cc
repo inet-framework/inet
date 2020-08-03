@@ -92,8 +92,7 @@ void Igmpv3::initialize(int stage)
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
-        registerService(Protocol::igmp, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::igmp, gate("ipOut"), gate("ipIn"));
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast()) {

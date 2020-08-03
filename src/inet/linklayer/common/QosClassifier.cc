@@ -154,22 +154,22 @@ int QosClassifier::getUserPriority(cMessage *msg)
     return defaultUp;
 }
 
-void QosClassifier::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void QosClassifier::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    if (!strcmp("out", out->getName()))
+    if (!strcmp("out", g->getName()))
         registerService(protocol, gate("in"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", out->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
-void QosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void QosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("in", in->getName()))
+    if (!strcmp("in", g->getName()))
         registerProtocol(protocol, gate("out"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", in->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
 } // namespace inet
