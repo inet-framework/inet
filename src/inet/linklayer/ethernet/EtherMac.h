@@ -24,7 +24,6 @@
 
 namespace inet {
 
-class EthernetJamSignal;
 class EtherPauseFrame;
 
 /**
@@ -50,26 +49,14 @@ class INET_API EtherMac : public EtherMacBase
 
   protected:
     // states
-    int numConcurrentTransmissions = 0;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
     int backoffs = 0;    // value of backoff for exponential back-off algorithm
-    long currentSendPkTreeID = -1;
 
     // other variables
-    EthernetSignalBase *frameBeingReceived = nullptr;
-    cMessage *endRxMsg = nullptr;
-    cMessage *endBackoffMsg = nullptr;
-    cMessage *endJammingMsg = nullptr;
+    cMessage *endBackoffTimer = nullptr;
+    EthernetSignalBase *curTxSignal = nullptr;
 
-    // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
-    // stores the end time of the reconnect state
-    struct PkIdRxTime
-    {
-        long packetTreeId;    // >=0: tree ID of packet being received; -1: this is a special entry that stores the end time of the reconnect state
-        simtime_t endTime;    // end of reception
-        PkIdRxTime(long id, simtime_t time) { packetTreeId = id; endTime = time; }
-    };
-    typedef std::list<PkIdRxTime> EndRxTimeList;
-    EndRxTimeList endRxTimeList;    // list of incoming packets, ordered by endTime
+    long activeReceptionId = -1; // original packet id of current reception
+    simtime_t activeReceptionStart; // reception start time of current reception
 
     // statistics
     simtime_t totalCollisionTime;    // total duration of collisions on channel
@@ -89,7 +76,7 @@ class INET_API EtherMac : public EtherMacBase
     virtual void handleEndIFGPeriod();
     virtual void handleEndPausePeriod();
     virtual void handleEndTxPeriod();
-    virtual void handleEndRxPeriod();
+    virtual void handleEndRxPeriod(EthernetSignalBase *signal);
     virtual void handleEndBackoffPeriod();
     virtual void handleEndJammingPeriod();
     virtual void handleRetransmission();
@@ -97,24 +84,23 @@ class INET_API EtherMac : public EtherMacBase
     // helpers
     virtual void readChannelParameters(bool errorWhenAsymmetric) override;
     virtual void handleUpperPacket(Packet *msg) override;
-    virtual void processJamSignalFromNetwork(EthernetJamSignal *msg);
-    virtual void processMsgFromNetwork(EthernetSignalBase *msg);
+    virtual void processSignalFromNetwork(EthernetSignalBase *signal);
     virtual void scheduleEndIFGPeriod();
     virtual void fillIFGIfInBurst();
     virtual void scheduleEndTxPeriod(B sentFrameByteLength);
-    virtual void scheduleEndRxPeriod(EthernetSignalBase *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
+    virtual void tryBeginSendFrame();
     virtual void beginSendFrames();
-    virtual void sendJamSignal();
     virtual void startFrameTransmission();
-    virtual void frameReceptionComplete();
+    virtual void abortTransmissionAndAppendJam();
+    virtual void frameReceptionComplete(EthernetSignalBase *signal);
     virtual void processReceivedDataFrame(Packet *frame);
-    virtual void processReceivedJam(EthernetJamSignal *jam);
+    virtual void processReceivedJam(EthernetSignalBase *jam);
     virtual void processReceivedControlFrame(Packet *packet);
     virtual void processConnectDisconnect() override;
-    virtual void addReception(simtime_t endRxTime);
     virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);
     virtual void processDetectedCollision();
+    virtual void calculateRxStatus();
 
     B calculateMinFrameLength();
     B calculatePaddedFrameLength(Packet *frame);

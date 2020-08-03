@@ -63,7 +63,6 @@ class INET_API EtherMacBase : public MacProtocolBase
     // Self-message kind values
     enum SelfMsgKindValues {
         ENDIFG = 100,
-        ENDRECEPTION,
         ENDBACKOFF,
         ENDTRANSMISSION,
         ENDJAMMING,
@@ -113,7 +112,9 @@ class INET_API EtherMacBase : public MacProtocolBase
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
 
     // self messages
-    cMessage *endTxMsg = nullptr, *endIFGMsg = nullptr, *endPauseMsg = nullptr;
+    cMessage *endTxTimer = nullptr;
+    cMessage *endIfgTimer = nullptr;
+    cMessage *endPauseTimer = nullptr;
 
     // statistics
     unsigned long numFramesSent = 0;
@@ -185,7 +186,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     // helpers
     virtual void processConnectDisconnect();
     virtual void encapsulate(Packet *packet);
-    virtual void decapsulate(Packet *packet);
+    virtual bool decapsulate(Packet *packet);
 
     /// Verify ethernet packet: check FCS and payload length
     bool verifyCrcAndLength(Packet *packet);
