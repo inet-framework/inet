@@ -63,9 +63,6 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
   public:
     virtual clocktime_t getClockTime() const override;
 
-    virtual clocktime_t convertIntervalToClockTime(simtime_t time) const override;
-    virtual simtime_t convertClockTimeToInterval(clocktime_t time) const override;
-
     virtual void scheduleClockEventAt(clocktime_t time, ClockEvent *event) override;
     virtual void scheduleClockEventAfter(clocktime_t time, ClockEvent *event) override;
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;

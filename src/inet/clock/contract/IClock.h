@@ -42,20 +42,6 @@ class INET_API IClock
     virtual clocktime_t getClockTime() const = 0;
 
     /**
-     * Returns the clock time interval in clock ticks for the specified simulation
-     * time duration according to the current clock speed. The result depends on
-     * clock drift but not on the actual clock value.
-     */
-    virtual clocktime_t convertIntervalToClockTime(simtime_t time) const = 0;
-
-    /**
-     * Returns the simulation time interval for the specified clock time duration
-     * in clock ticks according to the current clock speed. The result depends on
-     * clock drift but not on the actual clock value.
-     */
-    virtual simtime_t convertClockTimeToInterval(clocktime_t time) const = 0;
-
-    /**
      * Schedules an event to be delivered to the caller module (i.e. the context
      * module) at the specified clock time. The event is anchored to a specific
      * clock time value, so the actual simulation time when this event is executed

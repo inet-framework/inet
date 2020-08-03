@@ -38,16 +38,6 @@ void ClockBase::updateDisplayString() const
     }
 }
 
-clocktime_t ClockBase::convertIntervalToClockTime(simtime_t time) const
-{
-    return ClockTime::from(time);
-}
-
-simtime_t ClockBase::convertClockTimeToInterval(clocktime_t time) const
-{
-    return time.asSimTime();
-}
-
 clocktime_t ClockBase::getClockTime() const
 {
     return computeClockTimeFromSimTime(simTime());
