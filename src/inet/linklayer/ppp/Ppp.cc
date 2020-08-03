@@ -40,6 +40,7 @@ simsignal_t Ppp::rxPkOkSignal = registerSignal("rxPkOk");
 Ppp::~Ppp()
 {
     cancelAndDelete(endTransmissionEvent);
+    delete curTxPacket;
 }
 
 void Ppp::initialize(int stage)
@@ -55,6 +56,7 @@ void Ppp::initialize(int stage)
         physOutGate = gate("phys$o");
         lowerLayerOutGateId = physOutGate->getId();
 
+        setTxUpdateSupport(true);
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
         // if we're connected, get the gate with transmission rate
@@ -126,10 +128,15 @@ void Ppp::refreshOutGateConnection(bool connected)
 
     if (!connected) {
         if (endTransmissionEvent->isScheduled()) {
+            ASSERT(curTxPacket != nullptr);
+            simtime_t startTransmissionTime = endTransmissionEvent->getSendingTime();
+            simtime_t sentDuration = simTime() - startTransmissionTime;
+            double sentPart = sentDuration / (endTransmissionEvent->getArrivalTime() - startTransmissionTime);
+            b newLength = b(floor(curTxPacket->getBitLength() * sentPart));
+            curTxPacket->removeAtBack(curTxPacket->getDataLength() - newLength);
+            send(curTxPacket, SendOptions().updateTx(curTxPacket->getOrigPacketId()).duration(sentDuration), physOutGate);
+            curTxPacket = nullptr;
             cancelEvent(endTransmissionEvent);
-
-            if (datarateChannel)
-                datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
 
         PacketDropDetails details;
@@ -177,6 +184,8 @@ void Ppp::startTransmitting()
         pppFrame->eraseAll();
         pppFrame->insertAtFront(bytes);
     }
+    curTxPacket = pppFrame->dup();
+    curTxPacket->setOrigPacketId(pppFrame->getId());
     send(pppFrame, physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
@@ -203,6 +212,8 @@ void Ppp::handleSelfMessage(cMessage *message)
 {
     if (message == endTransmissionEvent) {
         deleteCurrentTxFrame();
+        delete curTxPacket;
+        curTxPacket = nullptr;
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
