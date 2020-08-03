@@ -202,7 +202,7 @@ The LANs are connected to a backbone of routers.
 
 All wired connections are ``Ethernet100``, except the ones between the routers, which are ``PppChannel``, defined in the NED file:
 
-.. literalinclude:: ../Network.ned
+.. literalinclude:: ../Network3.ned
    :start-at: Ethernet100
    :end-before: ParSimNetworkBackbone
    :language: ned
