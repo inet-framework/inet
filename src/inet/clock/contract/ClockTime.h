@@ -23,8 +23,13 @@
 
 namespace inet {
 
-#ifndef WITH_CLOCK_SUPPORT
+#ifdef WITH_CLOCK_SUPPORT
+#define CLOCKTIME_AS_SIMTIME(x) (x).asSimTime()
+#define SIMTIME_AS_CLOCKTIME(x) ClockTime::from(x)
+#else
 #define ClockTime SimTime
+#define CLOCKTIME_AS_SIMTIME(x)  (x)
+#define SIMTIME_AS_CLOCKTIME(x)  (x)
 #endif // WITH_CLOCK_SUPPORT
 
 typedef ClockTime clocktime_t;
