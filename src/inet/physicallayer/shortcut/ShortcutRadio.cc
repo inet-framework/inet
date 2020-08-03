@@ -39,7 +39,7 @@ void ShortcutRadio::initialize(int stage)
         durationOverhead = &par("durationOverhead");
         propagationDelay = &par("propagationDelay");
         packetLoss = &par("packetLoss");
-        gate("radioIn")->setDeliverOnReceptionStart(true);
+        gate("radioIn")->setDeliverImmediately(true);
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
