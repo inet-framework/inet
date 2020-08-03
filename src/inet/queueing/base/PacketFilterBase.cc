@@ -251,7 +251,7 @@ void PacketFilterBase::dropPacket(Packet *packet)
 
 void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
 {
-    PacketQueueingElementBase::dropPacket(packet, reason, limit);
+    PacketProcessorBase::dropPacket(packet, reason, limit);
     numDroppedPackets++;
     droppedTotalLength += packet->getTotalLength();
 }

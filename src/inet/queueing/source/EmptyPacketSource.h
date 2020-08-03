@@ -18,13 +18,13 @@
 #ifndef __INET_EMPTYPACKETSOURCE_H
 #define __INET_EMPTYPACKETSOURCE_H
 
-#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API EmptyPacketSource : public PacketQueueingElementBase, public virtual IActivePacketSource
+class INET_API EmptyPacketSource : public PacketProcessorBase, public virtual IActivePacketSource
 {
   protected:
     cGate *outputGate = nullptr;

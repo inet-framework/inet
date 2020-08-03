@@ -19,13 +19,15 @@
 #define __INET_PACKETPROCESSORBASE_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
+#include "inet/queueing/contract/IPacketProcessor.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketProcessorBase : public PacketQueueingElementBase, public StringFormat::IDirectiveResolver
+class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacketProcessor, public StringFormat::IDirectiveResolver
 {
   protected:
     const char *displayStringTextFormat = nullptr;
@@ -33,11 +35,28 @@ class INET_API PacketProcessorBase : public PacketQueueingElementBase, public St
     b processedTotalLength = b(-1);
 
   protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handlePacketProcessed(Packet *packet);
+
+    virtual void checkPacketOperationSupport(cGate *gate) const;
+
+    virtual void pushOrSendPacket(Packet *packet, cGate *gate);
+    virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
+    virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
+    virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
+    virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, b position, b extraProcessableLength);
+
+    virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
+
     virtual void updateDisplayString() const;
+    virtual void animateSend(Packet *packet, cGate *gate);
 
   public:
+    virtual bool supportsPacketSending(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPassing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
+
     virtual const char *resolveDirective(char directive) const override;
 };
 

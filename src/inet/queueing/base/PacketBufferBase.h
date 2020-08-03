@@ -18,13 +18,13 @@
 #ifndef __INET_PACKETBUFFERBASE_H
 #define __INET_PACKETBUFFERBASE_H
 
-#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketBufferBase : public PacketQueueingElementBase, public virtual IPacketCollection
+class INET_API PacketBufferBase : public PacketProcessorBase, public virtual IPacketCollection
 {
   protected:
     const char *displayStringTextFormat = nullptr;
