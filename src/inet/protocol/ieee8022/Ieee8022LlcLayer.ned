@@ -15,14 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.protocol.ieee8022;
 
 import inet.common.MessageDispatcher;
 import inet.protocol.common.ProtocolChecker;
-import inet.protocol.ieee8022.IIeee8022LlcChecker;
-import inet.protocol.ieee8022.IIeee8022LlcInserter;
-import inet.protocol.ieee8022.IIeee8022SnapChecker;
-import inet.protocol.ieee8022.IIeee8022SnapInserter;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 

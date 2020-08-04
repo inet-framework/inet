@@ -15,23 +15,20 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.queue;
+package inet.protocol.ethernet;
 
-import inet.queueing.contract.IPacketQueue;
-
-//
-// This module can be used to omit an optional packet queue submodule.
-//
-// @see ~IPacketQueue
-//
-module OmittedPacketQueue like IPacketQueue
+module OmittedSocketLayer like ISocketLayer
 {
     parameters:
         @class(OmittedModule);
-        @display("i=block/queue");
+        @display("i=block/layer,black,50");
     gates:
-        input in;
-        output out;
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
     connections:
-        in --> out;
+        upperLayerIn --> lowerLayerOut;
+        lowerLayerIn --> upperLayerOut;
 }
+
