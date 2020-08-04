@@ -1,0 +1,141 @@
+%description:
+Test EV macros.
+
+%includes:
+#include "inet/common/IPrintableObject.h"
+#include "inet/common/Units.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::units::values;
+
+#define EV_TEST(x) EV << #x << " -> "<< x << std::endl;
+
+%activity:
+    cLog::logLevel = static_cast<LogLevel>(INT_MIN);
+
+    int i = 42;
+    EV << "int i = 42" << std::endl;
+    EV_TEST(i);
+    EV_TEST(EV_FORMAT_OBJECT(i));
+    EV << std::endl;
+
+    const char *s = "42";
+    EV << "const char *s = \"42\"" << std::endl;
+    EV_TEST(s);
+    EV_TEST(EV_FORMAT_OBJECT(s));
+    EV << std::endl;
+
+    cNamedObject n1("42");
+    EV << "cNamedObject n1(\"42\")" << std::endl;
+    EV_TEST(n1);
+    EV_TEST(EV_FORMAT_OBJECT(n1));
+    EV_TEST(&n1);
+    EV_TEST(EV_FORMAT_OBJECT(&n1));
+    EV << std::endl;
+
+	cNamedObject *n2 = nullptr;
+    EV << "cNamedObject *n2 = nullptr" << std::endl;
+    EV_TEST(n2);
+    EV_TEST(EV_FORMAT_OBJECT(n2));
+    EV << std::endl;
+
+    ByteCountChunk c(B(42));
+    EV << "ByteCountChunk c(B(42))" << std::endl;
+    EV_TEST(c);
+    EV_TEST(EV_FORMAT_OBJECT(c));
+    EV_TEST(&c);
+    EV_TEST(EV_FORMAT_OBJECT(&c));
+    EV << std::endl;
+
+    W w(42); // has no operator<<
+    EV << "W w(42)" << std::endl;
+    EV_TEST(w);
+    EV_TEST(EV_FORMAT_OBJECT(w));
+    EV_TEST(&w);
+    EV_TEST(EV_FORMAT_OBJECT(&w));
+    EV << std::endl;
+
+    Packet p1("42");
+    EV << "Packet p1(\"42\")" << std::endl;
+    EV_TEST(p1);
+    EV_TEST(EV_FORMAT_OBJECT(p1));
+    EV_TEST(&p1);
+    EV_TEST(EV_FORMAT_OBJECT(&p1));
+    EV << std::endl;
+
+    Packet *p2 = nullptr;
+    EV << "Packet *p2 = nullptr" << std::endl;
+    EV_TEST(p2);
+    EV_TEST(EV_FORMAT_OBJECT(p2));
+    EV << std::endl;
+
+    cObject *p3 = new Packet("42"); // pointer to base type
+    EV << "cObject *p3 = new Packet(\"42\")" << std::endl;
+    EV_TEST(*p3);
+    EV_TEST(EV_FORMAT_OBJECT(*p3));
+    EV_TEST(p3);
+    EV_TEST(EV_FORMAT_OBJECT(p3));
+    EV << std::endl;
+
+    std::vector<int> v;
+    EV << "std::vector<int> v" << std::endl;
+//    EV_TEST(v); // std::vector doesn't operator<< by default
+//    EV_TEST(EV_FORMAT_OBJECT(v)); // std::vector doesn't operator<< by default
+    EV_TEST(&v);
+    EV_TEST(EV_FORMAT_OBJECT(&v));
+    EV << std::endl;
+
+%contains-regex: stdout
+int i = 42
+i -> 42
+EV_FORMAT_OBJECT\(i\) -> 42
+
+const char \*s = "42"
+s -> 42
+EV_FORMAT_OBJECT\(s\) -> 42
+
+cNamedObject n1\("42"\)
+n1 -> \(omnetpp::cNamedObject\)42
+EV_FORMAT_OBJECT\(n1\) -> 
+&n1 -> \(omnetpp::cNamedObject\)42
+EV_FORMAT_OBJECT\(&n1\) -> 
+
+cNamedObject \*n2 = nullptr
+n2 -> <nullptr>
+EV_FORMAT_OBJECT\(n2\) -> <nullptr>
+
+ByteCountChunk c\(B\(42\)\)
+c -> \(inet::ByteCountChunk\) length = 42 B, data = 63
+EV_FORMAT_OBJECT\(c\) -> \[2mByteCountChunk\[0m, \[1mlength\[0m = 42 B, \[1mdata\[0m = 63
+&c -> \(inet::ByteCountChunk\) length = 42 B, data = 63
+EV_FORMAT_OBJECT\(&c\) -> \[2mByteCountChunk\[0m, \[1mlength\[0m = 42 B, \[1mdata\[0m = 63
+
+W w\(42\)
+w -> 42 W
+EV_FORMAT_OBJECT\(w\) -> 42 W
+&w -> 0x[0-9a-f]+
+EV_FORMAT_OBJECT\(&w\) -> 0x[0-9a-f]+
+
+Packet p1\("42"\)
+p1 -> \(inet::Packet\)42 \(0 B\) \(inet::EmptyChunk\)
+EV_FORMAT_OBJECT\(p1\) -> \[2m\(Packet\)\[0m\[3m42\[0m \(0 B\) \[2mEmptyChunk\[0m
+\&p1 -> \(inet::Packet\)42 \(0 B\) \(inet::EmptyChunk\)
+EV_FORMAT_OBJECT\(\&p1\) -> \[2m\(Packet\)\[0m\[3m42\[0m \(0 B\) \[2mEmptyChunk\[0m
+
+Packet \*p2 = nullptr
+p2 -> <nullptr>
+EV_FORMAT_OBJECT\(p2\) -> <nullptr>
+
+cObject \*p3 = new Packet\("42"\)
+\*p3 -> \(inet::Packet\)42 \(0 B\) \(inet::EmptyChunk\) 
+EV_FORMAT_OBJECT\(\*p3\) -> \[2m\(Packet\)\[0m\[3m42\[0m \(0 B\) \[2mEmptyChunk\[0m
+p3 -> \(inet::Packet\)42 \(0 B\) \(inet::EmptyChunk\)
+EV_FORMAT_OBJECT\(p3\) -> \[2m\(Packet\)\[0m\[3m42\[0m \(0 B\) \[2mEmptyChunk\[0m
+
+std::vector<int> v
+\&v -> 0x[0-9a-f]+
+EV_FORMAT_OBJECT\(\&v\) -> 0x[0-9a-f]+
