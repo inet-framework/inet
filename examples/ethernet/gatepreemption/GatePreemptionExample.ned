@@ -15,11 +15,11 @@
 
 package inet.examples.ethernet.gatepreemption;
 
+import inet.linklayer.ethernet.layered.EthernetMacLayer;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.protocol.common.PreemptableStreamer;
-import inet.protocol.ethernet.EthernetMacLayer;
 import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
 import inet.queueing.contract.IPacketBuffer;
 import inet.queueing.contract.IPacketClassifier;
