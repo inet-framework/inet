@@ -53,7 +53,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     }
     // 3. peeking without conversion returns a BytesChunk or SliceChunk
     if (converter == nullptr) {
-        // 3. peeking complete bytes without conversion returns a BytesChunk or SliceChunk
+        // 3.a) peeking complete bytes without conversion returns a BytesChunk
         if (b(iterator.getPosition()).get() % 8 == 0 && (length < b(0) || length.get() % 8 == 0)) {
             B startOffset = iterator.getPosition();
             B endOffset = iterator.getPosition() + (length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
@@ -63,7 +63,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
             return chunk;
         }
         else
-            // 4. peeking incomplete bytes without conversion returns a SliceChunk
+            // 3.b) peeking incomplete bytes without conversion returns a SliceChunk
             return peekConverted<SliceChunk>(iterator, length, flags);
     }
     // 4. peeking with conversion
