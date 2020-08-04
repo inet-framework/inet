@@ -27,7 +27,7 @@ import inet.queueing.contract.IPacketQueue;
 module OmittedPacketQueue like IPacketQueue
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/queue");
     gates:
         input in;
