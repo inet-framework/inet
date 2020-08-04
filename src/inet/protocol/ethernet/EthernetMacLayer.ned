@@ -38,7 +38,7 @@ module EthernetMacLayer like IEthernetMacLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        queue: <default("PacketQueue")> like IPacketQueue {
+        queue: <default("PacketQueue")> like IPacketQueue if typename != "" {
             @display("p=200,100");
         }
         server: <default("InstantServer")> like IPacketServer {

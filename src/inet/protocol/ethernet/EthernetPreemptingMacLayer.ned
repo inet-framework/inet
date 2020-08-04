@@ -20,6 +20,7 @@ package inet.protocol.ethernet;
 import inet.protocol.server.PreemptingServer;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.IPacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 
 module EthernetPreemptingMacLayer like IEthernetMacLayer
@@ -33,32 +34,36 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        outboundClassifier: PacketClassifier {
-            classifierClass = default("inet::PacketVlanReqClassifier");
+        queue: <default("OmittedPacketQueue")> like IPacketQueue if typename != "" {
             @display("p=200,100");
         }
+        outboundClassifier: PacketClassifier {
+            classifierClass = default("inet::PacketVlanReqClassifier");
+            @display("p=200,200");
+        }
         expressMacLayer: <default("EthernetStreamingMacLayer")> like IEthernetMacLayer {
-            @display("p=300,200");
+            @display("p=300,300");
         }
         preemptableMacLayer: <default("EthernetFragmentingMacLayer")> like IEthernetMacLayer {
-            @display("p=500,200");
+            @display("p=500,300");
         }
         scheduler: PriorityScheduler {
-            @display("p=200,300");
+            @display("p=200,400");
         }
         preemptingServer: PreemptingServer {
             datarate = default(bitrate);
-            @display("p=200,400");
+            @display("p=200,500");
         }
         inboundClassifier: PacketClassifier {
             classifierClass = default("inet::PacketFragmentTagClassifier");
-            @display("p=600,300");
+            @display("p=600,400");
         }
         multiplexer: PacketMultiplexer {
-            @display("p=600,100");
+            @display("p=600,200");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> outboundClassifier.in;
+        upperLayerIn --> { @display("m=n"); } -->  queue.in;
+        queue.out --> outboundClassifier.in;
         outboundClassifier.out++ --> expressMacLayer.upperLayerIn;
         outboundClassifier.out++ --> preemptableMacLayer.upperLayerIn;
         expressMacLayer.lowerLayerOut --> scheduler.in++;
