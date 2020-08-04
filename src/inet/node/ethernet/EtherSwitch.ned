@@ -26,7 +26,7 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.ethernet.layered.SimpleEthernetLayer;
+import inet.linklayer.ethernet.layered.IEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
 
 //
@@ -96,7 +96,7 @@ module EtherSwitch
             parameters:
                 @display("p=250,450,row,150;q=txQueue");
         }
-        ethernet: SimpleEthernetLayer {
+        ethernet: <default("SimpleEthernetLayer")> like IEthernetLayer {
             @display("p=800,300");
         }
         cutthrough: MessageDispatcher if enableCutthrough {

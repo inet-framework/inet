@@ -25,9 +25,8 @@ import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IVlanInterface;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.ethernet.layered.SimpleEthernetLayer;
+import inet.linklayer.ethernet.layered.IEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
-
 
 module LinkLayerNodeBase extends NodeBase
 {
@@ -67,7 +66,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=750,596;b=1000,5,,,,1");
         }
-        ethernet: SimpleEthernetLayer {
+        ethernet: <default("SimpleEthernetLayer")> like IEthernetLayer {
             parameters:
                 @display("p=375,526");
         }
