@@ -20,6 +20,8 @@ INET 4.3 release TODO items:
 
 5. Ethernet model
 
+ - Choose between the possible Ethernet tag representations.
+ - Add Ethernet socket support to layered model.
  - Move layered Ethernet protocol components to the right place.
  - Support having a single queue in the Ethernet network interface.
 
@@ -38,8 +40,9 @@ INET 4.3 release TODO items:
  - Add examples that demonstrate the feature.
  - Add documentation to the User's Guide.
 
-7. General
+9. General
 
+ - Implement fingerprints for figures and values for all example simulations.
  - Rename InterfaceEntry to NetworkInterface.
 
 ===============================================================================
