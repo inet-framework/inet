@@ -135,6 +135,14 @@ void NetworkInterface::initialize(int stage)
             setMulticast(par("multicast"));
         if (hasPar("bitrate"))
             setDatarate(par("bitrate"));
+        if (hasGate("phys$o")) {
+            auto g = gate("phys$o");
+            auto channel = g->findTransmissionChannel();
+            if (channel != nullptr && channel->hasPar("datarate"))
+                setDatarate(channel->par("datarate"));
+            else
+                setCarrier(false);
+        }
         if (hasPar("mtu"))
             setMtu(par("mtu"));
         if (hasPar("pointToPoint"))
