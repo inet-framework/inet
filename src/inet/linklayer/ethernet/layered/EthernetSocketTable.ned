@@ -15,9 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+
+simple EthernetSocketTable
 {
     parameters:
         @display("i=block/table");

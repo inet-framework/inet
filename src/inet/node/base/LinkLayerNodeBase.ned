@@ -25,15 +25,9 @@ import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IVlanInterface;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.ethernet.switch.MacRelayUnit;
+import inet.linklayer.ethernet.layered.SimpleEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
-import inet.protocol.ethernet.SimpleEthernetLayer;
-import inet.protocol.ieee8021q.IIeee8021qChecker;
-import inet.protocol.ieee8021q.IIeee8021qInserter;
-import inet.queueing.common.PacketMultiplexer;
-import inet.queueing.contract.IPacketClassifier;
-import inet.queueing.contract.IPacketFilter;
-import inet.queueing.contract.IPacketFlow;
+
 
 module LinkLayerNodeBase extends NodeBase
 {

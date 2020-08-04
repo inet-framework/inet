@@ -15,11 +15,13 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+module EthernetStreamingMacLayer extends EthernetMacLayer
 {
     parameters:
-        @display("i=block/table");
+        server.typename = default("OmittedPacketServer");
+        streamer.typename = default("PacketStreamer");
+        transmitter.typename = default("StreamingTransmitter");
+        receiver.typename = default("DestreamingReceiver");
 }
-

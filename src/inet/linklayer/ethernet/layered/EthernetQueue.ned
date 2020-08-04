@@ -15,11 +15,12 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+import inet.queueing.queue.PacketQueue;
+
+module EthernetQueue extends PacketQueue
 {
     parameters:
-        @display("i=block/table");
+        comparatorClass = default("inet::PacketUserPriorityIndComparator");
 }
-

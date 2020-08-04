@@ -15,11 +15,16 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+simple EthernetSocketPacketProcessor
 {
     parameters:
-        @display("i=block/table");
+        @display("i=block/inserter");
+        string socketTableModule;
+    gates:
+        input in @labels(send);
+        output out @labels(send);
+        output socketOut @labels(send);
 }
 

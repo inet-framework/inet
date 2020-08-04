@@ -15,11 +15,15 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+moduleinterface IEthernetMacLayer
 {
     parameters:
-        @display("i=block/table");
+        @display("i=block/layer");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }
-

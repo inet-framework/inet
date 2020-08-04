@@ -15,11 +15,14 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
+
+simple EthernetTypeOrLengthInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        @display("i=block/table");
+        @class(EthernetTypeOrLengthInserter);
+        @display("i=block/inserter");
 }
-

@@ -15,11 +15,14 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+import inet.queueing.base.PacketFilterBase;
+import inet.queueing.contract.IPacketFilter;
+
+simple EthernetFcsChecker extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        @display("i=block/table");
+        @class(EthernetFcsChecker);
+        @display("i=block/checker");
 }
-

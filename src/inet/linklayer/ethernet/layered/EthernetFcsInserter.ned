@@ -15,11 +15,15 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.linklayer.ethernet.layered;
 
-simple LlcSocketTable
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
+
+simple EthernetFcsInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        @display("i=block/table");
+        string fcsMode @enum("disabled","declared","computed") = default("declared");
+        @class(EthernetFcsInserter);
+        @display("i=block/inserter");
 }
-

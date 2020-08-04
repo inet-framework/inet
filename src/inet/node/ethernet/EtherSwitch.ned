@@ -26,8 +26,8 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
+import inet.linklayer.ethernet.layered.SimpleEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
-import inet.protocol.ethernet.SimpleEthernetLayer;
 
 //
 // Model of an Ethernet switch.
