@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.physicallayer.ethernet;
 
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;

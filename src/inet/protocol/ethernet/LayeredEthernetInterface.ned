@@ -17,6 +17,7 @@ package inet.protocol.ethernet;
 
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.NetworkInterface;
+import inet.physicallayer.ethernet.IEthernetPhyLayer;
 
 module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {

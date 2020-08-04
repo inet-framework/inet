@@ -17,6 +17,7 @@
 
 package inet.protocol.ethernet;
 
+import inet.physicallayer.ethernet.IEthernetPhyLayer;
 import inet.protocol.common.InterPacketGap;
 import inet.protocol.transceiver.contract.IPacketReceiver;
 import inet.protocol.transceiver.contract.IPacketTransmitter;

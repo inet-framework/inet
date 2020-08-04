@@ -15,14 +15,15 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.physicallayer.ethernet;
 
-import inet.queueing.base.PacketFilterBase;
-import inet.queueing.contract.IPacketFilter;
-
-simple EthernetPreambleChecker extends PacketFilterBase like IPacketFilter
+moduleinterface IEthernetPhyLayer
 {
     parameters:
-        @class(EthernetPreambleChecker);
-        @display("i=block/checker");
+        @display("i=block/layer");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }

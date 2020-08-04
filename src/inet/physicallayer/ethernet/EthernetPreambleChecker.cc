@@ -17,7 +17,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/protocol/ethernet/EthernetPreambleChecker.h"
+#include "inet/physicallayer/ethernet/EthernetPreambleChecker.h"
 
 namespace inet {
 
