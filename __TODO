@@ -1,3 +1,49 @@
+INET 4.3 release TODO items:
+
+1. Clock model
+
+ - Add documentation to the User's Guide.
+
+2. Packet API
+
+ - Review packet data insertion, replace and update API.
+ - Update tags and region tags documentation in Developer's Guide.
+
+3. Queueing model
+
+ - Review interfaces in contract folder with respect to packet streaming.
+ - Review streaming implementation in all components.
+
+4. Protocol support model
+
+ - Review all added components.
+
+5. Ethernet model
+
+ - Move layered Ethernet protocol components to the right place.
+ - Support having a single queue in the Ethernet network interface.
+
+6. Packet flow
+
+ - Add examples that demonstrate the feature.
+ - Add documentation to the User's Guide.
+
+7. Timing measurement
+
+ - Add examples that demonstrate the feature.
+ - Add documentation to the User's Guide.
+
+8. Packet events
+
+ - Add examples that demonstrate the feature.
+ - Add documentation to the User's Guide.
+
+7. General
+
+ - Rename InterfaceEntry to NetworkInterface.
+
+===============================================================================
+
 1. The queue submodule of the MAC layer module should probably go one level up into the network interface module.
    This can either be the default architecture or it can be optional. We are going to decide later when we have
    more examples working. In any case, it should work either way.
