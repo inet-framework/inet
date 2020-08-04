@@ -55,7 +55,7 @@ void Radio::initialize(int stage)
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
-        radioIn->setDeliverOnReceptionStart(true);
+        radioIn->setDeliverImmediately(true);
         sendRawBytes = par("sendRawBytes");
         separateTransmissionParts = par("separateTransmissionParts");
         separateReceptionParts = par("separateReceptionParts");

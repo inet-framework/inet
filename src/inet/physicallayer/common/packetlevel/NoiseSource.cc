@@ -44,7 +44,7 @@ void NoiseSource::initialize(int stage)
         medium = getModuleFromPar<IRadioMedium>(par("radioMediumModule"), this);
         mediumModuleId = check_and_cast<cModule *>(medium)->getId();
         radioIn = gate("radioIn");
-        radioIn->setDeliverOnReceptionStart(true);
+        radioIn->setDeliverImmediately(true);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
