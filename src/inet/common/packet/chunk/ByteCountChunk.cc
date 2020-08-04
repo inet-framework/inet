@@ -15,6 +15,7 @@
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
 
@@ -55,12 +56,18 @@ const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConv
         if (predicate == nullptr || predicate(result))
             return result;
     }
-    // 3. peeking without conversion returns a ByteCountChunk
+    // 3. peeking without conversion returns a ByteCountChunk or SliceChunk
     if (converter == nullptr) {
-        auto chunk = makeShared<ByteCountChunk>(length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
-        chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
-        chunk->markImmutable();
-        return chunk;
+        // 3.a) peeking complete bytes without conversion returns a ByteCountChunk
+        if (b(iterator.getPosition()).get() % 8 == 0 && (length < b(0) || length.get() % 8 == 0)) {
+            auto chunk = makeShared<ByteCountChunk>(length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
+            chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
+            chunk->markImmutable();
+            return chunk;
+        }
+        else
+            // 3.b) peeking incomplete bytes without conversion returns a SliceChunk
+            return peekConverted<SliceChunk>(iterator, length, flags);
     }
     // 4. peeking with conversion
     return converter(const_cast<ByteCountChunk *>(this)->shared_from_this(), iterator, length, flags);
