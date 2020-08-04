@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace physicallayer {
+
 Define_Module(EthernetPreambleInserter);
 
 void EthernetPreambleInserter::processPacket(Packet *packet)
@@ -29,6 +31,8 @@ void EthernetPreambleInserter::processPacket(Packet *packet)
     packet->insertAtFront(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
 }
+
+} // namespace physicallayer
 
 } // namespace inet
 

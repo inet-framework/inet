@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace physicallayer {
+
 Define_Module(EthernetPreambleChecker);
 
 void EthernetPreambleChecker::processPacket(Packet *packet)
@@ -42,6 +44,8 @@ void EthernetPreambleChecker::dropPacket(Packet *packet)
 {
     PacketFilterBase::dropPacket(packet, INCORRECTLY_RECEIVED);
 }
+
+} // namespace physicallayer
 
 } // namespace inet
 

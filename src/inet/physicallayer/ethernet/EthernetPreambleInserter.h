@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace physicallayer {
+
 using namespace inet::queueing;
 
 class INET_API EthernetPreambleInserter : public PacketFlowBase
@@ -29,6 +31,8 @@ class INET_API EthernetPreambleInserter : public PacketFlowBase
   protected:
     virtual void processPacket(Packet *packet) override;
 };
+
+} // namespace physicallayer
 
 } // namespace inet
 

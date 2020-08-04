@@ -24,6 +24,8 @@ namespace inet {
 
 using namespace inet::queueing;
 
+namespace physicallayer {
+
 class INET_API EthernetPreambleChecker : public PacketFilterBase
 {
   protected:
@@ -33,6 +35,8 @@ class INET_API EthernetPreambleChecker : public PacketFilterBase
   public:
     virtual bool matchesPacket(const Packet *packet) const override;
 };
+
+} // namespace physicallayer
 
 } // namespace inet
 
