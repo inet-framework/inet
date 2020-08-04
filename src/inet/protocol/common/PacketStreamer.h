@@ -48,6 +48,8 @@ class INET_API PacketStreamer : public PacketProcessorBase, public virtual IPack
     virtual bool isStreaming() const { return streamedPacket != nullptr; }
 
   public:
+    virtual ~PacketStreamer();
+
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
 

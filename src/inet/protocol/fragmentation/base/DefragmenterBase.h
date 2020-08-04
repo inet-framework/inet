@@ -41,6 +41,9 @@ class INET_API DefragmenterBase : public PacketPusherBase
     virtual void endDefragmentation(Packet *fragmentPacket);
 
     virtual void defragmentPacket(Packet *fragmentPacket, bool firstFragment, bool lastFragment, bool expectedFragment);
+
+  public:
+    virtual ~DefragmenterBase();
 };
 
 } // namespace inet

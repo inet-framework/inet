@@ -19,6 +19,11 @@
 
 namespace inet {
 
+DefragmenterBase::~DefragmenterBase()
+{
+    delete defragmentedPacket;
+}
+
 void DefragmenterBase::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);

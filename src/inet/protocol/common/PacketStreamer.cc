@@ -22,6 +22,11 @@ namespace inet {
 
 Define_Module(PacketStreamer);
 
+PacketStreamer::~PacketStreamer()
+{
+    delete streamedPacket;
+}
+
 void PacketStreamer::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);

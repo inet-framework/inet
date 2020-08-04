@@ -24,6 +24,11 @@ namespace inet {
 
 Define_Module(PreemptableStreamer);
 
+PreemptableStreamer::~PreemptableStreamer()
+{
+    delete streamedPacket;
+}
+
 void PreemptableStreamer::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);

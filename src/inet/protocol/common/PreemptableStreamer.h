@@ -51,6 +51,8 @@ class INET_API PreemptableStreamer : public PacketProcessorBase, public virtual 
     virtual bool isStreaming() const { return streamedPacket != nullptr; }
 
   public:
+    virtual ~PreemptableStreamer();
+
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
 
