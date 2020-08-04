@@ -22,7 +22,7 @@ import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
-module SimpleEthernetLayer
+module SimpleEthernetLayer like IEthernetLayer
 {
     parameters:
         string interfaceTableModule;
