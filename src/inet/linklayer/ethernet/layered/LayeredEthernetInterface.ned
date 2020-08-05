@@ -18,6 +18,8 @@ package inet.linklayer.ethernet.layered;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.ethernet.IEthernetPhyLayer;
+import inet.protocol.trafficconditioner.ITrafficConditionerLayer;
+
 
 module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {
@@ -30,7 +32,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         string interfaceTableModule;
         *.bitrate = default(bitrate);
         @class(NetworkInterface);
-        @display("i=block/ifcard;bgb=700,300");
+        @display("i=block/ifcard;bgb=700,400");
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -38,18 +40,23 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         output cutthroughOut @loose;
         inout phys;
     submodules:
-        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
+        trafficConditionerLayer: <default("OmittedTrafficConditionerLayer")> like ITrafficConditionerLayer {
             @display("p=500,100");
         }
-        phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
+        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             @display("p=500,200");
         }
+        phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
+            @display("p=500,300");
+        }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> macLayer.upperLayerIn;
+        upperLayerIn --> { @display("m=n"); } --> trafficConditionerLayer.upperLayerIn;
+        trafficConditionerLayer.lowerLayerOut --> macLayer.upperLayerIn;
         macLayer.lowerLayerOut --> phyLayer.upperLayerIn;
         phyLayer.lowerLayerOut --> { @display("m=s"); } --> phys$o;
 
         phys$i --> { @display("m=s"); } --> phyLayer.lowerLayerIn;
         phyLayer.upperLayerOut --> macLayer.lowerLayerIn;
-        macLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        macLayer.upperLayerOut --> trafficConditionerLayer.lowerLayerIn;
+        trafficConditionerLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
