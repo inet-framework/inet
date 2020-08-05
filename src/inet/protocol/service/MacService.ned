@@ -17,8 +17,8 @@
 
 package inet.protocol.service;
 
-import inet.protocol.classifier.DynamicClassifier;
 import inet.protocol.fragmentation.FragmentNumberHeaderBasedDefragmenter;
+import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
 module PeerService

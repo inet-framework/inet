@@ -15,28 +15,12 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_DYNAMICCLASSIFIER_H
-#define __INET_DYNAMICCLASSIFIER_H
+package inet.queueing.classifier;
 
-#include "inet/queueing/classifier/PacketClassifier.h"
-
-namespace inet {
-
-using namespace inet::queueing;
-
-class INET_API DynamicClassifier : public PacketClassifier
+simple DynamicClassifier extends PacketClassifier
 {
-  protected:
-    const char *submoduleName = nullptr;
-    cModuleType *moduleType = nullptr;
-    std::map<int, int> classIndexToGateItMap;
-
-  protected:
-    virtual void initialize(int stage) override;
-    virtual int classifyPacket(Packet *packet) override;
-};
-
-} // namespace inet
-
-#endif // ifndef __INET_DYNAMICCLASSIFIER_H
-
+    parameters:
+        string submoduleName;
+        string moduleType;
+        @class(DynamicClassifier);
+}

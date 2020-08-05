@@ -17,9 +17,10 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocol/classifier/DynamicClassifier.h"
+#include "inet/queueing/classifier/DynamicClassifier.h"
 
 namespace inet {
+namespace queueing {
 
 Define_Module(DynamicClassifier);
 
@@ -62,5 +63,6 @@ int DynamicClassifier::classifyPacket(Packet *packet)
         return it->second;
 }
 
+} // namespace queueing
 } // namespace inet
 

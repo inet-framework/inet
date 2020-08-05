@@ -19,7 +19,6 @@ package inet.tutorials.protocol;
 
 import inet.protocol.checksum.FcsHeaderChecker;
 import inet.protocol.checksum.FcsHeaderInserter;
-import inet.protocol.classifier.DynamicClassifier;
 import inet.protocol.common.InterPacketGap;
 import inet.protocol.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.protocol.ordering.SequenceNumbering;
@@ -28,6 +27,7 @@ import inet.protocol.server.PreemptingServer;
 import inet.protocol.transceiver.PacketReceiver;
 import inet.protocol.transceiver.StreamThroughTransmitter;
 import inet.queueing.classifier.ContentBasedClassifier;
+import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.marker.PacketTagger;
 import inet.queueing.queue.PacketQueue;
@@ -35,7 +35,6 @@ import inet.queueing.server.InstantServer;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 import ned.TransmissionChannel;
-
 
 module SenderHost
 {
@@ -110,7 +109,7 @@ module SenderHost
         fragmenter.out --> multiplexer2.in++;
         multiplexer2.out --> inProgressQueue.in;
         inProgressQueue.out --> preemptingServer.in;
-// TODO:        preemptingServer.preemptedOut --> multiplexer2.in++;
+        // TODO:        preemptingServer.preemptedOut --> multiplexer2.in++;
         preemptingServer.out --> fcsInserter.in;
         fcsInserter.out --> interPacketGap.in;
         interPacketGap.out --> transmitter.in;
