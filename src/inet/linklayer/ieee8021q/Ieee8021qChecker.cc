@@ -18,7 +18,7 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/protocol/ieee8021q/Ieee8021qChecker.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qChecker.h"
 
 namespace inet {
 

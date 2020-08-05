@@ -13,18 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8021q;
+package inet.linklayer.ieee8021q;
 
-module OmittedIeee8021qChecker like IIeee8021qChecker
+moduleinterface IIeee8021qInserter
 {
     parameters:
-        string vlanTagType = default("");
-        @class(OmittedModule);
-        @display("i=block/cogwheel,black,50");
+        string vlanTagType @enum("c","s");
+        @display("i=block/cogwheel");
     gates:
         input in;
         output out;
-	connections:
-	    in --> out;
 }
 

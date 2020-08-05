@@ -13,15 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8021q;
+package inet.linklayer.ieee8021q;
 
-moduleinterface IIeee8021qTagger
+import inet.queueing.base.PacketFlowBase;
+
+simple Ieee8021qInserter extends PacketFlowBase like IIeee8021qInserter
 {
     parameters:
-        string vlanTagType @enum("c","s");
+        string vlanTagType @enum("c","s") = default("c");
+        @class(Ieee8021qInserter);
         @display("i=block/cogwheel");
-    gates:
-        input in;
-        output out;
 }
 

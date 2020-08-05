@@ -13,16 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8021q;
+package inet.linklayer.ieee8021q;
 
 import inet.queueing.base.PacketFilterBase;
 
-simple Ieee8021qChecker extends PacketFilterBase like IIeee8021qChecker
+simple Ieee8021qTagger extends PacketFilterBase like IIeee8021qTagger
 {
     parameters:
         string vlanTagType @enum("c","s") = default("c");
         string vlanIdFilter = default("");
-        @class(Ieee8021qChecker);
+        string vlanIdMap = default("");
+        @class(Ieee8021qTagger);
         @display("i=block/cogwheel");
 }
 

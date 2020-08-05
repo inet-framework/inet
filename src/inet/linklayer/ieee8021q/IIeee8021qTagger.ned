@@ -13,9 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8021q;
+package inet.linklayer.ieee8021q;
 
-moduleinterface IIeee8021qChecker
+moduleinterface IIeee8021qTagger
 {
     parameters:
         string vlanTagType @enum("c","s");

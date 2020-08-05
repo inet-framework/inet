@@ -13,17 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8021q;
+package inet.linklayer.ieee8021q;
 
-import inet.queueing.base.PacketFilterBase;
-
-simple Ieee8021qTagger extends PacketFilterBase like IIeee8021qTagger
+module OmittedIeee8021qInserter like IIeee8021qInserter
 {
     parameters:
-        string vlanTagType @enum("c","s") = default("c");
-        string vlanIdFilter = default("");
-        string vlanIdMap = default("");
-        @class(Ieee8021qTagger);
-        @display("i=block/cogwheel");
+        string vlanTagType = default("");
+        @class(OmittedModule);
+        @display("i=block/cogwheel,black,50");
+    gates:
+        input in;
+        output out;
+	connections:
+	    in --> out;
 }
 
