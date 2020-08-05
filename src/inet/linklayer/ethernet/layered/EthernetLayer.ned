@@ -15,8 +15,8 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.ieee8021q.IIeee8021qChecker;
-import inet.protocol.ieee8021q.IIeee8021qInserter;
+import inet.linklayer.ieee8021q.IIeee8021qChecker;
+import inet.linklayer.ieee8021q.IIeee8021qInserter;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFilter;
