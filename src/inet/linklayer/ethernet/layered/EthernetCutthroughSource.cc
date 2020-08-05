@@ -73,7 +73,7 @@ void EthernetCutthroughSource::pushPacketStart(Packet *packet, cGate *gate, bps 
     updateDisplayString();
 }
 
-void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
 {
     if (cutthroughInProgress) {
         Enter_Method("pushPacketEnd");
@@ -88,13 +88,13 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate, bps da
         streamedPacket = packet;
         streamDatarate = datarate;
         EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
-        pushOrSendPacketEnd(streamedPacket, cutthroughOutputGate, cutthroughConsumer, datarate);
+        pushOrSendPacketEnd(streamedPacket, cutthroughOutputGate, cutthroughConsumer);
         streamedPacket = nullptr;
         cutthroughInProgress = false;
         updateDisplayString();
     }
     else
-        PacketDestreamer::pushPacketEnd(packet, gate, datarate);
+        PacketDestreamer::pushPacketEnd(packet, gate);
 }
 
 } // namespace inet

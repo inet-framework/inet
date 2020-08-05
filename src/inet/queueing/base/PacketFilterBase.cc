@@ -112,7 +112,7 @@ void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate
     updateDisplayString();
 }
 
-void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -124,7 +124,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
         processPacket(packet);
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         endPacketStreaming(packet);
-        pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
+        pushOrSendPacketEnd(packet, outputGate, consumer);
     }
     else {
         EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;

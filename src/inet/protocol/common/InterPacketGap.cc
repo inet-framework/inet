@@ -103,7 +103,7 @@ void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double
 void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    pushOrSendPacketEnd(packet, outputGate, consumer, bps(datarate));
+    pushOrSendPacketEnd(packet, outputGate, consumer);
 }
 
 bool InterPacketGap::canPushSomePacket(cGate *gate) const
@@ -160,11 +160,11 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
     pushOrSendOrSchedulePacketProgress(packet, gate, datarate, b(0), b(0));
 }
 
-void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
-    pushOrSendOrSchedulePacketProgress(packet, gate, datarate, packet->getDataLength(), b(0));
+    pushOrSendOrSchedulePacketProgress(packet, gate, bps(NaN), packet->getDataLength(), b(0));
 }
 
 void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)

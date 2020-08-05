@@ -133,15 +133,15 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPa
     }
 }
 
-void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate)
+void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
 {
     if (consumer != nullptr) {
-        animateSendPacketEnd(packet, gate, datarate);
-        consumer->pushPacketEnd(packet, gate->getPathEndGate(), datarate);
+        animateSendPacketEnd(packet, gate);
+        consumer->pushPacketEnd(packet, gate->getPathEndGate());
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
-        progressTag->setDatarate(datarate);
+        progressTag->setDatarate(bps(NaN));
         progressTag->setPosition(packet->getTotalLength());
         send(packet, SendOptions().duration(packet->getDuration()), gate);
     }
@@ -155,8 +155,8 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, 
             consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
         }
         else if (position == packet->getTotalLength()) {
-            animateSendPacketEnd(packet, gate, datarate);
-            consumer->pushPacketEnd(packet, gate->getPathEndGate(), datarate);
+            animateSendPacketEnd(packet, gate);
+            consumer->pushPacketEnd(packet, gate->getPathEndGate());
         }
         else {
             animateSendPacketProgress(packet, gate, datarate, position, extraProcessableLength);
@@ -233,7 +233,7 @@ void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bp
     animateSend(packet, gate, duration, duration);
 }
 
-void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate, bps datarate) const
+void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate) const
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
     animateSend(packet, gate, -1, 0);

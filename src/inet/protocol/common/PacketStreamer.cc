@@ -73,7 +73,7 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
     pushOrSendPacketStart(packet, outputGate, consumer, streamDatarate);
     EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, streamDatarate);
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
     numProcessedPackets++;

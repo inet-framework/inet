@@ -93,7 +93,7 @@ void PacketFlowBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
     updateDisplayString();
 }
 
-void PacketFlowBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void PacketFlowBase::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -104,7 +104,7 @@ void PacketFlowBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
     processPacket(packet);
     emit(packetPushedSignal, packet);
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
     updateDisplayString();
 }
 
@@ -121,7 +121,7 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
     if (isPacketEnd) {
         emit(packetPushedSignal, packet);
         endPacketStreaming(packet);
-        pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
+        pushOrSendPacketEnd(packet, outputGate, consumer);
     }
     else
         pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
@@ -195,7 +195,7 @@ Packet *PacketFlowBase::pullPacketEnd(cGate *gate, bps datarate)
     inProgressStreamId = packet->getTreeId();
     emit(packetPulledSignal, packet);
     endPacketStreaming(packet);
-    animateSendPacketEnd(packet, outputGate, datarate);
+    animateSendPacketEnd(packet, outputGate);
     updateDisplayString();
     return packet;
 }

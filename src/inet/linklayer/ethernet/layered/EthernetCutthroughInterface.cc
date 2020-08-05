@@ -41,11 +41,11 @@ void EthernetCutthroughInterface::pushPacketStart(Packet *packet, cGate *gate, b
     cutthroughConsumer->pushPacketStart(packet, cutthroughOutputGate->getPathEndGate(), datarate);
 }
 
-void EthernetCutthroughInterface::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void EthernetCutthroughInterface::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-    cutthroughConsumer->pushPacketEnd(packet, cutthroughOutputGate->getPathEndGate(), datarate);
+    cutthroughConsumer->pushPacketEnd(packet, cutthroughOutputGate->getPathEndGate());
 }
 
 } // namespace inet

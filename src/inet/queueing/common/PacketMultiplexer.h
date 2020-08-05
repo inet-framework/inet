@@ -60,7 +60,7 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
 
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
 
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 

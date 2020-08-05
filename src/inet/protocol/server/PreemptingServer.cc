@@ -58,7 +58,7 @@ void PreemptingServer::endStreaming()
     delete streamedPacket;
     streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
     take(streamedPacket);
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, datarate);
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
 }
 

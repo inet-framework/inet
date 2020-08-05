@@ -36,7 +36,7 @@ class INET_API EthernetCutthroughSink : public PacketStreamer
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
 
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
 };
 
 } // namespace inet

@@ -92,7 +92,7 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
         rxSignal = nullptr;
         auto packet = decodePacket(signal);
         packet->setOrigPacketId(origPacketId);
-        pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
+        pushOrSendPacketEnd(packet, outputGate, consumer);
         delete signal;
     }
     else {

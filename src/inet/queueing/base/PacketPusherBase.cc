@@ -63,7 +63,7 @@ void PacketPusherBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate
     throw cRuntimeError("Invalid operation");
 }
 
-void PacketPusherBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void PacketPusherBase::pushPacketEnd(Packet *packet, cGate *gate)
 {
     throw cRuntimeError("Invalid operation");
 }

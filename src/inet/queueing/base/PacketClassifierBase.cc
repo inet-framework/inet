@@ -117,7 +117,7 @@ void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate, bps data
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -128,7 +128,7 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate, bps datara
     auto outputGate = outputGates[inProgressGateIndex];
     auto consumer = consumers[inProgressGateIndex];
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
     updateDisplayString();
 }
 

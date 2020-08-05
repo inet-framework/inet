@@ -158,7 +158,7 @@ Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate, bps datarate)
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
     endPacketStreaming(packet);
-    animateSendPacketEnd(packet, outputGate, datarate);
+    animateSendPacketEnd(packet, outputGate);
     updateDisplayString();
     return packet;
 }

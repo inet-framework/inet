@@ -80,7 +80,7 @@ void StreamThroughTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps 
     startTx(packet);
 }
 
-void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);

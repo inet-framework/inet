@@ -35,7 +35,7 @@ class INET_API EthernetCutthroughInterface : public NetworkInterface
 
   public:
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
 };
 
 } // namespace inet

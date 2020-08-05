@@ -74,7 +74,7 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, datarate);
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
     handlePacketProcessed(packet);
     updateDisplayString();

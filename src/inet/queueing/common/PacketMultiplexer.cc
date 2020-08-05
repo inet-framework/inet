@@ -88,7 +88,7 @@ void PacketMultiplexer::pushPacketStart(Packet *packet, cGate *gate, bps datarat
     updateDisplayString();
 }
 
-void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
+void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -98,7 +98,7 @@ void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate, bps datarate)
     else
         checkPacketStreaming(packet);
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer, datarate);
+    pushOrSendPacketEnd(packet, outputGate, consumer);
     updateDisplayString();
 }
 

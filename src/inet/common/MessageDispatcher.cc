@@ -102,14 +102,14 @@ void MessageDispatcher::pushPacketStart(Packet *packet, cGate *inGate, bps datar
     updateDisplayString();
 }
 
-void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate, bps datarate)
+void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
     auto outGate = handlePacket(packet, inGate);
     auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
     handlePacketProcessed(packet);
-    pushOrSendPacketEnd(packet, outGate, consumer, datarate);
+    pushOrSendPacketEnd(packet, outGate, consumer);
     updateDisplayString();
 }
 
