@@ -20,7 +20,7 @@ package inet.linklayer.ieee8021q;
 module OmittedIeee8021qEncap like IIeee8021qEncap
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/layer,black,50");
     gates:
         input upperLayerIn;

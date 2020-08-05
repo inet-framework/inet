@@ -20,7 +20,7 @@ package inet.protocol.trafficconditioner;
 module OmittedTrafficConditionerLayer like ITrafficConditionerLayer
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/layer,black,50");
     gates:
         input upperLayerIn;

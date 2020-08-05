@@ -20,7 +20,7 @@ package inet.protocol.measurement;
 module OmittedMeasurementLayer like IMeasurementLayer
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/layer,black,50");
     gates:
         input upperLayerIn;

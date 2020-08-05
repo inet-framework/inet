@@ -20,7 +20,7 @@ package inet.linklayer.ieee8022;
 module OmittedIeee8022LlcInserter like IIeee8022LlcInserter
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/inserter,black,50");
     gates:
         input in;

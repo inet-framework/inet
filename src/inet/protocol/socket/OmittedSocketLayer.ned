@@ -20,7 +20,7 @@ package inet.protocol.socket;
 module OmittedSocketLayer like ISocketLayer
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/layer,black,50");
     gates:
         input upperLayerIn;

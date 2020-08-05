@@ -20,7 +20,7 @@ package inet.linklayer.ieee8022;
 module OmittedIeee8022LlcLayer like IIeee8022LlcLayer
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/layer,black,50");
     gates:
         input upperLayerIn;

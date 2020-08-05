@@ -19,7 +19,7 @@ module OmittedIeee8021qInserter like IIeee8021qInserter
 {
     parameters:
         string vlanTagType = default("");
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/cogwheel,black,50");
     gates:
         input in;

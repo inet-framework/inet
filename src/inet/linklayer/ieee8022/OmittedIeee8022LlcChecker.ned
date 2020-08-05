@@ -20,7 +20,7 @@ package inet.linklayer.ieee8022;
 module OmittedIeee8022LlcChecker like IIeee8022LlcChecker
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/checker,black,50");
     gates:
         input in;

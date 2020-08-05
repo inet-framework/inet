@@ -19,7 +19,7 @@ module OmittedIeee8021qChecker like IIeee8021qChecker
 {
     parameters:
         string vlanTagType = default("");
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/cogwheel,black,50");
     gates:
         input in;

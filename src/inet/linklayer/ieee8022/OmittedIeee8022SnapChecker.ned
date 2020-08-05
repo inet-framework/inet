@@ -20,7 +20,7 @@ package inet.linklayer.ieee8022;
 module OmittedIeee8022SnapChecker like IIeee8022SnapChecker
 {
     parameters:
-        @class(OmittedModule);
+        @class(::inet::OmittedModule);
         @display("i=block/checker,black,50");
     gates:
         input in;
