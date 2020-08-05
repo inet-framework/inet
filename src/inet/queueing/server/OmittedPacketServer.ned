@@ -13,24 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.common;
+package inet.queueing.server;
 
-import inet.queueing.contract.IPacketFilter;
-import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketServer;
-
-
-module OmittedPacketFlow like IPacketFlow
-{
-    parameters:
-        @class(::inet::OmittedModule);
-        @display("i=block/star,black,50");
-    gates:
-        input in;
-        output out;
-    connections:
-        in --> out;
-}
 
 module OmittedPacketServer like IPacketServer
 {
@@ -44,14 +29,3 @@ module OmittedPacketServer like IPacketServer
         in --> out;
 }
 
-module OmittedPacketFilter like IPacketFilter
-{
-    parameters:
-        @class(::inet::OmittedModule);
-        @display("i=block/star,black,50");
-    gates:
-        input in;
-        output out;
-    connections:
-        in --> out;
-}

@@ -28,7 +28,7 @@ module OmittedPacketQueue like IPacketQueue
 {
     parameters:
         @class(::inet::OmittedModule);
-        @display("i=block/queue");
+        @display("i=block/queue,black,50");
     gates:
         input in;
         output out;
