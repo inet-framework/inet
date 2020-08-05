@@ -108,6 +108,7 @@ void NetworkInterface::initialize(int stage)
         }
         consumer = findConnectedModule<IPassivePacketSink>(upperLayerOut);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
+        setCarrier(computeCarrier());
         setDatarate(computeDatarate());
         WATCH(mtu);
         WATCH(state);
@@ -212,9 +213,30 @@ void NetworkInterface::receiveSignal(cComponent *source, simsignal_t signal, cOb
 {
     Enter_Method("receiveSignal");
     if (signal == POST_MODEL_CHANGE) {
-        if (auto notification = dynamic_cast<cPostParameterChangeNotification *>(obj)) {
-            if (notification->par->getOwner() == txTransmissionChannel)
+        if (auto notification = dynamic_cast<cPostPathCreateNotification *>(obj)) {
+            if (rxIn == notification->pathEndGate || txOut == notification->pathStartGate) {
+                rxTransmissionChannel = rxIn->findIncomingTransmissionChannel();
+                txTransmissionChannel = txOut->findTransmissionChannel();
+                if (rxTransmissionChannel != nullptr && !rxTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
+                    rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+                if (txTransmissionChannel != nullptr && !txTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
+                    txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+                setCarrier(computeCarrier());
+            }
+        }
+        else if (auto notification = dynamic_cast<cPostPathCutNotification *>(obj)) {
+            if (rxIn == notification->pathEndGate || txOut == notification->pathStartGate) {
+                rxTransmissionChannel = nullptr;
+                txTransmissionChannel = nullptr;
+                setCarrier(computeCarrier());
+            }
+        }
+        else if (auto notification = dynamic_cast<cPostParameterChangeNotification *>(obj)) {
+            auto owner = notification->par->getOwner();
+            if (owner == rxTransmissionChannel || owner == txTransmissionChannel) {
+                setCarrier(computeCarrier());
                 setDatarate(computeDatarate());
+            }
         }
     }
 }
@@ -230,6 +252,17 @@ double NetworkInterface::computeDatarate() const
     if (moduleDatarate != 0 && channelDatarate != 0 && moduleDatarate != channelDatarate)
         throw cRuntimeError("Wired network interface datarate is set on both the network interface module and on the corresponding transmission channel and the two values are different");
     return moduleDatarate != 0 ? moduleDatarate : channelDatarate;
+}
+
+bool NetworkInterface::computeCarrier() const
+{
+    if (isWireless())
+        return true;
+    else {
+        bool connected = rxTransmissionChannel != nullptr && txTransmissionChannel != nullptr;
+        bool disabled = !connected || rxTransmissionChannel->isDisabled() || txTransmissionChannel->isDisabled();
+        return connected && !disabled;
+    }
 }
 
 std::string NetworkInterface::str() const
@@ -454,6 +487,7 @@ void NetworkInterface::setState(State s)
     if (state != s)
     {
         state = s;
+        // TODO: carrier and UP/DOWN state is independent
         if (state == DOWN)
             setCarrier(false);
         stateChanged(F_STATE);
@@ -462,7 +496,6 @@ void NetworkInterface::setState(State s)
 
 void NetworkInterface::setCarrier(bool b)
 {
-    ASSERT(!(b && (state == DOWN)));
     if (carrier != b)
     {
         carrier = b;
@@ -501,18 +534,21 @@ bool NetworkInterface::handleOperationStage(LifecycleOperation *operation, IDone
 void NetworkInterface::handleStartOperation(LifecycleOperation *operation)
 {
     setState(State::UP);
+    // TODO: carrier and UP/DOWN state is independent
     setCarrier(true);
 }
 
 void NetworkInterface::handleStopOperation(LifecycleOperation *operation)
 {
     setState(State::DOWN);
+    // TODO: carrier and UP/DOWN state is independent
     setCarrier(false);
 }
 
 void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
 {
     setState(State::DOWN);
+    // TODO: carrier and UP/DOWN state is independent
     setCarrier(false);
 }
 

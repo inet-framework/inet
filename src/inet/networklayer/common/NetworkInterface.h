@@ -115,7 +115,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     int nodeInputGateId = -1;    ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
     int mtu = 0;    ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
     State state = DOWN;    ///< requested interface state, similar to Linux ifup/ifdown
-    bool carrier = false;    ///< current state (up/down) of the physical layer, e.g. Ethernet cable
+    bool carrier = false;    ///< presence of the physical or virtual carrier
     bool broadcast = false;    ///< interface supports broadcast
     bool multicast = false;    ///< interface supports multicast
     bool pointToPoint = false;    ///< interface is point-to-point link
@@ -156,6 +156,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 
     virtual double computeDatarate() const;
+    virtual bool computeCarrier() const;
 
   public:
     // internal: to be invoked from InterfaceTable only!
@@ -201,7 +202,9 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns the combined state of the carrier and the interface requested state.
      */
+    // TODO: remove hasCarrier from this function and update all call sites accordingly
     bool isUp() const { return getState() == UP && hasCarrier(); }
+    bool isDown() const { return getState() != UP; }
 
     const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getId()); }
     const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getId()); }
