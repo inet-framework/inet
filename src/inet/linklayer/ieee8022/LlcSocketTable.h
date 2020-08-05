@@ -15,29 +15,43 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_LLCSOCKETPACKETPROCESSOR_H
-#define __INET_LLCSOCKETPACKETPROCESSOR_H
+#ifndef __INET_LLCSOCKETTABLE_H
+#define __INET_LLCSOCKETTABLE_H
 
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/protocol/ieee8022/LlcSocketTable.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 
 namespace inet {
 
-class INET_API LlcSocketPacketProcessor : public cSimpleModule
+class INET_API LlcSocketTable : public cSimpleModule
 {
+  public:
+    struct Socket
+    {
+        int socketId = -1;
+        int localSap = -1;
+        int remoteSap = -1;
+
+        friend std::ostream& operator << (std::ostream& o, const Socket& t);
+
+        Socket(int socketId) : socketId(socketId) {}
+    };
+
+
   protected:
-    LlcSocketTable *socketTable = nullptr;
+    std::map<int, Socket *> socketIdToSocketMap;
 
   protected:
     virtual void initialize() override;
-    virtual void handleMessage(cMessage *msg) override;
 
-  protected:
-    void processPacket(Packet *packet);
+  public:
+    bool createSocket(int socketId, int localSap, int remoteSap);
+    bool deleteSocket(int socketId);
+    std::vector<Socket*> findSocketsFor(const Packet *packet) const;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_LLCSOCKETPACKETPROCESSOR_H
+#endif // ifndef __INET_LlcSocketTable_H
 

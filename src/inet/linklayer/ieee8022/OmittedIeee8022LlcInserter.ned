@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-module OmittedIeee8022LlcChecker like IIeee8022LlcChecker
+module OmittedIeee8022LlcInserter like IIeee8022LlcInserter
 {
     parameters:
         @class(OmittedModule);
-        @display("i=block/checker,black,50");
+        @display("i=block/inserter,black,50");
     gates:
         input in;
         output out;

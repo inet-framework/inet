@@ -15,9 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-simple LlcSocketCommandProcessor
+simple LlcSocketPacketProcessor
 {
     parameters:
         @display("i=block/inserter");
@@ -25,6 +25,6 @@ simple LlcSocketCommandProcessor
     gates:
         input in @labels(send);
         output out @labels(send);
-        output cmdOut @labels(send);
+        output socketOut @labels(send);
 }
 

@@ -18,7 +18,6 @@
 #ifndef __INET_LLCSOCKET_H
 #define __INET_LLCSOCKET_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 

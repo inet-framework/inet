@@ -15,14 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-import inet.queueing.base.PacketFlowBase;
-
-simple Ieee8022LlcInserter extends PacketFlowBase like IIeee8022LlcInserter
+module OmittedIeee8022SnapChecker like IIeee8022SnapChecker
 {
     parameters:
-        @class(Ieee8022LlcInserter);
-        @display("i=block/inserter");
+        @class(OmittedModule);
+        @display("i=block/checker,black,50");
+    gates:
+        input in;
+        output out;
+    connections:
+        in --> out;
 }
 

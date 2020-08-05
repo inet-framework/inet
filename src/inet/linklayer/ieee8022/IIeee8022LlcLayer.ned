@@ -12,17 +12,18 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-import inet.queueing.base.PacketFlowBase;
-
-simple Ieee8022SnapInserter extends PacketFlowBase like IIeee8022SnapInserter
+moduleinterface IIeee8022LlcLayer
 {
     parameters:
-        @class(Ieee8022SnapInserter);
-        @display("i=block/inserter");
+        @display("i=block/layer");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }
-

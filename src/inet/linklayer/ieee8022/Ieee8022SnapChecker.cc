@@ -19,7 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/ieee8022/Ieee8022SnapChecker.h"
+#include "inet/linklayer/ieee8022/Ieee8022SnapChecker.h"
 
 namespace inet {
 

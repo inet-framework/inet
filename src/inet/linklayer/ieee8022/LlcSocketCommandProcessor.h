@@ -15,16 +15,30 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8022;
+#ifndef __INET_LLCSOCKETCOMMANDPROCESSOR_H
+#define __INET_LLCSOCKETCOMMANDPROCESSOR_H
 
-simple LlcSocketPacketProcessor
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/linklayer/ieee8022/LlcSocketTable.h"
+
+namespace inet {
+
+class INET_API LlcSocketCommandProcessor : public cSimpleModule
 {
-    parameters:
-        @display("i=block/inserter");
-        string socketTableModule;
-    gates:
-        input in @labels(send);
-        output out @labels(send);
-        output socketOut @labels(send);
-}
+  protected:
+    LlcSocketTable *socketTable = nullptr;
+
+  protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+
+  protected:
+    void handleLlcSocketCommand(Request *msg, Ieee8022LlcSocketCommand *command);
+};
+
+} // namespace inet
+
+#endif // ifndef __INET_LlcSocketCommandProcessor_H
 

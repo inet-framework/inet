@@ -12,18 +12,19 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-import inet.queueing.base.PacketFilterBase;
-
-simple Ieee8022LlcChecker extends PacketFilterBase like IIeee8022LlcChecker
+simple LlcSocketCommandProcessor
 {
     parameters:
-        @class(Ieee8022LlcChecker);
-        @display("i=block/checker");
-        @signal[packetDropped](type=inet::Packet);
+        @display("i=block/inserter");
+        string socketTableModule;
+    gates:
+        input in @labels(send);
+        output out @labels(send);
+        output cmdOut @labels(send);
 }
 

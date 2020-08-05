@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-moduleinterface IIeee8022SnapChecker
+moduleinterface IIeee8022LlcInserter
 {
     parameters:
-        @display("i=block/checker");
+        @display("i=block/inserter");
     gates:
         input in;
         output out;

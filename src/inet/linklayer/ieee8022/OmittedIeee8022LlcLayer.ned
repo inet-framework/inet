@@ -12,17 +12,22 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-moduleinterface IIeee8022LlcChecker
+module OmittedIeee8022LlcLayer like IIeee8022LlcLayer
 {
     parameters:
-        @display("i=block/checker");
+        @class(OmittedModule);
+        @display("i=block/layer,black,50");
     gates:
-        input in;
-        output out;
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
+    connections:
+        upperLayerIn --> lowerLayerOut;
+        lowerLayerIn --> upperLayerOut;
 }
-

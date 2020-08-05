@@ -20,7 +20,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
-#include "inet/protocol/ieee8022/LlcSocketPacketProcessor.h"
+#include "inet/linklayer/ieee8022/LlcSocketPacketProcessor.h"
 
 namespace inet {
 

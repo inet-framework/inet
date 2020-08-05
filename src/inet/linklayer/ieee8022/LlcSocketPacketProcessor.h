@@ -15,19 +15,29 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ieee8022;
+#ifndef __INET_LLCSOCKETPACKETPROCESSOR_H
+#define __INET_LLCSOCKETPACKETPROCESSOR_H
 
-module OmittedIeee8022LlcLayer like IIeee8022LlcLayer
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee8022/LlcSocketTable.h"
+
+namespace inet {
+
+class INET_API LlcSocketPacketProcessor : public cSimpleModule
 {
-    parameters:
-        @class(OmittedModule);
-        @display("i=block/layer,black,50");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
-    connections:
-        upperLayerIn --> lowerLayerOut;
-        lowerLayerIn --> upperLayerOut;
-}
+  protected:
+    LlcSocketTable *socketTable = nullptr;
+
+  protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+
+  protected:
+    void processPacket(Packet *packet);
+};
+
+} // namespace inet
+
+#endif // ifndef __INET_LLCSOCKETPACKETPROCESSOR_H
+

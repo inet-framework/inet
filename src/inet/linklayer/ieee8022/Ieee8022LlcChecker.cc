@@ -20,7 +20,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/protocol/ieee8022/Ieee8022LlcChecker.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcChecker.h"
 
 namespace inet {
 

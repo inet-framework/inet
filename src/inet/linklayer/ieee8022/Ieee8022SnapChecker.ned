@@ -12,18 +12,18 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.ieee8022;
+package inet.linklayer.ieee8022;
 
-moduleinterface IIeee8022LlcLayer
+import inet.queueing.base.PacketFilterBase;
+
+simple Ieee8022SnapChecker extends PacketFilterBase like IIeee8022SnapChecker
 {
     parameters:
-        @display("i=block/layer");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
+        @class(Ieee8022SnapChecker);
+        @display("i=block/checker");
+        @signal[packetDropped](type=inet::Packet);
 }
+

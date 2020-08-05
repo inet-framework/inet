@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -12,24 +12,14 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// @author: Zoltan Bojthe
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IEEE8022LLCDISSECTOR_H_
-#define __INET_IEEE8022LLCDISSECTOR_H_
+package inet.linklayer.ieee8022;
 
-#include "inet/common/packet/dissector/ProtocolDissector.h"
-
-namespace inet {
-
-class INET_API Ieee802LlcDissector : public ProtocolDissector
+simple LlcSocketTable
 {
-  public:
-    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
-};
+    parameters:
+        @display("i=block/table");
+}
 
-} // namespace inet
-
-#endif // __INET_IEEE8022LLCDISSECTOR_H_
