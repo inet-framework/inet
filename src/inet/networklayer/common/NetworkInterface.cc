@@ -96,8 +96,19 @@ void NetworkInterface::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOut = gate("upperLayerOut");
+        if (hasGate("phys$i")) {
+            rxIn = gate("phys$i");
+            rxTransmissionChannel = rxIn->findIncomingTransmissionChannel();
+            rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+        }
+        if (hasGate("phys$o")) {
+            txOut = gate("phys$o");
+            txTransmissionChannel = txOut->findTransmissionChannel();
+            txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+        }
         consumer = findConnectedModule<IPassivePacketSink>(upperLayerOut);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
+        setDatarate(computeDatarate());
         WATCH(mtu);
         WATCH(state);
         WATCH(carrier);
@@ -133,16 +144,6 @@ void NetworkInterface::initialize(int stage)
             setBroadcast(par("broadcast"));
         if (hasPar("multicast"))
             setMulticast(par("multicast"));
-        if (hasPar("bitrate"))
-            setDatarate(par("bitrate"));
-        if (hasGate("phys$o")) {
-            auto g = gate("phys$o");
-            auto channel = g->findTransmissionChannel();
-            if (channel != nullptr && channel->hasPar("datarate"))
-                setDatarate(channel->par("datarate"));
-            else
-                setCarrier(false);
-        }
         if (hasPar("mtu"))
             setMtu(par("mtu"));
         if (hasPar("pointToPoint"))
@@ -199,6 +200,36 @@ void NetworkInterface::updateDisplayString() const
         return result.c_str();
     });
     getDisplayString().setTagArg("t", 0, text);
+}
+
+void NetworkInterface::handleParameterChange(const char *name)
+{
+    if (name != nullptr && !strcmp(name, "bitrate"))
+        setDatarate(computeDatarate());
+}
+
+void NetworkInterface::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
+{
+    Enter_Method("receiveSignal");
+    if (signal == POST_MODEL_CHANGE) {
+        if (auto notification = dynamic_cast<cPostParameterChangeNotification *>(obj)) {
+            if (notification->par->getOwner() == txTransmissionChannel)
+                setDatarate(computeDatarate());
+        }
+    }
+}
+
+double NetworkInterface::computeDatarate() const
+{
+    double moduleDatarate = 0;
+    if (hasPar("bitrate"))
+        moduleDatarate = par("bitrate");
+    double channelDatarate = 0;
+    if (txTransmissionChannel != nullptr && txTransmissionChannel->hasPar("datarate"))
+        channelDatarate = txTransmissionChannel->par("datarate");
+    if (moduleDatarate != 0 && channelDatarate != 0 && moduleDatarate != channelDatarate)
+        throw cRuntimeError("Wired network interface datarate is set on both the network interface module and on the corresponding transmission channel and the two values are different");
+    return moduleDatarate != 0 ? moduleDatarate : channelDatarate;
 }
 
 std::string NetworkInterface::str() const

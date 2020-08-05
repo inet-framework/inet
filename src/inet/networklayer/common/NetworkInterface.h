@@ -92,7 +92,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle
+class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle, public cListener
 {
     friend class InterfaceProtocolData;    // to call protocolDataChanged()
 
@@ -101,6 +101,10 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
 
   protected:
     cGate *upperLayerOut = nullptr;
+    cGate *rxIn = nullptr;
+    cGate *txOut = nullptr;
+    cChannel *rxTransmissionChannel = nullptr;
+    cChannel *txTransmissionChannel = nullptr;
     queueing::IPassivePacketSink *consumer = nullptr;
 
     const Protocol *protocol = nullptr;
@@ -148,6 +152,10 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
+    virtual void handleParameterChange(const char *name) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
+
+    virtual double computeDatarate() const;
 
   public:
     // internal: to be invoked from InterfaceTable only!
@@ -213,6 +221,8 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     bool isMulticast() const { return multicast; }
     bool isPointToPoint() const { return pointToPoint; }
     bool isLoopback() const { return loopback; }
+    bool isWired() const { return rxIn != nullptr && txOut != nullptr; }
+    bool isWireless() const { return !isWired(); }
     double getDatarate() const { return datarate; }
     const MacAddress& getMacAddress() const { return macAddr; }
     bool matchesMacAddress(const MacAddress& address) const;
