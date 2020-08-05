@@ -18,8 +18,6 @@
 #ifndef __INET_CONNECTIONMANAGER_H
 #define __INET_CONNECTIONMANAGER_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 
 namespace inet {
@@ -27,13 +25,10 @@ namespace inet {
 class INET_API ConnectionManager : public cSimpleModule, public cListener
 {
   protected:
-    NetworkInterface *networkInterface;
     cGate *physInGate = nullptr;    // pointer to the phys input gate
     cChannel *rxTransmissionChannel = nullptr;    // tx transmission channel
     cGate *physOutGate = nullptr;    // pointer to the output gate
     cChannel *txTransmissionChannel = nullptr;    // tx transmission channel
-    bool connected = false;
-    bool disabled = true;
     simtime_t txStartTime = -1;
     physicallayer::Signal *txSignal = nullptr;
 
@@ -42,7 +37,6 @@ class INET_API ConnectionManager : public cSimpleModule, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void propagateStatus();
     virtual void propagatePreChannelOff();
     void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 };

@@ -32,9 +32,6 @@ void ConnectionManager::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("physIn");
         physOutGate = gate("physOut");
-        connected = physInGate->getPathStartGate()->isConnected() && physOutGate->getPathEndGate()->isConnected();
-        disabled = true;
-        networkInterface = getContainingNicModule(this);
         txTransmissionChannel = physOutGate->findTransmissionChannel();
         rxTransmissionChannel = physInGate->findIncomingTransmissionChannel();
 
@@ -42,16 +39,9 @@ void ConnectionManager::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
 
         if (rxTransmissionChannel && txTransmissionChannel) {
-            disabled = rxTransmissionChannel->isDisabled() || txTransmissionChannel->isDisabled();
             rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
             txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-            // TODO copied from ChannelDatarateReader
         }
-        WATCH(connected);
-        WATCH(disabled);
-    }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
-        propagateStatus();
     }
 }
 
@@ -112,65 +102,25 @@ void ConnectionManager::propagatePreChannelOff()
     }
 }
 
-void ConnectionManager::propagateStatus()
-{
-    networkInterface->setCarrier(connected && ! disabled);
-}
-
 void ConnectionManager::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 
     if (signalID == PRE_MODEL_CHANGE) {
         if (auto gcobj = dynamic_cast<cPrePathCutNotification *>(obj)) {
-            if (connected && ((physInGate == gcobj->pathEndGate) || (physOutGate == gcobj->pathStartGate))) {
+            if (// TODO: connected &&
+                    ((physInGate == gcobj->pathEndGate) || (physOutGate == gcobj->pathStartGate))) {
                 propagatePreChannelOff();
             }
         }
         else if (auto gcobj = dynamic_cast<cPreParameterChangeNotification *>(obj)) {
-            if (connected
-                    && (gcobj->par->getOwner() == rxTransmissionChannel || gcobj->par->getOwner() == txTransmissionChannel)
+            if (// TODO: connected
+                    (gcobj->par->getOwner() == rxTransmissionChannel || gcobj->par->getOwner() == txTransmissionChannel)
                     && gcobj->par->getType() == cPar::BOOL
                     && strcmp(gcobj->par->getName(), "disabled") == 0
                     /* && gcobj->newValue == true */ //TODO the new value of parameter currently unavailable
                     ) {
                 propagatePreChannelOff();
-            }
-        }
-    }
-    else if (signalID == POST_MODEL_CHANGE) {
-        if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
-            if (physInGate == gcobj->pathEndGate || physOutGate == gcobj->pathStartGate) {
-                connected = physInGate->getPathStartGate()->isConnected() && physOutGate->getPathEndGate()->isConnected();
-                rxTransmissionChannel = physInGate->findIncomingTransmissionChannel();
-                txTransmissionChannel = physOutGate->findTransmissionChannel();
-                disabled =
-                        (rxTransmissionChannel ? rxTransmissionChannel->isDisabled() : true)
-                        || (txTransmissionChannel ? txTransmissionChannel->isDisabled() : true);
-                if (rxTransmissionChannel && txTransmissionChannel) {
-                    if (!rxTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
-                        rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-                    if (!txTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
-                        txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-                }
-                propagateStatus();
-            }
-        }
-        else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
-            if (connected && ((physInGate == gcobj->pathEndGate) || (physOutGate == gcobj->pathStartGate))) {
-                connected = false;
-                propagateStatus();
-            }
-        }
-        else if (auto gcobj = dynamic_cast<cPostParameterChangeNotification *>(obj)) {
-            if ((gcobj->par->getOwner() == rxTransmissionChannel) || (gcobj->par->getOwner() == txTransmissionChannel)) {
-                bool oldDisabled = disabled;
-                disabled =
-                        (rxTransmissionChannel ? rxTransmissionChannel->isDisabled() : true)
-                        || (txTransmissionChannel ? txTransmissionChannel->isDisabled() : true);
-                if (disabled != oldDisabled) {
-                    propagateStatus();
-                }
             }
         }
     }
