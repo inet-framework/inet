@@ -19,7 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/protocol/ethernet/LlcSocketCommandProcessor.h"
+#include "inet/protocol/ieee8022/LlcSocketCommandProcessor.h"
 
 namespace inet {
 

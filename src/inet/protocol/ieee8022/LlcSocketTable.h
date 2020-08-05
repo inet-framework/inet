@@ -15,15 +15,13 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_LlcSocketTable_H
-#define __INET_LlcSocketTable_H
+#ifndef __INET_LLCSOCKETTABLE_H
+#define __INET_LLCSOCKETTABLE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
-//#include "inet/linklayer/ethernet/EtherFrame_m.h"
-//#include "inet/linklayer/ethernet/EthernetCommand_m.h"
 
 namespace inet {
 

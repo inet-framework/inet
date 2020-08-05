@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.ethernet;
+package inet.protocol.ieee8022;
 
 simple LlcSocketCommandProcessor
 {

@@ -15,19 +15,19 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_LlcSocketPacketProcessor_H
-#define __INET_LlcSocketPacketProcessor_H
+#ifndef __INET_LLCSOCKETCOMMANDPROCESSOR_H
+#define __INET_LLCSOCKETCOMMANDPROCESSOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EthernetCommand_m.h"
-#include "inet/protocol/ethernet/LlcSocketTable.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/protocol/ieee8022/LlcSocketTable.h"
+
 
 namespace inet {
 
-class INET_API LlcSocketPacketProcessor : public cSimpleModule
+class INET_API LlcSocketCommandProcessor : public cSimpleModule
 {
   protected:
     LlcSocketTable *socketTable = nullptr;
@@ -37,10 +37,10 @@ class INET_API LlcSocketPacketProcessor : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
 
   protected:
-    void processPacket(Packet *packet);
+    void handleLlcSocketCommand(Request *msg, Ieee8022LlcSocketCommand *command);
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_LlcSocketPacketProcessor_H
+#endif // ifndef __INET_LlcSocketCommandProcessor_H
 
