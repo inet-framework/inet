@@ -46,12 +46,7 @@ void ConnectionManager::initialize(int stage)
             rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
             txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
             // TODO copied from ChannelDatarateReader
-            if (txTransmissionChannel->hasPar("datarate")) {
-                bitrate = txTransmissionChannel->par("datarate");
-                propagateDatarate();
-            }
         }
-        WATCH(bitrate);
         WATCH(connected);
         WATCH(disabled);
     }
@@ -122,13 +117,6 @@ void ConnectionManager::propagateStatus()
     networkInterface->setCarrier(connected && ! disabled);
 }
 
-void ConnectionManager::propagateDatarate()
-{
-    //TODO which is the good solution from these?
-    networkInterface->par("bitrate").setDoubleValue(bitrate);
-    networkInterface->setDatarate(bitrate);
-}
-
 void ConnectionManager::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
@@ -182,13 +170,6 @@ void ConnectionManager::receiveSignal(cComponent *source, simsignal_t signalID, 
                         || (txTransmissionChannel ? txTransmissionChannel->isDisabled() : true);
                 if (disabled != oldDisabled) {
                     propagateStatus();
-                }
-                if (txTransmissionChannel && txTransmissionChannel->hasPar("datarate")) {
-                    double newbitrate = txTransmissionChannel->par("datarate");
-                    if (bitrate != newbitrate) {
-                        bitrate = newbitrate;
-                        propagateDatarate();
-                    }
                 }
             }
         }

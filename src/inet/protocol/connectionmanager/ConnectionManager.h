@@ -32,7 +32,6 @@ class INET_API ConnectionManager : public cSimpleModule, public cListener
     cChannel *rxTransmissionChannel = nullptr;    // tx transmission channel
     cGate *physOutGate = nullptr;    // pointer to the output gate
     cChannel *txTransmissionChannel = nullptr;    // tx transmission channel
-    double bitrate = NAN;
     bool connected = false;
     bool disabled = true;
     simtime_t txStartTime = -1;
@@ -43,7 +42,6 @@ class INET_API ConnectionManager : public cSimpleModule, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void propagateDatarate();
     virtual void propagateStatus();
     virtual void propagatePreChannelOff();
     void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
