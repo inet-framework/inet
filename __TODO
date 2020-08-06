@@ -66,6 +66,9 @@ INET 4.3 release TODO items:
 4. We should create a list of examples for the set of features we want to support with the new Ethernet architecture.
    This would give a clear goal for development and simplify automated testing.
 
+- Add parameters to ScenarioManager disconnect operation to allow cutting connection at either end (source or destination)
+  and also support disconnecting bidirectional connections in all four combinations.
+
 Ethernet features:
  - priority queueing
  - gating
