@@ -16,11 +16,11 @@
 #ifndef __INET_DESTREAMINGRECEIVER_H
 #define __INET_DESTREAMINGRECEIVER_H
 
-#include "inet/protocol/transceiver/base/PacketReceiverBase.h"
+#include "inet/protocol/transceiver/base/StreamingReceiverBase.h"
 
 namespace inet {
 
-class INET_API DestreamingReceiver : public PacketReceiverBase
+class INET_API DestreamingReceiver : public StreamingReceiverBase
 {
   protected:
     virtual void initialize(int stage) override;

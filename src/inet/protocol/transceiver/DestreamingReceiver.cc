@@ -21,7 +21,7 @@ Define_Module(DestreamingReceiver);
 
 void DestreamingReceiver::initialize(int stage)
 {
-    PacketReceiverBase::initialize(stage);
+    StreamingReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         setTxUpdateSupport(true);
         inputGate->setDeliverImmediately(true);
@@ -44,7 +44,7 @@ void DestreamingReceiver::handleMessageWhenUp(cMessage *message)
         }
     }
     else
-        PacketReceiverBase::handleMessage(message);
+        StreamingReceiverBase::handleMessage(message);
 }
 
 void DestreamingReceiver::sendToUpperLayer(Packet *packet)

@@ -21,7 +21,7 @@ Define_Module(StreamThroughReceiver);
 
 void StreamThroughReceiver::initialize(int stage)
 {
-    PacketReceiverBase::initialize(stage);
+    StreamingReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         setTxUpdateSupport(true);
         inputGate->setDeliverImmediately(true);
@@ -44,7 +44,7 @@ void StreamThroughReceiver::handleMessageWhenUp(cMessage *message)
         }
     }
     else
-        PacketReceiverBase::handleMessage(message);
+        StreamingReceiverBase::handleMessage(message);
 }
 
 void StreamThroughReceiver::handleMessageWhenDown(cMessage *msg)

@@ -16,11 +16,11 @@
 #ifndef __INET_STREAMTHROUGHRECEIVER_H
 #define __INET_STREAMTHROUGHRECEIVER_H
 
-#include "inet/protocol/transceiver/base/PacketReceiverBase.h"
+#include "inet/protocol/transceiver/base/StreamingReceiverBase.h"
 
 namespace inet {
 
-class INET_API StreamThroughReceiver : public PacketReceiverBase
+class INET_API StreamThroughReceiver : public StreamingReceiverBase
 {
   int origPacketId = -1;
 
