@@ -15,19 +15,31 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.transceiver;
+#ifndef __INET_STREAMINGTRANSMITTERBASE_H
+#define __INET_STREAMINGTRANSMITTERBASE_H
 
-import inet.protocol.transceiver.base.StreamingTransmitterBase;
-import inet.protocol.transceiver.contract.IPacketTransmitter;
+#include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
 
-//
-// This module receives packets from the upper layer as a whole. It sends signals
-// to the transmission medium (wire) as a stream, it sends the signal start and
-// signal end separately.
-//
-simple StreamingTransmitter extends StreamingTransmitterBase like IPacketTransmitter
+namespace inet {
+
+class INET_API StreamingTransmitterBase : public PacketTransmitterBase
 {
-    parameters:
-        @class(StreamingTransmitter);
-}
+  protected:
+    cChannel *transmissionChannel = nullptr;
+    simtime_t txStartTime = -1;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+    virtual void abortTx() = 0;
+
+  public:
+    virtual bool canPushSomePacket(cGate *gate) const override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+};
+
+} // namespace inet
+
+#endif // ifndef __INET_STREAMINGTRANSMITTERBASE_H
 

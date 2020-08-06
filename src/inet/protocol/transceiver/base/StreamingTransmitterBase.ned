@@ -15,19 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.protocol.transceiver;
+package inet.protocol.transceiver.base;
 
-import inet.protocol.transceiver.base.StreamingTransmitterBase;
-import inet.protocol.transceiver.contract.IPacketTransmitter;
-
-//
-// This module receives packets from the upper layer as a whole. It sends signals
-// to the transmission medium (wire) as a stream, it sends the signal start and
-// signal end separately.
-//
-simple StreamingTransmitter extends StreamingTransmitterBase like IPacketTransmitter
+simple StreamingTransmitterBase extends PacketTransmitterBase
 {
     parameters:
-        @class(StreamingTransmitter);
+        @class(StreamingTransmitterBase);
 }
-

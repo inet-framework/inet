@@ -55,11 +55,13 @@ void StreamingTransmitter::startTx(Packet *packet)
     ASSERT(txSignal == nullptr);
     datarate = bps(*dataratePar);
     txStartTime = simTime();
-    txSignal = encodePacket(packet);
-    EV_INFO << "Starting transmission: packetName = " << packet->getName() << ", length = " << packet->getTotalLength() << ", duration = " << txSignal->getDuration() << std::endl;
-    scheduleTxEndTimer(txSignal);
-    emit(transmissionStartedSignal, txSignal);
-    sendPacketStart(txSignal->dup());
+    auto signal = encodePacket(packet);
+    txSignal = signal->dup();
+    txSignal->setOrigPacketId(signal->getId());
+    EV_INFO << "Starting transmission: packetName = " << packet->getName() << ", length = " << packet->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
+    scheduleTxEndTimer(signal);
+    emit(transmissionStartedSignal, signal);
+    sendPacketStart(signal);
 }
 
 void StreamingTransmitter::endTx()
@@ -79,15 +81,18 @@ void StreamingTransmitter::abortTx()
     ASSERT(txSignal != nullptr);
     cancelClockEvent(txEndTimer);
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
-    b transmittedLength = getPushPacketProcessedLength(packet, inputGate);
-    packet->eraseAtBack(packet->getTotalLength() - transmittedLength);
-    auto signal = encodePacket(packet);
-    EV_INFO << "Aborting transmission: packetName = " << packet->getName() << ", length = " << packet->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
-    emit(transmissionEndedSignal, signal);
+    // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
+    // b transmittedLength = getPushPacketProcessedLength(packet, inputGate);
+    // packet->eraseAtBack(packet->getTotalLength() - transmittedLength);
+    packet->setBitError(true);
+    txSignal->setDuration(simTime() - txStartTime);
+    EV_INFO << "Aborting transmission: packetName = " << packet->getName() << ", length = " << packet->getTotalLength() << ", duration = " << txSignal->getDuration() << std::endl;
+    emit(transmissionEndedSignal, txSignal);
     producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
     sendPacketEnd(txSignal);
     txSignal = nullptr;
     txStartTime = -1;
+    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)

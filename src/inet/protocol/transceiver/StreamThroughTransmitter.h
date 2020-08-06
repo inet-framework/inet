@@ -16,11 +16,11 @@
 #ifndef __INET_STREAMTHROUGHTRANSMITTER_H
 #define __INET_STREAMTHROUGHTRANSMITTER_H
 
-#include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
+#include "inet/protocol/transceiver/base/StreamingTransmitterBase.h"
 
 namespace inet {
 
-class INET_API StreamThroughTransmitter : public PacketTransmitterBase
+class INET_API StreamThroughTransmitter : public StreamingTransmitterBase
 {
   protected:
     clocktime_t txStartTime = -1;
@@ -32,14 +32,13 @@ class INET_API StreamThroughTransmitter : public PacketTransmitterBase
 
     virtual void startTx(Packet *packet);
     virtual void endTx();
+    virtual void abortTx() override;
 
     virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return txSignal == nullptr; };
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return txSignal == nullptr; };
     virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
     virtual void pushPacketEnd(Packet *packet, cGate *gate) override;

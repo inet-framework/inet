@@ -35,8 +35,6 @@ class INET_API PacketTransmitter : public PacketTransmitterBase
     virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
-    virtual bool canPushSomePacket(cGate *gate) const override { return !txEndTimer->isScheduled(); }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return canPushSomePacket(gate); }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }

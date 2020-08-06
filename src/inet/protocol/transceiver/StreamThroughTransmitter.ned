@@ -15,7 +15,7 @@
 
 package inet.protocol.transceiver;
 
-import inet.protocol.transceiver.base.PacketTransmitterBase;
+import inet.protocol.transceiver.base.StreamingTransmitterBase;
 import inet.protocol.transceiver.contract.IPacketTransmitter;
 
 //
@@ -23,7 +23,7 @@ import inet.protocol.transceiver.contract.IPacketTransmitter;
 // sends signals to the transmission medium as a stream. The stream start and
 // stream end are sent seperately allowing the preemption of signals.
 //
-simple StreamThroughTransmitter extends PacketTransmitterBase like IPacketTransmitter
+simple StreamThroughTransmitter extends StreamingTransmitterBase like IPacketTransmitter
 {
     parameters:
         @class(StreamThroughTransmitter);

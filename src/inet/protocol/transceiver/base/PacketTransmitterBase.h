@@ -41,7 +41,6 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     cGate *outputGate = nullptr;
     IActivePacketSource *producer = nullptr;
 
-    int txId = -1;
     Signal *txSignal = nullptr;
     ClockEvent *txEndTimer = nullptr;
 
@@ -69,8 +68,8 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(cGate *gate) const override { return !txEndTimer->isScheduled(); }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return canPushSomePacket(gate); }
 
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
     virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }

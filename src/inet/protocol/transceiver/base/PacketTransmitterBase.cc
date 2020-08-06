@@ -86,19 +86,20 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
 
 void PacketTransmitterBase::sendPacketStart(Signal *signal)
 {
-    txId = signal->getId();
     send(signal, SendOptions().duration(signal->getDuration()), outputGate);
 }
 
 void PacketTransmitterBase::sendPacketProgress(Signal *signal, b bitPosition, clocktime_t timePosition)
 {
+    ASSERT(signal->getOrigPacketId() != -1);
     simtime_t remainingDuration = signal->getDuration() - CLOCKTIME_AS_SIMTIME(timePosition);
-    send(signal, SendOptions().duration(signal->getDuration()).updateTx(txId, remainingDuration), outputGate);
+    send(signal, SendOptions().duration(signal->getDuration()).updateTx(signal->getOrigPacketId(), remainingDuration), outputGate);
 }
 
 void PacketTransmitterBase::sendPacketEnd(Signal *signal)
 {
-    send(signal, SendOptions().duration(signal->getDuration()).updateTx(txId, 0), outputGate);
+    ASSERT(signal->getOrigPacketId() != -1);
+    send(signal, SendOptions().duration(signal->getDuration()).finishTx(signal->getOrigPacketId()), outputGate);
 }
 
 clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const
