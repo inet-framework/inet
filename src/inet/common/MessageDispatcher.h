@@ -59,7 +59,11 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
 
   protected:
     virtual void initialize() override;
+#if OMNETPP_VERSION < 0x0600
+    virtual void arrived(cMessage *message, cGate *gate, simtime_t time) override;
+#else
     virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
+#endif
     virtual cGate *handlePacket(Packet *packet, cGate *inGate);
     virtual cGate *handleMessage(Message *request, cGate *inGate);
 

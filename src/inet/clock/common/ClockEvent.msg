@@ -47,7 +47,9 @@ cplusplus(cc) {{
     {
         if (clock != nullptr)
         	clock->handleClockEventOccurred(this);
+#if OMNETPP_VERSION >= 0x0600
         cMessage::execute();
+#endif
     }
 }}
 
