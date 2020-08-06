@@ -111,7 +111,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     streamDatarate = datarate;
     streamedPacket = packet->dup();
-    streamedPacket->setOrigPacketId(packet->getOrigPacketId());
+    streamedPacket->setOrigPacketId(packet->getId());
     EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
     updateDisplayString();
     return packet;
