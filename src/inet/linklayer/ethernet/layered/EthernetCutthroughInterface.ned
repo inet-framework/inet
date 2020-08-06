@@ -17,7 +17,7 @@ package inet.linklayer.ethernet.layered;
 
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.NetworkInterface;
-import inet.physicallayer.ethernet.EthernetPhyLayer;
+import inet.physicallayer.ethernet.IEthernetPhyLayer;
 
 module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterface
 {
@@ -30,7 +30,6 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         string macTableModule;
         *.bitrate = default(bitrate);
         *.macTableModule = default(macTableModule);
-        phyLayer.receiver.typename = default("StreamThroughReceiver");
         @class(EthernetCutthroughInterface);
         @display("i=block/ifcard;bgb=700,400");
     gates:
@@ -40,13 +39,13 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         output cutthroughOut;
         inout phys;
     submodules:
-        macLayer: EthernetMacLayer {
+        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             @display("p=500,100");
         }
         cutthroughLayer: EthernetCutthroughLayer {
             @display("p=500,200");
         }
-        phyLayer: EthernetPhyLayer {
+        phyLayer: <default("EthernetStreamThroughPhyLayer")> like IEthernetPhyLayer {
             @display("p=500,300");
         }
     connections:
