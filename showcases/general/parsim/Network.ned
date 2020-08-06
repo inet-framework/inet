@@ -13,13 +13,13 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 channel Ethernet100 extends ned.DatarateChannel
 {
     datarate = 100Mbps;
-    delay = 100us;
+    delay = 0.1us;
 }
 
 channel PppChannel extends ned.DatarateChannel
 {
     datarate = 1Gbps;
-    delay = 100us;
+    delay = 1us;
 }
 
 network ParSimNetworkBackbone
