@@ -52,7 +52,7 @@ module TelnetClientApp like IApp
         }
         emptyProducer: <default("EmptyPacketSource")> like IActivePacketSource {
             parameters:
-	            @display("p=500,100");
+                @display("p=500,100");
         }
         scheduler: <default("MarkovScheduler")> like IPacketScheduler {
             parameters:
@@ -62,11 +62,11 @@ module TelnetClientApp like IApp
         }
         consumer: <default("PassivePacketSink")> like IPassivePacketSink {
             parameters:
-	            @display("p=100,200");
+                @display("p=100,200");
         }
         io: TcpClientSocketIo {
             parameters:
-	            @display("p=200,300");
+                @display("p=200,300");
         }
     connections:
         characterProducer.out --> scheduler.in++;

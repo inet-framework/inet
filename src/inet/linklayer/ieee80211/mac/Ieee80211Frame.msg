@@ -328,7 +328,7 @@ class Ieee80211Delba extends Ieee80211ActionFrame
     // DELBA Parameter Set (2 bytes)
     uint16_t reserved = 0; // Reserved. (11 bits)
     bool initiator; // It is set to 1 to indicate the originator and is set to 0 to indicate the recipient.
-    				// The Initiator subfield indicates if the originator or the recipient of the data is sending this frame. (1 bit)
+                    // The Initiator subfield indicates if the originator or the recipient of the data is sending this frame. (1 bit)
     uint8_t tid; // The TID subfield indicates the TSID or the UP for which the Block Ack has been originally set up. (4 bits)
 
     // This Reason Code field is used to indicate the reason that an unsolicited notification management frame of

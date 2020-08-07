@@ -23,6 +23,6 @@ simple RandomDriftOscillator extends ConstantDriftOscillator
     parameters:
         volatile double changeInterval @unit(s);
         volatile double driftRateChange @unit(ppm);
-	    @class(RandomDriftOscillator);
+        @class(RandomDriftOscillator);
 }
 

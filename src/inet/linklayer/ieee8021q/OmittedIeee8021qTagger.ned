@@ -24,7 +24,7 @@ module OmittedIeee8021qTagger like IIeee8021qTagger
     gates:
         input in;
         output out;
-	connections:
-	    in --> out;
+    connections:
+        in --> out;
 }
 

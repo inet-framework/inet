@@ -46,7 +46,7 @@ cplusplus(cc) {{
     void ClockEvent::execute()
     {
         if (clock != nullptr)
-        	clock->handleClockEventOccurred(this);
+            clock->handleClockEventOccurred(this);
         cMessage::execute();
     }
 }}

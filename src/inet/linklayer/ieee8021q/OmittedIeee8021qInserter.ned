@@ -24,7 +24,7 @@ module OmittedIeee8021qInserter like IIeee8021qInserter
     gates:
         input in;
         output out;
-	connections:
-	    in --> out;
+    connections:
+        in --> out;
 }
 

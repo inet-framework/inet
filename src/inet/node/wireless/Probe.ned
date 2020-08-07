@@ -27,7 +27,7 @@ module Probe like INetworkNode
     submodules:
         mobility: <default("StationaryMobility")> like IMobility {
             parameters:
-	            subjectModule = default("^");
+                subjectModule = default("^");
                 @display("p=100,100");
         }
         antenna: <default("IsotropicAntenna")> like IAntenna {

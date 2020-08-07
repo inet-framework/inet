@@ -29,11 +29,11 @@ module ExtLowerIpv4 like IIpv4
     submodules:
         encap: Ipv4Encap {
             parameters:
-	            @display("p=100,50");
+                @display("p=100,50");
         }
         socket: ExtIpv4Socket {
             parameters:
-	            @display("p=100,150");
+                @display("p=100,150");
         }
     connections allowunconnected:
         transportIn --> encap.upperLayerIn;

@@ -33,7 +33,7 @@ module ExtUpperIpv4NetworkLayer like INetworkLayer
     parameters:
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-	    *.routingTableModule = default(absPath(".routingTable"));
+        *.routingTableModule = default(absPath(".routingTable"));
         @display("i=block/fork");
 
     gates:

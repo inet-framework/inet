@@ -53,7 +53,7 @@ simtime_t Ieee802154UwbIrTransmitter::getFrameDuration(int psduLength) const
 
 simtime_t Ieee802154UwbIrTransmitter::getMaxFrameDuration() const
 {
-	return cfg.preambleLength + Ieee802154UwbIrMode::MaxPSDULength * cfg.data_symbol_duration;
+    return cfg.preambleLength + Ieee802154UwbIrMode::MaxPSDULength * cfg.data_symbol_duration;
 }
 
 simtime_t Ieee802154UwbIrTransmitter::getPhyMaxFrameDuration() const
@@ -68,7 +68,7 @@ simtime_t Ieee802154UwbIrTransmitter::getPhyMaxFrameDuration() const
 
 simtime_t Ieee802154UwbIrTransmitter::getThdr() const
 {
-	switch (cfg.channel) {
+    switch (cfg.channel) {
         default:
             switch (cfg.prf) {
                 case Ieee802154UwbIrMode::NOMINAL_4_M:
@@ -83,8 +83,8 @@ simtime_t Ieee802154UwbIrTransmitter::getThdr() const
                     return 0;
             }
             break;
-	}
-	return 0;
+    }
+    return 0;
 }
 
 void Ieee802154UwbIrTransmitter::generateSyncPreamble(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const

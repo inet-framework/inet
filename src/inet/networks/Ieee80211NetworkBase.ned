@@ -21,5 +21,5 @@ import inet.physicallayer.contract.packetlevel.IRadioMedium;
 network Ieee80211NetworkBase extends WirelessNetworkBase
 {
     parameters:
-	    radioMedium.typename = default("Ieee80211ScalarRadioMedium");
+        radioMedium.typename = default("Ieee80211ScalarRadioMedium");
 }

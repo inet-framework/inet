@@ -24,7 +24,7 @@ module OmittedIeee8021qChecker like IIeee8021qChecker
     gates:
         input in;
         output out;
-	connections:
-	    in --> out;
+    connections:
+        in --> out;
 }
 

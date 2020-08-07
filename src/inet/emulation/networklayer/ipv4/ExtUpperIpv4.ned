@@ -29,7 +29,7 @@ module ExtUpperIpv4 like IIpv4
     submodules:
         tun: ExtIpv4TunDevice {
             parameters:
-	            @display("p=100,150");
+                @display("p=100,150");
         }
     connections allowunconnected:
         queueIn --> tun.lowerLayerIn;
