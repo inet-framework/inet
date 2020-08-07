@@ -28,12 +28,15 @@ Define_Module(MessageDispatcher);
 // TODO: optimize gate access throughout this class
 // TODO: factoring out some methods could also help
 
-void MessageDispatcher::initialize()
+void MessageDispatcher::initialize(int stage)
 {
-    WATCH_MAP(socketIdToGateIndex);
-    WATCH_MAP(interfaceIdToGateIndex);
-    WATCH_MAP(serviceToGateIndex);
-    WATCH_MAP(protocolToGateIndex);
+    PacketProcessorBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH_MAP(socketIdToGateIndex);
+        WATCH_MAP(interfaceIdToGateIndex);
+        WATCH_MAP(serviceToGateIndex);
+        WATCH_MAP(protocolToGateIndex);
+    }
 }
 
 #if OMNETPP_VERSION < 0x0600
@@ -44,8 +47,11 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
 {
     Enter_Method_Silent();
     cGate *outGate = nullptr;
-    if (message->isPacket())
-        outGate = handlePacket(check_and_cast<Packet *>(message), inGate);
+    if (message->isPacket()) {
+        auto packet = check_and_cast<Packet *>(message);
+        outGate = handlePacket(packet, inGate);
+        handlePacketProcessed(packet);
+    }
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
 #if OMNETPP_VERSION < 0x0600
@@ -53,6 +59,7 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
 #else
     outGate->deliver(message, options, time);
 #endif
+    updateDisplayString();
 }
 
 bool MessageDispatcher::canPushSomePacket(cGate *inGate) const
@@ -80,10 +87,9 @@ void MessageDispatcher::pushPacket(Packet *packet, cGate *inGate)
     take(packet);
     auto outGate = handlePacket(packet, inGate);
     auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
-    if (consumer != nullptr)
-        consumer->pushPacket(packet, outGate->getPathEndGate());
-    else
-        send(packet, outGate);
+    handlePacketProcessed(packet);
+    pushOrSendPacket(packet, outGate, consumer);
+    updateDisplayString();
 }
 
 void MessageDispatcher::handleCanPushPacket(cGate *outGate)
