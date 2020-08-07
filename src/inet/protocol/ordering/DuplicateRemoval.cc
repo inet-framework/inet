@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/ordering/DuplicateRemoval.h"
 #include "inet/protocol/ordering/SequenceNumberHeader_m.h"
 
@@ -28,8 +28,8 @@ void DuplicateRemoval::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::sequenceNumber, nullptr, inputGate);
-        registerProtocol(IProtocol::sequenceNumber, nullptr, outputGate);
+        registerService(AccessoryProtocol::sequenceNumber, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::sequenceNumber, nullptr, outputGate);
     }
 }
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPROTOCOL_H
-#define __INET_IPROTOCOL_H
+#ifndef __INET_ACCESSORYPROTOCOL_H
+#define __INET_ACCESSORYPROTOCOL_H
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Protocol.h"
@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class INET_API IProtocol
+class INET_API AccessoryProtocol
 {
   public:
     static const Protocol acknowledge;
@@ -43,5 +43,5 @@ class INET_API IProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_IPROTOCOL_H
+#endif // ifndef __INET_ACCESSORYPROTOCOL_H
 

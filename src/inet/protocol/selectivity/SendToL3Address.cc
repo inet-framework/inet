@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/selectivity/DestinationL3AddressHeader_m.h"
 #include "inet/protocol/selectivity/SendToL3Address.h"
 
@@ -31,8 +31,8 @@ void SendToL3Address::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         address = Ipv4Address(par("address").stringValue());
-        registerService(IProtocol::destinationL3Address, inputGate, nullptr);
-        registerProtocol(IProtocol::destinationL3Address, outputGate, nullptr);
+        registerService(AccessoryProtocol::destinationL3Address, inputGate, nullptr);
+        registerProtocol(AccessoryProtocol::destinationL3Address, outputGate, nullptr);
     }
 }
 
@@ -41,8 +41,8 @@ void SendToL3Address::processPacket(Packet *packet)
     auto header = makeShared<DestinationL3AddressHeader>();
     header->setDestinationAddress(address);
     packet->insertAtFront(header);
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&IProtocol::forwarding);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::destinationL3Address);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::forwarding);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::destinationL3Address);
 }
 
 } // namespace inet

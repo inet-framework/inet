@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/ordering/SequenceNumberHeader_m.h"
 #include "inet/protocol/ordering/SequenceNumbering.h"
 
@@ -29,7 +29,7 @@ void SequenceNumbering::processPacket(Packet *packet)
     auto header = makeShared<SequenceNumberHeader>();
     header->setSequenceNumber(sequenceNumber++);
     packet->insertAtFront(header);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::sequenceNumber);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::sequenceNumber);
 }
 
 } // namespace inet

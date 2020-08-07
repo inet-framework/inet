@@ -19,7 +19,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocol/checksum/FcsHeaderInserter.h"
 #include "inet/protocol/checksum/header/FcsHeader_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 
 namespace inet {
 
@@ -30,8 +30,8 @@ void FcsHeaderInserter::initialize(int stage)
     FcsInserterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(IProtocol::fcs, inputGate, nullptr);
-        registerProtocol(IProtocol::fcs, outputGate, nullptr);
+        registerService(AccessoryProtocol::fcs, inputGate, nullptr);
+        registerProtocol(AccessoryProtocol::fcs, outputGate, nullptr);
     }
 }
 
@@ -42,7 +42,7 @@ void FcsHeaderInserter::processPacket(Packet *packet)
     header->setFcs(fcs);
     header->setFcsMode(fcsMode);
     insertHeader<FcsHeader>(packet, header, headerPosition);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::fcs);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::fcs);
 }
 
 } // namespace inet

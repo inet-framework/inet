@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocol/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocol/acknowledgement/ReceiveWithAcknowledge.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {
@@ -29,8 +29,8 @@ void ReceiveWithAcknowledge::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::withAcknowledge, nullptr, inputGate);
-        registerProtocol(IProtocol::withAcknowledge, nullptr, outputGate);
+        registerService(AccessoryProtocol::withAcknowledge, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::withAcknowledge, nullptr, outputGate);
     }
 }
 
@@ -43,7 +43,7 @@ void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, cGate *gate)
     auto ackHeader = makeShared<AcknowledgeHeader>();
     ackHeader->setSequenceNumber(dataHeader->getSequenceNumber());
     auto ackPacket = new Packet("Ack", ackHeader);
-    ackPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::acknowledge);
+    ackPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::acknowledge);
     send(ackPacket, "ackOut");
 }
 

@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/selectivity/DestinationPortHeader_m.h"
 #include "inet/protocol/selectivity/ReceiveAtPort.h"
 
@@ -31,8 +31,8 @@ void ReceiveAtPort::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         port = par("port");
-        registerService(IProtocol::destinationPort, nullptr, inputGate);
-        registerProtocol(IProtocol::destinationPort, nullptr, outputGate);
+        registerService(AccessoryProtocol::destinationPort, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::destinationPort, nullptr, outputGate);
     }
 }
 

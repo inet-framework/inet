@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocol/checksum/CrcHeaderChecker.h"
 #include "inet/protocol/checksum/header/CrcHeader_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 
 namespace inet {
 
@@ -29,8 +29,8 @@ void CrcHeaderChecker::initialize(int stage)
     CrcCheckerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(IProtocol::crc, nullptr, inputGate);
-        registerProtocol(IProtocol::crc, nullptr, outputGate);
+        registerService(AccessoryProtocol::crc, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::crc, nullptr, outputGate);
     }
 }
 

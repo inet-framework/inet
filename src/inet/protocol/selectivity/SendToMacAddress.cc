@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/selectivity/DestinationMacAddressHeader_m.h"
 #include "inet/protocol/selectivity/SendToMacAddress.h"
 
@@ -33,8 +33,8 @@ void SendToMacAddress::initialize(int stage)
         const char *addressAsString = par("address");
         if (strlen(addressAsString) != 0)
             address = MacAddress(addressAsString);
-        registerService(IProtocol::destinationMacAddress, inputGate, nullptr);
-        registerProtocol(IProtocol::destinationMacAddress, outputGate, nullptr);
+        registerService(AccessoryProtocol::destinationMacAddress, inputGate, nullptr);
+        registerProtocol(AccessoryProtocol::destinationMacAddress, outputGate, nullptr);
     }
 }
 
@@ -57,7 +57,7 @@ void SendToMacAddress::processPacket(Packet *packet)
     auto header = makeShared<DestinationMacAddressHeader>();
     header->setDestinationAddress(destinationAddress);
     packet->insertAtFront(header);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::destinationMacAddress);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::destinationMacAddress);
 }
 
 void SendToMacAddress::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

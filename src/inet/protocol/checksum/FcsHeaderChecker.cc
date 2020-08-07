@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocol/checksum/FcsHeaderChecker.h"
 #include "inet/protocol/checksum/header/FcsHeader_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 
 namespace inet {
 
@@ -29,8 +29,8 @@ void FcsHeaderChecker::initialize(int stage)
     FcsCheckerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(IProtocol::fcs, nullptr, inputGate);
-        registerProtocol(IProtocol::fcs, nullptr, outputGate);
+        registerService(AccessoryProtocol::fcs, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::fcs, nullptr, outputGate);
     }
 }
 

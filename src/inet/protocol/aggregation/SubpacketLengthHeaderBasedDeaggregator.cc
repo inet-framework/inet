@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocol/aggregation/header/SubpacketLengthHeader_m.h"
 #include "inet/protocol/aggregation/SubpacketLengthHeaderBasedDeaggregator.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 
 namespace inet {
 
@@ -28,8 +28,8 @@ void SubpacketLengthHeaderBasedDeaggregator::initialize(int stage)
 {
     DeaggregatorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::aggregation, nullptr, inputGate);
-        registerProtocol(IProtocol::aggregation, nullptr, outputGate);
+        registerService(AccessoryProtocol::aggregation, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::aggregation, nullptr, outputGate);
     }
 }
 

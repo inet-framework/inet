@@ -19,7 +19,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/protocol/forwarding/HopLimitHeader_m.h"
 #include "inet/protocol/forwarding/ReceiveWithHopLimit.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 
 namespace inet {
 
@@ -29,8 +29,8 @@ void ReceiveWithHopLimit::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::hopLimit, nullptr, inputGate);
-        registerProtocol(IProtocol::hopLimit, nullptr, outputGate);
+        registerService(AccessoryProtocol::hopLimit, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::hopLimit, nullptr, outputGate);
     }
 }
 
@@ -39,7 +39,7 @@ void ReceiveWithHopLimit::processPacket(Packet *packet)
     auto header = packet->popAtFront<HopLimitHeader>();
     packet->popAtFront<HopLimitHeader>();
     packet->addTag<HopLimitInd>()->setHopLimit(header->getHopLimit());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&IProtocol::forwarding);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::forwarding);
 }
 
 bool ReceiveWithHopLimit::matchesPacket(const Packet *packet) const

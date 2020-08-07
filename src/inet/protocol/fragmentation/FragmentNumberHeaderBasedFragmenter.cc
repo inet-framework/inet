@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/fragmentation/FragmentNumberHeaderBasedFragmenter.h"
 #include "inet/protocol/fragmentation/header/FragmentNumberHeader_m.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
@@ -39,7 +39,7 @@ Packet *FragmentNumberHeaderBasedFragmenter::createFragmentPacket(Packet *packet
     fragmentHeader->setFragmentNumber(fragmentNumber);
     fragmentHeader->setLastFragment(fragmentNumber == numFragments - 1);
     insertHeader<FragmentNumberHeader>(fragmentPacket, fragmentHeader, headerPosition);
-    fragmentPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::fragmentation);
+    fragmentPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::fragmentation);
     return fragmentPacket;
 }
 

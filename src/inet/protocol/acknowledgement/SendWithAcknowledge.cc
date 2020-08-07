@@ -19,7 +19,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocol/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocol/acknowledgement/SendWithAcknowledge.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {
@@ -32,9 +32,9 @@ void SendWithAcknowledge::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         acknowledgeTimeout = par("acknowledgeTimeout");
         sequenceNumber = 0;
-        registerService(IProtocol::withAcknowledge, inputGate, nullptr);
-        registerProtocol(IProtocol::withAcknowledge, outputGate, nullptr);
-        registerService(IProtocol::acknowledge, gate("ackIn"), gate("ackIn"));
+        registerService(AccessoryProtocol::withAcknowledge, inputGate, nullptr);
+        registerProtocol(AccessoryProtocol::withAcknowledge, outputGate, nullptr);
+        registerService(AccessoryProtocol::acknowledge, gate("ackIn"), gate("ackIn"));
     }
 }
 
@@ -50,7 +50,7 @@ void SendWithAcknowledge::handleMessage(cMessage *message)
 void SendWithAcknowledge::processPacket(Packet *packet)
 {
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &IProtocol::acknowledge) {
+    if (protocol == &AccessoryProtocol::acknowledge) {
         auto header = packet->popAtFront<AcknowledgeHeader>();
         auto sequenceNumber = header->getSequenceNumber();
         auto it = timers.find(sequenceNumber);
@@ -65,7 +65,7 @@ void SendWithAcknowledge::processPacket(Packet *packet)
         auto header = makeShared<SequenceNumberHeader>();
         header->setSequenceNumber(sequenceNumber);
         packet->insertAtFront(header);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::withAcknowledge);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::withAcknowledge);
         send(packet, "out");
         auto timer = new cMessage("AcknowledgeTimer");
         timer->setKind(sequenceNumber);

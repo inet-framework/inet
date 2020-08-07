@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/fragmentation/FragmentNumberHeaderBasedDefragmenter.h"
 #include "inet/protocol/fragmentation/header/FragmentNumberHeader_m.h"
 
@@ -29,8 +29,8 @@ void FragmentNumberHeaderBasedDefragmenter::initialize(int stage)
     DefragmenterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(IProtocol::fragmentation, nullptr, inputGate);
-        registerProtocol(IProtocol::fragmentation, nullptr, outputGate);
+        registerService(AccessoryProtocol::fragmentation, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::fragmentation, nullptr, outputGate);
     }
 }
 

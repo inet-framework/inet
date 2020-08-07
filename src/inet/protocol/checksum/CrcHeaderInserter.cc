@@ -19,7 +19,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocol/checksum/CrcHeaderInserter.h"
 #include "inet/protocol/checksum/header/CrcHeader_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 
 namespace inet {
 
@@ -30,8 +30,8 @@ void CrcHeaderInserter::initialize(int stage)
     CrcInserterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(IProtocol::crc, inputGate, nullptr);
-        registerProtocol(IProtocol::crc, outputGate, nullptr);
+        registerService(AccessoryProtocol::crc, inputGate, nullptr);
+        registerProtocol(AccessoryProtocol::crc, outputGate, nullptr);
     }
 }
 
@@ -42,7 +42,7 @@ void CrcHeaderInserter::processPacket(Packet *packet)
     header->setCrc(crc);
     header->setCrcMode(crcMode);
     insertHeader<CrcHeader>(packet, header, headerPosition);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::crc);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::crc);
 }
 
 } // namespace inet

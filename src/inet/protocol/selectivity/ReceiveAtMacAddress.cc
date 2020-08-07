@@ -19,7 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/selectivity/DestinationMacAddressHeader_m.h"
 #include "inet/protocol/selectivity/ReceiveAtMacAddress.h"
 
@@ -32,8 +32,8 @@ void ReceiveAtMacAddress::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         address = MacAddress(par("address").stringValue());
-        registerService(IProtocol::destinationMacAddress, nullptr, inputGate);
-        registerProtocol(IProtocol::destinationMacAddress, nullptr, outputGate);
+        registerService(AccessoryProtocol::destinationMacAddress, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::destinationMacAddress, nullptr, outputGate);
         getContainingNicModule(this)->setMacAddress(address);
     }
 }
@@ -42,7 +42,7 @@ void ReceiveAtMacAddress::processPacket(Packet *packet)
 {
     packet->popAtFront<DestinationMacAddressHeader>();
     // TODO: KLUDGE:
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&IProtocol::sequenceNumber);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::sequenceNumber);
 }
 
 bool ReceiveAtMacAddress::matchesPacket(const Packet *packet) const

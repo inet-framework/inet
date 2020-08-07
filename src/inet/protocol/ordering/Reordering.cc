@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/ordering/Reordering.h"
 #include "inet/protocol/ordering/SequenceNumberHeader_m.h"
 
@@ -28,8 +28,8 @@ void Reordering::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(IProtocol::sequenceNumber, inputGate, nullptr);
-        registerProtocol(IProtocol::sequenceNumber, outputGate, nullptr);
+        registerService(AccessoryProtocol::sequenceNumber, inputGate, nullptr);
+        registerProtocol(AccessoryProtocol::sequenceNumber, outputGate, nullptr);
     }
 }
 

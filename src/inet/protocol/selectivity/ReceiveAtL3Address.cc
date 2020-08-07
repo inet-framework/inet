@@ -18,7 +18,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/selectivity/DestinationL3AddressHeader_m.h"
 #include "inet/protocol/selectivity/ReceiveAtL3Address.h"
 
@@ -31,8 +31,8 @@ void ReceiveAtL3Address::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         address = Ipv4Address(par("address").stringValue());
-        registerService(IProtocol::destinationL3Address, nullptr, inputGate);
-        registerProtocol(IProtocol::destinationL3Address, nullptr, outputGate);
+        registerService(AccessoryProtocol::destinationL3Address, nullptr, inputGate);
+        registerProtocol(AccessoryProtocol::destinationL3Address, nullptr, outputGate);
     }
 }
 

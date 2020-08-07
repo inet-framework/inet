@@ -21,7 +21,7 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/protocol/forwarding/Forwarding.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 #include "inet/protocol/selectivity/DestinationL3AddressHeader_m.h"
 
 namespace inet {
@@ -35,8 +35,8 @@ void Forwarding::initialize(int stage)
         const char *addressAsString = par("address");
         if (strlen(addressAsString) != 0)
             address = L3AddressResolver().resolve(addressAsString);
-        registerService(IProtocol::forwarding, inputGate, inputGate);
-        registerProtocol(IProtocol::forwarding, outputGate, outputGate);
+        registerService(AccessoryProtocol::forwarding, inputGate, inputGate);
+        registerProtocol(AccessoryProtocol::forwarding, outputGate, outputGate);
     }
 }
 
@@ -65,7 +65,7 @@ void Forwarding::pushPacket(Packet *packet, cGate *gate)
     auto interfaceIndex = nextHop.second;
     if (nextHopAddress.isUnspecified()) {
         packet->popAtFront<DestinationL3AddressHeader>();
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&IProtocol::destinationL3Address);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::destinationL3Address);
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
@@ -75,8 +75,8 @@ void Forwarding::pushPacket(Packet *packet, cGate *gate)
         MacAddress destinationMacAddress("00-AA-00-00-00-00");
         destinationMacAddress.setAddressByte(5, nextHopAddress.toIpv4().getDByte(3));
         packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(destinationMacAddress);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::forwarding);
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&IProtocol::hopLimit);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::forwarding);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::hopLimit);
         packet->trimFront();
         pushOrSendPacket(packet, outputGate, consumer);
     }

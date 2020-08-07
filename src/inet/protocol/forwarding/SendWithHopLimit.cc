@@ -19,7 +19,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocol/forwarding/HopLimitHeader_m.h"
 #include "inet/protocol/forwarding/SendWithHopLimit.h"
-#include "inet/protocol/contract/IProtocol.h"
+#include "inet/protocol/common/AccessoryProtocol.h"
 
 namespace inet {
 
@@ -30,8 +30,8 @@ void SendWithHopLimit::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         hopLimit = par("hopLimit");
-        registerService(IProtocol::hopLimit, inputGate, nullptr);
-        registerProtocol(IProtocol::hopLimit, outputGate, nullptr);
+        registerService(AccessoryProtocol::hopLimit, inputGate, nullptr);
+        registerProtocol(AccessoryProtocol::hopLimit, outputGate, nullptr);
     }
 }
 
@@ -41,7 +41,7 @@ void SendWithHopLimit::processPacket(Packet *packet)
     auto header = makeShared<HopLimitHeader>();
     header->setHopLimit(hopLimit);
     packet->insertAtFront(header);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&IProtocol::hopLimit);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::hopLimit);
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
