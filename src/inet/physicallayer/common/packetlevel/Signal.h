@@ -30,6 +30,8 @@ class INET_API Signal : public cPacket
     Signal(const Signal& other);
 
     virtual Signal *dup() const override { return new Signal(*this); }
+
+    virtual std::string str() const override;
 };
 
 } // namespace physicallayer

@@ -15,10 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/Units.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 
 namespace inet {
 namespace physicallayer {
+
+using namespace inet::units::values;
 
 Register_Class(Signal);
 
@@ -31,6 +34,15 @@ Signal::Signal(const Signal& other) :
     cPacket(other)
 {
 }
+
+std::string Signal::str() const
+{
+    std::ostringstream out;
+    out << "(" << getClassName() << ")" << getName() << ": " << getDuration() << " s (" << b(getBitLength()) << ")";
+    return out.str();
+}
+
+// TODO: getFullName()
 
 } // namespace physicallayer
 } // namespace inet
