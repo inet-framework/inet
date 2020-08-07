@@ -7,6 +7,7 @@ simple ClockTestApp
 {
     parameters:
         string clockModule; // relative path of a module that implements IClock; optional
+        @class(::inet::ClockTestApp);
 }
 
 module ClockTestHost

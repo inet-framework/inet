@@ -14,7 +14,7 @@ cmdenv-log-prefix = "C:%C: "
 *.host.clock.oscillator.nominalTickLength = 0.1s
 *.host.clock.oscillator.driftRate = -0.5e6 ppm
 *.host.clock.defaultOverdueClockEventHandlingMode = "execute"
-*.scenarioManager.script = xml('<scenario><set-clock t="2.5s" module="host.clock" time="2.9s" reset-oscillator="false"/></scenario>')
+*.scenarioManager.script = xml("<scenario><set-clock t='2.5s' module='host.clock' time='2.9s' reset-oscillator='false'/></scenario>")
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "^C:" test.out > clock.out || true
 %#--------------------------------------------------------------------------------------------------------------

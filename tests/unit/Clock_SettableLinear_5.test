@@ -12,7 +12,7 @@ cmdenv-log-prefix = "C:%C: "
 *.host.clock.typename = "SettableClock"
 *.host.clock.initialClockTime = 1s
 *.host.clock.oscillator.driftRate = -0.5e6 ppm
-*.scenarioManager.script = xml('<scenario><set-clock t="2.5s" module="host.clock" time="2.5s"/></scenario>')
+*.scenarioManager.script = xml("<scenario><set-clock t='2.5s' module='host.clock' time='2.5s'/></scenario>")
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "^C:" test.out > clock.out || true
 %#--------------------------------------------------------------------------------------------------------------
