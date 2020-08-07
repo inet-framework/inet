@@ -1,0 +1,3 @@
+#/usr/bin/sh
+
+find . -iregex '.*\.\(h\|cc\|ned\|msg\)$' -print | xargs -L 1 -I {} sh -c 'gawk "{ while (/^[[:blank:]]/) {     if (sub(/^ /,\"\")) printf \" \";     if (sub(/^\t/,\"\")) printf \"    \";     }   print; }" {} | sponge {}'
