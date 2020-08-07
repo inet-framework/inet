@@ -21,7 +21,7 @@ import inet.visualizer.base.TransportConnectionVisualizerBase;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 
 //
-// This module visualizes transport layer connections on a 2D canvas. 
+// This module visualizes transport layer connections on a 2D canvas.
 // It displays a pair of colored icons for each connection at the network nodes
 // where the connection starts or ends.
 //

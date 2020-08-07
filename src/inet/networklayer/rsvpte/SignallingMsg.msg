@@ -22,16 +22,16 @@ namespace inet;
 enum SignallingConstants {
     MSG_PSB_TIMER         = 1;
     MSG_PSB_TIMEOUT       = 2;
-    
+
     MSG_RSB_REFRESH_TIMER = 3;
     MSG_RSB_COMMIT_TIMER  = 4;
     MSG_RSB_TIMEOUT       = 5;
-    
+
     MSG_HELLO_TIMER       = 6;
     MSG_HELLO_TIMEOUT     = 7;
-    
+
     MSG_PATH_NOTIFY       = 8;
-    
+
     PATH_CREATED          = 1;
     PATH_UNFEASIBLE       = 2;
     PATH_FAILED           = 3;

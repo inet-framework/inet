@@ -54,7 +54,7 @@ class BMacHeaderBase extends FieldsChunk
 
 //
 // Control Frame for ~BMac. Frame size is configurable
-// in the MAC layer. 
+// in the MAC layer.
 //
 class BMacControlFrame extends BMacHeaderBase
 {
@@ -62,7 +62,7 @@ class BMacControlFrame extends BMacHeaderBase
 
 //
 // Dataframe header for ~BMac. Frame size is configurable
-// in the MAC layer. 
+// in the MAC layer.
 //
 class BMacDataFrameHeader extends BMacHeaderBase
 {

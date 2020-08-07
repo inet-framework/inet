@@ -43,7 +43,7 @@ simple MobilityVisualizerBase extends VisualizerBase
 
         bool displayOrientations = default(false); // display a pie indicating the current orientation, disabled by default
         double orientationPieRadius = default(32); // radius of the pie
-        double orientationPieSize = default(0.2); // relative size of the pie compared to the full circle 
+        double orientationPieSize = default(0.2); // relative size of the pie compared to the full circle
         double orientationPieOpacity = default(0.25); // opacity of the pie
         string orientationLineColor = default("black"); // orientation line color, black by default
         string orientationLineStyle = default("solid"); // orientation line style (solid, dashed, dotted)

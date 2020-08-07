@@ -222,7 +222,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
 
-//TODO this can be introduced when the SNAP header 
+//TODO this can be introduced when the SNAP header
 //class Ieee80211QoSDataHeader extends Ieee80211DataHeader
 //{
 //    type = ST_DATA_WITH_QOS;

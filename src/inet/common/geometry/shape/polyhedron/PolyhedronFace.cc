@@ -90,7 +90,7 @@ PolyhedronEdge* PolyhedronFace::findEdge(PolyhedronEdge* edge)
 {
     for (auto currEdge : edges)
     {
-        
+
         if (*currEdge == *edge)
             return currEdge;
     }

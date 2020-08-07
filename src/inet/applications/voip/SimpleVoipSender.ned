@@ -21,9 +21,9 @@ package inet.applications.voip;
 import inet.applications.contract.IApp;
 
 //
-// Implements a simple VoIP source. It is a constant bitrate source, with 
+// Implements a simple VoIP source. It is a constant bitrate source, with
 // talkspurt support added. Packets do not contain actual voice data.
-// Connection setup/teardown is not modelled. The peer must be a 
+// Connection setup/teardown is not modelled. The peer must be a
 // ~SimpleVoipReceiver.
 //
 // The source alternates between two states: talk and silence. The length
@@ -31,14 +31,14 @@ import inet.applications.contract.IApp;
 // silenceDuration parameters. In talk state, the module acts as a CBR source,
 // and sends packets of size talkPacketSize every packetizationInterval seconds
 // to the destination over UDP. Silence is implicit: in silence state, no packets
-// are sent, and there is no explicit signalling of silence either. 
+// are sent, and there is no explicit signalling of silence either.
 //
 // Packets are of type SimpleVoipPacket. In addition to packet ID and timestamp,
-// packets also contain a talkspurt ID and the total number of packets in the 
+// packets also contain a talkspurt ID and the total number of packets in the
 // talkspurt to facilitate statistics at the receiver side. (It allows the receiver
 // to detect loss of packets at the end of a talkspurt; a full talkspurt can still
 // be lost unnoticed.)
-// 
+//
 // The destination address/port, the local port, start and stop times can be
 // set via parameters.
 //

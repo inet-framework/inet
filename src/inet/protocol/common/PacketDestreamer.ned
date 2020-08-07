@@ -21,7 +21,7 @@ import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// This module takes packets streamed to its input and passes them to its output. 
+// This module takes packets streamed to its input and passes them to its output.
 //
 simple PacketDestreamer extends PacketProcessorBase like IPacketFlow
 {

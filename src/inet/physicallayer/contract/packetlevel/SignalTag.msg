@@ -100,7 +100,7 @@ class SignalBitrateInd extends SignalBitrateTagBase
 //
 class SnirInd extends SignalTagBase
 {
-    double minimumSnir = NaN; // minimum signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown. 
+    double minimumSnir = NaN; // minimum signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown.
     double maximumSnir = NaN; // maximum signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown.
     double averageSnir = NaN; // average signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown.
 }

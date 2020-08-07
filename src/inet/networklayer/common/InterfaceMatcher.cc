@@ -142,7 +142,7 @@ bool InterfaceMatcher::linkContainsMatchingHost(const NetworkInterface *ie, cons
     collectNeighbors(outGate, hostNodes, deviceNodes, node);
 
     for (auto neighbour : hostNodes) {
-        
+
         std::string hostFullPath = neighbour->getFullPath();
         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
         if (hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))

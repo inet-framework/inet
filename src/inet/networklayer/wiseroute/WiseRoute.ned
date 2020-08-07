@@ -15,7 +15,7 @@
 // *              For further information see file COPYING
 // *              in the top level directory
 // *
-// * Funding: This work was partially financed by the European Commission under the  
+// * Funding: This work was partially financed by the European Commission under the
 // * Framework 6 IST Project "Wirelessly Accessible Sensor Populations"
 // * (WASP) under contract IST-034963.
 // ***************************************************************************

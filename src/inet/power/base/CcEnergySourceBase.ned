@@ -23,7 +23,7 @@ import inet.power.contract.ICcEnergySource;
 // This is an abstract base module for current based energy source models.
 // It defines shared signals and statistics.
 //
-// @see ~CcEnergyConsumerBase, ~CcEnergyGeneratorBase, ~CcEnergySinkBase, ~CcEnergyStorageBase  
+// @see ~CcEnergyConsumerBase, ~CcEnergyGeneratorBase, ~CcEnergySinkBase, ~CcEnergyStorageBase
 // @author Levente Meszaros
 //
 simple CcEnergySourceBase like ICcEnergySource

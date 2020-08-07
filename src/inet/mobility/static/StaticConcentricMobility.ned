@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2014 Florian Meier <florian.meier@tu-harburg.de>
-// 
+//
 // Based on:
 // Copyright (C) 2006 Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
 //

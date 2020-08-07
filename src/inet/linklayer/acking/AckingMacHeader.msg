@@ -25,7 +25,7 @@ namespace inet;
 
 //
 // Packet for ~AckingMac. Packet size is configurable
-// in the MAC layer. 
+// in the MAC layer.
 //
 class AckingMacHeader extends FieldsChunk
 {

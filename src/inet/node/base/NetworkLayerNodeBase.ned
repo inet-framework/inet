@@ -25,7 +25,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
     parameters:
         bool hasIpv4 = default(true);
         bool hasIpv6 = default(false);
-        bool hasGn = default(false); 
+        bool hasGn = default(false);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;

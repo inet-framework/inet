@@ -29,7 +29,7 @@ import inet.mobility.contract.IMobility;
 // component in the mobility of each group member. It also allows to seprate the
 // mobility model of initial positioning from positioning during the simulation.
 // It also makes possible to separate the mobility model of positioning from the
-// mobility model of orientation. 
+// mobility model of orientation.
 //
 module SuperpositioningMobility extends MobilityBase
 {
@@ -37,7 +37,7 @@ module SuperpositioningMobility extends MobilityBase
         int numElements; // number of combined mobility modules
         string positionComposition @enum("zero", "sum", "average") = default("sum");
         string orientationComposition @enum("zero", "sum", "average", "faceForward") = default("sum");
-        element[*].subjectModule = default(""); // disable visual subject module of superposition elements by default 
+        element[*].subjectModule = default(""); // disable visual subject module of superposition elements by default
         @class(SuperpositioningMobility);
     submodules:
         element[numElements]: <> like IMobility {

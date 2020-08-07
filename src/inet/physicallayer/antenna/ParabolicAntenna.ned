@@ -21,7 +21,7 @@ import inet.physicallayer.base.packetlevel.AntennaBase;
 
 //
 // This model is based on a parabolic approximation of the main lobe radiation
-// pattern. A similar model appears in 
+// pattern. A similar model appears in
 //
 // George Calcev and Matt Dillon, "Antenna Tilt Control in CDMA Networks"
 // in Proc. of the 2nd Annual International Wireless Internet Conference (WICON), 2006

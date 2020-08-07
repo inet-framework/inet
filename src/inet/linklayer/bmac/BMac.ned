@@ -19,7 +19,7 @@ package inet.linklayer.bmac;
 //* file:        BMac.ned
 //*
 //* author:      Anna Foerster
-//* 
+//*
 //* copyright:   (C) 22008- 2010, NetLab, SUPSI, Switzerland.
 //*
 //*              This program is free software; you can redistribute it
@@ -58,11 +58,11 @@ module BMac extends MacProtocolBase like IMacProtocol
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
 
-        // should we animate the nodes with colors depending on their state or 
+        // should we animate the nodes with colors depending on their state or
         // not?
         bool animation = default(true);
 
-        // bit rate 
+        // bit rate
         double bitrate @unit(bps) = default(19200 bps);
 
         //should mac send and expect acknowledgments?

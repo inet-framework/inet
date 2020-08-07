@@ -212,7 +212,7 @@ class UdpSetDscpCommand extends UdpSetOptionCommand
 }
 
 //
-// Control info for setting the TOS (Type Of Service) / Traffic Class 
+// Control info for setting the TOS (Type Of Service) / Traffic Class
 // header field on outgoing Ipv4/Ipv6 packets sent from an Udp socket.
 // This is a 8-bit field.
 // To set the option, send a message to  the ~Udp module with kind=UDP_C_SETOPTION

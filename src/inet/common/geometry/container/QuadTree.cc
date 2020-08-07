@@ -217,7 +217,7 @@ void QuadTree::tryToJoinChildQuadrants()
     if (quadrantSum <= quadrantCapacity) {
         // Copy the points to the parent node
         for (auto quadrant : quadrants) {
-            
+
             for (auto & elem : quadrant->points)
                 points.push_back(elem);
             // Delete the child quadrants

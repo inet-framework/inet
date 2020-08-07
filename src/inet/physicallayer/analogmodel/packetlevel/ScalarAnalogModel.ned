@@ -27,7 +27,7 @@ import inet.physicallayer.contract.packetlevel.IAnalogModel;
 module ScalarAnalogModel like IAnalogModel
 {
     parameters:
-        bool ignorePartialInterference = default(false); // enabled means interference only partially overlapping with the signal being received is ignored, otherwise the simulation stops with an error 
+        bool ignorePartialInterference = default(false); // enabled means interference only partially overlapping with the signal being received is ignored, otherwise the simulation stops with an error
         @display("i=block/tunnel");
         @class(ScalarAnalogModel);
 }

@@ -23,7 +23,7 @@ import inet.mobility.base.MovingMobilityBase;
 // Implements the Random Waypoint mobility model.
 //
 // The node moves in line segments. For each line segment, a random destination
-// position (distributed uniformly over the constraint area or volume) and a 
+// position (distributed uniformly over the constraint area or volume) and a
 // random speed is chosen. You can define a speed as a variate from which a new
 // value will be drawn for each line segment; it is customary to specify it as
 // uniform(minSpeed, maxSpeed). When the node reaches the target position,

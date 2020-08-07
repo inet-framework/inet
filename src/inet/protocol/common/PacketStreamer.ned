@@ -20,7 +20,7 @@ package inet.protocol.common;
 import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPacketFlow;
 
-// This module takes packets passed to its input and streams them to its output. 
+// This module takes packets passed to its input and streams them to its output.
 //
 simple PacketStreamer extends PacketProcessorBase like IPacketFlow
 {

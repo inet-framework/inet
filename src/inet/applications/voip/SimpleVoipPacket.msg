@@ -22,7 +22,7 @@ import inet.common.packet.chunk.Chunk;
 namespace inet;
 
 //
-// Represents a voice packet used by SimpleVoipSender / SimpleVoipReceiver 
+// Represents a voice packet used by SimpleVoipSender / SimpleVoipReceiver
 //
 class SimpleVoipPacket extends FieldsChunk
 {

@@ -23,7 +23,7 @@ import inet.power.contract.ICcEnergySink;
 // This is an abstract base module for current based energy sink models.
 // It defines signals and statistics.
 //
-// @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergyStorageBase  
+// @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergyStorageBase
 // @author Levente Meszaros
 //
 simple CcEnergySinkBase like ICcEnergySink

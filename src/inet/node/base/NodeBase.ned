@@ -69,7 +69,7 @@ module NodeBase like INetworkNode
             parameters:
                 @display("p=125,560;is=s");
         }
-        // TODO: move mobility right after status to have it in the same order as in their positions, changes fingerprints 
+        // TODO: move mobility right after status to have it in the same order as in their positions, changes fingerprints
         mobility: <default("")> like IMobility if typename != "" {
             parameters:
                 @display("p=125,160;is=s");

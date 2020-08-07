@@ -21,7 +21,7 @@ import inet.node.base.ApplicationLayerNodeBase;
 
 //
 // This module implements a wireless sensor node. It has one 802.15.4 wireless interface
-// and an energy storage module by default. 
+// and an energy storage module by default.
 //# TODO and energyconsumer in the radio
 //# TODO there is no management; the IdealEnergyStorage never depletes...
 //

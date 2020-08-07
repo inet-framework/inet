@@ -25,17 +25,17 @@ import inet.visualizer.contract.ISceneVisualizer;
 // Other objects of the scene are placed on the map according to the coordinate system module.
 //
 // @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
-// @see ~IGeographicCoordinateSystem, ~SimpleGeographicCoordinateSystem, ~OsgGeographicCoordinateSystem 
+// @see ~IGeographicCoordinateSystem, ~SimpleGeographicCoordinateSystem, ~OsgGeographicCoordinateSystem
 //
 simple OpenStreetMapSceneCanvasVisualizer extends SceneVisualizerBase like ISceneVisualizer
 {
     parameters:
         @class(OpenStreetMapSceneCanvasVisualizer);
         string coordinateSystemModule = default("coordinateSystem"); // the geographic coordinate system, refers to a top level module by default
- 
+
         xml mapFile; // OpenStreetMap map file, e.g. one exported from openstreetmap.org
 
         double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
-        bool adjustBackgroundBox = default(true); // if true, sets background box (bgb tag) to match map bounds 
+        bool adjustBackgroundBox = default(true); // if true, sets background box (bgb tag) to match map bounds
 }
 

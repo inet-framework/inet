@@ -23,7 +23,7 @@ import inet.power.contract.IEpEnergyStorage;
 // This is an abstract base module for power based energy storage models.
 // It defines shared signals and statistics.
 //
-// @see ~EpEnergyConsumerBase, ~EpEnergySourceBase, ~EpEnergyGeneratorBase, ~EpEnergySinkBase  
+// @see ~EpEnergyConsumerBase, ~EpEnergySourceBase, ~EpEnergyGeneratorBase, ~EpEnergySinkBase
 // @author Levente Meszaros
 //
 simple EpEnergyStorageBase like IEpEnergyStorage

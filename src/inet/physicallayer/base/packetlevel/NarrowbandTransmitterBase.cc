@@ -42,7 +42,7 @@ void NarrowbandTransmitterBase::initialize(int stage)
 std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", modulation = " << printObjectToString(modulation, level + 1) 
+        stream << ", modulation = " << printObjectToString(modulation, level + 1)
                << ", centerFrequency = " << centerFrequency
                << ", bandwidth = " << bandwidth;
     return stream;

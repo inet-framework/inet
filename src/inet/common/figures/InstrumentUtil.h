@@ -37,7 +37,7 @@ class InstrumentUtil
      * P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
      * diagonal from (xmin, ymin) to (xmax, ymax).
      *
-     * Returns true if the line segment is intersecting with the 
+     * Returns true if the line segment is intersecting with the
      * rectangle, false otherwise.
      */
     static bool CohenSutherlandLineClip(double& x0, double& y0, double& x1, double& y1, double xmin, double xmax, double ymin, double ymax);

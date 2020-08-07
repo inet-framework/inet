@@ -28,7 +28,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 // coordinate system module.
 //
 // @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
-// @see ~IGeographicCoordinateSystem, ~SimpleGeographicCoordinateSystem, ~OsgGeographicCoordinateSystem 
+// @see ~IGeographicCoordinateSystem, ~SimpleGeographicCoordinateSystem, ~OsgGeographicCoordinateSystem
 //
 simple SceneOsgEarthVisualizer extends SceneOsgVisualizerBase like ISceneVisualizer
 {

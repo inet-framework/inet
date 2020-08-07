@@ -39,7 +39,7 @@ package inet.linklayer.contract;
 //
 // Data frames received from the network are Ethernet frames. They are passed to
 // the higher layers without modification.
-// 
+//
 // Also, the module properly responds to PAUSE frames, but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.
 // See <a href="ether-pause.html">PAUSE handling</a> for more info.

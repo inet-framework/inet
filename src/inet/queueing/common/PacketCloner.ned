@@ -25,7 +25,7 @@ import inet.queueing.contract.IPassivePacketSink;
 // pushed with packets from the connected packet producer. When this happens,
 // a separate copy of the packet is pushed to each output gate.
 //
-simple PacketCloner extends PacketProcessorBase like IPassivePacketSink // IActivePacketSource // TODO: out gate is vector 
+simple PacketCloner extends PacketProcessorBase like IPassivePacketSink // IActivePacketSource // TODO: out gate is vector
 {
     parameters:
         @class(PacketCloner);

@@ -24,7 +24,7 @@ package inet.clock.contract;
 // clock implementation for (re)scheduling events according to the clock.
 // These events are transparently scheduled for the client module and will be
 // delivered to it when the clock timer expires.
-// 
+//
 // The typical way to use clock modules is to include a clock submodule somewhere
 // in the model (e.g. in the network interfaces, in the network nodes) and add
 // optional module parameters (i.e. module path to the clock module) to modules

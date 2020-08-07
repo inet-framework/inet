@@ -33,7 +33,7 @@ void Polyhedron::buildConvexHull()
     initializeConflictGraph();
     for (auto currentPoint : points)
     {
-        
+
         if (currentPoint->isSelected())
             continue;
         currentPoint->setToSelected();
@@ -49,7 +49,7 @@ void Polyhedron::buildConvexHull()
             Edges horizonEdges = computeHorizonEdges(conflictVector);
             for (auto horizonEdge : horizonEdges)
             {
-                
+
                 // Faces incident to horizonEdge in the current convex hull
                 PolyhedronFace *neighborFace = horizonEdge->getJointFace();
                 PolyhedronFace *parentFace = horizonEdge->getParentFace();
@@ -176,7 +176,7 @@ Polyhedron::Edges Polyhedron::computeHorizonEdges(const Faces& visibleFaces) con
         Edges& edges = visibleFace->getEdges();
         for (auto visibleEdge : edges)
         {
-            
+
             PolyhedronFace *jointFace = visibleEdge->getJointFace();
             Faces::const_iterator visibleJointFace = std::find(visibleFaces.begin(), visibleFaces.end(), jointFace);
             // If the jointFace is not visible then we just have found a horizon edge, that is, a boundary edge
@@ -193,10 +193,10 @@ void Polyhedron::initializeConflictGraph()
 {
     for (auto point : points)
     {
-        
+
         for (auto face : faces)
         {
-            
+
             // The conflict graph is a bipartite graph with point class and face class
             if (face->isVisibleFrom(point))
             {
@@ -263,7 +263,7 @@ void Polyhedron::setContlictListForNewFace(PolyhedronFace *newFace, const Polyhe
     }
     for (auto point : conflict2)
     {
-        
+
         if (visited.find(point) == visited.end() && newFace->isVisibleFrom(point))
         {
             point->addConflictFace(newFace);
@@ -276,11 +276,11 @@ void Polyhedron::cleanConflictGraph(const Faces& conflictVector)
 {
     for (auto face : conflictVector)
     {
-        
+
         Points& pConflict = face->getConflictVector();
         for (auto point : pConflict)
         {
-            
+
             Faces& currFConflict = point->getConflictVector();
             auto fit2 = std::find(currFConflict.begin(), currFConflict.end(), face);
             if (fit2 == currFConflict.end())
@@ -303,7 +303,7 @@ void Polyhedron::purgeConflictFaces(const Faces& conflictVector)
 {
     for (auto face : conflictVector)
     {
-        
+
         face->setToWrapped();
     }
 }
@@ -328,10 +328,10 @@ void Polyhedron::connectFaces(PolyhedronFace* newFace)
     Edges& newEdges = newFace->getEdges();
     for (auto newEdge : newEdges)
     {
-        
+
         for (auto currentFace : faces)
         {
-            
+
             if (currentFace == newFace || currentFace->isWrapped()) continue;
             PolyhedronEdge *currEdge = currentFace->findEdge(newEdge);
             if (currEdge)
@@ -387,7 +387,7 @@ bool Polyhedron::computeIntersection(const LineSegment& lineSegment, Coord& inte
     double tL = 1;
     for (auto face : faces)
     {
-       
+
        Coord normalVec = face->getOutwardNormalVector();
        Coord centroid = face->getCentroid();
        double N = (centroid - p0) * normalVec;
@@ -438,14 +438,14 @@ void Polyhedron::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, co
 {
     for (auto face : this->faces)
     {
-        
+
         if (isVisibleFromView(face, viewRotation, rotation))
         {
             const Edges& edges = face->getEdges();
             std::vector<Coord> points;
             for (auto edge : edges)
             {
-                
+
                 Coord point = *edge->getP1();
                 points.push_back(point);
             }

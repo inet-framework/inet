@@ -23,7 +23,7 @@ import inet.power.contract.ICcEnergyConsumer;
 // This is an abstract base module for current based energy consumer models.
 // It defines shared signals and statistics.
 //
-// @see ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergySinkBase, ~CcEnergyStorageBase  
+// @see ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergySinkBase, ~CcEnergyStorageBase
 // @author Levente Meszaros
 //
 simple CcEnergyConsumerBase like ICcEnergyConsumer

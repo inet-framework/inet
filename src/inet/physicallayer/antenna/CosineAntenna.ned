@@ -20,7 +20,7 @@ package inet.physicallayer.antenna;
 import inet.physicallayer.base.packetlevel.AntennaBase;
 
 //
-// Models a hypotetical antenna with a cosine-based radiation pattern. 
+// Models a hypotetical antenna with a cosine-based radiation pattern.
 // This antenna model is commonly used in the real world to approximate
 // various directional antennas.
 //
@@ -29,7 +29,7 @@ import inet.physicallayer.base.packetlevel.AntennaBase;
 //   exponent = -3 / (20 * log10(cos(beamWidth) / 4))
 //   gain = maxGain * abs(cos(angle / 2)) ^ exponent
 // </pre>
-// This module represents the cosine antenna model found in 
+// This module represents the cosine antenna model found in
 //
 // Li Chunjian, "Efficient Antenna Patterns for Three-Sector WCDMA Systems",
 // eq. B.1 and B.2

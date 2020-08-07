@@ -41,7 +41,7 @@ package inet.visualizer.base;
 //  - %n packet name
 //  - %c packet class
 //
-// @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteOsgVisualizer, ~INetworkRouteVisualizer, 
+// @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteOsgVisualizer, ~INetworkRouteVisualizer,
 // ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, ~ITransportRouteVisualizer
 //
 simple PathVisualizerBase extends VisualizerBase
