@@ -150,5 +150,5 @@ class INET_API Ieee80211DsssCompliantModes
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211DSSSMODE_H
+#endif
 

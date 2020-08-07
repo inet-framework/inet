@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_RECIPIENTBLOCKACKHANDLER_H
-#define __INET_RECIPIENTBLOCKACKHANDLER_H
+#ifndef __INET_RECIPIENTBLOCKACKAGREEMENTHANDLER_H
+#define __INET_RECIPIENTBLOCKACKAGREEMENTHANDLER_H
 
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementHandler.h"
@@ -62,3 +62,4 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
 } // namespace inet
 
 #endif
+

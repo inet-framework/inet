@@ -31,5 +31,5 @@ class INET_API ProbabilisticProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_PROBABILISTICPROTOCOLPRINTER_H
+#endif
 

@@ -39,5 +39,5 @@ class INET_API IInterleaver : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IINTERLEAVER_H
+#endif
 

@@ -55,5 +55,5 @@ class INET_API ConstantGainAntenna : public AntennaBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CONSTANTGAINANTENNA_H
+#endif
 

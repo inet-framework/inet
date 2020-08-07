@@ -332,5 +332,5 @@ inline void doUnpacking(cCommBuffer *buf, Ipv6Address& addr)
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6ADDRESS_H
+#endif
 

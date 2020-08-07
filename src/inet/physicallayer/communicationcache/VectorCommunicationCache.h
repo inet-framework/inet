@@ -99,5 +99,5 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_VECTORCOMMUNICATIONCACHE_H
+#endif
 

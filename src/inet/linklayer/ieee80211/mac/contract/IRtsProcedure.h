@@ -35,4 +35,5 @@ class INET_API IRtsProcedure
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRTSPROCEDURE_H
+#endif
+

@@ -35,6 +35,5 @@ class INET_API DsdvHelloSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_DSDVHELLOSERIALIZER_H
-
+#endif
 

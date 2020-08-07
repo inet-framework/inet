@@ -60,5 +60,5 @@ class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGat
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETGATEBASE_H
+#endif
 

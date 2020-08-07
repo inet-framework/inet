@@ -56,5 +56,5 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_WRRSCHEDULER_H
+#endif
 

@@ -49,5 +49,5 @@ template <typename T> class INET_API DelayedInitializer
 
 } /* namespace inet */
 
-#endif // ifndef __INET_DELAYEDINITIALIZER_H
+#endif
 

@@ -17,8 +17,8 @@
 // author: Zoltan Bojthe
 //
 
-#ifndef __INET_INITSTAGES
-#define __INET_INITSTAGES
+#ifndef __INET_INITSTAGES_H
+#define __INET_INITSTAGES_H
 
 #include "inet/common/INETDefs.h"
 
@@ -161,5 +161,5 @@ enum InitStages {
 
 } // namespace inet
 
-#endif    // __INET_INITSTAGES
+#endif
 

@@ -42,5 +42,5 @@ class INET_API PhysicalEnvironmentVisualizerBase : public VisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALENVIRONMENTVISUALIZERBASE_H
+#endif
 

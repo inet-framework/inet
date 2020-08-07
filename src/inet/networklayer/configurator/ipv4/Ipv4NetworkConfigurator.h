@@ -271,5 +271,5 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4NETWORKCONFIGURATOR_H
+#endif
 

@@ -38,5 +38,5 @@ class INET_API LengthBasedFragmenterPolicy : public cSimpleModule, public IFragm
 
 } // namespace inet
 
-#endif // ifndef __INET_LENGTHBASEDFRAGMENTERPOLICY_H
+#endif
 

@@ -82,5 +82,5 @@ const B ETHER_PAUSE_COMMAND_PADDED_BYTES = std::max(MIN_ETHERNET_FRAME_BYTES, ET
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNET_H
+#endif
 

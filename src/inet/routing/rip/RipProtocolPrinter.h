@@ -31,5 +31,5 @@ class INET_API RipProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_ICMPPROTOCOLPRINTER_H
+#endif
 

@@ -105,5 +105,5 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACETABLEVISUALIZERBASE_H
+#endif
 

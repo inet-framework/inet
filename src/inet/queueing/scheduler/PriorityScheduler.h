@@ -48,5 +48,5 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PRIORITYSCHEDULER_H
+#endif
 

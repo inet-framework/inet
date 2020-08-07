@@ -56,5 +56,5 @@ class INET_API TokenBasedServer : public PacketServerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_TOKENBASEDSERVER_H
+#endif
 

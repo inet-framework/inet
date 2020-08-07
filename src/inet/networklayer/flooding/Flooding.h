@@ -155,5 +155,5 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_FLOODING_H
+#endif
 

@@ -40,5 +40,5 @@ class INET_API IPacketClassifierFunction
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETCLASSIFIERFUNCTION_H
+#endif
 

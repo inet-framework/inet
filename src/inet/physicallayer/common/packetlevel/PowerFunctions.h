@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_POWERFUNCTIONS_H_
-#define __INET_POWERFUNCTIONS_H_
+#ifndef __INET_POWERFUNCTIONS_H
+#define __INET_POWERFUNCTIONS_H
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/math/Functions.h"
@@ -473,5 +473,5 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
 
 } // namespace inet
 
-#endif // #ifndef __INET_POWERFUNCTIONS_H_
+#endif
 

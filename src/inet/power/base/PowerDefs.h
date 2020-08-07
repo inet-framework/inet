@@ -31,5 +31,5 @@ using namespace units::values;
 
 } // namespace inet
 
-#endif // ifndef __INET_POWERDEFS_H
+#endif
 

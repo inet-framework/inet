@@ -79,5 +79,5 @@ class INET_API Ieee80211Mib : public cSimpleModule
 
 } // namespace inet
 
-#endif // __INET_IEEE80211MIB_H
+#endif
 

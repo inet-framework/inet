@@ -99,5 +99,5 @@ std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {
 
 } // namespace inet
 
-#endif // ifndef __INET_MESSAGEDISPATCHER_H
+#endif
 

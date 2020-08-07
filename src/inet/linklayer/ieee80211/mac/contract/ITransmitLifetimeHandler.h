@@ -37,4 +37,5 @@ class INET_API ITransmitLifetimeHandler
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef ITRANSMITLIFETIMEHANDLER_H
+#endif
+

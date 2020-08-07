@@ -219,5 +219,5 @@ class INET_API MoBanCoordinator : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MOBANCOORDINATOR_H
+#endif
 

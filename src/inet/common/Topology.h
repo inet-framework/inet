@@ -613,5 +613,5 @@ class INET_API Topology : public cOwnedObject
 
 } // namespace inet
 
-#endif // ifndef __INET_TOPOLOGY_H
+#endif
 

@@ -86,5 +86,5 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NS2MOTIONMOBILITY_H
+#endif
 

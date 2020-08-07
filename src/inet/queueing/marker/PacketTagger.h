@@ -41,5 +41,5 @@ class INET_API PacketTagger : public PacketTaggerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETTAGGER_H
+#endif
 

@@ -40,5 +40,5 @@ class INET_API ApskSymbol : public std::complex<double>, public ISymbol
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKSYMBOL_H
+#endif
 

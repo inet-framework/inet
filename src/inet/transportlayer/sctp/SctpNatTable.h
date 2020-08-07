@@ -100,5 +100,5 @@ class INET_API SctpNatTable : public cSimpleModule
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPNATTABLE_H
+#endif
 

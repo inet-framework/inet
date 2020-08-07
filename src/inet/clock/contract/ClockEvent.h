@@ -31,5 +31,5 @@ typedef cMessage ClockEvent;
 
 } // namespace inet
 
-#endif // ifndef __INET_CLOCKEVENT_H
+#endif
 

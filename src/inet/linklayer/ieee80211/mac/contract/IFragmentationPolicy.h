@@ -36,4 +36,5 @@ class INET_API IFragmentationPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // __INET_IFRAGMENTATIONPOLICY_H
+#endif
+

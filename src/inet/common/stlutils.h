@@ -151,5 +151,5 @@ std::string to_str(const std::map<K,V>& m) {
 
 } // namespace inet
 
-#endif // ifndef __INET_STLUTILS_H
+#endif
 

@@ -47,5 +47,5 @@ class INET_API NetworkConnectionOsgVisualizer : public NetworkConnectionVisualiz
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKCONNECTIONOSGVISUALIZER_H
+#endif
 

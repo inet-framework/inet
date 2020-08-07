@@ -182,5 +182,5 @@ class INET_API Rstp : public StpBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RSTP_H
+#endif
 

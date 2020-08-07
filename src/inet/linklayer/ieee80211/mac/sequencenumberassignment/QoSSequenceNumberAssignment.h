@@ -53,4 +53,5 @@ class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_QOSSEQUENCENUMBERASSIGNMENT_H
+#endif
+

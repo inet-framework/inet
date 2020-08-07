@@ -49,4 +49,5 @@ class INET_API RecipientBlockAckAgreementPolicy : public cSimpleModule, public I
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RECIPIENTBLOCKACKAGREEMENTPOLICY_H
+#endif
+

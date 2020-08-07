@@ -67,5 +67,5 @@ class INET_API Ieee80211Radio : public FlatRadioBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211RADIO_H
+#endif
 

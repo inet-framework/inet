@@ -55,5 +55,5 @@ class INET_API TokenBucketMeter : public PacketMeterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TOKENBUCKETMETER_H
+#endif
 

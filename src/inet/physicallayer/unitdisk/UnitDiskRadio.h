@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALRADIO_H
-#define __INET_IDEALRADIO_H
+#ifndef __INET_UNITDISKRADIO_H
+#define __INET_UNITDISKRADIO_H
 
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 
@@ -38,5 +38,5 @@ class INET_API UnitDiskRadio : public Radio
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALRADIO_H
+#endif
 

@@ -35,4 +35,5 @@ class INET_API UnitDiskPhyHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_UNITDISKPHYHEADERSERIALIZER_H
+#endif
+

@@ -37,5 +37,5 @@ class INET_API SendWithProtocol : public PacketFlowBase, public IProtocolRegistr
 
 } // namespace inet
 
-#endif // ifndef __INET_SENDWITHPROTOCOL_H
+#endif
 

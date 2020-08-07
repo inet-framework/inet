@@ -73,5 +73,5 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACETABLEOSGVISUALIZER_H
+#endif
 

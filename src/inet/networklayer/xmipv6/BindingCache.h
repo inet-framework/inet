@@ -152,5 +152,5 @@ class INET_API BindingCache : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_BINDINGCACHE_H
+#endif
 

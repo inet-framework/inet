@@ -44,4 +44,5 @@ class INET_API DcfTransmitLifetimeHandler : public ITransmitLifetimeHandler
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef DCFTRANSMITLIFETIMEHANDLER_H
+#endif
+

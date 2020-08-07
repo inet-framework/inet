@@ -267,5 +267,5 @@ class INET_API Ieee80211OfdmCompliantModes
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211OFDMMODE_H
+#endif
 

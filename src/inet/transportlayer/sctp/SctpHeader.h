@@ -262,5 +262,5 @@ class INET_API SctpAsconfAckChunk : public SctpAsconfAckChunk_Base
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPHEADER_H
+#endif
 

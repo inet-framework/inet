@@ -46,5 +46,5 @@ class INET_API AckingMacToEthernetPcapRecorderHelper : public cObject, public Pc
 
 } // namespace inet
 
-#endif // ifndef __INET_ACKINGMACHEADERSERIALIZER_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INTERFACEOPERATIONS_H_
-#define __INET_INTERFACEOPERATIONS_H_
+#ifndef __INET_INTERFACEOPERATIONS_H
+#define __INET_INTERFACEOPERATIONS_H
 
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
@@ -56,5 +56,5 @@ class INET_API InterfaceDownOperation : public InterfaceOperationBase
 
 } // namespace inet
 
-#endif // #ifndef __INET_INTERFACEOPERATIONS_H_
+#endif
 

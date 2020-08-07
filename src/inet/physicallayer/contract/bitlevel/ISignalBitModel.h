@@ -64,5 +64,5 @@ class INET_API IReceptionBitModel : public virtual ISignalBitModel
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_ISIGNALBITMODEL_H
+#endif
 

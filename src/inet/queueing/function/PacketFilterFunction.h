@@ -43,5 +43,5 @@ class INET_API CPacketFilterFunction : public cObject, public virtual IPacketFil
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETFILTERFUNCTION_H
+#endif
 

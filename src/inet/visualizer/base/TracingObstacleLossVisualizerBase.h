@@ -80,5 +80,5 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
 
 } // namespace inet
 
-#endif // ifndef __INET_TRACINGOBSTACLELOSSVISUALIZERBASE_H
+#endif
 

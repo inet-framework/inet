@@ -43,4 +43,5 @@ class INET_API RecipientAckProcedure : public IRecipientAckProcedure
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_RECIPIENTACKPROCEDURE_H
+#endif
+

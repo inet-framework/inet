@@ -54,5 +54,5 @@ class INET_API PhysicalLayerBase : public LayeredProtocolBase, public IPhysicalL
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALLAYERBASE_H
+#endif
 

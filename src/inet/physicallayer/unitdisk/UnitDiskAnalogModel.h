@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALANALOGMODEL_H
-#define __INET_IDEALANALOGMODEL_H
+#ifndef __INET_UNITDISKANALOGMODEL_H
+#define __INET_UNITDISKANALOGMODEL_H
 
 #include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
 
@@ -41,5 +41,5 @@ class INET_API UnitDiskAnalogModel : public cModule, public IAnalogModel
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALANALOGMODEL_H
+#endif
 

@@ -61,5 +61,5 @@ class INET_API IScriptable
 
 } // namespace inet
 
-#endif // ifndef __INET_ISCRIPTABLE_H
+#endif
 

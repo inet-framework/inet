@@ -60,4 +60,5 @@ class INET_API IRx
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_IRX_H
+#endif
+

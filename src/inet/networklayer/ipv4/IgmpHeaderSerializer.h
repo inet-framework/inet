@@ -38,5 +38,5 @@ class INET_API IgmpHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_IGMPHEADERSERIALIZER_H
+#endif
 

@@ -40,4 +40,5 @@ class INET_API EdcaCollisionController : public IEdcaCollisionController, public
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef INET_EDCACOLLISIONCONTROLLER_H
+#endif
+

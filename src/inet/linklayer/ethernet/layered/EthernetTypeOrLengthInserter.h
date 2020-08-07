@@ -33,5 +33,5 @@ class INET_API EthernetTypeOrLengthInserter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETTYPEORLENGTHINSERTER_H
+#endif
 

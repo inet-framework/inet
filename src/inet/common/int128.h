@@ -273,5 +273,5 @@ inline bool operator!=(const Int128& a, const Int128& b)
 
 } // namespace inet
 
-#endif // ifndef __INET_INT128_H
+#endif
 

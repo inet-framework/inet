@@ -65,5 +65,5 @@ class INET_API RedDropper : public PacketFilterBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_REDDROPPER_H
+#endif
 

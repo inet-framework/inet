@@ -82,5 +82,5 @@ class INET_API SctpAlgorithm : public cObject
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPALGORITHM_H
+#endif
 

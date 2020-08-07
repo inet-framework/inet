@@ -49,5 +49,5 @@ class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
 
 } // namespace inet
 
-#endif // __INET_IEEE80211PORTAL_H
+#endif
 

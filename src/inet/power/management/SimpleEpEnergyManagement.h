@@ -63,5 +63,5 @@ class INET_API SimpleEpEnergyManagement : public cSimpleModule, public virtual I
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLEEPENERGYMANAGEMENT_H
+#endif
 

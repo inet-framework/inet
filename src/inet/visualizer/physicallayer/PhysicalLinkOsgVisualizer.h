@@ -35,5 +35,5 @@ class INET_API PhysicalLinkOsgVisualizer : public LinkOsgVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALLINKOSGVISUALIZER_H
+#endif
 

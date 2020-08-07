@@ -33,5 +33,5 @@ class INET_API IPhysicalLayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IPHYSICALLAYER_H
+#endif
 

@@ -146,5 +146,5 @@ inline void doParsimUnpacking(cCommBuffer *buffer, const Protocol*& protocol) { 
 
 } // namespace inet
 
-#endif // ifndef __INET_PROTOCOL_H
+#endif
 

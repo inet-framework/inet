@@ -36,5 +36,5 @@ class INET_API SendToPort : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SENDTOPORT_H
+#endif
 

@@ -73,5 +73,5 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
 
 } // namespace inet
 
-#endif // ifndef __INET_CLOCKBASE_H
+#endif
 

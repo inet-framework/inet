@@ -80,5 +80,5 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPECHOAPP_H
+#endif
 

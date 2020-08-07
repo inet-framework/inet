@@ -36,5 +36,5 @@ class INET_API InterfaceStateLoopback : public Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACESTATELOOPBACK_H
+#endif
 

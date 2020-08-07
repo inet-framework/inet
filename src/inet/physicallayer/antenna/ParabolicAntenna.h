@@ -59,5 +59,5 @@ class INET_API ParabolicAntenna : public AntennaBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PARABOLICANTENNA_H
+#endif
 

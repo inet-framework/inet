@@ -48,5 +48,5 @@ class INET_API Ieee80211OfdmEncoderModule : public IEncoder, public cSimpleModul
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMENCODERMODULE_H
+#endif
 

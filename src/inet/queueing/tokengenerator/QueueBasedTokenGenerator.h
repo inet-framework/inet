@@ -47,5 +47,5 @@ class INET_API QueueBasedTokenGenerator : public TokenGeneratorBase, public cLis
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_QUEUEBASEDTOKENGENERATOR_H
+#endif
 

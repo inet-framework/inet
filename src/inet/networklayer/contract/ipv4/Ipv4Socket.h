@@ -91,5 +91,5 @@ class INET_API Ipv4Socket : public INetworkSocket
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4SOCKET_H
+#endif
 

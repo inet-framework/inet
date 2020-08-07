@@ -49,5 +49,5 @@ class INET_API InterfaceToken
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACETOKEN_H
+#endif
 

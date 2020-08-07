@@ -65,5 +65,5 @@ class INET_API Prism : public ShapeBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PRISM_H
+#endif
 

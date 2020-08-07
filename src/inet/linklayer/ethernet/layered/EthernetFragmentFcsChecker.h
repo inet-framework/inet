@@ -42,5 +42,5 @@ class INET_API EthernetFragmentFcsChecker : public FcsCheckerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETFRAGMENTFCSCHECKER_H
+#endif
 

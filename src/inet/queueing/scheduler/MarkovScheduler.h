@@ -72,5 +72,5 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public virtual IPas
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_MARKOVSCHEDULERBASE_H
+#endif
 

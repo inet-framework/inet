@@ -37,4 +37,5 @@ class INET_API IRtsPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRTSPOLICY_H
+#endif
+

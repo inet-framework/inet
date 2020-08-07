@@ -143,5 +143,5 @@ inline void doParsimUnpacking(cCommBuffer *buf, L3Address& addr)
 
 } // namespace inet
 
-#endif // ifndef __INET_ADDRESS_H
+#endif
 

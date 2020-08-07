@@ -130,5 +130,5 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_STATISTICVISUALIZERBASE_H
+#endif
 

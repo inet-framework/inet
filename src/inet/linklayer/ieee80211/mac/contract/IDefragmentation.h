@@ -36,4 +36,5 @@ class INET_API IDefragmentation
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_IDEFRAGMENTATION_H
+#endif
+

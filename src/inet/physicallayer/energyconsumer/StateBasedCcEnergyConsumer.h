@@ -78,5 +78,5 @@ class INET_API StateBasedCcEnergyConsumer : public cSimpleModule, public virtual
 
 } // namespace inet
 
-#endif // ifndef __INET_STATEBASEDCCENERGYCONSUMER_H
+#endif
 

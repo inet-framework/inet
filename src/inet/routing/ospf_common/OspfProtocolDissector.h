@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFDISSECTOR_H
-#define __INET_OSPFDISSECTOR_H
+#ifndef __INET_OSPFPROTOCOLDISSECTOR_H
+#define __INET_OSPFPROTOCOLDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -33,5 +33,5 @@ class INET_API OspfProtocolDissector : public ProtocolDissector
 } // namespace ospf
 } // namespace inet
 
-#endif // __INET_OSPFDISSECTOR_H
+#endif
 

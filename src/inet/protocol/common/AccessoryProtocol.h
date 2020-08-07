@@ -43,5 +43,5 @@ class INET_API AccessoryProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_ACCESSORYPROTOCOL_H
+#endif
 

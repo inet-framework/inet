@@ -70,5 +70,5 @@ class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::N
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKNODEOSGVISUALIZATION_H
+#endif
 

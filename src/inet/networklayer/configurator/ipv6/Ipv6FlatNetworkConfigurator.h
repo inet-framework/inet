@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATNETWORKCONFIGURATOR6_H
-#define __INET_FLATNETWORKCONFIGURATOR6_H
+#ifndef __INET_IPV6FLATNETWORKCONFIGURATOR_H
+#define __INET_IPV6FLATNETWORKCONFIGURATOR_H
 
 #include "inet/common/INETDefs.h"
 
@@ -47,5 +47,5 @@ class INET_API Ipv6FlatNetworkConfigurator : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATNETWORKCONFIGURATOR6_H
+#endif
 

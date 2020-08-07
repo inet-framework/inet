@@ -46,5 +46,5 @@ class INET_API EpEnergySinkBase : public EnergySinkBase, public virtual IEpEnerg
 
 } // namespace inet
 
-#endif // ifndef __INET_EPENERGYSINKBASE_H
+#endif
 

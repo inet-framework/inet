@@ -59,5 +59,5 @@ class INET_API LinkBreakCanvasVisualizer : public LinkBreakVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKBREAKCANVASVISUALIZER_H
+#endif
 

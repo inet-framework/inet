@@ -102,5 +102,5 @@ class INET_API Ieee802154UwbIrMode
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154UWBIRMODE_H
+#endif
 

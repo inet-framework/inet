@@ -102,5 +102,5 @@ class INET_API MovingMobilityBase : public MobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MOVINGMOBILITYBASE_H
+#endif
 

@@ -64,5 +64,5 @@ class INET_API ErrorModelBase : public cModule, public IErrorModel
 
 } // namespace inet
 
-#endif // ifndef __INET_ERRORMODELBASE_H
+#endif
 

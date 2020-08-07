@@ -81,4 +81,5 @@ class INET_API IFrameSequence
 } // namespace ieee80211
 } // namespace inet
 
-#endif // __INET_IFRAMESEQUENCE_H
+#endif
+

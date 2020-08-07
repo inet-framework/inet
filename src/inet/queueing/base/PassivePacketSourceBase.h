@@ -50,5 +50,5 @@ class INET_API PassivePacketSourceBase : public PacketSourceBase, public virtual
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PASSIVEPACKETSOURCEBASE_H
+#endif
 

@@ -105,5 +105,5 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALENVIRONMENT_H
+#endif
 

@@ -73,5 +73,5 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_QUADTREENEIGHBORCACHE_H
+#endif
 

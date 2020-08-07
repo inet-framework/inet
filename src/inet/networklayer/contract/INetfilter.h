@@ -163,5 +163,5 @@ class INET_API NetfilterBase : public INetfilter {
 
 } // namespace inet
 
-#endif // ifndef __INET_INETFILTER_H
+#endif
 

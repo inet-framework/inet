@@ -59,4 +59,5 @@ class INET_API Edca : public cSimpleModule
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_EDCA_H
+#endif
+

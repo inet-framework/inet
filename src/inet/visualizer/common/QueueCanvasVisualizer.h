@@ -60,5 +60,5 @@ class INET_API QueueCanvasVisualizer : public QueueVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_QUEUECANVASVISUALIZER_H
+#endif
 

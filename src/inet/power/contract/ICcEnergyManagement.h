@@ -46,5 +46,5 @@ class INET_API ICcEnergyManagement : public IEnergyManagement
 
 } // namespace inet
 
-#endif // ifndef __INET_ICCENERGYMANAGEMENT_H
+#endif
 

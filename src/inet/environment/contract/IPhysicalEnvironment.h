@@ -52,5 +52,5 @@ class INET_API IPhysicalEnvironment
 
 } // namespace inet
 
-#endif // ifndef __INET_IPHYSICALENVIRONMENT_H
+#endif
 

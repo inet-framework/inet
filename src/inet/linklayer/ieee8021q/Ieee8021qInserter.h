@@ -34,5 +34,5 @@ class INET_API Ieee8021qInserter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021QINSERTER_H
+#endif
 

@@ -46,5 +46,5 @@ class INET_API DimensionalNoise : public NarrowbandNoiseBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALNOISE_H
+#endif
 

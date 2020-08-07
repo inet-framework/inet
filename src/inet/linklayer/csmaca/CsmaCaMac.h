@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CSMAMAC_H
-#define __INET_CSMAMAC_H
+#ifndef __INET_CSMACAMAC_H
+#define __INET_CSMACAMAC_H
 
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
@@ -202,4 +202,5 @@ class INET_API CsmaCaMac : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CSMAMAC_H
+#endif
+

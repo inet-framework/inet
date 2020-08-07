@@ -31,5 +31,5 @@ class INET_API NextHopProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_NEXTHOPPROTOCOLDISSECTOR_H
+#endif
 

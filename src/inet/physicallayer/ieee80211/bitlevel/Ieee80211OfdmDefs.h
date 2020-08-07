@@ -35,5 +35,5 @@ namespace physicallayer {
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMDEFS_H
+#endif
 

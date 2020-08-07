@@ -171,5 +171,5 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_MEDIUMVISUALIZERBASE_H
+#endif
 

@@ -37,5 +37,5 @@ class INET_API RateLimiter : public PacketFilterBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_RATELIMITER_H
+#endif
 

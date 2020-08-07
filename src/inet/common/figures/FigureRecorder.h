@@ -34,5 +34,5 @@ class INET_API FigureRecorder : public cNumericResultRecorder
 };
 }    // namespace inet
 
-#endif // ifndef __INET_FIGURERECORDER_H
+#endif
 

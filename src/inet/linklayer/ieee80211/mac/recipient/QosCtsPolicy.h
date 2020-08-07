@@ -45,4 +45,5 @@ class INET_API QosCtsPolicy : public ModeSetListener, public ICtsPolicy
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_QOSCTSPOLICY_H
+#endif
+

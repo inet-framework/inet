@@ -28,5 +28,5 @@ INET_API unsigned short computePathAttributeBytes(const BgpUpdatePathAttributes&
 } // namespace bgp
 } // namespace inet
 
-#endif // ifndef __INET_BGPUPDATE_H
+#endif
 

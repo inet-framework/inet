@@ -40,5 +40,5 @@ class INET_API IPacketSchedulerFunction
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETSCHEDULERFUNCTION_H
+#endif
 

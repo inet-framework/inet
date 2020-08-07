@@ -73,5 +73,5 @@ class INET_API InterPacketGap : public ClockUserModuleMixin<PacketPusherBase>
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERPACKETGAP_H
+#endif
 

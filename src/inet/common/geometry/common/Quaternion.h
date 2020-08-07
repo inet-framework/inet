@@ -150,4 +150,5 @@ inline std::string Quaternion::str() const
 
 } /* namespace inet */
 
-#endif // ifndef __INET_QUATERNION_H
+#endif
+

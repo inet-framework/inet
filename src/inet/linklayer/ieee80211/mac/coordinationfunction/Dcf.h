@@ -144,4 +144,5 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_DCF_H
+#endif
+

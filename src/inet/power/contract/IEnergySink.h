@@ -69,5 +69,5 @@ class INET_API IEnergySink
 
 } // namespace inet
 
-#endif // ifndef __INET_IENERGYSINK_H
+#endif
 

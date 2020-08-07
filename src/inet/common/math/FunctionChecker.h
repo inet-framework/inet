@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_FUNCTIONCHECKER_H_
-#define __INET_MATH_FUNCTIONCHECKER_H_
+#ifndef __INET_FUNCTIONCHECKER_H
+#define __INET_FUNCTIONCHECKER_H
 
 #include "inet/common/math/IFunction.h"
 
@@ -61,5 +61,5 @@ class INET_API FunctionChecker
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_FUNCTIONCHECKER_H_
+#endif
 

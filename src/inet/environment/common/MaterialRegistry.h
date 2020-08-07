@@ -48,5 +48,5 @@ class INET_API MaterialRegistry : public IMaterialRegistry
 
 } // namespace inet
 
-#endif // ifndef __INET_MATERIALREGISTRY_H
+#endif
 

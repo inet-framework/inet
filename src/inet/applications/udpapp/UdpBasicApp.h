@@ -86,5 +86,5 @@ class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, publi
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPBASICAPP_H
+#endif
 

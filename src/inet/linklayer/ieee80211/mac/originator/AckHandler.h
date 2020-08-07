@@ -64,4 +64,5 @@ class INET_API AckHandler : public cSimpleModule, public IAckHandler
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_ACKHANDLER_H
+#endif
+

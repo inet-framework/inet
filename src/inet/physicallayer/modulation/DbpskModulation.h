@@ -39,5 +39,5 @@ class INET_API DbpskModulation : public DpskModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DBPSKMODULATION_H
+#endif
 

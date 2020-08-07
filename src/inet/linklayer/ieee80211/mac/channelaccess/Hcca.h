@@ -42,5 +42,5 @@ class INET_API Hcca : public IChannelAccess, public cSimpleModule
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_HCCA_H
+#endif
 

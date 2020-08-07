@@ -53,5 +53,5 @@ class INET_API LlcSocketTable : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_LlcSocketTable_H
+#endif
 

@@ -34,5 +34,5 @@ class INET_API IRsvpClassifier : public IIngressClassifier
 
 } // namespace inet
 
-#endif // ifndef __INET_IRSVPCLASSIFIER_H
+#endif
 

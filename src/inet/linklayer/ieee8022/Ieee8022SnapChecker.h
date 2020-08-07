@@ -40,5 +40,5 @@ class INET_API Ieee8022SnapChecker : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8022SNAPCHECKER_H
+#endif
 

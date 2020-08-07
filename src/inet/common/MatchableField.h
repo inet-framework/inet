@@ -43,5 +43,5 @@ class INET_API MatchableField : public cMatchExpression::Matchable
 
 } // namespace inet
 
-#endif // #ifdef __INET_MATCHABLEOBJECT_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_ECNMARKER_H_
-#define __INET_ECNMARKER_H_
+#ifndef __INET_ECNMARKER_H
+#define __INET_ECNMARKER_H
 
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/queueing/base/PacketMarkerBase.h"
@@ -37,5 +37,5 @@ class INET_API EcnMarker : public PacketMarkerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // #ifndef __INET_ECNMARKER_H_
+#endif
 

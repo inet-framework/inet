@@ -35,5 +35,5 @@ class INET_API UdpHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPHEADERSERIALIZER_H
+#endif
 

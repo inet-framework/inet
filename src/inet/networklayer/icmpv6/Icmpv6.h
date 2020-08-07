@@ -113,5 +113,5 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
 
 } // namespace inet
 
-#endif // ifndef __INET_ICMPV6_H
+#endif
 

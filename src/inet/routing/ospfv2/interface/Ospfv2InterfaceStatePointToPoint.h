@@ -36,5 +36,5 @@ class INET_API InterfaceStatePointToPoint : public Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACESTATEPOINTTOPOINT_H
+#endif
 

@@ -38,5 +38,5 @@ class INET_API Icmpv6HeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_ICMPV6HEADERSERIALIZER_H
+#endif
 

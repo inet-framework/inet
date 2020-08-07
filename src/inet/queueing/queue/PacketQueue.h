@@ -81,5 +81,5 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETQUEUE_H
+#endif
 

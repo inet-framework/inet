@@ -34,5 +34,5 @@ class INET_API RandomDriftOscillator : public ConstantDriftOscillator
 
 } // namespace inet
 
-#endif // ifndef __INET_RANDOMDRIFTOSCILLATOR_H
+#endif
 

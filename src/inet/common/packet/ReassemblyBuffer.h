@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_REASSEMBLYBUFFER_H_
-#define __INET_REASSEMBLYBUFFER_H_
+#ifndef __INET_REASSEMBLYBUFFER_H
+#define __INET_REASSEMBLYBUFFER_H
 
 #include "inet/common/packet/ChunkBuffer.h"
 
@@ -71,5 +71,5 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
 
 } // namespace
 
-#endif // #ifndef __INET_REASSEMBLYBUFFER_H_
+#endif
 

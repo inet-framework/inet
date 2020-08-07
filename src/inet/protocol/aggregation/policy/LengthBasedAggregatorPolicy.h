@@ -42,5 +42,5 @@ class INET_API LengthBasedAggregatorPolicy : public cSimpleModule, public IAggre
 
 } // namespace inet
 
-#endif // ifndef __INET_LENGTHBASEDAGGREGATORPOLICY_H
+#endif
 

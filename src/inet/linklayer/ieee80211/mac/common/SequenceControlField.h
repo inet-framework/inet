@@ -48,5 +48,5 @@ inline std::ostream& operator<<(std::ostream& os, const SequenceControlField& fi
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_SEQUENCECONTROLFIELD_H
+#endif
 

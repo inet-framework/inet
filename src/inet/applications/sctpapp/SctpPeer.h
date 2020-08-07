@@ -129,5 +129,5 @@ class INET_API SctpPeer : public cSimpleModule, public SctpSocket::ICallback, pu
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPPEER_H
+#endif
 

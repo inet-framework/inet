@@ -37,5 +37,5 @@ class INET_API TransmitterBase : public cModule, public virtual ITransmitter
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_TRANSMITTERBASE_H
+#endif
 

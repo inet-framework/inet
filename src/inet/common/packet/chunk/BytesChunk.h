@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BYTESCHUNK_H_
-#define __INET_BYTESCHUNK_H_
+#ifndef __INET_BYTESCHUNK_H
+#define __INET_BYTESCHUNK_H
 
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -94,5 +94,5 @@ class INET_API BytesChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_BYTESCHUNK_H_
+#endif
 

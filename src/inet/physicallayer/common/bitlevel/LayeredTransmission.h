@@ -55,5 +55,5 @@ class INET_API LayeredTransmission : public TransmissionBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDTRANSMISSION_H
+#endif
 

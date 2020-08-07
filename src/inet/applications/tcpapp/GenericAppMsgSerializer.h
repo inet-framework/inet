@@ -35,4 +35,5 @@ class INET_API GenericAppMsgSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICAPPMSGSERIALIZER_H
+#endif
+

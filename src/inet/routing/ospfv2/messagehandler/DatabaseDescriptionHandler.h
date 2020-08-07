@@ -40,5 +40,5 @@ class INET_API DatabaseDescriptionHandler : public IMessageHandler
 
 } // namespace inet
 
-#endif // ifndef __INET_DATABASEDESCRIPTIONHANDLER_H
+#endif
 

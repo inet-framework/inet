@@ -22,5 +22,5 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 
-#endif // ifndef __INET_IEEE802CTRL_H
+#endif
 

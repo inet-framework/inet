@@ -37,5 +37,5 @@ class INET_API Ieee80211DimensionalTransmission : public DimensionalTransmission
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211DIMENSIONALTRANSMISSION_H
+#endif
 

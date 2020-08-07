@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCP_NSC_QUEUES_H
-#define __INET_TCP_NSC_QUEUES_H
+#ifndef __INET_TCPNSCQUEUES_H
+#define __INET_TCPNSCQUEUES_H
 
 #include "inet/common/INETDefs.h"
 
@@ -188,5 +188,5 @@ class INET_API TcpNscReceiveQueue : public cObject
 
 } // namespace inet
 
-#endif // ifndef __INET_TCP_NSC_BYTESTREAMQUEUES_H
+#endif
 

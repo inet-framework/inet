@@ -36,4 +36,5 @@ class INET_API IOriginatorBlockAckProcedure
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IORIGINATORBLOCKACKPROCEDURE_H
+#endif
+

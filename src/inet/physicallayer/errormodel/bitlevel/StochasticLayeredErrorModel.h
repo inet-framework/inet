@@ -49,5 +49,5 @@ class INET_API StochasticLayeredErrorModel : public LayeredErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDSTOCHASTICERRORMODEL_H
+#endif
 

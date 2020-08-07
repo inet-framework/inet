@@ -70,5 +70,5 @@
 
 #endif // if BYTE_ORDER == LITTLE_ENDIAN
 
-#endif // ifndef __INET_INETENDIANS_H
+#endif
 

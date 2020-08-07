@@ -35,4 +35,5 @@ class INET_API Ieee8021qHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021QHEADERSERIALIZER_H
+#endif
+

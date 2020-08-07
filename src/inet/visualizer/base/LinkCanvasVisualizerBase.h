@@ -61,5 +61,5 @@ class INET_API LinkCanvasVisualizerBase : public LinkVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKCANVASVISUALIZERBASE_H
+#endif
 

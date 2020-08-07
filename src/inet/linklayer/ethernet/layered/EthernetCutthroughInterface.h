@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_ETHERNETINTERFACE_H
-#define __INET_ETHERNETINTERFACE_H
+#ifndef __INET_ETHERNETCUTTHROUGHINTERFACE_H
+#define __INET_ETHERNETCUTTHROUGHINTERFACE_H
 
 #include "inet/networklayer/common/NetworkInterface.h"
 
@@ -40,5 +40,5 @@ class INET_API EthernetCutthroughInterface : public NetworkInterface
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETINTERFACE_H
+#endif
 

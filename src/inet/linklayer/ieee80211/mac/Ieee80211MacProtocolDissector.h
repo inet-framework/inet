@@ -17,8 +17,8 @@
 // @author: Zoltan Bojthe
 //
 
-#ifndef __INET_IEEE80211MACDISSECTOR_H_
-#define __INET_IEEE80211MACDISSECTOR_H_
+#ifndef __INET_IEEE80211MACPROTOCOLDISSECTOR_H
+#define __INET_IEEE80211MACPROTOCOLDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -36,4 +36,5 @@ class INET_API Ieee80211MacProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_IEEE80211MACDISSECTOR_H_
+#endif
+

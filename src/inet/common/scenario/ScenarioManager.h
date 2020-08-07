@@ -95,5 +95,5 @@ class INET_API ScenarioManager : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_SCENARIOMANAGER_H
+#endif
 

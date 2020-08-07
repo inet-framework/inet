@@ -132,5 +132,5 @@ class INET_API IPassivePacketSource
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPASSIVEPACKETSOURCE_H
+#endif
 

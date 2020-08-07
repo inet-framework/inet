@@ -57,5 +57,5 @@ class INET_API ExtIpv4TunDevice : public cSimpleModule, public RealTimeScheduler
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTIPV4TUNDEVICE_H
+#endif
 

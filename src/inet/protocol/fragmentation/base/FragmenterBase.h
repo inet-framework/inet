@@ -42,5 +42,5 @@ class INET_API FragmenterBase : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FRAGMENTERBASE_H
+#endif
 

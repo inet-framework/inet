@@ -62,5 +62,5 @@ cModule *getPayloadOwner(cPacket *msg);
 
 } // namespace inet
 
-#endif // ifndef __INET_UTILS_H
+#endif
 

@@ -43,5 +43,5 @@ class INET_API ScalarAnalogDigitalConverter : public IAnalogDigitalConverter
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_ANALOGDIGITALCONVERTER_H
+#endif
 

@@ -45,5 +45,5 @@ class INET_API Ieee80211OfdmInterleaverModule : public cSimpleModule, public IIn
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMINTERLEAVERMODULE_H
+#endif
 

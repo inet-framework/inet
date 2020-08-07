@@ -30,4 +30,5 @@ class INET_API ICode : public IPrintableObject
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_ICODE_H
+#endif
+

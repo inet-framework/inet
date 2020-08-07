@@ -302,5 +302,5 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IRADIO_H
+#endif
 

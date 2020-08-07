@@ -46,5 +46,5 @@ class INET_API IListening : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_ILISTENING_H
+#endif
 

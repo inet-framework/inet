@@ -68,4 +68,5 @@ class INET_API InProgressFrames : public cSimpleModule
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_INPROGRESSFRAMES_H
+#endif
+

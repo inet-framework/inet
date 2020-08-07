@@ -44,5 +44,5 @@ class INET_API InterfaceFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACEFILTER_H
+#endif
 

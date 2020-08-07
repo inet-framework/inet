@@ -48,4 +48,5 @@ class INET_API PolyhedronPoint : public Coord
 
 } /* namespace inet */
 
-#endif // ifndef __INET_POLYHEDRONPOINT_H
+#endif
+

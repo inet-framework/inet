@@ -105,5 +105,5 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MATRIXCLOUDDELAYER_H
+#endif
 

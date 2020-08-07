@@ -108,5 +108,5 @@ class INET_API MoBanLocal : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MOBANLOCAL_H
+#endif
 

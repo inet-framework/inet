@@ -34,4 +34,5 @@ class INET_API IBlockAckAgreementHandlerCallback
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IBLOCKACKAGREEMENTHANDLERCALLBACK_H
+#endif
+

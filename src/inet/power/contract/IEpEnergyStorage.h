@@ -62,5 +62,5 @@ class INET_API IEpEnergyStorage : public virtual IEpEnergySource, public virtual
 
 } // namespace inet
 
-#endif // ifndef __INET_IEPENERGYSTORAGE_H
+#endif
 

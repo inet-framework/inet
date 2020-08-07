@@ -50,5 +50,5 @@ class INET_API ITracingObstacleLoss : public IObstacleLoss
 
 } // namespace inet
 
-#endif // ifndef __INET_ITRACINGOBSTACLELOSS_H
+#endif
 

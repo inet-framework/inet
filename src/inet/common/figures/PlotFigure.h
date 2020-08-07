@@ -145,5 +145,5 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_PLOTFIGURE_H
+#endif
 

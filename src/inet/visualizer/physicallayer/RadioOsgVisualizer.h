@@ -65,5 +65,5 @@ class INET_API RadioOsgVisualizer : public RadioVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RADIOOSGGVISUALIZER_H
+#endif
 

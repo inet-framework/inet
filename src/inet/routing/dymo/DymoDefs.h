@@ -41,5 +41,5 @@ enum DymoRouteState {
 
 } // namespace inet
 
-#endif // ifndef __INET_DYMODEFS_H
+#endif
 

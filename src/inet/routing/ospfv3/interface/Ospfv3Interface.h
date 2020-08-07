@@ -1,6 +1,6 @@
 
-#ifndef __INET_OSPFV3INTERFACE_H_
-#define __INET_OSPFV3INTERFACE_H_
+#ifndef __INET_OSPFV3INTERFACE_H
+#define __INET_OSPFV3INTERFACE_H
 
 #include <string>
 
@@ -258,5 +258,5 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Interface& inter
 } // namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3INTERFACE_H_
+#endif
 

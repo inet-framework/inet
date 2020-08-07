@@ -96,5 +96,5 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETFILTERBASE_H
+#endif
 

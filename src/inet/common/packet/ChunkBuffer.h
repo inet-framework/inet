@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_CHUNKBUFFER_H_
-#define __INET_CHUNKBUFFER_H_
+#ifndef __INET_CHUNKBUFFER_H
+#define __INET_CHUNKBUFFER_H
 
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -152,5 +152,5 @@ inline std::ostream& operator<<(std::ostream& os, const ChunkBuffer& buffer) { r
 
 } // namespace
 
-#endif // #ifndef __INET_CHUNKBUFFER_H_
+#endif
 

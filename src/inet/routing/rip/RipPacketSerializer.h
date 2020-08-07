@@ -35,5 +35,5 @@ class INET_API RipPacketSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_RIPPACKETSERIALIZER_H
+#endif
 

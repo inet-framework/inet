@@ -306,5 +306,5 @@ class INET_API LocalSignalFilter : public cObjectResultFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_RESULTFILTERS_H
+#endif
 

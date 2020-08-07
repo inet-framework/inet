@@ -53,4 +53,5 @@ class INET_API Ieee80211OfdmCompliantModulations
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif /* __INET_IEEE80211OFDMMODULATION_H */
+#endif
+

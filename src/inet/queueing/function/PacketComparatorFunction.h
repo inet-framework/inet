@@ -44,5 +44,5 @@ class INET_API CPacketComparatorFunction : public cObject, public virtual IPacke
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETCOMPARATORFUNCTION_H
+#endif
 

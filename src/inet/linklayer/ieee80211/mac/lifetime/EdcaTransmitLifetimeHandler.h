@@ -47,4 +47,5 @@ class INET_API EdcaTransmitLifetimeHandler : public ITransmitLifetimeHandler
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef EDCATRANSMITLIFETIMEHANDLER_H
+#endif
+

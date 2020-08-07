@@ -57,5 +57,5 @@ class INET_API PimSplitter : public cSimpleModule
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIMSPLITTER_H
+#endif
 

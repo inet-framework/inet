@@ -90,5 +90,5 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211MODESET_H
+#endif
 

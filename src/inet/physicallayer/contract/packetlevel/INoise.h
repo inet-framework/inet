@@ -38,5 +38,5 @@ class INET_API INoise : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_INOISE_H
+#endif
 

@@ -50,5 +50,5 @@ class INET_API ICcEnergyConsumer : public virtual IEnergyConsumer
 
 } // namespace inet
 
-#endif // ifndef __INET_ICCENERGYCONSUMER_H
+#endif
 

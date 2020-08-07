@@ -95,5 +95,5 @@ class INET_API PimInterfaceTable : public cSimpleModule, protected cListener
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIMINTERFACETABLE_H
+#endif
 

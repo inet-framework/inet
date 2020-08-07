@@ -68,5 +68,5 @@ class INET_API IActivePacketSource
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IACTIVEPACKETSOURCE_H
+#endif
 

@@ -47,5 +47,5 @@ class INET_API NoiseDimensionalTransmitter : public TransmitterBase, public Dime
 
 } // namespace inet
 
-#endif // ifndef __INET_NOISEDIMENSIONALTRANSMITTER_H
+#endif
 

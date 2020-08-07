@@ -43,5 +43,5 @@ class INET_API CPacketClassifierFunction : public cObject, public virtual IPacke
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETCLASSIFIERFUNCTION_H
+#endif
 

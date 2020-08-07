@@ -51,5 +51,5 @@ class INET_API EthernetCutthroughSource : public PacketDestreamer
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETCUTTHROUGHSOURCE_H
+#endif
 

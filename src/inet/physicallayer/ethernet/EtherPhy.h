@@ -40,5 +40,5 @@ class INET_API EtherPhy : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERPHY_H
+#endif
 

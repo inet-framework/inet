@@ -73,5 +73,5 @@ class INET_API TcpAppBase : public ApplicationBase, public TcpSocket::ICallback
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPAPPBASE_H
+#endif
 

@@ -31,5 +31,5 @@ class INET_API Ipv6ProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_IPV6PROTOCOLPRINTER_H
+#endif
 

@@ -42,5 +42,5 @@ class INET_API NoiseBase : public INoise
 
 } // namespace inet
 
-#endif // ifndef __INET_NOISEBASE_H
+#endif
 

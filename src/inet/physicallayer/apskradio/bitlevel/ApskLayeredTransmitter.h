@@ -82,5 +82,5 @@ class INET_API ApskLayeredTransmitter : public TransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKLAYEREDTRANSMITTER_H
+#endif
 

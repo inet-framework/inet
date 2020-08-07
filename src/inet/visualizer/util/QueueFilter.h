@@ -44,5 +44,5 @@ class INET_API QueueFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_QUEUEFILTER_H
+#endif
 

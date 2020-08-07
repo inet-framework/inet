@@ -43,4 +43,5 @@ class INET_API StationRetryCounters
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_STATIONRETRYCOUNTERS_H
+#endif
+

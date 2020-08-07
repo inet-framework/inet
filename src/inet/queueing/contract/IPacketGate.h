@@ -49,5 +49,5 @@ class INET_API IPacketGate
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETGATE_H
+#endif
 

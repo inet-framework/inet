@@ -46,5 +46,5 @@ class INET_API NarrowbandNoiseBase : public NoiseBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NARROWBANDNOISEBASE_H
+#endif
 

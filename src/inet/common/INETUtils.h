@@ -110,5 +110,5 @@ INET_API void makePathForFile(const char *filename);
 
 } // namespace inet
 
-#endif // ifndef __INET_OPP_UTILS_H
+#endif
 

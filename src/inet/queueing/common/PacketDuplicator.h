@@ -35,5 +35,5 @@ class INET_API PacketDuplicator : public PacketPusherBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDUPLICATOR_H
+#endif
 

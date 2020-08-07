@@ -39,5 +39,5 @@ class INET_API ExtInterface : public NetworkInterface
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTINTERFACE_H
+#endif
 

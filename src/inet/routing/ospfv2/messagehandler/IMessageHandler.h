@@ -46,5 +46,5 @@ class INET_API IMessageHandler
 
 } // namespace inet
 
-#endif // ifndef __INET_IMESSAGEHANDLER_H
+#endif
 

@@ -110,5 +110,5 @@ class INET_API Ipv6FragBuf
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6FRAGBUF_H
+#endif
 

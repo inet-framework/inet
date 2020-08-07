@@ -54,5 +54,5 @@ class INET_API PassivePacketSink : public PassivePacketSinkBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PASSIVEPACKETSINK_H
+#endif
 

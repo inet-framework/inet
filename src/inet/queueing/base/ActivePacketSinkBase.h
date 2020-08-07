@@ -43,5 +43,5 @@ class INET_API ActivePacketSinkBase : public PacketSinkBase, public virtual IAct
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_ACTIVEPACKETSINKBASE_H
+#endif
 

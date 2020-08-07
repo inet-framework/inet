@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef INET_ROUTING_BGPV4_BGPMESSAGE_BGPHEADERSERIALIZER_H_
-#define INET_ROUTING_BGPV4_BGPMESSAGE_BGPHEADERSERIALIZER_H_
+#ifndef __INET_BGPHEADERSERIALIZER_H
+#define __INET_BGPHEADERSERIALIZER_H
 
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
@@ -39,4 +39,5 @@ class INET_API BgpHeaderSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 
-#endif /* INET_ROUTING_BGPV4_BGPMESSAGE_BGPHEADERSERIALIZER_H_ */
+#endif
+

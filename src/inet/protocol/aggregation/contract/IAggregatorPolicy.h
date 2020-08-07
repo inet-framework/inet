@@ -30,5 +30,5 @@ class INET_API IAggregatorPolicy
 
 } // namespace inet
 
-#endif // ifndef __INET_IAGGREGATORPOLICY_H
+#endif
 

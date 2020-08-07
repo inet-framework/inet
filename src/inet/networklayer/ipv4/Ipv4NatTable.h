@@ -48,5 +48,5 @@ class INET_API Ipv4NatTable : public cSimpleModule, public NetfilterBase::HookBa
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4NATTABLE_H
+#endif
 

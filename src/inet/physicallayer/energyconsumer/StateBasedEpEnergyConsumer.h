@@ -75,5 +75,5 @@ class INET_API StateBasedEpEnergyConsumer : public cSimpleModule, public power::
 
 } // namespace inet
 
-#endif // ifndef __INET_STATEBASEDEPENERGYCONSUMER_H
+#endif
 

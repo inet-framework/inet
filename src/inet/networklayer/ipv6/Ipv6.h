@@ -260,5 +260,5 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6_H
+#endif
 

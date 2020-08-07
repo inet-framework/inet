@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_COMPOUNDFUNCTIONS_H_
-#define __INET_MATH_COMPOUNDFUNCTIONS_H_
+#ifndef __INET_COMPOUNDFUNCTIONS_H
+#define __INET_COMPOUNDFUNCTIONS_H
 
 #include "inet/common/math/PrimitiveFunctions.h"
 
@@ -863,5 +863,5 @@ Ptr<const IFunction<RI, DI>> integrate(const Ptr<const IFunction<R, D>>& f) {
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_COMPOUNDFUNCTIONS_H_
+#endif
 

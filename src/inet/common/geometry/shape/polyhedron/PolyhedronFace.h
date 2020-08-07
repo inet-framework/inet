@@ -67,4 +67,5 @@ class INET_API PolyhedronFace
 
 } /* namespace inet */
 
-#endif // ifndef __INET_POLYHEDRONFACE_H
+#endif
+

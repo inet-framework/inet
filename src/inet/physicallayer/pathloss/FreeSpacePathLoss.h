@@ -50,5 +50,5 @@ class INET_API FreeSpacePathLoss : public PathLossBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FREESPACEPATHLOSS_H
+#endif
 

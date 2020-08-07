@@ -44,4 +44,5 @@ class INET_API IObjectCache
 
 } // namespace inet
 
-#endif // ifndef __INET_IOBJECTCACHE_H
+#endif
+

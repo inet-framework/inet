@@ -105,5 +105,5 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_GAUGEFIGURE_H
+#endif
 

@@ -35,4 +35,5 @@ class INET_API MsduDeaggregation : public IMsduDeaggregation, public cObject
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_MSDUDEAGGREGATION_H
+#endif
+

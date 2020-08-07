@@ -32,5 +32,5 @@ uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize, uint32_t cr
 #define ETHER_CRC_POLY_LE    0xedb88320
 #define ETHER_CRC_POLY_BE    0x04c11db6
 
-#endif /* ETHERNETCRC_H_ */
+#endif
 

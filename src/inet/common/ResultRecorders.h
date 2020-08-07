@@ -96,3 +96,4 @@ class INET_API WeightedHistogramRecorder : public cNumericResultRecorder
 } // namespace inet
 
 #endif
+

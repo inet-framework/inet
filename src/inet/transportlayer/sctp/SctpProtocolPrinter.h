@@ -33,5 +33,5 @@ class INET_API SctpProtocolPrinter : public ProtocolPrinter
 } // namespace sctp
 } // namespace inet
 
-#endif // __INET_SCTPPROTOCOLPRINTER_H
+#endif
 

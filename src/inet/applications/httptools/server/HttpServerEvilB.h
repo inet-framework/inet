@@ -54,5 +54,5 @@ class INET_API HttpServerEvilB : public HttpServer
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPSERVEREVILB_H
+#endif
 

@@ -33,4 +33,5 @@ class INET_API PppProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_PPPPROTOCOLDISSECTOR_H
+#endif
+

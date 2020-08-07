@@ -54,5 +54,5 @@ class INET_API ConstantDriftOscillator : public OscillatorBase, public IScriptab
 
 } // namespace inet
 
-#endif // ifndef __INET_CONSTANTDRIFTOSCILLATOR_H
+#endif
 

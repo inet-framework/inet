@@ -114,5 +114,5 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
 
 } // namespace inet
 
-#endif // ifndef __INET_THRUPUTMETERINGCHANNEL_H
+#endif
 

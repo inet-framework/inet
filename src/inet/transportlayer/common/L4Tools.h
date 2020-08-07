@@ -47,4 +47,5 @@ INET_API const Ptr<TransportHeaderBase> removeTransportProtocolHeader(Packet *pa
 
 }
 
-#endif // __INET_L4TOOLS_H
+#endif
+

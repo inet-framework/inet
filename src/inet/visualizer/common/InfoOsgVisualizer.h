@@ -68,5 +68,5 @@ class INET_API InfoOsgVisualizer : public InfoVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_INFOOSGGVISUALIZER_H
+#endif
 

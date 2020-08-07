@@ -35,5 +35,5 @@ class INET_API LifecycleUnsupported : public ILifecycle
 
 } // namespace inet
 
-#endif // ifndef __INET_LIFECYCLEUNSUPPORTED_H
+#endif
 

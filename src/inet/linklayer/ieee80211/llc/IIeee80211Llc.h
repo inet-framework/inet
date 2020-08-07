@@ -32,4 +32,5 @@ class INET_API IIeee80211Llc
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IIEEE80211LLC_H
+#endif
+

@@ -50,5 +50,5 @@ class INET_API Material : public cNamedObject, public IMaterial
 
 } // namespace inet
 
-#endif // ifndef __INET_MATERIAL_H
+#endif
 

@@ -38,5 +38,5 @@ class INET_API PacketDelayer : public PacketPusherBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDELAYER_H
+#endif
 

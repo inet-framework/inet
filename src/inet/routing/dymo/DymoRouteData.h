@@ -64,5 +64,5 @@ class INET_API DymoRouteData : public cObject
 } // namespace dymo
 } // namespace inet
 
-#endif // ifndef __INET_DYMOROUTEDATA_H
+#endif
 

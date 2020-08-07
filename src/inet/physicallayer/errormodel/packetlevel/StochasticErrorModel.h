@@ -51,5 +51,5 @@ class INET_API StochasticErrorModel : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_STOCHASTICERRORMODEL_H
+#endif
 

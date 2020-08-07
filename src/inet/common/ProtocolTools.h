@@ -40,4 +40,5 @@ const Ptr<T> removeProtocolHeader(Packet *packet)
 
 };
 
-#endif // __INET_PROTOCOLTOOLS_H
+#endif
+

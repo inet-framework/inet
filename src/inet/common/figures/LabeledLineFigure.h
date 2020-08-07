@@ -44,5 +44,5 @@ class INET_API LabeledLineFigure : public cGroupFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_LABELEDLINEFIGURE_H
+#endif
 

@@ -66,5 +66,5 @@ class INET_API AnsimMobility : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ANSIMMOBILITY_H
+#endif
 

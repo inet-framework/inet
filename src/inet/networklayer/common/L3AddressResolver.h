@@ -221,5 +221,5 @@ class INET_API L3AddressResolver
 
 } // namespace inet
 
-#endif // ifndef __INET_L3ADDRESSRESOLVER_H
+#endif
 

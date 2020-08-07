@@ -37,5 +37,5 @@ class INET_API TrailFigure : public cGroupFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_TRAILFIGURE_H
+#endif
 

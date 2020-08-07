@@ -185,5 +185,5 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
 
 } // namespace inet
 
-#endif // ifndef __INET_COMMUNICATIONCACHEBASE_H
+#endif
 

@@ -313,5 +313,5 @@ class INET_API UdpSocket : public ISocket
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPSOCKET_H
+#endif
 

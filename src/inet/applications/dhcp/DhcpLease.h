@@ -55,5 +55,5 @@ inline std::ostream& operator<<(std::ostream& os, DhcpLease obj)
 
 } // namespace inet
 
-#endif // ifndef __INET_DHCPLEASE_H
+#endif
 

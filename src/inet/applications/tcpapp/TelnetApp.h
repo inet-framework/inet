@@ -56,5 +56,5 @@ class INET_API TelnetApp : public TcpAppBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TELNETAPP_H
+#endif
 

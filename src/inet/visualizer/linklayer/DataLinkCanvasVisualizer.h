@@ -37,5 +37,5 @@ class INET_API DataLinkCanvasVisualizer : public LinkCanvasVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DATALINKCANVASVISUALIZER_H
+#endif
 

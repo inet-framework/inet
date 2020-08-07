@@ -178,5 +178,5 @@ class INET_API IInterfaceTable
 
 } // namespace inet
 
-#endif // ifndef __INET_IINTERFACETABLE_H
+#endif
 

@@ -41,5 +41,5 @@ class INET_API PaddingInserter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PADDINGINSERTER_H
+#endif
 

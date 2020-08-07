@@ -59,5 +59,5 @@ class INET_API DcTcpFamily : public TcpTahoeRenoFamily
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_DCTCPFAMILY_H
+#endif
 

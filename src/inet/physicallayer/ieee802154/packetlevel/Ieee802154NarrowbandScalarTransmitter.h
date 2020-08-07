@@ -38,5 +38,5 @@ class INET_API Ieee802154NarrowbandScalarTransmitter : public FlatTransmitterBas
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154NARROWBANDSCALARTRANSMITTER_H
+#endif
 

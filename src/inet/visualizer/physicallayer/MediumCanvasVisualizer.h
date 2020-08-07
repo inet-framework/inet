@@ -165,5 +165,5 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MEDIUMCANVASVISUALIZER_H
+#endif
 

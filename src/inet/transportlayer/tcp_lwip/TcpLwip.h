@@ -17,8 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_TCP_LWIP_H
-#define __INET_TCP_LWIP_H
+#ifndef __INET_TCPLWIP_H
+#define __INET_TCPLWIP_H
 
 #include <map>
 
@@ -165,5 +165,5 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
 
 } // namespace inet
 
-#endif // ifndef __INET_TCP_LWIP_H
+#endif
 

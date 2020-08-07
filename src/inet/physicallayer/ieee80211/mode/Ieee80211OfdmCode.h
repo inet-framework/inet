@@ -83,4 +83,5 @@ class INET_API Ieee80211OfdmCompliantCodes
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif /* __INET_IEEE80211OFDMCODE_H */
+#endif
+

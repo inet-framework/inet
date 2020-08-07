@@ -37,5 +37,5 @@ class INET_API IBackgroundNoise : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IBACKGROUNDNOISE_H
+#endif
 

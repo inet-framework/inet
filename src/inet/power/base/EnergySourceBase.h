@@ -40,5 +40,5 @@ class INET_API EnergySourceBase : public virtual IEnergySource
 
 } // namespace inet
 
-#endif // ifndef __INET_ENERGYSOURCEBASE_H
+#endif
 

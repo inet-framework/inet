@@ -201,5 +201,5 @@ class INET_API PimBase : public RoutingProtocolBase
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIMBASE_H
+#endif
 

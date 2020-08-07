@@ -183,5 +183,5 @@ class INET_API TcpSackRexmitQueue
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPSACKREXMITQUEUE_H
+#endif
 

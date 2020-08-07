@@ -133,5 +133,5 @@ class INET_API Ipv6Route : public cObject, public IRoute
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6ROUTE_H
+#endif
 

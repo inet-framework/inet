@@ -39,5 +39,5 @@ class INET_API Reordering : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_REORDERING_H
+#endif
 

@@ -190,5 +190,5 @@ class INET_API HttpController : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPCONTROLLER_H
+#endif
 

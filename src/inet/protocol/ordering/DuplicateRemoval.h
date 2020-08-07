@@ -38,5 +38,5 @@ class INET_API DuplicateRemoval : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DUPLICATEREMOVAL_H
+#endif
 

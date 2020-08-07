@@ -92,5 +92,5 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_MACPROTOCOLBASE_H
+#endif
 

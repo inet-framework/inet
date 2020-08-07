@@ -52,5 +52,5 @@ class INET_API SnirReceiverBase : public ReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SNIRRECEIVERBASE_H
+#endif
 

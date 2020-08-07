@@ -44,5 +44,5 @@ class INET_API LayeredProtocolBase : public OperationalBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDPROTOCOLBASE_H
+#endif
 

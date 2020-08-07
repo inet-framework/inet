@@ -86,5 +86,5 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_MAPCOMMUNICATIONCACHE_H
+#endif
 

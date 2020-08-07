@@ -212,5 +212,5 @@ class INET_API SdesChunk : public cArray
 
 } // namespace inet
 
-#endif // ifndef __INET_SDES_H
+#endif
 

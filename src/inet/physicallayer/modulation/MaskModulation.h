@@ -46,5 +46,5 @@ class INET_API MaskModulation : public ApskModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MASKMODULATION_H
+#endif
 

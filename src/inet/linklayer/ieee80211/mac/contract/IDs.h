@@ -38,4 +38,5 @@ class INET_API IDs
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_IDS_H
+#endif
+

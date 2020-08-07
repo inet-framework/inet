@@ -41,5 +41,5 @@ void increaseTimeTag(Packet *packet, simtime_t duration)
 
 } // namespace inet
 
-#endif // ifndef __INET_TIMETAG_H
+#endif
 

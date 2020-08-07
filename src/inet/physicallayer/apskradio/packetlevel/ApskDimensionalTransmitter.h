@@ -42,5 +42,5 @@ class INET_API ApskDimensionalTransmitter : public DimensionalTransmitterBase, p
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
+#endif
 

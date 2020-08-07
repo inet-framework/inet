@@ -91,5 +91,5 @@ inline std::string EulerAngles::str() const
 
 } // namespace inet
 
-#endif // ifndef __INET_EULERALNGLES_H
+#endif
 

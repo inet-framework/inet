@@ -41,5 +41,5 @@ class INET_API NetworkInfo : public cSimpleModule, public IScriptable
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKINFO_H
+#endif
 

@@ -40,4 +40,5 @@ class INET_API Ieee80211HtInterleaving : public IInterleaving
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211HTINTERLEAVING_H
+#endif
+

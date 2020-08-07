@@ -396,5 +396,5 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4ROUTINGTABLE_H
+#endif
 

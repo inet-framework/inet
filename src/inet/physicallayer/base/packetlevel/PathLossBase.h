@@ -34,5 +34,5 @@ class INET_API PathLossBase : public cModule, public IPathLoss
 
 } // namespace inet
 
-#endif // ifndef __INET_PATHLOSSBASE_H
+#endif
 

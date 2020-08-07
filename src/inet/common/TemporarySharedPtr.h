@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_TEMPORARYSHAREDPTRCLASS_H_
-#define __INET_TEMPORARYSHAREDPTRCLASS_H_
+#ifndef __INET_TEMPORARYSHAREDPTR_H
+#define __INET_TEMPORARYSHAREDPTR_H
 
 #include "inet/common/Ptr.h"
 
@@ -82,5 +82,5 @@ class TemporarySharedPtr : public cObject
 
 } // namespace
 
-#endif // #ifndef __INET_TEMPORARYSHAREDPTRCLASS_H_
+#endif
 

@@ -43,5 +43,5 @@ class INET_API IsotropicScalarBackgroundNoise : public cModule, public IBackgrou
 
 } // namespace inet
 
-#endif // ifndef __INET_ISOTROPICSCALARBACKGROUNDNOISE_H
+#endif
 

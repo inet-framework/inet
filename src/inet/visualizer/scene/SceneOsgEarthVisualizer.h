@@ -59,5 +59,5 @@ class INET_API SceneOsgEarthVisualizer : public SceneOsgVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCENEOSGEARTHVISUALIZER_H
+#endif
 

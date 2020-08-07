@@ -45,5 +45,5 @@ class INET_API LinearRotatingMobilityBase : public RotatingMobilityBase
 
 } // namespace inet
 
-#endif /* LINEARROTATINGMOBILITYBASE_H_ */
+#endif
 

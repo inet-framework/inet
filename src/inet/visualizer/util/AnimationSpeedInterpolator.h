@@ -52,5 +52,5 @@ class INET_API AnimationSpeedInterpolator
 
 } // namespace inet
 
-#endif // ifndef __INET_ANIMATIONSPEEDINTERPOLATOR_H
+#endif
 

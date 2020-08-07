@@ -40,5 +40,5 @@ class INET_API IListeningDecision : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_ILISTENINGDECISION_H
+#endif
 

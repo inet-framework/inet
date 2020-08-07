@@ -130,5 +130,5 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDROPVISUALIZERBASE_H
+#endif
 

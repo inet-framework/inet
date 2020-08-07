@@ -216,5 +216,5 @@ class INET_API Udp : public TransportProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_UDP_H
+#endif
 

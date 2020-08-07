@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ICMPPROTOCOLPRINTER_H
-#define __INET_ICMPPROTOCOLPRINTER_H
+#ifndef __INET_ICMPV6PROTOCOLPRINTER_H
+#define __INET_ICMPV6PROTOCOLPRINTER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
@@ -31,5 +31,5 @@ class INET_API Icmpv6ProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_ICMPPROTOCOLPRINTER_H
+#endif
 

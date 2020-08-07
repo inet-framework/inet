@@ -449,5 +449,5 @@ struct data_vector
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPHDR_H
+#endif
 

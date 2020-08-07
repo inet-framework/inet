@@ -87,5 +87,5 @@ class INET_API L3Socket : public INetworkSocket
 
 } // namespace inet
 
-#endif // ifndef __INET_L3SOCKET_H
+#endif
 

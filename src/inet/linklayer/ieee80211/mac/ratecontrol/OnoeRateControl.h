@@ -58,4 +58,5 @@ class INET_API OnoeRateControl : public RateControlBase
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // infndef __INET_ONOERATECONTROL_H
+#endif
+

@@ -58,5 +58,5 @@ class INET_API AnimationPosition
 
 } // namespace inet
 
-#endif // ifndef __INET_ANIMATIONPOSITION_H
+#endif
 

@@ -35,5 +35,5 @@ class INET_API ReceiveWithAcknowledge : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVEWITHACKNOWLEDGE_H
+#endif
 

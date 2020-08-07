@@ -55,5 +55,5 @@ class INET_API IReceptionSampleModel : public virtual ISignalSampleModel
 
 } // namespace inet
 
-#endif // ifndef __INET_ISIGNALSAMPLEMODEL_H
+#endif
 

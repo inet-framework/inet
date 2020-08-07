@@ -54,5 +54,5 @@ class INET_API ScalarReceptionSignalAnalogModel : public ScalarSignalAnalogModel
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARSIGNALANALOGMODEL_H
+#endif
 

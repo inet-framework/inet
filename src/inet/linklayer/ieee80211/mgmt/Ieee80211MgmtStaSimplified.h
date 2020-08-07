@@ -62,5 +62,5 @@ class INET_API Ieee80211MgmtStaSimplified : public Ieee80211MgmtBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211MGMTSTASIMPLIFIED_H
+#endif
 

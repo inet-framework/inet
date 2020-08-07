@@ -42,5 +42,5 @@ class INET_API StaticGridMobility : public StationaryMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_STATICGRIDMOBILITY_H
+#endif
 

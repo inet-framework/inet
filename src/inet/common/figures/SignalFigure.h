@@ -81,5 +81,5 @@ class INET_API SignalFigure : public cGroupFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_SIGNALFIGURE_H
+#endif
 

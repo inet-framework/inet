@@ -145,5 +145,5 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_HEATMAPPLOTFIGURE_H
+#endif
 

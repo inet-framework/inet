@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_PRIMITIVEFUNCTIONS_H_
-#define __INET_MATH_PRIMITIVEFUNCTIONS_H_
+#ifndef __INET_PRIMITIVEFUNCTIONS_H
+#define __INET_PRIMITIVEFUNCTIONS_H
 
 #include "inet/common/math/FunctionBase.h"
 #include "inet/common/math/Interpolators.h"
@@ -808,5 +808,5 @@ void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, co
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_PRIMITIVEFUNCTIONS_H_
+#endif
 

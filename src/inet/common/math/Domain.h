@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_DOMAIN_H_
-#define __INET_MATH_DOMAIN_H_
+#ifndef __INET_DOMAIN_H
+#define __INET_DOMAIN_H
 
 #include <algorithm>
 #include "inet/common/math/Interval.h"
@@ -57,5 +57,5 @@ inline std::ostream& operator<<(std::ostream& os, const Domain<T ...>& d) {
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_IFUNCTION_H_
+#endif
 

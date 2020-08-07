@@ -232,5 +232,5 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
 
 } // namespace inet
 
-#endif // ifndef __INET_DYMO_H
+#endif
 

@@ -35,4 +35,5 @@ class INET_API Ieee80211ModeBase : public IIeee80211Mode
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211MODEBASE_H
+#endif
+

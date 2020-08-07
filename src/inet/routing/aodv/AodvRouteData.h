@@ -72,5 +72,5 @@ class INET_API AodvRouteData : public cObject
 } // namespace aodv
 } // namespace inet
 
-#endif    // ifndef AODVROUTEDATA_H_
+#endif
 

@@ -17,8 +17,8 @@
 // @author: Zoltan Bojthe
 //
 
-#ifndef __INET_ETHERNETDISSECTOR_H_
-#define __INET_ETHERNETDISSECTOR_H_
+#ifndef __INET_ETHERNETPROTOCOLDISSECTOR_H
+#define __INET_ETHERNETPROTOCOLDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -39,4 +39,5 @@ class INET_API EthernetPhyDissector : public DefaultProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_ETHERNETDISSECTOR_H_
+#endif
+

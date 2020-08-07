@@ -74,5 +74,5 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETMULTIPLEXER_H
+#endif
 

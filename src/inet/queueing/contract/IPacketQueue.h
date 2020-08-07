@@ -51,5 +51,5 @@ class INET_API IPacketQueue : public virtual IPacketCollection, public virtual I
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETQUEUE_H
+#endif
 

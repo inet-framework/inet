@@ -82,5 +82,5 @@ class Ospfv2 : public RoutingProtocolBase, protected cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2_H
+#endif
 

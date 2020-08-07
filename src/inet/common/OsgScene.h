@@ -77,5 +77,5 @@ class INET_API TopLevelScene : public Group
 
 } // namespace inet
 
-#endif // ifndef __INET_OSGSCENE_H
+#endif
 

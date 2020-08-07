@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_EthernetSocketTable_H
-#define __INET_EthernetSocketTable_H
+#ifndef __INET_ETHERNETSOCKETTABLE_H
+#define __INET_ETHERNETSOCKETTABLE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
@@ -57,5 +57,5 @@ class INET_API EthernetSocketTable : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_EthernetSocketTable_H
+#endif
 

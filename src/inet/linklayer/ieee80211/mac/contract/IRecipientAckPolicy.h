@@ -36,4 +36,5 @@ class INET_API IRecipientAckPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRECIPIENTACKPOLICY_H
+#endif
+

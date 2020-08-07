@@ -61,5 +61,5 @@ class INET_API RectangleMobility : public MovingMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RECTANGLEMOBILITY_H
+#endif
 

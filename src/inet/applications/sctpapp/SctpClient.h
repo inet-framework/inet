@@ -117,5 +117,5 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, 
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPCLIENT_H
+#endif
 

@@ -53,5 +53,5 @@ class INET_API Ipv4Encap : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4ENCAP_H
+#endif
 

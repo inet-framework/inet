@@ -47,5 +47,5 @@ class INET_API TimeBasedTokenGenerator : public TokenGeneratorBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_TIMEBASEDTOKENGENERATOR_H
+#endif
 

@@ -17,8 +17,8 @@
 // Author: Levente Meszaros <levy@omnetpp.org>, Andras Varga (andras@omnetpp.org)
 //
 
-#ifndef __INET_NODEOPERATIONS_H
-#define __INET_NODEOPERATIONS_H
+#ifndef __INET_MODULEOPERATIONS_H
+#define __INET_MODULEOPERATIONS_H
 
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
@@ -95,5 +95,5 @@ class INET_API ModuleCrashOperation : public LifecycleOperation
 
 } // namespace inet
 
-#endif // ifndef __INET_NODEOPERATIONS_H
+#endif
 

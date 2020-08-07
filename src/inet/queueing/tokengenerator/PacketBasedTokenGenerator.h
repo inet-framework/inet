@@ -54,5 +54,5 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETBASEDTOKENGENERATOR_H
+#endif
 

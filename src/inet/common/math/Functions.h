@@ -13,12 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_FUNCTIONS_H_
-#define __INET_MATH_FUNCTIONS_H_
+#ifndef __INET_FUNCTIONS_H
+#define __INET_FUNCTIONS_H
 
 #include "inet/common/math/PrimitiveFunctions.h"
 #include "inet/common/math/AlgebraicOperations.h"
 #include "inet/common/math/CompoundFunctions.h"
 
-#endif // #ifndef __INET_MATH_FUNCTIONS_H_
+#endif
 

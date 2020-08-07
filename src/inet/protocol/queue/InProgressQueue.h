@@ -33,5 +33,5 @@ class INET_API InProgressQueue : public PacketQueue
 
 } // namespace inet
 
-#endif // ifndef __INET_INPROGRESSQUEUE_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_EthernetPauseCommandProcessor_H
-#define __INET_EthernetPauseCommandProcessor_H
+#ifndef __INET_ETHERNETPAUSECOMMANDPROCESSOR_H
+#define __INET_ETHERNETPAUSECOMMANDPROCESSOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
@@ -41,5 +41,5 @@ class INET_API EthernetPauseCommandProcessor : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_EthernetPauseCommandProcessor_H
+#endif
 

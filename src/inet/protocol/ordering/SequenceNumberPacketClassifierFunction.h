@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_DYNAMICCLASSIFIER_H
-#define __INET_DYNAMICCLASSIFIER_H
+#ifndef __INET_SEQUENCENUMBERPACKETCLASSIFIERFUNCTION_H
+#define __INET_SEQUENCENUMBERPACKETCLASSIFIERFUNCTION_H
 
 #include "inet/queueing/contract/IPacketClassifierFunction.h"
 
@@ -32,5 +32,5 @@ class INET_API SequenceNumberPacketClassifierFunction : public cObject, public I
 
 } // namespace inet
 
-#endif // ifndef __INET_DYNAMICCLASSIFIER_H
+#endif
 

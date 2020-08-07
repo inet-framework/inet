@@ -65,5 +65,5 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PATHOSGVISUALIZERBASE_H
+#endif
 

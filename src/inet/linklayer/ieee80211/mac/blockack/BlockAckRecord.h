@@ -51,4 +51,5 @@ class INET_API BlockAckRecord
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_BLOCKACKRECORD_H
+#endif
+

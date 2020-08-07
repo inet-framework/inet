@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SHORTCUTMACDISSECTOR_H
-#define __INET_SHORTCUTMACDISSECTOR_H
+#ifndef __INET_SHORTCUTMACPROTOCOLDISSECTOR_H
+#define __INET_SHORTCUTMACPROTOCOLDISSECTOR_H
 
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
@@ -31,5 +31,5 @@ class INET_API ShortcutMacProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // ifndef __INET_SHORTCUTMACDISSECTOR_H
+#endif
 

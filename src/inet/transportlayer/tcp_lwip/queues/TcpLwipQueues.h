@@ -230,5 +230,5 @@ class INET_API TcpLwipReceiveQueue : public cObject
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPLWIPQUEUES_H
+#endif
 

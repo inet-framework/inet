@@ -68,5 +68,5 @@ class INET_API EnergyStorageOsgVisualizer : public EnergyStorageVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ENERGYSTORAGEOSGGVISUALIZER_H
+#endif
 

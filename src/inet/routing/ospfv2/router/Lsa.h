@@ -208,5 +208,5 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsa& lsa);
 
 } // namespace inet
 
-#endif    // __LSA_HPP__
+#endif
 

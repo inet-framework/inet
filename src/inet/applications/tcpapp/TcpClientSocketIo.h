@@ -42,5 +42,5 @@ class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICall
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPCLIENTSOCKETIO_H
+#endif
 

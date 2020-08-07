@@ -66,5 +66,5 @@ class INET_API IAnalogModel : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IANALOGMODEL_H
+#endif
 

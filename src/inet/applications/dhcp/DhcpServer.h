@@ -130,5 +130,5 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
 
 } // namespace inet
 
-#endif // ifndef __INET_DHCPSERVER_H
+#endif
 

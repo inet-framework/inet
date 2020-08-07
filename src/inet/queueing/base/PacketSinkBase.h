@@ -30,5 +30,5 @@ class INET_API PacketSinkBase : public PacketProcessorBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSINKBASE_H
+#endif
 

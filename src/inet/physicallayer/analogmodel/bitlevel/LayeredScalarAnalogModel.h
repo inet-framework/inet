@@ -38,5 +38,5 @@ class INET_API LayeredScalarAnalogModel : public ScalarAnalogModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDSCALARANALOGMODEL_H
+#endif
 

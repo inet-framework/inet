@@ -41,5 +41,5 @@ class INET_API DsssOqpsk16Modulation : public ApskModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DSSSOQPSK16MODULATION_H
+#endif
 

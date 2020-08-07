@@ -36,5 +36,5 @@ class INET_API EthernetTypeOrLengthChecker : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETTYPEORLENGTHCHECKER_H
+#endif
 

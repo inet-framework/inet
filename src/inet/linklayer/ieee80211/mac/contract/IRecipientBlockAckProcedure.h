@@ -38,4 +38,5 @@ class INET_API IRecipientBlockAckProcedure
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRECIPIENTBLOCKACKPROCEDURE_H
+#endif
+

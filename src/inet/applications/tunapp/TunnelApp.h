@@ -71,5 +71,5 @@ protected:
 
 } // namespace inet
 
-#endif // ifndef __INET_TUNNELAPP_H
+#endif
 

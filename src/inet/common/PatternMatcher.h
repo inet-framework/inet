@@ -187,5 +187,5 @@ class INET_API PatternMatcher
 
 } // namespace inet
 
-#endif // ifndef __INET_PATTERNMATCHER_H
+#endif
 

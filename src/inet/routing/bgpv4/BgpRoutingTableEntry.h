@@ -150,5 +150,5 @@ inline std::string BgpRoutingTableEntry::str() const
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPROUTINGTABLEENTRY_H
+#endif
 

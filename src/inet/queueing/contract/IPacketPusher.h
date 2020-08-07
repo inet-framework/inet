@@ -34,5 +34,5 @@ class INET_API IPacketPusher : public virtual IPassivePacketSink, public virtual
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETPUSHER_H
+#endif
 

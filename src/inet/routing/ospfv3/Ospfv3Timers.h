@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3TIMERS_H_
-#define __INET_OSPFV3TIMERS_H_
+#ifndef __INET_OSPFV3TIMERS_H
+#define __INET_OSPFV3TIMERS_H
 
 namespace inet {
 namespace ospfv3 {
@@ -22,5 +22,5 @@ enum Ospfv3Timers
 } //namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3TIMERS_H_
+#endif
 

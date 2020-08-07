@@ -36,5 +36,5 @@ class INET_API InterfaceStateNotDesignatedRouter : public Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACESTATENOTDESIGNATEDROUTER_H
+#endif
 

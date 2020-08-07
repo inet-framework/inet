@@ -322,5 +322,5 @@ inline std::ostream& operator<<(std::ostream& out, const Ipv4AddressVector addre
 
 }    // namespace inet
 
-#endif /* INET_IGMPV3_H */
+#endif
 

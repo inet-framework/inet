@@ -38,5 +38,5 @@ class INET_API Ieee80211ScalarTransmitter : public Ieee80211TransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211SCALARTRANSMITTER_H
+#endif
 

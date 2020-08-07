@@ -35,4 +35,5 @@ public:
 
 }
 
-#endif /* INET_SIMTIMETEXTFIGURE_H */
+#endif
+

@@ -43,5 +43,5 @@ class INET_API CPacketDropperFunction : public cObject, public virtual IPacketDr
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDROPPERFUNCTION_H
+#endif
 

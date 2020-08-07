@@ -72,5 +72,5 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MOBILITYOSGVISUALIZER_H
+#endif
 

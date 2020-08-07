@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3INTERFACESTATEDROTHER_H_
-#define __INET_OSPFV3INTERFACESTATEDROTHER_H_
+#ifndef __INET_OSPFV3INTERFACESTATEDROTHER_H
+#define __INET_OSPFV3INTERFACESTATEDROTHER_H
 
 #include <string>
 
@@ -26,5 +26,5 @@ class INET_API Ospfv3InterfaceStateDrOther : public Ospfv3InterfaceState
 } // namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3INTERFACESTATEDROTHER_H_
+#endif
 

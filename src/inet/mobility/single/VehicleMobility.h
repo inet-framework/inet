@@ -62,5 +62,5 @@ class INET_API VehicleMobility : public MovingMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_VEHICLEMOBILITY_H
+#endif
 

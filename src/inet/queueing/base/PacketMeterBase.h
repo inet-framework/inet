@@ -33,5 +33,5 @@ class INET_API PacketMeterBase : public PacketFlowBase, public virtual IPacketMe
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETMETERBASE_H
+#endif
 

@@ -137,5 +137,5 @@ class INET_API PimNeighborTable : public cSimpleModule
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIMNEIGHBORTABLE_H
+#endif
 

@@ -82,5 +82,5 @@ class INET_API EtherTrafGen : public ApplicationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERTRAFGEN_H
+#endif
 

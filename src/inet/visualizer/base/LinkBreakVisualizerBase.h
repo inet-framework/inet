@@ -87,5 +87,5 @@ class INET_API LinkBreakVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKBREAKVISUALIZERBASE_H
+#endif
 

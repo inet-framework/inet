@@ -48,5 +48,5 @@ class INET_API PcapFilePacketConsumer : public PassivePacketSinkBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PCAPFILEPACKETCONSUMER_H
+#endif
 

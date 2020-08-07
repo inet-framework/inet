@@ -72,5 +72,5 @@ class INET_API IdealObstacleLoss : public TracingObstacleLossBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALOBSTACLELOSS_H
+#endif
 

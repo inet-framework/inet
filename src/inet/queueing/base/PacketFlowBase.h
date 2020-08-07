@@ -86,5 +86,5 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETFLOWBASE_H
+#endif
 

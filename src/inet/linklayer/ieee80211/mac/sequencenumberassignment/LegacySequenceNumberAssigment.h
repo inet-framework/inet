@@ -37,4 +37,5 @@ class INET_API LegacySequenceNumberAssigment : public ISequenceNumberAssignment
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_LEGACYSEQUENCENUMBERASSIGMENT_H
+#endif
+

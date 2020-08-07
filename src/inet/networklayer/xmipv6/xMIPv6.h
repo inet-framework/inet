@@ -549,5 +549,5 @@ class INET_API xMIPv6 : public cSimpleModule
 
 } // namespace inet
 
-#endif    //__XMIPV6_H__
+#endif
 

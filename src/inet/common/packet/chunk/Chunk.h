@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_CHUNK_H_
-#define __INET_CHUNK_H_
+#ifndef __INET_CHUNK_H
+#define __INET_CHUNK_H
 
 #include <memory>
 
@@ -807,5 +807,5 @@ typedef TemporarySharedPtr<Chunk> ChunkTemporarySharedPtr;
 
 } // namespace
 
-#endif // #ifndef __INET_CHUNK_H_
+#endif
 

@@ -46,5 +46,5 @@ class INET_API AntennaBase : public IAntenna, public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_ANTENNABASE_H
+#endif
 

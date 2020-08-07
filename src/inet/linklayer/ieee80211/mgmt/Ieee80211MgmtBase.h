@@ -104,5 +104,5 @@ class INET_API Ieee80211MgmtBase : public OperationalBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211MGMTBASE_H
+#endif
 

@@ -186,5 +186,5 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
 } // namespace inet
 
-#endif // ifndef __INET_MOBILITYBASE_H
+#endif
 

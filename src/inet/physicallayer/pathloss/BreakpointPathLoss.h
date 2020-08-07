@@ -34,4 +34,5 @@ class INET_API BreakpointPathLoss : public PathLossBase
 
 } // namespace inet
 
-#endif // ifndef __INET_BREAKPOINTPATHLOSS_H
+#endif
+

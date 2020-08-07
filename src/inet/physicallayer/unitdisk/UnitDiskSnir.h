@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALSNIR_H
-#define __INET_IDEALSNIR_H
+#ifndef __INET_UNITDISKSNIR_H
+#define __INET_UNITDISKSNIR_H
 
 #include "inet/physicallayer/base/packetlevel/SnirBase.h"
 
@@ -40,5 +40,5 @@ class INET_API UnitDiskSnir : public SnirBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALSNIR_H
+#endif
 

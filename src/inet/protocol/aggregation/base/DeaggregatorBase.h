@@ -39,5 +39,5 @@ class INET_API DeaggregatorBase : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DEAGGREGATORBASE_H
+#endif
 

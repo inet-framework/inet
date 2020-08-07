@@ -39,5 +39,5 @@ class INET_API ColorSet
 
 } // namespace inet
 
-#endif // ifndef __INET_COLORSET_H
+#endif
 

@@ -70,5 +70,5 @@ class INET_API Pim : public RoutingProtocolBase, protected cListener
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIM_H
+#endif
 

@@ -186,5 +186,5 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
 
 } // namespace inet
 
-#endif // ifndef __INET_DHCPCLIENT_H
+#endif
 

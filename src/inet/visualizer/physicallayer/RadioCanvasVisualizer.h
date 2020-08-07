@@ -68,5 +68,5 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RADIOCANVASVISUALIZER_H
+#endif
 

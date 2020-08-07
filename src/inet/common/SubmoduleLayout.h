@@ -30,5 +30,5 @@ INET_API void layoutSubmodules(cModule *module, int dimensionIndex = 1, double m
 
 } // namespace inet
 
-#endif // ifndef __INET_SUBMODULELAYOUT_H
+#endif
 

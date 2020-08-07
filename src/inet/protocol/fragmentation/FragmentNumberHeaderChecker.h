@@ -39,5 +39,5 @@ class INET_API FragmentNumberHeaderChecker : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FRAGMENTNUMBERHEADERCHECKER_H
+#endif
 

@@ -52,5 +52,5 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPBROWSERDIRECT_H
+#endif
 

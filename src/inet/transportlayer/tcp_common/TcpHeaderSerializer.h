@@ -43,4 +43,5 @@ class INET_API TcpHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPHEADERSERIALIZER_H
+#endif
+

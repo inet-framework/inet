@@ -46,5 +46,5 @@ class INET_API MpskModulation : public ApskModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MPSKMODULATION_H
+#endif
 

@@ -62,5 +62,5 @@ class INET_API PacketCloner : public PacketProcessorBase, public virtual IPassiv
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETCLONER_H
+#endif
 

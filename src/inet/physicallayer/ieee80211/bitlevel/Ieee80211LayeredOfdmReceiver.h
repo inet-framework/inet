@@ -106,5 +106,5 @@ class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211LAYEREDOFDMRECEIVER_H
+#endif
 

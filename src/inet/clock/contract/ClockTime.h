@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_CONTRACT_CLOCKTIME_H
-#define __INET_CONTRACT_CLOCKTIME_H
+#ifndef __INET_CLOCKTIME_H
+#define __INET_CLOCKTIME_H
 
 #include "inet/common/INETDefs.h"
 #ifdef WITH_CLOCK_SUPPORT
@@ -47,5 +47,5 @@ typedef ClockTime clocktime_t;
 
 } // namespace inet
 
-#endif // ifndef __INET_CONTRACT_CLOCKTIME_H
+#endif
 

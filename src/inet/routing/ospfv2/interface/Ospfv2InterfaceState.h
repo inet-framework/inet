@@ -43,5 +43,5 @@ class INET_API Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACESTATE_H
+#endif
 

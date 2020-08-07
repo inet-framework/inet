@@ -57,5 +57,5 @@ class INET_API WirelessSignal : public Signal, public IWirelessSignal
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_WIRELESSSIGNAL_H
+#endif
 

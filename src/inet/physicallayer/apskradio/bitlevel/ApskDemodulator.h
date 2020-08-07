@@ -50,5 +50,5 @@ class INET_API ApskDemodulator : public IDemodulator, public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKDEMODULATOR_H
+#endif
 

@@ -70,5 +70,5 @@ class INET_API Ieee802154UwbIrTransmitter : public TransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154UWBIRTRANSMITTER_H
+#endif
 

@@ -260,5 +260,5 @@ class INET_API IRadioMedium : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IRADIOMEDIUM_H
+#endif
 

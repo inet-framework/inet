@@ -182,5 +182,5 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021DINTERFACEDATA_H
+#endif
 

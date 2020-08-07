@@ -399,5 +399,5 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
 
 } // namespace inet
 
-#endif    //IPV6NEIGHBOURDISCOVERY_H
+#endif
 

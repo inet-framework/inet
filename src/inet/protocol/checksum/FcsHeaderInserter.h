@@ -37,5 +37,5 @@ class INET_API FcsHeaderInserter : public FcsInserterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FCSHEADERINSERTER_H
+#endif
 

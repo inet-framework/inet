@@ -265,5 +265,5 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public LifecycleUnsupported
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6TUNNELING_H
+#endif
 

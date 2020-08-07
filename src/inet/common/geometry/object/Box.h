@@ -48,4 +48,5 @@ class INET_API Box : public GeometricObjectBase
 };
 } /* namespace inet */
 
-#endif // ifndef __INET_BOX_H
+#endif
+

@@ -59,5 +59,5 @@ class INET_API AxiallySymmetricAntenna : public AntennaBase
 
 } // namespace inet
 
-#endif // ifndef __INET_AXIALLYSYMMETRICANTENNA_H
+#endif
 

@@ -41,5 +41,5 @@ class INET_API PacketClassifier : public PacketClassifierBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETCLASSIFIER_H
+#endif
 

@@ -36,4 +36,5 @@ class INET_API RtsProcedure : public IRtsProcedure
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RTSPROCEDURE_H
+#endif
+

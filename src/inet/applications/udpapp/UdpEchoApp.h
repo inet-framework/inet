@@ -52,5 +52,5 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPECHOAPP_H
+#endif
 

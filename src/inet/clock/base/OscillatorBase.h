@@ -37,5 +37,5 @@ class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public
 
 } // namespace inet
 
-#endif // ifndef __INET_OSCILLATORBASE_H
+#endif
 

@@ -33,5 +33,5 @@ class INET_API SubpacketLengthHeaderBasedDeaggregator : public DeaggregatorBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SUBPACKETLENGTHHEADERBASEDDEAGGREGATOR_H
+#endif
 

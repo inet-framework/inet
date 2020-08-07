@@ -218,5 +218,5 @@ inline bool operator!=(Neighbor::DdPacketId leftID, Neighbor::DdPacketId rightID
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2NEIGHBOR_H
+#endif
 

@@ -65,5 +65,5 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MASSMOBILITY_H
+#endif
 

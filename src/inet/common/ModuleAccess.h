@@ -196,5 +196,5 @@ T *getConnectedModule(cGate *gate, int direction = 0)
 
 } // namespace inet
 
-#endif // ifndef __INET_MODULEACCESS_H
+#endif
 

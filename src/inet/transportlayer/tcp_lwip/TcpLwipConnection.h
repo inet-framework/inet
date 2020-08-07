@@ -123,5 +123,5 @@ class INET_API TcpLwipConnection : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPLWIPCONNECTION_H
+#endif
 

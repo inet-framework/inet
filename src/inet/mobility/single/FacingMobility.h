@@ -46,5 +46,5 @@ class INET_API FacingMobility : public MobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FACINGMOBILITY_H
+#endif
 

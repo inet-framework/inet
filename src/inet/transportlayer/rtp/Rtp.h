@@ -205,5 +205,5 @@ class INET_API Rtp : public cSimpleModule, public LifecycleUnsupported
 } // namespace rtp
 } // namespace inet
 
-#endif // ifndef __INET_RTP_H
+#endif
 

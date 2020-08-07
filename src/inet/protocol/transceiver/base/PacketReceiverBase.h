@@ -66,5 +66,5 @@ class INET_API PacketReceiverBase : public OperationalMixin<PacketProcessorBase>
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETRECEIVERBASE_H
+#endif
 

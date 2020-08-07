@@ -31,5 +31,5 @@ class INET_API EthernetProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_ETHERNETPROTOCOLPRINTER_H
+#endif
 

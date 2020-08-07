@@ -42,5 +42,5 @@ class INET_API EthernetFragmentPreambleChecker : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETFRAGMENTPREAMBLECHECKER_H
+#endif
 

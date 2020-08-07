@@ -97,5 +97,5 @@ class INET_API IDimensionalSignal
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IRADIOSIGNAL_H
+#endif
 

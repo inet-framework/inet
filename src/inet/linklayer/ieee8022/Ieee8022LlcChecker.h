@@ -40,5 +40,5 @@ class INET_API Ieee8022LlcChecker : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8022LLCCHECKER_H
+#endif
 

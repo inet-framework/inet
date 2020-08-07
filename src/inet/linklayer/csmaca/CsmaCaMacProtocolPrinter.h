@@ -31,5 +31,5 @@ class INET_API CsmaCaMacProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_CSMACAMACPROTOCOLPRINTER_H
+#endif
 

@@ -43,5 +43,5 @@ class INET_API EchoProtocol : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_ECHOPROTOCOL_H
+#endif
 

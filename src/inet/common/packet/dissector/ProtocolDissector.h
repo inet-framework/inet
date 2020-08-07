@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PROTOCOLDISSECTOR_H_
-#define __INET_PROTOCOLDISSECTOR_H_
+#ifndef __INET_PROTOCOLDISSECTOR_H
+#define __INET_PROTOCOLDISSECTOR_H
 
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
@@ -80,5 +80,5 @@ class INET_API DefaultProtocolDissector : public ProtocolDissector
 
 } // namespace
 
-#endif // #ifndef __INET_PROTOCOLDISSECTOR_H_
+#endif
 

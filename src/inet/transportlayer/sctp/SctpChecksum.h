@@ -38,4 +38,5 @@ class INET_API SctpChecksum
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPCHECKSUM_H
+#endif
+

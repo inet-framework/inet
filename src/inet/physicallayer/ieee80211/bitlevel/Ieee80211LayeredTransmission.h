@@ -37,5 +37,5 @@ class INET_API Ieee80211LayeredTransmission : public LayeredTransmission, public
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211LAYEREDTRANSMISSION_H
+#endif
 

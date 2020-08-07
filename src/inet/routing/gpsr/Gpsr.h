@@ -170,5 +170,5 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
 
 } // namespace inet
 
-#endif // ifndef __INET_GPSR_H
+#endif
 

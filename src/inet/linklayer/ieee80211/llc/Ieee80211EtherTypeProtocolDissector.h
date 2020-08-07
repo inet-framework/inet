@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211ETHERTYPEPROTOCOLDISSECTOR_H_
-#define __INET_IEEE80211ETHERTYPEPROTOCOLDISSECTOR_H_
+#ifndef __INET_IEEE80211ETHERTYPEPROTOCOLDISSECTOR_H
+#define __INET_IEEE80211ETHERTYPEPROTOCOLDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -33,4 +33,5 @@ class INET_API Ieee80211EtherTypeProtocolDissector : public ProtocolDissector
 } // namespace ieee80211
 } // namespace inet
 
-#endif // __INET_IEEE80211ETHERTYPEPROTOCOLDISSECTOR_H_
+#endif
+

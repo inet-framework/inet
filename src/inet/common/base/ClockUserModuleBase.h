@@ -28,5 +28,5 @@ class INET_API ClockUserModuleBase : public ClockUserModuleMixin<cSimpleModule>
 
 } // namespace inet
 
-#endif // ifndef __INET_CLOCKUSERMODULEBASE_H
+#endif
 

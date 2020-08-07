@@ -480,4 +480,5 @@ class INET_API Ieee80211HtCompliantModes
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211HTMODE_H
+#endif
+

@@ -206,5 +206,5 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPBASEALG_H
+#endif
 

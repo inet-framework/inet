@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCTPSERIALIZER_H
-#define __INET_SCTPSERIALIZER_H
+#ifndef __INET_SCTPHEADERSERIALIZER_H
+#define __INET_SCTPHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
@@ -67,5 +67,5 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPSERIALIZER_H
+#endif
 

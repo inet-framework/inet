@@ -159,5 +159,5 @@ class INET_API MediumLimitCache : public cModule, public IMediumLimitCache
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_MEDIUMLIMITCACHE_H
+#endif
 

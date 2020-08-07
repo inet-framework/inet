@@ -61,5 +61,5 @@ class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PATHCANVASVISUALIZERBASE_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALTRANSMISSION_H
-#define __INET_IDEALTRANSMISSION_H
+#ifndef __INET_UNITDISKTRANSMISSION_H
+#define __INET_UNITDISKTRANSMISSION_H
 
 #include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
 
@@ -49,5 +49,5 @@ class INET_API UnitDiskTransmission : public TransmissionBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALTRANSMISSION_H
+#endif
 

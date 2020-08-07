@@ -42,5 +42,5 @@ class INET_API Ieee80211LlcEpd : public cSimpleModule, public IIeee80211Llc
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211EPDLLC_H
+#endif
 

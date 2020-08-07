@@ -32,5 +32,5 @@ class INET_API SubpacketLengthHeaderBasedAggregator : public AggregatorBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SUBPACKETLENGTHHEADERBASEDAGGREGATOR_H
+#endif
 

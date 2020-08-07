@@ -41,5 +41,5 @@ class INET_API ISnir : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_ISNIR_H
+#endif
 

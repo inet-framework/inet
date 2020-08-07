@@ -41,5 +41,5 @@ class INET_API Interference : public virtual IInterference
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_INTERFERENCE_H
+#endif
 

@@ -98,5 +98,5 @@ class INET_API DumbTcp : public TcpAlgorithm
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_DUMBTCP_H
+#endif
 

@@ -47,5 +47,5 @@ class INET_API PacketEmitter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETEMITTER_H
+#endif
 

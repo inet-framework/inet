@@ -38,4 +38,5 @@ class INET_API IOriginatorMacDataService
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IORIGINATORMACDATASERVICE_H
+#endif
+

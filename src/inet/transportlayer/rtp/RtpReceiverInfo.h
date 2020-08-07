@@ -211,5 +211,5 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
 
 } // namespace inet
 
-#endif // ifndef __INET_RTPRECEIVERINFO_H
+#endif
 

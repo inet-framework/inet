@@ -57,5 +57,5 @@ class INET_API IReceptionResult : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IRECEPTIONRESULT_H
+#endif
 

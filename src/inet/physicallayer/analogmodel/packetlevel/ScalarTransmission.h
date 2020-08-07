@@ -42,5 +42,5 @@ class INET_API ScalarTransmission : public FlatTransmissionBase, public virtual 
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARTRANSMISSION_H
+#endif
 

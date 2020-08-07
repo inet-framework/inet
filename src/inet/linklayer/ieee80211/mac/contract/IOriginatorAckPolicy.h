@@ -36,4 +36,5 @@ class INET_API IOriginatorAckPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IORIGINATORACKPOLICY_H
+#endif
+

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SEQUENCECHUNK_H_
-#define __INET_SEQUENCECHUNK_H_
+#ifndef __INET_SEQUENCECHUNK_H
+#define __INET_SEQUENCECHUNK_H
 
 #include <deque>
 
@@ -128,5 +128,5 @@ class INET_API SequenceChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_SEQUENCECHUNK_H_
+#endif
 

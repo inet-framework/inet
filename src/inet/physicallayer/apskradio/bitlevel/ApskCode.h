@@ -47,5 +47,5 @@ class INET_API ApskCode : public ICode
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif /* __INET_APSKCODE_H */
+#endif
 

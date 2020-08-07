@@ -49,5 +49,5 @@ class INET_API Ieee80211BerTableErrorModel : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211BERTABLEERRORMODEL_H
+#endif
 

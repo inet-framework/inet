@@ -25,5 +25,5 @@ INET_API void insertPacketEvent(const cModule *module, Packet *packet, int kind,
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETEVENTTAG_H
+#endif
 

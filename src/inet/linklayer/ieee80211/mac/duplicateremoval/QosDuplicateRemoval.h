@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_QOSDUPLICATEDETECTOR_H
-#define __INET_QOSDUPLICATEDETECTOR_H
+#ifndef __INET_QOSDUPLICATEREMOVAL_H
+#define __INET_QOSDUPLICATEREMOVAL_H
 
 #include <map>
 

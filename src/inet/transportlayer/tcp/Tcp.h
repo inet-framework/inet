@@ -216,5 +216,5 @@ class INET_API Tcp : public TransportProtocolBase
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCP_H
+#endif
 

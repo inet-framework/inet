@@ -85,4 +85,5 @@ class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_QOSACKHANDLER_H
+#endif
+

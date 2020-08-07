@@ -39,5 +39,5 @@ class INET_API DqpskModulation : public DpskModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DQPSKMODULATION_H
+#endif
 

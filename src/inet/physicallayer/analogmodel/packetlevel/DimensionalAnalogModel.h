@@ -36,5 +36,5 @@ class INET_API DimensionalAnalogModel : public DimensionalAnalogModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALANALOGMODEL_H
+#endif
 

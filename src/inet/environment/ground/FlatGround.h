@@ -41,5 +41,5 @@ class INET_API FlatGround : public IGround, public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATGROUND_H
+#endif
 

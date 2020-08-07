@@ -45,5 +45,5 @@ class INET_API ModuleIdAddressType : public IL3AddressType
 
 } // namespace inet
 
-#endif // ifndef __INET_MODULEIDADDRESSTYPE_H
+#endif
 

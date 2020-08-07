@@ -37,5 +37,5 @@ class INET_API LinkStateRequestHandler : public IMessageHandler
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKSTATEREQUESTHANDLER_H
+#endif
 

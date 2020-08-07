@@ -107,5 +107,5 @@ class INET_API RealTimeScheduler : public cScheduler
 
 } // namespace inet
 
-#endif // ifndef __INET_REALTIMESCHEDULER_H
+#endif
 

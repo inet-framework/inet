@@ -73,5 +73,5 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public virtual IA
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_MARKOVCLASSIFIERBASE_H
+#endif
 

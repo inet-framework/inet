@@ -48,4 +48,5 @@ class INET_API IGround
 
 } // namespace inet
 
-#endif // ifndef __INET_IGROUND_H
+#endif
+

@@ -240,5 +240,5 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPROUTINGTABLE_H
+#endif
 

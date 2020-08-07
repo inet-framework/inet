@@ -64,4 +64,5 @@ class INET_API BitVector
 
 } // namespace inet
 
-#endif // ifndef __INET_BITVECTOR_H
+#endif
+

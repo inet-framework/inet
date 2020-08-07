@@ -38,5 +38,5 @@ class INET_API DestreamingReceiver : public StreamingReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DESTREAMINGRECEIVER_H
+#endif
 

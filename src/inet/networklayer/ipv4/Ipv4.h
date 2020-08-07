@@ -315,5 +315,5 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4_H
+#endif
 

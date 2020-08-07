@@ -75,5 +75,5 @@ void insertHeader(Packet *packet, const Ptr<const T>& chunk, HeaderPosition head
 
 } // namespace inet
 
-#endif // ifndef __INET_HEADERPOSITION_H
+#endif
 

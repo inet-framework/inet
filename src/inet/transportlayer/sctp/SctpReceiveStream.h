@@ -60,5 +60,5 @@ class INET_API SctpReceiveStream : public cObject
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPRECEIVESTREAM_H
+#endif
 

@@ -240,5 +240,5 @@ class INET_API Rtcp : public cSimpleModule, public LifecycleUnsupported
 } // namespace rtp
 } // namespace inet
 
-#endif // ifndef __INET_RTCP_H
+#endif
 

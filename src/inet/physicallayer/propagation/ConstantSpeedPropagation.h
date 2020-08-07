@@ -46,5 +46,5 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CONSTANTSPEEDPROPAGATION_H
+#endif
 

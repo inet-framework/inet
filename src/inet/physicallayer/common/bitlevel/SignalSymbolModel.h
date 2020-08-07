@@ -72,5 +72,5 @@ class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual I
 } // namespace physicallayer
 } // namespace inet
 
-#endif /* ifndef __INET_SIGNALSYMBOLMODEL_H */
+#endif
 

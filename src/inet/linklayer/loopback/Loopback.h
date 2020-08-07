@@ -53,5 +53,5 @@ class INET_API Loopback : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LOOPBACK_H
+#endif
 

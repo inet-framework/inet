@@ -63,5 +63,5 @@ class INET_API TcpBasicClientApp : public TcpAppBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPBASICCLIENTAPP_H
+#endif
 

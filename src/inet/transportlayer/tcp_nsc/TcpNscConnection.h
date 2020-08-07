@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_TCP_NSC_CONNECTION_H
-#define __INET_TCP_NSC_CONNECTION_H
+#ifndef __INET_TCPNSCCONNECTION_H
+#define __INET_TCPNSCCONNECTION_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
@@ -117,5 +117,5 @@ class INET_API TcpNscConnection
 
 } // namespace inet
 
-#endif // ifndef __INET_TCP_NSC_CONNECTION_H
+#endif
 

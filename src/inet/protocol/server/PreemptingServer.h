@@ -52,5 +52,5 @@ class INET_API PreemptingServer : public PacketServerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PREEMPTINGSERVER_H
+#endif
 

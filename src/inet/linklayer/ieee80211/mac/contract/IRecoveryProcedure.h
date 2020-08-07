@@ -47,4 +47,5 @@ class INET_API IRecoveryProcedure
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRECOVERYPROCEDURE_H
+#endif
+

@@ -134,5 +134,5 @@ clocktime_t ClockUserModuleMixin<T>::getArrivalClockTime(ClockEvent *msg) const 
 
 } // namespace inet
 
-#endif // ifndef __INET_CLOCKUSERMODULEMIXINIMPL_H
+#endif
 

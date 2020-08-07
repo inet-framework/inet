@@ -40,5 +40,5 @@ class INET_API FlatRadioBase : public NarrowbandRadioBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATRADIOBASE_H
+#endif
 

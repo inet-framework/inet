@@ -101,5 +101,5 @@ class INET_API DielectricObstacleLoss : public TracingObstacleLossBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TRACINGOBSTACLELOSS_H
+#endif
 

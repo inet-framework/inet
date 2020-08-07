@@ -104,5 +104,5 @@ class INET_API DsdvIpv4Route : public Ipv4Route
 
 } // namespace inet
 
-#endif // ifndef __INET_DSDV_H
+#endif
 

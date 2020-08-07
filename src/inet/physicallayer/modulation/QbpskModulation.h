@@ -49,5 +49,5 @@ class INET_API QbpskModulation : public MqamModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_QBPSKMODULATION_H
+#endif
 

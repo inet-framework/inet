@@ -24,5 +24,5 @@ namespace inet {
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPCONTROLINFO_H
+#endif
 

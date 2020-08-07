@@ -48,4 +48,5 @@ class INET_API IRateSelection
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_IRATESELECTION_H
+#endif
+

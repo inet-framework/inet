@@ -32,5 +32,5 @@ class INET_API IInterfaceRegistrationListener
 
 } // namespace inet
 
-#endif // ifndef __INET_IINTERFACEREGISTRATIONLISTENER_H
+#endif
 

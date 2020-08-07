@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IGMPDISSECTOR_H
-#define __INET_IGMPDISSECTOR_H
+#ifndef __INET_IGMPPROTOCOLDISSECTOR_H
+#define __INET_IGMPPROTOCOLDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -31,5 +31,5 @@ class INET_API IgmpProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_IGMPDISSECTOR_H
+#endif
 

@@ -58,4 +58,5 @@ class INET_API GridObjectCache : public IObjectCache, public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_GRIDOBJECTCACHE_H
+#endif
+

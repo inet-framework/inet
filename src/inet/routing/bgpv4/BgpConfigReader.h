@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BGPCONFIGREADER
-#define __INET_BGPCONFIGREADER
+#ifndef __INET_BGPCONFIGREADER_H
+#define __INET_BGPCONFIGREADER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -60,5 +60,5 @@ private:
 } // namespace bgp
 } // namespace inet
 
-#endif // ifndef __INET_BGPCONFIGREADER
+#endif
 

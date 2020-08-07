@@ -64,5 +64,5 @@ class INET_API LinkBreakOsgVisualizer : public LinkBreakVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKBREAKOSGVISUALIZER_H
+#endif
 

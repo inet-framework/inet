@@ -131,5 +131,5 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
 
 } // namespace inet
 
-#endif // ifndef __INET_VOIPSTREAMSENDER_H
+#endif
 

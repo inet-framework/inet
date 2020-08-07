@@ -100,4 +100,5 @@ class INET_API BvhTree
 
 } /* namespace inet */
 
-#endif // ifndef __INET_BVHTREE_H
+#endif
+

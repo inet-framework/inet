@@ -111,5 +111,5 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTINGTABLEVISUALIZERBASE_H
+#endif
 

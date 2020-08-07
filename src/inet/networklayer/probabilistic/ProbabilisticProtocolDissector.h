@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PROBABILISTICDISSECTOR_H
-#define __INET_PROBABILISTICDISSECTOR_H
+#ifndef __INET_PROBABILISTICPROTOCOLDISSECTOR_H
+#define __INET_PROBABILISTICPROTOCOLDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -31,5 +31,5 @@ class INET_API ProbabilisticProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_PROBABILISTICDISSECTOR_H
+#endif
 

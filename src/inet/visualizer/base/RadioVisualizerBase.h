@@ -100,5 +100,5 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_RADIOVISUALIZERBASE_H
+#endif
 

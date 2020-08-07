@@ -63,5 +63,5 @@ class INET_API PacketFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETFILTER_H
+#endif
 

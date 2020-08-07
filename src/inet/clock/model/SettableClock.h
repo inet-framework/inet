@@ -41,5 +41,5 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 
 } // namespace inet
 
-#endif // ifndef __INET_SETTABLECLOCK_H
+#endif
 

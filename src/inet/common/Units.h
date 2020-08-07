@@ -1488,5 +1488,5 @@ Value tan(const value<Value, Unit>& angle)
 
 } // namespace inet
 
-#endif // ifndef __INET_UNITS_H
+#endif
 

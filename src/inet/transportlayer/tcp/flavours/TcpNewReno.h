@@ -63,5 +63,5 @@ class INET_API TcpNewReno : public TcpTahoeRenoFamily
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPNEWRENO_H
+#endif
 

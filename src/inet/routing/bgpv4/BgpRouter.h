@@ -189,5 +189,5 @@ private:
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPROUTER_H
+#endif
 

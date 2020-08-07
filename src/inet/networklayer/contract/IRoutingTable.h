@@ -186,5 +186,5 @@ class INET_API IRoutingTable
 
 } // namespace inet
 
-#endif // ifndef __INET_IROUTINGTABLE_H
+#endif
 

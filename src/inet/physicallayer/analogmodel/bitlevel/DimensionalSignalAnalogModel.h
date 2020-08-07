@@ -57,5 +57,5 @@ class INET_API DimensionalReceptionSignalAnalogModel : public DimensionalSignalA
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALSIGNALANALOGMODEL_H
+#endif
 

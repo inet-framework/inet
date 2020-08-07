@@ -44,5 +44,5 @@ class INET_API IPacketComparatorFunction : public cQueue::Comparator
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETCOMPARATORFUNCTION_H
+#endif
 

@@ -47,5 +47,5 @@ class INET_API Ieee80211UnitDiskTransmitter : public Ieee80211TransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211UNITDISKTRANSMITTER_H
+#endif
 

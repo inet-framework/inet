@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RANDOMWPMOBILITY_H
-#define __INET_RANDOMWPMOBILITY_H
+#ifndef __INET_RANDOMWAYPOINTMOBILITY_H
+#define __INET_RANDOMWAYPOINTMOBILITY_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
@@ -58,5 +58,5 @@ class INET_API RandomWaypointMobility : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RANDOMWPMOBILITY_H
+#endif
 

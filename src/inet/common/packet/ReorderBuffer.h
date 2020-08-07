@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_REORDERBUFFER_H_
-#define __INET_REORDERBUFFER_H_
+#ifndef __INET_REORDERBUFFER_H
+#define __INET_REORDERBUFFER_H
 
 #include "inet/common/packet/ChunkBuffer.h"
 
@@ -65,5 +65,5 @@ class INET_API ReorderBuffer : public ChunkBuffer
 
 } // namespace
 
-#endif // #ifndef __INET_REORDERBUFFER_H_
+#endif
 

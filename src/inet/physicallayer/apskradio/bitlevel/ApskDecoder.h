@@ -50,5 +50,5 @@ class INET_API ApskDecoder : public cSimpleModule, public IDecoder
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKDECODER_H
+#endif
 

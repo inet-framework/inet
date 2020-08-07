@@ -45,5 +45,5 @@ class INET_API PacketGate : public PacketGateBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETGATE_H
+#endif
 

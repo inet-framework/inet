@@ -108,5 +108,5 @@ class INET_API SctpQueue : public cObject
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPQUEUE_H
+#endif
 

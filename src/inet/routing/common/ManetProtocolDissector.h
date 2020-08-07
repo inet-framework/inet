@@ -31,5 +31,5 @@ class INET_API ManetProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_MANETPROTOCOLDISSECTOR_H
+#endif
 

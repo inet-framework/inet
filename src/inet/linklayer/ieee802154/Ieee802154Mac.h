@@ -326,5 +326,5 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154MAC_H
+#endif
 

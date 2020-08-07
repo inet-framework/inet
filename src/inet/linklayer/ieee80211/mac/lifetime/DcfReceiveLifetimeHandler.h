@@ -31,4 +31,5 @@ class INET_API DcfReceiveLifetimeHandler
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef DCFRECEIVELIFETIMEHANDLER_H
+#endif
+

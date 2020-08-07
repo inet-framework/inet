@@ -89,5 +89,5 @@ class INET_API Ipv6Socket : public INetworkSocket
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6SOCKET_H
+#endif
 

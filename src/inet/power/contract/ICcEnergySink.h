@@ -50,5 +50,5 @@ class INET_API ICcEnergySink : public virtual IEnergySink
 
 } // namespace inet
 
-#endif // ifndef __INET_ICCENERGYSINK_H
+#endif
 

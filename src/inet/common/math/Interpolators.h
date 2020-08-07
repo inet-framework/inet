@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_INTERPOLATORS_H_
-#define __INET_MATH_INTERPOLATORS_H_
+#ifndef __INET_INTERPOLATORS_H
+#define __INET_INTERPOLATORS_H
 
 #include "inet/common/math/IInterpolator.h"
 #include "inet/common/math/Point.h"
@@ -258,5 +258,5 @@ const IInterpolator<X, Y> *createInterpolator(const char *text) {
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_INTERPOLATORS_H_
+#endif
 

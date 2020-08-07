@@ -37,5 +37,5 @@ class INET_API LabelClassifier : public PacketClassifierBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_LABELCLASSIFIER_H
+#endif
 

@@ -35,5 +35,5 @@ INET_API bool parseBool(const char *text);
 
 } // namespace inet
 
-#endif // ifndef __INET_XMLUTILS_H
+#endif
 

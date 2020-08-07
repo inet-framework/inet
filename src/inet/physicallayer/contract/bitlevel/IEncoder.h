@@ -35,5 +35,5 @@ class INET_API IEncoder : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IENCODER_H
+#endif
 

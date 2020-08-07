@@ -104,5 +104,5 @@ class INET_API Ipv4FragBuf
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4FRAGBUF_H
+#endif
 

@@ -120,5 +120,5 @@ std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info);
 
 } // namespace inet
 
-#endif // ifndef __INET_TED_H
+#endif
 

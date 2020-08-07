@@ -46,5 +46,5 @@ class INET_API Ieee80211OfdmDemodulatorModule : public IDemodulator, public cSim
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMDEMODULATORMODULE_H
+#endif
 

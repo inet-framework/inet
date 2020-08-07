@@ -39,5 +39,5 @@ class INET_API PulseShaper : public IPulseShaper
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_PULSESHAPER_H
+#endif
 

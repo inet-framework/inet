@@ -36,5 +36,5 @@ class INET_API NetworkRouteOsgVisualizer : public PathOsgVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKROUTEOSGVISUALIZER_H
+#endif
 

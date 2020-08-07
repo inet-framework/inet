@@ -44,5 +44,5 @@ class INET_API ScalarNoise : public NarrowbandNoiseBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARNOISE_H
+#endif
 

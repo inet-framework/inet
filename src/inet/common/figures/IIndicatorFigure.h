@@ -34,5 +34,5 @@ class INET_API IIndicatorFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_IMETERFIGURE_H
+#endif
 

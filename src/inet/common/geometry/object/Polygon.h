@@ -52,5 +52,5 @@ class INET_API Polygon : public GeometricObjectBase
 
 } // namespace inet
 
-#endif // ifndef __INET_POLYGON_H
+#endif
 

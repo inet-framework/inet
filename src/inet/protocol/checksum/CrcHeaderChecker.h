@@ -40,5 +40,5 @@ class INET_API CrcHeaderChecker : public CrcCheckerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CRCCHECKER_H
+#endif
 

@@ -100,5 +100,5 @@ class INET_API RtpPayloadReceiver : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_RTPPAYLOADRECEIVER_H
+#endif
 

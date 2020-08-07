@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef INET_ORIGINATORBLOCKACKAGREEMENT_H
-#define INET_ORIGINATORBLOCKACKAGREEMENT_H
+#ifndef __INET_ORIGINATORBLOCKACKAGREEMENT_H
+#define __INET_ORIGINATORBLOCKACKAGREEMENT_H
 
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 
@@ -81,4 +81,5 @@ class OriginatorBlockAckAgreement : public cObject
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_ORIGINATORBLOCKACKAGREEMENT_H
+#endif
+

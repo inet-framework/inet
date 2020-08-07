@@ -44,5 +44,5 @@ class INET_API LabeledPolylineFigure : public cGroupFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_LABELEDPOLYLINEFIGURE_H
+#endif
 

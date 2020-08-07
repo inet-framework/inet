@@ -63,5 +63,5 @@ class INET_API IArrival : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IARRIVAL_H
+#endif
 

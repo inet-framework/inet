@@ -43,5 +43,5 @@ class INET_API Ieee8021qEncap : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021QENCAP_H
+#endif
 

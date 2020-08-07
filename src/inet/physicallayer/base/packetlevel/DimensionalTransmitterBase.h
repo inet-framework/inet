@@ -79,5 +79,5 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALTRANSMITTERBASE_H
+#endif
 

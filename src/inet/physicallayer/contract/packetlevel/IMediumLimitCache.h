@@ -124,5 +124,5 @@ class INET_API IMediumLimitCache : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IMEDIUMLIMITCACHE_H
+#endif
 

@@ -35,5 +35,5 @@ class INET_API IPacketSink : public virtual IPassivePacketSink, public virtual I
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETSINK_H
+#endif
 

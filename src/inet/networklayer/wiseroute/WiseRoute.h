@@ -205,5 +205,5 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_WISEROUTE_H
+#endif
 

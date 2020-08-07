@@ -87,4 +87,5 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_QOSRATESELECTION_H
+#endif
+

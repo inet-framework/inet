@@ -116,5 +116,5 @@ class INET_API IPacketProcessor
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETPROCESSOR_H
+#endif
 

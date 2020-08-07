@@ -62,5 +62,5 @@ class INET_API IAntennaGain : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IANTENNAGAIN_H
+#endif
 

@@ -61,5 +61,5 @@ class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerB
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACETABLECANVASVISUALIZER_H
+#endif
 

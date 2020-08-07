@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_XMAC_H_
-#define __INET_XMAC_H_
+#ifndef __INET_XMAC_H
+#define __INET_XMAC_H
 
 #include <list>
 #include <sstream>
@@ -238,5 +238,5 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif /* XMAC_H_ */
+#endif
 

@@ -305,5 +305,5 @@ struct ip6_frag
 
 } // namespace inet
 
-#endif /* not _NETINET_IP6_H_ */
+#endif
 

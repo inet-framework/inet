@@ -31,5 +31,5 @@ class INET_API NodeBase : public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_NODEBASE_H
+#endif
 

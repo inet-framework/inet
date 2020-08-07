@@ -63,4 +63,5 @@ class INET_API IFrameSequenceHandler
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IFRAMESEQUENCEHANDLER_H
+#endif
+

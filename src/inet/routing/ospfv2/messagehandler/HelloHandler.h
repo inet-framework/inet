@@ -37,5 +37,5 @@ class INET_API HelloHandler : public IMessageHandler
 
 } // namespace inet
 
-#endif // ifndef __INET_HELLOHANDLER_H
+#endif
 

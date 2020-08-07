@@ -39,5 +39,5 @@ class INET_API FragmentNumberHeaderBasedDefragmenter : public DefragmenterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FRAGMENTNUMBERHEADERBASEDDEFRAGMENTER_H
+#endif
 

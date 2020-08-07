@@ -64,5 +64,5 @@ class INET_API IProtocolRegistrationListener
 
 } // namespace inet
 
-#endif // ifndef __INET_IPROTOCOLREGISTRATIONLISTENER_H
+#endif
 

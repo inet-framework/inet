@@ -54,5 +54,5 @@ class INET_API L2NodeConfigurator : public cSimpleModule, public ILifecycle, pub
 
 } // namespace inet
 
-#endif // ifndef __INET_L2NODECONFIGURATOR_H
+#endif
 

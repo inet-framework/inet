@@ -30,5 +30,5 @@ class INET_API IFragmenterPolicy
 
 } // namespace inet
 
-#endif // ifndef __INET_IFRAGMENTERPOLICY_H
+#endif
 

@@ -33,5 +33,5 @@ class INET_API IAnalogDigitalConverter : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IANALOGDIGITALCONVERTER_H
+#endif
 

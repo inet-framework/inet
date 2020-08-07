@@ -43,5 +43,5 @@ class INET_API DimensionalReception : public FlatReceptionBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALRECEPTION_H
+#endif
 

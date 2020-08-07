@@ -70,5 +70,5 @@ class INET_API IPacketCollection
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETCOLLECTION_H
+#endif
 

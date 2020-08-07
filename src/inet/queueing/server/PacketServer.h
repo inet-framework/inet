@@ -49,5 +49,5 @@ class INET_API PacketServer : public PacketServerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSERVER_H
+#endif
 

@@ -37,5 +37,5 @@ class INET_API FragmentNumberHeaderInserter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FRAGMENTNUMBERHEADERINSERTER_H
+#endif
 

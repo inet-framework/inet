@@ -39,5 +39,5 @@ class INET_API SignalSource : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_SERIESSIGNALSOURCE_H
+#endif
 

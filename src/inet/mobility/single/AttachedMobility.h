@@ -51,5 +51,5 @@ class INET_API AttachedMobility : public MobilityBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_ATTACHEDMOBILITY_H
+#endif
 

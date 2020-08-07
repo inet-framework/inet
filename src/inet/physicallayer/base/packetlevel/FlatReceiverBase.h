@@ -64,5 +64,5 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATRECEIVERBASE_H
+#endif
 

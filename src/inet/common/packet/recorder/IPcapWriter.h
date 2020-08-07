@@ -224,5 +224,5 @@ class INET_API IPcapWriter
 
 } // namespace inet
 
-#endif // ifndef __INET_IPCAPWRITER_H
+#endif
 

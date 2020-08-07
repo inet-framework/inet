@@ -62,5 +62,5 @@ class INET_API ExtLowerUdp : public cSimpleModule, public ILifecycle, public Rea
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTLOWERUDP_H
+#endif
 

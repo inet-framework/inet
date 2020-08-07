@@ -55,5 +55,5 @@ class INET_API MessageChecker : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_MESSAGECHECKER_H
+#endif
 

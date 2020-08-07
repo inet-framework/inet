@@ -55,5 +55,5 @@ class INET_API SuiPathLoss : public PathLossBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SUIPATHLOSS_H
+#endif
 

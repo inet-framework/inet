@@ -140,5 +140,5 @@ class INET_API TcpReceiveQueue : public cObject
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPRECEIVEQUEUE_H
+#endif
 

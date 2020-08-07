@@ -57,5 +57,5 @@ class INET_API ExtEthernetTapDevice : public cSimpleModule, public RealTimeSched
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTETHERNETTAPDEVICE_H
+#endif
 

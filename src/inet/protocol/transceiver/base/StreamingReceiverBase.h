@@ -36,5 +36,5 @@ class INET_API StreamingReceiverBase : public PacketReceiverBase, public cListen
 
 } // namespace inet
 
-#endif // ifndef __INET_STREAMINGRECEIVERBASE_H
+#endif
 

@@ -45,5 +45,5 @@ class INET_API DimensionalTransmission : public FlatTransmissionBase, public IDi
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALTRANSMISSION_H
+#endif
 

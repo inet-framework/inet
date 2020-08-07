@@ -230,5 +230,5 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ReceiveQueueB
 
 } // namespace inet
 
-#endif // ifndef __INET_LDP_H
+#endif
 

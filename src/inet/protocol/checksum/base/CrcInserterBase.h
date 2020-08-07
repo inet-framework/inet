@@ -42,5 +42,5 @@ class INET_API CrcInserterBase : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CRCINSERTERBASE_H
+#endif
 

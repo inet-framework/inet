@@ -49,5 +49,5 @@ class INET_API UdpSocketIo : public ApplicationBase, public UdpSocket::ICallback
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPSOCKETIO_H
+#endif
 

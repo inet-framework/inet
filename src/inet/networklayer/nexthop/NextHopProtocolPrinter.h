@@ -31,5 +31,5 @@ class INET_API NextHopProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_NEXTHOPPROTOCOLPRINTER_H
+#endif
 

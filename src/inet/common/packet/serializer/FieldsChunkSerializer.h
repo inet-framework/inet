@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_FIELDSCHUNKSERIALIZER_H_
-#define __INET_FIELDSCHUNKSERIALIZER_H_
+#ifndef __INET_FIELDSCHUNKSERIALIZER_H
+#define __INET_FIELDSCHUNKSERIALIZER_H
 
 #include "inet/common/packet/serializer/ChunkSerializer.h"
 
@@ -43,5 +43,5 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
 
 } // namespace
 
-#endif // #ifndef __INET_FIELDSCHUNKSERIALIZER_H_
+#endif
 

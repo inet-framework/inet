@@ -49,5 +49,5 @@ class INET_API HttpServerDirect : public HttpServerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPSERVERDIRECT_H
+#endif
 

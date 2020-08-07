@@ -177,5 +177,5 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPROUTE_H
+#endif
 

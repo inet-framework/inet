@@ -66,5 +66,5 @@ protected:
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_DCTCP_H
+#endif
 

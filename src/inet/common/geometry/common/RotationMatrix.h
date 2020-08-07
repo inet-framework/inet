@@ -50,4 +50,5 @@ class INET_API RotationMatrix
 
 } // namespace inet
 
-#endif // ifndef __INET_ROTATIONMATRIX_H
+#endif
+

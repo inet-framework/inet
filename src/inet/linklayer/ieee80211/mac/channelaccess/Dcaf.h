@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_DCFCHANNELACCESS_H
-#define __INET_DCFCHANNELACCESS_H
+#ifndef __INET_DCAF_H
+#define __INET_DCAF_H
 
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
@@ -78,4 +78,5 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_DCFCHANNELACCESS_H
+#endif
+

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef INET_LINKLAYER_IEEE8021D_COMMON_IEEE8021DBPDUSERIALIZER_H_
-#define INET_LINKLAYER_IEEE8021D_COMMON_IEEE8021DBPDUSERIALIZER_H_
+#ifndef __INET_IEEE8021DBPDUSERIALIZER_H
+#define __INET_IEEE8021DBPDUSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
@@ -35,4 +35,5 @@ class INET_API Ieee8021dBpduSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif /* INET_LINKLAYER_IEEE8021D_COMMON_IEEE8021DBPDUSERIALIZER_H_ */
+#endif
+

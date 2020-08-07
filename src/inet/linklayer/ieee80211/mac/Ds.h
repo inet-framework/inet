@@ -53,3 +53,4 @@ class INET_API Ds : public cSimpleModule, public IDs
 } // namespace inet
 
 #endif
+

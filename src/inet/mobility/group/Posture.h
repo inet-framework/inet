@@ -158,5 +158,5 @@ class INET_API Posture
 
 } // namespace inet
 
-#endif // ifndef __INET_POSTURE_H
+#endif
 

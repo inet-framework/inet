@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_CHUNKSERIALIZER_H_
-#define __INET_CHUNKSERIALIZER_H_
+#ifndef __INET_CHUNKSERIALIZER_H
+#define __INET_CHUNKSERIALIZER_H
 
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
@@ -47,5 +47,5 @@ class INET_API ChunkSerializer : public cObject
 
 } // namespace
 
-#endif // #ifndef __INET_CHUNKSERIALIZER_H_
+#endif
 

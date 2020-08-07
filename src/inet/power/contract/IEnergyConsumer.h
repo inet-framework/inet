@@ -52,5 +52,5 @@ class INET_API IEnergyConsumer
 
 } // namespace inet
 
-#endif // ifndef __INET_IENERGYCONSUMER_H
+#endif
 

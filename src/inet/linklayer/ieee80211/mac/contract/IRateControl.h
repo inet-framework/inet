@@ -43,4 +43,5 @@ class INET_API IRateControl
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRATECONTROL_H
+#endif
+

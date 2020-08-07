@@ -40,5 +40,3 @@ class SctpUdpHook : public NetfilterBase::HookBase {
 
 #endif
 
-
-

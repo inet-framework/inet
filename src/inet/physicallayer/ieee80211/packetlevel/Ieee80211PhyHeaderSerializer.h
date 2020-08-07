@@ -132,4 +132,5 @@ class INET_API Ieee80211VhtPhyHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211PHYHEADERSERIALIZER_H
+#endif
+

@@ -42,5 +42,5 @@ class INET_API ScalarReception : public FlatReceptionBase, public virtual IScala
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARRECEPTION_H
+#endif
 

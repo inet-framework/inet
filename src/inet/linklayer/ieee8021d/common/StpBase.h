@@ -105,5 +105,5 @@ class INET_API StpBase : public OperationalBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_STPBASE_H
+#endif
 

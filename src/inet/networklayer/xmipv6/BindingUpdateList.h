@@ -283,5 +283,5 @@ class INET_API BindingUpdateList : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_BINDINGUPDATELIST_H
+#endif
 

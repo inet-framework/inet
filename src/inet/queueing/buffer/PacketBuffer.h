@@ -61,5 +61,5 @@ class INET_API PacketBuffer : public PacketBufferBase, public virtual IPacketBuf
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETBUFFER_H
+#endif
 

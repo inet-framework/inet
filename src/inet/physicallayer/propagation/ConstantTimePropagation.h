@@ -44,5 +44,5 @@ class INET_API ConstantTimePropagation : public PropagationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CONSTANTTIMEPROPAGATION_H
+#endif
 

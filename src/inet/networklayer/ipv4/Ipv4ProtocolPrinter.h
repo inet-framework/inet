@@ -31,5 +31,5 @@ class INET_API Ipv4ProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_IPV4PROTOCOLPRINTER_H
+#endif
 

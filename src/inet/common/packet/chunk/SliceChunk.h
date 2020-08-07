@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SLICECHUNK_H_
-#define __INET_SLICECHUNK_H_
+#ifndef __INET_SLICECHUNK_H
+#define __INET_SLICECHUNK_H
 
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -119,5 +119,5 @@ class INET_API SliceChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_SLICECHUNK_H_
+#endif
 

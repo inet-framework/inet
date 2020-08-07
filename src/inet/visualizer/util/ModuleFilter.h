@@ -43,5 +43,5 @@ class INET_API ModuleFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_MODULEFILTER_H
+#endif
 

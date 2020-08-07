@@ -37,5 +37,5 @@ class INET_API SendToL3Address : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SENDTOL3ADDRESS_H
+#endif
 

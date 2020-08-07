@@ -43,5 +43,5 @@ class INET_API ProtocolChecker : public PacketFilterBase, public IProtocolRegist
 
 } // namespace inet
 
-#endif // ifndef __INET_PROTOCOLCHECKER_H
+#endif
 

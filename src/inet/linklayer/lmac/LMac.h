@@ -198,5 +198,5 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_LMAC_H
+#endif
 

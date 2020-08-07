@@ -37,5 +37,5 @@ class INET_API Ieee8022LlcInserter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8022LLCINSERTER_H
+#endif
 

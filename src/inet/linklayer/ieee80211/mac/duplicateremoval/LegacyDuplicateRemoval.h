@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_LEGACYDUPLICATEDETECTOR_H
-#define __INET_LEGACYDUPLICATEDETECTOR_H
+#ifndef __INET_LEGACYDUPLICATEREMOVAL_H
+#define __INET_LEGACYDUPLICATEREMOVAL_H
 
 #include <map>
 

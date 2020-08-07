@@ -117,5 +117,5 @@ class INET_API ICommunicationCache : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_ICOMMUNICATIONCACHE_H
+#endif
 

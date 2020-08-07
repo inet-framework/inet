@@ -369,5 +369,5 @@ std::ostream& operator <<(std::ostream& o, NetworkInterface::State);
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKINTERFACE_H
+#endif
 

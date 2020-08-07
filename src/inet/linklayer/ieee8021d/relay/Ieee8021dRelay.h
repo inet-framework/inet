@@ -136,5 +136,5 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021DRELAY_H
+#endif
 

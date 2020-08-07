@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_ISEQUENCENUMBERASSIGMENT_H
-#define __INET_ISEQUENCENUMBERASSIGMENT_H
+#ifndef __INET_ISEQUENCENUMBERASSIGNMENT_H
+#define __INET_ISEQUENCENUMBERASSIGNMENT_H
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -34,4 +34,5 @@ class INET_API ISequenceNumberAssignment
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_ISEQUENCENUMBERASSIGMENT_H
+#endif
+

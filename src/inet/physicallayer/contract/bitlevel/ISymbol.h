@@ -32,5 +32,5 @@ class INET_API ISymbol
 
 } // namespace inet
 
-#endif // ifndef __INET_ISYMBOL_H
+#endif
 

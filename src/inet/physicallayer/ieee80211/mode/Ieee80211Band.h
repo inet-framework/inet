@@ -95,5 +95,5 @@ class INET_API Ieee80211CompliantBands
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211BAND_H
+#endif
 

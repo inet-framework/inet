@@ -128,5 +128,5 @@ class INET_API IReception : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IRECEPTION_H
+#endif
 

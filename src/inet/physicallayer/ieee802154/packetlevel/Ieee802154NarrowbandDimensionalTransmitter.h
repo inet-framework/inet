@@ -41,5 +41,5 @@ class INET_API Ieee802154NarrowbandDimensionalTransmitter : public FlatTransmitt
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMITTER_H
+#endif
 

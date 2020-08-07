@@ -120,5 +120,5 @@ class INET_API Ospfv2ConfigReader
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2CONFIGREADER_H
+#endif
 

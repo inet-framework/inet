@@ -47,5 +47,5 @@ class INET_API BarFigure : public cRectangleFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_BARFIGURE_H
+#endif
 

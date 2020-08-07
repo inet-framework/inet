@@ -31,5 +31,5 @@ class INET_API PppProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_PPPPROTOCOLPRINTER_H
+#endif
 

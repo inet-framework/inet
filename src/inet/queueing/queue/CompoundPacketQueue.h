@@ -64,5 +64,5 @@ class INET_API CompoundPacketQueue : public PacketQueueBase, public cListener
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_COMPOUNDPACKETQUEUE_H
+#endif
 

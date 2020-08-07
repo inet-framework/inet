@@ -80,5 +80,5 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETTRANSMITTERBASE_H
+#endif
 

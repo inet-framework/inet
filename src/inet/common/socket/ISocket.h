@@ -61,5 +61,5 @@ class INET_API ISocket
 
 } // namespace inet
 
-#endif // ifndef __INET_ISOCKET_H
+#endif
 

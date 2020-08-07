@@ -40,5 +40,5 @@ class INET_API EtherFrameClassifier : public queueing::PacketClassifierBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERFRAMECLASSIFIER_H
+#endif
 

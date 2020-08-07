@@ -46,4 +46,5 @@ class INET_API IQosRateSelection
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_IQOSRATESELECTION_H
+#endif
+

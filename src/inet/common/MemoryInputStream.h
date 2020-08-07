@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MEMORYINPUTSTREAM_H_
-#define __INET_MEMORYINPUTSTREAM_H_
+#ifndef __INET_MEMORYINPUTSTREAM_H
+#define __INET_MEMORYINPUTSTREAM_H
 
 #include "inet/common/Units.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -462,5 +462,5 @@ class INET_API MemoryInputStream {
 
 } // namespace inet
 
-#endif // #ifndef __INET_MEMORYINPUTSTREAM_H_
+#endif
 

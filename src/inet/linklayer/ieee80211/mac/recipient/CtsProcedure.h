@@ -43,4 +43,5 @@ class INET_API CtsProcedure : public ICtsProcedure
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_CTSPROCEDURE_H
+#endif
+

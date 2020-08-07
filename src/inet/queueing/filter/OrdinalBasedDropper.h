@@ -50,5 +50,5 @@ class INET_API OrdinalBasedDropper : public PacketFilterBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_ORDINALBASEDDROPPER_H
+#endif
 

@@ -38,5 +38,5 @@ class INET_API LayeredDimensionalAnalogModel : public DimensionalAnalogModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDDIMENSIONALANALOGMODEL_H
+#endif
 

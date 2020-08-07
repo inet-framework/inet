@@ -59,5 +59,5 @@ class INET_API ExtEthernetSocket : public cSimpleModule, public RealTimeSchedule
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTETHERNETSOCKET_H
+#endif
 

@@ -44,5 +44,5 @@ class INET_API Ieee80211Channel : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211CHANNEL_H
+#endif
 

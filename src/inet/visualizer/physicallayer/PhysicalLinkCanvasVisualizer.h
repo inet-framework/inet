@@ -37,5 +37,5 @@ class INET_API PhysicalLinkCanvasVisualizer : public LinkCanvasVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALLINKCANVASVISUALIZER_H
+#endif
 

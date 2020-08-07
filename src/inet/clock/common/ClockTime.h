@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_CLOCKTIME_H
-#define __INET_CLOCKTIME_H
+#ifndef __INET_COMMON_CLOCKTIME_H
+#define __INET_COMMON_CLOCKTIME_H
 
 #include "inet/common/INETDefs.h"
 
@@ -354,5 +354,5 @@ inline std::ostream& operator<<(std::ostream& os, const ClockTime& x)
 
 } // namespace inet
 
-#endif // ifndef __INET_CLOCKTIME_H
+#endif
 

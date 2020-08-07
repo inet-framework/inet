@@ -42,5 +42,5 @@ class INET_API Ieee80211OfdmSymbol : public ISymbol
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMSYMBOL_H
+#endif
 

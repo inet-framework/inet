@@ -68,5 +68,5 @@ class INET_API InterpolatingAntenna : public AntennaBase
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERPOLATINGANTENNA_H
+#endif
 

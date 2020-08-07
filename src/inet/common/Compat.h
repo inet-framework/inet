@@ -63,4 +63,5 @@ inline double fmax(double a, double b)
 
 } // namespace inet
 
-#endif // ifndef __INET_COMPAT_H
+#endif
+

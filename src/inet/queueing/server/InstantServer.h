@@ -37,5 +37,5 @@ class INET_API InstantServer : public PacketServerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_INSTANTSERVER_H
+#endif
 

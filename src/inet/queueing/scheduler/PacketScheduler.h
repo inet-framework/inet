@@ -41,5 +41,5 @@ class INET_API PacketScheduler : public PacketSchedulerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSCHEDULERBASE_H
+#endif
 

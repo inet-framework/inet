@@ -208,5 +208,5 @@ inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorB
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKCONFIGURATORBASE_H
+#endif
 

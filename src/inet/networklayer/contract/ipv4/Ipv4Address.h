@@ -354,5 +354,5 @@ inline void doParsimUnpacking(cCommBuffer *buf, Ipv4Address& addr)
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4ADDRESS_H
+#endif
 

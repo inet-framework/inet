@@ -28,5 +28,5 @@ namespace inet {
 
 } // namespace inet
 
-#endif // ifndef __INET_GPSRDEFS_H
+#endif
 

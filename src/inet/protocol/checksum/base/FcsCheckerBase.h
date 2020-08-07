@@ -37,5 +37,5 @@ class INET_API FcsCheckerBase : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FCSCHECKERBASE_H
+#endif
 

@@ -35,4 +35,5 @@ class INET_API IMpduAggregationPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // __INET_IMPDUAGGREGATIONPOLICY_H
+#endif
+

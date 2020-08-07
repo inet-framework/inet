@@ -85,5 +85,5 @@ class INET_API PacketStreamer : public PacketProcessorBase, public virtual IPack
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSTREAMER_H
+#endif
 

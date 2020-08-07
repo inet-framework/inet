@@ -38,5 +38,5 @@ class INET_API Ieee80211UnitDiskTransmission : public UnitDiskTransmission, publ
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211UNITDISKTRANSMISSION_H
+#endif
 

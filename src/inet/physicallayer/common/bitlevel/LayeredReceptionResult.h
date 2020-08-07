@@ -56,5 +56,5 @@ class INET_API LayeredReceptionResult : public ReceptionResult
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDRECEPTIONRESULT_H
+#endif
 

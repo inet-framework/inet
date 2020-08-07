@@ -61,5 +61,5 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTINGTABLEOSGVISUALIZER_H
+#endif
 

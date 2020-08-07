@@ -59,4 +59,5 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_ORIGINATORQOSACKPOLICY_H
+#endif
+

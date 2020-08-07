@@ -53,5 +53,5 @@ class INET_API ConvolutionalCode : public IForwardErrorCorrection
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_CONVOLUTIONALCODE_H
+#endif
 

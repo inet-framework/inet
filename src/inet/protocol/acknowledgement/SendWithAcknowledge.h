@@ -40,5 +40,5 @@ class INET_API SendWithAcknowledge : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SENDWITHACKNOWLEDGE_H
+#endif
 

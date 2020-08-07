@@ -84,5 +84,5 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IIEEE80211MODE_H
+#endif
 

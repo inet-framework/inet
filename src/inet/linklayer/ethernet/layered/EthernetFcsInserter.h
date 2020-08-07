@@ -33,5 +33,5 @@ class INET_API EthernetFcsInserter : public FcsInserterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETFCSINSERTER_H
+#endif
 

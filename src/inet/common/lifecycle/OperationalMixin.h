@@ -92,5 +92,5 @@ class INET_API OperationalMixin : public T, public ILifecycle
 
 } // namespace inet
 
-#endif // ifndef __INET_OPERATIONALMIXIN_H
+#endif
 

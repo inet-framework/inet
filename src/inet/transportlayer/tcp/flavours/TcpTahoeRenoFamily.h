@@ -57,5 +57,5 @@ class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPTAHOERENOFAMILY_H
+#endif
 

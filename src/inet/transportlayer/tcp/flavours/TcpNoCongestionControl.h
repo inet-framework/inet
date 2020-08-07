@@ -65,5 +65,5 @@ class INET_API TcpNoCongestionControl : public TcpBaseAlg
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPNOCONGESTIONCONTROL_H
+#endif
 

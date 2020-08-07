@@ -100,5 +100,5 @@ class INET_API IMobility
 
 } // namespace inet
 
-#endif // ifndef __INET_IMOBILITY_H
+#endif
 

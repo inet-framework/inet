@@ -62,5 +62,5 @@ class INET_API ICcEnergyStorage : public virtual ICcEnergySource, public virtual
 
 } // namespace inet
 
-#endif // ifndef __INET_ICCENERGYSTORAGE_H
+#endif
 

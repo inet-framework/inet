@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_LABELEDICON_H
-#define __INET_LABELEDICON_H
+#ifndef __INET_LABELEDICONFIGURE_H
+#define __INET_LABELEDICONFIGURE_H
 
 #include "inet/common/INETDefs.h"
 
@@ -46,5 +46,5 @@ class INET_API LabeledIconFigure : public cGroupFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_LABELEDICON_H
+#endif
 

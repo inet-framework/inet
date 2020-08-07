@@ -48,5 +48,5 @@ class INET_API EpEnergyStorageBase : public cSimpleModule, public EpEnergySource
 
 } // namespace inet
 
-#endif // ifndef __INET_EPENERGYSTORAGEBASE_H
+#endif
 

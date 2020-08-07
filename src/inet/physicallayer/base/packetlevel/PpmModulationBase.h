@@ -42,5 +42,5 @@ class INET_API PpmModulationBase : public IModulation
 
 } // namespace inet
 
-#endif // ifndef __INET_PPMMODULATIONBASE_H
+#endif
 

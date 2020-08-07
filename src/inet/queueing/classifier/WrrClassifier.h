@@ -46,5 +46,5 @@ class INET_API WrrClassifier : public PacketClassifierBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_WRRCLASSIFIER_H
+#endif
 

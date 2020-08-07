@@ -32,5 +32,5 @@ class INET_API PacketDeserializer : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDESERIALIZER_H
+#endif
 

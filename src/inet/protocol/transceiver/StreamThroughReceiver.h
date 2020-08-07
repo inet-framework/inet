@@ -39,5 +39,5 @@ class INET_API StreamThroughReceiver : public StreamingReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_STREAMTHROUGHRECEIVER_H
+#endif
 

@@ -65,5 +65,5 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MOBILITYCANVASVISUALIZER_H
+#endif
 

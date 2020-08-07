@@ -33,5 +33,5 @@ class INET_API Ieee80211EtherTypeProtocolPrinter : public ProtocolPrinter
 } // namespace ieee80211
 } // namespace inet
 
-#endif // __INET_IEEE80211ETHERTYPEPROTOCOLPRINTER_H
+#endif
 

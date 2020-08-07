@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_UDPVIDEOSTREAMCLI_H
-#define __INET_UDPVIDEOSTREAMCLI_H
+#ifndef __INET_UDPVIDEOSTREAMCLIENT_H
+#define __INET_UDPVIDEOSTREAMCLIENT_H
 
 #include "inet/common/INETDefs.h"
 
@@ -67,5 +67,5 @@ class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPVIDEOSTREAMCLI_H
+#endif
 

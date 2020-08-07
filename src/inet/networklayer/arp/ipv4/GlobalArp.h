@@ -89,5 +89,5 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_GLOBALARP_H
+#endif
 

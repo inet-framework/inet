@@ -92,5 +92,5 @@ std::ostream& operator<<(std::ostream& os, const LabelOpVector& label);
 
 } // namespace inet
 
-#endif // ifndef __INET_LIBTABLE_H
+#endif
 

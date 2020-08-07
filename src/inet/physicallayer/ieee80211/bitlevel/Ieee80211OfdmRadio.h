@@ -38,5 +38,5 @@ class INET_API Ieee80211OfdmRadio : public FlatRadioBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211OFDMRADIO_H
+#endif
 

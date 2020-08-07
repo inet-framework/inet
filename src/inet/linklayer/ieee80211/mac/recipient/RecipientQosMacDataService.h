@@ -64,4 +64,5 @@ class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, 
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_RECIPIENTQOSMACDATASERVICE_H
+#endif
+

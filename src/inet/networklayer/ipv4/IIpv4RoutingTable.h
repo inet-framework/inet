@@ -227,5 +227,5 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
 
 } // namespace inet
 
-#endif // ifndef __INET_IIPV4ROUTINGTABLE_H
+#endif
 

@@ -45,5 +45,5 @@ class INET_API OrdinalBasedDuplicator : public PacketDuplicatorBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_ORDINALBASEDDUPLICATOR_H
+#endif
 

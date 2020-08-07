@@ -53,4 +53,5 @@ class INET_API IReassembly
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_IREASSEMBLY_H
+#endif
+

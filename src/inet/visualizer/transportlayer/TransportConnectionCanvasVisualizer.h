@@ -61,5 +61,5 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
 
 } // namespace inet
 
-#endif // ifndef __INET_TRANSPORTCONNECTIONCANVASVISUALIZER_H
+#endif
 

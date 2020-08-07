@@ -62,5 +62,5 @@ class INET_API BoxedLabelFigure : public cGroupFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_BOXEDLABELFIGURE_H
+#endif
 

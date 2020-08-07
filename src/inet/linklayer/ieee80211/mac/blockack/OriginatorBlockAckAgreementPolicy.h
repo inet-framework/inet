@@ -57,4 +57,5 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_ORIGINATORBLOCKACKAGREEMENTPOLICY_H
+#endif
+

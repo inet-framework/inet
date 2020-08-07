@@ -32,4 +32,5 @@ class INET_API IVisitor
 
 } /* namespace inet */
 
-#endif /* __INET_IVISITOR_H_ */
+#endif
+

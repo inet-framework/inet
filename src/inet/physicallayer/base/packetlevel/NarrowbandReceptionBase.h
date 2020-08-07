@@ -44,5 +44,5 @@ class INET_API NarrowbandReceptionBase : public ReceptionBase, public virtual IN
 
 } // namespace inet
 
-#endif // ifndef __INET_NARROWBANDRECEPTIONBASE_H
+#endif
 

@@ -56,5 +56,5 @@ class INET_API IReceptionPacketModel : public virtual ISignalPacketModel
 
 } // namespace inet
 
-#endif // ifndef __INET_ISIGNALPACKETMODEL_H
+#endif
 

@@ -40,5 +40,5 @@ class INET_API DynamicClassifier : public PacketClassifier
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_DYNAMICCLASSIFIER_H
+#endif
 

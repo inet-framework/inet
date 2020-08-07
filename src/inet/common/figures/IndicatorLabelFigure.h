@@ -45,5 +45,5 @@ class INET_API IndicatorLabelFigure : public cLabelFigure, public IIndicatorFigu
 
 } // namespace inet
 
-#endif // ifndef __INET_INDICATORTEXTFIGURE_H
+#endif
 

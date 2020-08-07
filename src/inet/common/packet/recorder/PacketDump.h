@@ -134,5 +134,5 @@ class INET_API PacketDump
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDUMP_H
+#endif
 

@@ -36,4 +36,5 @@ class INET_API IAckHandler
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IACKHANDLER_H
+#endif
+

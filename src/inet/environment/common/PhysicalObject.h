@@ -96,5 +96,5 @@ class INET_API PhysicalObject : public cNamedObject, public IPhysicalObject
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALOBJECT_H
+#endif
 

@@ -76,5 +76,5 @@ class INET_API IArp
 
 } // namespace inet
 
-#endif // ifndef __INET_IARP_H
+#endif
 

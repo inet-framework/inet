@@ -50,5 +50,5 @@ class INET_API ScalarSnir : public SnirBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARSNIR_H
+#endif
 

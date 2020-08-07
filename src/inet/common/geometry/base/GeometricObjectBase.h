@@ -46,5 +46,5 @@ class INET_API GeometricObjectBase
 
 } // namespace inet
 
-#endif // ifndef __INET_GEOMETRICOBJECTBASE_H
+#endif
 

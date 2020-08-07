@@ -31,5 +31,5 @@ class INET_API FloodingProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_FLOODINGPROTOCOLPRINTER_H
+#endif
 

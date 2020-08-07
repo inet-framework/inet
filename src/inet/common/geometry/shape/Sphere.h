@@ -42,5 +42,5 @@ class INET_API Sphere : public ShapeBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SPHERE_H
+#endif
 

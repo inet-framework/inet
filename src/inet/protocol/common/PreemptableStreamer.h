@@ -88,5 +88,5 @@ class INET_API PreemptableStreamer : public PacketProcessorBase, public virtual 
 
 } // namespace inet
 
-#endif // ifndef __INET_PREEMPTABLESTREAMER_H
+#endif
 

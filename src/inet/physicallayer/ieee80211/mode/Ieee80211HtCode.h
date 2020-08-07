@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211HTSIGNALCODE_H
-#define __INET_IEEE80211HTSIGNALCODE_H
+#ifndef __INET_IEEE80211HTCODE_H
+#define __INET_IEEE80211HTCODE_H
 
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
 #include "inet/physicallayer/contract/bitlevel/ICode.h"
@@ -59,4 +59,5 @@ class INET_API Ieee80211HtCompliantCodes
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211HTSIGNALCODE_H
+#endif
+

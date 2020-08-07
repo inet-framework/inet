@@ -108,4 +108,5 @@ class INET_API EthernetFragmentPhyHeaderSerializer : public FieldsChunkSerialize
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETHEADERSERIALIZER_H
+#endif
+

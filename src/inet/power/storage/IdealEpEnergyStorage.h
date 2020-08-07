@@ -54,5 +54,5 @@ class INET_API IdealEpEnergyStorage : public EpEnergyStorageBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALEPENERGYSTORAGE_H
+#endif
 

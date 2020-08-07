@@ -68,5 +68,5 @@ class INET_API QueueOsgVisualizer : public QueueVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_QUEUEOSGGVISUALIZER_H
+#endif
 

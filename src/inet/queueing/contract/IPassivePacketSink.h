@@ -132,5 +132,5 @@ class INET_API IPassivePacketSink
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPASSIVEPACKETSINK_H
+#endif
 

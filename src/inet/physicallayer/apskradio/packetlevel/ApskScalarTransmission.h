@@ -36,5 +36,5 @@ class INET_API ApskScalarTransmission : public ScalarTransmission
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKSCALARTRANSMISSION_H
+#endif
 

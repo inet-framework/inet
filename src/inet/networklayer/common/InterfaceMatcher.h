@@ -84,5 +84,5 @@ class INET_API InterfaceMatcher
 
 } // namespace inet
 
-#endif /* INTERFACEMATCHER_H_ */
+#endif
 

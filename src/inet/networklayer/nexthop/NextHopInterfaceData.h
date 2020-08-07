@@ -71,5 +71,5 @@ class INET_API NextHopInterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPINTERFACEDATA_H
+#endif
 

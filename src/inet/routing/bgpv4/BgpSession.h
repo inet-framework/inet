@@ -124,5 +124,5 @@ std::ostream& operator<<(std::ostream& out, const BgpSession& entry);
 } // namespace bgp
 } // namespace inet
 
-#endif // ifndef __INET_BGPSESSION_H
+#endif
 

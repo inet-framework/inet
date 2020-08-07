@@ -51,5 +51,5 @@ class INET_API VisualizerBase : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_VISUALIZERBASE_H
+#endif
 

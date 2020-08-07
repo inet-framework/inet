@@ -43,5 +43,5 @@ class INET_API PortFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_PORTFILTER_H
+#endif
 

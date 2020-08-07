@@ -92,5 +92,5 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETCLASSIFIERBASE_H
+#endif
 

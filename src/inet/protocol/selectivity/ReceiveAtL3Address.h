@@ -40,5 +40,5 @@ class INET_API ReceiveAtL3Address : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVEATL3ADDRESS_H
+#endif
 

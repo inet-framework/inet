@@ -59,4 +59,5 @@ class INET_API ReceiveBuffer
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_RECEIVEBUFFER_H
+#endif
+

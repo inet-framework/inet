@@ -57,5 +57,5 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTINGTABLECANVASVISUALIZER_H
+#endif
 

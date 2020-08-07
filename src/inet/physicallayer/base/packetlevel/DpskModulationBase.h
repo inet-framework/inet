@@ -42,5 +42,5 @@ class INET_API DpskModulationBase : public IModulation
 
 } // namespace inet
 
-#endif // ifndef __INET_DPSKMODULATIONBASE_H
+#endif
 

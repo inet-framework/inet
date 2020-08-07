@@ -85,5 +85,5 @@ class INET_API AckingMac : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ACKINGMAC_H
+#endif
 

@@ -50,5 +50,5 @@ class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPack
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_LABELSCHEDULER_H
+#endif
 

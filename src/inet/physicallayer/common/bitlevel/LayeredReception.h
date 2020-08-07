@@ -50,5 +50,5 @@ class INET_API LayeredReception : public ReceptionBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDRECEPTION_H
+#endif
 

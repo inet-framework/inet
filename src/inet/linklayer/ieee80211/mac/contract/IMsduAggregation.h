@@ -35,4 +35,5 @@ class INET_API IMsduAggregation
 } // namespace ieee80211
 } // namespace inet
 
-#endif // __INET_IMSDUAGGREGATION_H
+#endif
+

@@ -34,5 +34,5 @@ class INET_API IPacketFlow : public virtual IPacketSink, public virtual IPacketS
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETFLOW_H
+#endif
 

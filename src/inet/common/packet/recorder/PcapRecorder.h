@@ -80,5 +80,5 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPRECORDER_H
+#endif
 

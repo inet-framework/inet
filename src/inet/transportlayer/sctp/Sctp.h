@@ -296,5 +296,5 @@ class INET_API Sctp : public cSimpleModule
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTP_H
+#endif
 

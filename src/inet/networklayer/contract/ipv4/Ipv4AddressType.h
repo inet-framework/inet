@@ -48,5 +48,5 @@ class INET_API Ipv4AddressType : public IL3AddressType
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4ADDRESSTYPE_H
+#endif
 

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BYTECOUNTCHUNKSERIALIZER_H_
-#define __INET_BYTECOUNTCHUNKSERIALIZER_H_
+#ifndef __INET_BYTECOUNTCHUNKSERIALIZER_H
+#define __INET_BYTECOUNTCHUNKSERIALIZER_H
 
 #include "inet/common/packet/serializer/ChunkSerializer.h"
 
@@ -29,5 +29,5 @@ class INET_API ByteCountChunkSerializer : public ChunkSerializer
 
 } // namespace
 
-#endif // #ifndef __INET_BYTECOUNTCHUNKSERIALIZER_H_
+#endif
 

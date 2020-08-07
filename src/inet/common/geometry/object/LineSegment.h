@@ -53,5 +53,5 @@ class INET_API LineSegment : public GeometricObjectBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LINESEGMENT_H
+#endif
 

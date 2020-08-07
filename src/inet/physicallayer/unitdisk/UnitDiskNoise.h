@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALNOISE_H
-#define __INET_IDEALNOISE_H
+#ifndef __INET_UNITDISKNOISE_H
+#define __INET_UNITDISKNOISE_H
 
 #include "inet/physicallayer/base/packetlevel/NoiseBase.h"
 
@@ -41,5 +41,5 @@ class INET_API UnitDiskNoise : public NoiseBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALNOISE_H
+#endif
 

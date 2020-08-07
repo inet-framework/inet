@@ -35,5 +35,5 @@ class INET_API AnalogModelBase : public cModule, public virtual IAnalogModel
 
 } // namespace inet
 
-#endif // ifndef __INET_ANALOGMODELBASE_H
+#endif
 

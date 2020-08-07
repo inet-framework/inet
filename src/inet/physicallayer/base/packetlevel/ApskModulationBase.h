@@ -54,5 +54,5 @@ class INET_API ApskModulationBase : public IApskModulation
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKMODULATIONBASE_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NEW_H
-#define __INET_NEW_H
+#ifndef __INET_INEW_H
+#define __INET_INEW_H
 
 #include "inet/common/Units.h"
 #include "inet/common/geometry/common/Coord.h"
@@ -117,5 +117,5 @@ class ISignalReception : public ISignalArrival
 } // namespace newphysicallayer
 } // namespace inet
 
-#endif // ifndef __INET_INEW_H
+#endif
 

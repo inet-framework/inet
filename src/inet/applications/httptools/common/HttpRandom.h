@@ -304,5 +304,5 @@ class INET_API rdObjectFactory
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPRANDOM_H
+#endif
 

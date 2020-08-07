@@ -36,5 +36,5 @@ class INET_API PacketFlowOsgVisualizer : public PathOsgVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETFLOWOSGVISUALIZER_H
+#endif
 

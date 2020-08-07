@@ -45,5 +45,5 @@ const int HOW_KIND = 50;
 
 } // namespace inet
 
-#endif // ifndef __INET_CONSTTYPE_H
+#endif
 

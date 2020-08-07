@@ -62,5 +62,5 @@ class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDROPCANVASVISUALIZER_H
+#endif
 

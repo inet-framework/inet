@@ -79,5 +79,5 @@ class INET_API Ieee80211YansErrorModel : public Ieee80211ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_YANSERRORRATEMODEL_H
+#endif
 

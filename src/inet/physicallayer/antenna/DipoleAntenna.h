@@ -57,5 +57,5 @@ class INET_API DipoleAntenna : public AntennaBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DIPOLEANTENNA_H
+#endif
 

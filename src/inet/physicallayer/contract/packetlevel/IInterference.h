@@ -42,5 +42,5 @@ class INET_API IInterference : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IINTERFERENCE_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BGPROUTING_H
-#define __INET_BGPROUTING_H
+#ifndef __INET_BGP_H
+#define __INET_BGP_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
@@ -56,5 +56,5 @@ private:
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPROUTING_H
+#endif
 

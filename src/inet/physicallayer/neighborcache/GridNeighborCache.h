@@ -72,5 +72,5 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_GRIDNEIGHBORCACHE_H
+#endif
 

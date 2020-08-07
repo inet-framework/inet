@@ -46,4 +46,5 @@ class INET_API CtsPolicy : public ModeSetListener, public ICtsPolicy
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_CTSPOLICY_H
+#endif
+

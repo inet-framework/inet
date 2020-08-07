@@ -209,5 +209,5 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4INTERFACEDATA_H
+#endif
 

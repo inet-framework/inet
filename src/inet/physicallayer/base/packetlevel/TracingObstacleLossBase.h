@@ -33,5 +33,5 @@ class INET_API TracingObstacleLossBase : public cModule, public ITracingObstacle
 
 } // namespace inet
 
-#endif // ifndef __INET_TRACINGOBSTACLELOSSBASE_H
+#endif
 

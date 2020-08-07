@@ -263,5 +263,5 @@ class INET_API IMulticastRoute
 
 } // namespace inet
 
-#endif // ifndef __INET_IROUTE_H
+#endif
 

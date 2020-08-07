@@ -1510,5 +1510,5 @@ class INET_API SctpAssociation : public cObject
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPASSOCIATION_H
+#endif
 

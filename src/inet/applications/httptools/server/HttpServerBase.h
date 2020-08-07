@@ -112,5 +112,5 @@ class INET_API HttpServerBase : public HttpNodeBase
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPSERVERBASE_H
+#endif
 

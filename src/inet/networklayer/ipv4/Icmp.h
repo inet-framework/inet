@@ -70,5 +70,5 @@ class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
 
 } // namespace inet
 
-#endif // ifndef __INET_ICMP_H
+#endif
 

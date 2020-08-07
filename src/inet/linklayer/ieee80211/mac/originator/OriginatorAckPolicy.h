@@ -43,4 +43,5 @@ class INET_API OriginatorAckPolicy : public ModeSetListener, public IOriginatorA
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_ORIGINATORACKPOLICY_H
+#endif
+

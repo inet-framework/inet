@@ -67,5 +67,5 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
 
 } // namespace inet
 
-#endif // ifndef __INET_TRANSPORTCONNECTIONOSGVISUALIZER_H
+#endif
 

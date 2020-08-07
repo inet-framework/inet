@@ -32,5 +32,5 @@ class INET_API EnergyStorageBase : public cSimpleModule, public EnergySourceBase
 } // namespace power
 } // namespace inet
 
-#endif // ifndef __INET_ENERGYSTORAGEBASE_H
+#endif
 

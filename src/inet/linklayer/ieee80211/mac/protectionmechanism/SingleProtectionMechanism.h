@@ -60,4 +60,5 @@ class INET_API SingleProtectionMechanism : public ModeSetListener
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_SINGLEPROTECTIONMECHANISM_H
+#endif
+

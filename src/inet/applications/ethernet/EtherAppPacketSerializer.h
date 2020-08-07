@@ -48,4 +48,5 @@ class INET_API EtherAppRespSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERAPPPACKETSERIALIZER_H
+#endif
+

@@ -228,5 +228,5 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 } // namespace aodv
 } // namespace inet
 
-#endif // ifndef __INET_AODV_H
+#endif
 

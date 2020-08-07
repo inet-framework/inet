@@ -66,5 +66,5 @@ class INET_API TcpSegmentTransmitInfoList
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPSEGMENTTRANSMITINFOLIST_H
+#endif
 

@@ -231,5 +231,5 @@ void OperationalMixin<T>::refreshDisplay() const
 
 } // namespace inet
 
-#endif // ifndef __INET_OPERATIONALMIXINIMPL_H
+#endif
 

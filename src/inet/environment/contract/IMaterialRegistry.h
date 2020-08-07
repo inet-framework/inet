@@ -34,5 +34,5 @@ class INET_API IMaterialRegistry
 
 } // namespace inet
 
-#endif // ifndef __INET_IMATERIALREGISTRY_H
+#endif
 

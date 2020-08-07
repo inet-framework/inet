@@ -32,5 +32,5 @@ class INET_API ReceiveWithProtocol : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVEWITHPROTOCOL_H
+#endif
 

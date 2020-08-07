@@ -65,4 +65,5 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_ORIGINATORQOSMACDATASERVICE_H
+#endif
+

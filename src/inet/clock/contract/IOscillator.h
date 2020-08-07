@@ -63,5 +63,5 @@ class INET_API IOscillator
 
 } // namespace inet
 
-#endif // ifndef __INET_IOSCILLATOR_H
+#endif
 

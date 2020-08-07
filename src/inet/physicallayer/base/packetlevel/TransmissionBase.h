@@ -90,5 +90,5 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_TRANSMISSIONBASE_H
+#endif
 

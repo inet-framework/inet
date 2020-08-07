@@ -79,5 +79,5 @@ class INET_API TcpSessionApp : public TcpAppBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPSESSIONAPP_H
+#endif
 

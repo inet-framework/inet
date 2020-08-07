@@ -50,4 +50,5 @@ class INET_API ITx
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_ITX_H
+#endif
+

@@ -35,5 +35,5 @@ class INET_API CrcHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_CRCHEADERSERIALIZER_H
+#endif
 

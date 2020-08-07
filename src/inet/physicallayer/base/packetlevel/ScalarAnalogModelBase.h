@@ -50,5 +50,5 @@ class INET_API ScalarAnalogModelBase : public AnalogModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARANALOGMODELBASE_H
+#endif
 

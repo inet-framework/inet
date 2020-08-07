@@ -37,5 +37,5 @@ class INET_API Signal : public cPacket
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_SIGNAL_H
+#endif
 

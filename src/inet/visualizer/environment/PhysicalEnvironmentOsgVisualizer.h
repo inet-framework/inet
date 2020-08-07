@@ -43,5 +43,5 @@ class INET_API PhysicalEnvironmentOsgVisualizer : public PhysicalEnvironmentVisu
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALENVIRONMENTOSGVISUALIZER_H
+#endif
 

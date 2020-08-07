@@ -43,5 +43,5 @@ class INET_API NetworkNodeFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKNODEFILTER_H
+#endif
 

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETPRINTER_H_
-#define __INET_PACKETPRINTER_H_
+#ifndef __INET_PACKETPRINTER_H
+#define __INET_PACKETPRINTER_H
 
 #include "inet/common/StringFormat.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
@@ -96,5 +96,5 @@ class INET_API PacketPrinter : public cMessagePrinter
 
 } // namespace
 
-#endif // #ifndef __INET_PACKETPRINTER_H_
+#endif
 

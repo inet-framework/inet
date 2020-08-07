@@ -83,5 +83,5 @@ class INET_API BerParseFile
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_BERPARSEFILE_H
+#endif
 

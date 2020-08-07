@@ -45,5 +45,5 @@ class INET_API NakagamiFading : public FreeSpacePathLoss
 
 } // namespace inet
 
-#endif // ifndef __INET_NAKAGAMIFADING_H
+#endif
 

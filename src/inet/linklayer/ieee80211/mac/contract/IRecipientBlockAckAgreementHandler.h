@@ -47,4 +47,5 @@ class INET_API IRecipientBlockAckAgreementHandler
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRECIPIENTBLOCKACKAGREEMENTHANDLER_H
+#endif
+

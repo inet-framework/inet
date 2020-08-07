@@ -43,5 +43,5 @@ class INET_API ApskRadio : public FlatRadioBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKRADIO_H
+#endif
 

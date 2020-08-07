@@ -40,5 +40,5 @@ class INET_API PacketFlowCanvasVisualizer : public PathCanvasVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETFLOWCANVASVISUALIZER_H
+#endif
 

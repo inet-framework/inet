@@ -35,5 +35,5 @@ class INET_API VoipStreamPacketSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_VOIPSTREAMPACKETSERIALIZER_H
+#endif
 

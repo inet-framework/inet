@@ -39,5 +39,5 @@ class INET_API IPacketDuplicator : public virtual IPassivePacketSink, public vir
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETDUPLICATOR_H
+#endif
 

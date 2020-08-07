@@ -227,5 +227,5 @@ SUBSTATE(Established, TopState) {
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPFSM_H
+#endif
 

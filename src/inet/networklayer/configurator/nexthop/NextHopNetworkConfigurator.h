@@ -58,5 +58,5 @@ class INET_API NextHopNetworkConfigurator : public NetworkConfiguratorBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPNETWORKCONFIGURATOR_H
+#endif
 

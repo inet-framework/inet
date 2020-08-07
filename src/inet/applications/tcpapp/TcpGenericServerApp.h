@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPGENERICSRVAPP_H
-#define __INET_TCPGENERICSRVAPP_H
+#ifndef __INET_TCPGENERICSERVERAPP_H
+#define __INET_TCPGENERICSERVERAPP_H
 
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/ChunkQueue.h"
@@ -57,5 +57,5 @@ class INET_API TcpGenericServerApp : public cSimpleModule, public LifecycleUnsup
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPGENERICSRVAPP_H
+#endif
 

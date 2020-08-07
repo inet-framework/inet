@@ -17,8 +17,8 @@
 
 // This file is based on the Ppp.h of INET written by Andras Varga.
 
-#ifndef __INET_TUNINTERFACE_H
-#define __INET_TUNINTERFACE_H
+#ifndef __INET_TUN_H
+#define __INET_TUN_H
 
 #include "inet/linklayer/base/MacProtocolBase.h"
 
@@ -42,5 +42,5 @@ class INET_API Tun : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TUNINTERFACE_H
+#endif
 

@@ -206,5 +206,5 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_BMAC_H
+#endif
 

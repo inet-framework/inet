@@ -38,5 +38,5 @@ class INET_API NetworkRouteCanvasVisualizer : public PathCanvasVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKROUTECANVASVISUALIZER_H
+#endif
 

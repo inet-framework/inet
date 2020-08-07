@@ -73,5 +73,5 @@ class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighbo
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_NEIGHBORLISTNEIGHBORCACHE_H
+#endif
 

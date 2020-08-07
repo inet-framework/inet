@@ -45,5 +45,5 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211ERRORMODELBASE_H
+#endif
 

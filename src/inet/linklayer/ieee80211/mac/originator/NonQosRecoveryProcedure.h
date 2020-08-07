@@ -83,4 +83,5 @@ class INET_API NonQosRecoveryProcedure : public cSimpleModule, public IRecoveryP
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_NONQOSRECOVERYPROCEDURE_H
+#endif
+

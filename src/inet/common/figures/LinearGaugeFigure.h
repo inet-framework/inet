@@ -96,5 +96,5 @@ class INET_API LinearGaugeFigure : public cGroupFigure, public inet::IIndicatorF
 
 } // namespace inet
 
-#endif // ifndef __INET_LinearGaugeFigure_H
+#endif
 

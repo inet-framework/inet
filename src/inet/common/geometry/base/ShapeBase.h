@@ -47,5 +47,5 @@ class INET_API ShapeBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SHAPEBASE_H
+#endif
 

@@ -44,5 +44,5 @@ class INET_API PcapFilePacketProducer : public ActivePacketSourceBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PCAPFILEPACKETPRODUCER_H
+#endif
 

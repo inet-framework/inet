@@ -22,8 +22,8 @@
   */
 
 
-#ifndef ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_
-#define ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_
+#ifndef __INET_CLNSADDRESSTYPE_H
+#define __INET_CLNSADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -54,4 +54,5 @@ class INET_API CLNSAddressType : public IL3AddressType
 
 } /* namespace inet */
 
-#endif /* ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_ */
+#endif
+

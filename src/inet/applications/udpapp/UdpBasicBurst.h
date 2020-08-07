@@ -115,5 +115,5 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPBASICBURST_H
+#endif
 

@@ -43,5 +43,5 @@ class INET_API OpenStreetMapSceneCanvasVisualizer : public SceneVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_OPENSTREETMAPSCENECANVASVISUALIZER_H
+#endif
 

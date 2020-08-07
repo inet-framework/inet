@@ -223,5 +223,5 @@ inline void doParsimUnpacking(cCommBuffer *buffer, MacAddress& macAddress) { uin
 
 } // namespace inet
 
-#endif // ifndef __INET_MACADDRESS_H
+#endif
 

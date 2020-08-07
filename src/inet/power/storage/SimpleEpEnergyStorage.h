@@ -113,5 +113,5 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLEEPENERGYSTORAGE_H
+#endif
 

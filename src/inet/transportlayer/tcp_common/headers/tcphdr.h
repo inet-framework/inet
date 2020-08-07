@@ -61,5 +61,5 @@ struct tcphdr
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPHDR_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SENDWITHRETRIES_H
-#define __INET_SENDWITHRETRIES_H
+#ifndef __INET_RESENDING_H
+#define __INET_RESENDING_H
 
 #include "inet/queueing/base/PacketPusherBase.h"
 
@@ -48,5 +48,5 @@ class INET_API Resending : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SENDWITHRETRIES_H
+#endif
 

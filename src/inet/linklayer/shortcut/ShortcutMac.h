@@ -57,5 +57,5 @@ class INET_API ShortcutMac : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SHORTCUTMAC_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ROUTINGLIFECYCLEBASE_H
-#define __INET_ROUTINGLIFECYCLEBASE_H
+#ifndef __INET_ROUTINGPROTOCOLBASE_H
+#define __INET_ROUTINGPROTOCOLBASE_H
 
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -36,5 +36,5 @@ class INET_API RoutingProtocolBase : public OperationalBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTINGLIFECYCLEBASE_H
+#endif
 

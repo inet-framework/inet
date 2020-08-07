@@ -80,5 +80,5 @@ class INET_API RtpAvProfilePayload32Receiver : public RtpPayloadReceiver
 
 } // namespace inet
 
-#endif // ifndef __INET_RTPAVPROFILEPAYLOAD32RECEIVER_H
+#endif
 

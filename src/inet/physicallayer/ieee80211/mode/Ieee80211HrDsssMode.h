@@ -184,5 +184,5 @@ class INET_API Ieee80211HrDsssCompliantModes
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211HRDSSSMODE_H
+#endif
 

@@ -102,5 +102,5 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MULTIFIELDCLASSIFIER_H
+#endif
 

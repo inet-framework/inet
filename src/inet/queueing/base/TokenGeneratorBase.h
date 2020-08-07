@@ -50,5 +50,5 @@ class INET_API TokenGeneratorBase : public PacketProcessorBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_TOKENGENERATORBASE_H
+#endif
 

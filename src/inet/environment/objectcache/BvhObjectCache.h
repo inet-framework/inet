@@ -61,5 +61,5 @@ class INET_API BvhObjectCache : public IObjectCache, public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_BVHOBJECTCACHE_H
+#endif
 

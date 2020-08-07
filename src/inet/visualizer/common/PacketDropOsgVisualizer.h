@@ -65,5 +65,5 @@ class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDROPOSGVISUALIZER_H
+#endif
 

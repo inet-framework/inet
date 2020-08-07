@@ -36,5 +36,5 @@ class INET_API InterfaceStateDown : public Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACESTATEDOWN_H
+#endif
 

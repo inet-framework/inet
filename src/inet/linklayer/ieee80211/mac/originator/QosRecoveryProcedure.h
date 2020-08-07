@@ -92,4 +92,5 @@ class INET_API QosRecoveryProcedure : public cSimpleModule, public IRecoveryProc
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RECOVERYPROCEDURE_H
+#endif
+

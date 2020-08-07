@@ -62,5 +62,5 @@ class INET_API NarrowbandReceiverBase : public SnirReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NARROWBANDRECEIVERBASE_H
+#endif
 

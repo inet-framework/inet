@@ -47,5 +47,5 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PERIODICGATE_H
+#endif
 

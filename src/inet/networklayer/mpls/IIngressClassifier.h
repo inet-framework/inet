@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_ICLASSIFIER_H
-#define __INET_ICLASSIFIER_H
+#ifndef __INET_IINGRESSCLASSIFIER_H
+#define __INET_IINGRESSCLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
@@ -52,5 +52,5 @@ class INET_API IIngressClassifier
 
 } // namespace inet
 
-#endif // ifndef __INET_ICLASSIFIER_H
+#endif
 

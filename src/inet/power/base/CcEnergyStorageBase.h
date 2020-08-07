@@ -48,5 +48,5 @@ class INET_API CcEnergyStorageBase : public cSimpleModule, public CcEnergySource
 
 } // namespace inet
 
-#endif // ifndef __INET_CCENERGYSTORAGEBASE_H
+#endif
 

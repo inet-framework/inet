@@ -45,5 +45,5 @@ class INET_API LogNormalShadowing : public FreeSpacePathLoss
 
 } // namespace inet
 
-#endif // ifndef __INET_LOGNORMALSHADOWING_H
+#endif
 

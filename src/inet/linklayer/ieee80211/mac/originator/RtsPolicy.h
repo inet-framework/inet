@@ -45,4 +45,5 @@ class INET_API RtsPolicy : public ModeSetListener, public IRtsPolicy
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RTSPOLICY_H
+#endif
+

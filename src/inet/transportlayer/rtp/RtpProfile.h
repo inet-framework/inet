@@ -219,5 +219,5 @@ class INET_API RtpProfile : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_RTPPROFILE_H
+#endif
 

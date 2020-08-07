@@ -77,5 +77,5 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
 
 } // namespace inet
 
-#endif // ifndef __INET_SHORTCUTRADIO_H
+#endif
 

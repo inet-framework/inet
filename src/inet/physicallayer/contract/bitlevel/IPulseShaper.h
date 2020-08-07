@@ -33,5 +33,5 @@ class INET_API IPulseShaper : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IPULSESHAPER_H
+#endif
 

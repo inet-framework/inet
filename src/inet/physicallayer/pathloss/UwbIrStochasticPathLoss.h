@@ -86,5 +86,5 @@ class INET_API UwbIrStochasticPathLoss : public PathLossBase
 
 } // namespace inet
 
-#endif // ifndef __INET_UWBIRSTOCHASTICPATHLOSS_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPGENERICSRVTHREAD_H
-#define __INET_TCPGENERICSRVTHREAD_H
+#ifndef __INET_TCPGENERICSERVERTHREAD_H
+#define __INET_TCPGENERICSERVERTHREAD_H
 
 #include "inet/common/INETDefs.h"
 
@@ -39,5 +39,5 @@ class INET_API TcpGenericServerThread : public TcpServerThreadBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPGENERICSRVTHREAD_H
+#endif
 

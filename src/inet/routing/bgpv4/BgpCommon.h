@@ -85,5 +85,5 @@ struct SessionInfo
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPCOMMON_H
+#endif
 

@@ -58,5 +58,5 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_STATISTICCANVASVISUALIZER_H
+#endif
 

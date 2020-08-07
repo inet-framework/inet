@@ -34,5 +34,5 @@ class INET_API INetworkProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_INETWORKPROTOCOL_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPACKETPULLPER_H
-#define __INET_IPACKETPULLPER_H
+#ifndef __INET_IPACKETPULLER_H
+#define __INET_IPACKETPULLER_H
 
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
@@ -34,5 +34,5 @@ class INET_API IPacketPuller : public virtual IActivePacketSink, public virtual 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETPUSHER_H
+#endif
 

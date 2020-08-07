@@ -54,5 +54,5 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVERBASE_H
+#endif
 

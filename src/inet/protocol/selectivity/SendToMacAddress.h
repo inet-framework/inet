@@ -47,5 +47,5 @@ class INET_API SendToMacAddress : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SENDTOMACADDRESS_H
+#endif
 

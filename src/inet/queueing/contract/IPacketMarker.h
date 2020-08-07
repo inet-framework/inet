@@ -38,5 +38,5 @@ class INET_API IPacketMarker : public virtual IPacketFlow
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETMARKER_H
+#endif
 

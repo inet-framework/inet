@@ -55,5 +55,5 @@ class INET_API CanvasProjection
 
 } // namespace inet
 
-#endif // ifndef __INET_CANVASPROJECTION_H
+#endif
 

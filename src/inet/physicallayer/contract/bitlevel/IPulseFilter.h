@@ -33,5 +33,5 @@ class INET_API IPulseFilter : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IPULSEFILTER_H
+#endif
 

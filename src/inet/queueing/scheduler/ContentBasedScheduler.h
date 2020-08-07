@@ -41,5 +41,5 @@ class INET_API ContentBasedScheduler : public PacketSchedulerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_CONTENTBASEDSCHEDULER_H
+#endif
 

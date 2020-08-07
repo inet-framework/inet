@@ -1,5 +1,5 @@
-#ifndef __INET_TWORAYINTERFERENCE_H_
-#define __INET_TWORAYINTERFERENCE_H_
+#ifndef __INET_TWORAYINTERFERENCE_H
+#define __INET_TWORAYINTERFERENCE_H
 
 #include <inet/physicallayer/contract/packetlevel/IPathLoss.h>
 
@@ -36,4 +36,5 @@ protected:
 } // namespace physicallayer
 } // namespace inet
 
-#endif /* __INET_TWORAYINTERFERENCE_H_ */
+#endif
+

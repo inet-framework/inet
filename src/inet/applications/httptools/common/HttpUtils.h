@@ -58,5 +58,5 @@ std::vector<std::string> splitFile(std::string fileName);
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPUTILS_H
+#endif
 

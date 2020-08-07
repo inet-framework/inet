@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_FIELDSCHUNK_H_
-#define __INET_FIELDSCHUNK_H_
+#ifndef __INET_FIELDSCHUNK_H
+#define __INET_FIELDSCHUNK_H
 
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -78,5 +78,5 @@ class INET_API FieldsChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_FIELDCHUNK_H_
+#endif
 

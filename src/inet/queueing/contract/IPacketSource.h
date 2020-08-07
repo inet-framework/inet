@@ -35,5 +35,5 @@ class INET_API IPacketSource : public virtual IPassivePacketSource, public virtu
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETSOURCE_H
+#endif
 

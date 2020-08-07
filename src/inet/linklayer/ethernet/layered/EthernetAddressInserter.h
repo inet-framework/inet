@@ -37,5 +37,5 @@ class INET_API EthernetAddressInserter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETADDRESSINSERTER_H
+#endif
 

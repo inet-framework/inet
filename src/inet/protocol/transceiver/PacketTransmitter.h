@@ -42,5 +42,5 @@ class INET_API PacketTransmitter : public PacketTransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETTRANSMITTER_H
+#endif
 

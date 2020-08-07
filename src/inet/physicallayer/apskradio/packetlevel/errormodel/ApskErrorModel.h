@@ -43,5 +43,5 @@ class INET_API ApskErrorModel : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKERRORMODEL_H
+#endif
 

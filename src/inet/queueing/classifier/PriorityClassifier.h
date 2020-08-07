@@ -37,5 +37,5 @@ class INET_API PriorityClassifier : public PacketClassifierBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PRIORITYCLASSIFIER_H
+#endif
 

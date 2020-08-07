@@ -91,5 +91,5 @@ class INET_API TunSocket : public ISocket
 
 } // namespace inet
 
-#endif // ifndef __INET_TUNSOCKET_H
+#endif
 

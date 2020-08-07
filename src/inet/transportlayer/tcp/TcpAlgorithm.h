@@ -198,5 +198,5 @@ class INET_API TcpAlgorithm : public cObject
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPALGORITHM_H
+#endif
 

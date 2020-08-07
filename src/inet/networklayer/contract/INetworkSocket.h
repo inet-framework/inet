@@ -93,5 +93,5 @@ class INET_API INetworkSocket : public ISocket
 
 } // namespace inet
 
-#endif // ifndef __INET_INETWORKSOCKET_H
+#endif
 

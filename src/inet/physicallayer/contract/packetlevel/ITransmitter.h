@@ -62,5 +62,5 @@ class INET_API ITransmitter : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_ITRANSMITTER_H
+#endif
 

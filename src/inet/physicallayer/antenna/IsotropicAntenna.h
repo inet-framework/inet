@@ -49,5 +49,5 @@ class INET_API IsotropicAntenna : public AntennaBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ISOTROPICANTENNA_H
+#endif
 

@@ -128,5 +128,5 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ReceiveQu
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPBROWSER_H
+#endif
 

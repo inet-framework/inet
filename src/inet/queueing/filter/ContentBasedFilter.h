@@ -37,5 +37,5 @@ class INET_API ContentBasedFilter : public PacketFilterBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_CONTENTBASEDFILTER_H
+#endif
 

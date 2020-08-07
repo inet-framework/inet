@@ -69,5 +69,5 @@ class INET_API SimpleCcBattery : public CcEnergyStorageBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLECCBATTERY_H
+#endif
 

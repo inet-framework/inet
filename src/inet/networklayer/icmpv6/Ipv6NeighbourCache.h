@@ -211,5 +211,5 @@ class INET_API Ipv6NeighbourCache
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6NEIGHBOURCACHE_H
+#endif
 

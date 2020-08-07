@@ -29,5 +29,5 @@ class INET_API IdealClock : public ClockBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALCLOCK_H
+#endif
 

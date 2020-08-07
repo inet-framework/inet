@@ -99,5 +99,5 @@ std::ostream& operator<<(std::ostream& out, const Ospfv2RoutingTableEntry& entry
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2ROUTINGTABLEENTRY_H
+#endif
 

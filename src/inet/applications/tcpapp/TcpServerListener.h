@@ -53,5 +53,5 @@ class INET_API TcpServerListener : public ApplicationBase, public TcpSocket::ICa
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPSERVERLISTENER_H
+#endif
 

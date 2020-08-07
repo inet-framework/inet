@@ -44,5 +44,5 @@ class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154SCALARRECEIVER_H
+#endif
 

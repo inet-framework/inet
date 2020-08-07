@@ -44,5 +44,5 @@ class INET_API NetworkConnectionVisualizerBase : public VisualizerBase, public c
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKCONNECTIONVISUALIZERBASE_H
+#endif
 

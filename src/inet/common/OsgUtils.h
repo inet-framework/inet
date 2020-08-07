@@ -106,5 +106,5 @@ class INET_API LineNode : public Group
 
 } // namespace inet
 
-#endif // ifndef __INET_OSGUTILS_H
+#endif
 

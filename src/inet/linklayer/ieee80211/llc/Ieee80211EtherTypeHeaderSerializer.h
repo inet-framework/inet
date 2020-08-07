@@ -36,5 +36,5 @@ class INET_API Ieee80211EtherTypeHeaderSerializer : public FieldsChunkSerializer
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211ETHERTYPEHEADERSERIALIZER_H
+#endif
 

@@ -80,5 +80,5 @@ class INET_API PcapngWriter : public IPcapWriter
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPNGWRITER_H
+#endif
 

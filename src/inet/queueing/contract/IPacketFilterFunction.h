@@ -40,5 +40,5 @@ class INET_API IPacketFilterFunction
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETFILTERFUNCTION_H
+#endif
 

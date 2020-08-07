@@ -41,5 +41,5 @@ class INET_API RayleighFading : public FreeSpacePathLoss
 
 } // namespace inet
 
-#endif // ifndef __INET_RAYLEIGHFADING_H
+#endif
 

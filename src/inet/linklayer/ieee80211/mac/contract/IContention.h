@@ -67,4 +67,5 @@ class INET_API IContention
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_ICONTENTION_H
+#endif
+

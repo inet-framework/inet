@@ -47,5 +47,5 @@ class INET_API HeatMapFigure : public cPixmapFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_HEATMAPFIGURE_H
+#endif
 

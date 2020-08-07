@@ -46,5 +46,5 @@ class INET_API ActivePacketSource : public ActivePacketSourceBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_ACTIVEPACKETSOURCE_H
+#endif
 

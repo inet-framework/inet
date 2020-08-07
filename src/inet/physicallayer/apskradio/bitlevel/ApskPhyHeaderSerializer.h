@@ -36,5 +36,5 @@ class INET_API ApskPhyHeaderSerializer : public ChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKPHYHEADERSERIALIZER_H
+#endif
 

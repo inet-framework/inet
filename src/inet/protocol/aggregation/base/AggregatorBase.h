@@ -51,5 +51,5 @@ class INET_API AggregatorBase : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_AGGREGATORBASE_H
+#endif
 

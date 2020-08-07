@@ -73,5 +73,5 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_STATISTICOSGVISUALIZER_H
+#endif
 

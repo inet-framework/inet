@@ -30,5 +30,5 @@ class INET_API IMacProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_IMACPROTOCOL_H
+#endif
 

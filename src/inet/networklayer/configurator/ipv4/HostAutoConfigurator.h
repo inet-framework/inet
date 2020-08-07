@@ -59,5 +59,5 @@ class INET_API HostAutoConfigurator : public OperationalBase
 
 } // namespace inet
 
-#endif // ifndef __INET_HOSTAUTOCONFIGURATOR_H
+#endif
 

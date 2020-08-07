@@ -376,5 +376,5 @@ inline std::string Coord::str() const
 
 } // namespace inet
 
-#endif // ifndef __INET_COORD_H
+#endif
 

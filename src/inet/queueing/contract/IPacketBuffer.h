@@ -57,5 +57,5 @@ class INET_API IPacketBuffer : public virtual IPacketCollection
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETBUFFER_H
+#endif
 

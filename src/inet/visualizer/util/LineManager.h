@@ -88,5 +88,5 @@ class INET_API LineManager
 
 } // namespace inet
 
-#endif // ifndef __INET_LINEMANAGER_H
+#endif
 

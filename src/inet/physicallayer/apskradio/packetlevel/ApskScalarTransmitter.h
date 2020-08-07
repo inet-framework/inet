@@ -37,5 +37,5 @@ class INET_API ApskScalarTransmitter : public FlatTransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKSCALARTRANSMITTER_H
+#endif
 

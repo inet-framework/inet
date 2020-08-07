@@ -47,4 +47,5 @@ class INET_API OriginatorProtectionMechanism : public ModeSetListener
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_ORIGINATORPROTECTIONMECHANISM_H
+#endif
+

@@ -54,4 +54,5 @@ class INET_API RecipientBlockAckAgreement : public cObject
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RECIPIENTBLOCKACKAGREEMENT_H
+#endif
+

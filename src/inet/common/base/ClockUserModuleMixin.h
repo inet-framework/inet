@@ -72,5 +72,5 @@ class INET_API ClockUserModuleMixin : public T
 
 } // namespace inet
 
-#endif // ifndef __INET_CLOCKUSERMODULEMIXIN_H
+#endif
 

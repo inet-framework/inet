@@ -42,5 +42,5 @@ class INET_API Mcf : public ICoordinationFunction, public cSimpleModule
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_MCF_H
+#endif
 

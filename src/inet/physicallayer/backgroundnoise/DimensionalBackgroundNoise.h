@@ -45,5 +45,5 @@ class INET_API DimensionalBackgroundNoise : public DimensionalTransmitterBase, p
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALBACKGROUNDNOISE_H
+#endif
 

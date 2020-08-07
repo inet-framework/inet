@@ -65,5 +65,5 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_NISTERRORRATEMODEL_H
+#endif
 

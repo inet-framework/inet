@@ -39,5 +39,5 @@ class INET_API _2GfskModulation : public GfskModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_2GFSKMODULATION_H
+#endif
 

@@ -198,5 +198,5 @@ class INET_API Ospfv2Interface
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACE_H
+#endif
 

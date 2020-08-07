@@ -53,4 +53,5 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_FRAMESEQUENCEHANDLER_H
+#endif
+

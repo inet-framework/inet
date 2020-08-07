@@ -88,5 +88,5 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
 
 } // namespace inet
 
-#endif // ifndef __INET_TRANSPORTCONNECTIONVISUALIZERBASE_H
+#endif
 

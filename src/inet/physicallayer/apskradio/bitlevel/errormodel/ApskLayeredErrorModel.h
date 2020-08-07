@@ -41,5 +41,5 @@ class INET_API ApskLayeredErrorModel : public LayeredErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDAPSKERRORMODEL_H
+#endif
 

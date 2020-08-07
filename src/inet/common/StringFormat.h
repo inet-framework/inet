@@ -47,5 +47,5 @@ class INET_API StringFormat
 
 } // namespace inet
 
-#endif // ifndef __INET_STRINGFORMAT_H
+#endif
 

@@ -45,5 +45,5 @@ Placement parsePlacement(const char *s);
 
 } // namespace inet
 
-#endif // ifndef __INET_PLACEMENT_H
+#endif
 

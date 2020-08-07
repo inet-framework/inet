@@ -31,5 +31,5 @@ class INET_API IgmpProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_IGMPPROTOCOLPRINTER_H
+#endif
 

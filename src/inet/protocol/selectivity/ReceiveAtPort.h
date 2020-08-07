@@ -39,5 +39,5 @@ class INET_API ReceiveAtPort : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVEATPORT_H
+#endif
 

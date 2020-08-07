@@ -86,3 +86,4 @@ class INET_API RateSelection : public IRateSelection, public cSimpleModule, publ
 } // namespace inet
 
 #endif
+

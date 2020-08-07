@@ -46,5 +46,5 @@ class INET_API EmptyPacketSource : public PacketProcessorBase, public virtual IA
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_EMPTYPACKETSOURCE_H
+#endif
 

@@ -89,5 +89,5 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_REFERENCECOMMUNICATIONCACHE_H
+#endif
 

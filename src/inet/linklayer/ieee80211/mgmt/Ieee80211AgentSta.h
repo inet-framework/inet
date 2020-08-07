@@ -108,5 +108,5 @@ class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener       
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211AGENTSTA_H
+#endif
 

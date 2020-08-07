@@ -42,5 +42,5 @@ class INET_API NeighborState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2NEIGHBORSTATE_H
+#endif
 

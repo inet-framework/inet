@@ -44,4 +44,5 @@ class SctpCrcInsertion : public NetfilterBase::HookBase {
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPCRCINSERTIONHOOK_H
+#endif
+

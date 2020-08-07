@@ -68,5 +68,5 @@ class INET_API TimingMeasurementStarter : public PacketFlowBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_TIMINGMEASUREMENTSTARTER_H
+#endif
 

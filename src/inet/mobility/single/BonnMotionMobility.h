@@ -66,5 +66,5 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_BONNMOTIONMOBILITY_H
+#endif
 

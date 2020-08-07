@@ -66,5 +66,5 @@ class INET_API Ieee80211OsgVisualizer : public Ieee80211VisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211OSGVISUALIZER_H
+#endif
 

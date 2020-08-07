@@ -72,4 +72,5 @@ class INET_API Polyhedron : public ShapeBase
 
 } /* namespace inet */
 
-#endif // ifndef __INET_POLYHEDRON_H
+#endif
+

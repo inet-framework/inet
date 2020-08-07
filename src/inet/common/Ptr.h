@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PTR_
-#define __INET_PTR_
+#ifndef __INET_PTR_H
+#define __INET_PTR_H
 
 #include "inet/common/INETDefs.h"
 
@@ -126,4 +126,5 @@ class INET_API SharedVector : public std::vector<T>, public SharedBase<SharedVec
 
 } // namespace inet
 
-#endif  // #ifndef __INET_PTR_
+#endif
+

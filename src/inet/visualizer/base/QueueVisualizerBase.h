@@ -82,5 +82,5 @@ class INET_API QueueVisualizerBase : public VisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_QUEUEVISUALIZERBASE_H
+#endif
 

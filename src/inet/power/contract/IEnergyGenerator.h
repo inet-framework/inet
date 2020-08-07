@@ -55,5 +55,5 @@ class INET_API IEnergyGenerator
 
 } // namespace inet
 
-#endif // ifndef __INET_IENERGYGENERATOR_H
+#endif
 

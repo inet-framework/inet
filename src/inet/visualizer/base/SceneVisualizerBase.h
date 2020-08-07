@@ -40,5 +40,5 @@ class INET_API SceneVisualizerBase : public VisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCENEVISUALIZERBASE_H
+#endif
 

@@ -47,5 +47,5 @@ class INET_API MfskModulation : public IModulation
 
 } // namespace inet
 
-#endif // ifndef __INET_MFSKMODULATION_H
+#endif
 

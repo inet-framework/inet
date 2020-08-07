@@ -39,5 +39,5 @@ class INET_API PulseFilter : public IPulseFilter
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_PULSEFILTER_H
+#endif
 

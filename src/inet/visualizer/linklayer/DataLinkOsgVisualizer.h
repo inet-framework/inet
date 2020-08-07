@@ -35,5 +35,5 @@ class INET_API DataLinkOsgVisualizer : public LinkOsgVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DATALINKOSGVISUALIZER_H
+#endif
 

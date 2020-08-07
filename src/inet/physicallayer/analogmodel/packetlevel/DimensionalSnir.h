@@ -52,5 +52,5 @@ class INET_API DimensionalSnir : public SnirBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALSNIR_H
+#endif
 

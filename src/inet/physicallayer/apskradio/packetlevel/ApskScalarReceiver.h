@@ -41,5 +41,5 @@ class INET_API ApskScalarReceiver : public FlatReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKSCALARRECEIVER_H
+#endif
 

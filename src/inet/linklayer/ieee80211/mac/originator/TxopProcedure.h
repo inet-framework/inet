@@ -78,4 +78,5 @@ class INET_API TxopDurationFilter : public cObjectResultFilter
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_TXOPPROCEDURE_H
+#endif
+

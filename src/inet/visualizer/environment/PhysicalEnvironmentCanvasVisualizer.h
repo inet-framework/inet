@@ -65,5 +65,5 @@ class INET_API PhysicalEnvironmentCanvasVisualizer : public PhysicalEnvironmentV
 
 } // namespace inet
 
-#endif // ifndef __INET_PHYSICALENVIRONMENTCANVASVISUALIZER_H
+#endif
 

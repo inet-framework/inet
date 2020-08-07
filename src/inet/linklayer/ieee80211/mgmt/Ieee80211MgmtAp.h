@@ -132,5 +132,5 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211MGMTAP_H
+#endif
 

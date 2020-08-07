@@ -45,4 +45,5 @@ class INET_API RecipientAckPolicy : public ModeSetListener, public IRecipientAck
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RECIPIENTACKPOLICY_H
+#endif
+

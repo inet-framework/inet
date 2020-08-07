@@ -58,5 +58,5 @@ class INET_API PacketDuplicatorBase : public PacketProcessorBase, public virtual
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDUPLICATORBASE_H
+#endif
 

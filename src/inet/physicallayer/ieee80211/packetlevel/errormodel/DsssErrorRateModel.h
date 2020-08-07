@@ -18,8 +18,8 @@
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
 
-#ifndef __INET_DSSS_ERROR_RATE_MODEL_H
-#define __INET_DSSS_ERROR_RATE_MODEL_H
+#ifndef __INET_DSSSERRORRATEMODEL_H
+#define __INET_DSSSERRORRATEMODEL_H
 //#include <stdint.h>
 
 #include "inet/common/INETDefs.h"
@@ -94,5 +94,5 @@ class INET_API DsssErrorRateModel
 
 } // namespace inet
 
-#endif /* DSSS_ERROR_RATE_MODEL_H */
+#endif
 

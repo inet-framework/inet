@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3SPLITTER_H_
-#define __INET_OSPFV3SPLITTER_H_
+#ifndef __INET_OSPFV3SPLITTER_H
+#define __INET_OSPFV3SPLITTER_H
 
 #include <string>
 
@@ -52,5 +52,5 @@ class INET_API Ospfv3Splitter : protected cListener, public cSimpleModule
 } //namespace ospfv3
 } //namespace inet
 
-#endif // __INET_OSPFV3SPLITTER_H_
+#endif
 

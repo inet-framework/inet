@@ -430,5 +430,5 @@ class INET_API TcpSocket : public ISocket
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPSOCKET_H
+#endif
 

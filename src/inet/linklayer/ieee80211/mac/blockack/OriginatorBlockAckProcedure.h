@@ -33,4 +33,5 @@ class INET_API OriginatorBlockAckProcedure : public IOriginatorBlockAckProcedure
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_ORIGINATORBLOCKACKPROCEDURE_H
+#endif
+

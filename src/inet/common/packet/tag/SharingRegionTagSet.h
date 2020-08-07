@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SHARINGREGIONTAGSET_H_
-#define __INET_SHARINGREGIONTAGSET_H_
+#ifndef __INET_SHARINGREGIONTAGSET_H
+#define __INET_SHARINGREGIONTAGSET_H
 
 #include <algorithm>
 #include <functional>
@@ -452,5 +452,5 @@ inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::remov
 
 } // namespace
 
-#endif // #ifndef __INET_SHARINGREGIONTAGSET_H_
+#endif
 

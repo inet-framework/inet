@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ISOCKETMAP_H
-#define __INET_ISOCKETMAP_H
+#ifndef __INET_SOCKETMAP_H
+#define __INET_SOCKETMAP_H
 
 #include <map>
 
@@ -84,5 +84,5 @@ std::ostream& operator<<(std::ostream& out, const ISocket& entry);
 
 } // namespace inet
 
-#endif // ifndef __INET_ISOCKETMAP_H
+#endif
 

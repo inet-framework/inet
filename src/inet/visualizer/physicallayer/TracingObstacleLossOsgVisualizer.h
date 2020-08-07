@@ -67,5 +67,5 @@ class INET_API TracingObstacleLossOsgVisualizer : public TracingObstacleLossVisu
 
 } // namespace inet
 
-#endif // ifndef __INET_TRACINGOBSTACLELOSSOSGVISUALIZER_H
+#endif
 

@@ -167,5 +167,5 @@ inline std::ostream& operator<<(std::ostream& ostr, Ospfv2Area& area)
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2AREA_H
+#endif
 

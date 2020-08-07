@@ -41,5 +41,5 @@ class INET_API BandListening : public ListeningBase
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_BANDLISTENING_H
+#endif
 

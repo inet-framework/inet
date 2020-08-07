@@ -36,5 +36,5 @@ class INET_API InterfaceStateBackup : public Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACESTATEBACKUP_H
+#endif
 

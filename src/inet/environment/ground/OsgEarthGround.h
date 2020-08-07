@@ -51,5 +51,5 @@ class INET_API OsgEarthGround : public IGround, public cModule
 
 #endif // defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 
-#endif // ifndef __INET_OSGEARTHGROUND_H
+#endif
 

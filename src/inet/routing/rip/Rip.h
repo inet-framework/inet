@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RIPROUTING_H
-#define __INET_RIPROUTING_H
+#ifndef __INET_RIP_H
+#define __INET_RIP_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
@@ -188,5 +188,5 @@ private:
 
 } // namespace inet
 
-#endif // ifndef __INET_RIPROUTING_H
+#endif
 

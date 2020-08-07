@@ -33,5 +33,5 @@ class INET_API FragmentTagBasedFragmenter : public FragmenterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FRAGMENTTAGBASEDFRAGMENTER_H
+#endif
 

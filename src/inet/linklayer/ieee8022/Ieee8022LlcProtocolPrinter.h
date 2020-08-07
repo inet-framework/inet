@@ -30,5 +30,5 @@ class INET_API Ieee8022LlcProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_IEEE8022LLCPROTOCOLPRINTER_H
+#endif
 

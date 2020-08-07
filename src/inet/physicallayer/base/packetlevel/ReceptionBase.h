@@ -81,5 +81,5 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEPTIONBASE_H
+#endif
 

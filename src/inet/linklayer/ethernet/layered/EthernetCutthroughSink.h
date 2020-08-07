@@ -41,5 +41,5 @@ class INET_API EthernetCutthroughSink : public PacketStreamer
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETCUTTHROUGHSINK_H
+#endif
 

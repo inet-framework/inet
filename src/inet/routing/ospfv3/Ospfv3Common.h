@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3COMMON_H_
-#define __INET_OSPFV3COMMON_H_
+#ifndef __INET_OSPFV3COMMON_H
+#define __INET_OSPFV3COMMON_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -413,5 +413,5 @@ inline bool operator==(const Ospfv3LsaHeader& leftLSA, const Ospfv3LsaHeader& ri
 } //namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3COMMON_H_
+#endif
 

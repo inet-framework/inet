@@ -85,5 +85,5 @@ class INET_API InfoVisualizerBase : public VisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_INFOVISUALIZERBASE_H
+#endif
 

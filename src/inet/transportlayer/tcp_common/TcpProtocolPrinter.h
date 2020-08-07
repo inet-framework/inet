@@ -31,5 +31,5 @@ class INET_API TcpProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_UDPPROTOCOLPRINTER_H
+#endif
 

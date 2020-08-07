@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_IINTERPOLATOR_H_
-#define __INET_MATH_IINTERPOLATOR_H_
+#ifndef __INET_IINTERPOLATOR_H
+#define __INET_IINTERPOLATOR_H
 
 #include "inet/common/INETDefs.h"
 
@@ -58,5 +58,5 @@ class INET_API IInterpolator : public cObject
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_IINTERPOLATOR_H_
+#endif
 

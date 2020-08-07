@@ -159,5 +159,5 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 
 } // namespace inet
 
-#endif // ifndef __INET_MACADDRESSTABLE_H
+#endif
 

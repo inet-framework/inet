@@ -388,5 +388,5 @@ class INET_API Router
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2ROUTER_H
+#endif
 

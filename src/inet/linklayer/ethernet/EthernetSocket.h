@@ -135,5 +135,5 @@ class INET_API EthernetSocket : public ISocket
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETSOCKET_H
+#endif
 

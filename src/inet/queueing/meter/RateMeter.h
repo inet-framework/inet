@@ -42,5 +42,5 @@ class INET_API RateMeter : public PacketMeterBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_RATEMETER_H
+#endif
 

@@ -197,5 +197,5 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPFORWARDING_H
+#endif
 

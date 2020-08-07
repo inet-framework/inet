@@ -122,5 +122,5 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MEDIUMOSGVISUALIZER_H
+#endif
 

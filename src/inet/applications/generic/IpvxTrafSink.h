@@ -52,5 +52,5 @@ class INET_API IpvxTrafSink : public ApplicationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IPVXTRAFSINK_H
+#endif
 

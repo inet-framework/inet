@@ -53,5 +53,5 @@ class INET_API ProtocolGroup
 
 } // namespace inet
 
-#endif // ifndef __INET_PROTOCOLGROUP_H
+#endif
 

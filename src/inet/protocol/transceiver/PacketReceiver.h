@@ -30,5 +30,5 @@ class INET_API PacketReceiver : public PacketReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETRECEIVER_H
+#endif
 

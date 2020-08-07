@@ -52,5 +52,5 @@ class INET_API IPropagation : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IPROPAGATION_H
+#endif
 

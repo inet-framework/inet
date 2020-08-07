@@ -29,5 +29,5 @@ class INET_API Ipv4NetworkLayer : public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4NETWORKLAYER_H
+#endif
 

@@ -91,5 +91,5 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSCHEDULERBASE_H
+#endif
 

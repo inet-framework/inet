@@ -66,5 +66,5 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKOSGVISUALIZERBASE_H
+#endif
 

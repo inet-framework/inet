@@ -36,5 +36,5 @@ class INET_API InterfaceStateWaiting : public Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2INTERFACESTATEWAITING_H
+#endif
 

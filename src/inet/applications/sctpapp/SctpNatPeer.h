@@ -155,5 +155,5 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPNATPEER_H
+#endif
 

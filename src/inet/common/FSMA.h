@@ -161,5 +161,5 @@ namespace inet {
 
 } // namespace inet
 
-#endif // ifndef __INET_FSMA_H
+#endif
 

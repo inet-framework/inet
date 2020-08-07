@@ -204,5 +204,5 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211MGMTSTA_H
+#endif
 

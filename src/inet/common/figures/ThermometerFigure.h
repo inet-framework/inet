@@ -93,5 +93,5 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
 
 } // namespace inet
 
-#endif // ifndef __INET_ThermoMeterFigure_H
+#endif
 

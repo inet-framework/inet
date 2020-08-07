@@ -49,5 +49,5 @@ class INET_API QueueFigure : public cRectangleFigure
 
 } // namespace inet
 
-#endif // ifndef __INET_QUEUEFIGURE_H
+#endif
 

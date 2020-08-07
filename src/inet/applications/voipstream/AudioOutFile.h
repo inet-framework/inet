@@ -56,5 +56,5 @@ class INET_API AudioOutFile
 
 } // namespace inet
 
-#endif // ifndef __INET_AUDIOOUTFILE_H
+#endif
 

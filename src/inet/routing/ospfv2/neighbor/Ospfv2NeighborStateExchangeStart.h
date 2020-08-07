@@ -36,5 +36,5 @@ class INET_API NeighborStateExchangeStart : public NeighborState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2NEIGHBORSTATEEXCHANGESTART_H
+#endif
 

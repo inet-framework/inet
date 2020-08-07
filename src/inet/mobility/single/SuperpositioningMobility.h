@@ -74,5 +74,5 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_SUPERPOSITIONINGMOBILITY_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __IORIGINATORBLOCKACKAGREEMENTPOLICY_H
-#define __IORIGINATORBLOCKACKAGREEMENTPOLICY_H
+#ifndef __INET_IORIGINATORBLOCKACKAGREEMENTPOLICY_H
+#define __INET_IORIGINATORBLOCKACKAGREEMENTPOLICY_H
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -45,4 +45,5 @@ class INET_API IOriginatorBlockAckAgreementPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __IORIGINATORBLOCKACKAGREEMENTPOLICY_H
+#endif
+

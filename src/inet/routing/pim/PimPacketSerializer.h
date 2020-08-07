@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef INET_ROUTING_PIM_PIMPACKETSERIALIZER_H_
-#define INET_ROUTING_PIM_PIMPACKETSERIALIZER_H_
+#ifndef __INET_PIMPACKETSERIALIZER_H
+#define __INET_PIMPACKETSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
@@ -39,4 +39,5 @@ class INET_API PimPacketSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 
-#endif /* INET_ROUTING_PIM_PIMPACKETSERIALIZER_H_ */
+#endif
+

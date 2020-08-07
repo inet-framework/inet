@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALRECEIVER_H
-#define __INET_IDEALRECEIVER_H
+#ifndef __INET_UNITDISKRECEIVER_H
+#define __INET_UNITDISKRECEIVER_H
 
 #include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
 
@@ -52,5 +52,5 @@ class INET_API UnitDiskReceiver : public ReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALRECEIVER_H
+#endif
 

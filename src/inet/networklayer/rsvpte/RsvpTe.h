@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_RSVP_H
-#define __INET_RSVP_H
+#ifndef __INET_RSVPTE_H
+#define __INET_RSVPTE_H
 
 #include <vector>
 
@@ -310,5 +310,5 @@ std::ostream& operator<<(std::ostream& os, const FlowSpecObj& a);
 
 } // namespace inet
 
-#endif // ifndef __INET_RSVP_H
+#endif
 

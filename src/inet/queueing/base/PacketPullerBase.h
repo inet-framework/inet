@@ -60,5 +60,5 @@ class INET_API PacketPullerBase : public PacketProcessorBase, public virtual IPa
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETPULLERBASE_H
+#endif
 

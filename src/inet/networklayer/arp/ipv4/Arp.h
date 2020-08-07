@@ -130,5 +130,5 @@ class INET_API Arp : public OperationalBase, public IArp
 
 } // namespace inet
 
-#endif // ifndef __INET_ARP_H
+#endif
 

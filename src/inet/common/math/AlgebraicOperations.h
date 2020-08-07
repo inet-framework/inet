@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_ALGEBRAICOPERATIONS_H_
-#define __INET_MATH_ALGEBRAICOPERATIONS_H_
+#ifndef __INET_ALGEBRAICOPERATIONS_H
+#define __INET_ALGEBRAICOPERATIONS_H
 
 #include "inet/common/math/PrimitiveFunctions.h"
 
@@ -445,5 +445,5 @@ class INET_API SummedFunction : public FunctionBase<R, D>
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_ALGEBRAICOPERATIONS_H_
+#endif
 

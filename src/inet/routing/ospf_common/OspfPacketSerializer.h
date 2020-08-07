@@ -37,5 +37,5 @@ class INET_API OspfPacketSerializer : public FieldsChunkSerializer
 } // namespace ospf
 } // namespace inet
 
-#endif // ifndef __INET_OSPFPACKETSERIALIZER_H
+#endif
 

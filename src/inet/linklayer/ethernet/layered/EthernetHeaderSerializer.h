@@ -48,4 +48,5 @@ class INET_API Ieee8023TypeOrLengthSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETHEADERSERIALIZER_H
+#endif
+

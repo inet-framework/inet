@@ -55,5 +55,5 @@ class INET_API IReceptionSymbolModel : public virtual ISignalSymbolModel
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_ISIGNALSYMBOLMODEL_H
+#endif
 

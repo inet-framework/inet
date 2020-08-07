@@ -260,5 +260,5 @@ static_assert(!std::is_integral<T>::value, "maxnan() is only meant for doubles a
 
 } // namespace inet
 
-#endif // ifndef __INET_INETMATH_H
+#endif
 

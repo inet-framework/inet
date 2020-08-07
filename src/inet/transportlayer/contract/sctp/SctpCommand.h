@@ -95,5 +95,5 @@ enum SctpFlags {
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPCOMMAND_H
+#endif
 

@@ -41,4 +41,5 @@ class INET_API IRecipientQosAckPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRECIPIENTQOSACKPOLICY_H
+#endif
+

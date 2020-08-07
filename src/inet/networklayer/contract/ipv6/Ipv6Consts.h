@@ -27,5 +27,5 @@ const B IPv6_HEADER_BYTES = B(40);
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6CONSTS_H
+#endif
 

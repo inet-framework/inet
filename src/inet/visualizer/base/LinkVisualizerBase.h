@@ -129,5 +129,5 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKVISUALIZERBASE_H
+#endif
 

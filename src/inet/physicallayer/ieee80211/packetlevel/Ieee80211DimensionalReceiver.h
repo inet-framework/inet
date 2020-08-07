@@ -41,5 +41,5 @@ class INET_API Ieee80211DimensionalReceiver : public Ieee80211ReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211DIMENSIONALRECEIVER_H
+#endif
 

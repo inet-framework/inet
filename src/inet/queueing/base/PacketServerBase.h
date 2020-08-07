@@ -54,5 +54,5 @@ class INET_API PacketServerBase : public PacketProcessorBase, public virtual IAc
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSERVERBASE_H
+#endif
 

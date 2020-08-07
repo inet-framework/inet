@@ -51,5 +51,5 @@ class INET_API LinearMobility : public MovingMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LINEARMOBILITY_H
+#endif
 

@@ -39,3 +39,4 @@ class INET_API HcfFs : public AlternativesFs {
 } // namespace inet
 
 #endif
+

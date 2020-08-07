@@ -57,5 +57,5 @@ class INET_API StaticLinearMobility : public StationaryMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_STATICLINEARMOBILITY_H
+#endif
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALLISTENING_H
-#define __INET_IDEALLISTENING_H
+#ifndef __INET_UNITDISKLISTENING_H
+#define __INET_UNITDISKLISTENING_H
 
 #include "inet/physicallayer/base/packetlevel/ListeningBase.h"
 
@@ -39,5 +39,5 @@ class INET_API UnitDiskListening : public ListeningBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALLISTENING_H
+#endif
 

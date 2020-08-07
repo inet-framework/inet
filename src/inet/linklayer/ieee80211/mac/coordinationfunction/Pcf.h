@@ -45,4 +45,5 @@ class INET_API Pcf : public ICoordinationFunction, public cSimpleModule
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_PCF_H
+#endif
+

@@ -77,5 +77,5 @@ class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener
 
 } // namespace inet
 
-#endif // ifndef __INET_MPLS_H
+#endif
 

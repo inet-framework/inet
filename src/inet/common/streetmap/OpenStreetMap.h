@@ -131,4 +131,5 @@ class INET_API OpenStreetMap {
 
 } // namespace inet
 
-#endif // ifndef __INET_OPENSTREETMAP_H
+#endif
+

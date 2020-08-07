@@ -41,5 +41,5 @@ class INET_API PacketFilter : public PacketFilterBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETFILTER_H
+#endif
 

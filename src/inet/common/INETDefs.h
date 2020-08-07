@@ -104,4 +104,5 @@ inline void printElapsedTime(const char *name, long startTime)
 
 } // namespace inet
 
-#endif // ifndef __INET_INETDEFS_H
+#endif
+

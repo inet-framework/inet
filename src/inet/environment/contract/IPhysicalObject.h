@@ -47,5 +47,5 @@ class INET_API IPhysicalObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IPHYSICALOBJECT_H
+#endif
 

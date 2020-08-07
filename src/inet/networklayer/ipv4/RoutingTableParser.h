@@ -98,5 +98,5 @@ class INET_API RoutingTableParser
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTINGTABLEPARSER_H
+#endif
 

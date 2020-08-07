@@ -48,5 +48,5 @@ class INET_API StreamThroughTransmitter : public StreamingTransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_STREAMTHROUGHTRANSMITTER_H
+#endif
 

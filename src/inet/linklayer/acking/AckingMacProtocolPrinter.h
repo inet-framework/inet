@@ -31,5 +31,5 @@ class INET_API AckingMacProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_ACKINGMACPROTOCOLPRINTER_H
+#endif
 

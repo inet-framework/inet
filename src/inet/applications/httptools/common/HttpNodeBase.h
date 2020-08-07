@@ -102,5 +102,5 @@ class INET_API HttpNodeBase : public cSimpleModule, public LifecycleUnsupported
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPNODEBASE_H
+#endif
 

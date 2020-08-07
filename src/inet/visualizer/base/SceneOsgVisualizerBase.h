@@ -47,5 +47,5 @@ class INET_API SceneOsgVisualizerBase : public SceneVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCENEOSGVISUALIZERBASE_H
+#endif
 

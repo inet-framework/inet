@@ -47,5 +47,5 @@ class INET_API Cuboid : public ShapeBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CUBOID_H
+#endif
 

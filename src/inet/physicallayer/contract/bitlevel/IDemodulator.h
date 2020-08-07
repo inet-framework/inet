@@ -35,5 +35,5 @@ class INET_API IDemodulator : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEMODULATOR_H
+#endif
 

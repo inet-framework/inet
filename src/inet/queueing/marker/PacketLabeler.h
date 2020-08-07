@@ -41,5 +41,5 @@ class INET_API PacketLabeler : public PacketLabelerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETLABELER_H
+#endif
 

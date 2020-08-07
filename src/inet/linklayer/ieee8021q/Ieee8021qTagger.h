@@ -40,5 +40,5 @@ class INET_API Ieee8021qTagger : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021QTAGGER_H
+#endif
 

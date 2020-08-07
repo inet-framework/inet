@@ -37,5 +37,5 @@ class INET_API ContentBasedTagger : public PacketTaggerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_CONTENTBASEDTAGGER_H
+#endif
 

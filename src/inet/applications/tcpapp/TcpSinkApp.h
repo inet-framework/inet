@@ -79,5 +79,5 @@ class INET_API TcpSinkAppThread : public TcpServerThreadBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPSINKAPP_H
+#endif
 

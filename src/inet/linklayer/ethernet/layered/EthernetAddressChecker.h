@@ -42,5 +42,5 @@ class INET_API EthernetAddressChecker : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETADDRESSCHECKER_H
+#endif
 

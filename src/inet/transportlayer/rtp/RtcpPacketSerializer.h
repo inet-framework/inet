@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef INET_TRANSPORTLAYER_RTP_RTCPPACKETSERIALIZER_H_
-#define INET_TRANSPORTLAYER_RTP_RTCPPACKETSERIALIZER_H_
+#ifndef __INET_RTCPPACKETSERIALIZER_H
+#define __INET_RTCPPACKETSERIALIZER_H
 
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
@@ -39,5 +39,5 @@ class INET_API RtcpPacketSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 
-#endif /* INET_TRANSPORTLAYER_RTP_RTCPPACKETSERIALIZER_H_ */
+#endif
 

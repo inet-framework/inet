@@ -51,5 +51,5 @@ class INET_API ListeningBase : public IListening
 
 } // namespace inet
 
-#endif // ifndef __INET_LISTENINGBASE_H
+#endif
 

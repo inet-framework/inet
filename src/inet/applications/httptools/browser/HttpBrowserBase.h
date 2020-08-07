@@ -158,5 +158,5 @@ class INET_API HttpBrowserBase : public HttpNodeBase
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPBROWSERBASE_H
+#endif
 

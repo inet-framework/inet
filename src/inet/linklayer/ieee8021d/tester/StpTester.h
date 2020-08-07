@@ -79,5 +79,5 @@ class INET_API StpTester : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_STPTESTER_H
+#endif
 

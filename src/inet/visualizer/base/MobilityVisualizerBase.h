@@ -88,5 +88,5 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_MOBILITYVISUALIZERBASE_H
+#endif
 

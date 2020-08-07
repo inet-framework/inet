@@ -58,5 +58,5 @@ class INET_API CloudDelayerBase : public cSimpleModule, public NetfilterBase::Ho
 
 } // namespace inet
 
-#endif // ifndef __INET_CLOUDDELAYERBASE_H
+#endif
 

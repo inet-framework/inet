@@ -54,5 +54,5 @@ class INET_API HttpServerDirectEvilB : public HttpServerDirect
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPSERVERDIRECTEVILB_H
+#endif
 

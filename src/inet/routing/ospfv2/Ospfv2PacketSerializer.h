@@ -72,5 +72,5 @@ class INET_API Ospfv2PacketSerializer : public FieldsChunkSerializer
 } // namespace ospfv2
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2PACKETSERIALIZER_H
+#endif
 

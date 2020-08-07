@@ -167,5 +167,5 @@ struct ip
 
 } // namespace inet
 
-#endif // ifndef __INET_IP_H
+#endif
 

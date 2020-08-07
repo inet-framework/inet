@@ -43,4 +43,5 @@ class InstrumentUtil
     static bool CohenSutherlandLineClip(double& x0, double& y0, double& x1, double& y1, double xmin, double xmax, double ymin, double ymax);
 };
 
-#endif // ifndef __INET_INSTRUMENTUTIL_H
+#endif
+

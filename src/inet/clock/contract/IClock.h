@@ -75,5 +75,5 @@ class INET_API IClock
 
 } // namespace inet
 
-#endif // ifndef __INET_ICLOCK_H
+#endif
 

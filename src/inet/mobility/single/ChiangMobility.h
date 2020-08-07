@@ -58,5 +58,5 @@ class INET_API ChiangMobility : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CHIANGMOBILITY_H
+#endif
 

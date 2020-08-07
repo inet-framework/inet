@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MATH_INDEXSEQUENCE_H_
-#define __INET_MATH_INDEXSEQUENCE_H_
+#ifndef __INET_INDEXSEQUENCE_H
+#define __INET_INDEXSEQUENCE_H
 
 #include <type_traits>
 #include "inet/common/INETDefs.h"
@@ -132,4 +132,5 @@ using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_INDEXSEQUENCE_H_
+#endif
+

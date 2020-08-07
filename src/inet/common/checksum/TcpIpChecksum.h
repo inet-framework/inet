@@ -54,5 +54,5 @@ class INET_API TcpIpChecksum
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPIPCHECKSUM_H
+#endif
 

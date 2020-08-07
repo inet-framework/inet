@@ -67,5 +67,5 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETPROCESSORBASE_H
+#endif
 

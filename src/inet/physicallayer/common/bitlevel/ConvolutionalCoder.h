@@ -157,5 +157,5 @@ class INET_API ConvolutionalCoder : public IFecCoder
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_CONVOLUTIONALCODER_H
+#endif
 

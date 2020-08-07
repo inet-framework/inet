@@ -52,5 +52,5 @@ class INET_API Plane : public GeometricObjectBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PLANE_H
+#endif
 

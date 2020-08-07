@@ -40,4 +40,5 @@ class INET_API IRecipientMacDataService
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRECIPIENTMACDATASERVICE_H
+#endif
+

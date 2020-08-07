@@ -35,5 +35,5 @@ class INET_API IApskModulation : public IModulation
 
 } // namespace inet
 
-#endif // ifndef __INET_IAPSKMODULATION_H
+#endif
 

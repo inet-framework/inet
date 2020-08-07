@@ -57,5 +57,5 @@ class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptio
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_SIGNALPACKETMODEL_H
+#endif
 

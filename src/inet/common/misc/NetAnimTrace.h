@@ -50,5 +50,5 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
 
 } // namespace inet
 
-#endif    // header guard
+#endif
 

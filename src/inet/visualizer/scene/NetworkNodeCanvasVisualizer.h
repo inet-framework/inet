@@ -49,5 +49,5 @@ class INET_API NetworkNodeCanvasVisualizer : public NetworkNodeVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKNODECANVASVISUALIZER_H
+#endif
 

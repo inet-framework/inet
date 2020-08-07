@@ -82,5 +82,5 @@ class INET_API BonnMotionFileCache
 
 } // namespace inet
 
-#endif // ifndef __INET_BONNMOTIONFILECACHE_H
+#endif
 

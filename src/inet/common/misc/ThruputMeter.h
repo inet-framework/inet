@@ -63,5 +63,5 @@ class INET_API ThruputMeter : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_THRUPUTMETER_H
+#endif
 

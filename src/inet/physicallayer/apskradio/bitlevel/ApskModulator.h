@@ -49,5 +49,5 @@ class INET_API ApskModulator : public IModulator, public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKMODULATOR_H
+#endif
 

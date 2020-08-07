@@ -27,4 +27,5 @@
 
 #include <omnetpp.h>
 
-#endif // ifndef __INET_PRECOMPILED_H
+#endif
+

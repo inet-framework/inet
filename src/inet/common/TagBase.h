@@ -33,5 +33,5 @@ class INET_API TagBase : public cObject, public SharedBase<TagBase>
 
 } // namespace inet
 
-#endif // ifndef __INET_TAGBASE_H
+#endif
 

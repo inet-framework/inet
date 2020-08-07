@@ -300,5 +300,5 @@ inline char hexPairToByte(char upperHex, char lowerHex)
 
 } // namespace inet
 
-#endif    // __COMMON_HPP__
+#endif
 

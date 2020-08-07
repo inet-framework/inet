@@ -36,5 +36,5 @@ class INET_API NeighborStateFull : public NeighborState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2NEIGHBORSTATEFULL_H
+#endif
 

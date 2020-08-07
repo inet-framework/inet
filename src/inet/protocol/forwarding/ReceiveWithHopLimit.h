@@ -36,5 +36,5 @@ class INET_API ReceiveWithHopLimit : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVEWITHHOPLIMIT_H
+#endif
 

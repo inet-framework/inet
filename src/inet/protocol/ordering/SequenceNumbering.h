@@ -35,5 +35,5 @@ class INET_API SequenceNumbering : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SEQUENCENUMBERING_H
+#endif
 

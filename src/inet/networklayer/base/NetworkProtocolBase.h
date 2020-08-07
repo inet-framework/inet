@@ -74,5 +74,5 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKPROTOCOLBASE_H
+#endif
 

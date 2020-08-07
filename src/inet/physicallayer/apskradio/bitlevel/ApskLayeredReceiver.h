@@ -85,5 +85,5 @@ class INET_API ApskLayeredReceiver : public SnirReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKLAYEREDRECEIVER_H
+#endif
 

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETDISSECTOR_H_
-#define __INET_PACKETDISSECTOR_H_
+#ifndef __INET_PACKETDISSECTOR_H
+#define __INET_PACKETDISSECTOR_H
 
 #include <stack>
 #include <functional>
@@ -170,5 +170,5 @@ class INET_API PacketDissector
 
 } // namespace
 
-#endif // #ifndef __INET_PACKETDISSECTOR_H_
+#endif
 

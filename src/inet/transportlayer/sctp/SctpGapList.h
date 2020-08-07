@@ -187,5 +187,5 @@ inline std::ostream& operator<<(std::ostream& ostr, const SctpGapList& gapList) 
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPGAPLIST_H
+#endif
 

@@ -60,5 +60,5 @@ class INET_API ILifecycle
 
 } // namespace inet
 
-#endif // ifndef __INET_ILIFECYCLE_H
+#endif
 

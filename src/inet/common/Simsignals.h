@@ -132,5 +132,5 @@ void printSignalBanner(simsignal_t signalID, intval_t value, const cObject *deta
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMSIGNALS_H
+#endif
 

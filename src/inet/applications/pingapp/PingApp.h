@@ -123,3 +123,4 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
 } // namespace inet
 
 #endif
+

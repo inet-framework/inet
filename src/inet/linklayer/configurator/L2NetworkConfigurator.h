@@ -147,5 +147,5 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_L2NETWORKCONFIGURATOR_H
+#endif
 

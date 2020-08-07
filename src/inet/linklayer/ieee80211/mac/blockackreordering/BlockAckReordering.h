@@ -61,4 +61,5 @@ class INET_API BlockAckReordering
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // __INET_BLOCKACKREORDERING_H
+#endif
+

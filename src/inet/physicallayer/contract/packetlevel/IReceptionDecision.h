@@ -65,5 +65,5 @@ class INET_API IReceptionDecision : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IRECEPTIONDECISION_H
+#endif
 

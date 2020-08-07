@@ -59,5 +59,5 @@ class INET_API Ieee80211OfdmDecoder : public IDecoder
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMDECODER_H
+#endif
 

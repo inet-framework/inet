@@ -60,5 +60,5 @@ class INET_API ReceptionSampleModel : public SignalSampleModel, public virtual I
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_SIGNALSAMPLEMODEL_H
+#endif
 

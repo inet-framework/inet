@@ -59,5 +59,5 @@ class INET_API IErrorModel : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IERRORMODEL_H
+#endif
 

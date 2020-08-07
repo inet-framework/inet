@@ -62,5 +62,5 @@ class INET_API PcapReader
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPREADER_H
+#endif
 

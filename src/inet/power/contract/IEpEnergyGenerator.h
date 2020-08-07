@@ -50,5 +50,5 @@ class INET_API IEpEnergyGenerator : public virtual IEnergyGenerator
 
 } // namespace inet
 
-#endif // ifndef __INET_IEPENERGYGENERATOR_H
+#endif
 

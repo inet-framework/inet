@@ -46,5 +46,5 @@ class INET_API AdditiveScramblerModule : public cSimpleModule, public IScrambler
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_ADDITIVESCRAMBLERMODULE_H
+#endif
 

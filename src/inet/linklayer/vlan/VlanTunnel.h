@@ -43,5 +43,5 @@ class VlanTunnel : public cSimpleModule, public EthernetSocket::ICallback
 
 } // namespace inet
 
-#endif // ifndef __INET_VLANTUNNEL_H
+#endif
 

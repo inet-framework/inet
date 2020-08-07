@@ -40,5 +40,5 @@ class INET_API IPacketDropperFunction
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETDROPPERFUNCTION_H
+#endif
 

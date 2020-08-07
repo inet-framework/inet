@@ -37,5 +37,5 @@ class INET_API CrcCheckerBase : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CRCCHECKERBASE_H
+#endif
 

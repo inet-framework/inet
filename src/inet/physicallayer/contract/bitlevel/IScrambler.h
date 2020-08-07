@@ -43,5 +43,5 @@ class INET_API IScrambler : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_ISCRAMBLER_H
+#endif
 

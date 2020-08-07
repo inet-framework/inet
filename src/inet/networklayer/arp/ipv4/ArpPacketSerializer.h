@@ -38,4 +38,5 @@ class INET_API ArpPacketSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_ARPPACKETSERIALIZER_H
+#endif
+

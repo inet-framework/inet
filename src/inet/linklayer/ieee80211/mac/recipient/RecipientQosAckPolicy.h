@@ -49,4 +49,5 @@ class INET_API RecipientQosAckPolicy : public ModeSetListener, public IRecipient
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RECIPIENTQOSACKPOLICY_H
+#endif
+

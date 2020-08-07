@@ -57,5 +57,5 @@ class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public vi
 
 } // namespace inet
 
-#endif // ifndef __INET_SIGNALANALOGMODEL_H
+#endif
 

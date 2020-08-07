@@ -37,4 +37,5 @@ class INET_API IProcedureCallback
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IPROCEDURECALLBACK_H
+#endif
+

@@ -48,5 +48,5 @@ class INET_API Qam256Modulation : public MqamModulationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_QAM256MODULATION_H
+#endif
 

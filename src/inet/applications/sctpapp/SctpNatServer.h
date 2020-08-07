@@ -86,5 +86,5 @@ class INET_API SctpNatServer : public cSimpleModule, public LifecycleUnsupported
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPNATSERVER_H
+#endif
 

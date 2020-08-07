@@ -54,5 +54,5 @@ class INET_API Ieee80211OfdmInterleaver : public IInterleaver
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMINTERLEAVER_H
+#endif
 

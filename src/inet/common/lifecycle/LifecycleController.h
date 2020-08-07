@@ -101,5 +101,5 @@ class INET_API LifecycleController
 
 } // namespace inet
 
-#endif // ifndef __INET_LIFECYCLECONTROLLER_H
+#endif
 

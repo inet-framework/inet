@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3INSTANCE_H_
-#define __INET_OSPFV3INSTANCE_H_
+#ifndef __INET_OSPFV3INSTANCE_H
+#define __INET_OSPFV3INSTANCE_H
 
 #include <string>
 
@@ -68,5 +68,5 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Instance& instan
 } // namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3INSTANCE_H_
+#endif
 

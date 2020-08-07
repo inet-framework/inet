@@ -45,5 +45,5 @@ class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFecCoder
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_CONVOLUTIONALCODERMODULE_H
+#endif
 

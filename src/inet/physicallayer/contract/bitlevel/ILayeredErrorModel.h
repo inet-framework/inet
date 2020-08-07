@@ -66,5 +66,5 @@ class INET_API ILayeredErrorModel : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_ILAYEREDERRORMODEL_H
+#endif
 

@@ -36,5 +36,5 @@ class INET_API LayeredErrorModelBase : public cModule, public ILayeredErrorModel
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDERRORMODELBASE_H
+#endif
 

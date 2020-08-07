@@ -188,5 +188,5 @@ class INET_API IntervalTree
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERVALTREE_H
+#endif
 

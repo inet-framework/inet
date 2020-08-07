@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPV4DISSECTOR_H
-#define __INET_IPV4DISSECTOR_H
+#ifndef __INET_IPV4PROTOCOLDISSECTOR_H
+#define __INET_IPV4PROTOCOLDISSECTOR_H
 
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
@@ -30,5 +30,5 @@ class INET_API Ipv4ProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif  // __INET_IPV4DISSECTOR_H
+#endif
 

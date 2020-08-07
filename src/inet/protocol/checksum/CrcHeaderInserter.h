@@ -37,5 +37,5 @@ class INET_API CrcHeaderInserter : public CrcInserterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CRCHEADERINSERTER_H
+#endif
 

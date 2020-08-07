@@ -97,5 +97,5 @@ class INET_API IMacAddressTable
 
 } // namespace inet
 
-#endif // ifndef __INET_IMACADDRESSTABLE_H
+#endif
 

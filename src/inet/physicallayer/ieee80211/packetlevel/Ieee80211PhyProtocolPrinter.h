@@ -33,5 +33,5 @@ class INET_API Ieee80211PhyProtocolPrinter : public ProtocolPrinter
 } // namespace physicallayer
 } // namespace inet
 
-#endif // __INET_IEEE80211PHYPROTOCOLPRINTER_H
+#endif
 

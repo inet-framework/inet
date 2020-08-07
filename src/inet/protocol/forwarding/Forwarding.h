@@ -40,5 +40,5 @@ class INET_API Forwarding : public PacketPusherBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FORWARDING_H
+#endif
 

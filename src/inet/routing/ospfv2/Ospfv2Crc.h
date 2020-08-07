@@ -37,5 +37,5 @@ INET_API void setLsaHeaderCrc(Ospfv2LsaHeader& lsaHeader, CrcMode crcMode);
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2CRC_H
+#endif
 

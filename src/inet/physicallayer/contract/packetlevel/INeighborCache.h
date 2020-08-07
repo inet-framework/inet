@@ -45,5 +45,5 @@ class INET_API INeighborCache : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_INEIGHBORCACHE_H
+#endif
 

@@ -46,3 +46,4 @@ class INET_API StaticConcentricMobility : public StationaryMobilityBase
 }
 
 #endif
+

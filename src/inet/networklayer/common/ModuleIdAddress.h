@@ -70,5 +70,5 @@ class INET_API ModuleIdAddress
 
 } // namespace inet
 
-#endif // ifndef __INET_MODULEIDADDRESS_H
+#endif
 

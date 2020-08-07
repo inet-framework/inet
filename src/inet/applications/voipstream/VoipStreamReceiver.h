@@ -117,5 +117,5 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
 
 } // namespace inet
 
-#endif // ifndef __INET_VOIPSTREAMRECEIVER_H
+#endif
 

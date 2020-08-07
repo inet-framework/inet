@@ -17,8 +17,8 @@
 // @author: Zoltan Bojthe
 //
 
-#ifndef __INET_IEEE8022LLCDISSECTOR_H_
-#define __INET_IEEE8022LLCDISSECTOR_H_
+#ifndef __INET_IEEE8022LLCPROTOCOLDISSECTOR_H
+#define __INET_IEEE8022LLCPROTOCOLDISSECTOR_H
 
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
@@ -32,4 +32,5 @@ class INET_API Ieee802LlcDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_IEEE8022LLCDISSECTOR_H_
+#endif
+

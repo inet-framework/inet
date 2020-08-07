@@ -45,5 +45,5 @@ class INET_API MacAddressType : public IL3AddressType
 
 } // namespace inet
 
-#endif // ifndef __INET_MACADDRESSTYPE_H
+#endif
 

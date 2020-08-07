@@ -48,4 +48,5 @@ class INET_API PppTrailerSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_PPPHEADERSERIALIZER_H
+#endif
+

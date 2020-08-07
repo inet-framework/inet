@@ -42,5 +42,5 @@ class INET_API FcsInserterBase : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FCSINSERTERBASE_H
+#endif
 

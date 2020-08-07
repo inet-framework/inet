@@ -54,5 +54,5 @@ class INET_API Ieee80211OfdmModulator : public IModulator
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifnded __INET_IEEE80211OFDMMODULATOR_H
+#endif
 

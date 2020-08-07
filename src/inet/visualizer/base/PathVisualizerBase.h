@@ -142,5 +142,5 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_PATHVISUALIZERBASE_H
+#endif
 

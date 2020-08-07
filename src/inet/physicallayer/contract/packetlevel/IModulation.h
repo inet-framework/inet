@@ -49,5 +49,5 @@ class INET_API IModulation : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IMODULATION_H
+#endif
 

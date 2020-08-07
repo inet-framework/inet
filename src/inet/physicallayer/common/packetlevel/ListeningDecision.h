@@ -42,5 +42,5 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_LISTENINGDECISION_H
+#endif
 

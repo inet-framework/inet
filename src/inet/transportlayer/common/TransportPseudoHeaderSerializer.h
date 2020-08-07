@@ -35,5 +35,5 @@ class INET_API TransportPseudoHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_TRANSPORTPSEUDOHEADERSERIALIZER_H
+#endif
 

@@ -213,5 +213,5 @@ class INET_API PostureTransition
 
 } // namespace inet
 
-#endif // ifndef __INET_POSTURETRANSITION_H
+#endif
 

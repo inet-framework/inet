@@ -73,5 +73,5 @@ class INET_API BehaviorAggregateClassifier : public queueing::PacketClassifierBa
 
 } // namespace inet
 
-#endif // ifndef __INET_BEHAVIORAGGREGATECLASSIFIER_H
+#endif
 

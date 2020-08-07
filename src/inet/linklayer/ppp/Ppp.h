@@ -85,5 +85,5 @@ class INET_API Ppp : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_PPP_H
+#endif
 

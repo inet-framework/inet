@@ -62,5 +62,5 @@ class INET_API AlternatingEpEnergyConsumer : public cSimpleModule, public IEpEne
 
 } // namespace inet
 
-#endif // ifndef __INET_ALTERNATINGEPENERGYCONSUMER_H
+#endif
 

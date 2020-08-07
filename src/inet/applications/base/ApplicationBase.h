@@ -36,5 +36,5 @@ class INET_API ApplicationBase : public OperationalBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APPLICATIONBASE_H
+#endif
 

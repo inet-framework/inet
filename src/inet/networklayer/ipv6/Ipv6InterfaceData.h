@@ -806,5 +806,5 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6INTERFACEDATA_H
+#endif
 

@@ -40,5 +40,5 @@ class INET_API FcsHeaderChecker : public FcsCheckerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FCSHEADERCHECKER_H
+#endif
 

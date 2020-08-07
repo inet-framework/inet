@@ -85,5 +85,5 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDESTREAMER_H
+#endif
 

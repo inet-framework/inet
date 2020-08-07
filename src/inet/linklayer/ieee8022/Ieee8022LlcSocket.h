@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_LLCSOCKET_H
-#define __INET_LLCSOCKET_H
+#ifndef __INET_IEEE8022LLCSOCKET_H
+#define __INET_IEEE8022LLCSOCKET_H
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
@@ -101,5 +101,5 @@ class INET_API Ieee8022LlcSocket : public ISocket
 
 } // namespace inet
 
-#endif // ifndef __INET_LLCSOCKET_H
+#endif
 

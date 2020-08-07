@@ -27,5 +27,5 @@ INET_API void endPacketFlow(cModule *module, Packet *packet, const char *name);
 
 } // namespace inet
 
-#endif // ifndef __INET_FLOWTAG_H
+#endif
 

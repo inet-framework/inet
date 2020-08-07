@@ -53,5 +53,5 @@ class INET_API Ieee802154UwbIrReceiver : public ReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154UWBIRRECEIVER_H
+#endif
 

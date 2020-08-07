@@ -43,5 +43,5 @@ class INET_API IsotropicDimensionalBackgroundNoise : public cModule, public IBac
 
 } // namespace inet
 
-#endif // ifndef __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
+#endif
 

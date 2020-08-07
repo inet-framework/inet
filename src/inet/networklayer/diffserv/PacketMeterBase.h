@@ -59,5 +59,5 @@ class INET_API PacketMeterBase : public PacketProcessorBase, public IPassivePack
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETMETERBASE_H
+#endif
 

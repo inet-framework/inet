@@ -15,6 +15,9 @@
 *                                                                         *
 ***************************************************************************/
 
+#ifndef __INET_RTPAVPROFILE_H
+#define __INET_RTPAVPROFILE_H
+
 #include "inet/common/INETDefs.h"
 
 #include "inet/transportlayer/rtp/RtpProfile.h"
@@ -43,4 +46,6 @@ class INET_API RtpAvProfile : public RtpProfile
 } // namespace rtp
 
 } // namespace inet
+
+#endif
 

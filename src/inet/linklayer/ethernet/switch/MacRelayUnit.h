@@ -82,5 +82,5 @@ class INET_API MacRelayUnit : public LayeredProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_MACRELAYUNIT_H
+#endif
 

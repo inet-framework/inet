@@ -70,5 +70,5 @@ class INET_API SimpleVoipSender : public cSimpleModule, public LifecycleUnsuppor
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLEVOIPSENDER_H
+#endif
 

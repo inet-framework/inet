@@ -35,5 +35,5 @@ class INET_API NetworkNamespaceContext
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKNAMESPACECONTEXT_H
+#endif
 

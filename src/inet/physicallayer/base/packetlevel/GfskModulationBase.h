@@ -42,5 +42,5 @@ class INET_API GfskModulationBase : public IModulation
 
 } // namespace inet
 
-#endif // ifndef __INET_GFSKMODULATIONBASE_H
+#endif
 

@@ -35,5 +35,5 @@ class INET_API FragmentNumberHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_FRAGMENTNUMBERHEADERSERIALIZER_H
+#endif
 

@@ -66,5 +66,5 @@ class INET_API Ipv4NodeConfigurator : public cSimpleModule, public ILifecycle, p
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4NODECONFIGURATOR_H
+#endif
 

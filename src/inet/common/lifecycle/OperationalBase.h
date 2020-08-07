@@ -28,5 +28,5 @@ class INET_API OperationalBase : public OperationalMixin<cSimpleModule>
 
 } // namespace inet
 
-#endif // ifndef __INET_OPERATIONALBASE_H
+#endif
 

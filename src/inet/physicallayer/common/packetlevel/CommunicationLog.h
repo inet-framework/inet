@@ -42,5 +42,5 @@ class INET_API CommunicationLog
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_COMMUNICATIONLOG_H
+#endif
 

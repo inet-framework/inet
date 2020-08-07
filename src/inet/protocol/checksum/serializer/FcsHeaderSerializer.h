@@ -35,5 +35,5 @@ class INET_API FcsHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_FCSHEADERSERIALIZER_H
+#endif
 

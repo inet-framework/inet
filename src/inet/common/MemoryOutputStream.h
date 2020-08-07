@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MEMORYOUTPUTSTREAM_H_
-#define __INET_MEMORYOUTPUTSTREAM_H_
+#ifndef __INET_MEMORYOUTPUTSTREAM_H
+#define __INET_MEMORYOUTPUTSTREAM_H
 
 #include "inet/common/Units.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -355,5 +355,5 @@ class INET_API MemoryOutputStream {
 
 } // namespace inet
 
-#endif // #ifndef __INET_MEMORYOUTPUTSTREAM_H_
+#endif
 

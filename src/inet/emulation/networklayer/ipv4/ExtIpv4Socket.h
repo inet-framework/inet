@@ -56,5 +56,5 @@ class INET_API ExtIpv4Socket : public cSimpleModule, public RealTimeScheduler::I
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTIPV4SOCKET_H
+#endif
 

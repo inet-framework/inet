@@ -85,5 +85,5 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TURTLEMOBILITY_H
+#endif
 

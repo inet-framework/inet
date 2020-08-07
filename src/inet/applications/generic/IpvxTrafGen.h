@@ -85,5 +85,5 @@ class INET_API IpvxTrafGen : public ApplicationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IPVXTRAFGEN_H
+#endif
 

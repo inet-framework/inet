@@ -85,5 +85,5 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211VISUALIZERBASE_H
+#endif
 

@@ -46,5 +46,5 @@ class INET_API IReceptionAnalogModel : public virtual ISignalAnalogModel
 
 } // namespace inet
 
-#endif // ifndef __INET_ISIGNALANALOGMODEL_H
+#endif
 

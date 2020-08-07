@@ -197,5 +197,5 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
 } // namespace rtp
 } // namespace inet
 
-#endif // ifndef __INET_RTPPARTICIPANTINFO_H
+#endif
 

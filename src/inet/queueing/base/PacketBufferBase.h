@@ -41,5 +41,5 @@ class INET_API PacketBufferBase : public PacketProcessorBase, public virtual IPa
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETBUFFERBASE_H
+#endif
 

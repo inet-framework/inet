@@ -36,5 +36,5 @@ class INET_API NeighborStateTwoWay : public NeighborState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2NEIGHBORSTATETWOWAY_H
+#endif
 

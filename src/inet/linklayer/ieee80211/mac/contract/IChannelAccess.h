@@ -47,4 +47,5 @@ class INET_API IChannelAccess
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_ICHANNELACCESS_H
+#endif
+

@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_EthernetSocketPacketProcessor_H
-#define __INET_EthernetSocketPacketProcessor_H
+#ifndef __INET_ETHERNETSOCKETPACKETPROCESSOR_H
+#define __INET_ETHERNETSOCKETPACKETPROCESSOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
@@ -42,5 +42,5 @@ class INET_API EthernetSocketPacketProcessor : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_EthernetSocketPacketProcessor_H
+#endif
 

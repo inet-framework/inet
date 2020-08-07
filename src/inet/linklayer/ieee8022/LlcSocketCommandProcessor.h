@@ -40,5 +40,5 @@ class INET_API LlcSocketCommandProcessor : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_LlcSocketCommandProcessor_H
+#endif
 

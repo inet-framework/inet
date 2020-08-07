@@ -40,5 +40,5 @@ class INET_API IdealOscillator : public OscillatorBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALOSCILLATOR_H
+#endif
 

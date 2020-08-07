@@ -41,4 +41,5 @@ class INET_API ICoordinationFunction
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_ICOORDINATIONFUNCTION_H
+#endif
+

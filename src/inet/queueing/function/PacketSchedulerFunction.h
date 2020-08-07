@@ -43,5 +43,5 @@ class INET_API CPacketSchedulerFunction : public cObject, public virtual IPacket
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSCHEDULERFUNCTION_H
+#endif
 

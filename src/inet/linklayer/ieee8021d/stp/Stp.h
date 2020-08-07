@@ -259,5 +259,5 @@ inline std::ostream& operator<<(std::ostream& os, Stp i)
 
 } // namespace inet
 
-#endif // ifndef __INET_STP_H
+#endif
 

@@ -38,5 +38,5 @@ class INET_API IPacketFilter : public virtual IPacketFlow
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETFILTER_H
+#endif
 

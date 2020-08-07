@@ -240,5 +240,5 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
 
 } // namespace inet
 
-#endif    // __INET_IPv4ROUTE_H
+#endif
 

@@ -77,5 +77,5 @@ protected:
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8022LLC_H
+#endif
 

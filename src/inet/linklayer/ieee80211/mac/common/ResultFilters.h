@@ -58,5 +58,5 @@ class INET_API Ieee80211NotRetryFilter : public cObjectResultFilter
 
 } // namespace inet
 
-#endif // ifndef __INET_RESULTFILTERS_H
+#endif
 

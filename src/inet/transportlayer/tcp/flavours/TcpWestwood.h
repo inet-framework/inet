@@ -92,5 +92,5 @@ class INET_API TcpWestwood : public TcpBaseAlg
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPWESTWOOD_H
+#endif
 

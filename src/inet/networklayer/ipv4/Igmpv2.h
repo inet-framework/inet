@@ -260,5 +260,5 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
 
 }    // namespace inet
 
-#endif    // ifndef __INET_IGMPV2_H
+#endif
 

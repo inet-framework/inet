@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SHARINGTAGSET_H_
-#define __INET_SHARINGTAGSET_H_
+#ifndef __INET_SHARINGTAGSET_H
+#define __INET_SHARINGTAGSET_H
 
 #include <vector>
 #include <memory>
@@ -265,5 +265,5 @@ inline const Ptr<T> SharingTagSet::removeTagIfPresent()
 
 } // namespace
 
-#endif // #ifndef __INET_SHARINGTAGSET_H_
+#endif
 

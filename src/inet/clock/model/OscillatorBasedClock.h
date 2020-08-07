@@ -49,5 +49,5 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_OSCILLATORBASEDCLOCK_H
+#endif
 

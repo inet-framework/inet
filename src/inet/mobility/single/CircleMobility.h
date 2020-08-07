@@ -65,5 +65,5 @@ class INET_API CircleMobility : public MovingMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CIRCLEMOBILITY_H
+#endif
 

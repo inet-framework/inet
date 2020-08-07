@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPSEGMENT_H
-#define __INET_TCPSEGMENT_H
+#ifndef __INET_TCPHEADER_H
+#define __INET_TCPHEADER_H
 
 #include <list>
 
@@ -41,5 +41,5 @@ inline uint32 seqMax(uint32 a, uint32 b) { return ((a - b) < (1UL << 31)) ? a : 
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPSEGMENT_H
+#endif
 

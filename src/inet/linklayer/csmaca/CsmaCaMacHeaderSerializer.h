@@ -48,4 +48,5 @@ class INET_API CsmaCaMacTrailerSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_CSMACAMACHEADERSERIALIZER_H
+#endif
+

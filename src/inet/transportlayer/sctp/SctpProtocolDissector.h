@@ -33,5 +33,5 @@ class INET_API SctpProtocolDissector : public ProtocolDissector
 } // namespace sctp
 } // namespace inet
 
-#endif // __INET_SCTPPROTOCOLDISSECTOR_H
+#endif
 

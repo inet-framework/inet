@@ -60,4 +60,5 @@ class INET_API AarfRateControl : public RateControlBase
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // infndef __INET_AARFRATECONTROL_H
+#endif
+

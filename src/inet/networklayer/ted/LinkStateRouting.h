@@ -82,5 +82,5 @@ class INET_API LinkStateRouting : public cSimpleModule, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKSTATEROUTING_H
+#endif
 

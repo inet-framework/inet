@@ -46,4 +46,5 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_RATECONTROLBASE_H
+#endif
+

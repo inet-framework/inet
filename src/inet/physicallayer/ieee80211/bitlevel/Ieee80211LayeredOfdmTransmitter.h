@@ -104,5 +104,5 @@ class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
+#endif
 

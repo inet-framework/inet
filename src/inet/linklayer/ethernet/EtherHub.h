@@ -34,5 +34,5 @@ class INET_API EtherHub : public physicallayer::WireJunction
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERHUB_H
+#endif
 

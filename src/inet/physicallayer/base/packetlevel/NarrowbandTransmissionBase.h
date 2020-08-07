@@ -47,5 +47,5 @@ class INET_API NarrowbandTransmissionBase : public TransmissionBase, public virt
 
 } // namespace inet
 
-#endif // ifndef __INET_NARROWBANDTRANSMISSIONBASE_H
+#endif
 

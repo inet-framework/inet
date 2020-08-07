@@ -57,5 +57,5 @@ class INET_API IPathLoss : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IPATHLOSS_H
+#endif
 

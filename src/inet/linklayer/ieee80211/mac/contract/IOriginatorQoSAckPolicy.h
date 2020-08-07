@@ -44,4 +44,5 @@ class INET_API IOriginatorQoSAckPolicy
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IORIGINATORQOSACKPOLICY_H
+#endif
+

@@ -81,5 +81,5 @@ class INET_API EtherEncap : public Ieee8022Llc
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERENCAP_H
+#endif
 

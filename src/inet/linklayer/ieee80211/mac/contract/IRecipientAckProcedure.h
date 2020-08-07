@@ -37,4 +37,5 @@ class INET_API IRecipientAckProcedure
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IRECIPIENTACKPROCEDURE_H
+#endif
+

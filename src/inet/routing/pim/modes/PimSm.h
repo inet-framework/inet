@@ -323,5 +323,5 @@ class INET_API PimSm : public PimBase, protected cListener
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIMSM_H
+#endif
 

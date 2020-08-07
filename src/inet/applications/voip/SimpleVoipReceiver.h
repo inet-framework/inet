@@ -116,5 +116,5 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLEVOIPRECEIVER_H
+#endif
 

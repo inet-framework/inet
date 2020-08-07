@@ -96,5 +96,5 @@ class INET_API TcpVegas : public TcpBaseAlg
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPVEGAS_H
+#endif
 

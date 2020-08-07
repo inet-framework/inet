@@ -39,5 +39,5 @@ class INET_API TransportProtocolBase : public LayeredProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TRANSPORTPROTOCOLBASE_H
+#endif
 

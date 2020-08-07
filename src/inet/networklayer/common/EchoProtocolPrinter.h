@@ -31,5 +31,5 @@ class INET_API EchoProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_ECHOPROTOCOLPRINTER_H
+#endif
 

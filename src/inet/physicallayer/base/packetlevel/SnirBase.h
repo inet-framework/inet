@@ -44,5 +44,5 @@ class INET_API SnirBase : public virtual ISnir
 
 } // namespace inet
 
-#endif // ifndef __INET_SNIRBASE_H
+#endif
 

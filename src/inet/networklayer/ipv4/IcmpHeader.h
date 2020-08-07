@@ -15,5 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef __INET_ICMPHEADER_H
+#define __INET_ICMPHEADER_H
+
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
+
+#endif
 

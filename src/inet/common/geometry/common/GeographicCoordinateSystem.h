@@ -99,5 +99,5 @@ class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeo
 
 } // namespace inet
 
-#endif // ifndef __INET_GEOGRAPHICCOORDINATESYSTEM_H
+#endif
 

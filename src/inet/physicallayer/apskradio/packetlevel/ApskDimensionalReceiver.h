@@ -41,5 +41,5 @@ class INET_API ApskDimensionalReceiver : public FlatReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKDIMENSIONALRECEIVER_H
+#endif
 

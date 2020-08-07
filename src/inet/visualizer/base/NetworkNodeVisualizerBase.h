@@ -61,5 +61,5 @@ class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListen
 
 } // namespace inet
 
-#endif // ifndef __INET_NETWORKNODEVISUALIZERBASE_H
+#endif
 

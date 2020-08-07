@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPV6DATAGRAM_H
-#define __INET_IPV6DATAGRAM_H
+#ifndef __INET_IPV6HEADER_H
+#define __INET_IPV6HEADER_H
 
 #include <list>
 
@@ -30,5 +30,5 @@ std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader&);
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6DATAGRAM_H
+#endif
 

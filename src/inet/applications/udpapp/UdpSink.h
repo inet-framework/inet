@@ -71,5 +71,5 @@ class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPSINK_H
+#endif
 

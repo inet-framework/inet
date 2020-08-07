@@ -53,5 +53,5 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTINGTABLERECORDER_H
+#endif
 

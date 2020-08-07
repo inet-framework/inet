@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_SIMPLECLASSIFIER_H
-#define __INET_SIMPLECLASSIFIER_H
+#ifndef __INET_RSVPCLASSIFIER_H
+#define __INET_RSVPCLASSIFIER_H
 
 #include <string>
 #include <vector>
@@ -81,5 +81,5 @@ class INET_API RsvpClassifier : public cSimpleModule, public IScriptable, public
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLECLASSIFIER_H
+#endif
 

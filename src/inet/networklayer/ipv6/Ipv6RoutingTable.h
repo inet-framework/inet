@@ -416,5 +416,5 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6ROUTINGTABLE_H
+#endif
 

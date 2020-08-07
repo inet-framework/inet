@@ -51,5 +51,5 @@ class INET_API IL3AddressType
 
 } // namespace inet
 
-#endif // ifndef __INET_IL3ADDRESSTYPE_H
+#endif
 

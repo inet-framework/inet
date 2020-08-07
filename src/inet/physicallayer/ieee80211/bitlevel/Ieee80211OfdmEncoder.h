@@ -50,5 +50,5 @@ class INET_API Ieee80211OfdmEncoder : public IEncoder
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMENCODER_H
+#endif
 

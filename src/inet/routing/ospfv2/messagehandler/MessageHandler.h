@@ -67,5 +67,5 @@ class INET_API MessageHandler : public IMessageHandler
 } // namespace ospfv2
 } // namespace inet
 
-#endif // ifndef __INET_MESSAGEHANDLER_H
+#endif
 

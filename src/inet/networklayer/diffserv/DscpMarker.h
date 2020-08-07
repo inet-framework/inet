@@ -75,5 +75,5 @@ class INET_API DscpMarker : public queueing::PacketProcessorBase, public queuein
 
 } // namespace inet
 
-#endif // ifndef __INET_DSCPMARKER_H
+#endif
 

@@ -134,5 +134,5 @@ class INET_API ShortBitVector
 
 } // namespace inet
 
-#endif // ifndef __INET_SHORTBITVECTOR_H
+#endif
 

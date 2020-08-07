@@ -77,5 +77,5 @@ class INET_API SctpAlg : public SctpAlgorithm
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPALG_H
+#endif
 

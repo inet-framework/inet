@@ -57,5 +57,5 @@ class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
 
 } // namespace inet
 
-#endif // ifndef __INET_ADAPTIVEPROBABILISTICBROADCAST_H
+#endif
 

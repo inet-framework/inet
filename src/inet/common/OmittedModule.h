@@ -32,5 +32,5 @@ class INET_API OmittedModule : public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_OMITTEDMODULE_H
+#endif
 

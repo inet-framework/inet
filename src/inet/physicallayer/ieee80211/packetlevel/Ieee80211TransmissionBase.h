@@ -44,5 +44,5 @@ class INET_API Ieee80211TransmissionBase : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211TRANSMISSIONBASE_H
+#endif
 

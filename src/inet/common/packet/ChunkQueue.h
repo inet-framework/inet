@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_CHUNKQUEUE_H_
-#define __INET_CHUNKQUEUE_H_
+#ifndef __INET_CHUNKQUEUE_H
+#define __INET_CHUNKQUEUE_H
 
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -214,5 +214,5 @@ inline std::ostream& operator<<(std::ostream& os, const ChunkQueue& queue) { ret
 
 } // namespace
 
-#endif // #ifndef __INET_CHUNKQUEUE_H_
+#endif
 

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef INET_NETWORKLAYER_MPLS_MPLSPACKETSERIALIZER_H_
-#define INET_NETWORKLAYER_MPLS_MPLSPACKETSERIALIZER_H_
+#ifndef __INET_MPLSPACKETSERIALIZER_H
+#define __INET_MPLSPACKETSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
@@ -35,4 +35,5 @@ class INET_API MplsPacketSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif /* INET_NETWORKLAYER_MPLS_MPLSPACKETSERIALIZER_H_ */
+#endif
+

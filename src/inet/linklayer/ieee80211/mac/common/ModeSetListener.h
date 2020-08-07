@@ -37,4 +37,5 @@ class INET_API ModeSetListener : public cSimpleModule, public cListener
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_MODESETLISTENER_H
+#endif
+

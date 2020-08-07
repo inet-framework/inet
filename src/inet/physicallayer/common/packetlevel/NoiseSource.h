@@ -77,5 +77,5 @@ class INET_API NoiseSource : public cSimpleModule, public virtual IRadio
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_NOISESOURCE_H
+#endif
 

@@ -39,5 +39,5 @@ class TcpCrcInsertion : public NetfilterBase::HookBase {
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPCRCINSERTIONHOOK_H
+#endif
 

@@ -64,5 +64,5 @@ class INET_API TwoRateThreeColorMeter : public PacketMeterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TWORATETHREECOLORMETER_H
+#endif
 

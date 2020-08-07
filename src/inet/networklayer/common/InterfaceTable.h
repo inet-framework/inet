@@ -249,5 +249,5 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACETABLE_H
+#endif
 

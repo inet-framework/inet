@@ -35,5 +35,5 @@ class INET_API IDecoder : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IDECODER_H
+#endif
 

@@ -71,5 +71,5 @@ class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211DSSSOFDMMODE_H
+#endif
 

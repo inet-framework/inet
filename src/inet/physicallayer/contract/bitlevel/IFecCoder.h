@@ -44,5 +44,5 @@ class INET_API IFecCoder : public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IFECCODER_H
+#endif
 

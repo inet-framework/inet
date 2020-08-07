@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPSRVHOSTAPP_H
-#define __INET_TCPSRVHOSTAPP_H
+#ifndef __INET_TCPSERVERHOSTAPP_H
+#define __INET_TCPSERVERHOSTAPP_H
 
 #include "inet/common/INETDefs.h"
 
@@ -148,5 +148,5 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPSRVHOSTAPP_H
+#endif
 

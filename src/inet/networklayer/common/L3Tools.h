@@ -45,4 +45,5 @@ INET_API const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet
 
 };
 
-#endif    // __INET_L3TOOLS_H
+#endif
+

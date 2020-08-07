@@ -41,5 +41,5 @@ class INET_API EthernetFragmentPreambleInserter : public PacketFlowBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
+#endif
 

@@ -40,5 +40,5 @@ class INET_API TcpSpoof : public cSimpleModule
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_TCPSPOOF_H
+#endif
 

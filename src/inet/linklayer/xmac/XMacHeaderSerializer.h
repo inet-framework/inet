@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef INET_LINKLAYER_XMAC_XMACHEADERSERIALIZER_H_
-#define INET_LINKLAYER_XMAC_XMACHEADERSERIALIZER_H_
+#ifndef __INET_XMACHEADERSERIALIZER_H
+#define __INET_XMACHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
@@ -35,4 +35,5 @@ class INET_API XMacHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif /* INET_LINKLAYER_XMAC_XMACHEADERSERIALIZER_H_ */
+#endif
+

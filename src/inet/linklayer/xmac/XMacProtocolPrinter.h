@@ -31,5 +31,5 @@ class INET_API XMacProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_XMACPROTOCOLPRINTER_H
+#endif
 

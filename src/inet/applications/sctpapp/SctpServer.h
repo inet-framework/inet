@@ -105,5 +105,5 @@ class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPSERVER_H
+#endif
 

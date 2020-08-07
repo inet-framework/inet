@@ -55,5 +55,5 @@ class INET_API AdditiveScrambler : public IScrambler
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // __INET_ADDITIVESCRAMBLER_H
+#endif
 

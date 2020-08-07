@@ -60,5 +60,5 @@ class INET_API PositionTable
 
 } // namespace inet
 
-#endif // ifndef __INET_POSITIONTABLE_H
+#endif
 

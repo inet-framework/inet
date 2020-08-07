@@ -58,5 +58,5 @@ class INET_API NodeStatus : public cSimpleModule, public ILifecycle
 
 } // namespace inet
 
-#endif // ifndef __INET_NODESTATUS_H
+#endif
 

@@ -213,5 +213,5 @@ class INET_API RtpPayloadSender : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_RTPPAYLOADSENDER_H
+#endif
 

@@ -87,4 +87,5 @@ inline std::string printObjectToString(const IPrintableObject *object, int level
 
 } // namespace inet
 
-#endif // ifndef __INET_IPRINTABLEOBJECT_H
+#endif
+

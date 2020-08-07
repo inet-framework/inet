@@ -39,5 +39,5 @@ class INET_API ReceiveAtMacAddress : public PacketFilterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVEATMACADDRESS_H
+#endif
 

@@ -47,5 +47,5 @@ class INET_API Ipv6AddressType : public IL3AddressType
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6ADDRESSTYPE_H
+#endif
 

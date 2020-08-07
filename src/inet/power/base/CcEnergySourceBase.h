@@ -46,5 +46,5 @@ class INET_API CcEnergySourceBase : public EnergySourceBase, public virtual ICcE
 
 } // namespace inet
 
-#endif // ifndef __INET_CCENERGYSOURCEBASE_H
+#endif
 

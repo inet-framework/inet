@@ -103,5 +103,5 @@ public:
 
 } // namespace inet
 
-#endif    // ifndef __INET_RIPROUTEDATA_H
+#endif
 

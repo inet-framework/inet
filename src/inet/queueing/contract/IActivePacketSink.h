@@ -68,5 +68,5 @@ class INET_API IActivePacketSink
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IACTIVEPACKETSINK_H
+#endif
 

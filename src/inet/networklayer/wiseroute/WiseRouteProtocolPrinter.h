@@ -31,5 +31,5 @@ class INET_API WiseRouteProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_WISEROUTEPROTOCOLPRINTER_H
+#endif
 

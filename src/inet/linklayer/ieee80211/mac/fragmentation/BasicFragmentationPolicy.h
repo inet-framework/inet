@@ -40,3 +40,4 @@ class INET_API BasicFragmentationPolicy : public IFragmentationPolicy, public cS
 } // namespace inet
 
 #endif
+

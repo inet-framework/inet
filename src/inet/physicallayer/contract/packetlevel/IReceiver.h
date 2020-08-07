@@ -146,5 +146,5 @@ class INET_API IReceiver : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IRECEIVER_H
+#endif
 

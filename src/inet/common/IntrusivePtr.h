@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INTRUSIVE_PTR_
-#define __INET_INTRUSIVE_PTR_
+#ifndef __INET_INTRUSIVEPTR_H
+#define __INET_INTRUSIVEPTR_H
 
 #include <iosfwd>
 
@@ -283,4 +283,5 @@ INET_ALWAYS_INLINE void intrusivePtrCounterDecrement(const IntrusivePtrCounter<T
 
 } // namespace inet
 
-#endif  // #ifndef __INET_INTRUSIVE_PTR_
+#endif
+

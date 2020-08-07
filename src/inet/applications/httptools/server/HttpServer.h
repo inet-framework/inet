@@ -71,5 +71,5 @@ class INET_API HttpServer : public HttpServerBase, public TcpSocket::ReceiveQueu
 
 } // namespace inet
 
-#endif // ifndef __INET_HTTPSERVER_H
+#endif
 

@@ -123,4 +123,5 @@ class INET_API SpatialGrid
 
 } /* namespace inet */
 
-#endif // ifndef __INET_SPATIALGRID_H
+#endif
+

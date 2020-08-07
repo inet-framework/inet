@@ -60,5 +60,5 @@ class INET_API InfoCanvasVisualizer : public InfoVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_INFOCANVASVISUALIZER_H
+#endif
 

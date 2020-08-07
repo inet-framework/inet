@@ -45,5 +45,5 @@ class INET_API PropagationBase : public cModule, public IPropagation
 
 } // namespace inet
 
-#endif // ifndef __INET_PROPAGATIONBASE_H
+#endif
 

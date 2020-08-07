@@ -62,5 +62,5 @@ class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERAPPSERVER_H
+#endif
 

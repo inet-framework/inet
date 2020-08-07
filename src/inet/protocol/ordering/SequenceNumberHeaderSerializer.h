@@ -35,5 +35,5 @@ class INET_API SequenceNumberHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_SEQUENCENUMBERHEADERSERIALIZER_H
+#endif
 

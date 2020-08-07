@@ -60,5 +60,5 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDEMULTIPLEXER_H
+#endif
 

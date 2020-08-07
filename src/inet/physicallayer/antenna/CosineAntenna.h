@@ -57,5 +57,5 @@ class INET_API CosineAntenna : public AntennaBase
 
 } // namespace inet
 
-#endif // ifndef __INET_COSINEANTENNA_H
+#endif
 
