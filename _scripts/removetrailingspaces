@@ -1,0 +1,3 @@
+#/usr/bin/sh
+
+find . -iregex '.*\.\(h\|cc\|ned\|msg\)$' -print | xargs sed -i '' -e's/[ \t]*$//' "$1"
