@@ -16,11 +16,13 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/linklayer/ethernet/layered/EthernetFragmentPreambleInserter.h"
+#include "inet/physicallayer/ethernet/EthernetFragmentPreambleInserter.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
+
+namespace physicallayer {
 
 Define_Module(EthernetFragmentPreambleInserter);
 
@@ -48,6 +50,8 @@ void EthernetFragmentPreambleInserter::handlePacketProcessed(Packet *packet)
         smdNumber = (smdNumber + 1) % 4;
     }
 }
+
+} // namespace physicallayer
 
 } // namespace inet
 

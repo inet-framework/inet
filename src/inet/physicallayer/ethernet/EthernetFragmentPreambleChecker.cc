@@ -16,11 +16,13 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/linklayer/ethernet/layered/EthernetFragmentPreambleChecker.h"
+#include "inet/physicallayer/ethernet/EthernetFragmentPreambleChecker.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
+
+namespace physicallayer {
 
 Define_Module(EthernetFragmentPreambleChecker);
 
@@ -65,6 +67,8 @@ void EthernetFragmentPreambleChecker::dropPacket(Packet *packet)
 {
     PacketFilterBase::dropPacket(packet, INCORRECTLY_RECEIVED);
 }
+
+} // namespace physicallayer
 
 } // namespace inet
 

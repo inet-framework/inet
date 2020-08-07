@@ -15,14 +15,31 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ethernet.layered;
+#ifndef __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
+#define __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
 
-import inet.queueing.base.PacketFlowBase;
-import inet.queueing.contract.IPacketFlow;
+#include "inet/queueing/base/PacketFlowBase.h"
 
-simple EthernetFragmentPreambleInserter extends PacketFlowBase like IPacketFlow
+namespace inet {
+
+namespace physicallayer {
+
+using namespace inet::queueing;
+
+class INET_API EthernetFragmentPreambleInserter : public PacketFlowBase
 {
-    parameters:
-        @class(EthernetFragmentPreambleInserter);
-        @display("i=block/inserter");
-}
+  protected:
+    uint8_t smdNumber = 0;
+    uint8_t fragmentNumber = 0;
+
+  protected:
+    virtual void processPacket(Packet *packet) override;
+    virtual void handlePacketProcessed(Packet *packet) override;
+};
+
+} // namespace physicallayer
+
+} // namespace inet
+
+#endif // ifndef __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
+

@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace physicallayer {
+
 using namespace inet::queueing;
 
 class INET_API EthernetFragmentPreambleChecker : public PacketFilterBase
@@ -35,6 +37,8 @@ class INET_API EthernetFragmentPreambleChecker : public PacketFilterBase
     virtual void processPacket(Packet *packet) override;
     virtual void dropPacket(Packet *packet) override;
 };
+
+} // namespace physicallayer
 
 } // namespace inet
 

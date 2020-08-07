@@ -2,7 +2,7 @@
 // Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
+// modify it under the terms of the G	NU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
 //
@@ -15,14 +15,14 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ethernet.layered;
+package inet.physicallayer.ethernet;
 
-import inet.queueing.base.PacketFilterBase;
-import inet.queueing.contract.IPacketFilter;
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
 
-simple EthernetFragmentPreambleChecker extends PacketFilterBase like IPacketFilter
+simple EthernetFragmentPreambleInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        @class(EthernetFragmentPreambleChecker);
-        @display("i=block/checker");
+        @class(EthernetFragmentPreambleInserter);
+        @display("i=block/inserter");
 }

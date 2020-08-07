@@ -15,27 +15,14 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
-#define __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
+package inet.physicallayer.ethernet;
 
-#include "inet/queueing/base/PacketFlowBase.h"
+import inet.queueing.base.PacketFilterBase;
+import inet.queueing.contract.IPacketFilter;
 
-namespace inet {
-
-using namespace inet::queueing;
-
-class INET_API EthernetFragmentPreambleInserter : public PacketFlowBase
+simple EthernetFragmentPreambleChecker extends PacketFilterBase like IPacketFilter
 {
-  protected:
-    uint8_t smdNumber = 0;
-    uint8_t fragmentNumber = 0;
-
-  protected:
-    virtual void processPacket(Packet *packet) override;
-    virtual void handlePacketProcessed(Packet *packet) override;
-};
-
-} // namespace inet
-
-#endif // ifndef __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
-
+    parameters:
+        @class(EthernetFragmentPreambleChecker);
+        @display("i=block/checker");
+}
