@@ -78,6 +78,7 @@ void NetworkNodeCanvasVisualizer::removeNetworkNodeVisualization(NetworkNodeVisu
     auto networkNodeCanvasVisualization = check_and_cast<NetworkNodeCanvasVisualization *>(networkNodeVisualization);
     networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeCanvasVisualization->networkNode));
     visualizationTargetModule->getCanvas()->removeFigure(networkNodeCanvasVisualization);
+    delete networkNodeVisualization;
 }
 
 } // namespace visualizer
