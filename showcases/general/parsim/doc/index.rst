@@ -59,7 +59,7 @@ Most simulation models can be parallelized. To parallelize a simulation, the mod
 .. To partition a simulation model, all modules in the network are assigned to one of the partitions.
 
 There are limitations with respect to partitioning, e.g. modules in a partition cannot call C++ methods in another partition.
-Thus global modules, such as network configurators, radio medium and visualizer modules need to be included multiple times in the network, one for each partition that needs them. For all limitations in partitioning, read the `Parallel Simulation section <https://doc.omnetpp.org/omnetpp/manual/#cha:parallel-exec>`_ in the OMNeT++ manual.
+Thus global modules, such as network configurators, radio medium and visualizer modules need to be included multiple times in the network, one for each partition that needs them. For all limitations in partitioning, read the `corresponding section <https://doc.omnetpp.org/omnetpp/manual/#sec:parallel-exec:overview>`_ in the OMNeT++ manual.
 
 .. The main limitation in partitioning is that only messages can be passed between partitions, e.g. method calls.
 
@@ -99,15 +99,25 @@ MPI needs installation and it needs to be enabled in ``configure.user`` in OMNeT
 
 .. Running a simulation model in parallel has a few constraints. Only messages can be sent between partitions, method calls and direct sends are not supported. TODO so you need multiple configurators for example. Lookahead is required, present in the form of link delays between partitions.
 
-Currently, the lookahead is based on the delay of the wired links between partitions. TODO
+.. Currently, the lookahead is based on the delay of the wired links between partitions. TODO
 
-TODO inet ben parallel sim esetén a legkézenfekvőbb mód a network szintu particionálás, és a wired linkek lesznek a lookahead-ek
-
+Currently, the lookahead is based on link delays. In INET, the most convenient partitioning is on the network level; thus partitions are crossed by wired links between network nodes, the delay of the wired links is the lookahead.
 For good performance, the number of messages between partitions should be as low as possible.
 For example, parts of the network with localized high traffic should be in their own partitions.
 Also, if the lookahead is too small, the partition simulations frequently stop to wait for each other, and it results in larger overhead of sync messages being sent.
 
-TODO ez az egész 1 paragraph
+.. TODO ez az egész 1 paragraph
+
+.. so it is most convenient to partition on the network level;
+
+.. TODO inet ben parallel sim esetén a legkézenfekvőbb mód a network szintu particionálás, és a wired linkek lesznek a lookahead-ek
+
+  - currently, the lookahead is based on link delays
+  - so the most convenient partitioning is on the network level/so it is most convenient to partition on the network level; thus partitions are crossed by wired links between network nodes,
+  the delay of the wired links is the lookahead
+
+.. Currently, the lookahead is based on link delays. So the most convenient partitioning is on the network level/so it is most convenient to partition on the network level; thus partitions are crossed by wired links between network nodes,
+   the delay of the wired links is the lookahead.
 
 .. **TODO** if the lookahead is too small, the partitions stop all the time
 
@@ -119,7 +129,7 @@ TODO ez az egész 1 paragraph
 
 To enable parallel simulation, the ``parallel-simulation`` key needs to be set to ``true`` in the ini file.
 Also, the number of partitions has to be specified with the ``parsim-num-partitions`` parameter.
-The ``parsim-communications-class`` key selects which communication method to use; either ``cNamedPipeCommunications`` or ``cMPICommunications`` (For the other keys, check the `Parallel Simulation section <https://doc.omnetpp.org/omnetpp/manual/#cha:parallel-exec>`_ in the OMNeT++ manual).
+The ``parsim-communications-class`` key selects which communication method to use; either ``cNamedPipeCommunications`` or ``cMPICommunications`` (For the other keys, check the `corresponding section <https://doc.omnetpp.org/omnetpp/manual/#sec:parallel-exec:configuration>`_ in the OMNeT++ manual).
 
 .. `Parallel Simulation section <https://doc.omnetpp.org/omnetpp/manual/#cha:parallel-exec>`_
 
@@ -167,7 +177,7 @@ When using MPI, the ``mpiexec`` command can be used from the command line. The c
 
 .. **TODO** mpiexec
 
-**TODO** a linkek specifikusan mutassanak vagy csak az első legyen benne
+.. **TODO** a linkek specifikusan mutassanak vagy csak az első legyen benne
 
 .. ---------------------
 
@@ -213,24 +223,24 @@ The LANs are connected to a backbone of routers.
    :end-at: }
    :language: ned
 
-All wired connections are ``Ethernet100``, except the ones between the routers, which are ``PppChannel``, defined in the NED file:
+Wired connections in LANs are ``Ethernet100``, the ones between the routers are ``PppChannel``, defined in the NED file:
 
-**TODO** not 'all wired connections'
+.. **TODO** not 'all wired connections'
 
 .. literalinclude:: ../Network.ned
    :start-at: Ethernet100
    :end-before: ParSimNetworkBackbone
    :language: ned
 
-The connections extend :ned:`DatarateChannel`, and add a delay of 100us.
+The connections extend :ned:`DatarateChannel`, and add a delay of 0.1 and 1 us (corresponding to about 20m and 200m long cables).
 Since only the connections between the routers cross partitions, the delay of these connections is the lookahead.
 
-**TODO** 100us is too much (100m -> 0.5us)
+.. **TODO** 100us is too much (100m -> 0.5us)
 
--> ethernet should be 0.1us -> ppp should be 1us
-(20m and 200m)
+  -> ethernet should be 0.1us -> ppp should be 1us
+  (20m and 200m)
 
--> hogy jönnek ki ezek az értékek -> a távolságból -> erről több
+  -> hogy jönnek ki ezek az értékek -> a távolságból -> erről több
 
 .. TODO: the emphasis is on the router connection delay -> ez lesz a lookahead
    mert a routerek vannak a hataron
@@ -306,11 +316,18 @@ The radio medium modules don't have the default name ``radioMedium``, so the mod
    :end-at: AP2.**.radioMediumModule
    :language: ini
 
-**TODO** ssid -> ne higgye azt hogy egy networkbe tartoznak
+.. **TODO** ssid -> ne higgye azt hogy egy networkbe tartoznak
+
+The access points have the same SSID by default. However, the configurator would put all wireless hosts and access points in the same wireless network, so the SSID's of the two wireless LANs need to be unique:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: AP1.**.ssid
+   :end-at: host{5..6}
+   :language: ini
 
 .. **TODO** rewrite? miert kell kulon medium
 
-.. literalinclude:: ../omnetpp.ini
+.. .. literalinclude:: ../omnetpp.ini
    :start-at: radioMedium1
    :end-at: AP2
    :language: ini
@@ -329,14 +346,16 @@ Similarly, we need to specify for each host and router to use the configurator m
   -we want to get the same results from sequential and parsim
   -so that we can verify that parsim does the same thing
 
-When the same simulation is run both sequentially and in parallel, the results might not be the same. By default, the different partition simulations have their own random number generators/use the same set of rngs. **TODO** different number of rngs then with seq...use an instance of the same random number generators as the sequential simulation, but the random numbers drawn by the same modules in the parallel and sequential case are different, since there are less modules in a partition that draw them compared to the sequential simulation. The results are just as correct, but we want to verify that; we configure the parallel and the sequential simulations to follow the same trajectory.
+When the same simulation is run both sequentially and in parallel, the results might not be the same. By default, the different partition simulations use the same set of random number generators as the sequential simulation; the random numbers drawn by the same modules in the parallel and sequential case are different, since there are less modules in a partition that draw them compared to the sequential simulation.
 
--> to prove that the results are correct...
+.. The results are just as correct, but we want to verify that; we configure the parallel and the sequential simulations to follow the same trajectory.
+
+.. -> to prove that the results are correct...
 
 Parallel simulation is susceptible to race conditions.
-We want to make sure that race conditions don't cause incorrect results.
+We want to make sure that race conditions don't cause incorrect results, so we configure the parallel and the sequential simulations to follow the same trajectory.
 
-  TODO a race condition ne hozzon ki incorrect eredményt
+..  TODO a race condition ne hozzon ki incorrect eredményt
   a seqeuentialban nincs race condition
   szoval ugy tudjuk bizonyitani hogy ugyanazt hozzuk ki
   mint a sequential
@@ -344,6 +363,19 @@ We want to make sure that race conditions don't cause incorrect results.
   -> elég hosszu eleg bonyolult sim-ben ugyan az az eredmenyt ki tudjuk hozni, akkor biztosak lehetünk hogy nincs baj a race conditionbol
 
 To do that, we configure each partition to have an own random number generator, which the modules in that partition will use, regardless of running the simulation sequentially or parallelly. Also, the seeds need to be set **TODO** why
+
+To do that, we configure the simulation to have four random number generators.
+
+so
+
+- there are four rngs
+- in the sequential case, there are 4 rngs total
+- in the parsim case, each partition has 4 rngs
+- we set the partitions to use just one rng (same index as partition id)
+- also set the rngs to use different seeds (same index as partition id)
+- so in the sequential case, the partitions use one of the four rngs with the same seed as the partition id
+- in the parsim case, a partition uses just one of the four generators, the one which belongs to its partition
+- still don't understand why they need to have different seeds -> turns out we don't
 
 -modules use the rng the same as the partition id
 -the partitions use one of the 4
@@ -386,20 +418,21 @@ We can't use a global configurator module due to the limitation of partitioning,
 To overcome this limitation, we run the simulation sequentially, dump the address and route configuration created
 by the configurator to an xml file, and use that file as the configuration for each configurator module.
 
-**TODO** redundant
+.. **TODO** redundant
 
-To do this, we need to run the simulation sequentially and with the configurator set to add static routes.
+.. To do this, we need to run the simulation sequentially and with the configurator set to add static routes.
+
 All four configurator's would create the same xml file, so we just dump one of them.
 The ``GenerateConfiguratorConfig`` configuration in omnetpp.ini can be used for this purpose:
 
-**TODO** RoutesAndAddresses.xml/AddressesAndRoutes.xml
+.. **TODO** RoutesAndAddresses.xml/AddressesAndRoutes.xml
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: GenerateConfiguratorConfig
    :end-at: Routes
    :language: ini
 
-The ``config.xml`` file is used by all network configurators in the parallel simulation:
+The ``AddressesAndRoutes.xml`` file is used by all network configurators in the parallel simulation:
 
 .. TODO
 
@@ -408,7 +441,7 @@ The ``config.xml`` file is used by all network configurators in the parallel sim
    :end-at: configurator*
    :language: ini
 
-To generate ``config.xml``, run the ``generateConfiguratorConfig`` script in the showcase's folder. The script runs the simulation sequentially:
+To generate ``AddressesAndRoutes.xml``, run the ``generateConfiguratorConfig`` script in the showcase's folder. The script runs the simulation sequentially:
 
 .. literalinclude:: ../generateConfiguratorConfig
    :language: bash
