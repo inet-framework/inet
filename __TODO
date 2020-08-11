@@ -44,6 +44,9 @@ INET 4.3 release TODO items:
 
  - Implement fingerprints for figures and values for all example simulations.
  - Rename InterfaceEntry to NetworkInterface.
+ - Refactor Ieee8021dRelay similarly to MacRelayUnit.
+ - Follow changes related to multiHistogram in OMNeT++
+ - Make all tests PASS
 
 ===============================================================================
 
