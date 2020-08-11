@@ -22,7 +22,7 @@ import inet.clock.contract.IOscillator;
 //
 // Models a clock that uses an oscillator to produce ticks periodically. The
 // oscillator is allowed to drift and produce ticks with different lengths over
-// time. The clock simply sums up the number of oscillator ticks. The mapping
+// time. The clock simply counts the number of oscillator ticks. The mapping
 // between clock ticks and clock time uses the nominal tick length.
 //
 // When scheduling to a clock time or with a clock delay, this clock rounds the
