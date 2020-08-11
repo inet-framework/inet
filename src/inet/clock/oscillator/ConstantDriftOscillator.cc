@@ -106,7 +106,7 @@ void ConstantDriftOscillator::processCommand(const cXMLElement& node)
     Enter_Method("processCommand");
     if (!strcmp(node.getTagName(), "set-oscillator")) {
         if (const char *driftRateStr = node.getAttribute("drift-rate")) {
-            double newDriftRate = strtod(driftRateStr, nullptr);
+            double newDriftRate = strtod(driftRateStr, nullptr) / 1E+6;
             setDriftRate(newDriftRate);
         }
         if (const char *tickOffsetStr = node.getAttribute("tick-offset")) {
