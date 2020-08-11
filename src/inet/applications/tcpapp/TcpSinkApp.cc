@@ -60,6 +60,7 @@ void TcpSinkApp::finish()
 {
     TcpServerHostApp::finish();
 
+    EV << getFullPath() << " (TcpSinkApp)" << ": received " << bytesRcvd << "\n";
     recordScalar("bytesRcvd", bytesRcvd);
 }
 

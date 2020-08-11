@@ -9,7 +9,7 @@ if test "$HOSTNAME" = ""; then
   export HOSTNAME=`hostname`
 fi
 
-inet -p0 $* &
+inet -p0 $* & $! > p0pid
 inet -p1 $* &
 inet -p2 $* &
 inet -p3 $*
