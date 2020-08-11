@@ -18,8 +18,8 @@ package inet.linklayer.ethernet.layered;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.ethernet.IEthernetPhyLayer;
+import inet.protocol.measurement.IMeasurementLayer;
 import inet.protocol.trafficconditioner.ITrafficConditionerLayer;
-
 
 module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {
@@ -43,20 +43,25 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         trafficConditionerLayer: <default("OmittedTrafficConditionerLayer")> like ITrafficConditionerLayer {
             @display("p=500,100");
         }
-        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
+        measurementLayer: <default("OmittedMeasurementLayer")> like IMeasurementLayer {
             @display("p=500,200");
         }
-        phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
+        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             @display("p=500,300");
+        }
+        phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
+            @display("p=500,400");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> trafficConditionerLayer.upperLayerIn;
-        trafficConditionerLayer.lowerLayerOut --> macLayer.upperLayerIn;
+        trafficConditionerLayer.lowerLayerOut --> measurementLayer.upperLayerIn;
+        measurementLayer.lowerLayerOut --> macLayer.upperLayerIn;
         macLayer.lowerLayerOut --> phyLayer.upperLayerIn;
         phyLayer.lowerLayerOut --> { @display("m=s"); } --> phys$o;
 
         phys$i --> { @display("m=s"); } --> phyLayer.lowerLayerIn;
         phyLayer.upperLayerOut --> macLayer.lowerLayerIn;
-        macLayer.upperLayerOut --> trafficConditionerLayer.lowerLayerIn;
+        macLayer.upperLayerOut --> measurementLayer.lowerLayerIn;
+        measurementLayer.upperLayerOut --> trafficConditionerLayer.lowerLayerIn;
         trafficConditionerLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
