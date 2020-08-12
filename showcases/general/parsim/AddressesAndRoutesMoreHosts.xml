@@ -1,0 +1,166 @@
+<config>
+   <interface hosts="MoreHostsNetwork.host1" names="eth0" address="10.0.0.1" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.host2" names="eth0" address="10.0.0.2" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.router1" names="eth0" address="10.0.0.3" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.hostA" names="eth0" address="10.0.0.4" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.hostB" names="eth0" address="10.0.0.5" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.host3" names="wlan0" address="10.0.0.9" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.host4" names="wlan0" address="10.0.0.10" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.hostC" names="wlan0" address="10.0.0.11" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.hostD" names="wlan0" address="10.0.0.12" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.router2" names="eth0" address="10.0.0.13" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.router2" names="ppp0" address="10.0.0.17" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="MoreHostsNetwork.router4" names="ppp1" address="10.0.0.18" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="MoreHostsNetwork.router2" names="ppp1" address="10.0.0.21" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="MoreHostsNetwork.router1" names="ppp1" address="10.0.0.22" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="MoreHostsNetwork.host5" names="wlan0" address="10.0.0.25" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.host6" names="wlan0" address="10.0.0.26" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.hostE" names="wlan0" address="10.0.0.27" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.hostF" names="wlan0" address="10.0.0.28" netmask="255.255.255.248" metric="1"/>
+   <interface hosts="MoreHostsNetwork.router3" names="eth0" address="10.0.0.29" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.host7" names="eth0" address="10.0.0.33" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.host8" names="eth0" address="10.0.0.34" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.router4" names="eth0" address="10.0.0.35" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.hostX" names="eth0" address="10.0.0.36" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.hostY" names="eth0" address="10.0.0.37" netmask="255.255.255.248" metric="20"/>
+   <interface hosts="MoreHostsNetwork.router1" names="ppp0" address="10.0.0.41" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="MoreHostsNetwork.router3" names="ppp0" address="10.0.0.42" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="MoreHostsNetwork.router3" names="ppp1" address="10.0.0.45" netmask="255.255.255.252" metric="2"/>
+   <interface hosts="MoreHostsNetwork.router4" names="ppp0" address="10.0.0.46" netmask="255.255.255.252" metric="2"/>
+   <multicast-group hosts="MoreHostsNetwork.host1" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.host2" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.router1" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.hostA" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.hostB" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.host3" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.host4" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.hostC" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.hostD" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.router2" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.router2" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.router4" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.router2" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.router1" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.host5" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.host6" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.hostE" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.hostF" interfaces="wlan0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.router3" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.host7" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.host8" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.router4" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.hostX" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.hostY" interfaces="eth0" address="224.0.0.1"/>
+   <multicast-group hosts="MoreHostsNetwork.router1" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.router3" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.router3" interfaces="ppp1" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="MoreHostsNetwork.router4" interfaces="ppp0" address="224.0.0.1 224.0.0.2"/>
+   <wireless interfaces="MoreHostsNetwork.host3%wlan0 MoreHostsNetwork.host4%wlan0 MoreHostsNetwork.hostC%wlan0 MoreHostsNetwork.hostD%wlan0 "/>
+   <wireless interfaces="MoreHostsNetwork.host5%wlan0 MoreHostsNetwork.host6%wlan0 MoreHostsNetwork.hostE%wlan0 MoreHostsNetwork.hostF%wlan0 "/>
+   <route hosts="MoreHostsNetwork.host1" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host1" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.host1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host1" destination="*" netmask="*" gateway="10.0.0.3" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host2" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host2" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.host2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host2" destination="*" netmask="*" gateway="10.0.0.3" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host3" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host3" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host3" destination="*" netmask="*" gateway="10.0.0.13" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host4" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host4" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host4" destination="*" netmask="*" gateway="10.0.0.13" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.18" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.22" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.45" netmask="255.255.255.255" gateway="10.0.0.22" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.16" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.20" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.40" netmask="255.255.255.252" gateway="10.0.0.22" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.32" netmask="255.255.255.240" gateway="10.0.0.18" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="10.0.0.0" netmask="255.255.255.224" gateway="10.0.0.22" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router2" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host5" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host5" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host5" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host5" destination="*" netmask="*" gateway="10.0.0.29" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host6" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host6" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host6" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host6" destination="*" netmask="*" gateway="10.0.0.29" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host7" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host7" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.host7" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host7" destination="*" netmask="*" gateway="10.0.0.35" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host8" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.host8" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.host8" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.host8" destination="*" netmask="*" gateway="10.0.0.35" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.21" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.42" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.45" netmask="255.255.255.255" gateway="10.0.0.42" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.20" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.40" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.24" netmask="255.255.255.248" gateway="10.0.0.42" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router1" destination="10.0.0.0" netmask="255.255.255.192" gateway="10.0.0.21" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router1" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.18" netmask="255.255.255.255" gateway="10.0.0.46" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.41" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.46" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.40" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.44" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.32" netmask="255.255.255.248" gateway="10.0.0.46" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router3" destination="10.0.0.0" netmask="255.255.255.224" gateway="10.0.0.41" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router3" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.17" netmask="255.255.255.255" gateway="*" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.41" netmask="255.255.255.255" gateway="10.0.0.17" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.45" netmask="255.255.255.255" gateway="*" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.16" netmask="255.255.255.252" gateway="*" interface="ppp1" metric="2"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.44" netmask="255.255.255.252" gateway="*" interface="ppp0" metric="2"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.24" netmask="255.255.255.248" gateway="10.0.0.45" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.0" netmask="255.255.255.224" gateway="10.0.0.17" interface="ppp1" metric="0"/>
+   <route hosts="MoreHostsNetwork.router4" destination="10.0.0.0" netmask="255.255.255.192" gateway="10.0.0.45" interface="ppp0" metric="0"/>
+   <route hosts="MoreHostsNetwork.router4" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostA" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostA" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.hostA" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostA" destination="*" netmask="*" gateway="10.0.0.3" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostB" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostB" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.hostB" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostB" destination="*" netmask="*" gateway="10.0.0.3" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostY" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostY" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.hostY" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostY" destination="*" netmask="*" gateway="10.0.0.35" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostX" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostX" destination="10.0.0.32" netmask="255.255.255.248" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="MoreHostsNetwork.hostX" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostX" destination="*" netmask="*" gateway="10.0.0.35" interface="eth0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostC" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostC" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostC" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostC" destination="*" netmask="*" gateway="10.0.0.13" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostD" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostD" destination="10.0.0.8" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostD" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostD" destination="*" netmask="*" gateway="10.0.0.13" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostE" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostE" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostE" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostE" destination="*" netmask="*" gateway="10.0.0.29" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostF" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="MoreHostsNetwork.hostF" destination="10.0.0.24" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostF" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="MoreHostsNetwork.hostF" destination="*" netmask="*" gateway="10.0.0.29" interface="wlan0" metric="0"/>
+</config>
