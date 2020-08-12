@@ -113,3 +113,43 @@ network DebugNetwork extends ParSimNetworkBackbone
         visualizer: IntegratedVisualizer;
 }
 
+network MoreHostsNetwork extends ParSimNetworkBackbone
+{
+    submodules:
+        hostA: StandardHost {
+            @display("p=133.62,25.5");
+        }
+        hostB: StandardHost {
+            @display("p=123.42,161.16");
+        }
+        hostY: StandardHost {
+            @display("p=480.42,363.12");
+        }
+        hostX: StandardHost {
+            @display("p=475.32,192.78");
+        }
+        hostC: WirelessHost {
+            @display("p=137.7,224.4");
+        }
+        hostD: WirelessHost {
+            @display("p=106.08,350.88");
+        }
+        hostE: WirelessHost {
+            @display("p=530.4,25.5");
+        }
+        hostF: WirelessHost {
+            @display("p=519.18,158.1");
+        }
+    connections:
+        switch1.ethg++ <--> Ethernet100 <--> hostA.ethg++;
+        switch1.ethg++ <--> Ethernet100 <--> hostB.ethg++;
+        switch4.ethg++ <--> Ethernet100 <--> hostX.ethg++;
+        switch4.ethg++ <--> Ethernet100 <--> hostY.ethg++;
+}
+
+network DebugMoreHostsNetwork extends MoreHostsNetwork
+{
+    submodules:
+        visualizer: IntegratedVisualizer;
+}
+
