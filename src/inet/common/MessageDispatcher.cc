@@ -210,7 +210,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         if (it != socketIdToGateIndex.end())
             return gate("out", it->second);
         else
-            throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketId);
+            throw cRuntimeError("handleMessage(): Unknown socket, id = %d, new gate = %d (from %s)", socketId, inGate->getIndex(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
     }
     const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {

@@ -350,7 +350,7 @@ class INET_API TcpConnection : public cSimpleModule
     // connection identification by apps: socketId
     int socketId = -1; // identifies connection within the app
     int getSocketId() const { return socketId; }
-    void setSocketId(int newSocketId) { ASSERT(socketId == -1); socketId = newSocketId; }
+    void setSocketId(int newSocketId) { ASSERT(socketId == -1); ASSERT(newSocketId >= 0); socketId = newSocketId; }
 
     int listeningSocketId = -1; // identifies listening connection within the app
     int getListeningSocketId() const { return listeningSocketId; }
