@@ -26,55 +26,55 @@ network ParSimNetworkBackbone
 {
     @display("bgb=812,400");
     submodules:
-        host1: StandardHost {
+        hostA1: StandardHost {
             @display("p=56,44");
         }
-        host2: StandardHost {
+        hostA2: StandardHost {
             @display("p=56,147");
         }
-        switch1: EtherSwitch {
+        switchA: EtherSwitch {
             @display("p=130,97");
         }
-        host3: WirelessHost {
+        hostB1: WirelessHost {
             @display("p=56,232");
         }
-        host4: WirelessHost {
+        hostB2: WirelessHost {
             @display("p=56,335");
         }
-        AP1: AccessPoint {
+        APB: AccessPoint {
             @display("p=130,285");
         }
-        router2: Router {
+        routerB: Router {
             @display("p=221.34,271.32");
         }
-        host5: WirelessHost {
+        hostC1: WirelessHost {
             @display("p=585,45");
         }
-        host6: WirelessHost {
+        hostC2: WirelessHost {
             @display("p=585,154");
         }
-        host7: StandardHost {
+        HostD1: StandardHost {
             @display("p=585,236");
         }
-        host8: StandardHost {
+        HostD2: StandardHost {
             @display("p=591,325");
         }
-        AP2: AccessPoint {
+        APC: AccessPoint {
             @display("p=515,97");
         }
-        switch4: EtherSwitch {
+        swtichD: EtherSwitch {
             @display("p=503,280");
         }
-        configurator1: Ipv4NetworkConfigurator {
+        configuratorA: Ipv4NetworkConfigurator {
             @display("p=736,47");
         }
-        configurator2: Ipv4NetworkConfigurator {
+        configuratorB: Ipv4NetworkConfigurator {
             @display("p=736,147");
         }
-        configurator3: Ipv4NetworkConfigurator {
+        configuratorC: Ipv4NetworkConfigurator {
             @display("p=736,247");
         }
-        configurator4: Ipv4NetworkConfigurator {
+        configuratorD: Ipv4NetworkConfigurator {
             @display("p=736,347");
         }
         radioMedium2: Ieee80211ScalarRadioMedium {
@@ -83,28 +83,28 @@ network ParSimNetworkBackbone
         radioMedium1: Ieee80211ScalarRadioMedium {
             @display("p=193,340");
         }
-        router1: Router {
+        routerA: Router {
             @display("p=222,112");
         }
-        router3: Router {
+        routerC: Router {
             @display("p=371,112");
         }
-        router4: Router {
+        routerD: Router {
             @display("p=370.26,271.32");
         }
     connections:
-        host1.ethg++ <--> Ethernet100 <--> switch1.ethg++;
-        host2.ethg++ <--> Ethernet100 <--> switch1.ethg++;
-        switch4.ethg++ <--> Ethernet100 <--> host7.ethg++;
-        switch4.ethg++ <--> Ethernet100 <--> host8.ethg++;
-        router1.pppg++ <--> PppChannel <--> router3.pppg++;
-        router3.pppg++ <--> PppChannel <--> router4.pppg++;
-        router4.pppg++ <--> PppChannel <--> router2.pppg++;
-        router2.pppg++ <--> PppChannel <--> router1.pppg++;
-        switch1.ethg++ <--> Ethernet100 <--> router1.ethg++;
-        router3.ethg++ <--> Ethernet100 <--> AP2.ethg++;
-        AP1.ethg++ <--> Ethernet100 <--> router2.ethg++;
-        router4.ethg++ <--> Ethernet100 <--> switch4.ethg++;
+        hostA1.ethg++ <--> Ethernet100 <--> switchA.ethg++;
+        hostA2.ethg++ <--> Ethernet100 <--> switchA.ethg++;
+        swtichD.ethg++ <--> Ethernet100 <--> HostD1.ethg++;
+        swtichD.ethg++ <--> Ethernet100 <--> HostD2.ethg++;
+        routerA.pppg++ <--> PppChannel <--> routerC.pppg++;
+        routerC.pppg++ <--> PppChannel <--> routerD.pppg++;
+        routerD.pppg++ <--> PppChannel <--> routerB.pppg++;
+        routerB.pppg++ <--> PppChannel <--> routerA.pppg++;
+        switchA.ethg++ <--> Ethernet100 <--> routerA.ethg++;
+        routerC.ethg++ <--> Ethernet100 <--> APC.ethg++;
+        APB.ethg++ <--> Ethernet100 <--> routerB.ethg++;
+        routerD.ethg++ <--> Ethernet100 <--> swtichD.ethg++;
 }
 
 network DebugNetwork extends ParSimNetworkBackbone
@@ -116,35 +116,35 @@ network DebugNetwork extends ParSimNetworkBackbone
 network MoreHostsNetwork extends ParSimNetworkBackbone
 {
     submodules:
-        hostA: StandardHost {
+        hostA3: StandardHost {
             @display("p=133.62,25.5");
         }
-        hostB: StandardHost {
+        hostA4: StandardHost {
             @display("p=123.42,161.16");
         }
-        hostY: StandardHost {
+        hostD4: StandardHost {
             @display("p=480.42,363.12");
         }
-        hostX: StandardHost {
+        hostD3: StandardHost {
             @display("p=475.32,192.78");
         }
-        hostC: WirelessHost {
+        hostB3: WirelessHost {
             @display("p=137.7,224.4");
         }
-        hostD: WirelessHost {
+        hostB4: WirelessHost {
             @display("p=106.08,350.88");
         }
-        hostE: WirelessHost {
+        hostC3: WirelessHost {
             @display("p=530.4,25.5");
         }
-        hostF: WirelessHost {
+        hostC4: WirelessHost {
             @display("p=519.18,158.1");
         }
     connections:
-        switch1.ethg++ <--> Ethernet100 <--> hostA.ethg++;
-        switch1.ethg++ <--> Ethernet100 <--> hostB.ethg++;
-        switch4.ethg++ <--> Ethernet100 <--> hostX.ethg++;
-        switch4.ethg++ <--> Ethernet100 <--> hostY.ethg++;
+        switchA.ethg++ <--> Ethernet100 <--> hostA3.ethg++;
+        switchA.ethg++ <--> Ethernet100 <--> hostA4.ethg++;
+        swtichD.ethg++ <--> Ethernet100 <--> hostD3.ethg++;
+        swtichD.ethg++ <--> Ethernet100 <--> hostD4.ethg++;
 }
 
 network DebugMoreHostsNetwork extends MoreHostsNetwork
