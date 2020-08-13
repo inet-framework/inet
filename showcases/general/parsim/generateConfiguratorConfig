@@ -1,3 +1,0 @@
-#!/bin/bash
-
-inet -u Cmdenv -c GenerateConfiguratorConfig --parallel-simulation=false

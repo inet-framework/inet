@@ -1,0 +1,17 @@
+#! /bin/sh
+
+rm -rf comm
+mkdir comm
+mkdir comm/read
+
+# make sure HOSTNAME is exported as some distros no longer export it by default
+if test "$HOSTNAME" = ""; then
+  export HOSTNAME=`hostname`
+fi
+
+inet -p0 $* > results/0.out &
+inet -p1 $* > results/1.out &
+inet -p2 $* > results/2.out &
+inet -p3 $* > results/3.out
+
+killall opp_run_dbg

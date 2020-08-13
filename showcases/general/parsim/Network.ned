@@ -7,8 +7,8 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.contract.IIntegratedVisualizer;
 import inet.visualizer.integrated.IntegratedVisualizer;
-
 
 channel Ethernet100 extends ned.DatarateChannel
 {
@@ -22,134 +22,104 @@ channel PppChannel extends ned.DatarateChannel
     delay = 1us;
 }
 
-network ParSimNetworkBackbone
+module Subnetwork
 {
-    @display("bgb=812,400");
+    parameters:
+        @display("i=misc/cloud");
+        **.radioMediumModule = absPath(".radioMedium");
+        **.networkConfiguratorModule = absPath(".configurator");
+    gates:
+        inout ethg[];
     submodules:
-        hostA1: StandardHost {
-            @display("p=56,44");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=300,50;is=s");
         }
-        hostA2: StandardHost {
-            @display("p=56,147");
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=300,100;is=s");
         }
-        switchA: EtherSwitch {
-            @display("p=130,97");
+        wiredHost1: StandardHost {
+            @display("p=50,150");
         }
-        hostB1: WirelessHost {
-            @display("p=56,232");
+        wiredHost2: StandardHost {
+            @display("p=50,250");
         }
-        hostB2: WirelessHost {
-            @display("p=56,335");
+        wiredHost3: StandardHost {
+            @display("p=150,100");
         }
-        APB: AccessPoint {
-            @display("p=130,285");
+        wiredHost4: StandardHost {
+            @display("p=150,300");
         }
-        routerB: Router {
-            @display("p=221.34,271.32");
+        switch: EtherSwitch {
+            @display("p=150,200");
         }
-        hostC1: WirelessHost {
-            @display("p=585,45");
+        wirelessHost1: WirelessHost {
+            @display("p=350,150");
         }
-        hostC2: WirelessHost {
-            @display("p=585,154");
+        wirelessHost2: WirelessHost {
+            @display("p=350,250");
         }
-        HostD1: StandardHost {
-            @display("p=585,236");
+        wirelessHost3: WirelessHost {
+            @display("p=450,100");
         }
-        HostD2: StandardHost {
-            @display("p=591,325");
+        wirelessHost4: WirelessHost {
+            @display("p=450,300");
         }
-        APC: AccessPoint {
-            @display("p=515,97");
+        ap: AccessPoint {
+            @display("p=450,200");
         }
-        swtichD: EtherSwitch {
-            @display("p=503,280");
-        }
-        configuratorA: Ipv4NetworkConfigurator {
-            @display("p=736,47");
-        }
-        configuratorB: Ipv4NetworkConfigurator {
-            @display("p=736,147");
-        }
-        configuratorC: Ipv4NetworkConfigurator {
-            @display("p=736,247");
-        }
-        configuratorD: Ipv4NetworkConfigurator {
-            @display("p=736,347");
-        }
-        radioMedium2: Ieee80211ScalarRadioMedium {
-            @display("p=467,46");
-        }
-        radioMedium1: Ieee80211ScalarRadioMedium {
-            @display("p=193,340");
+    connections:
+        wiredHost1.ethg++ <--> Ethernet100 <--> switch.ethg++;
+        wiredHost2.ethg++ <--> Ethernet100 <--> switch.ethg++;
+        wiredHost3.ethg++ <--> Ethernet100 <--> switch.ethg++;
+        wiredHost4.ethg++ <--> Ethernet100 <--> switch.ethg++;
+        switch.ethg++ <--> Ethernet100 <--> ap.ethg++;
+        switch.ethg++ <--> ethg++;
+}
+
+network ParsimNetwork
+{
+    parameters:
+        @display("bgb=812,600");
+    submodules:
+        visualizer: <default("")> like IIntegratedVisualizer if typename != "" {
+            @display("p=750,100;is=s");
         }
         routerA: Router {
-            @display("p=222,112");
+            **.networkConfiguratorModule = absPath("^.subnetworkA.configurator");
+            @display("p=200,100");
+        }
+        routerB: Router {
+            **.networkConfiguratorModule = absPath("^.subnetworkB.configurator");
+            @display("p=200,300");
         }
         routerC: Router {
-            @display("p=371,112");
+            **.networkConfiguratorModule = absPath("^.subnetworkC.configurator");
+            @display("p=400,300");
         }
         routerD: Router {
-            @display("p=370.26,271.32");
+            **.networkConfiguratorModule = absPath("^.subnetworkD.configurator");
+            @display("p=400,100");
+        }
+        subnetworkA: Subnetwork {
+            @display("p=50,50");
+        }
+        subnetworkB: Subnetwork {
+            @display("p=50,350");
+        }
+        subnetworkD: Subnetwork {
+            @display("p=500,50");
+        }
+        subnetworkC: Subnetwork {
+            @display("p=500,350");
         }
     connections:
-        hostA1.ethg++ <--> Ethernet100 <--> switchA.ethg++;
-        hostA2.ethg++ <--> Ethernet100 <--> switchA.ethg++;
-        swtichD.ethg++ <--> Ethernet100 <--> HostD1.ethg++;
-        swtichD.ethg++ <--> Ethernet100 <--> HostD2.ethg++;
-        routerA.pppg++ <--> PppChannel <--> routerC.pppg++;
-        routerC.pppg++ <--> PppChannel <--> routerD.pppg++;
-        routerD.pppg++ <--> PppChannel <--> routerB.pppg++;
+        routerA.pppg++ <--> PppChannel <--> routerD.pppg++;
+        routerD.pppg++ <--> PppChannel <--> routerC.pppg++;
+        routerC.pppg++ <--> PppChannel <--> routerB.pppg++;
         routerB.pppg++ <--> PppChannel <--> routerA.pppg++;
-        switchA.ethg++ <--> Ethernet100 <--> routerA.ethg++;
-        routerC.ethg++ <--> Ethernet100 <--> APC.ethg++;
-        APB.ethg++ <--> Ethernet100 <--> routerB.ethg++;
-        routerD.ethg++ <--> Ethernet100 <--> swtichD.ethg++;
-}
-
-network DebugNetwork extends ParSimNetworkBackbone
-{
-    submodules:
-        visualizer: IntegratedVisualizer;
-}
-
-network MoreHostsNetwork extends ParSimNetworkBackbone
-{
-    submodules:
-        hostA3: StandardHost {
-            @display("p=133.62,25.5");
-        }
-        hostA4: StandardHost {
-            @display("p=123.42,161.16");
-        }
-        hostD4: StandardHost {
-            @display("p=480.42,363.12");
-        }
-        hostD3: StandardHost {
-            @display("p=475.32,192.78");
-        }
-        hostB3: WirelessHost {
-            @display("p=137.7,224.4");
-        }
-        hostB4: WirelessHost {
-            @display("p=106.08,350.88");
-        }
-        hostC3: WirelessHost {
-            @display("p=530.4,25.5");
-        }
-        hostC4: WirelessHost {
-            @display("p=519.18,158.1");
-        }
-    connections:
-        switchA.ethg++ <--> Ethernet100 <--> hostA3.ethg++;
-        switchA.ethg++ <--> Ethernet100 <--> hostA4.ethg++;
-        swtichD.ethg++ <--> Ethernet100 <--> hostD3.ethg++;
-        swtichD.ethg++ <--> Ethernet100 <--> hostD4.ethg++;
-}
-
-network DebugMoreHostsNetwork extends MoreHostsNetwork
-{
-    submodules:
-        visualizer: IntegratedVisualizer;
+        subnetworkA.ethg++ <--> Ethernet100 <--> routerA.ethg++;
+        subnetworkB.ethg++ <--> Ethernet100 <--> routerB.ethg++;
+        subnetworkD.ethg++ <--> Ethernet100 <--> routerD.ethg++;
+        subnetworkC.ethg++ <--> Ethernet100 <--> routerC.ethg++;
 }
 
