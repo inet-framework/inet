@@ -13,13 +13,13 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 channel Ethernet100 extends ned.DatarateChannel
 {
     datarate = 100Mbps;
-    delay = 0.1us;
+    delay = 0.1us; // 20 meters
 }
 
 channel PppChannel extends ned.DatarateChannel
 {
     datarate = 1Gbps;
-    delay = 1us;
+    delay = 10us; // 2000 meters
 }
 
 module Subnetwork
