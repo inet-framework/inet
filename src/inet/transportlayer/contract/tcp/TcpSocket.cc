@@ -25,9 +25,8 @@ namespace inet {
 
 TcpSocket::TcpSocket()
 {
-    // don't allow user-specified connIds because they may conflict with
-    // automatically assigned ones.
-    connId = getEnvir()->getUniqueNumber();
+    connId = getEnvir()->getUniqueNumber() % INT_MAX;
+    ASSERT(connId >= 0);
 }
 
 TcpSocket::TcpSocket(cMessage *msg)
