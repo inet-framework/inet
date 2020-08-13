@@ -122,7 +122,7 @@ void Tx::handleMessage(cMessage *msg)
 
 void Tx::refreshDisplay() const
 {
-    const char *stateName = endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
+    const char *stateName = endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
     // faster version is just to display the state: getDisplayString().setTagArg("t", 0, stateName);
     std::stringstream os;
     if (frame)
