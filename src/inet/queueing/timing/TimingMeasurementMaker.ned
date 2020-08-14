@@ -40,11 +40,11 @@ simple TimingMeasurementMaker extends PacketFlowBase like IPacketFlow
         @signal[processingTime](type=simtime_t);
         @signal[transmissionTime](type=simtime_t);
         @signal[propagationTime](type=simtime_t);
-        @statistic[lifeTime](title="Life time"; record=vector,multiHistogram; interpolationmode=none);
-        @statistic[elapsedTime](title="Elapsed time"; record=vector,multiHistogram; interpolationmode=none);
-        @statistic[delayingTime](title="Delaying time"; record=vector,multiHistogram; interpolationmode=none);
-        @statistic[queueingTime](title="Queueing time"; record=vector,multiHistogram; interpolationmode=none);
-        @statistic[processingTime](title="Processing time"; record=vector,multiHistogram; interpolationmode=none);
-        @statistic[transmissionTime](title="Transmission time"; record=vector,multiHistogram; interpolationmode=none);
-        @statistic[propagationTime](title="Propagation time"; record=vector,multiHistogram; interpolationmode=none);
+        @statistic[lifeTime](title="Life time"; source=demux(lifeTime); record=vector,histogram; interpolationmode=none);
+        @statistic[elapsedTime](title="Elapsed time"; source=demux(elapsedTime); record=vector,histogram; interpolationmode=none);
+        @statistic[delayingTime](title="Delaying time"; source=demux(delayingTime); record=vector,histogram; interpolationmode=none);
+        @statistic[queueingTime](title="Queueing time"; source=demux(queueingTime); record=vector,histogram; interpolationmode=none);
+        @statistic[processingTime](title="Processing time"; source=demux(processingTime); record=vector,histogram; interpolationmode=none);
+        @statistic[transmissionTime](title="Transmission time"; source=demux(transmissionTime); record=vector,histogram; interpolationmode=none);
+        @statistic[propagationTime](title="Propagation time"; source=demux(propagationTime); record=vector,histogram; interpolationmode=none);
 }
