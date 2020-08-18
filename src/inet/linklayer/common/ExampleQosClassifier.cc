@@ -24,9 +24,12 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 
+#ifdef INET_WITH_ETHERNET
+#  include "inet/linklayer/ethernet/EtherFrame_m.h"
+#endif
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#  include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#  include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #endif
 #ifdef INET_WITH_IPv6
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
@@ -59,14 +62,24 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 {
     int ipProtocol = -1;
 
-#if defined(INET_WITH_IPv4) || defined(INET_WITH_IPv6) || defined(INET_WITH_UDP) || defined(INET_WITH_TCP_COMMON)
+#if defined(INET_WITH_ETHERNET) || defined(INET_WITH_IPv4) || defined(INET_WITH_IPv6) || defined(INET_WITH_UDP) || defined(INET_WITH_TCP_COMMON)
     auto packet = check_and_cast<Packet *>(msg);
+    int ethernetMacProtocol = -1;
+    b ethernetMacHeaderLength = b(0);
     b ipHeaderLength = b(-1);
 #endif
 
+#if defined(INET_WITH_ETHERNET)
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ethernetMac) {
+        const auto& ethernetMacHeader = packet->peekAtFront<EthernetMacHeader>();
+        ethernetMacProtocol = ethernetMacHeader->getTypeOrLength();
+        ethernetMacHeaderLength = ethernetMacHeader->getChunkLength();
+    }
+#endif
+
 #ifdef INET_WITH_IPv4
-    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
-        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+    if (ethernetMacProtocol == ETHERTYPE_IPv4 || packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
+        const auto& ipv4Header = packet->peekDataAt<Ipv4Header>(ethernetMacHeaderLength);
         if (ipv4Header->getProtocolId() == IP_PROT_ICMP)
             return UP_BE; // ICMP class
         ipProtocol = ipv4Header->getProtocolId();
@@ -75,8 +88,8 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 #endif
 
 #ifdef INET_WITH_IPv6
-    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    if (ethernetMacProtocol == ETHERTYPE_IPv6 || packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+        const auto& ipv6Header = packet->peekDataAt<Ipv6Header>(ethernetMacHeaderLength);
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP)
             return UP_BE; // ICMPv6 class
         ipProtocol = ipv6Header->getProtocolId();
@@ -89,7 +102,7 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 
 #ifdef INET_WITH_UDP
     if (ipProtocol == IP_PROT_UDP) {
-        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipHeaderLength);
+        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ethernetMacHeaderLength + ipHeaderLength);
         unsigned int srcPort = udpHeader->getSourcePort();
         unsigned int destPort = udpHeader->getDestinationPort();
         if (destPort == 21 || srcPort == 21)
@@ -107,7 +120,7 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 
 #ifdef INET_WITH_TCP_COMMON
     if (ipProtocol == IP_PROT_TCP) {
-        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipHeaderLength);
+        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ethernetMacHeaderLength + ipHeaderLength);
         unsigned int srcPort = tcpHeader->getSourcePort();
         unsigned int destPort = tcpHeader->getDestinationPort();
         if (destPort == 21 || srcPort == 21)
