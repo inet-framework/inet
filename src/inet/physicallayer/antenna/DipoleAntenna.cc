@@ -51,7 +51,8 @@ DipoleAntenna::AntennaGain::AntennaGain(const char *wireAxis, m length) :
 
 double DipoleAntenna::AntennaGain::computeGain(const Quaternion& direction) const
 {
-    double angle = std::acos(direction.rotate(Coord::X_AXIS) * wireAxisDirection);
+    double product = math::minnan(1.0, math::maxnan(-1.0, direction.rotate(Coord::X_AXIS) * wireAxisDirection));
+    double angle = std::acos(product);
     double q = sin(angle);
     return 1.5 * q * q;
 }
