@@ -226,7 +226,7 @@ Packet *PacketFilterBase::pullPacketStart(cGate *gate, bps datarate)
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketFilterBase::pullPacketEnd(cGate *gate, bps datarate)
+Packet *PacketFilterBase::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
     throw cRuntimeError("Invalid operation");

@@ -185,10 +185,10 @@ Packet *PacketFlowBase::pullPacketStart(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketEnd(cGate *gate, bps datarate)
+Packet *PacketFlowBase::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
-    auto packet = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
+    auto packet = provider->pullPacketEnd(inputGate->getPathStartGate());
     take(packet);
     checkPacketStreaming(packet);
     processPacket(packet);

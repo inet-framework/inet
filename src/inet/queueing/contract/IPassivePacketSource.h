@@ -97,7 +97,7 @@ class INET_API IPassivePacketSource
      * must support pulling and streaming packets. The returned packet must not
      * be nullptr.
      */
-    virtual Packet *pullPacketEnd(cGate *gate, bps datarate) = 0;
+    virtual Packet *pullPacketEnd(cGate *gate) = 0;
 
     /**
      * Progresses pulling the packet from the packet source at the given gate.

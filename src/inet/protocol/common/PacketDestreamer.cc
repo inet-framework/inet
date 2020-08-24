@@ -136,7 +136,7 @@ Packet *PacketDestreamer::pullPacket(cGate *gate)
     EV_INFO << "Starting destreaming packet " << packet->getName() << "." << std::endl;
     take(packet);
     streamedPacket = packet;
-    packet = provider->pullPacketEnd(inputGate->getPathStartGate(), streamDatarate);
+    packet = provider->pullPacketEnd(inputGate->getPathStartGate());
     EV_INFO << "Ending destreaming packet " << packet->getName() << "." << std::endl;
     take(packet);
     delete streamedPacket;

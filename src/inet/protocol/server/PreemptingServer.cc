@@ -56,7 +56,7 @@ void PreemptingServer::endStreaming()
 {
     EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << endl;
     delete streamedPacket;
-    streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
+    streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate());
     take(streamedPacket);
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
@@ -85,7 +85,7 @@ void PreemptingServer::handlePushPacketProcessed(Packet *packet, cGate *gate, bo
     Enter_Method("handlePushPacketProcessed");
     if (isStreaming()) {
         delete streamedPacket;
-        streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate(), datarate);
+        streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate());
         take(streamedPacket);
         EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << endl;
         delete streamedPacket;

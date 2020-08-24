@@ -125,7 +125,7 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PreemptableStreamer::pullPacketEnd(cGate *gate, bps datarate)
+Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;

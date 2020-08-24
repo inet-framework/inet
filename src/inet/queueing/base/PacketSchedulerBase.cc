@@ -148,12 +148,12 @@ Packet *PacketSchedulerBase::pullPacketStart(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate, bps datarate)
+Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
     if (!isStreamingPacket())
         startPacketStreaming();
-    auto packet = providers[inProgressGateIndex]->pullPacketEnd(inputGates[inProgressGateIndex]->getPathStartGate(), datarate);
+    auto packet = providers[inProgressGateIndex]->pullPacketEnd(inputGates[inProgressGateIndex]->getPathStartGate());
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();

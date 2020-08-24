@@ -57,7 +57,7 @@ Packet *PacketPullerBase::pullPacketStart(cGate *gate, bps datarate)
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketPullerBase::pullPacketEnd(cGate *gate, bps datarate)
+Packet *PacketPullerBase::pullPacketEnd(cGate *gate)
 {
     throw cRuntimeError("Invalid operation");
 }

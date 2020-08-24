@@ -117,7 +117,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PacketStreamer::pullPacketEnd(cGate *gate, bps datarate)
+Packet *PacketStreamer::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
