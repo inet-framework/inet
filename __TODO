@@ -1,3 +1,18 @@
+PARSIM:
+ - build a table with the following columns:
+   - source module
+   - destination module
+   - delay from source to destination (sum of link delays + remaining transmission duration if abortion is not possible)
+ - merge rows of the table as follows:
+   - two lines with the same destination module from two modules having the same delay -> any module of the two
+   - same destination module from all submodules within a compound module having the same delay -> module tree
+   - two destination modules from the same source module having the same delay -> any module of the two
+   - all destination submodules within a compound module from the same source modules having the same delay -> module tree
+ - rows can be used for partitioning as follows
+   - compute earliest input time for all rows from FES + delay
+   - parallel execution of module events is possible if earliest input time > earliest module event 
+
+
 
  - temporal and spectral and spatial energy density
    - sampling

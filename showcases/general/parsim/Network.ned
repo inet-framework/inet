@@ -6,9 +6,10 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
+import inet.parsim.Parsim2;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
-import inet.visualizer.integrated.IntegratedVisualizer;
+
 
 channel Ethernet100 extends ned.DatarateChannel
 {
@@ -52,27 +53,27 @@ module Subnetwork
         switch: EtherSwitch {
             @display("p=150,200");
         }
-        wirelessHost1: WirelessHost {
-            @display("p=350,150");
-        }
-        wirelessHost2: WirelessHost {
-            @display("p=350,250");
-        }
-        wirelessHost3: WirelessHost {
-            @display("p=450,100");
-        }
-        wirelessHost4: WirelessHost {
-            @display("p=450,300");
-        }
-        ap: AccessPoint {
-            @display("p=450,200");
-        }
+//        wirelessHost1: WirelessHost {
+//            @display("p=350,150");
+//        }
+//        wirelessHost2: WirelessHost {
+//            @display("p=350,250");
+//        }
+//        wirelessHost3: WirelessHost {
+//            @display("p=450,100");
+//        }
+//        wirelessHost4: WirelessHost {
+//            @display("p=450,300");
+//        }
+//        ap: AccessPoint {
+//            @display("p=450,200");
+//        }
     connections:
         wiredHost1.ethg++ <--> Ethernet100 <--> switch.ethg++;
         wiredHost2.ethg++ <--> Ethernet100 <--> switch.ethg++;
         wiredHost3.ethg++ <--> Ethernet100 <--> switch.ethg++;
         wiredHost4.ethg++ <--> Ethernet100 <--> switch.ethg++;
-        switch.ethg++ <--> Ethernet100 <--> ap.ethg++;
+//        switch.ethg++ <--> Ethernet100 <--> ap.ethg++;
         switch.ethg++ <--> ethg++;
 }
 
@@ -81,6 +82,7 @@ network ParsimNetwork
     parameters:
         @display("bgb=812,600");
     submodules:
+        submodule: Parsim2;
         visualizer: <default("")> like IIntegratedVisualizer if typename != "" {
             @display("p=750,100;is=s");
         }
