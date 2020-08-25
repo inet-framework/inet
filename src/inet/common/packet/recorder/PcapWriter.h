@@ -36,6 +36,7 @@ namespace inet {
 class INET_API PcapWriter : public IPcapWriter
 {
   protected:
+    std::string fileName;
     FILE *dumpfile = nullptr;    // pcap file
     unsigned int snaplen = 0;    // max. length of packets in pcap file
     PcapLinkType network = LINKTYPE_INVALID;    // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html

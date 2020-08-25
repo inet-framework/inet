@@ -29,6 +29,7 @@ namespace inet {
 class INET_API PcapngWriter : public IPcapWriter
 {
   protected:
+    std::string fileName;
     FILE *dumpfile = nullptr;    // pcap file
     bool flush = false;
     int nextPcapngInterfaceId = 0;
