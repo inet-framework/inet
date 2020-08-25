@@ -179,7 +179,7 @@ std::string ChunkBuffer::str() const
             os << " | ";
         else
             first = false;
-        os << "offset = " << region.offset << ", chunk = ";
+        os << EV_FIELD(offset, region.offset) << ", chunk = ";
         if (region.data == nullptr)
             os << "<nullptr>";
         else

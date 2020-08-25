@@ -175,7 +175,7 @@ void SliceChunk::doRemoveAtBack(b length)
 std::string SliceChunk::str() const
 {
     std::ostringstream os;
-    os << "SliceChunk, offset = " << offset << ", length = " << length << ", chunk = {" << chunk << "}";
+    os << "\x1b[2mSliceChunk\x1b[0m" << EV_FIELD(offset) << EV_FIELD(length) << ", chunk = {" << chunk << "}";
     return os.str();
 }
 

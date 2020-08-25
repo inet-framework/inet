@@ -402,7 +402,6 @@ void Packet::updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags)
     updateAt(f, b(0), getTotalLength(), flags);
 }
 
-//(inet::Packet)UdpBasicAppData-0 (5000 B) [content]
 std::string Packet::str() const
 {
     std::ostringstream out;

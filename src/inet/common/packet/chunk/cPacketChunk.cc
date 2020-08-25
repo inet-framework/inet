@@ -78,7 +78,7 @@ const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConver
 std::string cPacketChunk::str() const {
     if (packet != nullptr) {
         std::ostringstream os;
-        os << "cPacketChunk, packet = {(" << packet->getClassName() << ")" << packet->str() << ", length = " << getChunkLength() << "}";
+        os << "\x1b[2mcPacketChunk\x1b[0m, packet = {(" << packet->getClassName() << ")" << packet->str() << ", length = " << getChunkLength() << "}";
         return os.str();
     }
     else

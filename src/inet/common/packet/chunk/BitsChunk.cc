@@ -148,7 +148,7 @@ void BitsChunk::doRemoveAtBack(b length)
 std::string BitsChunk::str() const
 {
     std::ostringstream os;
-    os << "BitsChunk, length = " << bits.size() << ", bits = {";
+    os << "\x1b[2mBitsChunk\x1b[0m" << EV_FIELD(length, bits.size()) << ", bits = {";
     for (auto bit : bits)
         os << (bit ? "1" : "0");
     os << "}";

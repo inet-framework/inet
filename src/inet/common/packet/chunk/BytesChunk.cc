@@ -164,7 +164,7 @@ void BytesChunk::doRemoveAtBack(b length)
 std::string BytesChunk::str() const
 {
     std::ostringstream os;
-    os << "BytesChunk, length = " << B(getChunkLength()) << ", bytes = {";
+    os << "\x1b[2mBytesChunk\x1b[0m" << EV_FIELD(length, B(getChunkLength())) << ", bytes = {";
     bool first = true;
     for (auto byte : bytes) {
         if (!first)
