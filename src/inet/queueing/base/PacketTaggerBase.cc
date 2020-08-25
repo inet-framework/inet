@@ -56,35 +56,35 @@ void PacketTaggerBase::initialize(int stage)
 void PacketTaggerBase::markPacket(Packet *packet)
 {
     if (dscp != -1) {
-        EV_DEBUG << "Attaching DscpReq to " << packet->getName() << " with dscp = " << dscp << std::endl;
+        EV_DEBUG << "Attaching DscpReq" << EV_FIELD(packet, *packet) << EV_FIELD(dscp) << std::endl;
         packet->addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
     }
     if (ecn != -1) {
-        EV_DEBUG << "Attaching EcnReq to " << packet->getName() << " with ecn = " << ecn << std::endl;
+        EV_DEBUG << "Attaching EcnReq" << EV_FIELD(packet, *packet) << EV_FIELD(ecn) << std::endl;
         packet->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification(ecn);
     }
     if (tos != -1) {
-        EV_DEBUG << "Attaching TosReq to " << packet->getName() << " with tos = " << tos << std::endl;
+        EV_DEBUG << "Attaching TosReq" << EV_FIELD(packet, *packet) << EV_FIELD(tos) << std::endl;
         packet->addTagIfAbsent<TosReq>()->setTos(tos);
     }
     if (interfaceId != -1) {
-        EV_DEBUG << "Attaching InterfaceReq to " << packet->getName() << " with interfaceId = " << interfaceId << std::endl;
+        EV_DEBUG << "Attaching InterfaceReq" << EV_FIELD(packet, *packet) << EV_FIELD(interfaceId) << std::endl;
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     }
     if (hopLimit != -1) {
-        EV_DEBUG << "Attaching HopLimitReq to " << packet->getName() << " with hopLimit = " << hopLimit << std::endl;
+        EV_DEBUG << "Attaching HopLimitReq" << EV_FIELD(packet, *packet) << EV_FIELD(hopLimit) << std::endl;
         packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     }
     if (vlanId != -1) {
-        EV_DEBUG << "Attaching VlanReq to " << packet->getName() << " with vlanId = " << vlanId << std::endl;
+        EV_DEBUG << "Attaching VlanReq" << EV_FIELD(packet, *packet) << EV_FIELD(vlanId) << std::endl;
         packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
     }
     if (userPriority != -1) {
-        EV_DEBUG << "Attaching UserPriorityReq to " << packet->getName() << " with userPriority = " << userPriority << std::endl;
+        EV_DEBUG << "Attaching UserPriorityReq" << EV_FIELD(packet, *packet) << EV_FIELD(userPriority) << std::endl;
         packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(userPriority);
     }
     if (!std::isnan(transmissionPower.get())) {
-        EV_DEBUG << "Attaching SignalPowerReq to " << packet->getName() << " with power = " << transmissionPower << std::endl;
+        EV_DEBUG << "Attaching SignalPowerReq" << EV_FIELD(packet, *packet) << EV_FIELD(transmissionPower) << std::endl;
         packet->addTagIfAbsent<SignalPowerReq>()->setPower(transmissionPower);
     }
 }

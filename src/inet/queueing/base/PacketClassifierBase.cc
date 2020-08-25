@@ -68,7 +68,7 @@ void PacketClassifierBase::checkPacketStreaming(Packet *packet)
 
 void PacketClassifierBase::startPacketStreaming(Packet *packet)
 {
-    EV_INFO << "Classifying packet " << packet->getName() << ".\n";
+    EV_INFO << "Classifying packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     inProgressStreamId = packet->getTreeId();
     inProgressGateIndex = callClassifyPacket(packet);
 }
@@ -99,7 +99,7 @@ void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     checkPacketStreaming(nullptr);
-    EV_INFO << "Classifying packet " << packet->getName() << ".\n";
+    EV_INFO << "Classifying packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     int index = callClassifyPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPushedSignal, packet);

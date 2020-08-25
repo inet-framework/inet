@@ -42,11 +42,11 @@ void PacketDuplicatorBase::pushPacket(Packet *packet, cGate *gate)
     take(packet);
     int numDuplicates = getNumPacketDuplicates(packet);
     for (int i = 0; i < numDuplicates; i++) {
-        EV_INFO << "Forwarding duplicate packet " << packet->getName() << "." << endl;
+        EV_INFO << "Forwarding duplicate packet" << EV_FIELD(packet, *packet) << EV_ENDL;
         auto duplicate = packet->dup();
         pushOrSendPacket(duplicate, outputGate, consumer);
     }
-    EV_INFO << "Forwarding original packet " << packet->getName() << "." << endl;
+    EV_INFO << "Forwarding original packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     pushOrSendPacket(packet, outputGate, consumer);
 }
 

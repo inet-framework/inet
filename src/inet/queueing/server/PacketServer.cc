@@ -64,12 +64,12 @@ void PacketServer::startProcessingPacket()
 {
     packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
-    EV_INFO << "Processing packet " << packet->getName() << " started." << endl;
+    EV_INFO << "Processing packet started" << EV_FIELD(packet, *packet) << EV_ENDL;
 }
 
 void PacketServer::endProcessingPacket()
 {
-    EV_INFO << "Processing packet " << packet->getName() << " ended.\n";
+    EV_INFO << "Processing packet ended" << EV_FIELD(packet, *packet) << EV_ENDL;
     simtime_t processingTime = (simTime() - processingTimer->getSendingTime()) / packet->getBitLength();
     insertPacketEvent(this, packet, PEK_PROCESSED, processingTime);
     increaseTimeTag<ProcessingTimeTag>(packet, processingTime);

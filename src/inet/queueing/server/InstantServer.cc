@@ -41,12 +41,12 @@ void InstantServer::processPacket()
     take(packet);
     std::string packetName = packet->getName();
     auto packetLength = packet->getDataLength();
-    EV_INFO << "Processing packet " << packetName << " started." << endl;
+    EV_INFO << "Processing packet started" << EV_FIELD(packet, *packet) << EV_ENDL;
     emit(packetServedSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
     processedTotalLength += packetLength;
     numProcessedPackets++;
-    EV_INFO << "Processing packet " << packetName << " ended.\n";
+    EV_INFO << "Processing packet ended" << EV_FIELD(packet, *packet) << EV_ENDL;
 }
 
 void InstantServer::handleCanPushPacketChanged(cGate *gate)

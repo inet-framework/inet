@@ -52,7 +52,7 @@ void PacketLabeler::markPacket(Packet *packet)
     for (int i = 0; i < (int)filters.size(); i++) {
         auto filter = filters[i];
         if (filter->matchesPacket(packet)) {
-            EV_INFO << "Marking packet " << packet->getName() << " with " << labels[i] << ".\n";
+            EV_INFO << "Marking packet " << packet->getName() << " with " << labels[i] << EV_ENDL;
             labelsTag->insertLabels(labels[i].c_str());
         }
     }

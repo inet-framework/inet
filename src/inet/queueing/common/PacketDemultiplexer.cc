@@ -49,7 +49,7 @@ Packet *PacketDemultiplexer::pullPacket(cGate *gate)
     Enter_Method("pullPacket");
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
-    EV_INFO << "Forwarding pulled packet " << packet->getName() << "." << endl;
+    EV_INFO << "Forwarding pulled packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     animateSendPacket(packet, gate);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();

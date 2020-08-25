@@ -50,7 +50,7 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
     take(packet);
     int numGates = outputGates.size();
     for (int i = 0; i < numGates; i++) {
-        EV_INFO << "Cloning packet " << packet->getName() << "." << endl;
+        EV_INFO << "Cloning packet" << EV_FIELD(packet, *packet) << EV_ENDL;
         pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i]);
     }
     numProcessedPackets++;

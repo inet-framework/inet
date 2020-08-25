@@ -57,7 +57,7 @@ void PacketGateBase::close()
 
 void PacketGateBase::processPacket(Packet *packet)
 {
-    EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
+    EV_INFO << "Passing through packet" << EV_FIELD(packet, *packet) << EV_ENDL;
 }
 
 bool PacketGateBase::canPushSomePacket(cGate *gate) const

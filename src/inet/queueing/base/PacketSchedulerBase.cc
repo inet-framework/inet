@@ -127,7 +127,7 @@ Packet *PacketSchedulerBase::pullPacket(cGate *gate)
     int index = callSchedulePacket();
     auto packet = providers[index]->pullPacket(inputGates[index]->getPathStartGate());
     take(packet);
-    EV_INFO << "Scheduling packet " << packet->getName() << ".\n";
+    EV_INFO << "Scheduling packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     handlePacketProcessed(packet);
     emit(packetPulledSignal, packet);
     animateSendPacket(packet, outputGate);

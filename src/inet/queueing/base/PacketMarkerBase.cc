@@ -22,7 +22,7 @@ namespace queueing {
 
 void PacketMarkerBase::processPacket(Packet *packet)
 {
-    EV_INFO << "Marking packet " << packet->getName() << "." << endl;
+    EV_INFO << "Marking packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     markPacket(packet);
 }
 
