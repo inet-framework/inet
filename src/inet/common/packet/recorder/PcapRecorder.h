@@ -22,8 +22,8 @@
 #define __INET_PCAPRECORDER_H
 
 #include "inet/common/packet/PacketFilter.h"
+#include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/recorder/IPcapWriter.h"
-#include "inet/common/packet/recorder/PacketDump.h"
 
 namespace inet {
 
@@ -50,14 +50,15 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     typedef std::map<simsignal_t, Direction> SignalList;
     std::vector<const Protocol *> dumpProtocols;
     SignalList signalList;
-    PacketDump packetDumper;
     IPcapWriter *pcapWriter = nullptr;
     unsigned int snaplen = 0;
     bool dumpBadFrames = false;
     PacketFilter packetFilter;
     int numRecorded = 0;
+    bool verbose = false;
     bool recordPcap = false;
     std::vector<IHelper *> helpers;
+    PacketPrinter packetPrinter;
 
     static simsignal_t packetRecordedSignal;
 

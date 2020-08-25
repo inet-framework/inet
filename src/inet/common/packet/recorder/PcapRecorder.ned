@@ -40,17 +40,10 @@ package inet.common.packet.recorder;
 // sendingSignalNames and receivingSignalNames parameters. The packets
 // themselves are expected as cPacket* signal values.
 //
-// <b>Supported packets:</b> The module handles IPv4/IPv6 packets (~Ipv4Header/
-// ~Ipv6Header classes), possibly encapsulated into other (L2, PHY, etc)
-// frames at any depth. Packets not containing IP packets are discarded.
-// The following higher layer protocol messages (inside IP packets) are
-// recognized and dumped/recorded: ~Ipv4Header, ~SctpHeader, ~TcpHeader,
-// ~IcmpHeader.
-//
 simple PcapRecorder
 {
     parameters:
-        bool verbose = default(false);  // whether to log packets on the module output
+        bool verbose = default(true);  // whether to log packets on the module output
         string pcapFile = default(""); // the PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // maximum number of bytes to record per packet
