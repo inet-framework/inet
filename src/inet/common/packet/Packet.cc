@@ -406,7 +406,11 @@ void Packet::updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags)
 std::string Packet::str() const
 {
     std::ostringstream out;
-    out << "(" << getClassName() << ")" << getName() << " (" << getDataLength() << ") [" << content->str() << "]";
+    std::string className = getClassName();
+    auto index = className.rfind("::");
+    if (index != std::string::npos)
+        className = className.substr(index + 2);
+    out << "\x1b[2m(" << className << ")\x1b[0m\x1b[3m" << getName() << "\x1b[0m (" << getDataLength() << ") " << content->str();
     return out.str();
 }
 

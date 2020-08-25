@@ -38,7 +38,11 @@ Signal::Signal(const Signal& other) :
 std::string Signal::str() const
 {
     std::ostringstream out;
-    out << "(" << getClassName() << ")" << getName() << ": " << getDuration() << " s (" << b(getBitLength()) << ")";
+    std::string className = getClassName();
+    auto index = className.rfind("::");
+    if (index != std::string::npos)
+        className = className.substr(index + 2);
+    out << "\x1b[2m(" << className << ")\x1b[0m\x1b[3m" << getName() << "\x1b[0m (" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
     return out.str();
 }
 

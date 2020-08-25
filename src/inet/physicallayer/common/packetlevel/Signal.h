@@ -34,6 +34,16 @@ class INET_API Signal : public cPacket
     virtual std::string str() const override;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Signal *signal) {
+    if (!signal)
+        return os << "(Signal)\x1b[3m<nullptr>\x1b[0m";
+    return os << signal->str();
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Signal& signal) {
+    return os << signal.str();
+}
+
 } // namespace physicallayer
 } // namespace inet
 

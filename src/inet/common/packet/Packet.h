@@ -1057,9 +1057,15 @@ class INET_API Packet : public cPacket
 
 INET_API SharingTagSet& getTags(cMessage *msg);
 
-inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
+inline std::ostream& operator<<(std::ostream& os, const Packet *packet) {
+    if (!packet)
+        return os << "(Packet)\x1b[3m<nullptr>\x1b[0m";
+    return os << packet->str();
+}
 
-inline std::ostream& operator<<(std::ostream& os, const Packet& packet) { return os << packet.str(); }
+inline std::ostream& operator<<(std::ostream& os, const Packet& packet) {
+    return os << packet.str();
+}
 
 } // namespace
 

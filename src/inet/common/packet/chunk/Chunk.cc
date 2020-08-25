@@ -155,7 +155,12 @@ const Ptr<Chunk> Chunk::peek(const Iterator& iterator, b length, int flags) cons
 std::string Chunk::str() const
 {
     std::ostringstream os;
-    os << getClassName() << ", length = " << getChunkLength();
+    std::string className = getClassName();
+    auto index = className.rfind("::");
+    if (index != std::string::npos)
+    if (index != -1)
+        className = className.substr(index + 2);
+    os << "\x1b[2m" << className << "\x1b[0m" << EV_FIELD(length, getChunkLength());
     return os.str();
 }
 
