@@ -108,7 +108,9 @@ inline void printElapsedTime(const char *name, long startTime)
 #define EV_FIELD_2(field, value) ", \x1b[1m"#field"\x1b[0m = " << (value)
 #define EV_FIELD_CHOOSER(...) GET_3TH_ARG(__VA_ARGS__, EV_FIELD_2, EV_FIELD_1, )
 #define EV_FIELD(...) EV_FIELD_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+
 #define EV_ENDL "." << endl
+#define EV_LOC "\x1b[2m" << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "()\x1b[0m "
 
 } // namespace inet
 
