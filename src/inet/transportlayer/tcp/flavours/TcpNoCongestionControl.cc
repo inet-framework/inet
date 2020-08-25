@@ -67,7 +67,7 @@ bool TcpNoCongestionControl::sendData(bool sendCommandInvoked)
     // Send window is effectively the minimum of the congestion window (cwnd)
     // and the advertised window (snd_wnd).
     //
-    return conn->sendData(fullSegmentsOnly, state->snd_cwnd);
+    return conn->sendData(state->snd_cwnd);
 }
 
 void TcpNoCongestionControl::processRexmitTimer(TcpEventCode& event)

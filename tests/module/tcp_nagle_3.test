@@ -36,20 +36,22 @@ include ../../lib/defaults.ini
 [1.205 A005] A.1000 > B.2000: A 2049:3073(1024) ack 501 win 16384
 [1.207 B003] A.1000 < B.2000: A ack 3073 win 16384
 [1.209 A006] A.1000 > B.2000: A 3073:4097(1024) ack 501 win 16384
-[1.209 A007] A.1000 > B.2000: A 4097:5001(904) ack 501 win 16384 <--- wrong: small segment sent when previous not yet acked
-[1.411 B004] A.1000 < B.2000: A ack 5001 win 16384
+[1.411 B004] A.1000 < B.2000: A ack 4097 win 16384
+[1.413 A007] A.1000 > B.2000: A 4097:5001(904) ack 501 win 16384
+[1.615 B005] A.1000 < B.2000: A ack 5001 win 16384
 [2.001 A008] A.1000 > B.2000: A 5001:6025(1024) ack 501 win 16384
 [2.001 A009] A.1000 > B.2000: A 6025:7049(1024) ack 501 win 16384
-[2.001 A010] A.1000 > B.2000: A 7049:8001(952) ack 501 win 16384 <--- ditto
-[2.003 B005] A.1000 < B.2000: A ack 7049 win 16384
-[2.005 A011] A.1000 > B.2000: A 8001:8101(100) ack 501 win 16384
-[2.203 B006] A.1000 < B.2000: A ack 8101 win 16384
+[2.002 A010] A.1000 > B.2000: A 7049:8073(1024) ack 501 win 16384
+[2.003 B006] A.1000 < B.2000: A ack 7049 win 16384
+[2.204 B007] A.1000 < B.2000: A ack 8073 win 16384
+[2.205 A011] A.1000 > B.2000: A 8073:8101(28) ack 501 win 16384
+[2.407 B008] A.1000 < B.2000: A ack 8101 win 16384
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
 TcpTestNet1.cli_app: received 0 bytes in 0 packets
 TcpTestNet1.srv_app: received 8100 bytes in 9 packets
-[2.204] tcpdump finished, A:11 B:6 segments
+[2.409] tcpdump finished, A:11 B:8 segments
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

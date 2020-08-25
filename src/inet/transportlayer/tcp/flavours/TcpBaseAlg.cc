@@ -408,21 +408,6 @@ void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
 
 bool TcpBaseAlg::sendData(bool sendCommandInvoked)
 {
-    //
-    // Nagle's algorithm: when a TCP connection has outstanding data that has not
-    // yet been acknowledged, small segments cannot be sent until the outstanding
-    // data is acknowledged. (In this case, small amounts of data are collected
-    // by TCP and sent in a single segment.)
-    //
-    // FIXME there's also something like this: can still send if
-    // "b) a segment that can be sent is at least half the size of
-    // the largest window ever advertised by the receiver"
-
-    bool fullSegmentsOnly = sendCommandInvoked && state->nagle_enabled && state->snd_una != state->snd_max;
-
-    if (fullSegmentsOnly)
-        EV_INFO << "Nagle is enabled and there's unacked data: only full segments will be sent\n";
-
     // RFC 2581, pages 7 and 8: "When TCP has not received a segment for
     // more than one retransmission timeout, cwnd is reduced to the value
     // of the restart window (RW) before transmission begins.
@@ -451,7 +436,7 @@ bool TcpBaseAlg::sendData(bool sendCommandInvoked)
     // Send window is effectively the minimum of the congestion window (cwnd)
     // and the advertised window (snd_wnd).
     //
-    return conn->sendData(fullSegmentsOnly, state->snd_cwnd);
+    return conn->sendData(state->snd_cwnd);
 }
 
 void TcpBaseAlg::sendCommandInvoked()

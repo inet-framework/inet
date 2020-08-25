@@ -510,10 +510,8 @@ class INET_API TcpConnection : public cSimpleModule
 
     /**
      * Utility: Send data from sendQueue, at most congestionWindow.
-     * If fullSegmentsOnly is set, don't send segments smaller than SMSS (needed for Nagle).
-     * Returns true if some data was actually sent.
      */
-    virtual bool sendData(bool fullSegmentsOnly, uint32 congestionWindow);
+    virtual bool sendData(uint32 congestionWindow);
 
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
     virtual bool sendProbe();

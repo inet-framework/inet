@@ -849,7 +849,7 @@ void TcpConnection::sendSegment(uint32 bytes)
     }
 }
 
-bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
+bool TcpConnection::sendData(uint32 congestionWindow)
 {
     // we'll start sending from snd_max, if not after RTO
     if (!state->afterRto)
@@ -891,8 +891,11 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     ASSERT(options_len < state->snd_mss);
     uint32 effectiveMss = state->snd_mss - options_len;
 
-    // last segment could be less than state->snd_mss (or less than snd_mss - TCP_OPTION_TS_SIZE if using TS option)
-    if (fullSegmentsOnly && bytesToSend < effectiveMss) {
+    // Nagle's algorithm: when a TCP connection has outstanding data that has not
+    // yet been acknowledged, small segments cannot be sent until the outstanding
+    // data is acknowledged.
+    bool unacknowledgedData = (state->snd_una != state->snd_max);
+    if (state->nagle_enabled && unacknowledgedData && bytesToSend < effectiveMss) {
         EV_WARN << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
                 << ", effectiveWindow=" << effectiveWin << ", bytesToSend=" << bytesToSend << ", in buffer " << buffered << ")\n";
         return false;
@@ -906,30 +909,34 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 
     ASSERT(bytesToSend > 0);
 
-      // send < MSS segments only if it's the only segment we can send now
-      // Note: if (bytesToSend == 1010 && MSS == 1012 && ts_enabled == true) => we may send
-      // 2 segments (1000 payload + 12 optionsHeader and 10 payload + 12 optionsHeader)
-      // FIXME this should probably obey Nagle's alg -- to be checked
-    if (bytesToSend <= state->snd_mss) {
+    // send small segment only if it's the only segment we can send now
+    if (bytesToSend <= effectiveMss) {
         sendSegment(bytesToSend);
         ASSERT(bytesToSend >= state->sentBytes);
         bytesToSend -= state->sentBytes;
     }
     else {    // send whole segments only (nagle_enabled)
         while (bytesToSend >= effectiveMss) {
-            sendSegment(state->snd_mss);
+            sendSegment(effectiveMss);
             ASSERT(bytesToSend >= state->sentBytes);
             bytesToSend -= state->sentBytes;
         }
     }
 
-    // check how many bytes we have - last segment could be less than state->snd_mss
-    buffered = sendQueue->getBytesAvailable(state->snd_nxt);
-
-    if (bytesToSend == buffered && buffered != 0) // last segment?
+    if (state->nagle_enabled) {
+        // If Nagle's algorithm is enabled, by this point at least one full segment was sent;
+        // these already sent segments are not ACKed yet.
+        // Also, cannot form a full segment with the remaining buffered data.
+        // Thus, do not send last segment
+        EV_DETAIL << "Cannot send last segment, not enough data for a full segment\n";
+    }
+    else if (bytesToSend == buffered && buffered != 0) { // last segment?
+        // Send last segment
         sendSegment(bytesToSend);
-    else if (bytesToSend > 0)
+    }
+    else if (bytesToSend > 0) {
         EV_DETAIL << bytesToSend << " bytes of space left in effectiveWindow\n";
+    }
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
