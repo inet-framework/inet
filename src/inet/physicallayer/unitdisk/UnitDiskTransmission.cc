@@ -33,10 +33,10 @@ std::ostream& UnitDiskTransmission::printToStream(std::ostream& stream, int leve
 {
     stream << "UnitDiskTransmission";
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", communicationRange = " << communicationRange;
+        stream << EV_FIELD(communicationRange);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", interferenceRange = " << interferenceRange
-               << ", detectionRange = " << detectionRange;
+        stream << EV_FIELD(interferenceRange)
+               << EV_FIELD(detectionRange);
     return TransmissionBase::printToStream(stream, level);
 }
 

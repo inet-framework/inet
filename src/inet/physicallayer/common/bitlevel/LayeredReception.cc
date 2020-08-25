@@ -35,7 +35,7 @@ std::ostream& LayeredReception::printToStream(std::ostream& stream, int level) c
 {
     stream << "LayeredReception";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", analogModel = " << printObjectToString(analogModel, level + 1);
+        stream << EV_FIELD(analogModel, printObjectToString(analogModel, level + 1));
     return ReceptionBase::printToStream(stream, level);
 
 }

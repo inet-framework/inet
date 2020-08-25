@@ -31,8 +31,8 @@ std::ostream& BandListening::printToStream(std::ostream& stream, int level) cons
 {
     stream << "BandListening";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", centerFrequency = " << centerFrequency
-               << ", bandwidth = " << bandwidth;
+        stream << EV_FIELD(centerFrequency)
+               << EV_FIELD(bandwidth);
     return ListeningBase::printToStream(stream, level);
 }
 

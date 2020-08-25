@@ -95,9 +95,9 @@ std::ostream& Radio::printToStream(std::ostream& stream, int level) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", antenna = " << printObjectToString(antenna, level + 1)
-               << ", transmitter = " << printObjectToString(transmitter, level + 1)
-               << ", receiver = " << printObjectToString(receiver, level + 1);
+        stream << EV_FIELD(antenna, printObjectToString(antenna, level + 1))
+               << EV_FIELD(transmitter, printObjectToString(transmitter, level + 1))
+               << EV_FIELD(receiver, printObjectToString(receiver, level + 1));
     return stream;
 }
 

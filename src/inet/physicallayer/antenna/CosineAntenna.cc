@@ -42,8 +42,8 @@ std::ostream& CosineAntenna::printToStream(std::ostream& stream, int level) cons
 {
     stream << "CosineAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << gain->getMaxGain()
-               << ", beamWidth = " << gain->getBeamWidth();
+        stream << EV_FIELD(maxGain, gain->getMaxGain())
+               << EV_FIELD(beamWidth, gain->getBeamWidth());
     return AntennaBase::printToStream(stream, level);
 }
 

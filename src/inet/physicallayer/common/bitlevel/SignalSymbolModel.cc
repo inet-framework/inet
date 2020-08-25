@@ -38,10 +38,10 @@ std::ostream& SignalSymbolModel::printToStream(std::ostream& stream, int level) 
 {
     stream << "SignalSymbolModel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", headerSymbolLength = " << headerSymbolLength
-               << ", payloadSymbolLength = " << payloadSymbolLength
-               << ", headerSymbolRate = " << headerSymbolRate
-               << ", payloadSymbolRate = " << payloadSymbolRate;
+        stream << EV_FIELD(headerSymbolLength)
+               << EV_FIELD(payloadSymbolLength)
+               << EV_FIELD(headerSymbolRate)
+               << EV_FIELD(payloadSymbolRate);
     return stream;
 }
 

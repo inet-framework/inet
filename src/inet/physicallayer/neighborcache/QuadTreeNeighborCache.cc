@@ -65,9 +65,9 @@ std::ostream& QuadTreeNeighborCache::printToStream(std::ostream& stream, int lev
 {
     stream << "QuadTreeNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", maxNumOfPointsPerQuadrant = " << maxNumOfPointsPerQuadrant
-               << ", refillPeriod = " << refillPeriod
-               << ", maxSpeed = " << maxSpeed;
+        stream << EV_FIELD(maxNumOfPointsPerQuadrant)
+               << EV_FIELD(refillPeriod)
+               << EV_FIELD(maxSpeed);
     return stream;
 }
 

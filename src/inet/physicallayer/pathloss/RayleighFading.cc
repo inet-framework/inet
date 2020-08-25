@@ -27,7 +27,7 @@ std::ostream& RayleighFading::printToStream(std::ostream& stream, int level) con
 {
     stream << "RayleighFading";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", alpha = " << alpha
+        stream << EV_FIELD(alpha)
                << "systemLoss = " << systemLoss;
     return stream;
 }

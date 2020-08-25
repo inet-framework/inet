@@ -39,8 +39,8 @@ ApskModulationBase::ApskModulationBase(const std::vector<ApskSymbol> *constellat
 std::ostream& ApskModulationBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", constellationSize = " << constellationSize
-               << ", codeWordSize = " << codeWordSize;
+        stream << EV_FIELD(constellationSize)
+               << EV_FIELD(codeWordSize);
     return stream;
 }
 

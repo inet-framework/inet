@@ -31,8 +31,8 @@ NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime,
 std::ostream& NarrowbandNoiseBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", centerFrequency = " << centerFrequency
-               << ", bandwidth = " << bandwidth;
+        stream << EV_FIELD(centerFrequency)
+               << EV_FIELD(bandwidth);
     return NoiseBase::printToStream(stream, level);
 }
 

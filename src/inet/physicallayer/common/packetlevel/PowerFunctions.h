@@ -69,7 +69,7 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
     virtual bool isFinite(const Interval<simsec, Hz>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(FrequencyDependentAttenuation, distance = " << distance << ", transmitterAntennaGain = " << transmitterAntennaGain << ", receiverAntennaGain = " << receiverAntennaGain;
+        os << "(FrequencyDependentAttenuation" << EV_FIELD(distance) << EV_FIELD(transmitterAntennaGain) << EV_FIELD(receiverAntennaGain);
         os << "\n" << std::string(level + 2, ' ');
         os << "(" << *radioMedium->getPathLoss() << ")";
         os << "\n" << std::string(level + 2, ' ');
@@ -466,7 +466,7 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
     virtual void print(std::ostream& os, const Interval<Quaternion>& i, int level = 0) const override { os << "TODO"; }
     virtual void printPartitioning(std::ostream& os, const Interval<Quaternion>& i, int level = 0) const override { os << "TODO"; }
     virtual void printPartition(std::ostream& os, const Interval<Quaternion>& i, int level = 0) const override { os << "TODO"; }
-    virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(AntennaGain, minGain = " << antennaGain->getMinGain() << ", maxGain = " << antennaGain->getMaxGain() << ")"; }
+    virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(AntennaGain" << EV_FIELD(minGain, antennaGain->getMinGain()) << EV_FIELD(maxGain, antennaGain->getMaxGain()) << ")"; }
 };
 
 } // namespace physicallayer

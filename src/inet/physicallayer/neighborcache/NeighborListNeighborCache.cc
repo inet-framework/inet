@@ -51,9 +51,9 @@ std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int
 {
     stream << "NeighborListNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", refillPeriod = " << refillPeriod
-               << ", range = " << range
-               << ", maxSpeed = " << maxSpeed;
+        stream << EV_FIELD(refillPeriod)
+               << EV_FIELD(range)
+               << EV_FIELD(maxSpeed);
     return stream;
 }
 

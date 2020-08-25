@@ -96,18 +96,18 @@ std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level
 {
     stream << "ApskLayeredReceiver";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", levelOfDetail = " << levelOfDetail
-               << ", centerFrequency = " << centerFrequency;
+        stream << EV_FIELD(levelOfDetail)
+               << EV_FIELD(centerFrequency);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", errorModel = " << printObjectToString(errorModel, level + 1)
-               << ", decoder = " << printObjectToString(decoder, level + 1)
-               << ", demodulator = " << printObjectToString(demodulator, level + 1)
-               << ", pulseFilter = " << printObjectToString(pulseFilter, level + 1)
-               << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level + 1)
-               << ", energyDetection = " << energyDetection
-               << ", sensitivity = " << sensitivity
-               << ", bandwidth = " << bandwidth
-               << ", snirThreshold = " << snirThreshold;
+        stream << EV_FIELD(errorModel, printObjectToString(errorModel, level + 1))
+               << EV_FIELD(decoder, printObjectToString(decoder, level + 1))
+               << EV_FIELD(demodulator, printObjectToString(demodulator, level + 1))
+               << EV_FIELD(pulseFilter, printObjectToString(pulseFilter, level + 1))
+               << EV_FIELD(analogDigitalConverter, printObjectToString(analogDigitalConverter, level + 1))
+               << EV_FIELD(energyDetection)
+               << EV_FIELD(sensitivity)
+               << EV_FIELD(bandwidth)
+               << EV_FIELD(snirThreshold);
     return stream;
 }
 
@@ -210,7 +210,7 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(scalarReception->getAnalogModel());
         W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
         bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing reception possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+        EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
     }
 }

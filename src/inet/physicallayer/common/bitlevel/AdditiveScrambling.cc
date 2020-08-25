@@ -30,8 +30,8 @@ std::ostream& AdditiveScrambling::printToStream(std::ostream& stream, int level)
 {
     stream << "AdditiveScrambling";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", seed = " << seed
-               << ", generatorPolynomial = " << generatorPolynomial;
+        stream << EV_FIELD(seed)
+               << EV_FIELD(generatorPolynomial);
     return stream;
 }
 

@@ -49,10 +49,10 @@ void FlatReceiverBase::initialize(int stage)
 std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", errorModel = " << printObjectToString(errorModel, level + 1);
+        stream << EV_FIELD(errorModel, printObjectToString(errorModel, level + 1));
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", energyDetection = " << energyDetection
-               << ", sensitivity = " << sensitivity;
+        stream << EV_FIELD(energyDetection)
+               << EV_FIELD(sensitivity);
     return NarrowbandReceiverBase::printToStream(stream, level);
 }
 
@@ -80,7 +80,7 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
         W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(part), reception->getEndTime(part));
         ASSERT(W(0.0) <= minReceptionPower);
         bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing whether reception is possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+        EV_DEBUG << "Computing whether reception is possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
     }
 }

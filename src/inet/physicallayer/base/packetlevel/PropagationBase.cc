@@ -36,7 +36,7 @@ void PropagationBase::initialize(int stage)
 std::ostream& PropagationBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", propagationSpeed = " << propagationSpeed;
+        stream << EV_FIELD(propagationSpeed);
     return stream;
 }
 

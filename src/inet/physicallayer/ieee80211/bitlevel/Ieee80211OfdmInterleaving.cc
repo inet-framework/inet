@@ -31,8 +31,8 @@ std::ostream& Ieee80211OfdmInterleaving::printToStream(std::ostream& stream, int
 {
     stream << "Ieee80211OfdmInterleaving";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", numberOfCodedBitsPerSymbol = " << numberOfCodedBitsPerSymbol
-               << ", numberOfCodedBitsPerSubcarrier = " << numberOfCodedBitsPerSubcarrier;
+        stream << EV_FIELD(numberOfCodedBitsPerSymbol)
+               << EV_FIELD(numberOfCodedBitsPerSubcarrier);
     return stream;
 }
 

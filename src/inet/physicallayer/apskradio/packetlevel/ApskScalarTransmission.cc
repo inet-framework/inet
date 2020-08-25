@@ -30,7 +30,7 @@ std::ostream& ApskScalarTransmission::printToStream(std::ostream& stream, int le
 {
     stream << "ApskScalarTransmission";
     if (level <= PRINT_LEVEL_DETAIL)
-       stream << ", power = " << power;
+       stream << EV_FIELD(power);
     return FlatTransmissionBase::printToStream(stream, level);
 }
 

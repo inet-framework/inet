@@ -118,8 +118,8 @@ void DimensionalTransmitterBase::parseFrequencyGains(const char *text)
 
 std::ostream& DimensionalTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
-    // TODO: << ", timeGains = " << timeGains
-    // TODO: << ", frequencyGains = " << frequencyGains;
+    // TODO: << EV_FIELD(timeGains)
+    // TODO: << EV_FIELD(frequencyGains);
     return stream;
 }
 

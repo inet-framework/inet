@@ -35,7 +35,7 @@ std::ostream& ScalarSnir::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarSnir";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", minSNIR = " << minSNIR;
+        stream << EV_FIELD(minSNIR);
     return stream;
 }
 

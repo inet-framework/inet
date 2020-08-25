@@ -46,10 +46,10 @@ std::ostream& Ieee80211UnitDiskTransmitter::printToStream(std::ostream& stream, 
 {
     stream << "Ieee80211UnitDiskTransmitter";
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", communicationRange = " << communicationRange;
+        stream << EV_FIELD(communicationRange);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", interferenceRange = " << interferenceRange
-               << ", detectionRange = " << detectionRange;
+        stream << EV_FIELD(interferenceRange)
+               << EV_FIELD(detectionRange);
     return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 

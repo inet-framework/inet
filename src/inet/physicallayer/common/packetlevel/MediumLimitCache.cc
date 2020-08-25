@@ -98,17 +98,17 @@ std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level) c
 {
     stream << "RadioMediumLimits";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", minConstraintArea = " << minConstraintArea
-               << ", maxConstraintArea = " << maxConstraintArea
-               << ", maxSpeed = " << maxSpeed
-               << ", maxTransmissionPower = " << maxTransmissionPower
-               << ", minInterferencePower = " << minInterferencePower
-               << ", minReceptionPower = " << minReceptionPower
-               << ", maxAntennaGain = " << maxAntennaGain
-               << ", minInterferenceTime = " << minInterferenceTime
-               << ", maxTransmissionDuration = " << maxTransmissionDuration
-               << ", maxCommunicationRange = " << maxCommunicationRange
-               << ", maxInterferenceRange = " << maxInterferenceRange;
+        stream << EV_FIELD(minConstraintArea)
+               << EV_FIELD(maxConstraintArea)
+               << EV_FIELD(maxSpeed)
+               << EV_FIELD(maxTransmissionPower)
+               << EV_FIELD(minInterferencePower)
+               << EV_FIELD(minReceptionPower)
+               << EV_FIELD(maxAntennaGain)
+               << EV_FIELD(minInterferenceTime)
+               << EV_FIELD(maxTransmissionDuration)
+               << EV_FIELD(maxCommunicationRange)
+               << EV_FIELD(maxInterferenceRange);
     return stream;
 }
 

@@ -40,7 +40,7 @@ std::ostream& InterpolatingAntenna::printToStream(std::ostream& stream, int leve
 {
     stream << "InterpolatingAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << gain->getMaxGain();
+        stream << EV_FIELD(maxGain, gain->getMaxGain());
     return AntennaBase::printToStream(stream, level);
 }
 

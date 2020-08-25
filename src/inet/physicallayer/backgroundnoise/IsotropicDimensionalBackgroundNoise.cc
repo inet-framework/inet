@@ -44,10 +44,10 @@ std::ostream& IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& s
     stream << "IsotropicDimensionalBackgroundNoise";
     if (level <= PRINT_LEVEL_DETAIL) {
         if (!std::isnan(powerSpectralDensity.get()))
-            stream << ", powerSpectralDensity = " << powerSpectralDensity;
+            stream << EV_FIELD(powerSpectralDensity);
         else {
-            stream << ", power = " << power;
-            stream << ", bandwidth = " << bandwidth;
+            stream << EV_FIELD(power);
+            stream << EV_FIELD(bandwidth);
         }
     }
     return stream;

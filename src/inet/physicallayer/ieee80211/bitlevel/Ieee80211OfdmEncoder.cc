@@ -36,10 +36,10 @@ std::ostream& Ieee80211OfdmEncoder::printToStream(std::ostream& stream, int leve
 {
     stream << "Ieee80211OfdmEncoder";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", convolutionalCoder = " << printObjectToString(convolutionalCoder, level + 1)
-               << ", interleaver = " << printObjectToString(interleaver, level + 1)
-               << ", scrambler = " << printObjectToString(scrambler, level + 1)
-               << ", code = " << printObjectToString(code, level + 1);
+        stream << EV_FIELD(convolutionalCoder, printObjectToString(convolutionalCoder, level + 1))
+               << EV_FIELD(interleaver, printObjectToString(interleaver, level + 1))
+               << EV_FIELD(scrambler, printObjectToString(scrambler, level + 1))
+               << EV_FIELD(code, printObjectToString(code, level + 1));
     return stream;
 }
 

@@ -44,7 +44,7 @@ std::ostream& ApskDemodulator::printToStream(std::ostream& stream, int level) co
 {
     stream << "ApskDemodulator";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", modulation = " << printObjectToString(modulation, level + 1);
+        stream << EV_FIELD(modulation, printObjectToString(modulation, level + 1));
     return stream;
 }
 

@@ -42,7 +42,7 @@ std::ostream& ApskModulator::printToStream(std::ostream& stream, int level) cons
 {
     stream << "ApskModulator";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", modulation = " << printObjectToString(modulation, level + 1);
+        stream << EV_FIELD(modulation, printObjectToString(modulation, level + 1));
     return stream;
 }
 

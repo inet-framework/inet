@@ -31,7 +31,7 @@ std::ostream& ScalarSignalAnalogModel::printToStream(std::ostream& stream, int l
 {
     stream << "ScalarSignalAnalogModel";
     if (level <= PRINT_LEVEL_DETAIL)
-       stream << ", power = " << power;
+       stream << EV_FIELD(power);
     return NarrowbandSignalAnalogModel::printToStream(stream, level);
 }
 

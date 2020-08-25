@@ -53,7 +53,7 @@ std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int l
 {
     stream << "ConstantTimePropagation";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", propagationTime = " << propagationTime;
+        stream << EV_FIELD(propagationTime);
     return PropagationBase::printToStream(stream, level);
 }
 

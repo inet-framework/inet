@@ -31,10 +31,10 @@ std::ostream& DimensionalTransmission::printToStream(std::ostream& stream, int l
 {
     stream << "DimensionalTransmission";
     if (level <= PRINT_LEVEL_DEBUG)
-//        stream << ", powerMax = " << power->getMax()
-//               << ", powerMin = " << power->getMin();
+//        stream << EV_FIELD(powerMax, power->getMax())
+//               << EV_FIELD(powerMin, power->getMin());
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", power = " << power;
+        stream << EV_FIELD(power);
     return FlatTransmissionBase::printToStream(stream, level);
 }
 

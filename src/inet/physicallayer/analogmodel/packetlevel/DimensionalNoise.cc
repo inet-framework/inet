@@ -31,10 +31,10 @@ std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level) c
 {
     stream << "DimensionalNoise";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", powerMax = " << power->getMax()
-               << ", powerMin = " << power->getMin();
+        stream << EV_FIELD(powerMax, power->getMax())
+               << EV_FIELD(powerMin, power->getMin());
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", power = " << power;
+        stream << EV_FIELD(power);
     return NarrowbandNoiseBase::printToStream(stream, level);
 }
 
@@ -43,7 +43,7 @@ W DimensionalNoise::computeMinPower(simtime_t startTime, simtime_t endTime) cons
     Point<simsec> startPoint{simsec(startTime)};
     Point<simsec> endPoint{simsec(endTime)};
     W minPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMin(Interval<simsec>(startPoint, endPoint, 0b1, 0b1, 0b0));
-    EV_DEBUG << "Computing minimum noise power: start = " << startPoint << ", end = " << endPoint << " -> " << minPower << endl;
+    EV_DEBUG << "Computing minimum noise power" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(minPower) << endl;
     return minPower;
 }
 
@@ -52,7 +52,7 @@ W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) cons
     Point<simsec> startPoint{simsec(startTime)};
     Point<simsec> endPoint{simsec(endTime)};
     W maxPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMax(Interval<simsec>(startPoint, endPoint, 0b1, 0b1, 0b0));
-    EV_DEBUG << "Computing maximum noise power: start = " << startPoint << ", end = " << endPoint << " -> " << maxPower << endl;
+    EV_DEBUG << "Computing maximum noise power" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(maxPower) << endl;
     return maxPower;
 }
 

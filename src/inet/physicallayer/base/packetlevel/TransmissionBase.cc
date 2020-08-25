@@ -43,18 +43,18 @@ TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *pack
 std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", id = " << id;
+        stream << EV_FIELD(id);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", transmitterId = " << transmitterId
-               << ", startTime = " << startTime
-               << ", endTime = " << endTime
-               << ", startPosition = " << startPosition
-               << ", preambleDuration = " << preambleDuration
-               << ", headerDuration = " << headerDuration
-               << ", dataDuration = " << dataDuration
-               << ", endPosition = " << endPosition
-               << ", startOrientation = " << startOrientation
-               << ", endOrientation = " << endOrientation;
+        stream << EV_FIELD(transmitterId)
+               << EV_FIELD(startTime)
+               << EV_FIELD(endTime)
+               << EV_FIELD(preambleDuration)
+               << EV_FIELD(headerDuration)
+               << EV_FIELD(dataDuration)
+               << EV_FIELD(startPosition)
+               << EV_FIELD(endPosition)
+               << EV_FIELD(startOrientation)
+               << EV_FIELD(endOrientation);
     return stream;
 }
 

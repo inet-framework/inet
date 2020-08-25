@@ -74,8 +74,8 @@ std::ostream& SuiPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "SuiPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", ht = " << ht
-               << ", hr = " << hr;
+        stream << EV_FIELD(ht)
+               << EV_FIELD(hr);
     return stream;
 }
 

@@ -43,9 +43,9 @@ std::ostream& ParabolicAntenna::printToStream(std::ostream& stream, int level) c
 {
     stream << "ParabolicAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << gain->getMaxGain()
-               << ", minGain = " << gain->getMinGain()
-               << ", beamWidth = " << gain->getBeamWidth();
+        stream << EV_FIELD(maxGain, gain->getMaxGain())
+               << EV_FIELD(minGain, gain->getMinGain())
+               << EV_FIELD(beamWidth, gain->getBeamWidth());
     return AntennaBase::printToStream(stream, level);
 }
 

@@ -38,8 +38,8 @@ std::ostream& ConvolutionalCode::printToStream(std::ostream& stream, int level) 
 {
     stream << "ConvolutionalCode";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", codeRatePuncturingK = " << codeRatePuncturingK
-               << ", codeRatePuncturingN = " << codeRatePuncturingN;
+        stream << EV_FIELD(codeRatePuncturingK)
+               << EV_FIELD(codeRatePuncturingN);
     return stream;
 }
 

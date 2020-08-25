@@ -40,7 +40,7 @@ std::ostream& TwoRayInterference::printToStream(std::ostream& os, int level) con
 {
     os << "TwoRayInterference";
     if (level >= PRINT_LEVEL_TRACE)
-        os << ", epsilon_r = " << epsilon_r << ", polarization = " << polarization;
+        os << ", epsilon_r = " << epsilon_r << EV_FIELD(polarization);
     return os;
 }
 

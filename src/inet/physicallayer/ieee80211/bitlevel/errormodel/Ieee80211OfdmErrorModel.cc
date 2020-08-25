@@ -48,10 +48,10 @@ std::ostream& Ieee80211OfdmErrorModel::printToStream(std::ostream& stream, int l
 {
     stream << "Ieee80211OfdmErrorModel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", signalSymbolErrorRate = " << signalSymbolErrorRate
-               << ", dataSymbolErrorRate = " << dataSymbolErrorRate
-               << ", signalBitErrorRate = " << signalBitErrorRate
-               << ", dataBitErrorRate = " << dataBitErrorRate;
+        stream << EV_FIELD(signalSymbolErrorRate)
+               << EV_FIELD(dataSymbolErrorRate)
+               << EV_FIELD(signalBitErrorRate)
+               << EV_FIELD(dataBitErrorRate);
     return stream;
 }
 

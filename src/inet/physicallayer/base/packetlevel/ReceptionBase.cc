@@ -39,18 +39,18 @@ ReceptionBase::ReceptionBase(const IRadio *receiver, const ITransmission *transm
 std::ostream& ReceptionBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", transmissionId = " << transmission->getId();
+        stream << EV_FIELD(transmissionId, transmission->getId());
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", receiverId = " << receiver->getId()
-               << ", startTime = " << startTime
-               << ", endTime = " << endTime
-               << ", preambleDuration = " << preambleDuration
-               << ", headerDuration = " << headerDuration
-               << ", dataDuration = " << dataDuration
-               << ", startPosition = " << startPosition
-               << ", endPosition = " << endPosition
-               << ", startOrientation = " << startOrientation
-               << ", endOrientation = " << endOrientation;
+        stream << EV_FIELD(receiverId, receiver->getId())
+               << EV_FIELD(startTime)
+               << EV_FIELD(endTime)
+               << EV_FIELD(preambleDuration)
+               << EV_FIELD(headerDuration)
+               << EV_FIELD(dataDuration)
+               << EV_FIELD(startPosition)
+               << EV_FIELD(endPosition)
+               << EV_FIELD(startOrientation)
+               << EV_FIELD(endOrientation);
     return stream;
 }
 

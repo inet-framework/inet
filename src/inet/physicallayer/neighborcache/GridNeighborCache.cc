@@ -74,9 +74,9 @@ std::ostream& GridNeighborCache::printToStream(std::ostream& stream, int level) 
 {
     stream << "GridNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", cellSize = " << cellSize
-               << ", refillPeriod = " << refillPeriod
-               << ", maxSpeed = " << maxSpeed;
+        stream << EV_FIELD(cellSize)
+               << EV_FIELD(refillPeriod)
+               << EV_FIELD(maxSpeed);
     return stream;
 }
 

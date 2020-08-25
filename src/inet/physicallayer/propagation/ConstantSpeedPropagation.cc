@@ -55,9 +55,9 @@ std::ostream& ConstantSpeedPropagation::printToStream(std::ostream& stream, int 
 {
     stream << "ConstantSpeedPropagation";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", ignoreMovementDuringTransmission = " << ignoreMovementDuringTransmission
-               << ", ignoreMovementDuringPropagation = " << ignoreMovementDuringPropagation
-               << ", ignoreMovementDuringReception = " << ignoreMovementDuringReception;
+        stream << EV_FIELD(ignoreMovementDuringTransmission)
+               << EV_FIELD(ignoreMovementDuringPropagation)
+               << EV_FIELD(ignoreMovementDuringReception);
     return PropagationBase::printToStream(stream, level);
 }
 

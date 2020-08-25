@@ -34,11 +34,11 @@ ListeningBase::ListeningBase(const IRadio *receiver, simtime_t startTime, simtim
 std::ostream& ListeningBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", receiverId = " << receiver->getId()
-               << ", startTime = " << startTime
-               << ", endTime = " << endTime
-               << ", startPosition = " << startPosition
-               << ", endPosition = " << endPosition;
+        stream << EV_FIELD(receiverId, receiver->getId())
+               << EV_FIELD(startTime)
+               << EV_FIELD(endTime)
+               << EV_FIELD(startPosition)
+               << EV_FIELD(endPosition);
     return stream;
 }
 

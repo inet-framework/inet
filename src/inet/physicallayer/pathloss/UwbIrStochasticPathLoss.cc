@@ -64,11 +64,11 @@ std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int l
     stream << "UwbIrStochasticPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", PL0 = " << PL0
-               << ", muGamma = " << muGamma
-               << ", muSigma = " << muSigma
-               << ", sigmaGamma = " << sigmaGamma
-               << ", sigmaSigma = " << sigmaSigma
-               << ", shadowing = " << shadowing;
+               << EV_FIELD(muGamma)
+               << EV_FIELD(muSigma)
+               << EV_FIELD(sigmaGamma)
+               << EV_FIELD(sigmaSigma)
+               << EV_FIELD(shadowing);
     return stream;
 }
 

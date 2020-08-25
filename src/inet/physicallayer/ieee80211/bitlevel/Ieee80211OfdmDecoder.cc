@@ -46,10 +46,10 @@ std::ostream& Ieee80211OfdmDecoder::printToStream(std::ostream& stream, int leve
 {
     stream << "Ieee80211OfdmDecoder";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", code = " << printObjectToString(code, level + 1)
-               << ", descrambler = " << printObjectToString(descrambler, level + 1)
-               << ", fecDecoder = " << printObjectToString(fecDecoder, level + 1)
-               << ", deinterleaver = " << printObjectToString(deinterleaver, level + 1);
+        stream << EV_FIELD(code, printObjectToString(code, level + 1))
+               << EV_FIELD(descrambler, printObjectToString(descrambler, level + 1))
+               << EV_FIELD(fecDecoder, printObjectToString(fecDecoder, level + 1))
+               << EV_FIELD(deinterleaver, printObjectToString(deinterleaver, level + 1));
     return stream;
 }
 

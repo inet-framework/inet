@@ -25,7 +25,7 @@ std::ostream& AdditiveScrambler::printToStream(std::ostream& stream, int level) 
 {
     stream << "AdditiveScrambler";
     if (level <= PRINT_LEVEL_TRACE)
-        stream<< ", scrambling = " << printObjectToString(scrambling, level + 1);
+        stream<< EV_FIELD(scrambling, printObjectToString(scrambling, level + 1));
     return stream;
 }
 

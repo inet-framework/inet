@@ -31,7 +31,7 @@ std::ostream& ScalarNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarNoise";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", powerChanges = " << powerChanges ;
+        stream << EV_FIELD(powerChanges, powerChanges);
     return NarrowbandNoiseBase::printToStream(stream, level);
 }
 

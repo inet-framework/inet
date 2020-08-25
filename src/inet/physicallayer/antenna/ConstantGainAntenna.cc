@@ -39,7 +39,7 @@ std::ostream& ConstantGainAntenna::printToStream(std::ostream& stream, int level
 {
     stream << "ConstantGainAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", gain = " << gain->getMaxGain();
+        stream << EV_FIELD(gain, gain->getMaxGain());
     return AntennaBase::printToStream(stream, level);
 }
 

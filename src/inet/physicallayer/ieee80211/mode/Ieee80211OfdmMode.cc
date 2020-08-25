@@ -160,7 +160,7 @@ std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int lev
 {
     stream << "Ieee80211OfdmDataMode";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", netBitrate = " << netBitrate;
+        stream << EV_FIELD(netBitrate);
     return stream;
 }
 
@@ -168,10 +168,10 @@ std::ostream& Ieee80211OfdmMode::printToStream(std::ostream& stream, int level) 
 {
     stream << "Ieee80211OfdmMode";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", preambleMode = " << printObjectToString(preambleMode, level + 1)
-               << ", signalMode = " << printObjectToString(signalMode, level + 1);
+        stream << EV_FIELD(preambleMode, printObjectToString(preambleMode, level + 1))
+               << EV_FIELD(signalMode, printObjectToString(signalMode, level + 1));
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", dataMode = " << printObjectToString(dataMode, level + 1);
+        stream << EV_FIELD(dataMode, printObjectToString(dataMode, level + 1));
     return stream;
 }
 

@@ -40,9 +40,9 @@ std::ostream& NakagamiFading::printToStream(std::ostream& stream, int level) con
 {
     stream << "NakagamiFading";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", alpha = " << alpha
-               << ", systemLoss = " << systemLoss
-               << ", shapeFactor = " << shapeFactor;
+        stream << EV_FIELD(alpha)
+               << EV_FIELD(systemLoss)
+               << EV_FIELD(shapeFactor);
     return stream;
 }
 

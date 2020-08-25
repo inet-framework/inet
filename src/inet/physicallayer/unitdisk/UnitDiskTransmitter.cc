@@ -51,14 +51,14 @@ std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level
 {
     stream << "UnitDiskTransmitter";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", preambleDuration = " << preambleDuration
-               << ", headerLength = " << headerLength
-               << ", bitrate = " << bitrate;
+        stream << EV_FIELD(preambleDuration)
+               << EV_FIELD(headerLength)
+               << EV_FIELD(bitrate);
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", communicationRange = " << communicationRange;
+        stream << EV_FIELD(communicationRange);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", interferenceRange = " << interferenceRange
-               << ", detectionRange = " << detectionRange;
+        stream << EV_FIELD(interferenceRange)
+               << EV_FIELD(detectionRange);
     return stream;
 }
 

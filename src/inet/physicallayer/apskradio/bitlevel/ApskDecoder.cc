@@ -57,11 +57,11 @@ std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "ApskDecoder";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", code = " << code;
+        stream << EV_FIELD(code);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", descrambler = " << printObjectToString(descrambler, level + 1)
-               << ", fecDecoder = " << printObjectToString(fecDecoder, level + 1)
-               << ", deinterleaver = " << printObjectToString(deinterleaver, level + 1);
+        stream << EV_FIELD(descrambler, printObjectToString(descrambler, level + 1))
+               << EV_FIELD(fecDecoder, printObjectToString(fecDecoder, level + 1))
+               << EV_FIELD(deinterleaver, printObjectToString(deinterleaver, level + 1));
     return stream;
 }
 

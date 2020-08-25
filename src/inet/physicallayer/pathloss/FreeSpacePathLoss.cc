@@ -41,8 +41,8 @@ std::ostream& FreeSpacePathLoss::printToStream(std::ostream& stream, int level) 
 {
     stream << "FreeSpacePathLoss";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", alpha = " << alpha
-               << ", systemLoss = " << systemLoss;
+        stream << EV_FIELD(alpha)
+               << EV_FIELD(systemLoss);
     return stream;
 }
 

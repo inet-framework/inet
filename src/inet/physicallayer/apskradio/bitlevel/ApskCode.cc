@@ -41,9 +41,9 @@ std::ostream& ApskCode::printToStream(std::ostream& stream, int level) const
 {
     stream << "ApskCode";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level + 1)
-               << ", interleaving = " << printObjectToString(interleaving, level + 1)
-               << ", scrambling = " << printObjectToString(scrambling, level + 1);
+        stream << EV_FIELD(convolutionalCode, printObjectToString(convolutionalCode, level + 1))
+               << EV_FIELD(interleaving, printObjectToString(interleaving, level + 1))
+               << EV_FIELD(scrambling, printObjectToString(scrambling, level + 1));
     return stream;
 }
 

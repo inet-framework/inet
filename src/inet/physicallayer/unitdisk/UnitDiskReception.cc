@@ -37,7 +37,7 @@ std::ostream& UnitDiskReception::printToStream(std::ostream& stream, int level) 
 {
     stream << "UnitDiskReception";
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", power = " << cEnum::get(opp_typename(typeid(UnitDiskReception::Power)))->getStringFor(power) + 6;
+        stream << EV_FIELD(power, cEnum::get(opp_typename(typeid(UnitDiskReception::Power)))->getStringFor(power) + 6);
     return ReceptionBase::printToStream(stream, level);
 }
 

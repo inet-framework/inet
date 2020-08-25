@@ -26,7 +26,7 @@ std::ostream& ConvolutionalCoder::printToStream(std::ostream& stream, int level)
 {
     stream << "ConvolutionalCoder";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level + 1);
+        stream << EV_FIELD(convolutionalCode, printObjectToString(convolutionalCode, level + 1));
     return stream;
 }
 

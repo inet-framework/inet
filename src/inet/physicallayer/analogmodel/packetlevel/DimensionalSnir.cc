@@ -33,7 +33,7 @@ std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level) co
 {
     stream << "DimensionalSnir";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", minSNIR = " << minSNIR;
+        stream << EV_FIELD(minSNIR);
     return SnirBase::printToStream(stream, level);
 }
 
@@ -58,7 +58,7 @@ double DimensionalSnir::computeMin() const
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
     double minSNIR = snir->getMin(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
-    EV_DEBUG << "Computing minimum SNIR: start = " << startPoint << ", end = " << endPoint << " -> minimum SNIR = " << minSNIR << endl;
+    EV_DEBUG << "Computing minimum SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(minSNIR) << endl;
     return minSNIR;
 }
 
@@ -83,7 +83,7 @@ double DimensionalSnir::computeMax() const
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
     double maxSNIR = snir->getMax(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
-    EV_DEBUG << "Computing maximum SNIR: start = " << startPoint << ", end = " << endPoint << " -> maximum SNIR = " << maxSNIR << endl;
+    EV_DEBUG << "Computing maximum SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(maxSNIR) << endl;
     return maxSNIR;
 }
 
@@ -108,7 +108,7 @@ double DimensionalSnir::computeMean() const
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
     double meanSNIR = snir->getMean(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
-    EV_DEBUG << "Computing mean SNIR: start = " << startPoint << ", end = " << endPoint << " -> mean SNIR = " << meanSNIR << endl;
+    EV_DEBUG << "Computing mean SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(meanSNIR) << endl;
     return meanSNIR;
 }
 

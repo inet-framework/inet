@@ -50,9 +50,9 @@ void NarrowbandReceiverBase::initialize(int stage)
 std::ostream& NarrowbandReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", modulation = " << printObjectToString(modulation, level + 1)
-               << ", centerFrequency = " << centerFrequency
-               << ", bandwidth = " << bandwidth;
+        stream << EV_FIELD(modulation, printObjectToString(modulation, level + 1))
+               << EV_FIELD(centerFrequency)
+               << EV_FIELD(bandwidth);
     return SnirReceiverBase::printToStream(stream, level);
 }
 

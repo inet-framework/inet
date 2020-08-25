@@ -40,9 +40,9 @@ std::ostream& RicianFading::printToStream(std::ostream& stream, int level) const
 {
     stream << "RicianFading";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", alpha = " << alpha
+        stream << EV_FIELD(alpha)
                << ", system loss = " << systemLoss
-               << ", k = " << k;
+               << EV_FIELD(k);
     return stream;
 }
 

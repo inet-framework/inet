@@ -39,7 +39,7 @@ std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) cons
 {
     stream << "DipoleAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", length = " << gain->getLength();
+        stream << EV_FIELD(length, gain->getLength());
     return AntennaBase::printToStream(stream, level);
 }
 

@@ -32,10 +32,10 @@ FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const Pack
 std::ostream& FlatTransmissionBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", bitrate = " << bitrate;
+        stream << EV_FIELD(bitrate);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", headerLength = " << headerLength
-               << ", dataLength = " << dataLength;
+        stream << EV_FIELD(headerLength)
+               << EV_FIELD(dataLength);
     return NarrowbandTransmissionBase::printToStream(stream, level);
 }
 

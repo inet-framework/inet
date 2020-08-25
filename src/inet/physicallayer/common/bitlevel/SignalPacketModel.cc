@@ -30,7 +30,7 @@ std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level) 
 {
     stream << "SignalPacketModel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", packet = " << packet;
+        stream << EV_FIELD(packet);
     return stream;
 }
 

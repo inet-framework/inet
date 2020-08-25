@@ -38,8 +38,8 @@ std::ostream& IsotropicScalarBackgroundNoise::printToStream(std::ostream& stream
 {
     stream << "IsotropicScalarBackgroundNoise";
     if (level <= PRINT_LEVEL_DETAIL) {
-        stream << ", power = " << power;
-        stream << ", bandwidth = " << bandwidth;
+        stream << EV_FIELD(power);
+        stream << EV_FIELD(bandwidth);
     }
     return stream;
 }

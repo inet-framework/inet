@@ -38,10 +38,10 @@ std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level) con
 {
     stream << "SignalBitModel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", headerLength = " << headerLength
-               << ", headerBitRate = " << headerBitRate
-               << ", dataLength = " << dataLength
-               << ", dataBitRate = " << dataBitRate;
+        stream << EV_FIELD(headerLength)
+               << EV_FIELD(headerBitRate)
+               << EV_FIELD(dataLength)
+               << EV_FIELD(dataBitRate);
     return stream;
 }
 

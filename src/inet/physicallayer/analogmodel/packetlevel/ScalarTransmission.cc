@@ -31,7 +31,7 @@ std::ostream& ScalarTransmission::printToStream(std::ostream& stream, int level)
 {
     stream << "ScalarTransmission";
     if (level <= PRINT_LEVEL_DETAIL)
-       stream << ", power = " << power;
+       stream << EV_FIELD(power);
     return FlatTransmissionBase::printToStream(stream, level);
 }
 

@@ -44,10 +44,10 @@ void FlatTransmitterBase::initialize(int stage)
 std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", preambleDuration = " << preambleDuration
-               << ", headerLength = " << headerLength
-               << ", bitrate = " << bitrate
-               << ", power = " << power;
+        stream << EV_FIELD(preambleDuration)
+               << EV_FIELD(headerLength)
+               << EV_FIELD(bitrate)
+               << EV_FIELD(power);
     return NarrowbandTransmitterBase::printToStream(stream, level);
 }
 

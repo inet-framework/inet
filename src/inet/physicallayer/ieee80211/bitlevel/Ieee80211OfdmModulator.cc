@@ -50,7 +50,7 @@ std::ostream& Ieee80211OfdmModulator::printToStream(std::ostream& stream, int le
 {
     stream << "Ieee80211OfdmModulator";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level + 1);
+        stream << EV_FIELD(subcarrierModulation, printObjectToString(subcarrierModulation, level + 1));
     return stream;
 }
 

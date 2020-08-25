@@ -31,7 +31,7 @@ std::ostream& ScalarReception::printToStream(std::ostream& stream, int level) co
 {
     stream << "ScalarReception";
     if (level <= PRINT_LEVEL_DETAIL)
-       stream << ", power = " << power;
+       stream << EV_FIELD(power);
     return FlatReceptionBase::printToStream(stream, level);
 }
 

@@ -40,9 +40,9 @@ std::ostream& LogNormalShadowing::printToStream(std::ostream& stream, int level)
 {
     stream << "LogNormalShadowing";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", alpha = " << alpha
-               << ", systemLoss = " << systemLoss
-               << ", sigma = " << sigma;
+        stream << EV_FIELD(alpha)
+               << EV_FIELD(systemLoss)
+               << EV_FIELD(sigma);
     return stream;
 }
 

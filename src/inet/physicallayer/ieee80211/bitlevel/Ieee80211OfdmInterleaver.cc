@@ -25,7 +25,7 @@ std::ostream& Ieee80211OfdmInterleaver::printToStream(std::ostream& stream, int 
 {
     stream << "Ieee80211Interleaver";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", interleaving = " << printObjectToString(interleaving, level + 1);
+        stream << EV_FIELD(interleaving, printObjectToString(interleaving, level + 1));
     return stream;
 }
 

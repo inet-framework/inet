@@ -32,7 +32,7 @@ std::ostream& ListeningDecision::printToStream(std::ostream& stream, int level) 
     if (level <= PRINT_LEVEL_DETAIL)
         stream << (isListeningPossible_ ? ", \x1b[1mpossible\x1b[0m" : ", \x1b[1mimpossible\x1b[0m");
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", listening = " << printObjectToString(listening, level + 1);
+        stream << EV_FIELD(listening, printObjectToString(listening, level + 1));
     return stream;
 }
 

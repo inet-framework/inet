@@ -36,8 +36,8 @@ std::ostream& SignalSampleModel::printToStream(std::ostream& stream, int level) 
 {
     stream << "SignalSampleModel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", sampleLength = " << sampleLength
-               << ", sampleRate = " << sampleRate;
+        stream << EV_FIELD(sampleLength)
+               << EV_FIELD(sampleRate);
     return stream;
 }
 

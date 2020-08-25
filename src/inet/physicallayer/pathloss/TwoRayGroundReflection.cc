@@ -38,8 +38,8 @@ std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int le
 {
     stream << "TwoRayGroundReflection";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", alpha = " << alpha
-               << ", systemLoss = " << systemLoss;
+        stream << EV_FIELD(alpha)
+               << EV_FIELD(systemLoss);
     return stream;
 }
 
