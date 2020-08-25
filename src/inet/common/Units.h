@@ -1069,6 +1069,9 @@ typedef milli<m>::type mm;
 typedef kilo<m>::type km;
 typedef milli<kg>::type g;
 typedef milli<g>::type mg;
+typedef pico<s>::type ps;
+typedef nano<s>::type ns;
+typedef micro<s>::type us;
 typedef milli<s>::type ms;
 typedef pico<W>::type pW;
 typedef nano<W>::type nW;
@@ -1086,6 +1089,9 @@ UNIT_DISPLAY_NAME(units::mm, "mm");
 UNIT_DISPLAY_NAME(units::km, "km");
 UNIT_DISPLAY_NAME(units::g, "g");
 UNIT_DISPLAY_NAME(units::mg, "mg");
+UNIT_DISPLAY_NAME(units::ps, "ps");
+UNIT_DISPLAY_NAME(units::ns, "ns");
+UNIT_DISPLAY_NAME(units::us, "us");
 UNIT_DISPLAY_NAME(units::ms, "ms");
 UNIT_DISPLAY_NAME(units::pW, "pW");
 UNIT_DISPLAY_NAME(units::nW, "nW");
@@ -1277,6 +1283,10 @@ typedef value<double, units::mAh> mAh;
 typedef value<double, units::kHz> kHz;
 typedef value<double, units::MHz> MHz;
 typedef value<double, units::GHz> GHz;
+typedef value<simtime_t, units::ps> psimsec;
+typedef value<simtime_t, units::ns> nsimsec;
+typedef value<simtime_t, units::us> usimsec;
+typedef value<simtime_t, units::ms> msimsec;
 
 // Non-SI
 typedef value<double, units::lb> lb;
@@ -1424,6 +1434,14 @@ inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::
         os << "inf s";
     else if (value.get() == negativeInfinity)
         os << "-inf s";
+    else if (values::simsec(value) < values::psimsec(1000.0))
+        os << values::psimsec(value);
+    else if (values::simsec(value) < values::nsimsec(1000.0))
+        os << values::nsimsec(value);
+    else if (values::simsec(value) < values::usimsec(1000.0))
+        os << values::usimsec(value);
+    else if (values::simsec(value) < values::msimsec(1000.0))
+        os << values::msimsec(value);
     else {
         os << value.get() << ' ';
         output_unit<units::s>::fn(os);
