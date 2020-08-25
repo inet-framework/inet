@@ -102,6 +102,14 @@ inline void printElapsedTime(const char *name, long startTime)
 
 #define TIME(CODE)    { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }
 
+#define GET_3TH_ARG(arg1, arg2, arg3, ...) arg3
+
+#define EV_FIELD_1(field) EV_FIELD_2(field, field)
+#define EV_FIELD_2(field, value) ", \x1b[1m"#field"\x1b[0m = " << (value)
+#define EV_FIELD_CHOOSER(...) GET_3TH_ARG(__VA_ARGS__, EV_FIELD_2, EV_FIELD_1, )
+#define EV_FIELD(...) EV_FIELD_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+#define EV_ENDL "." << endl
+
 } // namespace inet
 
 #endif
