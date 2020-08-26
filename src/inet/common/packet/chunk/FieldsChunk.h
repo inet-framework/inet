@@ -74,6 +74,14 @@ class INET_API FieldsChunk : public Chunk
     virtual void setChunkLength(b chunkLength) { handleChange(); this->chunkLength = chunkLength; }
     virtual void addChunkLength(b chunkLength) { handleChange(); this->chunkLength += chunkLength; }
     //@}
+
+    /** @name Utility functions */
+    //@{
+    /**
+     * Returns a human readable string representation.
+     */
+    virtual std::string str() const override;
+    //@}
 };
 
 } // namespace

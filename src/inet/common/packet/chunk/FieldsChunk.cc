@@ -91,4 +91,17 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
     return converter(const_cast<FieldsChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
+std::string FieldsChunk::str() const
+{
+    std::ostringstream os;
+    os << Chunk::str();
+    auto className = getClassName();
+    auto descriptor = getDescriptor();
+    // TODO: make this more sophisticated, e.g. add properties to fields to control what is printed
+    for (int i = 0; i < descriptor->getFieldCount(); i++)
+        if (!descriptor->getFieldIsArray(i) && !strcmp(className, descriptor->getFieldDeclaredOn(i)))
+            os << ", \x1b[1m" << descriptor->getFieldName(i) << "\x1b[0m = " << descriptor->getFieldValueAsString((void *)this, i, 0);
+    return os.str();
+}
+
 } // namespace
