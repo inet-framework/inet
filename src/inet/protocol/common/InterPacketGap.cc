@@ -133,7 +133,7 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
     if (packetDelay == 0)
         pushOrSendPacket(packet, outputGate, consumer);
     else {
-        EV_INFO << "Inserting packet gap before " << packet->getName() << "." << endl;
+        EV_INFO << "Inserting packet gap before " << EV_FIELD(packet, *packet) << EV_ENDL;
         progress->setContextPointer(packet);
         scheduleClockEventAt(now + packetDelay, progress);
     }
@@ -200,7 +200,7 @@ void InterPacketGap::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *g
     if (progress == nullptr || !progress->isScheduled())
         pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
     else {
-        EV_INFO << "Inserting packet gap before " << packet->getName() << "." << endl;
+        EV_INFO << "Inserting packet gap before" << EV_FIELD(packet, *packet) << EV_ENDL;
         cancelClockEvent(progress);
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
         progressTag->setDatarate(datarate);

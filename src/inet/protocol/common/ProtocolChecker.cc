@@ -42,9 +42,9 @@ void ProtocolChecker::dropPacket(Packet *packet)
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     if (protocol)
-        EV_WARN << "Unregistered protocol '" << protocol->getName() << "', dropping packet\n";
+        EV_WARN << "Dropping packet because the protocol is not registered" << EV_FIELD(protocol, *protocol) << EV_FIELD(packet, *packet) << EV_ENDL;
     else
-        EV_WARN << "The PacketProtocolTag missing, dropping packet\n";
+        EV_WARN << "Dropping packet because the PacketProtocolTag is missing" << EV_FIELD(packet, *packet) << EV_ENDL;
     PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
 }
 

@@ -63,7 +63,7 @@ void DefragmenterBase::endDefragmentation(Packet *fragmentPacket)
 void DefragmenterBase::defragmentPacket(Packet *fragmentPacket, bool firstFragment, bool lastFragment, bool expectedFragment)
 {
     if (!expectedFragment) {
-        EV_INFO << "Ignoring unexpected fragment packet " << fragmentPacket->getName() << "." << endl;
+        EV_INFO << "Ignoring unexpected fragment" << EV_FIELD(packet, *fragmentPacket) << EV_ENDL;
         if (isDefragmenting())
             endDefragmentation(fragmentPacket);
         else
@@ -72,7 +72,7 @@ void DefragmenterBase::defragmentPacket(Packet *fragmentPacket, bool firstFragme
     else {
         if (firstFragment)
             startDefragmentation(fragmentPacket);
-        EV_INFO << "Defragmenting packet " << defragmentedPacket->getName() << " from packet " << fragmentPacket->getName() << "." << endl;
+        EV_INFO << "Defragmenting packet" << EV_FIELD(packet, *defragmentedPacket) << EV_FIELD(fragment, *fragmentPacket) << EV_ENDL;
         continueDefragmentation(fragmentPacket);
         if (lastFragment) {
             pushOrSendPacket(defragmentedPacket->dup(), outputGate, consumer);

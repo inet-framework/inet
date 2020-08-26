@@ -38,12 +38,12 @@ void StreamThroughTransmitter::handleCrashOperation(LifecycleOperation *operatio
 void StreamThroughTransmitter::startTx(Packet *packet)
 {
     datarate = bps(*dataratePar);
+    EV_INFO << "Starting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
     txStartTime = getClockTime();
     ASSERT(txSignal == nullptr);
     auto signal = encodePacket(packet);
     txSignal = signal->dup();
     txSignal->setOrigPacketId(signal->getId());
-    EV_INFO << "Starting transmission: packetName = " << packet->getName() << ", length = " << packet->getTotalLength() << ", duration = " << txSignal->getDuration() << std::endl;
     scheduleTxEndTimer(signal);
     emit(transmissionStartedSignal, signal);
     sendPacketStart(signal);
@@ -52,7 +52,7 @@ void StreamThroughTransmitter::startTx(Packet *packet)
 void StreamThroughTransmitter::endTx()
 {
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
-    EV_INFO << "Ending transmission: packetName = " << packet->getName() << std::endl;
+    EV_INFO << "Ending transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
     emit(transmissionEndedSignal, txSignal);
     sendPacketEnd(txSignal);
     txSignal = nullptr;

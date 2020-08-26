@@ -53,11 +53,11 @@ void StreamingTransmitter::startTx(Packet *packet)
 {
     ASSERT(txSignal == nullptr);
     datarate = bps(*dataratePar);
+    EV_INFO << "Starting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
     txStartTime = simTime();
     auto signal = encodePacket(packet);
     txSignal = signal->dup();
     txSignal->setOrigPacketId(signal->getId());
-    EV_INFO << "Starting transmission: packetName = " << packet->getName() << ", length = " << packet->getTotalLength() << ", duration = " << signal->getDuration() << std::endl;
     scheduleTxEndTimer(signal);
     emit(transmissionStartedSignal, signal);
     sendPacketStart(signal);
@@ -65,9 +65,9 @@ void StreamingTransmitter::startTx(Packet *packet)
 
 void StreamingTransmitter::endTx()
 {
-    EV_INFO << "Ending transmission: packetName = " << txSignal->getName() << std::endl;
     emit(transmissionEndedSignal, txSignal);
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
+    EV_INFO << "Ending transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
     producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
     sendPacketEnd(txSignal);
     txSignal = nullptr;
@@ -85,7 +85,7 @@ void StreamingTransmitter::abortTx()
     // packet->eraseAtBack(packet->getTotalLength() - transmittedLength);
     packet->setBitError(true);
     txSignal->setDuration(simTime() - txStartTime);
-    EV_INFO << "Aborting transmission: packetName = " << packet->getName() << ", length = " << packet->getTotalLength() << ", duration = " << txSignal->getDuration() << std::endl;
+    EV_INFO << "Aborting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
     emit(transmissionEndedSignal, txSignal);
     producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
     sendPacketEnd(txSignal);

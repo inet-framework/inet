@@ -68,7 +68,7 @@ void PacketDestreamer::pushPacketStart(Packet *packet, cGate *gate, bps datarate
     take(packet);
     streamedPacket = packet;
     streamDatarate = datarate;
-    EV_INFO << "Starting destreaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Starting destreaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
 }
 
 void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate)
@@ -79,7 +79,7 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate)
     streamedPacket = packet;
     streamDatarate = datarate;
     auto packetLength = streamedPacket->getTotalLength();
-    EV_INFO << "Ending destreaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Ending destreaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     streamedPacket->setOrigPacketId(-1);
     pushOrSendPacket(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
@@ -95,7 +95,7 @@ void PacketDestreamer::pushPacketProgress(Packet *packet, cGate *gate, bps datar
     delete streamedPacket;
     streamedPacket = packet;
     streamDatarate = datarate;
-    EV_INFO << "Progressing destreaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Progressing destreaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
 }
 
 b PacketDestreamer::getPushPacketProcessedLength(Packet *packet, cGate *gate)
@@ -133,11 +133,11 @@ Packet *PacketDestreamer::pullPacket(cGate *gate)
     ASSERT(!isStreaming());
     streamDatarate = datarate;
     auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), streamDatarate);
-    EV_INFO << "Starting destreaming packet " << packet->getName() << "." << std::endl;
+    EV_INFO << "Starting destreaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     take(packet);
     streamedPacket = packet;
     packet = provider->pullPacketEnd(inputGate->getPathStartGate());
-    EV_INFO << "Ending destreaming packet " << packet->getName() << "." << std::endl;
+    EV_INFO << "Ending destreaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     take(packet);
     delete streamedPacket;
     streamedPacket = packet;

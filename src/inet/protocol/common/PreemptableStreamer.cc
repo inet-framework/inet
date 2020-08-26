@@ -71,9 +71,9 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     take(packet);
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
+    EV_INFO << "Starting streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);
-    EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
+    EV_INFO << "Ending streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
     handlePacketProcessed(packet);
@@ -120,7 +120,7 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamStart = simTime();
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Starting streaming " << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     updateDisplayString();
     return packet;
 }
@@ -128,7 +128,7 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
 Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
-    EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
     b pulledLength = datarate * s((simTime() - streamStart).dbl());
     b preemptedLength = roundingLength * ((pulledLength + roundingLength - b(1)) / roundingLength);
@@ -164,7 +164,7 @@ Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
 Packet *PreemptableStreamer::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
-    EV_INFO << "Progressing streaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Progressing streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     updateDisplayString();
     return streamedPacket->dup();
 }

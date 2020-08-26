@@ -60,7 +60,7 @@ void FragmenterBase::pushPacket(Packet *packet, cGate *gate)
         auto fragmentLength = fragmentLengths[fragmentNumber];
         auto fragmentPacket = createFragmentPacket(packet, fragmentOffset, fragmentLength, fragmentNumber, numFragments);
         fragmentOffset += fragmentLength;
-        EV_INFO << "Fragmenting packet " << packet->getName() << " into packet " << fragmentPacket->getName() << "." << endl;
+        EV_INFO << "Fragmenting packet" << EV_FIELD(packet, *packet) << EV_FIELD(fragment, *fragmentPacket) << EV_ENDL;
         pushOrSendPacket(fragmentPacket, outputGate, consumer);
     }
     processedTotalLength += packet->getDataLength();

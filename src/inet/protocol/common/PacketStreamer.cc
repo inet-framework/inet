@@ -70,9 +70,9 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
     auto packetLength = packet->getTotalLength();
-    EV_INFO << "Starting streaming packet " << packet->getName() << "." << std::endl;
+    EV_INFO << "Starting streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     pushOrSendPacketStart(packet, outputGate, consumer, streamDatarate);
-    EV_INFO << "Ending streaming packet " << packet->getName() << "." << std::endl;
+    EV_INFO << "Ending streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
@@ -112,7 +112,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamDatarate = datarate;
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Starting streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     updateDisplayString();
     return packet;
 }
@@ -120,7 +120,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
 Packet *PacketStreamer::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
-    EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
@@ -134,7 +134,7 @@ Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position
 {
     Enter_Method("pullPacketProgress");
     streamDatarate = datarate;
-    EV_INFO << "Progressing streaming packet " << streamedPacket->getName() << "." << std::endl;
+    EV_INFO << "Progressing streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     updateDisplayString();
     return streamedPacket->dup();
 }

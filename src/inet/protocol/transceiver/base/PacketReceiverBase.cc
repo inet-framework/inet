@@ -46,7 +46,7 @@ void PacketReceiverBase::handleMessageWhenUp(cMessage *message)
 void PacketReceiverBase::handleMessageWhenDown(cMessage *msg)
 {
     if (!msg->isSelfMessage()) {
-        EV << "Received message from the network while the receiver is turned off, dropping it (" << msg->getClassName() << ")" << msg->getName() << "\n";
+        EV << "Dropping message because interface is down" << EV_FIELD(msg) << EV_ENDL;
         delete msg;
     }
     else
