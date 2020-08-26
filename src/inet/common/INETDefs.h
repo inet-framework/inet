@@ -112,6 +112,10 @@ inline void printElapsedTime(const char *name, long startTime)
 #define EV_ENDL "." << endl
 #define EV_LOC "\x1b[2m" << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "()\x1b[0m "
 
+inline std::ostream& operator<<(std::ostream& os, const cEvent& event) {
+    return os << event.str();
+}
+
 } // namespace inet
 
 #endif
