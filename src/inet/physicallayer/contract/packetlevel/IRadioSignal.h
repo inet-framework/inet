@@ -20,7 +20,7 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/math/Functions.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {

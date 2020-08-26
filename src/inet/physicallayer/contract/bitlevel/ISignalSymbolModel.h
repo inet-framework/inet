@@ -20,7 +20,7 @@
 
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {

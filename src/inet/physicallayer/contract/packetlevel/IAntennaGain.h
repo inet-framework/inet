@@ -20,7 +20,7 @@
 
 #include "inet/common/Ptr.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {

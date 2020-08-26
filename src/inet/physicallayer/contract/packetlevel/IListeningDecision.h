@@ -19,7 +19,7 @@
 #define __INET_ILISTENINGDECISION_H
 
 #include "inet/physicallayer/contract/packetlevel/IListening.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {

@@ -20,7 +20,7 @@
 
 #include "inet/common/math/IFunction.h"
 #include "inet/common/math/IInterpolator.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 

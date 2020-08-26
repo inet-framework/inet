@@ -18,11 +18,9 @@
 #ifndef __INET_IPRINTABLEOBJECT_H
 #define __INET_IPRINTABLEOBJECT_H
 
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
-
-namespace physicallayer {
 
 /**
  * This purely virtual interface provides an abstraction for printable objects.
@@ -82,8 +80,6 @@ inline std::string printObjectToString(const IPrintableObject *object, int level
         return s.str();
     }
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 

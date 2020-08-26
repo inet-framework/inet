@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {

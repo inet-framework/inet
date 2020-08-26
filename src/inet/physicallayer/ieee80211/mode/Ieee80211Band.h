@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211BAND_H
 #define __INET_IEEE80211BAND_H
 
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 

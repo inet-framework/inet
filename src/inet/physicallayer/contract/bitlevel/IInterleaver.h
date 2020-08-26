@@ -19,7 +19,7 @@
 #define __INET_IINTERLEAVER_H
 
 #include "inet/common/BitVector.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {
