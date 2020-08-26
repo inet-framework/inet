@@ -19,10 +19,13 @@
 #define __INET_IMODULATION_H
 
 #include "inet/common/IPrintableObject.h"
+#include "inet/common/Units.h"
 
 namespace inet {
 
 namespace physicallayer {
+
+using namespace inet::units::values;
 
 /**
  * This interface represents the process of varying one or more physical

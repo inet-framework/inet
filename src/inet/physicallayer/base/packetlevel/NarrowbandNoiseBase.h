@@ -18,11 +18,14 @@
 #ifndef __INET_NARROWBANDNOISEBASE_H
 #define __INET_NARROWBANDNOISEBASE_H
 
+#include "inet/common/Units.h"
 #include "inet/physicallayer/base/packetlevel/NoiseBase.h"
 
 namespace inet {
 
 namespace physicallayer {
+
+using namespace inet::units::values;
 
 class INET_API NarrowbandNoiseBase : public NoiseBase
 {

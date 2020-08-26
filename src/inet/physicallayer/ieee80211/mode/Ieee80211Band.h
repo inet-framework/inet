@@ -18,11 +18,14 @@
 #ifndef __INET_IEEE80211BAND_H
 #define __INET_IEEE80211BAND_H
 
+#include "inet/common/Units.h"
 #include "inet/common/IPrintableObject.h"
 
 namespace inet {
 
 namespace physicallayer {
+
+using namespace inet::units::values;
 
 class INET_API IIeee80211Band : public cObject, public IPrintableObject
 {

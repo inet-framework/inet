@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/INETMath.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
 
 namespace inet {

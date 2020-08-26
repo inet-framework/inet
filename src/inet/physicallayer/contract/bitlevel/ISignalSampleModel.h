@@ -18,11 +18,14 @@
 #ifndef __INET_ISIGNALSAMPLEMODEL_H
 #define __INET_ISIGNALSAMPLEMODEL_H
 
+#include "inet/common/Units.h"
 #include "inet/common/IPrintableObject.h"
 
 namespace inet {
 
 namespace physicallayer {
+
+using namespace inet::units::values;
 
 /**
  * This purely virtual interface provides an abstraction for different radio
