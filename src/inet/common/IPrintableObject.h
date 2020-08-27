@@ -36,6 +36,11 @@ class INET_API IPrintableObject
         PRINT_LEVEL_COMPLETE = INT_MIN
     };
 
+    enum PrintFlag {
+        PRINT_FLAG_FORMATTED = (1 << 0),
+        PRINT_FLAG_MULTILINE = (1 << 1),
+    };
+
   public:
     virtual ~IPrintableObject() {}
 
@@ -45,37 +50,49 @@ class INET_API IPrintableObject
      * Function calls to operator<< with pointers or references either const
      * or not are all forwarded to this function.
      */
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const { return stream << "<object@" << static_cast<const void *>(this) << ">"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int flags = 0) const {
+        return stream << "<object@" << static_cast<const void *>(this) << ">";
+    }
 
-    virtual std::string getInfoStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_INFO); return s.str(); }
+    virtual std::string getInfoStringRepresentation(int flags = 0) const {
+        std::stringstream s; printToStream(s, PRINT_LEVEL_INFO, flags); return s.str();
+    }
 
-    virtual std::string getDetailStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_DETAIL); return s.str(); }
+    virtual std::string getDetailStringRepresentation(int flags = 0) const {
+        std::stringstream s; printToStream(s, PRINT_LEVEL_DETAIL, flags); return s.str();
+    }
 
-    virtual std::string getDebugStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_DEBUG); return s.str(); }
+    virtual std::string getDebugStringRepresentation(int flags = 0) const {
+        std::stringstream s; printToStream(s, PRINT_LEVEL_DEBUG, flags); return s.str();
+    }
 
-    virtual std::string getTraceStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_TRACE); return s.str(); }
+    virtual std::string getTraceStringRepresentation(int flags = 0) const {
+        std::stringstream s; printToStream(s, PRINT_LEVEL_TRACE, flags); return s.str();
+    }
 
-    virtual std::string getCompleteStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_COMPLETE); return s.str(); }
+    virtual std::string getCompleteStringRepresentation(int flags = 0) const {
+        std::stringstream s; printToStream(s, PRINT_LEVEL_COMPLETE, flags); return s.str();
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
 {
-    return object->printToStream(stream, cLog::logLevel);
+    return object->printToStream(stream, cLog::logLevel, 0);
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& object)
 {
-    return object.printToStream(stream, cLog::logLevel);
+    return object.printToStream(stream, cLog::logLevel, 0);
 };
 
-inline std::string printObjectToString(const IPrintableObject *object, int level)
+inline std::string printObjectToString(const IPrintableObject *object, int level, int flags = 0)
 {
     std::stringstream s;
     if (object == nullptr)
         return "nullptr";
     else {
         s << "{ ";
-        object->printToStream(s, level);
+        object->printToStream(s, level, flags);
         s << " }";
         return s.str();
     }
