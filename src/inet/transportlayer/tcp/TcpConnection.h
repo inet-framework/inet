@@ -190,8 +190,6 @@ class INET_API TcpStateVariables : public cObject
     bool fin_rcvd;    // whether FIN received or not
     uint32 rcv_fin_seq;    // if fin_rcvd: sequence number of received FIN
 
-    uint32 sentBytes;    // amount of user data (in bytes) sent in last segment
-
     bool nagle_enabled;    // set if Nagle's algorithm (RFC 896) is enabled
     bool delayed_acks_enabled;    // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled;    // set if Limited Transmit algorithm (RFC 3042) is enabled
@@ -535,8 +533,9 @@ class INET_API TcpConnection : public cSimpleModule
     /**
      * Utility: sends one segment of 'bytes' bytes from snd_nxt, and advances snd_nxt.
      * sendData(), sendProbe() and retransmitData() internally all rely on this one.
+     * Returns the number of bytes sent.
      */
-    virtual void sendSegment(uint32 bytes);
+    virtual uint32 sendSegment(uint32 bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg);
@@ -694,8 +693,9 @@ class INET_API TcpConnection : public cSimpleModule
 
     /**
      * Utility: send segment during Loss Recovery phase (if SACK is enabled).
+     * Returns the number of bytes sent.
      */
-    virtual void sendSegmentDuringLossRecoveryPhase(uint32 seqNum);
+    virtual uint32 sendSegmentDuringLossRecoveryPhase(uint32 seqNum);
 
     /**
      * Utility: send one new segment from snd_max if allowed (RFC 3042).

@@ -272,7 +272,6 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     ASSERT(tcpseg->getHeaderLength() >= TCP_MIN_HEADER_LENGTH);
     ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_LENGTH);
     ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
-    state->sentBytes = packet->getByteLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
 
     EV_INFO << "Sending: ";
     printSegmentBrief(packet, tcpseg);
@@ -753,7 +752,7 @@ void TcpConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-void TcpConnection::sendSegment(uint32 bytes)
+uint32 TcpConnection::sendSegment(uint32 bytes)
 {
     //FIXME check it: where is the right place for the next code (sacked/rexmitted)
     if (state->sack_enabled && state->afterRto) {
@@ -786,7 +785,7 @@ void TcpConnection::sendSegment(uint32 bytes)
     if (bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
 
-    state->sentBytes = bytes;
+    uint32 sentBytes = bytes;
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
     Packet *packet = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
@@ -847,6 +846,8 @@ void TcpConnection::sendSegment(uint32 bytes)
         sendIndicationToApp(TCP_I_SEND_MSG, abated);
         state->queueUpdate = true;
     }
+
+    return sentBytes;
 }
 
 bool TcpConnection::sendData(uint32 congestionWindow)
@@ -911,15 +912,15 @@ bool TcpConnection::sendData(uint32 congestionWindow)
 
     // send small segment only if it's the only segment we can send now
     if (bytesToSend <= effectiveMss) {
-        sendSegment(bytesToSend);
-        ASSERT(bytesToSend >= state->sentBytes);
-        bytesToSend -= state->sentBytes;
+        uint32 sentBytes = sendSegment(bytesToSend);
+        ASSERT(bytesToSend >= sentBytes);
+        bytesToSend -= sentBytes;
     }
-    else {    // send whole segments only (nagle_enabled)
+    else {    // send whole segments
         while (bytesToSend >= effectiveMss) {
-            sendSegment(effectiveMss);
-            ASSERT(bytesToSend >= state->sentBytes);
-            bytesToSend -= state->sentBytes;
+            uint32 sentBytes = sendSegment(effectiveMss);
+            ASSERT(bytesToSend >= sentBytes);
+            bytesToSend -= sentBytes;
         }
     }
 
@@ -1076,15 +1077,15 @@ void TcpConnection::retransmitData()
     while (bytesToSend > 0) {
         uint32 bytes = std::min(bytesToSend, state->snd_mss);
         bytes = std::min(bytes, (uint32)(sendQueue->getBytesAvailable(state->snd_nxt)));
-        sendSegment(bytes);
+        uint32 sentBytes = sendSegment(bytes);
 
         // Do not send packets after the FIN.
         // fixes bug that occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744
         if (state->send_fin && state->snd_nxt == state->snd_fin_seq + 1)
             break;
 
-        ASSERT(bytesToSend >= state->sentBytes);
-        bytesToSend -= state->sentBytes;
+        ASSERT(bytesToSend >= sentBytes);
+        bytesToSend -= sentBytes;
     }
     tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 
@@ -1598,7 +1599,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
                     state->snd_nxt = state->snd_max;
 
                     EV_DETAIL << "Limited Transmit algorithm enabled. Sending one new segment.\n";
-                    sendSegment(bytes);
+                    uint32 sentBytes = sendSegment(bytes);
 
                     if (seqGreater(state->snd_nxt, state->snd_max))
                         state->snd_max = state->snd_nxt;
@@ -1607,7 +1608,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
 
                     // reset snd_nxt if needed
                     if (state->afterRto)
-                        state->snd_nxt = old_snd_nxt + state->sentBytes;
+                        state->snd_nxt = old_snd_nxt + sentBytes;
 
                     // notify
                     tcpAlgorithm->ackSent();

@@ -361,15 +361,15 @@ void TcpConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
         if (!nextSeg(seqNum)) // if nextSeg() returns false (=failure): terminate steps C.1 -- C.5
             break;
 
-        sendSegmentDuringLossRecoveryPhase(seqNum);
+        uint32 sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
         // RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
         // network must be updated by incrementing pipe by the number of
         // octets transmitted in (C.1)."
-        state->pipe += state->sentBytes;
+        state->pipe += sentBytes;
     }
 }
 
-void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
+uint32 TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
@@ -380,9 +380,9 @@ void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 
     // no need to check cwnd and rwnd - has already be done before
     // no need to check nagle - sending mss bytes
-    sendSegment(state->snd_mss);
+    uint32 sentBytes = sendSegment(state->snd_mss);
 
-    uint32 sentSeqNum = seqNum + state->sentBytes;
+    uint32 sentSeqNum = seqNum + sentBytes;
 
     if(state->send_fin && sentSeqNum == state->snd_fin_seq)
         sentSeqNum = sentSeqNum + 1;
@@ -435,6 +435,8 @@ void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
     }
     else // don't measure RTT for retransmitted packets
         tcpAlgorithm->dataSent(seqNum); // seqNum = old_snd_nxt
+
+    return sentBytes;
 }
 
 TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)

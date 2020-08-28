@@ -84,8 +84,6 @@ struct TcpStateVariables
     bool fin_rcvd;    // whether FIN received or not
     uint32_t rcv_fin_seq;    // if fin_rcvd: sequence number of received FIN
 
-    uint32_t sentBytes;    // amount of user data (in bytes) sent in last segment
-
     bool nagle_enabled;    // set if Nagle's algorithm (RFC 896) is enabled
     bool delayed_acks_enabled;    // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled;    // set if Limited Transmit algorithm (RFC 3042) is enabled
