@@ -16,8 +16,11 @@
  */
 
 #include "inet/linklayer/ethernet/EtherHub.h"
+#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
 
 namespace inet {
+
+using namespace inet::physicallayer;
 
 Define_Module(EtherHub);
 

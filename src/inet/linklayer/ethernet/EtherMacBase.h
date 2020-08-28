@@ -25,14 +25,16 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
+
+using namespace inet::physicallayer;
 
 /**
  * Base class for Ethernet MAC implementations.

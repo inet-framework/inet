@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/protocol/transceiver/StreamingTransmitter.h"
 
 namespace inet {

@@ -22,10 +22,12 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetProtocolDissector.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
+
+using namespace inet::physicallayer;
 
 Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacDissector);
 Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyDissector);

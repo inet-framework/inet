@@ -15,9 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
 #include "inet/physicallayer/ethernet/EtherPhy.h"
 
 namespace inet {

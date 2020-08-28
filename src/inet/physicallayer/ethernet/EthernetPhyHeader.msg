@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -12,56 +12,17 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
 import inet.common.INETDefs;
-import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
-import inet.linklayer.common.MacAddress;
-import inet.physicallayer.common.packetlevel.Signal;
 
 cplusplus {{
 #include "inet/linklayer/ethernet/Ethernet.h"
 }}
 
-namespace inet;
-
-//
-// Abstract base class for various Ethernet traffic types:
-// EtherJam, EtherFilledIfg and EtherPhyFrame.
-//
-packet EthernetSignalBase extends physicallayer::Signal
-{
-    bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration
-    double bitrate;  // meta-info, for detecting model misconfiguration
-}
-
-//
-// Represents dataframe on the Ethernet.
-//
-packet EthernetSignal extends EthernetSignalBase
-{
-}
-
-//
-// Represents jam on the Ethernet.
-//
-packet EthernetJamSignal extends EthernetSignalBase
-{
-    srcMacFullDuplex = false;
-    long abortedPkTreeID = 0;  // this field stores the packetTreeId of the aborted packet
-}
-
-//
-// Represents a filled inter-frame gap in burst mode.
-// Also used for calculating IFG times.
-//
-packet EthernetFilledIfgSignal extends EthernetSignalBase
-{
-    srcMacFullDuplex = false;
-    bitLength = b(INTERFRAME_GAP_BITS).get();
-}
+namespace inet::physicallayer;
 
 //
 // Base class for Ethernet PHY headers.

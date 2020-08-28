@@ -22,7 +22,7 @@
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #endif // ifdef WITH_ETHERNET
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

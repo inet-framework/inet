@@ -16,10 +16,12 @@
 #include <algorithm>
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetHeaderSerializer.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 
 namespace inet {
+
+using namespace inet::physicallayer;
 
 Register_Serializer(EthernetMacHeader, EthernetMacHeaderSerializer);
 
