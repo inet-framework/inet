@@ -23,6 +23,8 @@
 
 namespace inet {
 
+using namespace inet::physicallayer;
+
 /**
  * Models an Ethernet hub.
  */
