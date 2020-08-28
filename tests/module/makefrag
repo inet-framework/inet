@@ -1,0 +1,2 @@
+MSGC:=$(MSGC) --msg6
+
