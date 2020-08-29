@@ -889,10 +889,10 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     writeHeaderOptions(tmpTcpHeader);
     uint options_len = B(tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get();
     ASSERT(options_len < state->snd_mss);
-    uint32 effectiveMaxBytesSend = state->snd_mss - options_len;
+    uint32 effectiveMss = state->snd_mss - options_len;
 
     // last segment could be less than state->snd_mss (or less than snd_mss - TCP_OPTION_TS_SIZE if using TS option)
-    if (fullSegmentsOnly && (bytesToSend < (effectiveMaxBytesSend))) {
+    if (fullSegmentsOnly && bytesToSend < effectiveMss) {
         EV_WARN << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
                 << ", effectiveWindow=" << effectiveWin << ", bytesToSend=" << bytesToSend << ", in buffer " << buffered << ")\n";
         return false;
@@ -916,7 +916,7 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
         bytesToSend -= state->sentBytes;
     }
     else {    // send whole segments only (nagle_enabled)
-        while (bytesToSend >= effectiveMaxBytesSend) {
+        while (bytesToSend >= effectiveMss) {
             sendSegment(state->snd_mss);
             ASSERT(bytesToSend >= state->sentBytes);
             bytesToSend -= state->sentBytes;
