@@ -66,20 +66,20 @@ void AggregatorBase::endAggregation(Packet *packet)
         deleteModule();
 }
 
-void AggregatorBase::pushPacket(Packet *packet, cGate *gate)
+void AggregatorBase::pushPacket(Packet *subpacket, cGate *gate)
 {
     Enter_Method("pushPacket");
-    take(packet);
+    take(subpacket);
     if (!isAggregating())
-        startAggregation(packet);
-    else if (!aggregatorPolicy->isAggregatablePacket(aggregatedPacket, aggregatedSubpackets, packet)) {
+        startAggregation(subpacket);
+    else if (!aggregatorPolicy->isAggregatablePacket(aggregatedPacket, aggregatedSubpackets, subpacket)) {
         pushOrSendPacket(aggregatedPacket, outputGate, consumer);
-        endAggregation(packet);
-        startAggregation(packet);
+        endAggregation(subpacket);
+        startAggregation(subpacket);
     }
-    continueAggregation(packet);
-    delete packet;
+    continueAggregation(subpacket);
     EV_INFO << "Aggregating packet" << EV_FIELD(subpacket, *subpacket) << EV_FIELD(subpacket, *aggregatedPacket) << EV_ENDL;
+    delete subpacket;
     updateDisplayString();
 }
 
