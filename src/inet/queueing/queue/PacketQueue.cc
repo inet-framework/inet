@@ -91,7 +91,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    EV_INFO << "Pushing packet into the queue" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Pushing packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     queue.insert(packet);
     emit(packetPushedSignal, packet);
     if (buffer != nullptr)
@@ -100,7 +100,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         if (packetDropperFunction != nullptr) {
             while (!isEmpty() && isOverloaded()) {
                 auto packet = packetDropperFunction->selectPacket(this);
-                EV_INFO << "Dropping packet from the queue" << EV_FIELD(packet, *packet) << EV_ENDL;
+                EV_INFO << "Dropping packet" << EV_FIELD(packet, *packet) << EV_ENDL;
                 queue.remove(packet);
                 dropPacket(packet, QUEUE_OVERFLOW);
             }
@@ -117,7 +117,7 @@ Packet *PacketQueue::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
-    EV_INFO << "Pulling packet from the queue" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Pulling packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     if (buffer != nullptr) {
         queue.remove(packet);
         buffer->removePacket(packet);
@@ -139,7 +139,7 @@ Packet *PacketQueue::pullPacket(cGate *gate)
 void PacketQueue::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
-    EV_INFO << "Removing packet from the queue" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Removing packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     if (buffer != nullptr) {
         queue.remove(packet);
         buffer->removePacket(packet);
@@ -176,7 +176,7 @@ void PacketQueue::handlePacketRemoved(Packet *packet)
 {
     Enter_Method("handlePacketRemoved");
     if (queue.contains(packet)) {
-        EV_INFO << "Removing packet from the queue" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Removing packet" << EV_FIELD(packet, *packet) << EV_ENDL;
         queue.remove(packet);
         emit(packetRemovedSignal, packet);
         updateDisplayString();

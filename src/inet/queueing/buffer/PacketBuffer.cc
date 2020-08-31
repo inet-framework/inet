@@ -64,14 +64,14 @@ b PacketBuffer::getTotalLength() const
 void PacketBuffer::addPacket(Packet *packet)
 {
     Enter_Method("addPacket");
-    EV_INFO << "Adding packet to the buffer" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Adding packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     emit(packetAddedSignal, packet);
     packets.push_back(packet);
     if (isOverloaded()) {
         if (packetDropperFunction != nullptr) {
             while (!isEmpty() && isOverloaded()) {
                 auto packet = packetDropperFunction->selectPacket(this);
-                EV_INFO << "Dropping packet from the buffer" << EV_FIELD(packet, *packet) << EV_ENDL;
+                EV_INFO << "Dropping packet" << EV_FIELD(packet, *packet) << EV_ENDL;
                 packets.erase(find(packets.begin(), packets.end(), packet));
                 auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
                 if (queue != nullptr) {
@@ -91,7 +91,7 @@ void PacketBuffer::addPacket(Packet *packet)
 void PacketBuffer::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
-    EV_INFO << "Removing packet from the buffer" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Removing packet" << EV_FIELD(packet, *packet) << EV_ENDL;
     emit(packetRemovedSignal, packet);
     packets.erase(find(packets.begin(), packets.end(), packet));
     updateDisplayString();
