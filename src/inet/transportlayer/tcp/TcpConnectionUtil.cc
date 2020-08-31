@@ -847,6 +847,12 @@ uint32 TcpConnection::sendSegment(uint32 bytes)
         state->queueUpdate = true;
     }
 
+    // remember highest seq sent (snd_nxt may be set back on retransmission,
+    // but we'll need snd_max to check validity of ACKs -- they must ack
+    // something we really sent)
+    if (seqGreater(state->snd_nxt, state->snd_max))
+        state->snd_max = state->snd_nxt;
+
     return sentBytes;
 }
 
@@ -905,12 +911,6 @@ bool TcpConnection::sendData(uint32 congestionWindow)
     }
 
     if (bytesToSend > 0) {
-        // remember highest seq sent (snd_nxt may be set back on retransmission,
-        // but we'll need snd_max to check validity of ACKs -- they must ack
-        // something we really sent)
-        if (seqGreater(state->snd_nxt, state->snd_max))
-            state->snd_max = state->snd_nxt;
-
         // Nagle's algorithm: when a TCP connection has outstanding data that has not
         // yet been acknowledged, small segments cannot be sent until the outstanding
         // data is acknowledged.
@@ -925,12 +925,6 @@ bool TcpConnection::sendData(uint32 congestionWindow)
 
     if (old_snd_nxt == state->snd_nxt)
         return false; // no data sent
-
-    // remember highest seq sent (snd_nxt may be set back on retransmission,
-    // but we'll need snd_max to check validity of ACKs -- they must ack
-    // something we really sent)
-    if (seqGreater(state->snd_nxt, state->snd_max))
-        state->snd_max = state->snd_nxt;
 
     emit(unackedSignal, state->snd_max - state->snd_una);
 
