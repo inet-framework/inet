@@ -29,14 +29,6 @@
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 #include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
 namespace inet {
-namespace eigrp {
-#define EIGRP_TT_DEBUG
-
-Define_Module(EigrpIpv4TopologyTable);
-
-#ifndef DISABLE_EIGRP_IPV6
-Define_Module(EigrpIpv6TopologyTable);
-#endif /* DISABLE_EIGRP_IPV6 */
 
 template <typename IPAddress>
 std::ostream &operator<<(std::ostream &os, const EigrpRouteSource<IPAddress> &source)
@@ -74,6 +66,15 @@ std::ostream &operator<<(std::ostream &os, const EigrpRoute<IPAddress> &route)
     return os;
 }
 
+namespace eigrp {
+
+#define EIGRP_TT_DEBUG
+
+Define_Module(EigrpIpv4TopologyTable);
+
+#ifndef DISABLE_EIGRP_IPV6
+Define_Module(EigrpIpv6TopologyTable);
+#endif /* DISABLE_EIGRP_IPV6 */
 
 template <typename IPAddress>
 void EigrpTopologyTable<IPAddress>::initialize(int stage)
@@ -83,9 +84,9 @@ void EigrpTopologyTable<IPAddress>::initialize(int stage)
     {
         //TODO
         WATCH(routerID);
-        WATCH_VECTOR(routeVec);
+        WATCH_PTRVECTOR(routeVec);
         #ifdef EIGRP_TT_DEBUG
-        WATCH_VECTOR(routeInfoVec);
+        WATCH_PTRVECTOR(routeInfoVec);
         #endif
     }
 }
