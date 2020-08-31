@@ -104,17 +104,24 @@ inline void printElapsedTime(const char *name, long startTime)
 
 #define GET_3TH_ARG(arg1, arg2, arg3, ...) arg3
 
+
+
+extern int evFlags;
+#define EV_FORMAT_STYLE(format) (evFlags & IPrintableObject::PRINT_FLAG_FORMATTED ? format : "")
+#define EV_NORMAL    EV_FORMAT_STYLE("\x1b[0m")
+#define EV_BOLD      EV_FORMAT_STYLE("\x1b[1m")
+#define EV_FAINT     EV_FORMAT_STYLE("\x1b[2m")
+#define EV_ITALIC    EV_FORMAT_STYLE("\x1b[3m")
+#define EV_UNDERLINE EV_FORMAT_STYLE("\x1b[4m")
+#define EV_FORMAT_OBJECT(object) printToStringIfPossible(object, evFlags)
+
 #define EV_FIELD_1(field) EV_FIELD_2(field, field)
-#define EV_FIELD_2(field, value) ", \x1b[1m"#field"\x1b[0m = " << (value)
+#define EV_FIELD_2(field, value) ", " << EV_BOLD << #field << EV_NORMAL << " = " << EV_FORMAT_OBJECT(value)
 #define EV_FIELD_CHOOSER(...) GET_3TH_ARG(__VA_ARGS__, EV_FIELD_2, EV_FIELD_1, )
 #define EV_FIELD(...) EV_FIELD_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 
 #define EV_ENDL "." << endl
-#define EV_LOC "\x1b[2m" << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "()\x1b[0m "
-
-inline std::ostream& operator<<(std::ostream& os, const cEvent& event) {
-    return os << event.str();
-}
+#define EV_LOC EV_FAINT << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "()" << EV_NORMAL
 
 } // namespace inet
 
