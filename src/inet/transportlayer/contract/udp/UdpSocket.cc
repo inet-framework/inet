@@ -315,13 +315,7 @@ void UdpSocket::sendToUDP(cMessage *msg)
 {
     if (!gateToUdp)
         throw cRuntimeError("UdpSocket: setOutputGate() must be invoked before socket can be used");
-
-    cObject *ctrl = msg->getControlInfo();
-    EV_TRACE << "UdpSocket: Send (" << msg->getClassName() << ")" << msg->getFullName();
-    if (ctrl)
-        EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
-    EV_TRACE << endl;
-
+    EV_DEBUG << "Sending to UDP protocol" << EV_FIELD(msg, *msg) << EV_ENDL;
     auto& tags = getTags(msg);
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
