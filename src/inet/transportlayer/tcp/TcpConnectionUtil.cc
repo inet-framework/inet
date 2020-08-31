@@ -892,52 +892,39 @@ bool TcpConnection::sendData(uint32 congestionWindow)
     ASSERT(options_len < state->snd_mss);
     uint32 effectiveMss = state->snd_mss - options_len;
 
-    // Nagle's algorithm: when a TCP connection has outstanding data that has not
-    // yet been acknowledged, small segments cannot be sent until the outstanding
-    // data is acknowledged.
-    bool unacknowledgedData = (state->snd_una != state->snd_max);
-    if (state->nagle_enabled && unacknowledgedData && bytesToSend < effectiveMss) {
-        EV_WARN << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
-                << ", effectiveWindow=" << effectiveWin << ", bytesToSend=" << bytesToSend << ", in buffer " << buffered << ")\n";
-        return false;
-    }
-
-    // start sending 'bytesToSend' bytes
-    EV_INFO << "Will send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin
-            << ", in buffer " << buffered << " bytes)\n";
-
     uint32 old_snd_nxt = state->snd_nxt;
 
-    ASSERT(bytesToSend > 0);
+    // start sending 'bytesToSend' bytes
+    EV_INFO << "May send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin << ", in buffer " << buffered << " bytes)\n";
 
-    // send small segment only if it's the only segment we can send now
-    if (bytesToSend <= effectiveMss) {
-        uint32 sentBytes = sendSegment(bytesToSend);
+    // send whole segments
+    while (bytesToSend >= effectiveMss) {
+        uint32 sentBytes = sendSegment(effectiveMss);
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
     }
-    else {    // send whole segments
-        while (bytesToSend >= effectiveMss) {
-            uint32 sentBytes = sendSegment(effectiveMss);
-            ASSERT(bytesToSend >= sentBytes);
-            bytesToSend -= sentBytes;
-        }
+
+    if (bytesToSend > 0) {
+        // remember highest seq sent (snd_nxt may be set back on retransmission,
+        // but we'll need snd_max to check validity of ACKs -- they must ack
+        // something we really sent)
+        if (seqGreater(state->snd_nxt, state->snd_max))
+            state->snd_max = state->snd_nxt;
+
+        // Nagle's algorithm: when a TCP connection has outstanding data that has not
+        // yet been acknowledged, small segments cannot be sent until the outstanding
+        // data is acknowledged.
+        bool unacknowledgedData = (state->snd_una != state->snd_max);
+        if (state->nagle_enabled && unacknowledgedData)
+            EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
+        else if (bytesToSend == sendQueue->getBytesAvailable(state->snd_nxt)) // last segment?
+            sendSegment(bytesToSend);
+        else
+            EV_DETAIL << bytesToSend << " bytes of space left in effectiveWindow\n";
     }
 
-    if (state->nagle_enabled) {
-        // If Nagle's algorithm is enabled, by this point at least one full segment was sent;
-        // these already sent segments are not ACKed yet.
-        // Also, cannot form a full segment with the remaining buffered data.
-        // Thus, do not send last segment
-        EV_DETAIL << "Cannot send last segment, not enough data for a full segment\n";
-    }
-    else if (bytesToSend == buffered && buffered != 0) { // last segment?
-        // Send last segment
-        sendSegment(bytesToSend);
-    }
-    else if (bytesToSend > 0) {
-        EV_DETAIL << bytesToSend << " bytes of space left in effectiveWindow\n";
-    }
+    if (old_snd_nxt == state->snd_nxt)
+        return false; // no data sent
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
