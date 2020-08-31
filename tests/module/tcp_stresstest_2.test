@@ -15,7 +15,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 cmdenv-express-mode=false
-cmdenv-event-banners=false
+#cmdenv-event-banners=false
 #cmdenv-module-messages=false
 
 *.testing=true
