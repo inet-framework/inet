@@ -107,7 +107,9 @@ void PacketTransmitterBase::sendPacketEnd(Signal *signal)
 
 clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const
 {
-    return packet->getTotalLength().get() / datarate.get();
+    s duration = packet->getTotalLength() / datarate;
+    EV_TRACE << "Calculating signal duration" << EV_FIELD(packet, *packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;
+    return duration.get();
 }
 
 } // namespace inet
