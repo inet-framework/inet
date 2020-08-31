@@ -88,7 +88,7 @@ class INET_API BytesChunk : public Chunk
     virtual bool canRemoveAtFront(b length) const override { return b(length).get() % 8 == 0; }
     virtual bool canRemoveAtBack(b length) const override { return b(length).get() % 8 == 0; }
 
-    virtual std::string str() const override;
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

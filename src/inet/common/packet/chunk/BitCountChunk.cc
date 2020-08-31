@@ -139,11 +139,11 @@ void BitCountChunk::doRemoveAtBack(b length)
     this->length -= length;
 }
 
-std::string BitCountChunk::str() const
+std::ostream& BitCountChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "\x1b[2mBitCountChunk\x1b[0m" << EV_FIELD(length) << EV_FIELD(data, (int)data);
-    return os.str();
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FIELD(data, (int)data);
+    return stream;
 }
 
 } // namespace

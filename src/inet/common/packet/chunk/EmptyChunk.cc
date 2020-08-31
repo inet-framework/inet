@@ -55,9 +55,4 @@ const Ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const 
     return makeShared<EmptyChunk>();
 }
 
-std::string EmptyChunk::str() const
-{
-    return "\x1b[2mEmptyChunk\x1b[0m";
-}
-
 } // namespace

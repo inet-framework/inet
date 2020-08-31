@@ -17,6 +17,7 @@
 #define __INET_PACKET_H
 
 #include <functional>
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
@@ -71,7 +72,7 @@ namespace inet {
  *  - copy the packet, it's a cheap operation
  *  - convert to a human readable string
  */
-class INET_API Packet : public cPacket
+class INET_API Packet : public cPacket, public IPrintableObject
 {
   friend class PacketDescriptor;
 
@@ -1048,6 +1049,8 @@ class INET_API Packet : public cPacket
 
     /** @name Utility functions */
     //@{
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+
     /**
      * Returns a human readable string representation.
      */
@@ -1056,16 +1059,6 @@ class INET_API Packet : public cPacket
 };
 
 INET_API SharingTagSet& getTags(cMessage *msg);
-
-inline std::ostream& operator<<(std::ostream& os, const Packet *packet) {
-    if (!packet)
-        return os << "(Packet)\x1b[3m<nullptr>\x1b[0m";
-    return os << packet->str();
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Packet& packet) {
-    return os << packet.str();
-}
 
 } // namespace
 

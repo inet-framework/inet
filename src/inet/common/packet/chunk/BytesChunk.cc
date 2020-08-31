@@ -161,20 +161,19 @@ void BytesChunk::doRemoveAtBack(b length)
     bytes.erase(bytes.end() - B(length).get(), bytes.end());
 }
 
-std::string BytesChunk::str() const
+std::ostream& BytesChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "\x1b[2mBytesChunk\x1b[0m" << EV_FIELD(length, B(getChunkLength())) << ", bytes = {";
+    stream << ", " << EV_BOLD << "bytes" << EV_NORMAL << " = {";
     bool first = true;
     for (auto byte : bytes) {
         if (!first)
-            os << ", ";
+            stream << ", ";
         else
             first = false;
-        os << (int) (byte);
+        stream << (int) (byte);
     }
-    os << "}";
-    return os.str();
+    stream << "}";
+    return stream;
 }
 
 } // namespace

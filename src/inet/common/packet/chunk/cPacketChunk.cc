@@ -75,14 +75,11 @@ const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConver
     return converter(const_cast<cPacketChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::string cPacketChunk::str() const {
-    if (packet != nullptr) {
-        std::ostringstream os;
-        os << "\x1b[2mcPacketChunk\x1b[0m, packet = {(" << packet->getClassName() << ")" << packet->str() << ", length = " << getChunkLength() << "}";
-        return os.str();
-    }
-    else
-        return std::string("cPacketChunk, packet = {<null>}");
+std::ostream& cPacketChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+{
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FIELD(packet, *packet);
+    return stream;
 }
 
 } // namespace

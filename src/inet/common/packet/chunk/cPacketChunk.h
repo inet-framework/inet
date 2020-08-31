@@ -59,7 +59,7 @@ class INET_API cPacketChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_CPACKET; }
     virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(packet->getBitLength() >= 0); return b(packet->getBitLength()); }
 
-    virtual std::string str() const override;
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

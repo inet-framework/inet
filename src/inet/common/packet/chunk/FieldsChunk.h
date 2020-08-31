@@ -73,14 +73,8 @@ class INET_API FieldsChunk : public Chunk
     virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(chunkLength >= b(0)); return chunkLength; }
     virtual void setChunkLength(b chunkLength) { handleChange(); this->chunkLength = chunkLength; }
     virtual void addChunkLength(b chunkLength) { handleChange(); this->chunkLength += chunkLength; }
-    //@}
 
-    /** @name Utility functions */
-    //@{
-    /**
-     * Returns a human readable string representation.
-     */
-    virtual std::string str() const override;
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

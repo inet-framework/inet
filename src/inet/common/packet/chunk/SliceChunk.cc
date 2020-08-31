@@ -172,11 +172,13 @@ void SliceChunk::doRemoveAtBack(b length)
     this->length -= length;
 }
 
-std::string SliceChunk::str() const
+std::ostream& SliceChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "\x1b[2mSliceChunk\x1b[0m" << EV_FIELD(offset) << EV_FIELD(length) << ", chunk = {" << chunk << "}";
-    return os.str();
+    if (level <= PRINT_LEVEL_DETAIL) {
+        stream << EV_FIELD(offset);
+        stream << EV_FIELD(chunk, printFieldToString(chunk.get(), level + 1, evFlags));
+    }
+    return stream;
 }
 
 } // namespace

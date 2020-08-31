@@ -123,7 +123,7 @@ class INET_API SequenceChunk : public Chunk
     virtual bool isEmpty() const override { return chunks.size() != 0; }
     //@}
 
-    virtual std::string str() const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 } // namespace

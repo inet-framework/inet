@@ -402,15 +402,24 @@ void Packet::updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags)
     updateAt(f, b(0), getTotalLength(), flags);
 }
 
-std::string Packet::str() const
+std::ostream& Packet::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream out;
     std::string className = getClassName();
     auto index = className.rfind("::");
     if (index != std::string::npos)
         className = className.substr(index + 2);
-    out << "\x1b[2m(" << className << ")\x1b[0m\x1b[3m" << getName() << "\x1b[0m (" << getDataLength() << ") " << content->str();
-    return out.str();
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FAINT << "(" << className << ")" << EV_NORMAL;
+    stream << EV_ITALIC << getName() << EV_NORMAL << " (" << getDataLength() << ") ";
+    content->printToStream(stream, level + 1, evFlags);
+    return stream;
+}
+
+std::string Packet::str() const
+{
+    std::stringstream stream;
+    stream << "(" << getDataLength() << ") " << *content;
+    return stream.str();
 }
 
 // TODO: move?

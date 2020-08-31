@@ -152,16 +152,29 @@ const Ptr<Chunk> Chunk::peek(const Iterator& iterator, b length, int flags) cons
     return checkPeekResult<Chunk>(chunk, flags);
 }
 
-std::string Chunk::str() const
+std::ostream& Chunk::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
     std::string className = getClassName();
     auto index = className.rfind("::");
     if (index != std::string::npos)
     if (index != -1)
         className = className.substr(index + 2);
-    os << "\x1b[2m" << className << "\x1b[0m" << EV_FIELD(length, getChunkLength());
-    return os.str();
+    stream << EV_FAINT << className << EV_NORMAL;
+    return printFieldsToStream(stream, level, evFlags);
+}
+
+std::ostream& Chunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+{
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FIELD(length, getChunkLength());
+    return stream;
+}
+
+std::string Chunk::str() const
+{
+    std::stringstream stream;
+    printFieldsToStream(stream, PRINT_LEVEL_COMPLETE, 0);
+    return stream.tellp() == 0 ? "" : stream.str().substr(2);
 }
 
 void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length)

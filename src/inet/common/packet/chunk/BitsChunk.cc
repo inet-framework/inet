@@ -145,14 +145,15 @@ void BitsChunk::doRemoveAtBack(b length)
     bits.erase(bits.end() - b(length).get(), bits.end());
 }
 
-std::string BitsChunk::str() const
+std::ostream& BitsChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "\x1b[2mBitsChunk\x1b[0m" << EV_FIELD(length, bits.size()) << ", bits = {";
-    for (auto bit : bits)
-        os << (bit ? "1" : "0");
-    os << "}";
-    return os.str();
+    if (level <= PRINT_LEVEL_TRACE) {
+        stream << ", " << EV_BOLD << "bits" << EV_NORMAL << " = {";
+        for (auto bit : bits)
+            stream << (bit ? "1" : "0");
+        stream << "}";
+    }
+    return stream;
 }
 
 } // namespace

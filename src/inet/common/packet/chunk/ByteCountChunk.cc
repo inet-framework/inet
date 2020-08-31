@@ -146,11 +146,12 @@ void ByteCountChunk::doRemoveAtBack(b length)
     this->length -= B(length);
 }
 
-std::string ByteCountChunk::str() const
+std::ostream& ByteCountChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "\x1b[2mByteCountChunk\x1b[0m" << EV_FIELD(length, B(getChunkLength())) << EV_FIELD(data, (int)data);
-    return os.str();
+    Chunk::printFieldsToStream(stream, level, evFlags);
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FIELD(data, (int)data);
+    return stream;
 }
 
 } // namespace

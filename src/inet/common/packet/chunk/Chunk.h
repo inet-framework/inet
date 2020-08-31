@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
 #include "inet/common/packet/tag/SharingRegionTagSet.h"
@@ -243,7 +244,7 @@ using namespace units::values;
  * e) Inserting a connecting SliceChunk into a SliceChunk merges them
  */
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
-class INET_API Chunk : public cObject, public SharedBase<Chunk>
+class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject
 {
   friend class SliceChunk;
   friend class SequenceChunk;
@@ -760,6 +761,18 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>
     /** @name Utility functions */
     //@{
     /**
+     * Prints an optinally formatted human readable string representation of
+     * the data present in this chunk to the given stream.
+     */
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+
+    /**
+     * Prints an optinally formatted human readable string representation of
+     * the feilds of this chunk to the given stream.
+     */
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const;
+
+    /**
      * Returns a human readable string representation of the data present in
      * this chunk.
      */
@@ -798,10 +811,6 @@ const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
     else
         return staticPtrCast<T>(chunk->dupShared());
 }
-
-inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { if (chunk != nullptr) return os << chunk->str(); else return os << "<nullptr>"; }
-
-inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) { return os << chunk.str(); }
 
 typedef TemporarySharedPtr<Chunk> ChunkTemporarySharedPtr;
 

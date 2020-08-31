@@ -50,7 +50,7 @@ class INET_API EmptyChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_EMPTY; }
     virtual b getChunkLength() const override { return b(0); }
 
-    virtual std::string str() const override;
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream; }
     //@}
 
     static const Ptr<Chunk> getEmptyChunk(int flags) {

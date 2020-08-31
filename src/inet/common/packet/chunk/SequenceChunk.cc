@@ -376,20 +376,18 @@ void SequenceChunk::doRemoveAtBack(b length)
     chunks.erase(it.base(), chunks.end());
 }
 
-std::string SequenceChunk::str() const
+std::ostream& SequenceChunk::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "[";
+    stream << "[";
     bool first = true;
     for (const auto& chunk : chunks) {
         if (!first)
-            os << " | ";
+            stream << " | ";
         else
             first = false;
-        os << chunk->str();
+        chunk->printToStream(stream, level + 1, evFlags);
     }
-    os << "]";
-    return os.str();
+    return stream << "]";
 }
 
 } // namespace
