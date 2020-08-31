@@ -54,9 +54,9 @@ void PreemptingServer::startStreaming()
 
 void PreemptingServer::endStreaming()
 {
-    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     delete streamedPacket;
     streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate());
+    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     take(streamedPacket);
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;

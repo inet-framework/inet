@@ -77,8 +77,8 @@ void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate,
         rxSignal = check_and_cast<Signal *>(cpacket);
     }
     else {
-        EV_WARN << "Signal start not received, drop it";
-        delete cpacket;
+        EV_WARN << "Dropping signal progress because signal start was not received" << EV_FIELD(signal, *signal) << EV_ENDL;
+        delete signal;
     }
 }
 
@@ -96,7 +96,7 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
         delete signal;
     }
     else {
-        EV_WARN << "Signal start not received, drop it";
+        EV_WARN << "Dropping signal end because signal start was not received" << EV_FIELD(signal, *signal) << EV_ENDL;
         delete signal;
     }
 }
