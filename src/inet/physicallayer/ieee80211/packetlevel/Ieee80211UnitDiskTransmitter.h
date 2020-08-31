@@ -38,7 +38,7 @@ class INET_API Ieee80211UnitDiskTransmitter : public Ieee80211TransmitterBase
     Ieee80211UnitDiskTransmitter();
     virtual m getMaxCommunicationRange() const override { return communicationRange; }
     virtual m getMaxInterferenceRange() const override { return interferenceRange; }
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
 };

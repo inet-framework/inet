@@ -33,7 +33,7 @@ UnitDiskReception::UnitDiskReception(const IRadio *radio, const ITransmission *t
 {
 }
 
-std::ostream& UnitDiskReception::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskReception::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskReception";
     if (level <= PRINT_LEVEL_INFO)

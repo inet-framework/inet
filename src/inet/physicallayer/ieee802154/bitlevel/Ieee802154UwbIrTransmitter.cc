@@ -41,7 +41,7 @@ void Ieee802154UwbIrTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& Ieee802154UwbIrTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154UwbIrTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee802154UwbIrTransmitter";
 }

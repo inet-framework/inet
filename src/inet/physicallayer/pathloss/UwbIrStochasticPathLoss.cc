@@ -59,7 +59,7 @@ void UwbIrStochasticPathLoss::initialize(int stage)
     }
 }
 
-std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UwbIrStochasticPathLoss";
     if (level <= PRINT_LEVEL_TRACE)

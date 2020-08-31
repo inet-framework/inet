@@ -30,7 +30,7 @@ Ieee80211ScalarReceiver::Ieee80211ScalarReceiver() :
 {
 }
 
-std::ostream& Ieee80211ScalarReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211ScalarReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211ScalarReceiver";
     return Ieee80211ReceiverBase::printToStream(stream, level);

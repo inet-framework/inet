@@ -51,7 +51,7 @@ const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t tim
     throw cRuntimeError("Movement approximation is not implemented");
 }
 
-std::ostream& ConstantSpeedPropagation::printToStream(std::ostream& stream, int level) const
+std::ostream& ConstantSpeedPropagation::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ConstantSpeedPropagation";
     if (level <= PRINT_LEVEL_TRACE)

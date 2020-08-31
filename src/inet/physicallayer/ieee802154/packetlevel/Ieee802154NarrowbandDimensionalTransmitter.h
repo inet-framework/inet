@@ -33,7 +33,7 @@ class INET_API Ieee802154NarrowbandDimensionalTransmitter : public FlatTransmitt
 
     virtual void initialize(int stage) override;
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
 };
 

@@ -27,7 +27,7 @@ Ieee80211UnitDiskTransmission::Ieee80211UnitDiskTransmission(const IRadio *trans
 {
 }
 
-std::ostream& Ieee80211UnitDiskTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211UnitDiskTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211UnitDiskTransmission";
     Ieee80211TransmissionBase::printToStream(stream, level);

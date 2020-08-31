@@ -80,18 +80,18 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211LayeredOfdmTransmitter";
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(levelOfDetail)
-               << EV_FIELD(mode, printObjectToString(mode, level + 1))
-               << EV_FIELD(signalEncoder, printObjectToString(signalEncoder, level + 1))
-               << EV_FIELD(dataEncoder, printObjectToString(dataEncoder, level + 1))
-               << EV_FIELD(signalModulator, printObjectToString(signalModulator, level + 1))
-               << EV_FIELD(dataModulator, printObjectToString(dataModulator, level + 1))
-               << EV_FIELD(pulseShaper, printObjectToString(pulseShaper, level + 1))
-               << EV_FIELD(digitalAnalogConverter, printObjectToString(digitalAnalogConverter, level + 1))
+               << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
+               << EV_FIELD(signalEncoder, printFieldToString(signalEncoder, level + 1, evFlags))
+               << EV_FIELD(dataEncoder, printFieldToString(dataEncoder, level + 1, evFlags))
+               << EV_FIELD(signalModulator, printFieldToString(signalModulator, level + 1, evFlags))
+               << EV_FIELD(dataModulator, printFieldToString(dataModulator, level + 1, evFlags))
+               << EV_FIELD(pulseShaper, printFieldToString(pulseShaper, level + 1, evFlags))
+               << EV_FIELD(digitalAnalogConverter, printFieldToString(digitalAnalogConverter, level + 1, evFlags))
                << EV_FIELD(isCompliant)
                << EV_FIELD(bandwidth)
                << EV_FIELD(channelSpacing)

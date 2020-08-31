@@ -39,7 +39,7 @@ void Ieee802154NarrowbandDimensionalTransmitter::initialize(int stage)
     DimensionalTransmitterBase::initialize(stage);
 }
 
-std::ostream& Ieee802154NarrowbandDimensionalTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154NarrowbandDimensionalTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee802154NarrowbandDimensionalTransmitter";
     DimensionalTransmitterBase::printToStream(stream, level);

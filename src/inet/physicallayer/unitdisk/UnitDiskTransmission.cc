@@ -29,7 +29,7 @@ UnitDiskTransmission::UnitDiskTransmission(const IRadio *transmitter, const Pack
 {
 }
 
-std::ostream& UnitDiskTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskTransmission";
     if (level <= PRINT_LEVEL_INFO)

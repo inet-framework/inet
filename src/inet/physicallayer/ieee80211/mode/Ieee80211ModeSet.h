@@ -52,7 +52,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
   public:
     Ieee80211ModeSet(const char *name, const std::vector<Entry> entries);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211ModeSet, name = " << name; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
     const char *getName() const override { return name.c_str(); }
 

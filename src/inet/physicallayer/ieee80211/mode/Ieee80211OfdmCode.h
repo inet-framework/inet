@@ -36,7 +36,7 @@ class INET_API Ieee80211OfdmCode : public ICode
     public:
         Ieee80211OfdmCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OfdmInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
-        virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+        virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
         const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
         const Ieee80211OfdmInterleaving *getInterleaving() const { return interleaving; }

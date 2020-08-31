@@ -31,11 +31,11 @@ Ieee80211OfdmModulation::Ieee80211OfdmModulation(const ApskModulationBase* subca
 {
 }
 
-std::ostream& Ieee80211OfdmModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmModulation::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmModulation";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(subcarrierModulation, printObjectToString(subcarrierModulation, level + 1));
+        stream << EV_FIELD(subcarrierModulation, printFieldToString(subcarrierModulation, level + 1, evFlags));
     return stream;
 }
 

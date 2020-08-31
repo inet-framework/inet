@@ -47,7 +47,7 @@ void NeighborListNeighborCache::initialize(int stage)
     }
 }
 
-std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "NeighborListNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)

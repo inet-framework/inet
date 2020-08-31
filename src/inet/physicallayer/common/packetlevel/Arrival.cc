@@ -35,7 +35,7 @@ Arrival::Arrival(const simtime_t startPropagationTime, const simtime_t endPropag
 {
 }
 
-std::ostream& Arrival::printToStream(std::ostream& stream, int level) const
+std::ostream& Arrival::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Arrival";
     if (level <= PRINT_LEVEL_TRACE)

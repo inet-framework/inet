@@ -70,7 +70,7 @@ void SuiPathLoss::initialize(int stage)
     }
 }
 
-std::ostream& SuiPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& SuiPathLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "SuiPathLoss";
     if (level <= PRINT_LEVEL_TRACE)

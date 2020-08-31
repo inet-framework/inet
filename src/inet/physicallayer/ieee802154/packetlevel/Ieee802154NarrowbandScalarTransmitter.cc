@@ -31,7 +31,7 @@ Ieee802154NarrowbandScalarTransmitter::Ieee802154NarrowbandScalarTransmitter() :
 {
 }
 
-std::ostream& Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee802154NarrowbandScalarTransmitter";
     return FlatTransmitterBase::printToStream(stream, level);

@@ -55,7 +55,7 @@ void DielectricObstacleLoss::finish()
     recordScalar("Obstacle loss intersection count", intersectionCount);
 }
 
-std::ostream& DielectricObstacleLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& DielectricObstacleLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "DielectricObstacleLoss";
 }

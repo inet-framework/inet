@@ -29,13 +29,13 @@ Ieee80211OfdmCode::Ieee80211OfdmCode(const ConvolutionalCode* convolutionalCode,
 {
 }
 
-std::ostream& Ieee80211OfdmCode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmCode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskCode";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(convolutionalCode, printObjectToString(convolutionalCode, level + 1))
-               << EV_FIELD(interleaving, printObjectToString(interleaving, level + 1))
-               << EV_FIELD(scrambling, printObjectToString(scrambling, level + 1));
+        stream << EV_FIELD(convolutionalCode, printFieldToString(convolutionalCode, level + 1, evFlags))
+               << EV_FIELD(interleaving, printFieldToString(interleaving, level + 1, evFlags))
+               << EV_FIELD(scrambling, printFieldToString(scrambling, level + 1, evFlags));
     return stream;
 }
 

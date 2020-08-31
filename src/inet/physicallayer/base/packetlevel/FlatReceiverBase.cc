@@ -46,10 +46,10 @@ void FlatReceiverBase::initialize(int stage)
     }
 }
 
-std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level) const
+std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(errorModel, printObjectToString(errorModel, level + 1));
+        stream << EV_FIELD(errorModel, printFieldToString(errorModel, level + 1, evFlags));
     if (level <= PRINT_LEVEL_INFO)
         stream << EV_FIELD(energyDetection)
                << EV_FIELD(sensitivity);

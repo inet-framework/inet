@@ -44,7 +44,7 @@ void Ieee80211OfdmErrorModel::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211OfdmErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmErrorModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmErrorModel";
     if (level <= PRINT_LEVEL_TRACE)

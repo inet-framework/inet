@@ -34,7 +34,7 @@ SignalBitModel::~SignalBitModel()
     delete bits;
 }
 
-std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level) const
+std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "SignalBitModel";
     if (level <= PRINT_LEVEL_TRACE)

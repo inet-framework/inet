@@ -46,7 +46,7 @@ class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
   public:
     Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OfdmPreambleMode *ofdmPreambleMode, const Ieee80211OfdmSignalMode *ofdmSignalMode, const Ieee80211OfdmDataMode *ofdmDataMode);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211DsssOfdmMode"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211DsssOfdmMode"; }
 
     virtual const IIeee80211PreambleMode *getPreambleMode() const override { return nullptr; }
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return nullptr; }

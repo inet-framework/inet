@@ -53,15 +53,15 @@ void ApskDecoder::initialize(int stage)
     }
 }
 
-std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskDecoder";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(code);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(descrambler, printObjectToString(descrambler, level + 1))
-               << EV_FIELD(fecDecoder, printObjectToString(fecDecoder, level + 1))
-               << EV_FIELD(deinterleaver, printObjectToString(deinterleaver, level + 1));
+        stream << EV_FIELD(descrambler, printFieldToString(descrambler, level + 1, evFlags))
+               << EV_FIELD(fecDecoder, printFieldToString(fecDecoder, level + 1, evFlags))
+               << EV_FIELD(deinterleaver, printFieldToString(deinterleaver, level + 1, evFlags));
     return stream;
 }
 

@@ -36,7 +36,7 @@ class INET_API MqamModulation : public MqamModulationBase
     MqamModulation(unsigned int codeWordSize);
     virtual ~MqamModulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 } // namespace physicallayer

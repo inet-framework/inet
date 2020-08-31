@@ -27,7 +27,7 @@ ScalarSignalAnalogModel::ScalarSignalAnalogModel(const simtime_t duration, Hz ce
 {
 }
 
-std::ostream& ScalarSignalAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarSignalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ScalarSignalAnalogModel";
     if (level <= PRINT_LEVEL_DETAIL)

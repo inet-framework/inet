@@ -40,7 +40,7 @@ class INET_API BpskModulation : public MqamModulationBase
   public:
     BpskModulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "BpskModulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "BpskModulation"; }
 
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;

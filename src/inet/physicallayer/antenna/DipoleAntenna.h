@@ -49,7 +49,7 @@ class INET_API DipoleAntenna : public AntennaBase
   public:
     DipoleAntenna();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
 };
 

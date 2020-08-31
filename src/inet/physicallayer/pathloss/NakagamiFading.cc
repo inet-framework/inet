@@ -36,7 +36,7 @@ void NakagamiFading::initialize(int stage)
     }
 }
 
-std::ostream& NakagamiFading::printToStream(std::ostream& stream, int level) const
+std::ostream& NakagamiFading::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "NakagamiFading";
     if (level <= PRINT_LEVEL_TRACE)

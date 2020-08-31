@@ -47,7 +47,7 @@ void UnitDiskTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskTransmitter";
     if (level <= PRINT_LEVEL_TRACE)

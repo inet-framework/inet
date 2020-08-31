@@ -27,11 +27,11 @@ Ieee80211Channel::Ieee80211Channel(const IIeee80211Band *band, int channelNumber
 {
 }
 
-std::ostream& Ieee80211Channel::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211Channel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211Channel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(band, printObjectToString(band, level + 1));
+        stream << EV_FIELD(band, printFieldToString(band, level + 1, evFlags));
     if (level <= PRINT_LEVEL_INFO)
         stream << EV_FIELD(channelNumber);
     return stream;

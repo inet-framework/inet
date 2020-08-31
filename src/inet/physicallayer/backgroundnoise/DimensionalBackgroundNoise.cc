@@ -38,7 +38,7 @@ void DimensionalBackgroundNoise::initialize(int stage)
     }
 }
 
-std::ostream& DimensionalBackgroundNoise::printToStream(std::ostream& stream, int level) const
+std::ostream& DimensionalBackgroundNoise::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DimensionalBackgroundNoise";
     return DimensionalTransmitterBase::printToStream(stream, level);

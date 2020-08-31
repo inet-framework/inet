@@ -38,7 +38,7 @@ void AntennaBase::initialize(int stage)
     }
 }
 
-std::ostream& AntennaBase::printToStream(std::ostream& stream, int level) const
+std::ostream& AntennaBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream;
 }

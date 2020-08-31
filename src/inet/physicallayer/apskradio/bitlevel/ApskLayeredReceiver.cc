@@ -92,18 +92,18 @@ const IReceptionAnalogModel *ApskLayeredReceiver::createAnalogModel(const Layere
     return nullptr;
 }
 
-std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskLayeredReceiver";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(levelOfDetail)
                << EV_FIELD(centerFrequency);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(errorModel, printObjectToString(errorModel, level + 1))
-               << EV_FIELD(decoder, printObjectToString(decoder, level + 1))
-               << EV_FIELD(demodulator, printObjectToString(demodulator, level + 1))
-               << EV_FIELD(pulseFilter, printObjectToString(pulseFilter, level + 1))
-               << EV_FIELD(analogDigitalConverter, printObjectToString(analogDigitalConverter, level + 1))
+        stream << EV_FIELD(errorModel, printFieldToString(errorModel, level + 1, evFlags))
+               << EV_FIELD(decoder, printFieldToString(decoder, level + 1, evFlags))
+               << EV_FIELD(demodulator, printFieldToString(demodulator, level + 1, evFlags))
+               << EV_FIELD(pulseFilter, printFieldToString(pulseFilter, level + 1, evFlags))
+               << EV_FIELD(analogDigitalConverter, printFieldToString(analogDigitalConverter, level + 1, evFlags))
                << EV_FIELD(energyDetection)
                << EV_FIELD(sensitivity)
                << EV_FIELD(bandwidth)

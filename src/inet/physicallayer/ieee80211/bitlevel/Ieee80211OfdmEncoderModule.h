@@ -41,7 +41,7 @@ class INET_API Ieee80211OfdmEncoderModule : public IEncoder, public cSimpleModul
   public:
     virtual ~Ieee80211OfdmEncoderModule();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return encoder->printToStream(stream, level); }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return encoder->printToStream(stream, level); }
     const Ieee80211OfdmCode *getCode() const override { return code; }
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
 };

@@ -26,7 +26,7 @@ ApskScalarTransmission::ApskScalarTransmission(const IRadio *transmitter, const 
 {
 }
 
-std::ostream& ApskScalarTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskScalarTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskScalarTransmission";
     if (level <= PRINT_LEVEL_DETAIL)

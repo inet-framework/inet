@@ -35,7 +35,7 @@ class INET_API Ieee802154NarrowbandDimensionalReceiver : public FlatReceiverBase
 
     void initialize(int stage) override;
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual W getMinInterferencePower() const override { return minInterferencePower; }
 };

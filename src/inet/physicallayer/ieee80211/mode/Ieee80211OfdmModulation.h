@@ -35,7 +35,7 @@ class INET_API Ieee80211OfdmModulation : public IModulation
         virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
         virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateSER(snir, bandwidth, bitrate); }
 
-        virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+        virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 class INET_API Ieee80211OfdmCompliantModulations

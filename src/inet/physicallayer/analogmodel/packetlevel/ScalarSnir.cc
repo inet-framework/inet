@@ -31,7 +31,7 @@ ScalarSnir::ScalarSnir(const IReception *reception, const INoise *noise) :
 {
 }
 
-std::ostream& ScalarSnir::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarSnir::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ScalarSnir";
     if (level <= PRINT_LEVEL_DETAIL)

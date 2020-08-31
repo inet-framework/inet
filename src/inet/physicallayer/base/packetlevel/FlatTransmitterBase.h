@@ -43,7 +43,7 @@ class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
   public:
     FlatTransmitterBase();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual b getHeaderLength() const { return headerLength; }
     virtual void setHeaderLength(b headerLength) { this->headerLength = headerLength; }

@@ -36,7 +36,7 @@ void RicianFading::initialize(int stage)
     }
 }
 
-std::ostream& RicianFading::printToStream(std::ostream& stream, int level) const
+std::ostream& RicianFading::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "RicianFading";
     if (level <= PRINT_LEVEL_TRACE)

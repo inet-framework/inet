@@ -64,7 +64,7 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
     QuadTreeNeighborCache();
     ~QuadTreeNeighborCache();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual void sendToNeighbors(IRadio *transmitter, const IWirelessSignal *signal, double range) const override;

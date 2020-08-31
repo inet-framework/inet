@@ -36,7 +36,7 @@ class INET_API Ieee80211UnitDiskReceiver : public UnitDiskReceiver
   public:
     Ieee80211UnitDiskReceiver();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 };

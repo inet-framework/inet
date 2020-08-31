@@ -33,7 +33,7 @@ ApskDimensionalReceiver::ApskDimensionalReceiver() :
 {
 }
 
-std::ostream& ApskDimensionalReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDimensionalReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskDimensionalReceiver";
     return FlatReceiverBase::printToStream(stream, level);

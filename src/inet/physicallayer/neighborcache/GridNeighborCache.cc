@@ -70,7 +70,7 @@ void GridNeighborCache::handleMessage(cMessage *msg)
     scheduleAfter(refillPeriod, msg);
 }
 
-std::ostream& GridNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& GridNeighborCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "GridNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)

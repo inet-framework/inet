@@ -42,7 +42,7 @@ void Ieee80211UnitDiskTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211UnitDiskTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211UnitDiskTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211UnitDiskTransmitter";
     if (level <= PRINT_LEVEL_INFO)

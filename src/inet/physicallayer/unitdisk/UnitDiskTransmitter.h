@@ -43,7 +43,7 @@ class INET_API UnitDiskTransmitter : public TransmitterBase
   public:
     UnitDiskTransmitter();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual simtime_t getPreambleDuration() const { return preambleDuration; }
     virtual b getHeaderLength() const { return headerLength; }

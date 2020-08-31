@@ -61,7 +61,7 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
     scheduleAfter(refillPeriod, msg);
 }
 
-std::ostream& QuadTreeNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& QuadTreeNeighborCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "QuadTreeNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)

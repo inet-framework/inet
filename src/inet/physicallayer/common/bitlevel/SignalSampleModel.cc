@@ -32,7 +32,7 @@ SignalSampleModel::~SignalSampleModel()
     delete samples;
 }
 
-std::ostream& SignalSampleModel::printToStream(std::ostream& stream, int level) const
+std::ostream& SignalSampleModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "SignalSampleModel";
     if (level <= PRINT_LEVEL_TRACE)

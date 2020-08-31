@@ -32,7 +32,7 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
   public:
     ListeningDecision(const IListening *listening, bool isListeningPossible_);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IListening *getListening() const override { return listening; }
 

@@ -45,7 +45,7 @@ class INET_API AdditiveScrambler : public IScrambler
   public:
     AdditiveScrambler(const AdditiveScrambling *scrambling);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     BitVector scramble(const BitVector& bits) const override;
     BitVector descramble(const BitVector& bits) const override { return scramble(bits); }
     const AdditiveScrambling *getScrambling() const override { return scrambling; }

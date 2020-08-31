@@ -36,7 +36,7 @@ class INET_API AntennaBase : public IAntenna, public cModule
   public:
     AntennaBase();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual bool isDirectional() const override { return getGain()->getMinGain() != 1 || getGain()->getMaxGain() != 1; }
     virtual IMobility *getMobility() const override { return mobility; }
     virtual int getNumAntennas() const override { return numAntennas; }

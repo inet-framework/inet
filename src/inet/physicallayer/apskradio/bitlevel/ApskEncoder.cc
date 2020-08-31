@@ -53,15 +53,15 @@ void ApskEncoder::initialize(int stage)
     }
 }
 
-std::ostream& ApskEncoder::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskEncoder::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskEncoder";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(code, printObjectToString(code, level + 1));
+        stream << EV_FIELD(code, printFieldToString(code, level + 1, evFlags));
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(scrambler, printObjectToString(scrambler, level + 1))
-               << EV_FIELD(fecEncoder, printObjectToString(fecEncoder, level + 1))
-               << EV_FIELD(interleaver, printObjectToString(interleaver, level + 1));
+        stream << EV_FIELD(scrambler, printFieldToString(scrambler, level + 1, evFlags))
+               << EV_FIELD(fecEncoder, printFieldToString(fecEncoder, level + 1, evFlags))
+               << EV_FIELD(interleaver, printFieldToString(interleaver, level + 1, evFlags));
     return stream;
 }
 

@@ -51,7 +51,7 @@ class INET_API ParabolicAntenna : public AntennaBase
   public:
     ParabolicAntenna();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
 };
 

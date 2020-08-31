@@ -152,7 +152,7 @@ class INET_API ConvolutionalCoder : public IFecCoder
     const int **getOutputTable() const { return (const int **)inputSymbols; }
 
     /* IPrintable object */
-    std::ostream& printToStream(std::ostream& stream, int level) const override;
+    std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 } /* namespace physicallayer */
 } /* namespace inet */

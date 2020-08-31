@@ -35,15 +35,23 @@ Signal::Signal(const Signal& other) :
 {
 }
 
-std::string Signal::str() const
+std::ostream& Signal::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream out;
     std::string className = getClassName();
     auto index = className.rfind("::");
     if (index != std::string::npos)
         className = className.substr(index + 2);
-    out << "\x1b[2m(" << className << ")\x1b[0m\x1b[3m" << getName() << "\x1b[0m (" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
-    return out.str();
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FAINT << "(" << className << ")" << EV_NORMAL;
+    stream << EV_ITALIC << getName() << EV_NORMAL << " (" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
+    return stream;
+}
+
+std::string Signal::str() const
+{
+    std::stringstream stream;
+    stream << "(" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
+    return stream.str();
 }
 
 // TODO: getFullName()

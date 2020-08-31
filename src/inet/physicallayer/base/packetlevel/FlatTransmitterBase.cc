@@ -41,7 +41,7 @@ void FlatTransmitterBase::initialize(int stage)
     }
 }
 
-std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level) const
+std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(preambleDuration)

@@ -41,7 +41,7 @@ void UnitDiskReceiver::initialize(int stage)
         ignoreInterference = par("ignoreInterference");
 }
 
-std::ostream& UnitDiskReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskReceiver";
     if (level <= PRINT_LEVEL_INFO)

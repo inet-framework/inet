@@ -51,7 +51,7 @@ MqamModulation::~MqamModulation()
     delete constellation;
 }
 
-std::ostream& MqamModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MqamModulation::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "MqamModulation";
     return ApskModulationBase::printToStream(stream, level);

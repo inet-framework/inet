@@ -37,7 +37,7 @@ class INET_API DimensionalBackgroundNoise : public DimensionalTransmitterBase, p
     DimensionalBackgroundNoise();
 
   public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const INoise *computeNoise(const IListening *listening) const override;
 };
 

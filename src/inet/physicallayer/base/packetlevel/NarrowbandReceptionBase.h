@@ -34,7 +34,7 @@ class INET_API NarrowbandReceptionBase : public ReceptionBase, public virtual IN
   public:
     NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, Hz centerFrequency, Hz bandwidth);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual Hz getCenterFrequency() const override { return centerFrequency; }
     virtual Hz getBandwidth() const override { return bandwidth; }

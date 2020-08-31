@@ -86,19 +86,19 @@ const IReceptionAnalogModel *Ieee80211LayeredOfdmReceiver::createAnalogModel(con
     return nullptr;
 }
 
-std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211LayeredOfdmReceiver";
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(levelOfDetail)
-               << EV_FIELD(mode, printObjectToString(mode, level + 1))
-               << EV_FIELD(errorModel, printObjectToString(errorModel, level + 1))
-               << EV_FIELD(dataDecoder, printObjectToString(dataDecoder, level + 1))
-               << EV_FIELD(signalDecoder, printObjectToString(signalDecoder, level + 1))
-               << EV_FIELD(dataDemodulator, printObjectToString(dataDemodulator, level + 1))
-               << EV_FIELD(signalDemodulator, printObjectToString(signalDemodulator, level + 1))
-               << EV_FIELD(pulseFilter, printObjectToString(pulseFilter, level + 1))
-               << EV_FIELD(analogDigitalConverter, printObjectToString(analogDigitalConverter, level + 1))
+               << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
+               << EV_FIELD(errorModel, printFieldToString(errorModel, level + 1, evFlags))
+               << EV_FIELD(dataDecoder, printFieldToString(dataDecoder, level + 1, evFlags))
+               << EV_FIELD(signalDecoder, printFieldToString(signalDecoder, level + 1, evFlags))
+               << EV_FIELD(dataDemodulator, printFieldToString(dataDemodulator, level + 1, evFlags))
+               << EV_FIELD(signalDemodulator, printFieldToString(signalDemodulator, level + 1, evFlags))
+               << EV_FIELD(pulseFilter, printFieldToString(pulseFilter, level + 1, evFlags))
+               << EV_FIELD(analogDigitalConverter, printFieldToString(analogDigitalConverter, level + 1, evFlags))
                << EV_FIELD(energyDetection)
                << EV_FIELD(sensitivity)
                << EV_FIELD(centerFrequency)

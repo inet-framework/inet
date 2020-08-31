@@ -34,7 +34,7 @@ class INET_API FlatTransmissionBase : public NarrowbandTransmissionBase
   public:
     FlatTransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, b headerLength, b dataLength, bps bitrate, const IModulation *modulation, Hz centerFrequency, Hz bandwidth);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual b getHeaderLength() const { return headerLength; }
     virtual b getDataLength() const { return dataLength; }

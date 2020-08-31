@@ -27,7 +27,7 @@ Ieee80211LayeredTransmission::Ieee80211LayeredTransmission(const ITransmissionPa
 {
 }
 
-std::ostream& Ieee80211LayeredTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211LayeredTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211LayeredTransmission";
     Ieee80211TransmissionBase::printToStream(stream, level);

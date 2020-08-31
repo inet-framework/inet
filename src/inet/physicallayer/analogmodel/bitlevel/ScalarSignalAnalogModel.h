@@ -32,7 +32,7 @@ class INET_API ScalarSignalAnalogModel : public NarrowbandSignalAnalogModel, pub
   public:
     ScalarSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual W getPower() const override { return power; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { return power; }

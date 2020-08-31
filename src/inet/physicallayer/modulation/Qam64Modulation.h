@@ -41,7 +41,7 @@ class INET_API Qam64Modulation : public MqamModulationBase
   public:
     Qam64Modulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Qam64Modulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Qam64Modulation"; }
 };
 
 } // namespace physicallayer

@@ -72,7 +72,7 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
   public:
     virtual ~VectorCommunicationCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "VectorCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override { return stream << "VectorCommunicationCache"; }
 
     /** @name Radio cache */
     //@{

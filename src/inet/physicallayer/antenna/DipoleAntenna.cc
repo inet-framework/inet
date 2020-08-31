@@ -35,7 +35,7 @@ void DipoleAntenna::initialize(int stage)
         gain = makeShared<AntennaGain>(par("wireAxis"), m(par("length")));
 }
 
-std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DipoleAntenna";
     if (level <= PRINT_LEVEL_DETAIL)

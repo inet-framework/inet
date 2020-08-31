@@ -26,7 +26,7 @@ DimensionalSignalAnalogModel::DimensionalSignalAnalogModel(const simtime_t durat
 {
 }
 
-std::ostream& DimensionalSignalAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& DimensionalSignalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DimensionalSignalAnalogModel";
     if (level <= PRINT_LEVEL_DEBUG)

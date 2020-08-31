@@ -51,7 +51,7 @@ class INET_API Ieee80211OfdmDecoder : public IDecoder
     Ieee80211OfdmDecoder(const Ieee80211OfdmCode *code);
     virtual ~Ieee80211OfdmDecoder();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const override;
     const Ieee80211OfdmCode *getCode() const { return code; }
 };

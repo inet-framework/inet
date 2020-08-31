@@ -27,7 +27,7 @@ Ieee80211ScalarTransmission::Ieee80211ScalarTransmission(const IRadio *transmitt
 {
 }
 
-std::ostream& Ieee80211ScalarTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211ScalarTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211ScalarTransmission";
     Ieee80211TransmissionBase::printToStream(stream, level);

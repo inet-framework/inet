@@ -33,7 +33,7 @@ class INET_API Ieee80211Channel : public IPrintableObject
   public:
     Ieee80211Channel(const IIeee80211Band *band, int channelNumber);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IIeee80211Band *getBand() const { return band; }
     virtual int getChannelNumber() const { return channelNumber; }

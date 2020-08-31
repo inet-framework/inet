@@ -51,7 +51,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 
     virtual int getId() const override { return id; }
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IRadio *getTransmitter() const override;
     virtual int getTransmitterId() const override { return transmitterId; }

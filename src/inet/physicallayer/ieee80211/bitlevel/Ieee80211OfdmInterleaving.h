@@ -33,7 +33,7 @@ class INET_API Ieee80211OfdmInterleaving : public IInterleaving
   public:
     Ieee80211OfdmInterleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
     int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }

@@ -26,7 +26,7 @@ ApskDimensionalTransmission::ApskDimensionalTransmission(const IRadio *transmitt
 {
 }
 
-std::ostream& ApskDimensionalTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDimensionalTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskDimensionalTransmission";
     if (level <= PRINT_LEVEL_DETAIL)

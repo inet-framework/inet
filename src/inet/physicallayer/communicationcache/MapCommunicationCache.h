@@ -59,7 +59,7 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
   public:
     virtual ~MapCommunicationCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "MapCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override { return stream << "MapCommunicationCache"; }
 
     /** @name Radio cache */
     //@{

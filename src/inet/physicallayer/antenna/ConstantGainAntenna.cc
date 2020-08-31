@@ -35,7 +35,7 @@ void ConstantGainAntenna::initialize(int stage)
         gain = makeShared<AntennaGain>(math::dB2fraction(par("gain")));
 }
 
-std::ostream& ConstantGainAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& ConstantGainAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ConstantGainAntenna";
     if (level <= PRINT_LEVEL_DETAIL)

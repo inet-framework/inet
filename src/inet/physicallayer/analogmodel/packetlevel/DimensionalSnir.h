@@ -41,7 +41,7 @@ class INET_API DimensionalSnir : public SnirBase
   public:
     DimensionalSnir(const DimensionalReception *reception, const DimensionalNoise *noise);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual double getMin() const override;
     virtual double getMax() const override;

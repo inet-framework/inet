@@ -26,7 +26,7 @@ UnitDiskListening::UnitDiskListening(const IRadio *radio, simtime_t startTime, s
 {
 }
 
-std::ostream& UnitDiskListening::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskListening::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskListening";
     return ListeningBase::printToStream(stream, level);

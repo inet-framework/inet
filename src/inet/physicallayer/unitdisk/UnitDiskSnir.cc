@@ -26,7 +26,7 @@ UnitDiskSnir::UnitDiskSnir(const IReception *reception, const INoise *noise) :
 {
 }
 
-std::ostream& UnitDiskSnir::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskSnir::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskSnir";
     return stream;

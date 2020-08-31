@@ -33,7 +33,7 @@ class INET_API NoiseBase : public INoise
   public:
     NoiseBase(simtime_t startTime, simtime_t endTime);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const simtime_t getStartTime() const override { return startTime; }
     virtual const simtime_t getEndTime() const override { return endTime; }
 };

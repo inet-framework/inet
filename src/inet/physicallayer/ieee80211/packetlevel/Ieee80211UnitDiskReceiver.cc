@@ -40,7 +40,7 @@ void Ieee80211UnitDiskReceiver::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211UnitDiskReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211UnitDiskReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211UnitDiskReceiver";
     return UnitDiskReceiver::printToStream(stream, level);

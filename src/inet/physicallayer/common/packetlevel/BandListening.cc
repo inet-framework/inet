@@ -27,7 +27,7 @@ BandListening::BandListening(const IRadio *radio, simtime_t startTime, simtime_t
 {
 }
 
-std::ostream& BandListening::printToStream(std::ostream& stream, int level) const
+std::ostream& BandListening::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "BandListening";
     if (level <= PRINT_LEVEL_DETAIL)

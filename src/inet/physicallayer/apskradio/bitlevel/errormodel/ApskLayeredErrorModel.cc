@@ -36,7 +36,7 @@ ApskLayeredErrorModel::ApskLayeredErrorModel()
 {
 }
 
-std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "LayeredApskErrorModel";
 }

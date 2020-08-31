@@ -18,10 +18,13 @@
 #ifndef __INET_IEEE80211VHTINTERLEAVING_H
 #define __INET_IEEE80211VHTINTERLEAVING_H
 
+#include "inet/common/Units.h"
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
 
 namespace inet {
 namespace physicallayer {
+
+using namespace inet::units::values;
 
 class INET_API Ieee80211VhtInterleaving : public IInterleaving
 {

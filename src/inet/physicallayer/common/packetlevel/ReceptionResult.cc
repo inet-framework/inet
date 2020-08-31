@@ -33,7 +33,7 @@ ReceptionResult::~ReceptionResult()
     delete decisions;
 }
 
-std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) const
+std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ReceptionResult";
     return stream;

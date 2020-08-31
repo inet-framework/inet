@@ -36,7 +36,7 @@ void TwoRayInterference::initialize(int stage)
     }
 }
 
-std::ostream& TwoRayInterference::printToStream(std::ostream& os, int level) const
+std::ostream& TwoRayInterference::printToStream(std::ostream& os, int level, int evFlags) const
 {
     os << "TwoRayInterference";
     if (level >= PRINT_LEVEL_TRACE)

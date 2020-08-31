@@ -45,7 +45,7 @@ class INET_API Ieee80211OfdmDemodulator : public IDemodulator
 
     const Ieee80211OfdmModulation *getModulation() const { return subcarrierModulation; }
     virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const override;
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 } // namespace physicallayer

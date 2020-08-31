@@ -39,7 +39,7 @@ void ParabolicAntenna::initialize(int stage)
     }
 }
 
-std::ostream& ParabolicAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& ParabolicAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ParabolicAntenna";
     if (level <= PRINT_LEVEL_DETAIL)

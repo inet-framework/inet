@@ -42,7 +42,7 @@ void Ieee80211DimensionalTransmitter::initialize(int stage)
     DimensionalTransmitterBase::initialize(stage);
 }
 
-std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211DimensionalTransmitter";
     Ieee80211TransmitterBase::printToStream(stream, level);

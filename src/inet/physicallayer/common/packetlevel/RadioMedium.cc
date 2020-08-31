@@ -153,18 +153,18 @@ void RadioMedium::finish()
     recordScalar("reception result cache hit", resultCacheHitPercentage, "%");
 }
 
-std::ostream& RadioMedium::printToStream(std::ostream &stream, int level) const
+std::ostream& RadioMedium::printToStream(std::ostream &stream, int level, int evFlags) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE) {
-        stream << EV_FIELD(propagation, printObjectToString(propagation, level + 1))
-               << EV_FIELD(pathLoss, printObjectToString(pathLoss, level + 1))
-               << EV_FIELD(analogModel, printObjectToString(analogModel, level + 1))
-               << EV_FIELD(obstacleLoss, printObjectToString(obstacleLoss, level + 1))
-               << EV_FIELD(backgroundNoise, printObjectToString(backgroundNoise, level + 1))
-               << EV_FIELD(mediumLimitCache, printObjectToString(mediumLimitCache, level + 1))
-               << EV_FIELD(neighborCache, printObjectToString(neighborCache, level + 1))
-               << EV_FIELD(communicationCache, printObjectToString(communicationCache, level + 1) );
+        stream << EV_FIELD(propagation, printFieldToString(propagation, level + 1, evFlags))
+               << EV_FIELD(pathLoss, printFieldToString(pathLoss, level + 1, evFlags))
+               << EV_FIELD(analogModel, printFieldToString(analogModel, level + 1, evFlags))
+               << EV_FIELD(obstacleLoss, printFieldToString(obstacleLoss, level + 1, evFlags))
+               << EV_FIELD(backgroundNoise, printFieldToString(backgroundNoise, level + 1, evFlags))
+               << EV_FIELD(mediumLimitCache, printFieldToString(mediumLimitCache, level + 1, evFlags))
+               << EV_FIELD(neighborCache, printFieldToString(neighborCache, level + 1, evFlags))
+               << EV_FIELD(communicationCache, printFieldToString(communicationCache, level + 1, evFlags));
     }
     return stream;
 }

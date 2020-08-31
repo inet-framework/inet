@@ -42,14 +42,14 @@ Ieee80211OfdmDecoder::Ieee80211OfdmDecoder(const Ieee80211OfdmCode *code) :
         deinterleaver = new Ieee80211OfdmInterleaver(code->getInterleaving());
 }
 
-std::ostream& Ieee80211OfdmDecoder::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmDecoder::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmDecoder";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(code, printObjectToString(code, level + 1))
-               << EV_FIELD(descrambler, printObjectToString(descrambler, level + 1))
-               << EV_FIELD(fecDecoder, printObjectToString(fecDecoder, level + 1))
-               << EV_FIELD(deinterleaver, printObjectToString(deinterleaver, level + 1));
+        stream << EV_FIELD(code, printFieldToString(code, level + 1, evFlags))
+               << EV_FIELD(descrambler, printFieldToString(descrambler, level + 1, evFlags))
+               << EV_FIELD(fecDecoder, printFieldToString(fecDecoder, level + 1, evFlags))
+               << EV_FIELD(deinterleaver, printFieldToString(deinterleaver, level + 1, evFlags));
     return stream;
 }
 

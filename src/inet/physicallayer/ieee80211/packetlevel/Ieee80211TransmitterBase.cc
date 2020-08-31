@@ -50,14 +50,14 @@ void Ieee80211TransmitterBase::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211TransmitterBase::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211TransmitterBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(modeSet, printObjectToString(modeSet, level + 1))
-               << EV_FIELD(band, printObjectToString(band, level + 1));
+        stream << EV_FIELD(modeSet, printFieldToString(modeSet, level + 1, evFlags))
+               << EV_FIELD(band, printFieldToString(band, level + 1, evFlags));
     if (level <= PRINT_LEVEL_INFO)
-        stream << EV_FIELD(mode, printObjectToString(mode, level + 1))
-               << EV_FIELD(channel, printObjectToString(channel, level + 1));
+        stream << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
+               << EV_FIELD(channel, printFieldToString(channel, level + 1, evFlags));
     return FlatTransmitterBase::printToStream(stream, level);
 }
 

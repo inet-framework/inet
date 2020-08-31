@@ -309,7 +309,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     RadioMedium();
     virtual ~RadioMedium();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override;
 
     virtual const physicalenvironment::IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }

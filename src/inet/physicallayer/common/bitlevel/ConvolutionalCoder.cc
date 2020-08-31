@@ -22,11 +22,11 @@
 namespace inet {
 namespace physicallayer {
 
-std::ostream& ConvolutionalCoder::printToStream(std::ostream& stream, int level) const
+std::ostream& ConvolutionalCoder::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ConvolutionalCoder";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(convolutionalCode, printObjectToString(convolutionalCode, level + 1));
+        stream << EV_FIELD(convolutionalCode, printFieldToString(convolutionalCode, level + 1, evFlags));
     return stream;
 }
 

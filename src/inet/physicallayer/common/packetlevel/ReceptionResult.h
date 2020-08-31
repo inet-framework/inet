@@ -35,7 +35,7 @@ class INET_API ReceptionResult : public IReceptionResult, public cObject
     ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *packet);
     virtual ~ReceptionResult();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IReception *getReception() const override { return reception; }
     virtual const std::vector<const IReceptionDecision *> *getDecisions() const override { return decisions; }

@@ -25,7 +25,7 @@ namespace physicallayer {
 
 Define_Module(ScalarAnalogModel);
 
-std::ostream& ScalarAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "ScalarAnalogModel";
 }

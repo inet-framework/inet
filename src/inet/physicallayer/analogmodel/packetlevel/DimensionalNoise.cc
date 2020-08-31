@@ -27,7 +27,7 @@ DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz ce
 {
 }
 
-std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level) const
+std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DimensionalNoise";
     if (level <= PRINT_LEVEL_DEBUG)

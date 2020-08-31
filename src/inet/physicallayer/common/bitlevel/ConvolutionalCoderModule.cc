@@ -36,7 +36,7 @@ void ConvolutionalCoderModule::initialize(int stage)
     }
 }
 
-std::ostream& ConvolutionalCoderModule::printToStream(std::ostream& stream, int level) const
+std::ostream& ConvolutionalCoderModule::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return convolutionalCoder->printToStream(stream, level);
 }

@@ -26,7 +26,7 @@ SignalAnalogModel::SignalAnalogModel(const simtime_t duration) :
 {
 }
 
-std::ostream& SignalAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& SignalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(duration);
@@ -40,7 +40,7 @@ NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duratio
 {
 }
 
-std::ostream& NarrowbandSignalAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& NarrowbandSignalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DEBUG)
        stream << EV_FIELD(centerFrequency);

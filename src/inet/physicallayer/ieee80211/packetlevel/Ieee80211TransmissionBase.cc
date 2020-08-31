@@ -27,11 +27,11 @@ Ieee80211TransmissionBase::Ieee80211TransmissionBase(const IIeee80211Mode *mode,
 {
 }
 
-std::ostream& Ieee80211TransmissionBase::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211TransmissionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(mode, printObjectToString(mode, level + 1))
-               << EV_FIELD(channel, printObjectToString(channel, level + 1));
+        stream << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
+               << EV_FIELD(channel, printFieldToString(channel, level + 1, evFlags));
     return stream;
 }
 

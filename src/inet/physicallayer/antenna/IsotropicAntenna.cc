@@ -28,7 +28,7 @@ IsotropicAntenna::IsotropicAntenna() :
 {
 }
 
-std::ostream& IsotropicAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& IsotropicAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "IsotropicAntenna";
     return AntennaBase::printToStream(stream, level);

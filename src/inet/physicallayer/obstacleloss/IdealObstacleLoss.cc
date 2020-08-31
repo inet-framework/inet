@@ -41,7 +41,7 @@ void IdealObstacleLoss::initialize(int stage)
     }
 }
 
-std::ostream& IdealObstacleLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& IdealObstacleLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "IdealObstacleLoss";
 }

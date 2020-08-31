@@ -34,7 +34,7 @@ SignalSymbolModel::~SignalSymbolModel()
     delete symbols;
 }
 
-std::ostream& SignalSymbolModel::printToStream(std::ostream& stream, int level) const
+std::ostream& SignalSymbolModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "SignalSymbolModel";
     if (level <= PRINT_LEVEL_TRACE)

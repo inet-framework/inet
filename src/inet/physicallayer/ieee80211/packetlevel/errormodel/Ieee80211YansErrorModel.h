@@ -72,7 +72,7 @@ class INET_API Ieee80211YansErrorModel : public Ieee80211ErrorModelBase
     virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const override;
 
   public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211YansErrorModel"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211YansErrorModel"; }
 };
 
 } // namespace physicallayer

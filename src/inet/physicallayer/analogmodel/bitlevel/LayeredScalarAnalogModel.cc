@@ -30,7 +30,7 @@ namespace physicallayer {
 
 Define_Module(LayeredScalarAnalogModel);
 
-std::ostream& LayeredScalarAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& LayeredScalarAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "LayeredScalarAnalogModel";
 }

@@ -42,7 +42,7 @@ void Ieee80211OfdmDecoderModule::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211OfdmDecoderModule::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmDecoderModule::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return ofdmDecoder->printToStream(stream, level);
 }

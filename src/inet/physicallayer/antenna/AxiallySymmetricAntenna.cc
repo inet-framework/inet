@@ -38,7 +38,7 @@ void AxiallySymmetricAntenna::initialize(int stage)
 }
 
 
-std::ostream& AxiallySymmetricAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& AxiallySymmetricAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "AxiallySymmetricAntenna";
     return AntennaBase::printToStream(stream, level);

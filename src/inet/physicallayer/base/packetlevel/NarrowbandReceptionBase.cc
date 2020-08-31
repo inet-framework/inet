@@ -28,7 +28,7 @@ NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const I
 {
 }
 
-std::ostream& NarrowbandReceptionBase::printToStream(std::ostream& stream, int level) const
+std::ostream& NarrowbandReceptionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(centerFrequency);

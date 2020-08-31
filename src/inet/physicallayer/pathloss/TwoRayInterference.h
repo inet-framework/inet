@@ -22,7 +22,7 @@ public:
     double computePathLoss(const ITransmission*, const IArrival*) const override;
     double computePathLoss(mps propagation, Hz frequency, m distance) const override;
     m computeRange(mps propagation, Hz frequency, double loss) const override;
-    std::ostream& printToStream(std::ostream&, int level) const override;
+    std::ostream& printToStream(std::ostream&, int level, int evFlags = 0) const override;
 
 protected:
     double epsilon_r;

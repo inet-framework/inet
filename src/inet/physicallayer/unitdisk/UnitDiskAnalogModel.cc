@@ -28,7 +28,7 @@ namespace physicallayer {
 
 Define_Module(UnitDiskAnalogModel);
 
-std::ostream& UnitDiskAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "UnitDiskAnalogModel";
 }

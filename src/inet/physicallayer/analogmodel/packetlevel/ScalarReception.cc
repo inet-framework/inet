@@ -27,7 +27,7 @@ ScalarReception::ScalarReception(const IRadio *radio, const ITransmission *trans
 {
 }
 
-std::ostream& ScalarReception::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarReception::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ScalarReception";
     if (level <= PRINT_LEVEL_DETAIL)

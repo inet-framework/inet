@@ -33,7 +33,7 @@ class INET_API ScalarNoise : public NarrowbandNoiseBase
     ScalarNoise(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges);
     virtual ~ScalarNoise() { delete powerChanges; }
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
 
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;

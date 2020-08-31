@@ -26,7 +26,7 @@ SignalPacketModel::SignalPacketModel(const Packet *packet, bps bitrate) :
 {
 }
 
-std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level) const
+std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "SignalPacketModel";
     if (level <= PRINT_LEVEL_TRACE)

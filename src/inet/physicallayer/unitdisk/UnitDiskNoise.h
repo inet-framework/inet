@@ -32,7 +32,7 @@ class INET_API UnitDiskNoise : public NoiseBase
   public:
     UnitDiskNoise(simtime_t startTime, simtime_t endTime, bool isInterfering);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual bool isInterfering() const { return isInterfering_; }
 };

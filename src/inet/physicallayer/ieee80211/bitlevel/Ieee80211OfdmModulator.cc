@@ -46,11 +46,11 @@ Ieee80211OfdmModulator::Ieee80211OfdmModulator(const Ieee80211OfdmModulation *su
 {
 }
 
-std::ostream& Ieee80211OfdmModulator::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmModulator::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmModulator";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(subcarrierModulation, printObjectToString(subcarrierModulation, level + 1));
+        stream << EV_FIELD(subcarrierModulation, printFieldToString(subcarrierModulation, level + 1, evFlags));
     return stream;
 }
 

@@ -37,7 +37,7 @@ void Ieee802154NarrowbandDimensionalReceiver::initialize(int stage)
     }
 }
 
-std::ostream& Ieee802154NarrowbandDimensionalReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154NarrowbandDimensionalReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee802154NarrowbandDimensionalReceiver";
     return FlatReceiverBase::printToStream(stream, level);

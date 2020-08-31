@@ -36,7 +36,7 @@ ReceptionBase::ReceptionBase(const IRadio *receiver, const ITransmission *transm
 {
 }
 
-std::ostream& ReceptionBase::printToStream(std::ostream& stream, int level) const
+std::ostream& ReceptionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(transmissionId, transmission->getId());

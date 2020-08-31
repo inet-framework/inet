@@ -36,7 +36,7 @@ void InterpolatingAntenna::initialize(int stage)
     }
 }
 
-std::ostream& InterpolatingAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& InterpolatingAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "InterpolatingAntenna";
     if (level <= PRINT_LEVEL_DETAIL)

@@ -91,13 +91,13 @@ void Radio::initializeRadioMode() {
         throw cRuntimeError("Unknown initialRadioMode");
 }
 
-std::ostream& Radio::printToStream(std::ostream& stream, int level) const
+std::ostream& Radio::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(antenna, printObjectToString(antenna, level + 1))
-               << EV_FIELD(transmitter, printObjectToString(transmitter, level + 1))
-               << EV_FIELD(receiver, printObjectToString(receiver, level + 1));
+        stream << EV_FIELD(antenna, printFieldToString(antenna, level + 1, evFlags))
+               << EV_FIELD(transmitter, printFieldToString(transmitter, level + 1, evFlags))
+               << EV_FIELD(receiver, printFieldToString(receiver, level + 1, evFlags));
     return stream;
 }
 

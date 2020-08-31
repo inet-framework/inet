@@ -36,7 +36,7 @@ void LogNormalShadowing::initialize(int stage)
     }
 }
 
-std::ostream& LogNormalShadowing::printToStream(std::ostream& stream, int level) const
+std::ostream& LogNormalShadowing::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LogNormalShadowing";
     if (level <= PRINT_LEVEL_TRACE)

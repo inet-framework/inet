@@ -40,7 +40,7 @@ TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *pack
 {
 }
 
-std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level) const
+std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(id);

@@ -27,7 +27,7 @@ ScalarTransmission::ScalarTransmission(const IRadio *transmitter, const Packet *
 {
 }
 
-std::ostream& ScalarTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ScalarTransmission";
     if (level <= PRINT_LEVEL_DETAIL)

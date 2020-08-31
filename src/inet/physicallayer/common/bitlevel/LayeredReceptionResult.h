@@ -42,7 +42,7 @@ class INET_API LayeredReceptionResult : public ReceptionResult
     LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel);
     virtual ~LayeredReceptionResult();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IReceptionPacketModel *getPacketModel() const { return packetModel; }
     virtual const IReceptionBitModel *getBitModel() const { return bitModel; }

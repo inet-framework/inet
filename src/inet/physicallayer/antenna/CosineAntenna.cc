@@ -38,7 +38,7 @@ void CosineAntenna::initialize(int stage)
     }
 }
 
-std::ostream& CosineAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& CosineAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "CosineAntenna";
     if (level <= PRINT_LEVEL_DETAIL)

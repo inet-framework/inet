@@ -32,7 +32,7 @@ class INET_API DqpskModulation : public DpskModulationBase
   public:
     DqpskModulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "DqpskModulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "DqpskModulation"; }
 };
 
 } // namespace physicallayer

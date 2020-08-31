@@ -18,12 +18,12 @@
 #ifndef __INET_SIGNAL_H
 #define __INET_SIGNAL_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API Signal : public cPacket
+class INET_API Signal : public cPacket, public IPrintableObject
 {
   public:
     explicit Signal(const char *name=nullptr, short kind=0, int64_t bitLength=0);
@@ -31,18 +31,10 @@ class INET_API Signal : public cPacket
 
     virtual Signal *dup() const override { return new Signal(*this); }
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+
     virtual std::string str() const override;
 };
-
-inline std::ostream& operator<<(std::ostream& os, const Signal *signal) {
-    if (!signal)
-        return os << "(Signal)\x1b[3m<nullptr>\x1b[0m";
-    return os << signal->str();
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Signal& signal) {
-    return os << signal.str();
-}
 
 } // namespace physicallayer
 } // namespace inet

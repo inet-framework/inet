@@ -32,14 +32,14 @@ namespace inet {
 
 namespace physicallayer {
 
-std::ostream& Ieee80211OfdmEncoder::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmEncoder::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmEncoder";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(convolutionalCoder, printObjectToString(convolutionalCoder, level + 1))
-               << EV_FIELD(interleaver, printObjectToString(interleaver, level + 1))
-               << EV_FIELD(scrambler, printObjectToString(scrambler, level + 1))
-               << EV_FIELD(code, printObjectToString(code, level + 1));
+        stream << EV_FIELD(convolutionalCoder, printFieldToString(convolutionalCoder, level + 1, evFlags))
+               << EV_FIELD(interleaver, printFieldToString(interleaver, level + 1, evFlags))
+               << EV_FIELD(scrambler, printFieldToString(scrambler, level + 1, evFlags))
+               << EV_FIELD(code, printFieldToString(code, level + 1, evFlags));
     return stream;
 }
 

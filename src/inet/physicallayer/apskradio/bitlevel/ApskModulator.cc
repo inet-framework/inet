@@ -38,11 +38,11 @@ void ApskModulator::initialize(int stage)
         modulation = ApskModulationBase::findModulation(par("modulation"));
 }
 
-std::ostream& ApskModulator::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskModulator::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskModulator";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(modulation, printObjectToString(modulation, level + 1));
+        stream << EV_FIELD(modulation, printFieldToString(modulation, level + 1, evFlags));
     return stream;
 }
 

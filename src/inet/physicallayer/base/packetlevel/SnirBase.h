@@ -35,7 +35,7 @@ class INET_API SnirBase : public virtual ISnir
   public:
     SnirBase(const IReception *reception, const INoise *noise);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const IReception *getReception() const override { return reception; }
     virtual const INoise *getNoise() const override { return noise; }
 };

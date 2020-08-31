@@ -94,7 +94,7 @@ void MediumLimitCache::initialize(int stage)
     }
 }
 
-std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level) const
+std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level, int evFlags) const
 {
     stream << "RadioMediumLimits";
     if (level <= PRINT_LEVEL_TRACE)

@@ -29,7 +29,7 @@ DimensionalSnir::DimensionalSnir(const DimensionalReception *reception, const Di
 {
 }
 
-std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level) const
+std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DimensionalSnir";
     if (level <= PRINT_LEVEL_DETAIL)

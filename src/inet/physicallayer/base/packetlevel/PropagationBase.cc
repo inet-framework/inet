@@ -33,7 +33,7 @@ void PropagationBase::initialize(int stage)
         propagationSpeed = mps(par("propagationSpeed"));
 }
 
-std::ostream& PropagationBase::printToStream(std::ostream& stream, int level) const
+std::ostream& PropagationBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(propagationSpeed);

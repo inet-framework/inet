@@ -41,7 +41,7 @@ void Ieee802154UwbIrReceiver::initialize(int stage)
     }
 }
 
-std::ostream& Ieee802154UwbIrReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154UwbIrReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee802154UwbIrReceiver";
 }

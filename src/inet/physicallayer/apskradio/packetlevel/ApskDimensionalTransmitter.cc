@@ -39,7 +39,7 @@ void ApskDimensionalTransmitter::initialize(int stage)
     DimensionalTransmitterBase::initialize(stage);
 }
 
-std::ostream& ApskDimensionalTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDimensionalTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskDimensionalTransmitter";
     FlatTransmitterBase::printToStream(stream, level);

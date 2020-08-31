@@ -42,7 +42,7 @@ MpskModulation::~MpskModulation()
     delete constellation;
 }
 
-std::ostream& MpskModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MpskModulation::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "MPSKModulaiton";
     return ApskModulationBase::printToStream(stream, level);

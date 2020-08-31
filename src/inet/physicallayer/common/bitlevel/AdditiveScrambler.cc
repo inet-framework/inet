@@ -21,11 +21,11 @@
 namespace inet {
 namespace physicallayer {
 
-std::ostream& AdditiveScrambler::printToStream(std::ostream& stream, int level) const
+std::ostream& AdditiveScrambler::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "AdditiveScrambler";
     if (level <= PRINT_LEVEL_TRACE)
-        stream<< EV_FIELD(scrambling, printObjectToString(scrambling, level + 1));
+        stream<< EV_FIELD(scrambling, printFieldToString(scrambling, level + 1, evFlags));
     return stream;
 }
 

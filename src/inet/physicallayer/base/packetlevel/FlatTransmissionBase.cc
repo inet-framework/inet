@@ -29,7 +29,7 @@ FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const Pack
 {
 }
 
-std::ostream& FlatTransmissionBase::printToStream(std::ostream& stream, int level) const
+std::ostream& FlatTransmissionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(bitrate);

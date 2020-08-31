@@ -59,7 +59,7 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
     virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const override;
 
   public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211NistErrorModel"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211NistErrorModel"; }
 };
 
 } // namespace physicallayer

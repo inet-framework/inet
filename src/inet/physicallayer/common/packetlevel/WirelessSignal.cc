@@ -37,7 +37,7 @@ WirelessSignal::WirelessSignal(const WirelessSignal& other) :
 {
 }
 
-std::ostream& WirelessSignal::printToStream(std::ostream& stream, int level) const
+std::ostream& WirelessSignal::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << (cPacket *)this;
 }

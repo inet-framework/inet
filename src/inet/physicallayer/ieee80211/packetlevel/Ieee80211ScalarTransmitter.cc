@@ -34,7 +34,7 @@ Ieee80211ScalarTransmitter::Ieee80211ScalarTransmitter() :
 {
 }
 
-std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211ScalarTransmitter";
     return Ieee80211TransmitterBase::printToStream(stream, level);

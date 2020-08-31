@@ -21,11 +21,11 @@ namespace inet {
 
 namespace physicallayer {
 
-std::ostream& Ieee80211OfdmInterleaver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmInterleaver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211Interleaver";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(interleaving, printObjectToString(interleaving, level + 1));
+        stream << EV_FIELD(interleaving, printFieldToString(interleaving, level + 1, evFlags));
     return stream;
 }
 

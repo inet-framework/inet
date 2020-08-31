@@ -30,7 +30,7 @@ using namespace inet::units::values;
 class INET_API IIeee80211Band : public cObject, public IPrintableObject
 {
   public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211Band, name = " << getName(); }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211Band, name = " << getName(); }
     virtual const char *getName() const override = 0;
     virtual int getNumChannels() const = 0;
     virtual Hz getCenterFrequency(int channelNumber) const = 0;

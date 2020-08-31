@@ -29,7 +29,7 @@ class INET_API UnitDiskSnir : public SnirBase
   public:
     UnitDiskSnir(const IReception *reception, const INoise *noise);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual double getMin() const override;
     virtual double getMax() const override;

@@ -28,7 +28,7 @@ NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime,
 {
 }
 
-std::ostream& NarrowbandNoiseBase::printToStream(std::ostream& stream, int level) const
+std::ostream& NarrowbandNoiseBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(centerFrequency)

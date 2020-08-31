@@ -97,7 +97,7 @@ class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
     const Hz getBandwidth() const { return mode->getDataMode()->getBandwidth(); }
     const Hz getCenterFrequency() const { return centerFrequency; }
     const Hz getCarrierSpacing() const { return mode->getChannelSpacing(); }
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 } // namespace physicallayer

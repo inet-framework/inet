@@ -39,15 +39,15 @@ LayeredTransmission::~LayeredTransmission()
     delete analogModel;
 }
 
-std::ostream& LayeredTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& LayeredTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LayeredTransmission";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(packetModel, printObjectToString(packetModel, level + 1))
-               << EV_FIELD(bitModel, printObjectToString(bitModel, level + 1))
-               << EV_FIELD(symbolModel, printObjectToString(symbolModel, level + 1))
-               << EV_FIELD(sampleModel, printObjectToString(sampleModel, level + 1))
-               << EV_FIELD(analogModel, printObjectToString(analogModel, level + 1));
+        stream << EV_FIELD(packetModel, printFieldToString(packetModel, level + 1, evFlags))
+               << EV_FIELD(bitModel, printFieldToString(bitModel, level + 1, evFlags))
+               << EV_FIELD(symbolModel, printFieldToString(symbolModel, level + 1, evFlags))
+               << EV_FIELD(sampleModel, printFieldToString(sampleModel, level + 1, evFlags))
+               << EV_FIELD(analogModel, printFieldToString(analogModel, level + 1, evFlags));
     return TransmissionBase::printToStream(stream, level);
 }
 

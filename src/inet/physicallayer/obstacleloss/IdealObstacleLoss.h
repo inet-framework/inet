@@ -64,7 +64,7 @@ class INET_API IdealObstacleLoss : public TracingObstacleLossBase
 
   public:
     IdealObstacleLoss();
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const override;
 };
 

@@ -27,7 +27,7 @@ NoiseBase::NoiseBase(simtime_t startTime, simtime_t endTime) :
 {
 }
 
-std::ostream& NoiseBase::printToStream(std::ostream& stream, int level) const
+std::ostream& NoiseBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(startTime)

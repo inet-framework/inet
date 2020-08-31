@@ -34,7 +34,7 @@ class INET_API Ieee80211TransmissionBase : public IPrintableObject
   public:
     Ieee80211TransmissionBase(const IIeee80211Mode *mode, const Ieee80211Channel *channel);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IIeee80211Mode *getMode() const { return mode; }
     virtual const Ieee80211Channel *getChannel() const { return channel; }

@@ -33,7 +33,7 @@ ApskScalarTransmitter::ApskScalarTransmitter() :
 {
 }
 
-std::ostream& ApskScalarTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskScalarTransmitter";
     return FlatTransmitterBase::printToStream(stream, level);

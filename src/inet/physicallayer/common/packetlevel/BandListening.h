@@ -35,7 +35,7 @@ class INET_API BandListening : public ListeningBase
   public:
     BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz centerFrequency, Hz bandwidth);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual Hz getCenterFrequency() const { return centerFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }

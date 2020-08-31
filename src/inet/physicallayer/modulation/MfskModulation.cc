@@ -26,7 +26,7 @@ MfskModulation::MfskModulation(unsigned int codeWordSize) :
 {
 }
 
-std::ostream& MfskModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MfskModulation::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "MFSKModulaiton";
 }

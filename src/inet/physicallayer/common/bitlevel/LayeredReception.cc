@@ -31,11 +31,11 @@ LayeredReception::~LayeredReception()
     delete analogModel;
 }
 
-std::ostream& LayeredReception::printToStream(std::ostream& stream, int level) const
+std::ostream& LayeredReception::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LayeredReception";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(analogModel, printObjectToString(analogModel, level + 1));
+        stream << EV_FIELD(analogModel, printFieldToString(analogModel, level + 1, evFlags));
     return ReceptionBase::printToStream(stream, level);
 
 }

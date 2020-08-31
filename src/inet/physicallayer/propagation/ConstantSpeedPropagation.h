@@ -38,7 +38,7 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
   public:
     ConstantSpeedPropagation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const override;
 };
 

@@ -77,17 +77,17 @@ void ApskLayeredTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskLayeredTransmitter";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(levelOfDetail)
                << EV_FIELD(centerFrequency);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(encoder, printObjectToString(encoder, level + 1))
-               << EV_FIELD(modulator, printObjectToString(modulator, level + 1))
-               << EV_FIELD(pulseShaper, printObjectToString(pulseShaper, level + 1))
-               << EV_FIELD(digitalAnalogConverter, printObjectToString(digitalAnalogConverter, level + 1))
+        stream << EV_FIELD(encoder, printFieldToString(encoder, level + 1, evFlags))
+               << EV_FIELD(modulator, printFieldToString(modulator, level + 1, evFlags))
+               << EV_FIELD(pulseShaper, printFieldToString(pulseShaper, level + 1, evFlags))
+               << EV_FIELD(digitalAnalogConverter, printFieldToString(digitalAnalogConverter, level + 1, evFlags))
                << EV_FIELD(power)
                << EV_FIELD(bitrate)
                << EV_FIELD(bandwidth);

@@ -41,7 +41,7 @@ MaskModulation::~MaskModulation()
     delete constellation;
 }
 
-std::ostream& MaskModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MaskModulation::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "MASKModulaiton";
     return ApskModulationBase::printToStream(stream, level);

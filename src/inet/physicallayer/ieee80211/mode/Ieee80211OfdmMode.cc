@@ -146,17 +146,17 @@ const simtime_t Ieee80211OfdmMode::getRxTxTurnaroundTime() const
     return -1;
 }
 
-std::ostream& Ieee80211OfdmPreambleMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmPreambleMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee80211OfdmPreambleMode";
 }
 
-std::ostream& Ieee80211OfdmSignalMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmSignalMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee80211OfdmSignalMode";
 }
 
-std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmDataMode";
     if (level <= PRINT_LEVEL_DETAIL)
@@ -164,14 +164,14 @@ std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int lev
     return stream;
 }
 
-std::ostream& Ieee80211OfdmMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmMode";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << EV_FIELD(preambleMode, printObjectToString(preambleMode, level + 1))
-               << EV_FIELD(signalMode, printObjectToString(signalMode, level + 1));
+        stream << EV_FIELD(preambleMode, printFieldToString(preambleMode, level + 1, evFlags))
+               << EV_FIELD(signalMode, printFieldToString(signalMode, level + 1, evFlags));
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(dataMode, printObjectToString(dataMode, level + 1));
+        stream << EV_FIELD(dataMode, printFieldToString(dataMode, level + 1, evFlags));
     return stream;
 }
 

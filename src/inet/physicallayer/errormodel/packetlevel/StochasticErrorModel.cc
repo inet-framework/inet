@@ -40,7 +40,7 @@ void StochasticErrorModel::initialize(int stage)
     }
 }
 
-std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << "StochasticErrorModel"

@@ -33,7 +33,7 @@ ApskScalarReceiver::ApskScalarReceiver() :
 {
 }
 
-std::ostream& ApskScalarReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskScalarReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskScalarReceiver";
     return FlatReceiverBase::printToStream(stream, level);

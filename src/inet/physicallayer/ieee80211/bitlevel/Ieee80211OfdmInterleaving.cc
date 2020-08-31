@@ -27,7 +27,7 @@ Ieee80211OfdmInterleaving::Ieee80211OfdmInterleaving(int numberOfCodedBitsPerSym
 {
 }
 
-std::ostream& Ieee80211OfdmInterleaving::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmInterleaving::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmInterleaving";
     if (level <= PRINT_LEVEL_TRACE)

@@ -34,7 +34,7 @@ void TwoRayGroundReflection::initialize(int stage)
     }
 }
 
-std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int level) const
+std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "TwoRayGroundReflection";
     if (level <= PRINT_LEVEL_TRACE)

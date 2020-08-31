@@ -40,7 +40,7 @@ class INET_API QpskModulation : public MqamModulationBase
   public:
     QpskModulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "QpskModulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "QpskModulation"; }
 };
 
 } // namespace physicallayer

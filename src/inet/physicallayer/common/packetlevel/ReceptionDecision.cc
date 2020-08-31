@@ -29,7 +29,7 @@ ReceptionDecision::ReceptionDecision(const IReception *reception, IRadioSignal::
 {
 }
 
-std::ostream& ReceptionDecision::printToStream(std::ostream& stream, int level) const
+std::ostream& ReceptionDecision::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ReceptionDecision";
     if (level <= PRINT_LEVEL_DETAIL)

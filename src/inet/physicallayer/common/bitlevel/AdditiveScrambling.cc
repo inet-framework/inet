@@ -26,7 +26,7 @@ AdditiveScrambling::AdditiveScrambling(const ShortBitVector& seed, const ShortBi
 {
 }
 
-std::ostream& AdditiveScrambling::printToStream(std::ostream& stream, int level) const
+std::ostream& AdditiveScrambling::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "AdditiveScrambling";
     if (level <= PRINT_LEVEL_TRACE)

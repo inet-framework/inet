@@ -30,7 +30,7 @@ Ieee80211DimensionalReceiver::Ieee80211DimensionalReceiver() :
 {
 }
 
-std::ostream& Ieee80211DimensionalReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211DimensionalReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211DimensionalReceiver";
     return Ieee80211ReceiverBase::printToStream(stream, level);

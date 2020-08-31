@@ -49,7 +49,7 @@ const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *tra
     return new Arrival(propagationTime, propagationTime, startTime + propagationTime, endTime + propagationTime, preambleDuration, headerDuration, dataDuration, position, position, orientation, orientation);
 }
 
-std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int level) const
+std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ConstantTimePropagation";
     if (level <= PRINT_LEVEL_TRACE)

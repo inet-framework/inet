@@ -38,7 +38,7 @@ void NoiseDimensionalTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& NoiseDimensionalTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& NoiseDimensionalTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "NoiseDimensionalTransmitter";
     TransmitterBase::printToStream(stream, level);

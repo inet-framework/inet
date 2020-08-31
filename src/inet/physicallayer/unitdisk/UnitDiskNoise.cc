@@ -27,7 +27,7 @@ UnitDiskNoise::UnitDiskNoise(simtime_t startTime, simtime_t endTime, bool isInte
 {
 }
 
-std::ostream& UnitDiskNoise::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskNoise::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskNoise";
     return NoiseBase::printToStream(stream, level);

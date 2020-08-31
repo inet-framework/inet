@@ -25,7 +25,7 @@ namespace physicallayer {
 
 Define_Module(ApskErrorModel);
 
-std::ostream& ApskErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskErrorModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "ApskErrorModel";
 }

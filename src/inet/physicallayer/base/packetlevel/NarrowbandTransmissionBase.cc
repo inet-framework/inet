@@ -29,13 +29,13 @@ NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter
 {
 }
 
-std::ostream& NarrowbandTransmissionBase::printToStream(std::ostream& stream, int level) const
+std::ostream& NarrowbandTransmissionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(centerFrequency);
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(bandwidth)
-               << EV_FIELD(modulation, printObjectToString(modulation, level + 1) );
+               << EV_FIELD(modulation, printFieldToString(modulation, level + 1, evFlags));
     return TransmissionBase::printToStream(stream, level);
 }
 

@@ -33,7 +33,7 @@ class INET_API AdditiveScrambling : public IScrambling
   public:
     AdditiveScrambling(const ShortBitVector& seed, const ShortBitVector& generatorPolynomial);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     const ShortBitVector& getGeneratorPolynomial() const { return generatorPolynomial; }
     const ShortBitVector& getSeed() const { return seed; }

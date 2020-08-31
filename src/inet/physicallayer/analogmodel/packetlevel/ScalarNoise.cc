@@ -27,11 +27,11 @@ ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz centerFreque
 {
 }
 
-std::ostream& ScalarNoise::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarNoise::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ScalarNoise";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(powerChanges, powerChanges);
+        stream << EV_FIELD(powerChanges);
     return NarrowbandNoiseBase::printToStream(stream, level);
 }
 

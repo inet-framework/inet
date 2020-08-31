@@ -32,7 +32,7 @@ class INET_API _4GfskModulation : public GfskModulationBase
   public:
     _4GfskModulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "4GfskModulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "4GfskModulation"; }
 };
 
 } // namespace physicallayer

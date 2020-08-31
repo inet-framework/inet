@@ -39,10 +39,10 @@ void NarrowbandTransmitterBase::initialize(int stage)
     }
 }
 
-std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int level) const
+std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(modulation, printObjectToString(modulation, level + 1))
+        stream << EV_FIELD(modulation, printFieldToString(modulation, level + 1, evFlags))
                << EV_FIELD(centerFrequency)
                << EV_FIELD(bandwidth);
     return stream;

@@ -36,7 +36,7 @@ class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFecCoder
   public:
     ~ConvolutionalCoderModule();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual BitVector encode(const BitVector& informationBits) const override { return convolutionalCoder->encode(informationBits); }
     virtual std::pair<BitVector, bool> decode(const BitVector& encodedBits) const override { return convolutionalCoder->decode(encodedBits); }
     virtual const ConvolutionalCode *getForwardErrorCorrection() const override { return convolutionalCoder->getForwardErrorCorrection(); }

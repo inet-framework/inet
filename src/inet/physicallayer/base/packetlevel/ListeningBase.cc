@@ -31,7 +31,7 @@ ListeningBase::ListeningBase(const IRadio *receiver, simtime_t startTime, simtim
 {
 }
 
-std::ostream& ListeningBase::printToStream(std::ostream& stream, int level) const
+std::ostream& ListeningBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(receiverId, receiver->getId())

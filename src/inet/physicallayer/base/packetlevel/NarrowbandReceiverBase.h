@@ -39,7 +39,7 @@ class INET_API NarrowbandReceiverBase : public SnirReceiverBase
   public:
     NarrowbandReceiverBase();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const override;
 

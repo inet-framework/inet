@@ -70,7 +70,7 @@ class INET_API ApskLayeredReceiver : public SnirReceiverBase
   public:
     ApskLayeredReceiver();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const IDecoder *getDecoder() const { return decoder; }
     virtual const IDemodulator *getModulator() const { return demodulator; }
     virtual const IPulseFilter *getPulseFilter() const { return pulseFilter; }

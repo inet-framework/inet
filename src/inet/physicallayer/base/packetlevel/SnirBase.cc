@@ -27,11 +27,11 @@ SnirBase::SnirBase(const IReception *reception, const INoise *noise) :
 {
 }
 
-std::ostream& SnirBase::printToStream(std::ostream& stream, int level) const
+std::ostream& SnirBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(reception, printObjectToString(reception, level + 1))
-               << EV_FIELD(noise, printObjectToString(noise, level + 1) );
+        stream << EV_FIELD(reception, printFieldToString(reception, level + 1, evFlags))
+               << EV_FIELD(noise, printFieldToString(noise, level + 1, evFlags));
     return stream;
 }
 

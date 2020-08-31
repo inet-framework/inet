@@ -43,7 +43,7 @@ class INET_API Ieee80211OfdmInterleaver : public IInterleaver
   public:
     Ieee80211OfdmInterleaver(const Ieee80211OfdmInterleaving *interleaving);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     BitVector interleave(const BitVector& bits) const override;
     BitVector deinterleave(const BitVector& bits) const override;
     int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
