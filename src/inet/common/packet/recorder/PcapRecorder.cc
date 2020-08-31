@@ -179,7 +179,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cComponent *source)
 {
     if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
-        EV_DEBUG << "Recording packet" << EV_FIELD(packet, *packet) << EV_FIELD(direction, direction) << EV_ENDL;
+        EV_INFO << "Recording packet" << EV_FIELD(source, source->getFullPath()) << EV_FIELD(direction, direction) << EV_FIELD(packet, *packet) << EV_ENDL;
         if (verbose)
             EV_DEBUG << "Dumping packet" << EV_FIELD(packet, packetPrinter.printPacketToString(const_cast<Packet *>(packet), "%i")) << EV_ENDL;
         if (recordPcap && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {

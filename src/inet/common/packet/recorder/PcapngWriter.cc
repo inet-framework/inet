@@ -123,7 +123,7 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen)
 
 void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkType linkType)
 {
-    EV_INFO << "Writing packet" << EV_FIELD(networkInterface, *networkInterface) << EV_FIELD(fileName) << EV_ENDL;
+    EV_INFO << "Writing interface to file" << EV_FIELD(fileName) << EV_FIELD(networkInterface, *networkInterface) << EV_ENDL;
     if (!dumpfile)
         throw cRuntimeError("Cannot write interface: pcap output file is not open");
 
@@ -193,7 +193,7 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
 
 void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, NetworkInterface *networkInterface, PcapLinkType linkType)
 {
-    EV_INFO << "Writing packet" << EV_FIELD(packet, *packet) << EV_FIELD(fileName) << EV_ENDL;
+    EV_INFO << "Writing packet to file" << EV_FIELD(fileName) << EV_FIELD(packet, *packet) << EV_ENDL;
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
