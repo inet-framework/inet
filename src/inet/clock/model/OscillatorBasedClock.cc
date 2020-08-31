@@ -42,6 +42,12 @@ static int64_t roundNone(int64_t t, int64_t l)
     return t / l;
 }
 
+OscillatorBasedClock::~OscillatorBasedClock()
+{
+    for (auto event : events)
+        event->setClock(nullptr);
+}
+
 void OscillatorBasedClock::initialize(int stage)
 {
     ClockBase::initialize(stage);

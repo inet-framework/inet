@@ -34,6 +34,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual void initialize(int stage) override;
 
   public:
+    virtual ~OscillatorBasedClock();
+
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t t) const override;
 
