@@ -917,10 +917,8 @@ bool TcpConnection::sendData(uint32 congestionWindow)
         bool unacknowledgedData = (state->snd_una != state->snd_max);
         if (state->nagle_enabled && unacknowledgedData)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
-        else if (bytesToSend == sendQueue->getBytesAvailable(state->snd_nxt)) // last segment?
-            sendSegment(bytesToSend);
         else
-            EV_DETAIL << bytesToSend << " bytes of space left in effectiveWindow\n";
+            sendSegment(bytesToSend);
     }
 
     if (old_snd_nxt == state->snd_nxt)
