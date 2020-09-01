@@ -416,6 +416,10 @@ void EigrpDeviceConfigurator::loadEigrpInterfacesConfig(cXMLElement *device, IEi
             throw cRuntimeError("No interface called %s on this device", ifaceName);
         }
         int ifaceId = iface->getInterfaceId();
+
+        loadEigrpInterfaceParams(ifaceElem, eigrpModule, ifaceId, ifaceName);
+
+
         // Get EIGRP configuration for interface
         eigrpIfaceElem = ifaceElem->getFirstChildWithTag("EIGRP-IPv4");
 
@@ -434,6 +438,48 @@ void EigrpDeviceConfigurator::loadEigrpInterfacesConfig(cXMLElement *device, IEi
             loadEigrpInterface(eigrpIfaceElem, eigrpModule, ifaceId, ifaceName);
         }
         ifaceElem = GetInterface(ifaceElem, NULL);
+    }
+}
+
+void EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, IEigrpModule<Ipv4Address> *eigrpModule, int ifaceId, const char *ifaceName)
+{
+    int tempNumber;
+    bool tempBool, success;
+
+    cXMLElementList ifDetails = eigrpIface->getChildren();
+    for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++)
+    {
+        std::string nodeName = (*ifElemIt)->getTagName();
+
+        if (nodeName == "Delay")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 0 || tempNumber > 16777215)
+                throw cRuntimeError("Bad value for EIGRP Delay on interface %s", ifaceName);
+            eigrpModule->setDelay(tempNumber, ifaceId);
+        }
+        else if (nodeName == "Bandwidth")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 0 || tempNumber > 10000000)
+                throw cRuntimeError("Bad value for EIGRP Bandwidth on interface %s", ifaceName);
+            eigrpModule->setBandwidth(tempNumber, ifaceId);
+        }
+        else if (nodeName == "Reliability")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 1 || tempNumber > 255)
+                throw cRuntimeError("Bad value for EIGRP Reliability on interface %s", ifaceName);
+            eigrpModule->setReliability(tempNumber, ifaceId);
+        }
+        else if (nodeName == "Load")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 1 || tempNumber > 255)
+                throw cRuntimeError("Bad value for EIGRP Load on interface %s", ifaceName);
+            eigrpModule->setLoad(tempNumber, ifaceId);
+        }
+
     }
 }
 
@@ -466,34 +512,6 @@ void EigrpDeviceConfigurator::loadEigrpInterface(cXMLElement *eigrpIface, IEigrp
             if (!Str2Bool(&tempBool, (*ifElemIt)->getNodeValue()))
                 throw cRuntimeError("Bad value for EIGRP Split Horizon on interface %s", ifaceName);
             eigrpModule->setSplitHorizon(tempBool, ifaceId);
-        }
-        else if (nodeName == "Delay")
-        {
-            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
-            if (!success || tempNumber < 0 || tempNumber > 16777215)
-                throw cRuntimeError("Bad value for EIGRP Delay on interface %s", ifaceName);
-            eigrpModule->setDelay(tempNumber, ifaceId);
-        }
-        else if (nodeName == "Bandwidth")
-        {
-            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
-            if (!success || tempNumber < 0 || tempNumber > 10000000)
-                throw cRuntimeError("Bad value for EIGRP Bandwidth on interface %s", ifaceName);
-            eigrpModule->setBandwidth(tempNumber, ifaceId);
-        }
-        else if (nodeName == "Reliability")
-        {
-            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
-            if (!success || tempNumber < 1 || tempNumber > 255)
-                throw cRuntimeError("Bad value for EIGRP Reliability on interface %s", ifaceName);
-            eigrpModule->setReliability(tempNumber, ifaceId);
-        }
-        else if (nodeName == "Load")
-        {
-            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
-            if (!success || tempNumber < 1 || tempNumber > 255)
-                throw cRuntimeError("Bad value for EIGRP Load on interface %s", ifaceName);
-            eigrpModule->setLoad(tempNumber, ifaceId);
         }
 
     }
@@ -667,6 +685,9 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
 
 
         int ifaceId = iface->getInterfaceId();
+
+        loadEigrpInterfaceParams6(ifaceElem, eigrpModule, ifaceId, ifaceName);
+
         // Get EIGRP configuration for interface
         eigrpIfaceElem = ifaceElem->getFirstChildWithTag("EIGRP-IPv6");
 
@@ -692,6 +713,48 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
         }
 
         ifaceElem = GetInterface(ifaceElem, NULL);
+    }
+}
+
+void EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface, IEigrpModule<Ipv6Address> *eigrpModule, int ifaceId, const char *ifaceName)
+{
+    int tempNumber;
+    bool tempBool, success;
+
+    cXMLElementList ifDetails = eigrpIface->getChildren();
+    for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++)
+    {
+        std::string nodeName = (*ifElemIt)->getTagName();
+
+        if (nodeName == "Delay")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 0 || tempNumber > 16777215)
+                throw cRuntimeError("Bad value for EIGRP Delay on interface %s", ifaceName);
+            eigrpModule->setDelay(tempNumber, ifaceId);
+        }
+        else if (nodeName == "Bandwidth")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 0 || tempNumber > 10000000)
+                throw cRuntimeError("Bad value for EIGRP Bandwidth on interface %s", ifaceName);
+            eigrpModule->setBandwidth(tempNumber, ifaceId);
+        }
+        else if (nodeName == "Reliability")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 1 || tempNumber > 255)
+                throw cRuntimeError("Bad value for EIGRP Reliability on interface %s", ifaceName);
+            eigrpModule->setReliability(tempNumber, ifaceId);
+        }
+        else if (nodeName == "Load")
+        {
+            success = Str2Int(&tempNumber, (*ifElemIt)->getNodeValue());
+            if (!success || tempNumber < 1 || tempNumber > 255)
+                throw cRuntimeError("Bad value for EIGRP Load on interface %s", ifaceName);
+            eigrpModule->setLoad(tempNumber, ifaceId);
+        }
+
     }
 }
 
