@@ -56,7 +56,10 @@ class INET_API EigrpDeviceConfigurator
       void loadEigrpProcessesConfig(cXMLElement *device, IEigrpModule<Ipv4Address> *eigrpModule);
       /**< Loads configuration of interfaces for EIGRP */
       void loadEigrpInterfacesConfig(cXMLElement *device, IEigrpModule<Ipv4Address> *eigrpModule);
+      /**< Loads parameters of interfaces for EIGRP */
+      void loadEigrpInterfaceParams(cXMLElement *eigrpIface, IEigrpModule<Ipv4Address> *eigrpModule, int ifaceId, const char *ifaceName);
       void loadEigrpInterface(cXMLElement *eigrpIface, IEigrpModule<Ipv4Address> *eigrpModule, int ifaceId, const char *ifaceName);
+
       /**< Loads networks added to EIGRP */
       void loadEigrpIPv4Networks(cXMLElement *processElem, IEigrpModule<Ipv4Address> *eigrpModule);
       /**< Loads K-value and converts it to number */
@@ -68,6 +71,9 @@ class INET_API EigrpDeviceConfigurator
       void loadEigrpProcesses6Config(cXMLElement *device, IEigrpModule<Ipv6Address> *eigrpModule);
       /**< Loads configuration of interfaces for EIGRP IPv6 */
       void loadEigrpInterfaces6Config(cXMLElement *device, IEigrpModule<Ipv6Address> *eigrpModule);
+      /**< Loads parameters of interfaces for EIGRP */
+      void loadEigrpInterfaceParams6(cXMLElement *eigrpIface, IEigrpModule<Ipv6Address> *eigrpModule, int ifaceId, const char *ifaceName);
+
       /**< Loads interfaces for EIGRP IPv6 */
       void loadEigrpInterface6(cXMLElement *eigrpIface, IEigrpModule<Ipv6Address> *eigrpModule, int ifaceId, const char *ifaceName);
 
