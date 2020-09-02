@@ -34,11 +34,11 @@ class INET_API PacketLoggerChannel : public cDatarateChannel
 
   public:
     explicit PacketLoggerChannel(const char *name = NULL) : cDatarateChannel(name) { counter = 0; }
-    virtual void processMessage(cMessage *msg, simtime_t t, result_t& result);
+    virtual cChannel::Result processMessage(cMessage *msg, const SendOptions& options, simtime_t t) override;
 
   protected:
-    virtual void initialize();
-    void finish();
+    virtual void initialize() override;
+    void finish() override;
 };
 
 
@@ -58,21 +58,29 @@ void PacketLoggerChannel::initialize()
     counter = 0;
 }
 
-void PacketLoggerChannel::processMessage(cMessage *msg, simtime_t t, result_t& result)
+cChannel::Result PacketLoggerChannel::processMessage(cMessage *msg, const SendOptions& options, simtime_t t)
 {
     EV << "PacketLogger processMessage()\n";
-    cDatarateChannel::processMessage(msg, t, result);
+    cChannel::Result result = cDatarateChannel::processMessage(msg, options, t);
 
-    counter++;
+    const char *status;
+    if (options.origPacketId == -1) {
+        counter++;
+        status = "start";
+    }
+    else {
+        status = (options.remainingDuration == SIMTIME_ZERO) ? "end" : "update";
+    }
     if (logfile.is_open())
     {
-        logfile << '#' << counter << ':' << t.raw() << ": '" << msg->getName() << "' (" << msg->getClassName() << ") sent:" << msg->getSendingTime().raw();
+        logfile << '#' << counter << ':' << t.raw() << ": '" << msg->getName() << ":" << status << "' (" << msg->getClassName() << ") sent:" << msg->getSendingTime().raw();
         cPacket* pk = dynamic_cast<cPacket *>(msg);
         if (pk)
             logfile << " (" << pk->getByteLength() << " byte)";
         logfile << " discard:" << result.discard << ", delay:" << result.delay.raw() << ", duration:" << result.duration.raw();
         logfile << endl;
     }
+    return result;
 }
 
 void PacketLoggerChannel::finish()
