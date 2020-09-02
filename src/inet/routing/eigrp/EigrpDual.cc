@@ -559,8 +559,7 @@ void EigrpDual<IPAddress>::processTransition4(int event, EigrpRouteSource<IPAddr
     }
     else
     { // Go to passive state
-        if (numStubs != numPeers)
-            processTransition15(event, source, route, neighborId);
+        processTransition15(event, source, route, neighborId);
         return;
     }
 

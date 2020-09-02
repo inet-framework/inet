@@ -3,14 +3,10 @@
 	<Router id="10.0.1.0">
         <Interfaces>
             <Interface name="eth0">
-                <IPAddress>10.0.12.1</IPAddress>
-                <Mask>255.255.255.252</Mask>
                 <EIGRP-IPv4 asNumber='1'>
                 </EIGRP-IPv4>
             </Interface>
             <Interface name="eth1">
-                <IPAddress>10.0.1.1</IPAddress>
-                <Mask>255.255.255.0</Mask>
                 <EIGRP-IPv4 asNumber='1'>
                 </EIGRP-IPv4>
             </Interface>        
@@ -42,20 +38,14 @@
     <Router id="10.0.2.0">
         <Interfaces>
             <Interface name="eth0">
-                <IPAddress>10.0.12.2</IPAddress>
-                <Mask>255.255.255.252</Mask>
                 <EIGRP-IPv4 asNumber='1'>
                 </EIGRP-IPv4>
             </Interface>
             <Interface name="eth1">
-                <IPAddress>10.0.23.1</IPAddress>
-                <Mask>255.255.255.252</Mask>
                 <EIGRP-IPv4 asNumber='1'>
                 </EIGRP-IPv4>
             </Interface>
             <Interface name="eth2">
-                <IPAddress>10.0.2.1</IPAddress>
-                <Mask>255.255.255.0</Mask>
                 <EIGRP-IPv4 asNumber='1'>
                 </EIGRP-IPv4>
             </Interface> 
@@ -91,14 +81,10 @@
     <Router id="10.0.3.0">
         <Interfaces>
             <Interface name="eth0">
-                <IPAddress>10.0.23.2</IPAddress>
-                <Mask>255.255.255.252</Mask>
                 <EIGRP-IPv4 asNumber='1'>
                 </EIGRP-IPv4>
             </Interface>
             <Interface name="eth1">
-                <IPAddress>10.0.3.1</IPAddress>
-                <Mask>255.255.255.0</Mask>
                 <EIGRP-IPv4 asNumber='1'>
                 </EIGRP-IPv4>
             </Interface> 
@@ -125,33 +111,4 @@
         </Routing6>
         
     </Router>
-    
-    	<Host id="10.0.1.2">
-		<Interfaces>
-			<Interface name="eth0">
-				<IPAddress>10.0.1.2</IPAddress>
-                <Mask>255.255.255.0</Mask>
-			</Interface>
-		</Interfaces>
-		<DefaultRouter>10.0.1.1</DefaultRouter>
-	</Host>
-		<Host id="10.0.2.2">
-		<Interfaces>
-			<Interface name="eth0">
-				<IPAddress>10.0.2.2</IPAddress>
-                <Mask>255.255.255.0</Mask>
-			</Interface>
-		</Interfaces>
-		<DefaultRouter>10.0.2.1</DefaultRouter>
-	</Host>
-		<Host id="10.0.3.2">
-		<Interfaces>
-			<Interface name="eth0">
-				<IPAddress>10.0.3.2</IPAddress>
-                <Mask>255.255.255.0</Mask>
-			</Interface>
-		</Interfaces>
-		<DefaultRouter>10.0.3.1</DefaultRouter>
-	</Host>
-
 </Devices>
