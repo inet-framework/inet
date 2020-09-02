@@ -35,6 +35,25 @@ Signal::Signal(const Signal& other) :
 {
 }
 
+const char *Signal::getFullName() const
+{
+    if (!isUpdate())
+        return getName();
+    else {
+        const char *suffix;
+        if (getRemainingDuration().isZero())
+            suffix = ":end";
+        else if (getRemainingDuration() == getDuration())
+            suffix = ":start";
+        else
+            suffix = ":progress";
+        static std::set<std::string> pool;
+        std::string fullname = std::string(getName()) + suffix;
+        auto it = pool.insert(fullname).first;
+        return it->c_str();
+    }
+}
+
 std::ostream& Signal::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     std::string className = getClassName();
@@ -53,8 +72,6 @@ std::string Signal::str() const
     stream << "(" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
     return stream.str();
 }
-
-// TODO: getFullName()
 
 } // namespace physicallayer
 } // namespace inet

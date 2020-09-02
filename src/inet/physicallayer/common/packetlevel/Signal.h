@@ -31,8 +31,9 @@ class INET_API Signal : public cPacket, public IPrintableObject
 
     virtual Signal *dup() const override { return new Signal(*this); }
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    virtual const char *getFullName() const override;
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual std::string str() const override;
 };
 
