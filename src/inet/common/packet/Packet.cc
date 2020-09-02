@@ -402,6 +402,25 @@ void Packet::updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags)
     updateAt(f, b(0), getTotalLength(), flags);
 }
 
+const char *Packet::getFullName() const
+{
+    if (!isUpdate())
+        return getName();
+    else {
+        const char *suffix;
+        if (getRemainingDuration().isZero())
+            suffix = ":end";
+        else if (getRemainingDuration() == getDuration())
+            suffix = ":start";
+        else
+            suffix = ":progress";
+        static std::set<std::string> pool;
+        std::string fullname = std::string(getName()) + suffix;
+        auto it = pool.insert(fullname).first;
+        return it->c_str();
+    }
+}
+
 std::ostream& Packet::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     std::string className = getClassName();

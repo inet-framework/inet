@@ -1047,6 +1047,8 @@ class INET_API Packet : public cPacket, public IPrintableObject
     }
     //@}
 
+    virtual const char *getFullName() const override;
+
     /** @name Utility functions */
     //@{
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
