@@ -243,8 +243,6 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
 
 TcpConnection *TcpConnection::cloneListeningConnection()
 {
-//    TcpConnection *conn = new TcpConnection();
-//    conn->initConnection(tcpMain, socketId);
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     int newSocketId = getEnvir()->getUniqueNumber();
     char submoduleName[24];
@@ -252,9 +250,6 @@ TcpConnection *TcpConnection::cloneListeningConnection()
     auto conn = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, tcpMain));
     conn->initConnection(tcpMain, newSocketId);
     conn->initClonedConnection(this);
-    // FSM_Goto(conn->fsm, TCP_S_LISTEN);
-    //FSM_Goto(fsm, TCP_S_LISTEN);
-
     return conn;
 }
 
