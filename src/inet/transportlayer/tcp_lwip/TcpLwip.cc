@@ -739,7 +739,8 @@ void TcpLwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TcpOpenCommand *tcp
 {
     ASSERT(pLwipTcpLayerM);
 
-    ASSERT(tcpCommandP->getFork() == true);
+    if (tcpCommandP->getFork() == false)
+        throw cRuntimeError("Error processing command OPEN_PASSIVE: non-forking listening connections are not supported yet");
 
     if (tcpCommandP->getLocalPort() == -1)
         throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
