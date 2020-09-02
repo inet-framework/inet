@@ -5,7 +5,7 @@
 
 # /showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         aa91-2c95/tplx, PASS,
 
-/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         cfee-4b65/tplx, PASS,	wireless
+/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         057b-7878/tplx, PASS,	wireless
 
 /showcases/mobility/basic/,          -f omnetpp.ini -c LinearMobility -r 0,         100s,         1211-c17f/tplx, PASS,
 /showcases/mobility/basic/,          -f omnetpp.ini -c CircleMobility -r 0,         100s,         6226-0ee5/tplx, PASS,
@@ -105,7 +105,7 @@
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Line -r 0,                   25s,         cb1d-a154/tplx, PASS,	wireless
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Font -r 0,                   25s,         cb1d-a154/tplx, PASS,	wireless
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Icon -r 0,                   25s,         9218-0d5b/tplx, PASS,	wireless
-/showcases/visualizer/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         5d75-fdcf/tplx, PASS,	wireless
+/showcases/visualizer/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         d41c-f158/tplx, PASS,	wireless
 
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0,                       2s,            3411-6527/tplx, PASS,
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0,                         2s,            b32b-bedd/tplx, PASS,

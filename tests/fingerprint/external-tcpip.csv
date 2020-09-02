@@ -2,11 +2,11 @@
 
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            7d1a-ed9a/tplx, PASS,
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_nsc -r 0,                    50s,            2aec-505b/tplx, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            a6c8-3b83/tplx, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_nsc -r 0,                    50s,            743c-69cf/tplx, PASS,
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            442f-6f29/tplx, PASS,
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            dcc6-1cd8/tplx, PASS,
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0,                    50s,            7033-d165/tplx, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0,                    50s,            8bb8-162e/tplx, PASS,
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0,                     50s,            fd69-8d92/tplx, PASS,
 
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0,                     100s,           0000-0000/tplx, ERROR,    # object transfer not supported by TCP_NSC
@@ -17,18 +17,18 @@
 # /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,       100s,            0000-0000/tplx, ERROR,    # freebsd NSC stack works on 32 bit system only
 # /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0,     100s,            0000-0000/tplx, ERROR,    # freebsd NSC stack works on 32 bit system only
 # /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,              100s,            0000-0000/tplx, ERROR,    # lwip NSC stack works on 32 bit system only
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0,             100s,            b019-af83/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0,             100s,            716e-87a8/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,                 100s,            bec1-4c81/tplx, PASS,
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            10f9-d917/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            b59a-1a61/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,            100s,            bec1-4c81/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            bec1-4c81/tplx, PASS,
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            3d38-bba4/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            0cfa-6ffd/tplx, PASS,
 
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            315e-eba7/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,                    50s,            b90f-b90e/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            1645-6ad6/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,                    50s,            ee14-e1ea/tplx, PASS,
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,                  50s,            fd4e-2be5/tplx, PASS,
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            3b84-9e31/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,                    50s,            eee3-5229/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,                    50s,            9483-4257/tplx, PASS,
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                     50s,            abe6-5fbc/tplx, PASS,
 
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            e194-036d/tplx, ERROR,
