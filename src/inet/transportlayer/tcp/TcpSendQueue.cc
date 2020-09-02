@@ -74,11 +74,11 @@ Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
     char msgname[32];
     sprintf(msgname, "tcpseg(l=%lu)", numBytes);
 
-    Packet *packet = new Packet(msgname);
+    Packet *tcpSegment = new Packet(msgname);
     const auto& payload = dataBuffer.peekAt(B(fromSeq - begin), B(numBytes));   //get data from buffer
     //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
-    packet->insertAtBack(payload);
-    return packet;
+    tcpSegment->insertAtBack(payload);
+    return tcpSegment;
 }
 
 void TcpSendQueue::discardUpTo(uint32 seqNum)

@@ -140,9 +140,9 @@ class INET_API Tcp : public TransportProtocolBase
     virtual TcpConnection *createConnection(int socketId);
 
     // utility methods
-    virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
+    virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
     virtual TcpConnection *findConnForApp(int socketId);
-    virtual void segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
     virtual void refreshDisplay() const override;
 
   public:

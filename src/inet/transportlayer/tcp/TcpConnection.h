@@ -430,27 +430,27 @@ class INET_API TcpConnection : public cSimpleModule
      * Shortcut to process most common case as fast as possible. Returns false
      * if segment requires normal (slow) route.
      */
-    virtual bool tryFastRoute(const Ptr<const TcpHeader>& tcpseg);
+    virtual bool tryFastRoute(const Ptr<const TcpHeader>& tcpHeader);
     /**
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    virtual TcpEventCode process_RCV_SEGMENT(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TcpEventCode processSegmentInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TcpEventCode processSynInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
-    virtual TcpEventCode processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TcpEventCode processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
-    virtual TcpEventCode processRstInSynReceived(const Ptr<const TcpHeader>& tcpseg);
-    virtual bool processAckInEstabEtc(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
+    virtual TcpEventCode process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
+    virtual TcpEventCode processSegmentInListen(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
+    virtual TcpEventCode processSynInListen(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
+    virtual TcpEventCode processSegmentInSynSent(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
+    virtual TcpEventCode processSegment1stThru8th(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
+    virtual TcpEventCode processRstInSynReceived(const Ptr<const TcpHeader>& tcpHeader);
+    virtual bool processAckInEstabEtc(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
     //@}
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
-    virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionMaxSegmentSize& option);
-    virtual bool processWSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionWindowScale& option);
-    virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSackPermitted& option);
-    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSack& option);
-    virtual bool processTSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionTimestamp& option);
+    virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionMaxSegmentSize& option);
+    virtual bool processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option);
+    virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option);
+    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSack& option);
+    virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
@@ -476,7 +476,7 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    virtual bool isSegmentAcceptable(Packet *packet, const Ptr<const TcpHeader>& tcpseg) const;
+    virtual bool isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader) const;
 
     /** Utility: send SYN */
     virtual void sendSyn();
@@ -485,19 +485,19 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void sendSynAck();
 
     /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual void readHeaderOptions(const Ptr<const TcpHeader>& tcpseg);
+    virtual void readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader);
 
     /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual TcpHeader writeHeaderOptions(const Ptr<TcpHeader>& tcpseg);
+    virtual TcpHeader writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader);
 
     /** Utility: adds SACKs to segments header options field */
-    virtual TcpHeader addSacks(const Ptr<TcpHeader>& tcpseg);
+    virtual TcpHeader addSacks(const Ptr<TcpHeader>& tcpHeader);
 
     /** Utility: get TSval from segments TS header option */
-    virtual uint32 getTSval(const Ptr<const TcpHeader>& tcpseg) const;
+    virtual uint32 getTSval(const Ptr<const TcpHeader>& tcpHeader) const;
 
     /** Utility: get TSecr from segments TS header option */
-    virtual uint32 getTSecr(const Ptr<const TcpHeader>& tcpseg) const;
+    virtual uint32 getTSecr(const Ptr<const TcpHeader>& tcpHeader) const;
 
     /** Utility: returns true if the connection is not yet accepted by the application */
     virtual bool isToBeAccepted() const { return listeningSocketId != -1; }
@@ -538,7 +538,7 @@ class INET_API TcpConnection : public cSimpleModule
     virtual uint32 sendSegment(uint32 bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
-    virtual void sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg);
+    virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();
@@ -548,7 +548,7 @@ class INET_API TcpConnection : public cSimpleModule
 
   protected:
     /** Utility: send IP packet */
-    virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpHeader, L3Address src, L3Address dest);
 
     /** Utility: sends packet to application */
     virtual void sendToApp(cMessage *msg);
@@ -569,7 +569,7 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: prints local/remote addr/port and app gate index/socketId */
     virtual void printConnBrief() const;
     /** Utility: prints important header fields */
-    static void printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
+    static void printSegmentBrief(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
     /** Utility: returns name of TCP_S_xxx constants */
     static const char *stateName(int state);
     /** Utility: returns name of TCP_E_xxx constants */
@@ -581,8 +581,8 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
 
-    /** Utility: returns true when receive queue has enough space for store the tcpseg */
-    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
+    /** Utility: returns true when receive queue has enough space for store the tcpHeader */
+    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
 
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
@@ -590,7 +590,7 @@ class INET_API TcpConnection : public cSimpleModule
     virtual unsigned short updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlways = false);
+    virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
 
   public:
     TcpConnection() {}
@@ -619,7 +619,7 @@ class INET_API TcpConnection : public cSimpleModule
      * connection object so that it can call this method, then immediately
      * deletes it.
      */
-    virtual void segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
 
     /** @name Various getters **/
     //@{
@@ -645,7 +645,7 @@ class INET_API TcpConnection : public cSimpleModule
      * of false means that the connection structure must be deleted by the
      * caller (TCP).
      */
-    virtual bool processTCPSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
+    virtual bool processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
 
     /**
      * Process commands from the application.

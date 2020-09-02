@@ -149,7 +149,7 @@ TcpStateVariables::TcpStateVariables()
     ecnWillingness = false;
     sndAck = false;
     rexmit = false;
-    eceReactionTime = 0;          
+    eceReactionTime = 0;
 }
 
 std::string TcpStateVariables::str() const
@@ -290,26 +290,26 @@ bool TcpConnection::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool TcpConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
+bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address segSrcAddr, L3Address segDestAddr)
 {
     Enter_Method_Silent();
 
     printConnBrief();
     if (!localAddr.isUnspecified()) {
         ASSERT(localAddr == segDestAddr);
-        ASSERT(localPort == tcpseg->getDestPort());
+        ASSERT(localPort == tcpHeader->getDestPort());
     }
 
     if (!remoteAddr.isUnspecified()) {
         ASSERT(remoteAddr == segSrcAddr);
-        ASSERT(remotePort == tcpseg->getSrcPort());
+        ASSERT(remotePort == tcpHeader->getSrcPort());
     }
 
-    if (tryFastRoute(tcpseg))
+    if (tryFastRoute(tcpHeader))
         return true;
 
     // first do actions
-    TcpEventCode event = process_RCV_SEGMENT(packet, tcpseg, segSrcAddr, segDestAddr);
+    TcpEventCode event = process_RCV_SEGMENT(tcpSegment, tcpHeader, segSrcAddr, segDestAddr);
 
     // then state transitions
     return performStateTransition(event);

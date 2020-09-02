@@ -224,13 +224,13 @@ void Tcp::removeConnection(TcpConnection *conn)
     conn->deleteModule();
 }
 
-TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;
     key.remoteAddr = srcAddr;
-    key.localPort = tcpseg->getDestPort();
-    key.remotePort = tcpseg->getSrcPort();
+    key.localPort = tcpHeader->getDestPort();
+    key.remotePort = tcpHeader->getSrcPort();
     SockPair save = key;
 
     // try with fully qualified SockPair
@@ -265,15 +265,15 @@ TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Add
     return nullptr;
 }
 
-void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+void Tcp::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
 {
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     const char *submoduleName = "conn-temp";
     auto module = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, this));
     module->initConnection(this, -1);
-    module->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
+    module->segmentArrivalWhileClosed(tcpSegment, tcpHeader, srcAddr, destAddr);
     module->deleteModule();
-    delete packet;
+    delete tcpSegment;
 }
 
 ushort Tcp::getEphemeralPort()
@@ -399,18 +399,18 @@ void Tcp::reset()
 }
 
 // packet contains the tcpHeader
-bool Tcp::checkCrc(Packet *packet)
+bool Tcp::checkCrc(Packet *tcpSegment)
 {
-    auto tcpHeader = packet->peekAtFront<TcpHeader>();
+    auto tcpHeader = tcpSegment->peekAtFront<TcpHeader>();
 
     switch (tcpHeader->getCrcMode()) {
         case CRC_COMPUTED: {
             //check CRC:
-            auto networkProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
-            const std::vector<uint8_t> tcpBytes = packet->peekDataAsBytes()->getBytes();
+            auto networkProtocol = tcpSegment->getTag<NetworkProtocolInd>()->getProtocol();
+            const std::vector<uint8_t> tcpBytes = tcpSegment->peekDataAsBytes()->getBytes();
             auto pseudoHeader = makeShared<TransportPseudoHeader>();
-            L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
-            L3Address destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+            L3Address srcAddr = tcpSegment->getTag<L3AddressInd>()->getSrcAddress();
+            L3Address destAddr = tcpSegment->getTag<L3AddressInd>()->getDestAddress();
             pseudoHeader->setSrcAddress(srcAddr);
             pseudoHeader->setDestAddress(destAddr);
             ASSERT(networkProtocol);
@@ -426,7 +426,7 @@ bool Tcp::checkCrc(Packet *packet)
                 throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
             MemoryOutputStream stream;
             Chunk::serialize(stream, pseudoHeader);
-            Chunk::serialize(stream, packet->peekData());
+            Chunk::serialize(stream, tcpSegment->peekData());
             uint16_t crc = TcpIpChecksum::checksum(stream.getData());
             return (crc == 0);
         }
