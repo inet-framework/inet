@@ -64,6 +64,25 @@ void SequenceChunk::forEachChild(cVisitor *v)
         v->visit(const_cast<Chunk *>(chunk.get()));
 }
 
+bool SequenceChunk::containsSameData(const Chunk& other) const
+{
+    if (&other == this)
+        return true;
+    else if (!Chunk::containsSameData(other))
+        return false;
+    else {
+        auto otherSequence = static_cast<const SequenceChunk *>(&other);
+        if (chunks.size() != otherSequence->chunks.size())
+            return false;
+        else {
+            for (auto i = 0; i < (int)chunks.size(); i++)
+                if (!chunks[i]->containsSameData(*otherSequence->chunks[i].get()))
+                    return false;
+            return true;
+        }
+    }
+}
+
 const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
     b chunkLength = getChunkLength();

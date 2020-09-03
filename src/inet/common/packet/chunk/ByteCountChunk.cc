@@ -114,6 +114,11 @@ void ByteCountChunk::setData(uint8_t data)
     this->data = data;
 }
 
+bool ByteCountChunk::containsSameData(const Chunk& other) const
+{
+    return &other == this || (Chunk::containsSameData(other) && data == static_cast<const ByteCountChunk *>(&other)->data);
+}
+
 bool ByteCountChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTECOUNT;

@@ -81,6 +81,8 @@ class INET_API SequenceChunk : public Chunk
 
     virtual void forEachChild(cVisitor *v) override;
 
+    virtual bool containsSameData(const Chunk& other) const override;
+
     /** @name Field accessor functions */
     const std::deque<Ptr<const Chunk>>& getChunks() const { return chunks; }
     void setChunks(const std::deque<Ptr<const Chunk>>& chunks);

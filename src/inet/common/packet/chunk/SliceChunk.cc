@@ -77,6 +77,18 @@ void SliceChunk::forEachChild(cVisitor *v)
     v->visit(const_cast<Chunk *>(chunk.get()));
 }
 
+bool SliceChunk::containsSameData(const Chunk& other) const
+{
+    if (&other == this)
+        return true;
+    else if (!Chunk::containsSameData(other))
+        return false;
+    else {
+        auto otherSlice = static_cast<const SliceChunk *>(&other);
+        return offset == otherSlice->offset && chunk->containsSameData(*otherSlice->chunk.get());
+    }
+}
+
 const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
     b chunkLength = getChunkLength();

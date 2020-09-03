@@ -107,6 +107,11 @@ void BitCountChunk::setData(bool data)
     this->data = data;
 }
 
+bool BitCountChunk::containsSameData(const Chunk& other) const
+{
+    return &other == this || (Chunk::containsSameData(other) && data == static_cast<const BitCountChunk *>(&other)->data);
+}
+
 bool BitCountChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITCOUNT;

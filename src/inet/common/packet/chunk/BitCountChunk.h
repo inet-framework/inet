@@ -74,6 +74,8 @@ class INET_API BitCountChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_BITCOUNT; }
     virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
 
+    virtual bool containsSameData(const Chunk& other) const override;
+
     virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
 

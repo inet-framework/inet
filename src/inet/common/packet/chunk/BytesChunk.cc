@@ -129,6 +129,11 @@ void BytesChunk::copyFromBuffer(const uint8_t *buffer, size_t bufferLength)
     bytes.assign(buffer, buffer + bufferLength);
 }
 
+bool BytesChunk::containsSameData(const Chunk& other) const
+{
+    return &other == this || (Chunk::containsSameData(other) && bytes == static_cast<const BytesChunk *>(&other)->bytes);
+}
+
 bool BytesChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTES;

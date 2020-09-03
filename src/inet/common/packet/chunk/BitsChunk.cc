@@ -113,6 +113,11 @@ void BitsChunk::setBit(int index, bool bit)
     bits.at(index) = bit;
 }
 
+bool BitsChunk::containsSameData(const Chunk& other) const
+{
+    return &other == this || (Chunk::containsSameData(other) && bits == static_cast<const BitsChunk *>(&other)->bits);
+}
+
 bool BitsChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITS;

@@ -61,6 +61,37 @@ void FieldsChunk::handleChange()
     serializedBytes = nullptr;
 }
 
+bool FieldsChunk::containsSameData(const Chunk& other) const
+{
+    if (&other == this)
+        return true;
+    else if (!Chunk::containsSameData(other))
+        return false;
+    else {
+        // KLUDGE: TODO: should we generate this method from the MSG compiler?
+        // this implementation returns false if it cannot determine the result correctly
+        auto thisDescriptor = getDescriptor();
+        auto otherDescriptor = other.getDescriptor();
+        if (thisDescriptor != otherDescriptor)
+            return false;
+        auto thisVoidPtr = static_cast<void *>(const_cast<FieldsChunk *>(this));
+        auto otherVoidPtr = static_cast<void *>(const_cast<FieldsChunk *>(static_cast<const FieldsChunk *>(&other)));
+        for (int field = 0; field < thisDescriptor->getFieldCount(); field++) {
+            auto declaredOn = thisDescriptor->getFieldDeclaredOn(field);
+            if (!strcmp(declaredOn, "omnetpp::cObject") || !strcmp(declaredOn, "inet::Chunk") || !strcmp(declaredOn, "inet::FieldsChunk"))
+                continue;
+            auto flags = thisDescriptor->getFieldTypeFlags(field);
+            if ((flags & cClassDescriptor::FD_ISARRAY) || (flags & cClassDescriptor::FD_ISCOMPOUND) || (flags & cClassDescriptor::FD_ISPOINTER))
+                return false;
+            auto thisValue = thisDescriptor->getFieldValueAsString(thisVoidPtr, field, 0);
+            auto otherValue = otherDescriptor->getFieldValueAsString(otherVoidPtr, field, 0);
+            if (thisValue != otherValue)
+                return false;
+        }
+        return true;
+    }
+}
+
 const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
     b chunkLength = getChunkLength();

@@ -579,6 +579,16 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     virtual b getChunkLength() const = 0;
 
     /**
+     * Returns true if the two chunks represent the same binary data. The two
+     * chunks are compared without serialization, and the method is allowed to
+     * return false if the result cannot be determined correctly. Tags and other
+     * metadata are ignored in the comparison.
+     */
+    virtual bool containsSameData(const Chunk& other) const {
+        return getChunkType() == other.getChunkType() && getChunkLength() == other.getChunkLength();
+    }
+
+    /**
      * Returns true if this chunk contains no data.
      */
     virtual bool isEmpty() const { return getChunkLength() == b(0); }

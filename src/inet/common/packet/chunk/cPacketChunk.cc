@@ -75,6 +75,11 @@ const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConver
     return converter(const_cast<cPacketChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
+bool cPacketChunk::containsSameData(const Chunk& other) const
+{
+    return &other == this || (Chunk::containsSameData(other) && packet == static_cast<const cPacketChunk *>(&other)->packet);
+}
+
 std::ostream& cPacketChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
