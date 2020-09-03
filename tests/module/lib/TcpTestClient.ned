@@ -28,7 +28,6 @@ simple TcpTestClient like IApp
     parameters:
         string localAddress;
         int localPort;
-        bool active;
         string connectAddress;
         int connectPort;
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");

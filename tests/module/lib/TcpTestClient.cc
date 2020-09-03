@@ -160,13 +160,8 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             int localPort = par("localPort");
             const char *connectAddress = par("connectAddress");
             int connectPort = par("connectPort");
-
             socket.bind(*localAddress ? L3Address(localAddress) : L3Address(), localPort);
-
-            if (par("active"))
-                socket.connect(L3Address(connectAddress), connectPort);
-            else
-                socket.listenOnce();
+            socket.connect(L3Address(connectAddress), connectPort);
             scheduleNextSend();
             delete msg;
             break;
