@@ -43,10 +43,12 @@ bool PreemptingServer::canStartStreaming() const
 
 void PreemptingServer::startStreaming()
 {
-    streamedPacket = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
-    take(streamedPacket);
-    EV_INFO << "Starting streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
-    pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, datarate);
+    auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
+    take(packet);
+    EV_INFO << "Starting streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
+    streamedPacket = packet->dup();
+    streamedPacket->setOrigPacketId(packet->getId());
+    pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     scheduleAt(simTime() + s(streamedPacket->getTotalLength() / datarate).get(), timer);
     handlePacketProcessed(streamedPacket);
     updateDisplayString();
@@ -54,12 +56,15 @@ void PreemptingServer::startStreaming()
 
 void PreemptingServer::endStreaming()
 {
+    auto packet = provider->pullPacketEnd(inputGate->getPathStartGate());
+    take(packet);
+    packet->setOrigPacketId(streamedPacket->getOrigPacketId());
     delete streamedPacket;
-    streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate());
+    streamedPacket = packet;
     EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
-    take(streamedPacket);
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
+    updateDisplayString();
 }
 
 void PreemptingServer::handleCanPushPacketChanged(cGate *gate)
