@@ -16,7 +16,7 @@ network TcpTestNet1
         srv_tcp: <default("Tcp")> like ITcp {
             @display("p=302,178");
         }
-        srv_app: TcpTestClient {
+        srv_app: TcpTestServer {
             @display("p=303,96");
         }
         tcptester: TCPScriptableTester {
@@ -49,7 +49,7 @@ network TcpTestNet2
         srv_tcp: <default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"))> like ITcp {
             @display("p=302,178");
         }
-        srv_app: TcpTestClient {
+        srv_app: TcpTestServer {
             @display("p=303,96");
         }
         tcptester: TCPRandomTester {
