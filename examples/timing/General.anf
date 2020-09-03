@@ -5,7 +5,7 @@
         <input pattern="/inet/examples/timing/results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/histogramchart.png" id="7" name="Server2, Queueing time, multiHistogram (by name)" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="7" name="Server2, Queueing time, histograms (by name)" template="histogramchart_native" type="HISTOGRAM">
             <script>
                 <![CDATA[from omnetpp.scave import results, chart, utils, plot
 
@@ -495,7 +495,7 @@ Show over_underflow cell?
             <property name="image_export_filename" value=""/>
             <property name="cumulative" value="false"/>
             <property name="xaxis_min" value=""/>
-            <property name="filter" value="module =~ &quot;*.inbound&quot; AND name =~ &quot;q*&quot; AND (runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server2.app[0].inbound&quot; AND name =~ &quot;queueingTime:multiHistogram.client1&quot; OR &#10;runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server2.app[0].inbound&quot; AND name =~ &quot;queueingTime:multiHistogram.client2&quot;)"/>
+            <property name="filter" value="module =~ &quot;*.inbound&quot; AND name =~ &quot;q*&quot; AND (runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server2.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client1&quot; OR &#10;runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server2.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client2&quot;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="drawstyle" value="Solid"/>
             <property name="show_overflows" value="true"/>
@@ -505,7 +505,7 @@ Show over_underflow cell?
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart icon="icons/full/obj/histogramchart.png" id="5" name="Server1, Queueing time, multiHistogram (by name)" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="5" name="Server1, Queueing time, histograms (by name)" template="histogramchart_native" type="HISTOGRAM">
             <script>
                 <![CDATA[from omnetpp.scave import results, chart, utils, plot
 
@@ -995,7 +995,7 @@ Show over_underflow cell?
             <property name="image_export_filename" value=""/>
             <property name="cumulative" value="false"/>
             <property name="xaxis_min" value=""/>
-            <property name="filter" value="module =~ &quot;*.inbound&quot; AND name =~ &quot;q*&quot; AND (runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server1.app[0].inbound&quot; AND name =~ &quot;queueingTime:multiHistogram.client1&quot; OR &#10;runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server1.app[0].inbound&quot; AND name =~ &quot;queueingTime:multiHistogram.client2&quot;)"/>
+            <property name="filter" value="module =~ &quot;*.inbound&quot; AND name =~ &quot;q*&quot; AND (runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server1.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client1&quot; OR &#10;runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server1.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client2&quot;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="drawstyle" value="Solid"/>
             <property name="show_overflows" value="true"/>
@@ -1005,7 +1005,7 @@ Show over_underflow cell?
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart icon="icons/full/obj/histogramchart.png" id="6" name="Switch2, Queueing time, multiHistogram (by title)" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="6" name="Switch2, Queueing time, histograms (by title)" template="histogramchart_native" type="HISTOGRAM">
             <script>
                 <![CDATA[from omnetpp.scave import results, chart, utils, plot
 
@@ -1495,7 +1495,7 @@ Show over_underflow cell?
             <property name="image_export_filename" value=""/>
             <property name="cumulative" value="false"/>
             <property name="xaxis_min" value=""/>
-            <property name="filter" value="module =~ &quot;*.switch2.*&quot; AND name =~ &quot;q*&quot; AND (name =~ &quot;queueingTime:multiHistogram.switch1&quot;)"/>
+            <property name="filter" value="module =~ &quot;*.switch2.*&quot; AND name =~ &quot;q*&quot; AND (name =~ &quot;queueingTime:histogram:switch1&quot;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="drawstyle" value="Solid"/>
             <property name="show_overflows" value="true"/>
