@@ -53,28 +53,22 @@ class INET_API TcpSinkAppThread : public TcpServerThreadBase
     long bytesRcvd;
     TcpSinkApp *sinkAppModule = nullptr;
 
-
+  protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void refreshDisplay() const override;
 
-    //TcpServerThreadBase:
-    /**
-     * Called when connection is established.
-     */
+    // TcpServerThreadBase: Called when connection is established.
     virtual void established() override;
 
-    /*
-     * Called when a data packet arrives.
-     */
+    // TcpServerThreadBase: Called when a data packet arrives.
     virtual void dataArrived(Packet *msg, bool urgent) override;
 
-    /*
-     * Called when a timer (scheduled via scheduleAt()) expires.
-     */
-    virtual void timerExpired(cMessage *timer) override { throw cRuntimeError("Model error: unknown timer message arrived"); }
+    // TcpServerThreadBase: Called when a timer (scheduled via scheduleAt()) expires.
+    virtual void timerExpired(cMessage *timer) override;
 
-    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { TcpServerThreadBase::init(hostmodule, socket); sinkAppModule = check_and_cast<TcpSinkApp *>(hostmod); }
+    // TcpServerThreadBase: called by TcpServerHostApp after creating this module
+    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override;
 };
 
 } // namespace inet

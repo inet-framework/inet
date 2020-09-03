@@ -96,5 +96,16 @@ void TcpSinkAppThread::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
+void TcpSinkAppThread::timerExpired(cMessage *timer)
+{
+    throw cRuntimeError("Model error: unknown timer message arrived");
+}
+
+void TcpSinkAppThread::init(TcpServerHostApp *hostmodule, TcpSocket *socket)
+{
+    TcpServerThreadBase::init(hostmodule, socket);
+    sinkAppModule = check_and_cast<TcpSinkApp *>(hostmod);
+}
+
 } // namespace inet
 
