@@ -38,35 +38,35 @@ cmdenv-event-banners = false
 *.collector.collectionInterval = 1s
 *.gate.durations = "1s 2s"
 
-%contains: stdout
+%contains-regex: stdout
 Initializing...
 
 Running simulation...
 Opening gate.
-Providing packet provider-0.
-Passing through packet provider-0.
-Collecting packet provider-0.
-Providing packet provider-1.
-Passing through packet provider-1.
-Collecting packet provider-1.
+Providing packet, .*?provider-0.*?
+Passing through packet, .*?provider-0.*?
+Collecting packet, .*?provider-0.*?
+Providing packet, .*?provider-1.*?
+Passing through packet, .*?provider-1.*?
+Collecting packet, .*?provider-1.*?
 Closing gate.
 Opening gate.
-Providing packet provider-2.
-Passing through packet provider-2.
-Collecting packet provider-2.
-Providing packet provider-3.
-Passing through packet provider-3.
-Collecting packet provider-3.
+Providing packet, .*?provider-2.*?
+Passing through packet, .*?provider-2.*?
+Collecting packet, .*?provider-2.*?
+Providing packet, .*?provider-3.*?
+Passing through packet, .*?provider-3.*?
+Collecting packet, .*?provider-3.*?
 Closing gate.
 Opening gate.
-Providing packet provider-4.
-Passing through packet provider-4.
-Collecting packet provider-4.
-Providing packet provider-5.
-Passing through packet provider-5.
-Collecting packet provider-5.
+Providing packet, .*?provider-4.*?
+Passing through packet, .*?provider-4.*?
+Collecting packet, .*?provider-4.*?
+Providing packet, .*?provider-5.*?
+Passing through packet, .*?provider-5.*?
+Collecting packet, .*?provider-5.*?
 Closing gate.
 Opening gate.
-Providing packet provider-6.
-Passing through packet provider-6.
-Collecting packet provider-6.
+Providing packet, .*?provider-6.*?
+Passing through packet, .*?provider-6.*?
+Collecting packet, .*?provider-6.*?

@@ -37,32 +37,32 @@ cmdenv-event-banners = false
 *.provider.packetLength = 1B
 *.server.processingTime = uniform(0s, 2s)
 
-%contains: stdout
-Providing packet provider-0.
-Processing packet provider-0 started.
+%contains-regex: stdout
+Providing packet, .*?provider-0.*?
+Processing packet started, .*?provider-0.*?
 
 Running simulation...
-Processing packet provider-0 ended.
-Consuming packet provider-0.
-Providing packet provider-1.
-Processing packet provider-1 started.
-Processing packet provider-1 ended.
-Consuming packet provider-1.
-Providing packet provider-2.
-Processing packet provider-2 started.
-Processing packet provider-2 ended.
-Consuming packet provider-2.
-Providing packet provider-3.
-Processing packet provider-3 started.
-Processing packet provider-3 ended.
-Consuming packet provider-3.
-Providing packet provider-4.
-Processing packet provider-4 started.
-Processing packet provider-4 ended.
-Consuming packet provider-4.
-Providing packet provider-5.
-Processing packet provider-5 started.
-Processing packet provider-5 ended.
-Consuming packet provider-5.
-Providing packet provider-6.
-Processing packet provider-6 started.
+Processing packet ended, .*?provider-0.*?
+Consuming packet, .*?provider-0.*?
+Providing packet, .*?provider-1.*?
+Processing packet started, .*?provider-1.*?
+Processing packet ended, .*?provider-1.*?
+Consuming packet, .*?provider-1.*?
+Providing packet, .*?provider-2.*?
+Processing packet started, .*?provider-2.*?
+Processing packet ended, .*?provider-2.*?
+Consuming packet, .*?provider-2.*?
+Providing packet, .*?provider-3.*?
+Processing packet started, .*?provider-3.*?
+Processing packet ended, .*?provider-3.*?
+Consuming packet, .*?provider-3.*?
+Providing packet, .*?provider-4.*?
+Processing packet started, .*?provider-4.*?
+Processing packet ended, .*?provider-4.*?
+Consuming packet, .*?provider-4.*?
+Providing packet, .*?provider-5.*?
+Processing packet started, .*?provider-5.*?
+Processing packet ended, .*?provider-5.*?
+Consuming packet, .*?provider-5.*?
+Providing packet, .*?provider-6.*?
+Processing packet started, .*?provider-6.*?

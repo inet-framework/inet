@@ -37,44 +37,44 @@ cmdenv-event-banners = false
 *.producer.productionInterval = 1s
 *.tagger.hopLimit = 1
 
-%contains: stdout
-Producing packet producer-1.
-Marking packet producer-1.
-Attaching HopLimitReq to producer-1 with hopLimit = 1
-Consuming packet producer-1.
-Producing packet producer-2.
-Marking packet producer-2.
-Attaching HopLimitReq to producer-2 with hopLimit = 1
-Consuming packet producer-2.
-Producing packet producer-3.
-Marking packet producer-3.
-Attaching HopLimitReq to producer-3 with hopLimit = 1
-Consuming packet producer-3.
-Producing packet producer-4.
-Marking packet producer-4.
-Attaching HopLimitReq to producer-4 with hopLimit = 1
-Consuming packet producer-4.
-Producing packet producer-5.
-Marking packet producer-5.
-Attaching HopLimitReq to producer-5 with hopLimit = 1
-Consuming packet producer-5.
-Producing packet producer-6.
-Marking packet producer-6.
-Attaching HopLimitReq to producer-6 with hopLimit = 1
-Consuming packet producer-6.
-Producing packet producer-7.
-Marking packet producer-7.
-Attaching HopLimitReq to producer-7 with hopLimit = 1
-Consuming packet producer-7.
-Producing packet producer-8.
-Marking packet producer-8.
-Attaching HopLimitReq to producer-8 with hopLimit = 1
-Consuming packet producer-8.
-Producing packet producer-9.
-Marking packet producer-9.
-Attaching HopLimitReq to producer-9 with hopLimit = 1
-Consuming packet producer-9.
-Producing packet producer-10.
-Marking packet producer-10.
-Attaching HopLimitReq to producer-10 with hopLimit = 1
-Consuming packet producer-10.
+%contains-regex: stdout
+Producing packet, .*?producer-1.*?
+Marking packet, .*?producer-1.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-1.*?
+Consuming packet, .*?producer-1.*?
+Producing packet, .*?producer-2.*?
+Marking packet, .*?producer-2.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-2.*?
+Consuming packet, .*?producer-2.*?
+Producing packet, .*?producer-3.*?
+Marking packet, .*?producer-3.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-3.*?
+Consuming packet, .*?producer-3.*?
+Producing packet, .*?producer-4.*?
+Marking packet, .*?producer-4.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-4.*?
+Consuming packet, .*?producer-4.*?
+Producing packet, .*?producer-5.*?
+Marking packet, .*?producer-5.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-5.*?
+Consuming packet, .*?producer-5.*?
+Producing packet, .*?producer-6.*?
+Marking packet, .*?producer-6.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-6.*?
+Consuming packet, .*?producer-6.*?
+Producing packet, .*?producer-7.*?
+Marking packet, .*?producer-7.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-7.*?
+Consuming packet, .*?producer-7.*?
+Producing packet, .*?producer-8.*?
+Marking packet, .*?producer-8.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-8.*?
+Consuming packet, .*?producer-8.*?
+Producing packet, .*?producer-9.*?
+Marking packet, .*?producer-9.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-9.*?
+Consuming packet, .*?producer-9.*?
+Producing packet, .*?producer-10.*?
+Marking packet, .*?producer-10.*?
+Attaching HopLimitReq, .*?hopLimit.*?1.*?producer-10.*?
+Consuming packet, .*?producer-10.*?

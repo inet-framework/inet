@@ -61,199 +61,199 @@ cmdenv-event-banners = false
 *.queue*.bufferModule = "^.buffer"
 *.buffer.packetCapacity = 2
 
-%contains: stdout
-Producing packet producer1-0.
-Pushing packet producer1-0 into the queue.
-Adding packet producer1-0 to the buffer.
-Pulling packet producer1-0 from the queue.
-Removing packet producer1-0 from the buffer.
-Collecting packet producer1-0.
-Producing packet producer2-0.
-Pushing packet producer2-0 into the queue.
-Adding packet producer2-0 to the buffer.
-Pulling packet producer2-0 from the queue.
-Removing packet producer2-0 from the buffer.
-Collecting packet producer2-0.
+%contains-regex: stdout
+Producing packet, .*?producer1-0.*?
+Pushing packet, .*?producer1-0.*?
+Adding packet, .*?producer1-0.*?
+Pulling packet, .*?producer1-0.*?
+Removing packet, .*?producer1-0.*?
+Collecting packet, .*?producer1-0.*?
+Producing packet, .*?producer2-0.*?
+Pushing packet, .*?producer2-0.*?
+Adding packet, .*?producer2-0.*?
+Pulling packet, .*?producer2-0.*?
+Removing packet, .*?producer2-0.*?
+Collecting packet, .*?producer2-0.*?
 
 Running simulation...
-Producing packet producer1-1.
-Pushing packet producer1-1 into the queue.
-Adding packet producer1-1 to the buffer.
-Producing packet producer2-1.
-Pushing packet producer2-1 into the queue.
-Adding packet producer2-1 to the buffer.
-Producing packet producer1-2.
-Pushing packet producer1-2 into the queue.
-Adding packet producer1-2 to the buffer.
-Dropping packet producer1-1 from the buffer.
-Removing packet producer1-1 from the queue.
-Pulling packet producer1-2 from the queue.
-Removing packet producer1-2 from the buffer.
-Collecting packet producer1-2.
-Producing packet producer2-2.
-Pushing packet producer2-2 into the queue.
-Adding packet producer2-2 to the buffer.
-Pulling packet producer2-1 from the queue.
-Removing packet producer2-1 from the buffer.
-Collecting packet producer2-1.
-Producing packet producer1-3.
-Pushing packet producer1-3 into the queue.
-Adding packet producer1-3 to the buffer.
-Producing packet producer2-3.
-Pushing packet producer2-3 into the queue.
-Adding packet producer2-3 to the buffer.
-Dropping packet producer2-2 from the buffer.
-Removing packet producer2-2 from the queue.
-Producing packet producer1-4.
-Pushing packet producer1-4 into the queue.
-Adding packet producer1-4 to the buffer.
-Dropping packet producer1-3 from the buffer.
-Removing packet producer1-3 from the queue.
-Producing packet producer2-4.
-Pushing packet producer2-4 into the queue.
-Adding packet producer2-4 to the buffer.
-Dropping packet producer2-3 from the buffer.
-Removing packet producer2-3 from the queue.
-Producing packet producer2-5.
-Pushing packet producer2-5 into the queue.
-Adding packet producer2-5 to the buffer.
-Dropping packet producer1-4 from the buffer.
-Removing packet producer1-4 from the queue.
-Producing packet producer1-5.
-Pushing packet producer1-5 into the queue.
-Adding packet producer1-5 to the buffer.
-Dropping packet producer2-4 from the buffer.
-Removing packet producer2-4 from the queue.
-Producing packet producer1-6.
-Pushing packet producer1-6 into the queue.
-Adding packet producer1-6 to the buffer.
-Dropping packet producer2-5 from the buffer.
-Removing packet producer2-5 from the queue.
-Pulling packet producer1-5 from the queue.
-Removing packet producer1-5 from the buffer.
-Collecting packet producer1-5.
-Pulling packet producer1-6 from the queue.
-Removing packet producer1-6 from the buffer.
-Collecting packet producer1-6.
-Producing packet producer2-6.
-Pushing packet producer2-6 into the queue.
-Adding packet producer2-6 to the buffer.
-Pulling packet producer2-6 from the queue.
-Removing packet producer2-6 from the buffer.
-Collecting packet producer2-6.
-Producing packet producer1-7.
-Pushing packet producer1-7 into the queue.
-Adding packet producer1-7 to the buffer.
-Producing packet producer2-7.
-Pushing packet producer2-7 into the queue.
-Adding packet producer2-7 to the buffer.
-Pulling packet producer1-7 from the queue.
-Removing packet producer1-7 from the buffer.
-Collecting packet producer1-7.
-Producing packet producer2-8.
-Pushing packet producer2-8 into the queue.
-Adding packet producer2-8 to the buffer.
-Producing packet producer1-8.
-Pushing packet producer1-8 into the queue.
-Adding packet producer1-8 to the buffer.
-Dropping packet producer2-7 from the buffer.
-Removing packet producer2-7 from the queue.
-Producing packet producer1-9.
-Pushing packet producer1-9 into the queue.
-Adding packet producer1-9 to the buffer.
-Dropping packet producer2-8 from the buffer.
-Removing packet producer2-8 from the queue.
-Producing packet producer2-9.
-Pushing packet producer2-9 into the queue.
-Adding packet producer2-9 to the buffer.
-Dropping packet producer1-8 from the buffer.
-Removing packet producer1-8 from the queue.
-Pulling packet producer1-9 from the queue.
-Removing packet producer1-9 from the buffer.
-Collecting packet producer1-9.
-Pulling packet producer2-9 from the queue.
-Removing packet producer2-9 from the buffer.
-Collecting packet producer2-9.
-Producing packet producer1-10.
-Pushing packet producer1-10 into the queue.
-Adding packet producer1-10 to the buffer.
-Pulling packet producer1-10 from the queue.
-Removing packet producer1-10 from the buffer.
-Collecting packet producer1-10.
-Producing packet producer2-10.
-Pushing packet producer2-10 into the queue.
-Adding packet producer2-10 to the buffer.
-Pulling packet producer2-10 from the queue.
-Removing packet producer2-10 from the buffer.
-Collecting packet producer2-10.
-Producing packet producer2-11.
-Pushing packet producer2-11 into the queue.
-Adding packet producer2-11 to the buffer.
-Producing packet producer1-11.
-Pushing packet producer1-11 into the queue.
-Adding packet producer1-11 to the buffer.
-Pulling packet producer2-11 from the queue.
-Removing packet producer2-11 from the buffer.
-Collecting packet producer2-11.
-Producing packet producer2-12.
-Pushing packet producer2-12 into the queue.
-Adding packet producer2-12 to the buffer.
-Producing packet producer2-13.
-Pushing packet producer2-13 into the queue.
-Adding packet producer2-13 to the buffer.
-Dropping packet producer1-11 from the buffer.
-Removing packet producer1-11 from the queue.
-Producing packet producer1-12.
-Pushing packet producer1-12 into the queue.
-Adding packet producer1-12 to the buffer.
-Dropping packet producer2-12 from the buffer.
-Removing packet producer2-12 from the queue.
-Pulling packet producer1-12 from the queue.
-Removing packet producer1-12 from the buffer.
-Collecting packet producer1-12.
-Producing packet producer2-14.
-Pushing packet producer2-14 into the queue.
-Adding packet producer2-14 to the buffer.
-Producing packet producer1-13.
-Pushing packet producer1-13 into the queue.
-Adding packet producer1-13 to the buffer.
-Dropping packet producer2-13 from the buffer.
-Removing packet producer2-13 from the queue.
-Pulling packet producer2-14 from the queue.
-Removing packet producer2-14 from the buffer.
-Collecting packet producer2-14.
-Producing packet producer2-15.
-Pushing packet producer2-15 into the queue.
-Adding packet producer2-15 to the buffer.
-Producing packet producer1-14.
-Pushing packet producer1-14 into the queue.
-Adding packet producer1-14 to the buffer.
-Dropping packet producer1-13 from the buffer.
-Removing packet producer1-13 from the queue.
-Producing packet producer2-16.
-Pushing packet producer2-16 into the queue.
-Adding packet producer2-16 to the buffer.
-Dropping packet producer2-15 from the buffer.
-Removing packet producer2-15 from the queue.
-Producing packet producer1-15.
-Pushing packet producer1-15 into the queue.
-Adding packet producer1-15 to the buffer.
-Dropping packet producer1-14 from the buffer.
-Removing packet producer1-14 from the queue.
-Pulling packet producer1-15 from the queue.
-Removing packet producer1-15 from the buffer.
-Collecting packet producer1-15.
-Producing packet producer2-17.
-Pushing packet producer2-17 into the queue.
-Adding packet producer2-17 to the buffer.
-Producing packet producer1-16.
-Pushing packet producer1-16 into the queue.
-Adding packet producer1-16 to the buffer.
-Dropping packet producer2-16 from the buffer.
-Removing packet producer2-16 from the queue.
-Pulling packet producer1-16 from the queue.
-Removing packet producer1-16 from the buffer.
-Collecting packet producer1-16.
-Pulling packet producer2-17 from the queue.
-Removing packet producer2-17 from the buffer.
-Collecting packet producer2-17.
+Producing packet, .*?producer1-1.*?
+Pushing packet, .*?producer1-1.*?
+Adding packet, .*?producer1-1.*?
+Producing packet, .*?producer2-1.*?
+Pushing packet, .*?producer2-1.*?
+Adding packet, .*?producer2-1.*?
+Producing packet, .*?producer1-2.*?
+Pushing packet, .*?producer1-2.*?
+Adding packet, .*?producer1-2.*?
+Dropping packet, .*?producer1-1.*?
+Removing packet, .*?producer1-1.*?
+Pulling packet, .*?producer1-2.*?
+Removing packet, .*?producer1-2.*?
+Collecting packet, .*?producer1-2.*?
+Producing packet, .*?producer2-2.*?
+Pushing packet, .*?producer2-2.*?
+Adding packet, .*?producer2-2.*?
+Pulling packet, .*?producer2-1.*?
+Removing packet, .*?producer2-1.*?
+Collecting packet, .*?producer2-1.*?
+Producing packet, .*?producer1-3.*?
+Pushing packet, .*?producer1-3.*?
+Adding packet, .*?producer1-3.*?
+Producing packet, .*?producer2-3.*?
+Pushing packet, .*?producer2-3.*?
+Adding packet, .*?producer2-3.*?
+Dropping packet, .*?producer2-2.*?
+Removing packet, .*?producer2-2.*?
+Producing packet, .*?producer1-4.*?
+Pushing packet, .*?producer1-4.*?
+Adding packet, .*?producer1-4.*?
+Dropping packet, .*?producer1-3.*?
+Removing packet, .*?producer1-3.*?
+Producing packet, .*?producer2-4.*?
+Pushing packet, .*?producer2-4.*?
+Adding packet, .*?producer2-4.*?
+Dropping packet, .*?producer2-3.*?
+Removing packet, .*?producer2-3.*?
+Producing packet, .*?producer2-5.*?
+Pushing packet, .*?producer2-5.*?
+Adding packet, .*?producer2-5.*?
+Dropping packet, .*?producer1-4.*?
+Removing packet, .*?producer1-4.*?
+Producing packet, .*?producer1-5.*?
+Pushing packet, .*?producer1-5.*?
+Adding packet, .*?producer1-5.*?
+Dropping packet, .*?producer2-4.*?
+Removing packet, .*?producer2-4.*?
+Producing packet, .*?producer1-6.*?
+Pushing packet, .*?producer1-6.*?
+Adding packet, .*?producer1-6.*?
+Dropping packet, .*?producer2-5.*?
+Removing packet, .*?producer2-5.*?
+Pulling packet, .*?producer1-5.*?
+Removing packet, .*?producer1-5.*?
+Collecting packet, .*?producer1-5.*?
+Pulling packet, .*?producer1-6.*?
+Removing packet, .*?producer1-6.*?
+Collecting packet, .*?producer1-6.*?
+Producing packet, .*?producer2-6.*?
+Pushing packet, .*?producer2-6.*?
+Adding packet, .*?producer2-6.*?
+Pulling packet, .*?producer2-6.*?
+Removing packet, .*?producer2-6.*?
+Collecting packet, .*?producer2-6.*?
+Producing packet, .*?producer1-7.*?
+Pushing packet, .*?producer1-7.*?
+Adding packet, .*?producer1-7.*?
+Producing packet, .*?producer2-7.*?
+Pushing packet, .*?producer2-7.*?
+Adding packet, .*?producer2-7.*?
+Pulling packet, .*?producer1-7.*?
+Removing packet, .*?producer1-7.*?
+Collecting packet, .*?producer1-7.*?
+Producing packet, .*?producer2-8.*?
+Pushing packet, .*?producer2-8.*?
+Adding packet, .*?producer2-8.*?
+Producing packet, .*?producer1-8.*?
+Pushing packet, .*?producer1-8.*?
+Adding packet, .*?producer1-8.*?
+Dropping packet, .*?producer2-7.*?
+Removing packet, .*?producer2-7.*?
+Producing packet, .*?producer1-9.*?
+Pushing packet, .*?producer1-9.*?
+Adding packet, .*?producer1-9.*?
+Dropping packet, .*?producer2-8.*?
+Removing packet, .*?producer2-8.*?
+Producing packet, .*?producer2-9.*?
+Pushing packet, .*?producer2-9.*?
+Adding packet, .*?producer2-9.*?
+Dropping packet, .*?producer1-8.*?
+Removing packet, .*?producer1-8.*?
+Pulling packet, .*?producer1-9.*?
+Removing packet, .*?producer1-9.*?
+Collecting packet, .*?producer1-9.*?
+Pulling packet, .*?producer2-9.*?
+Removing packet, .*?producer2-9.*?
+Collecting packet, .*?producer2-9.*?
+Producing packet, .*?producer1-10.*?
+Pushing packet, .*?producer1-10.*?
+Adding packet, .*?producer1-10.*?
+Pulling packet, .*?producer1-10.*?
+Removing packet, .*?producer1-10.*?
+Collecting packet, .*?producer1-10.*?
+Producing packet, .*?producer2-10.*?
+Pushing packet, .*?producer2-10.*?
+Adding packet, .*?producer2-10.*?
+Pulling packet, .*?producer2-10.*?
+Removing packet, .*?producer2-10.*?
+Collecting packet, .*?producer2-10.*?
+Producing packet, .*?producer2-11.*?
+Pushing packet, .*?producer2-11.*?
+Adding packet, .*?producer2-11.*?
+Producing packet, .*?producer1-11.*?
+Pushing packet, .*?producer1-11.*?
+Adding packet, .*?producer1-11.*?
+Pulling packet, .*?producer2-11.*?
+Removing packet, .*?producer2-11.*?
+Collecting packet, .*?producer2-11.*?
+Producing packet, .*?producer2-12.*?
+Pushing packet, .*?producer2-12.*?
+Adding packet, .*?producer2-12.*?
+Producing packet, .*?producer2-13.*?
+Pushing packet, .*?producer2-13.*?
+Adding packet, .*?producer2-13.*?
+Dropping packet, .*?producer1-11.*?
+Removing packet, .*?producer1-11.*?
+Producing packet, .*?producer1-12.*?
+Pushing packet, .*?producer1-12.*?
+Adding packet, .*?producer1-12.*?
+Dropping packet, .*?producer2-12.*?
+Removing packet, .*?producer2-12.*?
+Pulling packet, .*?producer1-12.*?
+Removing packet, .*?producer1-12.*?
+Collecting packet, .*?producer1-12.*?
+Producing packet, .*?producer2-14.*?
+Pushing packet, .*?producer2-14.*?
+Adding packet, .*?producer2-14.*?
+Producing packet, .*?producer1-13.*?
+Pushing packet, .*?producer1-13.*?
+Adding packet, .*?producer1-13.*?
+Dropping packet, .*?producer2-13.*?
+Removing packet, .*?producer2-13.*?
+Pulling packet, .*?producer2-14.*?
+Removing packet, .*?producer2-14.*?
+Collecting packet, .*?producer2-14.*?
+Producing packet, .*?producer2-15.*?
+Pushing packet, .*?producer2-15.*?
+Adding packet, .*?producer2-15.*?
+Producing packet, .*?producer1-14.*?
+Pushing packet, .*?producer1-14.*?
+Adding packet, .*?producer1-14.*?
+Dropping packet, .*?producer1-13.*?
+Removing packet, .*?producer1-13.*?
+Producing packet, .*?producer2-16.*?
+Pushing packet, .*?producer2-16.*?
+Adding packet, .*?producer2-16.*?
+Dropping packet, .*?producer2-15.*?
+Removing packet, .*?producer2-15.*?
+Producing packet, .*?producer1-15.*?
+Pushing packet, .*?producer1-15.*?
+Adding packet, .*?producer1-15.*?
+Dropping packet, .*?producer1-14.*?
+Removing packet, .*?producer1-14.*?
+Pulling packet, .*?producer1-15.*?
+Removing packet, .*?producer1-15.*?
+Collecting packet, .*?producer1-15.*?
+Producing packet, .*?producer2-17.*?
+Pushing packet, .*?producer2-17.*?
+Adding packet, .*?producer2-17.*?
+Producing packet, .*?producer1-16.*?
+Pushing packet, .*?producer1-16.*?
+Adding packet, .*?producer1-16.*?
+Dropping packet, .*?producer2-16.*?
+Removing packet, .*?producer2-16.*?
+Pulling packet, .*?producer1-16.*?
+Removing packet, .*?producer1-16.*?
+Collecting packet, .*?producer1-16.*?
+Pulling packet, .*?producer2-17.*?
+Removing packet, .*?producer2-17.*?
+Collecting packet, .*?producer2-17.*?
