@@ -294,6 +294,12 @@ void EigrpIpv4Pdm::processRTRouteDel(const cObject *details)
             return;
         }
 
+        if (source == oldsource)
+            return;
+        else
+            oldsource = source;
+
+
         if (source->isSuccessor())
         {
             if (!source->getRouteInfo()->isActive())
