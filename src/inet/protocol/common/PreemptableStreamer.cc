@@ -91,7 +91,7 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     streamDatarate = datarate;
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    EV_INFO << "Starting streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Starting streaming" << EV_FIELD(packet) << EV_ENDL;
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     if (std::isnan(streamDatarate.get()))
         endStreaming();

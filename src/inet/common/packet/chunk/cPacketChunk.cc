@@ -83,7 +83,7 @@ bool cPacketChunk::containsSameData(const Chunk& other) const
 std::ostream& cPacketChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(packet, *packet);
+        stream << EV_FIELD(packet);
     return stream;
 }
 

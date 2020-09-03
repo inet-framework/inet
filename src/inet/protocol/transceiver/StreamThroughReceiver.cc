@@ -67,7 +67,7 @@ void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate,
         rxSignal = signal;
     }
     else {
-        EV_WARN << "Dropping signal progress because signal start was not received" << EV_FIELD(signal, *signal) << EV_ENDL;
+        EV_WARN << "Dropping signal progress because signal start was not received" << EV_FIELD(signal) << EV_ENDL;
         delete signal;
     }
 }
@@ -86,7 +86,7 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
         delete signal;
     }
     else {
-        EV_WARN << "Dropping signal end because signal start was not received" << EV_FIELD(signal, *signal) << EV_ENDL;
+        EV_WARN << "Dropping signal end because signal start was not received" << EV_FIELD(signal) << EV_ENDL;
         delete signal;
     }
 }

@@ -72,7 +72,7 @@ void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)
 
 void PassivePacketSink::consumePacket(Packet *packet)
 {
-    EV_INFO << "Consuming packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Consuming packet" << EV_FIELD(packet) << EV_ENDL;
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();

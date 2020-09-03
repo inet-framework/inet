@@ -55,7 +55,7 @@ void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
     if ((packetCapacity != -1 && getNumPackets() >= packetCapacity) ||
         (dataCapacity != b(-1) && getTotalLength() + packet->getTotalLength() > dataCapacity))
     {
-        EV_INFO << "Dropping packet because the queue is full" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Dropping packet because the queue is full" << EV_FIELD(packet) << EV_ENDL;
         dropPacket(packet, QUEUE_OVERFLOW, packetCapacity);
     }
     else {

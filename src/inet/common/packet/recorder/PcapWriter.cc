@@ -109,7 +109,7 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction di
     (void)direction; // unused
     (void)ie; // unused
 
-    EV_INFO << "Writing packet" << EV_FIELD(packet, *packet) << EV_FIELD(fileName) << EV_ENDL;
+    EV_INFO << "Writing packet" << EV_FIELD(packet) << EV_FIELD(fileName) << EV_ENDL;
     uint8_t buf[MAXBUFLENGTH];
     memset(buf, 0, sizeof(buf));
 

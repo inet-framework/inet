@@ -45,7 +45,7 @@ void PreemptingServer::startStreaming()
 {
     auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
     take(packet);
-    EV_INFO << "Starting streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Starting streaming" << EV_FIELD(packet) << EV_ENDL;
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);

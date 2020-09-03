@@ -133,11 +133,11 @@ Packet *PacketDestreamer::pullPacket(cGate *gate)
     ASSERT(!isStreaming());
     streamDatarate = datarate;
     auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), streamDatarate);
-    EV_INFO << "Starting destreaming" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Starting destreaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     streamedPacket = packet;
     packet = provider->pullPacketEnd(inputGate->getPathStartGate());
-    EV_INFO << "Ending destreaming" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Ending destreaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     delete streamedPacket;
     streamedPacket = packet;

@@ -83,11 +83,11 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     emit(packetPushedSignal, packet);
     if (matchesPacket(packet)) {
         processPacket(packet);
-        EV_INFO << "Passing through packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
-        EV_INFO << "Filtering out packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
         dropPacket(packet);
     }
     handlePacketProcessed(packet);
@@ -102,11 +102,11 @@ void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate
     startPacketStreaming(packet);
     if (matchesPacket(packet)) {
         processPacket(packet);
-        EV_INFO << "Passing through packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     }
     else {
-        EV_INFO << "Filtering out packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
         dropPacket(packet);
     }
     updateDisplayString();
@@ -122,12 +122,12 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
         checkPacketStreaming(packet);
     if (matchesPacket(packet)) {
         processPacket(packet);
-        EV_INFO << "Passing through packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
         pushOrSendPacketEnd(packet, outputGate, consumer);
     }
     else {
-        EV_INFO << "Filtering out packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
         dropPacket(packet);
     }
@@ -144,13 +144,13 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, bps datar
         checkPacketStreaming(packet);
     if (matchesPacket(packet)) {
         processPacket(packet);
-        EV_INFO << "Passing through packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         if (packet->getTotalLength() == position + extraProcessableLength)
             endPacketStreaming(packet);
         pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
     }
     else {
-        EV_INFO << "Filtering out packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+        EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
         dropPacket(packet);
     }
@@ -188,7 +188,7 @@ bool PacketFilterBase::canPullSomePacket(cGate *gate) const
             auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
             packet = provider->pullPacket(providerGate);
             nonConstThisPtr->take(packet);
-            EV_INFO << "Filtering out packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+            EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
             // TODO: KLUDGE:
             nonConstThisPtr->dropPacket(packet);
             nonConstThisPtr->handlePacketProcessed(packet);
@@ -207,14 +207,14 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
         handlePacketProcessed(packet);
         if (matchesPacket(packet)) {
             processPacket(packet);
-            EV_INFO << "Passing through packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+            EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
             animateSendPacket(packet, outputGate);
             updateDisplayString();
             emit(packetPulledSignal, packet);
             return packet;
         }
         else {
-            EV_INFO << "Filtering out packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+            EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
             dropPacket(packet);
         }
     }

@@ -22,7 +22,7 @@ namespace queueing {
 
 void PacketMeterBase::processPacket(Packet *packet)
 {
-    EV_INFO << "Metering packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Metering packet" << EV_FIELD(packet) << EV_ENDL;
     meterPacket(packet);
 }
 

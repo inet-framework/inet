@@ -87,7 +87,7 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
 void PacketTransmitterBase::sendPacketStart(Signal *signal)
 {
     ASSERT(signal->getOrigPacketId() == -1);
-    EV_INFO << "Sending signal start to channel" << EV_FIELD(signal, *signal) << EV_ENDL;
+    EV_INFO << "Sending signal start to channel" << EV_FIELD(signal) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()), outputGate);
 }
 
@@ -95,21 +95,21 @@ void PacketTransmitterBase::sendPacketProgress(Signal *signal, b bitPosition, cl
 {
     ASSERT(signal->getOrigPacketId() != -1);
     simtime_t remainingDuration = signal->getDuration() - CLOCKTIME_AS_SIMTIME(timePosition);
-    EV_INFO << "Sending signal progress to channel" << EV_FIELD(signal, *signal) << EV_FIELD(origPacketId, signal->getOrigPacketId()) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
+    EV_INFO << "Sending signal progress to channel" << EV_FIELD(signal) << EV_FIELD(origPacketId, signal->getOrigPacketId()) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()).updateTx(signal->getOrigPacketId(), remainingDuration), outputGate);
 }
 
 void PacketTransmitterBase::sendPacketEnd(Signal *signal)
 {
     ASSERT(signal->getOrigPacketId() != -1);
-    EV_INFO << "Sending signal end to channel" << EV_FIELD(signal, *signal) << EV_FIELD(origPacketId, signal->getOrigPacketId()) << EV_ENDL;
+    EV_INFO << "Sending signal end to channel" << EV_FIELD(signal) << EV_FIELD(origPacketId, signal->getOrigPacketId()) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()).finishTx(signal->getOrigPacketId()), outputGate);
 }
 
 clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const
 {
     s duration = packet->getTotalLength() / txDatarate;
-    EV_TRACE << "Calculating signal duration" << EV_FIELD(packet, *packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;
+    EV_TRACE << "Calculating signal duration" << EV_FIELD(packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;
     return duration.get();
 }
 

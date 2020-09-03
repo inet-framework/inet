@@ -52,7 +52,7 @@ int OrdinalBasedDuplicator::getNumPacketDuplicates(Packet *packet)
 {
     if (generateFurtherDuplicates) {
         if (numPackets == duplicatesVector[0]) {
-            EV_DEBUG << "Duplicating packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet, *packet) << endl;
+            EV_DEBUG << "Duplicating packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet) << endl;
             numDuplicated++;
             duplicatesVector.erase(duplicatesVector.begin());
             if (duplicatesVector.size() == 0) {

@@ -71,7 +71,7 @@ void PacketMultiplexer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    EV_INFO << "Forwarding packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
     handlePacketProcessed(packet);
     pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
@@ -81,7 +81,7 @@ void PacketMultiplexer::pushPacketStart(Packet *packet, cGate *gate, bps datarat
 {
     Enter_Method("pushPacketStart");
     take(packet);
-    EV_INFO << "Forwarding packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);
@@ -92,7 +92,7 @@ void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
-    EV_INFO << "Forwarding packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
     if (!isStreamingPacket())
         startPacketStreaming(packet);
     else
@@ -106,7 +106,7 @@ void PacketMultiplexer::pushPacketProgress(Packet *packet, cGate *gate, bps data
 {
     Enter_Method("pushPacketProgress");
     take(packet);
-    EV_INFO << "Forwarding packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
     if (!isStreamingPacket())
         startPacketStreaming(packet);
     else

@@ -59,7 +59,7 @@ void ActivePacketSource::scheduleProductionTimer()
 void ActivePacketSource::producePacket()
 {
     auto packet = createPacket();
-    EV_INFO << "Producing packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Producing packet" << EV_FIELD(packet) << EV_ENDL;
     pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
 }

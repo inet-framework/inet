@@ -61,7 +61,7 @@ void StreamingTransmitter::startTx(Packet *packet)
     txSignal = signal->dup();
     txSignal->setOrigPacketId(signal->getId());
     // 5. send signal start and notify subscribers
-    EV_INFO << "Starting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(txDatarate) << EV_ENDL;
+    EV_INFO << "Starting transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
     emit(transmissionStartedSignal, signal);
     sendPacketStart(signal);
     // 6. schedule transmission end
@@ -74,7 +74,7 @@ void StreamingTransmitter::endTx()
     ASSERT(isTransmitting());
     // 2. send signal end to receiver and notify subscribers
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
-    EV_INFO << "Ending transmission" << EV_FIELD(packet, *packet) << EV_FIELD(txDatarate) << EV_ENDL;
+    EV_INFO << "Ending transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
     emit(transmissionEndedSignal, txSignal);
     sendPacketEnd(txSignal);
     // 3. clear internal state
@@ -103,7 +103,7 @@ void StreamingTransmitter::abortTx()
     delete txSignal;
     txSignal = nullptr;
     // 4. send signal end to receiver and notify subscribers
-    EV_INFO << "Aborting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(txDatarate) << EV_ENDL;
+    EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
     emit(transmissionEndedSignal, txSignal);
     sendPacketEnd(signal);
     // 5. clear internal state

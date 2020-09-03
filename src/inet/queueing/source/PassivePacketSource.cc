@@ -90,7 +90,7 @@ Packet *PassivePacketSource::providePacket(cGate *gate)
         packet = nextPacket;
         nextPacket = nullptr;
     }
-    EV_INFO << "Providing packet" << EV_FIELD(packet, *packet) << EV_ENDL;
+    EV_INFO << "Providing packet" << EV_FIELD(packet) << EV_ENDL;
     updateDisplayString();
     return packet;
 }
