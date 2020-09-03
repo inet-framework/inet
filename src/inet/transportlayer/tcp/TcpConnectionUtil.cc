@@ -762,7 +762,7 @@ uint32 TcpConnection::sendSegment(uint32 bytes)
         }
     }
 
-    ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+    uint32 buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
     if (bytes > buffered) // last segment?
         bytes = buffered;
@@ -863,16 +863,16 @@ bool TcpConnection::sendData(uint32 congestionWindow)
         old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
 
     // check how many bytes we have
-    ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+    uint32 buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
     if (buffered == 0)
         return false;
 
     // maxWindow is minimum of snd_wnd and congestionWindow (snd_cwnd)
-    ulong maxWindow = std::min(state->snd_wnd, congestionWindow);
+    uint32 maxWindow = std::min(state->snd_wnd, congestionWindow);
 
     // effectiveWindow: number of bytes we're allowed to send now
-    long effectiveWin = maxWindow - (state->snd_nxt - state->snd_una);
+    int64 effectiveWin = (int64)maxWindow - (state->snd_nxt - state->snd_una);
 
     if (effectiveWin <= 0) {
         EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd
@@ -880,10 +880,7 @@ bool TcpConnection::sendData(uint32 congestionWindow)
         return false;
     }
 
-    ulong bytesToSend = effectiveWin;
-
-    if (bytesToSend > buffered)
-        bytesToSend = buffered;
+    uint32 bytesToSend = std::min(buffered, (uint32)effectiveWin);
 
     // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32 bytes)' )
     const auto& tmpTcpHeader = makeShared<TcpHeader>();
@@ -980,7 +977,7 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     state->snd_nxt = state->snd_una;
 
     // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
-    ulong bytes = std::min((ulong)std::min(state->snd_mss, state->snd_max - state->snd_nxt),
+    uint32 bytes = std::min(std::min(state->snd_mss, state->snd_max - state->snd_nxt),
                 sendQueue->getBytesAvailable(state->snd_nxt));
 
     // FIN (without user data) needs to be resent
@@ -1051,7 +1048,7 @@ void TcpConnection::retransmitData()
     // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend > 0) {
         uint32 bytes = std::min(bytesToSend, state->snd_mss);
-        bytes = std::min(bytes, (uint32)(sendQueue->getBytesAvailable(state->snd_nxt)));
+        bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
         uint32 sentBytes = sendSegment(bytes);
 
         // Do not send packets after the FIN.
@@ -1553,10 +1550,10 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
     // receivers."
     if (!state->sack_enabled || (state->sack_enabled && state->sackedBytes_old != state->sackedBytes)) {
         // check how many bytes we have
-        ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
+        uint32 buffered = sendQueue->getBytesAvailable(state->snd_max);
 
         if (buffered >= state->snd_mss || (!fullSegmentsOnly && buffered > 0)) {
-            ulong outstandingData = state->snd_max - state->snd_una;
+            uint32 outstandingData = state->snd_max - state->snd_una;
 
             // check conditions from RFC 3042
             if (outstandingData + state->snd_mss <= state->snd_wnd &&

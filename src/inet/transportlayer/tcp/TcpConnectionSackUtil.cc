@@ -275,10 +275,10 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // HighData+1 MUST be returned."
     {
         // check how many unsent bytes we have
-        ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
-        ulong maxWindow = state->snd_wnd;
+        uint32 buffered = sendQueue->getBytesAvailable(state->snd_max);
+        uint32 maxWindow = state->snd_wnd;
         // effectiveWindow: number of bytes we're allowed to send now
-        ulong effectiveWin = maxWindow - state->pipe;
+        uint32 effectiveWin = maxWindow - state->pipe;
 
         if (buffered > 0 && effectiveWin >= state->snd_mss) {
             seqNum = state->snd_max;    // HighData = snd_max

@@ -98,7 +98,7 @@ class INET_API TcpSendQueue : public cObject
      * Utility function: returns how many bytes are available in the queue, from
      * (and including) the given sequence number.
      */
-    virtual ulong getBytesAvailable(uint32 fromSeq) const;
+    virtual uint32 getBytesAvailable(uint32 fromSeq) const;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
@@ -107,7 +107,7 @@ class INET_API TcpSendQueue : public cObject
      * maxNumBytes bytes if the subclass wants to reproduce the original
      * segment boundaries when retransmitting.
      */
-    virtual Packet *createSegmentWithBytes(uint32 fromSeq, ulong numBytes);
+    virtual Packet *createSegmentWithBytes(uint32 fromSeq, uint32 numBytes);
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been

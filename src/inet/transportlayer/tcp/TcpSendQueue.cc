@@ -64,18 +64,17 @@ uint32 TcpSendQueue::getBufferEndSeq() const
     return end;
 }
 
-ulong TcpSendQueue::getBytesAvailable(uint32 fromSeq) const
+uint32 TcpSendQueue::getBytesAvailable(uint32 fromSeq) const
 {
-    uint32 bufEndSeq = getBufferEndSeq();
-    return seqLess(fromSeq, bufEndSeq) ? bufEndSeq - fromSeq : 0;
+    return seqLess(fromSeq, end) ? end - fromSeq : 0;
 }
 
-Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, uint32 numBytes)
 {
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
     char msgname[32];
-    sprintf(msgname, "tcpseg(l=%lu)", numBytes);
+    sprintf(msgname, "tcpseg(l=%u)", (unsigned int)numBytes);
 
     Packet *tcpSegment = new Packet(msgname);
     const auto& payload = dataBuffer.peekAt(B(fromSeq - begin), B(numBytes));   //get data from buffer
