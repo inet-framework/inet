@@ -68,7 +68,7 @@ cli_tcp: ESTABLISHED --> CLOSED  (on RCV_RST)
 Calling finish() at end of Run #0...
 []: TcpTestNet1.cli_app: received 0 bytes in 0 packets
 []: TcpTestNet1.cli_tcp: finishing with 0 connections open.
-[]: TcpTestNet1.srv_tcp: finishing with 1 connections open.
+[]: TcpTestNet1.srv_tcp: finishing with 2 connections open.
 []: TcpTestNet1.srv_app: received 0 bytes in 0 packets
 [testing]: [100.004] tcpdump finished, A:7 B:6 segments
 
