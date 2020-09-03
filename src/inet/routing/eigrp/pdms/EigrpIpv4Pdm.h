@@ -83,6 +83,8 @@ protected:
     const Ipv4Address EIGRP_IPV4_MULT; /**< Multicast address for EIGRP messages */
     EigrpKValues KVALUES_MAX;           /**< K-values (from K1 to K5) are set to max */
     const Ipv4Address EIGRP_SELF_ADDR;  /**< Next hop address 0.0.0.0 (self address) */
+    EigrpRouteSource<Ipv4Address> *oldsource = NULL; /**< Latest route change */
+
 
     int asNum;                  /**< Autonomous system number */
     EigrpKValues kValues;       /**< K-values for calculation of metric */
