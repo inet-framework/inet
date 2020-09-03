@@ -35,12 +35,12 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
 {
   protected:
     cPar *dataratePar = nullptr;
-    bps datarate = bps(NaN);
 
     cGate *inputGate = nullptr;
     cGate *outputGate = nullptr;
     IActivePacketSource *producer = nullptr;
 
+    bps txDatarate = bps(NaN);
     Signal *txSignal = nullptr;
     ClockEvent *txEndTimer = nullptr;
 

@@ -29,7 +29,7 @@ void PacketReceiverBase::initialize(int stage)
     OperationalMixin::initialize(stage);
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        datarate = bps(par("datarate"));
+        rxDatarate = bps(par("datarate"));
         inputGate = gate("in");
         outputGate = gate("out");
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);

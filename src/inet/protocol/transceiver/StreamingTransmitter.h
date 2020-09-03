@@ -25,7 +25,7 @@ namespace inet {
 class INET_API StreamingTransmitter : public StreamingTransmitterBase
 {
   protected:
-    simtime_t txStartTime = -1;
+    clocktime_t txStartTime = -1;
 
   protected:
     virtual void handleMessageWhenUp(cMessage *message) override;
@@ -42,7 +42,7 @@ class INET_API StreamingTransmitter : public StreamingTransmitterBase
     virtual bool supportsPacketStreaming(cGate *gate) const override { return gate == outputGate; }
 
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
+
     virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 };
 

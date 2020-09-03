@@ -27,7 +27,6 @@ class INET_API StreamThroughReceiver : public StreamingReceiverBase
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
-    virtual void handleMessageWhenDown(cMessage *message) override;
 
     virtual void receivePacketStart(cPacket *packet, cGate *gate, bps datarate);
     virtual void receivePacketProgress(cPacket *packet, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration);

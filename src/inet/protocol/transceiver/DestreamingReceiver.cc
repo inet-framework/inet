@@ -33,14 +33,14 @@ void DestreamingReceiver::handleMessageWhenUp(cMessage *message)
     if (message->getArrivalGate() == inputGate) {
         auto signal = check_and_cast<Signal *>(message);
         if (!signal->isUpdate())
-            receivePacketStart(signal, inputGate, datarate);
+            receivePacketStart(signal, inputGate, rxDatarate);
         else if (signal->getRemainingDuration() == 0)
-            receivePacketEnd(signal, inputGate, datarate);
+            receivePacketEnd(signal, inputGate, rxDatarate);
         else {
             auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
             simtime_t timePosition = signal->getDuration() - signal->getRemainingDuration();
-            b position = packet->getTotalLength() * timePosition.dbl() / signal->getDuration().dbl();
-            receivePacketProgress(signal, inputGate, datarate, position, timePosition, b(0), 0);
+            b position(std::floor(packet->getTotalLength().get() * timePosition.dbl() / signal->getDuration().dbl()));
+            receivePacketProgress(signal, inputGate, rxDatarate, position, timePosition, b(0), 0);
         }
     }
     else

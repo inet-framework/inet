@@ -36,7 +36,7 @@ void PacketTransmitterBase::initialize(int stage)
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dataratePar = &par("datarate");
-        datarate = bps(*dataratePar);
+        txDatarate = bps(*dataratePar);
         inputGate = gate("in");
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
@@ -86,6 +86,7 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
 
 void PacketTransmitterBase::sendPacketStart(Signal *signal)
 {
+    ASSERT(signal->getOrigPacketId() == -1);
     EV_INFO << "Sending signal start to channel" << EV_FIELD(signal, *signal) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()), outputGate);
 }
@@ -107,7 +108,7 @@ void PacketTransmitterBase::sendPacketEnd(Signal *signal)
 
 clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const
 {
-    s duration = packet->getTotalLength() / datarate;
+    s duration = packet->getTotalLength() / txDatarate;
     EV_TRACE << "Calculating signal duration" << EV_FIELD(packet, *packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;
     return duration.get();
 }

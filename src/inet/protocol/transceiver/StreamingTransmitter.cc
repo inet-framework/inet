@@ -32,13 +32,13 @@ void StreamingTransmitter::handleMessageWhenUp(cMessage *message)
 
 void StreamingTransmitter::handleStopOperation(LifecycleOperation *operation)
 {
-    if (txSignal != nullptr)
+    if (isTransmitting())
         abortTx();
 }
 
 void StreamingTransmitter::handleCrashOperation(LifecycleOperation *operation)
 {
-    if (txSignal != nullptr)
+    if (isTransmitting())
         abortTx();
 }
 
@@ -51,69 +51,83 @@ void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
 
 void StreamingTransmitter::startTx(Packet *packet)
 {
-    ASSERT(txSignal == nullptr);
-    datarate = bps(*dataratePar);
-    EV_INFO << "Starting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
-    txStartTime = simTime();
+    // 1. check current state
+    ASSERT(!isTransmitting());
+    // 2. store transmission progress
+    txDatarate = bps(*dataratePar);
+    txStartTime = getClockTime();
+    // 3. create signal
     auto signal = encodePacket(packet);
     txSignal = signal->dup();
     txSignal->setOrigPacketId(signal->getId());
-    scheduleTxEndTimer(signal);
+    // 5. send signal start and notify subscribers
+    EV_INFO << "Starting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(txDatarate) << EV_ENDL;
     emit(transmissionStartedSignal, signal);
     sendPacketStart(signal);
+    // 6. schedule transmission end
+    scheduleTxEndTimer(txSignal);
 }
 
 void StreamingTransmitter::endTx()
 {
-    emit(transmissionEndedSignal, txSignal);
+    // 1. check current state
+    ASSERT(isTransmitting());
+    // 2. send signal end to receiver and notify subscribers
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
-    EV_INFO << "Ending transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
+    EV_INFO << "Ending transmission" << EV_FIELD(packet, *packet) << EV_FIELD(txDatarate) << EV_ENDL;
+    emit(transmissionEndedSignal, txSignal);
     sendPacketEnd(txSignal);
+    // 3. clear internal state
     txSignal = nullptr;
     txStartTime = -1;
-    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+    // 4. notify producer
+    auto gate = inputGate->getPathStartGate();
+    producer->handlePushPacketProcessed(packet, gate, true);
+    producer->handleCanPushPacketChanged(gate);
 }
 
 void StreamingTransmitter::abortTx()
 {
-    ASSERT(txSignal != nullptr);
-    cancelClockEvent(txEndTimer);
+    // 1. check current state
+    ASSERT(isTransmitting());
+    // 2. create new truncated signal
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
     // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
-    // b transmittedLength = getPushPacketProcessedLength(packet, inputGate);
-    // packet->eraseAtBack(packet->getTotalLength() - transmittedLength);
+    clocktime_t timePosition = getClockTime() - txStartTime;
+    b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
+    packet->eraseAtBack(packet->getTotalLength() - dataPosition);
     packet->setBitError(true);
-    txSignal->setDuration(simTime() - txStartTime);
-    EV_INFO << "Aborting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
-    emit(transmissionEndedSignal, txSignal);
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
-    sendPacketEnd(txSignal);
+    auto signal = encodePacket(packet);
+    signal->setOrigPacketId(txSignal->getOrigPacketId());
+    // 3. delete old signal
+    delete txSignal;
     txSignal = nullptr;
+    // 4. send signal end to receiver and notify subscribers
+    EV_INFO << "Aborting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(txDatarate) << EV_ENDL;
+    emit(transmissionEndedSignal, txSignal);
+    sendPacketEnd(signal);
+    // 5. clear internal state
     txStartTime = -1;
-    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+    // 6. notify producer
+    auto gate = inputGate->getPathStartGate();
+    producer->handlePushPacketProcessed(packet, gate, true);
+    producer->handleCanPushPacketChanged(gate);
 }
 
 void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
 {
-    if (txEndTimer->isScheduled())
-        cancelClockEvent(txEndTimer);
-    scheduleClockEventAfter(SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
-}
-
-void StreamingTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
-{
-    take(packet);
-    delete packet;
-    throw cRuntimeError("Invalid operation");
+    ASSERT(txStartTime != -1);
+    clocktime_t txEndTime = txStartTime + SIMTIME_AS_CLOCKTIME(signal->getDuration());
+    EV_INFO << "Scheduling transmission end timer" << EV_FIELD(at, txEndTime.ustr()) << EV_ENDL;
+    cancelClockEvent(txEndTimer);
+    scheduleClockEventAt(txEndTime, txEndTimer);
 }
 
 b StreamingTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
 {
-    if (txSignal == nullptr)
-        return b(0);
-    simtime_t transmissionDuration = simTime() - txStartTime;
-    return b(std::floor(datarate.get() * transmissionDuration.dbl()));
+    ASSERT(isTransmitting());
+    clocktime_t txDuration = getClockTime() - txStartTime;
+    return b(std::floor(txDatarate.get() * txDuration.dbl()));
 }
 
 } // namespace inet

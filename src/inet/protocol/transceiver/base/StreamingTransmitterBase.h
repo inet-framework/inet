@@ -26,6 +26,7 @@ class INET_API StreamingTransmitterBase : public PacketTransmitterBase
 {
   protected:
     cChannel *transmissionChannel = nullptr;
+
     simtime_t txStartTime = -1;
 
   protected:

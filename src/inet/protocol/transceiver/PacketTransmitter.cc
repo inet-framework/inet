@@ -31,10 +31,12 @@ void PacketTransmitter::handleMessageWhenUp(cMessage *message)
 
 void PacketTransmitter::handleStopOperation(LifecycleOperation *operation)
 {
+    ASSERT(!isTransmitting());
 }
 
 void PacketTransmitter::handleCrashOperation(LifecycleOperation *operation)
 {
+    ASSERT(!isTransmitting());
 }
 
 void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
@@ -46,20 +48,30 @@ void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
 
 void PacketTransmitter::startTx(Packet *packet)
 {
-    ASSERT(txSignal == nullptr);
-    txSignal = encodePacket(packet);
-    emit(transmissionStartedSignal, txSignal);
-    send(txSignal->dup(), SendOptions().duration(txSignal->getDuration()), outputGate);
+    // 1. check current state
+    ASSERT(!isTransmitting());
+    // 2. create signal
+    auto signal = encodePacket(packet);
+    txSignal = signal->dup();
+    // 3. send signal start and notify subscribers
+    emit(transmissionStartedSignal, signal);
+    send(signal, SendOptions().duration(signal->getDuration()), outputGate);
+    // 4. schedule transmission end timer
     scheduleTxEndTimer(txSignal);
 }
 
 void PacketTransmitter::endTx()
 {
+    // 1. check current state
+    ASSERT(isTransmitting());
+    // 2. notify subscribers
     emit(transmissionStartedSignal, txSignal);
-    auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
+    auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
+    // 3. clear internal state
     delete txSignal;
     txSignal = nullptr;
+    // 4. notify producer
+    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
     producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 

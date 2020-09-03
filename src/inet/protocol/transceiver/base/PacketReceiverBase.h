@@ -30,7 +30,7 @@ using namespace inet::physicallayer;
 class INET_API PacketReceiverBase : public OperationalMixin<PacketProcessorBase>, public virtual IActivePacketSource
 {
   protected:
-    bps datarate = bps(NaN);
+    bps rxDatarate = bps(NaN);
 
     cGate *inputGate = nullptr;
     cGate *outputGate = nullptr;
