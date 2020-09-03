@@ -15,9 +15,9 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.common.PacketStreamer;
+import inet.protocol.common.PacketDestreamer;
 
-simple EthernetCutthroughSource extends PacketStreamer
+simple EthernetCutthroughSource extends PacketDestreamer
 {
     parameters:
         string macTableModule;

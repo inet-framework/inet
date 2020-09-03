@@ -15,9 +15,9 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.common.PacketDestreamer;
+import inet.protocol.common.PacketStreamer;
 
-simple EthernetCutthroughSink extends PacketDestreamer
+simple EthernetCutthroughSink extends PacketStreamer
 {
     parameters:
         @class(EthernetCutthroughSink);
