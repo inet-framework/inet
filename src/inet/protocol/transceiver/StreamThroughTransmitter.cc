@@ -19,106 +19,204 @@ namespace inet {
 
 Define_Module(StreamThroughTransmitter);
 
+void StreamThroughTransmitter::initialize(int stage)
+{
+    StreamingTransmitterBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        bufferUnderrunTimer = new cMessage("BufferUnderrunTimer");
+}
+
 void StreamThroughTransmitter::handleMessageWhenUp(cMessage *message)
 {
     if (message == txEndTimer)
         endTx();
+    else if (message == bufferUnderrunTimer)
+        throw cRuntimeError("Buffer underrun during transmission");
     else
-        PacketTransmitterBase::handleMessageWhenUp(message);
+        StreamingTransmitterBase::handleMessageWhenUp(message);
 }
 
 void StreamThroughTransmitter::handleStopOperation(LifecycleOperation *operation)
 {
+    if (isTransmitting())
+        abortTx();
 }
 
 void StreamThroughTransmitter::handleCrashOperation(LifecycleOperation *operation)
 {
+    if (isTransmitting())
+        abortTx();
 }
 
-void StreamThroughTransmitter::startTx(Packet *packet)
+void StreamThroughTransmitter::startTx(Packet *packet, bps datarate, b position)
 {
-    datarate = bps(*dataratePar);
-    EV_INFO << "Starting transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
+    // 1. check current state
+    ASSERT(!isTransmitting());
+    // 2. store input progress
+    lastInputDatarate = datarate;
+    lastInputProgressTime = simTime();
+    lastInputProgressPosition = position;
+    // 3. store transmission progress
+    txDatarate = bps(*dataratePar);
     txStartTime = getClockTime();
-    ASSERT(txSignal == nullptr);
+    lastTxProgressTime = simTime();
+    lastTxProgressPosition = b(0);
+    // 4. create signal
     auto signal = encodePacket(packet);
     txSignal = signal->dup();
     txSignal->setOrigPacketId(signal->getId());
-    scheduleTxEndTimer(signal);
+    // 5. send signal start and notify subscribers
+    EV_INFO << "Starting transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
     emit(transmissionStartedSignal, signal);
     sendPacketStart(signal);
+    // 6. schedule transmission end timer and buffer underrun timer
+    scheduleTxEndTimer(txSignal);
+    scheduleBufferUnderrunTimer();
+}
+
+void StreamThroughTransmitter::progressTx(Packet *packet, bps datarate, b position)
+{
+    // 1. check current state
+    ASSERT(isTransmitting());
+    // 2. store input progress
+    b inputProgressPosition = lastInputProgressPosition + b(std::floor((simTime() - lastInputProgressTime).dbl() * lastInputDatarate.get()));
+    auto txPacket = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
+    bool isInputProgressAtEnd = inputProgressPosition == packet->getTotalLength() && packet->getTotalLength() == txPacket->getTotalLength();
+    bool isPacketUnchangedSinceLastProgress = isInputProgressAtEnd || packet->peekAll()->containsSameData(*txPacket->peekAll().get());
+    lastInputDatarate = datarate;
+    lastInputProgressTime = simTime();
+    lastInputProgressPosition = position;
+    // 3. store transmission progress
+    clocktime_t timePosition = getClockTime() - txStartTime;
+    lastTxProgressTime = simTime();
+    lastTxProgressPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
+    if (isPacketUnchangedSinceLastProgress)
+        delete packet;
+    else {
+        // 4. create progress signal
+        auto signal = encodePacket(packet);
+        signal->setOrigPacketId(txSignal->getOrigPacketId());
+        delete txSignal;
+        txSignal = signal->dup();
+        // 5. send signal progress
+        EV_INFO << "Progressing transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
+        sendPacketProgress(signal, lastTxProgressPosition, timePosition);
+    }
+    // 6. reschedule timers
+    scheduleTxEndTimer(txSignal);
+    scheduleBufferUnderrunTimer();
 }
 
 void StreamThroughTransmitter::endTx()
 {
+    // 1. check current state
+    ASSERT(isTransmitting());
+    // 2. send signal end to receiver and notify subscribers
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
-    EV_INFO << "Ending transmission" << EV_FIELD(packet, *packet) << EV_FIELD(datarate) << EV_ENDL;
+    EV_INFO << "Ending transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
     emit(transmissionEndedSignal, txSignal);
     sendPacketEnd(txSignal);
+    // 3. clear internal state
     txSignal = nullptr;
+    txDatarate = bps(NaN);
     txStartTime = -1;
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
-    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+    lastTxProgressTime = -1;
+    lastTxProgressPosition = b(-1);
+    lastInputDatarate = bps(NaN);
+    lastInputProgressTime = -1;
+    lastInputProgressPosition = b(-1);
+    // 4. notify producer
+    auto gate = inputGate->getPathStartGate();
+    producer->handlePushPacketProcessed(packet, gate, true);
+    producer->handleCanPushPacketChanged(gate);
 }
 
 void StreamThroughTransmitter::abortTx()
 {
-    throw cRuntimeError("TODO");
+    // 1. check current state
+    ASSERT(isTransmitting());
+    // 2. create new truncated signal
+    auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
+    // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
+    clocktime_t timePosition = getClockTime() - txStartTime;
+    b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
+    packet->eraseAtBack(packet->getTotalLength() - dataPosition);
+    packet->setBitError(true);
+    auto signal = encodePacket(packet);
+    signal->setOrigPacketId(txSignal->getOrigPacketId());
+    // 3. delete old signal
+    delete txSignal;
+    txSignal = nullptr;
+    // 4. send signal end to receiver and notify subscribers
+    EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
+    emit(transmissionEndedSignal, signal);
+    sendPacketEnd(signal);
+    // 5. clear internal state
+    txDatarate = bps(NaN);
+    txStartTime = -1;
+    lastTxProgressTime = -1;
+    lastTxProgressPosition = b(-1);
+    lastInputDatarate = bps(NaN);
+    lastInputProgressTime = -1;
+    lastInputProgressPosition = b(-1);
+    // 6. notify producer
+    auto gate = inputGate->getPathStartGate();
+    producer->handlePushPacketProcessed(packet, gate, true);
+    producer->handleCanPushPacketChanged(gate);
+}
+
+void StreamThroughTransmitter::scheduleBufferUnderrunTimer()
+{
+    cancelEvent(bufferUnderrunTimer);
+    if (lastInputDatarate < txDatarate) {
+        // Underrun occurs when the following two values become equal:
+        //   inputProgressPosition = lastInputProgressPosition + inputDatarate * (simTime() - lastInputProgressTime)
+        //   txProgressPosition = lastTxProgressPosition + txDatarate * (simTime() - lastTxProgressTime)
+        simtime_t bufferUnderrunTime = s((-lastInputProgressPosition + lastInputDatarate * s(lastInputProgressTime.dbl()) + lastTxProgressPosition - txDatarate * s(lastTxProgressTime.dbl())) / (lastInputDatarate - txDatarate)).get();
+        EV_INFO << "Scheduling buffer underrun timer" << EV_FIELD(at, bufferUnderrunTime.ustr()) << EV_ENDL;
+        scheduleAt(bufferUnderrunTime, bufferUnderrunTimer);
+    }
 }
 
 void StreamThroughTransmitter::scheduleTxEndTimer(Signal *signal)
 {
     ASSERT(txStartTime != -1);
-    scheduleClockEventAt(txStartTime + SIMTIME_AS_CLOCKTIME(signal->getDuration()), txEndTimer);
-}
-
-void StreamThroughTransmitter::pushPacket(Packet *packet, cGate *gate)
-{
-    Enter_Method("pushPacket");
-    take(packet);
-    startTx(packet);
+    clocktime_t txEndTime = txStartTime + SIMTIME_AS_CLOCKTIME(signal->getDuration());
+    EV_INFO << "Scheduling transmission end timer" << EV_FIELD(at, txEndTime.ustr()) << EV_ENDL;
+    cancelClockEvent(txEndTimer);
+    scheduleClockEventAt(txEndTime, txEndTimer);
 }
 
 void StreamThroughTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
-    startTx(packet);
+    startTx(packet, datarate, b(0));
 }
 
 void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
+    ASSERT(txSignal != nullptr);
     take(packet);
-    auto signal = encodePacket(packet);
-    signal->setOrigPacketId(txSignal->getOrigPacketId());
-    delete txSignal;
-    txSignal = signal;
-    cancelClockEvent(txEndTimer);
-    scheduleTxEndTimer(txSignal);
+    progressTx(packet, bps(NaN), packet->getTotalLength());
 }
 
 void StreamThroughTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
-    auto signal = encodePacket(packet);
-    signal->setOrigPacketId(txSignal->getOrigPacketId());
-    delete txSignal;
-    txSignal = signal->dup();
-    clocktime_t timePosition = getClockTime() - txStartTime;
-    b bitPosition = b(std::floor(datarate.get() * timePosition.dbl()));
-    sendPacketProgress(signal, bitPosition, timePosition);
-    cancelClockEvent(txEndTimer);
-    scheduleTxEndTimer(signal);
+    if (isTransmitting())
+        progressTx(packet, datarate, position);
+    else
+        startTx(packet, datarate, position);
 }
 
 b StreamThroughTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
 {
-    if (txSignal == nullptr)
-        return b(0);
-    clocktime_t transmissionDuration = getClockTime() - txStartTime;
-    return b(std::floor(datarate.get() * transmissionDuration.dbl()));
+    ASSERT(isTransmitting());
+    clocktime_t txDuration = getClockTime() - txStartTime;
+    return b(std::floor(txDatarate.get() * txDuration.dbl()));
 }
 
 } // namespace inet
