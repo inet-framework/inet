@@ -66,6 +66,24 @@ TcpSocket::TcpSocket(TcpAvailableInfo *availableInfo)
     remotePrt = availableInfo->getRemotePort();
 }
 
+TcpSocket::TcpSocket(const TcpSocket& other)
+{
+    connId = other.connId;
+    sockstate = other.sockstate;
+
+    localAddr = other.localAddr;
+    localPrt = other.localPrt;
+    remoteAddr = other.remoteAddr;
+    remotePrt = other.remotePrt;
+
+    cb = other.cb;
+    userData = other.userData;
+    gateToTcp = other.gateToTcp;
+    tcpAlgorithmClass = other.tcpAlgorithmClass;
+
+    // note: receiveQueue not copied
+}
+
 TcpSocket::~TcpSocket()
 {
     if (cb) {
