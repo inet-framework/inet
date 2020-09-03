@@ -72,7 +72,7 @@ void PacketTaggerBase::markPacket(Packet *packet)
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     }
     if (hopLimit != -1) {
-        EV_DEBUG << "Attaching HopLimitReq" << EV_FIELD(packet, *packet) << EV_FIELD(hopLimit) << std::endl;
+        EV_DEBUG << "Attaching HopLimitReq" << EV_FIELD(hopLimit) << EV_FIELD(packet, *packet) << std::endl;
         packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     }
     if (vlanId != -1) {

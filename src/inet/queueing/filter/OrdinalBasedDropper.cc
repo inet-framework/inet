@@ -59,7 +59,7 @@ void OrdinalBasedDropper::processPacket(Packet *packet)
 
 void OrdinalBasedDropper::dropPacket(Packet *packet)
 {
-    EV_DEBUG << "Dropping packet number " << numPackets << " " << packet << endl;
+    EV_DEBUG << "Dropping packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet, *packet) << EV_ENDL;
     numPackets++;
     numDropped++;
     dropsVector.erase(dropsVector.begin());
