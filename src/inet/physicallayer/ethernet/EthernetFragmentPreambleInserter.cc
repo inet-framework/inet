@@ -51,6 +51,17 @@ void EthernetFragmentPreambleInserter::handlePacketProcessed(Packet *packet)
     }
 }
 
+void EthernetFragmentPreambleInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+{
+    Enter_Method("pushPacketStart");
+    take(packet);
+    checkPacketStreaming(packet);
+    startPacketStreaming(packet);
+    processPacket(packet);
+    pushOrSendPacketProgress(packet, outputGate, consumer, datarate, B(8), b(0));
+    updateDisplayString();
+}
+
 } // namespace physicallayer
 
 } // namespace inet

@@ -30,6 +30,9 @@ class INET_API EthernetPreambleInserter : public PacketFlowBase
 {
   protected:
     virtual void processPacket(Packet *packet) override;
+
+  public:
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
 };
 
 } // namespace physicallayer
