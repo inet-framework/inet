@@ -207,15 +207,8 @@ void PacketProcessorBase::animateSend(Packet *packet, cGate *gate, simtime_t dur
         }
         while (gate->getNextGate() != nullptr) {
             ChannelResult result;
-            // NOTE: we must set the duration for only one hop
-            if (packet->getOrigPacketId() == -1) {
-                result.duration = duration;
-                duration = 0;
-            }
-            else {
-                result.remainingDuration = remainingDuration;
-                remainingDuration = 0;
-            }
+            result.duration = duration;
+            result.remainingDuration = remainingDuration;
             envir->messageSendHop(packet, gate, result);
             gate = gate->getNextGate();
         }
