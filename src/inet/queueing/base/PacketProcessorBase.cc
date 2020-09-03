@@ -243,7 +243,10 @@ void PacketProcessorBase::animateSendPacketProgress(Packet *packet, cGate *gate,
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
     simtime_t remainingDuration = s((packet->getTotalLength() - position) / datarate).get();
-    animateSend(packet, gate, -1, remainingDuration);
+    if (packet->getOrigPacketId() == -1)
+        animateSend(packet, gate, remainingDuration, remainingDuration);
+    else
+        animateSend(packet, gate, -1, remainingDuration);
 }
 
 const char *PacketProcessorBase::resolveDirective(char directive) const
