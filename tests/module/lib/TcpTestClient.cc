@@ -13,6 +13,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/applications/common/SocketTag_m.h"
 
 namespace inet {
 
@@ -134,6 +135,21 @@ void TcpTestClient::handleMessage(cMessage *msg)
         return;
     }
 
+    if (!socket.belongsToSocket(msg)) {
+        delete msg;
+        return;
+    }
+
+    if (msg->getKind() == TCP_I_AVAILABLE) {
+        TcpSocket newSocket = TcpSocket(msg);
+        newSocket.setOutputGate(gate("socketOut"));
+        socket.accept(newSocket.getSocketId());
+        socket.close();
+        delete msg;
+        socket = newSocket;
+        return;
+    }
+
     //EV << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
     if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
@@ -159,7 +175,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort);
             else
-                socket.listenOnce();
+                socket.listen();
             scheduleNextSend();
             delete msg;
             break;
