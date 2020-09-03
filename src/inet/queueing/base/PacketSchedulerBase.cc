@@ -190,7 +190,7 @@ b PacketSchedulerBase::getPullPacketProcessedLength(Packet *packet, cGate *gate)
 void PacketSchedulerBase::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    if (collector != nullptr)
+    if (collector != nullptr && (!isStreamingPacket() || callSchedulePacket() != inProgressGateIndex))
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
