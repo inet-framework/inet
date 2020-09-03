@@ -22,15 +22,18 @@ import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
+//
+// This module implements an IEEE 802.15.4 narrowband network interface.
+//
 module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
         @class(NetworkInterface);
         string interfaceTableModule;
         string energySourceModule = default("");
+        string protocol = default("ieee802154mac");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
-        @display("i=block/ifcard");
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -38,17 +41,18 @@ module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInte
     submodules:
         mac: Ieee802154NarrowbandMac {
             parameters:
-                @display("p=100,100");
+                @display("p=300,100");
         }
         radio: <default("Ieee802154NarrowbandScalarRadio")> like IRadio {
             parameters:
-                @display("p=100,200");
+                @display("p=300,200");
         }
     connections:
-        upperLayerIn --> mac.upperLayerIn;
+        upperLayerIn --> { @display("m=n"); } --> mac.upperLayerIn;
         mac.lowerLayerOut --> radio.upperLayerIn;
-        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+
         radioIn --> { @display("m=s"); } --> radio.radioIn;
         radio.upperLayerOut --> mac.lowerLayerIn;
+        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
 

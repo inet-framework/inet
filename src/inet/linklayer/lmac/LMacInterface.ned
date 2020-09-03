@@ -19,6 +19,9 @@ package inet.linklayer.lmac;
 
 import inet.linklayer.common.WirelessInterface;
 
+//
+// This module implements a wireless network interface using the L-MAC protocol.
+//
 module LMacInterface extends WirelessInterface
 {
     parameters:

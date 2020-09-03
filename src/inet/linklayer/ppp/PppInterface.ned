@@ -21,16 +21,12 @@ import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
 
-
 //
-// PPP interface. Complements the ~Ppp module with an output queue
-// for QoS and RED support.
+// This module implements a PPP network interface.
 //
 module PppInterface extends NetworkInterface like IPppInterface
 {
     parameters:
-        @class(NetworkInterface);
-        @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;
         string protocol = default("ppp");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
@@ -40,15 +36,17 @@ module PppInterface extends NetworkInterface like IPppInterface
         inout phys @labels(PppFrame);
     submodules:
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=300,100");
+            parameters:
+                @display("p=500,100");
         }
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=100,100");
+            parameters:
+                @display("p=300,100");
         }
         ppp: Ppp {
             parameters:
                 queue.packetCapacity = default(10000);
-                @display("p=200,200");
+                @display("p=400,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> egressTC.in if exists(egressTC);

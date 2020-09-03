@@ -17,12 +17,15 @@
 
 package inet.linklayer.contract;
 
+//
+// This module interface is implemnted by network interfaces.
+//
 moduleinterface INetworkInterface
 {
     parameters:
         @display("i=block/ifcard");
     gates:
-        input upperLayerIn;    // from upper layers
-        output upperLayerOut;  // to upper layers
+        input upperLayerIn;
+        output upperLayerOut;
 }
 

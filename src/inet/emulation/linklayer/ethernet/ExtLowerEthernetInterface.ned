@@ -29,7 +29,6 @@ import inet.linklayer.ethernet.IEtherEncap;
 module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
-        @display("i=block/ifcard");
         double bitrate @unit(bps) = default(nan bps);
     gates:
         input cutthroughIn @loose;
@@ -38,11 +37,11 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
     submodules:
         encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=100,100");
+                @display("p=300,100");
         }
         socket: ExtEthernetSocket {
             parameters:
-                @display("p=100,300");
+                @display("p=300,200");
         }
     connections allowunconnected:
         upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if exists(encap);

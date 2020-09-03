@@ -31,11 +31,11 @@ import inet.protocol.selectivity.SendToMacAddress;
 import inet.protocol.transceiver.PacketTransmitter;
 import inet.queueing.common.PacketMultiplexer;
 
-
 module InterfaceService extends NetworkInterface
 {
     parameters:
         string interfaceTableModule;
+        string protocol;
         @class(inet::NetworkInterface);
         @display("i=block/ifcard");
     gates:
@@ -44,40 +44,40 @@ module InterfaceService extends NetworkInterface
         inout g;
     submodules:
         sendToMacAddress: SendToMacAddress {
-            @display("p=150,100");
+            @display("p=300,100");
         }
         resending: Resending {
-            @display("p=150,200");
+            @display("p=300,200");
         }
         sendWithAcknowledge: SendWithAcknowledge {
-            @display("p=150,300");
+            @display("p=300,300");
         }
         m1: PacketMultiplexer {
-            @display("p=150,400");
+            @display("p=300,400");
         }
         sendWithProtocol: SendWithProtocol {
-            @display("p=150,500");
+            @display("p=300,500");
         }
         crcInserter: CrcHeaderInserter {
-            @display("p=150,600");
+            @display("p=300,600");
         }
         transmitter: PacketTransmitter {
-            @display("p=150,700");
+            @display("p=300,700");
         }
         receiveAtMacAddress: ReceiveAtMacAddress {
-            @display("p=450,100");
+            @display("p=600,100");
         }
         receiveWithAcknowledge: ReceiveWithAcknowledge {
-            @display("p=450,200");
+            @display("p=600,200");
         }
         d1: MessageDispatcher {
-            @display("p=450,300");
+            @display("p=600,300");
         }
         receiveWithProtocol: ReceiveWithProtocol {
-            @display("p=450,400");
+            @display("p=600,400");
         }
         crcChecker: CrcHeaderChecker {
-            @display("p=450,500");
+            @display("p=600,500");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> sendToMacAddress.in;

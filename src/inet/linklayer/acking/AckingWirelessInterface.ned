@@ -25,10 +25,10 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
-// Highly abstracted wireless NIC that consists of a unit disk radio and a trivial
-// MAC protocol. It offers simplicity for scenarios where Layer 1 and 2 effects
-// can be completely ignored, for example testing the basic functionality
-// of a wireless ad-hoc routing protocol.
+// This module implements a highly abstracted wireless network interface (NIC)
+// that uses a trivial MAC protocol. It offers simplicity for scenarios where
+// Layer 1 and 2 effects can be completely ignored, for example testing the
+// basic functionality of a wireless ad-hoc routing protocol.
 //
 // The most important parameter this model accepts is the transmission range.
 // When a radio transmits a frame, all other radios within transmission range
@@ -40,10 +40,9 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(NetworkInterface);
-        @display("i=block/ifcard");
         string interfaceTableModule;
         string energySourceModule = default("");
+        string protocol = default("ackingmac");
         double bitrate @unit(bps);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
@@ -55,17 +54,18 @@ module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
     submodules:
         mac: AckingMac {
             parameters:
-                @display("p=100,100");
+                @display("p=300,100");
         }
         radio: <default("UnitDiskRadio")> like IRadio {
             parameters:
-                @display("p=100,200");
+                @display("p=300,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> mac.upperLayerIn;
         mac.lowerLayerOut --> radio.upperLayerIn;
-        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+
         radioIn --> { @display("m=s"); } --> radio.radioIn;
         radio.upperLayerOut --> mac.lowerLayerIn;
+        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
 

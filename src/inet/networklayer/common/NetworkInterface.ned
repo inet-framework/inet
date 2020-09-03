@@ -20,14 +20,19 @@ package inet.networklayer.common;
 import inet.clock.contract.IClock;
 import inet.common.packet.recorder.PcapRecorder;
 
+//
+// This module serves as the base module for all network interfaces.
+//
 module NetworkInterface
 {
     parameters:
+        string displayStringTextFormat = default("%a (%i)\n%m");
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
-        string displayStringTextFormat = default("%a (%i)\n%m");
         pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
         **.clockModule = default(exists(clock) ? absPath(".clock") : "");
+        @class(NetworkInterface);
+        @display("i=block/ifcard");
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:

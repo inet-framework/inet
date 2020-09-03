@@ -22,37 +22,42 @@ import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
+//
+// This module implements a generic wireless network interface.
+//
 module WirelessInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(NetworkInterface);
         string interfaceTableModule;
         string energySourceModule;
+        string protocol;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
-        @display("i=block/ifcard");
     gates:
         input upperLayerIn;
         output upperLayerOut;
         input radioIn @labels(IWirelessSignal);
     submodules:
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
-            @display("p=250,100");
+            parameters:
+	            @display("p=500,100");
         }
         mac: <> like IMacProtocol {
-            @display("p=100,200");
+            parameters:
+	            @display("p=300,200");
         }
-        radio: <> like IRadio if typename != "" {
-            @display("p=100,350");
+        radio: <default("")> like IRadio if typename != "" {
+            parameters:
+	            @display("p=300,300");
         }
     connections allowunconnected:
-        radioIn --> { @display("m=s"); } --> radio.radioIn if exists(radio);
-        radio.upperLayerIn <-- mac.lowerLayerOut if exists(radio);
-        radio.upperLayerOut --> mac.lowerLayerIn if exists(radio);
+        upperLayerIn --> { @display("m=n"); } --> mac.upperLayerIn if !exists(classifier);
+        upperLayerIn --> { @display("m=n"); } --> classifier.in if exists(classifier);
+        classifier.out --> mac.upperLayerIn if exists(classifier);
+        mac.lowerLayerOut --> radio.upperLayerIn if exists(radio);
 
+        radioIn --> { @display("m=s"); } --> radio.radioIn if exists(radio);
+        radio.upperLayerOut --> mac.lowerLayerIn if exists(radio);
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if !exists(classifier);
-        mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
-        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if exists(classifier);
 }
 

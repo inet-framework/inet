@@ -20,21 +20,25 @@ package inet.linklayer.vlan;
 import inet.linklayer.contract.IVlanInterface;
 import inet.networklayer.common.NetworkInterface;
 
+//
+// This module implements a virtual network interface.
+//
 module VlanInterface extends NetworkInterface like IVlanInterface
 {
     parameters:
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/tunnel");
-        @class(NetworkInterface);
     gates:
         input upperLayerIn;
         output upperLayerOut;
     submodules:
         tunnel: VlanTunnel {
-            @display("p=100,100");
+            parameters:
+	            @display("p=300,100");
         }
     connections:
-        upperLayerIn --> tunnel.upperLayerIn;
-        upperLayerOut <-- tunnel.upperLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> tunnel.upperLayerIn;
+        tunnel.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
+

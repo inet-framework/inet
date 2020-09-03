@@ -19,6 +19,9 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.ethernet.IEthernetPhyLayer;
 
+//
+// This module represents an Ethernet network interface with cut-through support.
+//
 module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
@@ -31,7 +34,6 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         *.bitrate = default(bitrate);
         *.macTableModule = default(macTableModule);
         @class(EthernetCutthroughInterface);
-        @display("i=block/ifcard;bgb=700,400");
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -40,13 +42,16 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         inout phys;
     submodules:
         macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
-            @display("p=500,100");
+            parameters:
+	            @display("p=400,100");
         }
         cutthroughLayer: EthernetCutthroughLayer {
-            @display("p=500,200");
+            parameters:
+	            @display("p=400,200");
         }
         phyLayer: <default("EthernetStreamThroughPhyLayer")> like IEthernetPhyLayer {
-            @display("p=500,300");
+            parameters:
+	            @display("p=400,300");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> macLayer.upperLayerIn;
@@ -62,3 +67,4 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         cutthroughLayer.cutthroughOut --> { @display("m=e"); } --> cutthroughOut;
         cutthroughIn --> { @display("m=e"); } --> cutthroughLayer.cutthroughIn;
 }
+

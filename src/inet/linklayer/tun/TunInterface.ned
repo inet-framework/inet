@@ -21,23 +21,26 @@ package inet.linklayer.tun;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.networklayer.common.NetworkInterface;
 
+//
+// This module implements a TUN network interface.
+//
 module TunInterface extends NetworkInterface like ITunnelInterface
 {
     parameters:
-        @class(NetworkInterface);
-        string interfaceTableModule;    // The path to the InterfaceTable module
+        string interfaceTableModule;
         int mtu @unit(B) = default(1500B);
-        @display("i=block/tunnel");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
+        @display("i=block/tunnel");
     gates:
-        input upperLayerIn;    // from upper layers
-        output upperLayerOut;  // to upper layers
+        input upperLayerIn;
+        output upperLayerOut;
     submodules:
         tun: Tun {
-            @display("p=100,100");
+            parameters:
+	            @display("p=300,100");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> tun.upperLayerIn;
-        upperLayerOut <-- { @display("m=n"); } <-- tun.upperLayerOut;
+        tun.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
 

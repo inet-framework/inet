@@ -31,7 +31,6 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     parameters:
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         double bitrate @unit(bps) = default(nan bps);
-        @display("i=block/ifcard");
     gates:
         input cutthroughIn @loose;
         output cutthroughOut @loose;
@@ -39,15 +38,16 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     submodules:
         tap: ExtEthernetTapDevice {
             parameters:
-                @display("p=100,100");
+                @display("p=300,100");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queue.packetCapacity = 10000;
-                @display("p=200,400");
+                @display("p=300,200");
         }
     connections allowunconnected:
         tap.lowerLayerOut --> { @display("m=s"); } --> mac.upperLayerIn;
         tap.lowerLayerIn <-- { @display("m=s"); } <-- mac.upperLayerOut;
         mac.phys <--> { @display("m=s"); } <--> phys;
 }
+

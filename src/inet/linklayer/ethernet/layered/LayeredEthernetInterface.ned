@@ -21,6 +21,9 @@ import inet.physicallayer.ethernet.IEthernetPhyLayer;
 import inet.protocol.measurement.IMeasurementLayer;
 import inet.protocol.trafficconditioner.ITrafficConditionerLayer;
 
+//
+// This module implements an Ethernet network interface.
+//
 module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
@@ -31,8 +34,6 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         double bitrate @unit(bps);
         string interfaceTableModule;
         *.bitrate = default(bitrate);
-        @class(NetworkInterface);
-        @display("i=block/ifcard;bgb=700,400");
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -41,16 +42,20 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         inout phys;
     submodules:
         trafficConditionerLayer: <default("OmittedTrafficConditionerLayer")> like ITrafficConditionerLayer {
-            @display("p=500,100");
+            parameters:
+	            @display("p=400,100");
         }
         measurementLayer: <default("OmittedMeasurementLayer")> like IMeasurementLayer {
-            @display("p=500,200");
+            parameters:
+	            @display("p=400,200");
         }
         macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
-            @display("p=500,300");
+            parameters:
+	            @display("p=400,300");
         }
         phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
-            @display("p=500,400");
+            parameters:
+	            @display("p=400,400");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> trafficConditionerLayer.upperLayerIn;
@@ -65,3 +70,4 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         measurementLayer.upperLayerOut --> trafficConditionerLayer.lowerLayerIn;
         trafficConditionerLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
+

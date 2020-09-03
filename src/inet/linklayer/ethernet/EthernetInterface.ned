@@ -25,17 +25,13 @@ import inet.linklayer.ieee8021q.IIeee8021qEncap;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
 
-
 //
-// Ethernet network interface. Complements ~EtherMac and ~EtherEncap
-// with an output queue for QoS and RED support.
+// This module represents an Ethernet network interface.
 //
 module EthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
-        @class(NetworkInterface);
         @lifecycleSupport;
-        @display("i=block/ifcard;bgl=2");
         string interfaceTableModule;
         string protocol = default("ethernetmac");
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
@@ -56,23 +52,25 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         inout phys @labels(EtherFrame);
     submodules:
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=400,100");
+            parameters:
+	            @display("p=700,100");
         }
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=100,100");
+            parameters:
+            	@display("p=300,100");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queue.packetCapacity = default(10000);
-                @display("p=250,400");
+                @display("p=500,400");
         }
         encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=250,200");
+                @display("p=500,200");
         }
         qEncap: <default("")> like IIeee8021qEncap if typename != "" {
             parameters:
-                @display("p=150,300");
+                @display("p=300,300");
         }
     connections:
         mac.upperLayerOut --> qEncap.lowerLayerIn if exists(qEncap);

@@ -27,7 +27,8 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
-// This NIC implements an 802.11 network interface card.
+// This module implements an IEEE 802.11 network interface.
+//
 // It can be configured via the mgmt.typename parameter to act
 // as an AP or a STA, or for ad-hoc mode.
 //
@@ -39,9 +40,9 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(::inet::NetworkInterface);
         string interfaceTableModule;
         string energySourceModule = default("");
+        string protocol = default("ieee80211mac");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
@@ -55,39 +56,38 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
-        @display("i=block/ifcard");
     gates:
-        input upperLayerIn; // to upper layers
-        output upperLayerOut; // from upper layers
-        input radioIn @labels(IWirelessSignal); // to receive signals
+        input upperLayerIn;
+        output upperLayerOut;
+        input radioIn @labels(IWirelessSignal);
     submodules:
         mib: Ieee80211Mib {
             parameters:
-                @display("p=100,100;is=s");
+                @display("p=100,300;is=s");
         }
         llc: <default(opMode == "p" ? "Ieee80211LlcEpd" : "Ieee80211LlcLpd")> like IIeee80211Llc {
             parameters:
-                @display("p=250,200");
+                @display("p=300,200");
         }
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             parameters:
-                @display("p=400,100");
+                @display("p=500,100");
         }
         agent: <default("Ieee80211AgentSta")> like IIeee80211Agent if typename != "" {
             parameters:
-                @display("p=550,350");
+                @display("p=700,300");
         }
         mgmt: <default("Ieee80211MgmtSta")> like IIeee80211Mgmt {
             parameters:
-                @display("p=400,350");
+                @display("p=500,300");
         }
         mac: <default("Ieee80211Mac")> like IIeee80211Mac {
             parameters:
-                @display("p=250,350");
+                @display("p=300,300");
         }
         radio: <default("Ieee80211ScalarRadio")> like IRadio {
             parameters:
-                @display("p=250,500");
+                @display("p=300,400");
         }
     connections:
         radioIn --> { @display("m=s"); } --> radio.radioIn;

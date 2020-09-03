@@ -18,7 +18,7 @@
 package inet.linklayer.contract;
 
 //
-// Module interface for PPP interfaces.
+// This module interface is implemented by PPP network interfaces.
 //
 moduleinterface IPppInterface extends IWiredInterface
 {

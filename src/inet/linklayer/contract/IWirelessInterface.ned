@@ -16,12 +16,13 @@
 package inet.linklayer.contract;
 
 //
-// Module interface for wireless network interfaces.
+// This module interface is implemented by wireless network interfaces.
 //
 moduleinterface IWirelessInterface extends INetworkInterface
 {
     parameters:
         @display("i=block/ifcard");
     gates:
-        input radioIn @labels(IWirelessSignal); // to receive signals
+        input radioIn @labels(IWirelessSignal);
 }
+
