@@ -1,3 +1,37 @@
+remove getPullPacketProcessedLength and getPushPacketProcessedLength?
+
+handlePullPacketChanged can come from the queue when
+ - a high priority frame is already being streamed and it gets interrupted
+ - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
+
+in both cases a progress report is sent which is unnecessary and confusing
+
+
+- review all EV statements at least in the queueing and protocol packages
+- adapt Ieee8021dRelayUnit to new structure
+- fix datarate handling PacketStreamer, use the parameter if provided and the component is active!!!
+- review all streamig operation with respect to origPacketId handling
+
+- ethernet preemption example: 2nd out of 3 sends per packet must be avoided
+  - add a check for whether the two packets are definitely equal or may be different?!
+  - change the preamble insertion module to immediately start with a progress of 8 bytes and
+  - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
+
+- reformat source code
+- remove core team members as authors from comments?
+- replace core team members in copyright holders?
+- create release script (remove trailing spaces, replace leading tabs, fix header guards, format source code)
+
+- check Ethernet FCS progress report at the correct moment of time
+
+Parallel simulation support
+ - compute earliest input/output time (function?!) for each gate in the network
+   - earliest output time (EOT) per gate starts from the earliest event in the module (using virtual method in modules with default implementation)
+   - also take into account C++ methods calls when propagating EIT/EOT
+   - earliest input time (EIT) per gate is computed from neighbors' earliest output time per gate + channel delay
+   - refine times by propagating EOT to EIT until there's no change
+   - neighbor partitions' EIT can be easily found
+
 INET 4.3 release TODO items:
 
 1. Clock model
