@@ -47,7 +47,7 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 Calling finish() at end of Run #0...
 []: TcpTestNet1.cli_app: received 0 bytes in 0 packets
 []: TcpTestNet1.cli_tcp: finishing with 1 connections open.
-[]: TcpTestNet1.srv_tcp: finishing with 1 connections open.
+[]: TcpTestNet1.srv_tcp: finishing with 2 connections open.
 []: TcpTestNet1.srv_app: received 100 bytes in 1 packets
 [testing]: [0.208] tcpdump finished, A:2 B:2 segments
 

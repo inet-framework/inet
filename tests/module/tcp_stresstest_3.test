@@ -28,7 +28,7 @@ include ../../lib/defaults.ini
 Calling finish() at end of Run #0...
 TcpTestNet2.cli_app: received 0 bytes in 0 packets
 TcpTestNet2.cli_tcp: finishing with 1 connections open.
-TcpTestNet2.srv_tcp: finishing with 1 connections open.
+TcpTestNet2.srv_tcp: finishing with 2 connections open.
 TcpTestNet2.srv_app: received 655360 bytes in 334 packets
 [361.678] tcpdump finished, A:842 B:914 segments
 
