@@ -41,11 +41,14 @@ class INET_API PacketStreamer : public PacketProcessorBase, public virtual IPack
     bps streamDatarate = bps(NaN);
     Packet *streamedPacket = nullptr;
 
+    cMessage *endStreamingTimer = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
     virtual bool isStreaming() const { return streamedPacket != nullptr; }
+    virtual void endStreaming();
 
   public:
     virtual ~PacketStreamer();

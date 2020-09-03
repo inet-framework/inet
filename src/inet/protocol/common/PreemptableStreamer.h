@@ -41,14 +41,18 @@ class INET_API PreemptableStreamer : public PacketProcessorBase, public virtual 
     IActivePacketSink *collector = nullptr;
 
     simtime_t streamStart;
+    bps streamDatarate = bps(NaN);
     Packet *streamedPacket = nullptr;
     Packet *remainingPacket = nullptr;
+
+    cMessage *endStreamingTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
     virtual bool isStreaming() const { return streamedPacket != nullptr; }
+    virtual void endStreaming();
 
   public:
     virtual ~PreemptableStreamer();

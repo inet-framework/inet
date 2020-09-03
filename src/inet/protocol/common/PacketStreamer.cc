@@ -25,6 +25,7 @@ Define_Module(PacketStreamer);
 PacketStreamer::~PacketStreamer()
 {
     delete streamedPacket;
+    cancelAndDelete(endStreamingTimer);
 }
 
 void PacketStreamer::initialize(int stage)
@@ -38,6 +39,7 @@ void PacketStreamer::initialize(int stage)
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         collector = findConnectedModule<IActivePacketSink>(outputGate);
+        endStreamingTimer = new cMessage("EndStreamingTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -47,8 +49,24 @@ void PacketStreamer::initialize(int stage)
 
 void PacketStreamer::handleMessage(cMessage *message)
 {
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
+    if (message == endStreamingTimer)
+        endStreaming();
+    else {
+        auto packet = check_and_cast<Packet *>(message);
+        pushPacket(packet, packet->getArrivalGate());
+    }
+}
+
+void PacketStreamer::endStreaming()
+{
+    auto packetLength = streamedPacket->getTotalLength();
+    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
+    streamDatarate = bps(NaN);
+    streamedPacket = nullptr;
+    numProcessedPackets++;
+    processedTotalLength += packetLength;
+    updateDisplayString();
 }
 
 bool PacketStreamer::canPushSomePacket(cGate *gate) const
@@ -69,16 +87,12 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     streamDatarate = datarate;
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    auto packetLength = packet->getTotalLength();
     EV_INFO << "Starting streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     pushOrSendPacketStart(packet, outputGate, consumer, streamDatarate);
-    EV_INFO << "Ending streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
-    streamDatarate = bps(NaN);
-    streamedPacket = nullptr;
-    numProcessedPackets++;
-    processedTotalLength += packetLength;
-    updateDisplayString();
+    if (std::isnan(streamDatarate.get()))
+        endStreaming();
+    else
+        scheduleAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
 }
 
 void PacketStreamer::handleCanPushPacketChanged(cGate *gate)

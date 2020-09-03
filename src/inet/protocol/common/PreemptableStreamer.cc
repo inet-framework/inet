@@ -27,12 +27,14 @@ Define_Module(PreemptableStreamer);
 PreemptableStreamer::~PreemptableStreamer()
 {
     delete streamedPacket;
+    cancelAndDelete(endStreamingTimer);
 }
 
 void PreemptableStreamer::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        datarate = bps(par("datarate"));
         minPacketLength = b(par("minPacketLength"));
         roundingLength = b(par("roundingLength"));
         inputGate = gate("in");
@@ -41,6 +43,7 @@ void PreemptableStreamer::initialize(int stage)
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         collector = findConnectedModule<IActivePacketSink>(outputGate);
+        endStreamingTimer = new cMessage("EndStreamingTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -50,8 +53,24 @@ void PreemptableStreamer::initialize(int stage)
 
 void PreemptableStreamer::handleMessage(cMessage *message)
 {
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
+    if (message == endStreamingTimer)
+        endStreaming();
+    else {
+        auto packet = check_and_cast<Packet *>(message);
+        pushPacket(packet, packet->getArrivalGate());
+    }
+}
+
+void PreemptableStreamer::endStreaming()
+{
+    auto packetLength = streamedPacket->getTotalLength();
+    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
+    streamDatarate = bps(NaN);
+    streamedPacket = nullptr;
+    numProcessedPackets++;
+    processedTotalLength += packetLength;
+    updateDisplayString();
 }
 
 bool PreemptableStreamer::canPushSomePacket(cGate *gate) const
@@ -69,15 +88,15 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     ASSERT(!isStreaming());
     take(packet);
+    streamDatarate = datarate;
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
     EV_INFO << "Starting streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);
-    EV_INFO << "Ending streaming" << EV_FIELD(packet, *packet) << EV_ENDL;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
-    streamedPacket = nullptr;
-    handlePacketProcessed(packet);
-    updateDisplayString();
+    if (std::isnan(streamDatarate.get()))
+        endStreaming();
+    else
+        scheduleAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
 }
 
 void PreemptableStreamer::handleCanPushPacketChanged(cGate *gate)
@@ -107,6 +126,7 @@ Packet *PreemptableStreamer::canPullPacket(cGate *gate) const
 Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
+    streamDatarate = datarate;
     auto packet = remainingPacket == nullptr ? provider->pullPacket(inputGate->getPathStartGate()) : remainingPacket;
     remainingPacket = nullptr;
     auto fragmentTag = packet->findTagForUpdate<FragmentTag>();
@@ -120,7 +140,7 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamStart = simTime();
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    EV_INFO << "Starting streaming " << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    EV_INFO << "Starting streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     updateDisplayString();
     return packet;
 }
@@ -130,7 +150,7 @@ Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
-    b pulledLength = datarate * s((simTime() - streamStart).dbl());
+    b pulledLength = streamDatarate * s((simTime() - streamStart).dbl());
     b preemptedLength = roundingLength * ((pulledLength + roundingLength - b(1)) / roundingLength);
     if (preemptedLength < minPacketLength)
         preemptedLength = minPacketLength;
