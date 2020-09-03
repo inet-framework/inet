@@ -86,23 +86,19 @@ class INET_API TcpSendQueue : public cObject
     /**
      * Returns the sequence number of the first byte stored in the buffer.
      */
-    virtual uint32 getBufferStartSeq();
+    virtual uint32 getBufferStartSeq() const;
 
     /**
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */
-    virtual uint32 getBufferEndSeq();
+    virtual uint32 getBufferEndSeq() const;
 
     /**
      * Utility function: returns how many bytes are available in the queue, from
      * (and including) the given sequence number.
      */
-    inline ulong getBytesAvailable(uint32 fromSeq)
-    {
-        uint32 bufEndSeq = getBufferEndSeq();
-        return seqLess(fromSeq, bufEndSeq) ? bufEndSeq - fromSeq : 0;
-    }
+    virtual ulong getBytesAvailable(uint32 fromSeq) const;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs

@@ -47,7 +47,6 @@ std::string TcpSendQueue::str() const
 
 void TcpSendQueue::enqueueAppData(Packet *msg)
 {
-    //tcpEV << "sendQ: " << str() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     dataBuffer.push(msg->peekDataAt(B(0), msg->getDataLength()));
     end += msg->getByteLength();
     if (seqLess(end, begin))
@@ -55,20 +54,24 @@ void TcpSendQueue::enqueueAppData(Packet *msg)
     delete msg;
 }
 
-uint32 TcpSendQueue::getBufferStartSeq()
+uint32 TcpSendQueue::getBufferStartSeq() const
 {
     return begin;
 }
 
-uint32 TcpSendQueue::getBufferEndSeq()
+uint32 TcpSendQueue::getBufferEndSeq() const
 {
     return end;
 }
 
+ulong TcpSendQueue::getBytesAvailable(uint32 fromSeq) const
+{
+    uint32 bufEndSeq = getBufferEndSeq();
+    return seqLess(fromSeq, bufEndSeq) ? bufEndSeq - fromSeq : 0;
+}
+
 Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
-    //tcpEV << "sendQ: " << str() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
-
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
     char msgname[32];
@@ -76,15 +79,12 @@ Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 
     Packet *tcpSegment = new Packet(msgname);
     const auto& payload = dataBuffer.peekAt(B(fromSeq - begin), B(numBytes));   //get data from buffer
-    //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
     tcpSegment->insertAtBack(payload);
     return tcpSegment;
 }
 
 void TcpSendQueue::discardUpTo(uint32 seqNum)
 {
-    //tcpEV << "sendQ: " << str() << " discardUpTo(seq=" << seqNum << ")\n";
-
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
     if (seqNum != begin) {
