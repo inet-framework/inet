@@ -34,7 +34,6 @@ namespace ieee80211 {
 /**
  * Abstract base class for 802.11 infrastructure mode management components.
  *
- * @author Andras Varga
  */
 class INET_API Ieee80211MgmtBase : public OperationalBase
 {

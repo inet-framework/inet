@@ -24,7 +24,6 @@ package inet.power.contract;
 // The Cc is an abbreviation that is used for charge and current based interfaces.
 //
 // @see ~ICcEnergyConsumer, ~ICcEnergyGenerator, ~ICcEnergySink, ~ICcEnergyStorage, ~ICcEnergyManagement
-// @author Levente Meszaros
 //
 moduleinterface ICcEnergySource extends IEnergySource
 {

@@ -21,7 +21,6 @@ package inet.power.contract;
 // The energy source models provide energy for multiple energy consumers.
 //
 // @see ~IEnergyConsumer, ~IEnergyGenerator, ~IEnergySink, ~IEnergyStorage, ~IEnergyManagement
-// @author Levente Meszaros
 //
 moduleinterface IEnergySource
 {

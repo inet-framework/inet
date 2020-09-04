@@ -16,7 +16,7 @@
 
 /**
  * @file Igmpv3.cc
- * @author Adam Malik(towdie13@gmail.com), Vladimir Vesely (ivesely@fit.vutbr.cz), Tamas Borbely (tomi@omnetpp.org)
+ * @author Adam Malik(towdie13@gmail.com), Vladimir Vesely (ivesely@fit.vutbr.cz)
  * @date 12.5.2013
  */
 

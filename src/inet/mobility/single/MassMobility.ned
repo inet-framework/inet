@@ -49,7 +49,7 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // 3D (spatial movement) is also supported using rotationAxisAngle parameter.
 //
-// @author Emin Ilker Cetinbas, Andras Varga
+// @author Emin Ilker Cetinbas
 //
 simple MassMobility extends MovingMobilityBase
 {

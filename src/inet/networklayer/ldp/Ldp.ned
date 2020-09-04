@@ -33,7 +33,7 @@ import inet.applications.contract.IApp;
 // Message processing in the ~Ldp module is explained in
 // <a href="ldp-processing.html">LDP Message Processing</a>
 //
-// @author Andras Varga, Vojta Janota
+// @author Vojta Janota
 //
 simple Ldp like IApp
 {

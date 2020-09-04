@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-// Author: Benjamin Martin Seregi
 
 #ifndef __INET_IEEE8021DRELAY_H
 #define __INET_IEEE8021DRELAY_H

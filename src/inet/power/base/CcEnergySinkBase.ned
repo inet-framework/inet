@@ -24,7 +24,6 @@ import inet.power.contract.ICcEnergySink;
 // It defines signals and statistics.
 //
 // @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergyGeneratorBase, ~CcEnergyStorageBase
-// @author Levente Meszaros
 //
 simple CcEnergySinkBase like ICcEnergySink
 {

@@ -32,7 +32,6 @@ namespace ieee80211 {
  * handling for access points (APs). This class extends Ieee80211MgmtBase
  * with utility functions that are useful for implementing AP functionality.
  *
- * @author Andras Varga
  */
 class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase
 {

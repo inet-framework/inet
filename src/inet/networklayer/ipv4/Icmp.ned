@@ -21,7 +21,7 @@ package inet.networklayer.ipv4;
 //
 // ICMP implementation.
 //
-// @author Jochen Reber, Andras Varga
+// @author Jochen Reber
 //
 simple Icmp
 {

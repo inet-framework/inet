@@ -29,7 +29,6 @@ namespace ieee80211 {
  * an access point (AP). See corresponding NED file for a detailed description.
  * This implementation ignores many details.
  *
- * @author Andras Varga
  */
 class INET_API Ieee80211MgmtApSimplified : public Ieee80211MgmtApBase
 {

@@ -7,7 +7,6 @@
 //   Member functions of
 //    cQueue : queue of cObject descendants
 //
-//  Author: Andras Varga
 //
 //=========================================================================
 

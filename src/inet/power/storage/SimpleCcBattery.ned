@@ -27,7 +27,6 @@ import inet.power.base.CcEnergyStorageBase;
 // residual charge capacity reaches zero. See the base module for signals and
 // statistics.
 //
-// @author Levente Meszaros
 //
 simple SimpleCcBattery extends CcEnergyStorageBase
 {

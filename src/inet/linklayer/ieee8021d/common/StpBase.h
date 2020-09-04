@@ -12,8 +12,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-// Author: Zsolt Prontvai
-//
 
 #ifndef __INET_STPBASE_H
 #define __INET_STPBASE_H

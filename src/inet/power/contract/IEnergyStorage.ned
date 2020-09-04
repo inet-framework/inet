@@ -26,7 +26,6 @@ package inet.power.contract;
 // socket.
 //
 // @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergySink, ~IEnergyManagement
-// @author Levente Meszaros
 //
 moduleinterface IEnergyStorage extends IEnergySource, IEnergySink
 {

@@ -57,8 +57,6 @@ package inet.networklayer.ipv6;
 //
 // @see ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
-// @author Andras Varga
-//
 simple Ipv6
 {
     parameters:

@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-//
-// Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
-//
 
 #include "inet/networklayer/configurator/nexthop/NextHopNetworkConfigurator.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"

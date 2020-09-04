@@ -24,7 +24,6 @@ package inet.power.contract;
 // or a display consumes energy when it's turned on, etc.
 //
 // @see ~IEnergySource, ~IEnergyGenerator, ~IEnergySink, ~IEnergyStorage, ~IEnergyManagement
-// @author Levente Meszaros
 //
 moduleinterface IEnergyConsumer
 {

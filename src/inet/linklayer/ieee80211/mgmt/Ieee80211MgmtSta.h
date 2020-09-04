@@ -32,7 +32,6 @@ namespace ieee80211 {
  * Used in 802.11 infrastructure mode: handles management frames for
  * a station (STA). See corresponding NED file for a detailed description.
  *
- * @author Andras Varga
  */
 class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
 {

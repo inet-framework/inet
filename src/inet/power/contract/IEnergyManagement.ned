@@ -23,7 +23,6 @@ package inet.power.contract;
 // operating outside its safe operating area.
 //
 // @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergySink, ~IEnergyStorage
-// @author Levente Meszaros
 //
 moduleinterface IEnergyManagement
 {

@@ -24,7 +24,6 @@ import inet.power.contract.ICcEnergyGenerator;
 // It defines shared signals and statistics.
 //
 // @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergySinkBase, ~CcEnergyStorageBase
-// @author Levente Meszaros
 //
 simple CcEnergyGeneratorBase like ICcEnergyGenerator
 {

@@ -26,8 +26,6 @@ namespace inet {
 
 /**
  * Records a NetAnim trace. See NED file for more information.
- *
- * @author andras
  */
 class INET_API NetAnimTrace : public cSimpleModule, protected cListener
 {

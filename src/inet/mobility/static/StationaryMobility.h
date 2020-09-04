@@ -26,7 +26,6 @@ namespace inet {
  * This mobility module does not move at all; it can be used for standalone stationary nodes.
  *
  * @ingroup mobility
- * @author Andras Varga
  */
 class INET_API StationaryMobility : public StationaryMobilityBase
 {

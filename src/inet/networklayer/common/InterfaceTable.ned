@@ -30,8 +30,6 @@ package inet.networklayer.common;
 // functions of the C++ module class. For detailed info, please see the C++
 // documentation of the class (Doxygen).
 //
-// @author: Andras Varga
-//
 simple InterfaceTable
 {
     parameters:

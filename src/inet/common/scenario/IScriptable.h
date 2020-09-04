@@ -27,7 +27,6 @@ namespace inet {
  * (subclass from) this class.
  *
  * @see ScenarioManager
- * @author Andras Varga
  */
 class INET_API IScriptable
 {

@@ -22,8 +22,6 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // Moves the node around a circle.
 //
-// @author Andras Varga
-//
 simple CircleMobility extends MovingMobilityBase
 {
     parameters:

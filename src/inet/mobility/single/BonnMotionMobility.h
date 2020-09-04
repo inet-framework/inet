@@ -28,7 +28,6 @@ namespace inet {
  * @brief Uses the BonnMotion native file format. See NED file for more info.
  *
  * @ingroup mobility
- * @author Andras Varga
  */
 class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
 {

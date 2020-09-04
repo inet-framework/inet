@@ -24,7 +24,6 @@ package inet.power.contract;
 // that is used for energy and power based interfaces.
 //
 // @see ~IEpEnergyConsumer, ~IEpEnergySource, ~IEpEnergyGenerator, ~IEpEnergySink, ~IEpEnergyManagement
-// @author Levente Meszaros
 //
 moduleinterface IEpEnergyStorage extends IEpEnergySource, IEpEnergySink, IEnergyStorage
 {

@@ -48,7 +48,6 @@ class INET_API cPostModuleInitNotification : public cModelChangeNotification
  * See NED file for details.
  *
  * @see IScriptable
- * @author Andras Varga
  */
 class INET_API ScenarioManager : public cSimpleModule
 {

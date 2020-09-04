@@ -31,7 +31,6 @@ namespace ieee80211 {
  * Used in 802.11 infrastructure mode: handles management frames for
  * an access point (AP). See corresponding NED file for a detailed description.
  *
- * @author Andras Varga
  */
 class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
 {

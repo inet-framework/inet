@@ -41,7 +41,6 @@ namespace inet {
  * along the X axis rotates Y into Z (leans right).
  *
  * @ingroup mobility
- * @author Levente Meszaros
  */
 class INET_API IMobility
 {

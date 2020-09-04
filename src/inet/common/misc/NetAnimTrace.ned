@@ -28,8 +28,6 @@ package inet.common.misc;
 // it is recommended that you assign explicit coordinates to all network
 // nodes.
 //
-// @author Andras
-//
 simple NetAnimTrace
 {
     parameters:

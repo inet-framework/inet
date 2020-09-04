@@ -31,7 +31,6 @@ namespace inet {
  * a new targetPosition and nextChange once the previous target is reached.
  *
  * @ingroup mobility
- * @author Andras Varga
  */
 class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
 {

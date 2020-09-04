@@ -35,8 +35,6 @@ import inet.mobility.base.MovingMobilityBase;
 // The meaning is that the given node gets to (xk,yk) at tk. There's no
 // separate notation for wait, so x and y coordinates will be repeated there.
 //
-// @author Andras Varga
-//
 simple BonnMotionMobility extends MovingMobilityBase
 {
     parameters:

@@ -27,7 +27,6 @@ namespace inet {
  * @brief Rectangle movement model. See NED file for more info.
  *
  * @ingroup mobility
- * @author Andras Varga
  */
 class INET_API RectangleMobility : public MovingMobilityBase
 {

@@ -28,8 +28,6 @@ package inet.linklayer.ieee80211.mgmt;
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
 //
-// @author Andras Varga
-//
 simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
 {
     parameters:

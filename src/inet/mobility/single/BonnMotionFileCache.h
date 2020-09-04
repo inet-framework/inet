@@ -51,7 +51,6 @@ class INET_API BonnMotionFile
  * have to open and read the file independently.
  *
  * @ingroup mobility
- * @author Andras Varga
  */
 class INET_API BonnMotionFileCache
 {

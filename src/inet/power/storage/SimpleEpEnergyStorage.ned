@@ -28,7 +28,6 @@ import inet.power.base.EpEnergyStorageBase;
 // have. See the base module for signals and statistics.
 //
 // @see ~SimpleEpEnergyManagement
-// @author Levente Meszaros
 //
 simple SimpleEpEnergyStorage extends EpEnergyStorageBase
 {

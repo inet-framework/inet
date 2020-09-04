@@ -21,8 +21,6 @@ package inet.mobility.single;
 import inet.mobility.base.MovingMobilityBase;
 
 //
-// @author Andras Varga
-//
 simple Ns2MotionMobility extends MovingMobilityBase
 {
     parameters:

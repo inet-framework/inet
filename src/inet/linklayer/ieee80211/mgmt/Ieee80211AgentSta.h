@@ -35,7 +35,6 @@ namespace ieee80211 {
  *
  * See corresponding NED file for a detailed description.
  *
- * @author Andras Varga
  */
 class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener       //TODO add ILifecycle
 {

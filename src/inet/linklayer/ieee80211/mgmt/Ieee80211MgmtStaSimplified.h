@@ -29,7 +29,6 @@ namespace ieee80211 {
  * a station (STA). See corresponding NED file for a detailed description.
  * This implementation ignores many details.
  *
- * @author Andras Varga
  */
 class INET_API Ieee80211MgmtStaSimplified : public Ieee80211MgmtBase
 {

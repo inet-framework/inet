@@ -1,7 +1,7 @@
 /* -*- mode:c++ -*- ********************************************************
  * file:        MobilityBase.cc
  *
- * author:      Daniel Willkomm, Andras Varga, Zoltan Bojthe
+ * author:      Daniel Willkomm
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.

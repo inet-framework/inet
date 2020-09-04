@@ -37,7 +37,6 @@ class IEnergySink;
  *
  * See the corresponding NED file for more details.
  *
- * @author Levente Meszaros
  */
 class INET_API IEnergyGenerator
 {

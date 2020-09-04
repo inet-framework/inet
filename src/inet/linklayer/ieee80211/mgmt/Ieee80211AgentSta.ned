@@ -22,8 +22,6 @@ package inet.linklayer.ieee80211.mgmt;
 // controls channel scanning, association and handovers, by sending commands
 // (e.g. ~Ieee80211Prim_ScanRequest) to the management module (~Ieee80211MgmtSta).
 //
-// @author Andras Varga
-//
 simple Ieee80211AgentSta like IIeee80211Agent
 {
     parameters:

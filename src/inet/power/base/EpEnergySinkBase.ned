@@ -24,7 +24,6 @@ import inet.power.contract.IEpEnergySink;
 // It defines signals and statistics.
 //
 // @see ~EpEnergyConsumerBase, ~EpEnergySourceBase, ~EpEnergyGeneratorBase, ~EpEnergyStorageBase
-// @author Levente Meszaros
 //
 simple EpEnergySinkBase like IEpEnergySink
 {

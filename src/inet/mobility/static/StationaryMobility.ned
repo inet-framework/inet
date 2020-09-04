@@ -22,8 +22,6 @@ import inet.mobility.base.MobilityBase;
 //
 // This mobility module does nothing; it can be used for stationary nodes.
 //
-// @author Andras Varga
-//
 simple StationaryMobility extends MobilityBase
 {
     parameters:

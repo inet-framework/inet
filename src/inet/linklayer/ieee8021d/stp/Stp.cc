@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-// Authors: ANSA Team, Benjamin Martin Seregi
+// Authors: ANSA Team
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"

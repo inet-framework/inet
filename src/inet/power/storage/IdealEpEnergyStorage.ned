@@ -26,7 +26,6 @@ import inet.power.base.EpEnergyStorageBase;
 // depleted. This module is primarily useful for testing energy consumer and
 // energy generator models. See the base module for signals and statistics.
 //
-// @author Levente Meszaros
 //
 simple IdealEpEnergyStorage extends EpEnergyStorageBase
 {

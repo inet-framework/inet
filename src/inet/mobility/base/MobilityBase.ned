@@ -32,8 +32,6 @@ import inet.mobility.contract.IMobility;
 //  - %S angular speed
 //  - %A angular acceleration
 //
-// @author Andras Varga
-//
 simple MobilityBase like IMobility
 {
     parameters:

@@ -28,7 +28,6 @@ namespace inet {
  * See NED file for more info.
  *
  * @ingroup mobility
- * @author Andras Varga
  */
 class INET_API AnsimMobility : public LineSegmentsMobilityBase
 {

@@ -17,7 +17,6 @@
 //
 
 //
-//  Author: Andras Varga
 //
 
 #ifndef __INET_IPV4INTERFACEDATA_H

@@ -42,7 +42,7 @@ import inet.applications.contract.IApp;
 // The destination address/port, the local port, start and stop times can be
 // set via parameters.
 //
-// @author: Adriano, Zoltan Bojthe
+// @author: Adriano
 //
 simple SimpleVoipSender like IApp
 {

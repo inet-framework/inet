@@ -31,7 +31,6 @@ namespace power {
  *
  * See the corresponding NED file for more details.
  *
- * @author Levente Meszaros
  */
 class INET_API IEpEnergyStorage : public virtual IEpEnergySource, public virtual IEpEnergySink, public virtual IEnergyStorage
 {

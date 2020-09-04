@@ -1,7 +1,7 @@
 /* -*- mode:c++ -*- ********************************************************
  * file:        MovingMobilityBase.h
  *
- * author:      Daniel Willkomm, Andras Varga
+ * author:      Daniel Willkomm
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -30,7 +30,6 @@ namespace inet {
  * @brief Base class for moving mobility modules. Periodically emits a signal with the current mobility state.
  *
  * @ingroup mobility
- * @author Levente Meszaros
  */
 class INET_API MovingMobilityBase : public MobilityBase
 {

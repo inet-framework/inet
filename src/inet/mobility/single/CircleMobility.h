@@ -27,7 +27,6 @@ namespace inet {
  * @brief Circle movement model. See NED file for more info.
  *
  * @ingroup mobility
- * @author Andras Varga
  */
 class INET_API CircleMobility : public MovingMobilityBase
 {

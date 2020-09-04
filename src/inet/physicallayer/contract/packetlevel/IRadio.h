@@ -35,7 +35,6 @@ class IRadioMedium;
  * supported. The radio has an operation mode and it provides the state of the
  * radio medium at its position.
  *
- * @author Levente Meszaros
  */
 // TODO: add burst support, sending of signals back to back (using a resource limited queue)
 // TODO: rename *Changed signals to *Change signals and emit them just before overwriting

@@ -1,7 +1,7 @@
 /* -*- mode:c++ -*- ********************************************************
  * file:        MobilityBase.h
  *
- * author:      Daniel Willkomm, Andras Varga
+ * author:      Daniel Willkomm
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -49,7 +49,7 @@ namespace inet {
  *
  * @ingroup mobility
  * @ingroup basicModules
- * @author Daniel Willkomm, Andras Varga
+ * @author Daniel Willkomm
  */
 class INET_API MobilityBase : public cSimpleModule, public IMobility
 {

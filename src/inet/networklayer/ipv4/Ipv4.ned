@@ -86,8 +86,6 @@ moduleinterface IIpv4
 //
 // @see ~Ipv4RoutingTable, ~Arp
 //
-// @author Andras Varga
-//
 simple Ipv4 like IIpv4
 {
     parameters:

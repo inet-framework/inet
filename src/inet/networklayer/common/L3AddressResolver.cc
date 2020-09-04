@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// @author Andras Varga
-// @author Zoltan Bojthe
-//
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/ModuleIdAddress.h"

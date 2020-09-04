@@ -28,7 +28,6 @@ import inet.power.contract.IEpEnergyManagement;
 // threshold.
 //
 // @see ~SimpleEpEnergyStorage
-// @author Levente Meszaros
 //
 simple SimpleEpEnergyManagement like IEpEnergyManagement
 {

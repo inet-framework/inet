@@ -107,8 +107,6 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // You can find the DTD with the sources: TurtleMobility.dtd.
 //
-// @author Andras Varga
-//
 //TODO update documentation; <turn heading=".."> is strange
 simple TurtleMobility extends MovingMobilityBase
 {

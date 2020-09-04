@@ -24,7 +24,6 @@ package inet.power.contract;
 // weather conditions.
 //
 // @see ~IEnergyConsumer, ~IEnergySource, ~IEnergySink, ~IEnergyStorage, ~IEnergyManagement
-// @author Levente Meszaros
 //
 moduleinterface IEnergyGenerator
 {

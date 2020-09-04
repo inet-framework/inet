@@ -32,7 +32,6 @@ namespace power {
  *
  * See the corresponding NED file for more details.
  *
- * @author Levente Meszaros
  */
 class INET_API IEnergySource
 {

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// @author Zoltan Bojthe
-//
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/common/ResultFilters.h"

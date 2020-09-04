@@ -29,7 +29,6 @@ namespace inet {
  *
  * @author Georg Lutz (georglutz AT gmx DOT de), Institut fuer Telematik,
  *  Universitaet Karlsruhe, http://www.tm.uka.de, 2004-2005
- * @author Andras Varga (generalized, ported to LineSegmentsMobilityBase)
  */
 class INET_API RandomWaypointMobility : public LineSegmentsMobilityBase
 {

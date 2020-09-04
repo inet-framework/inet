@@ -23,8 +23,6 @@ import inet.mobility.base.MovingMobilityBase;
 // Uses the <position_change> elements of the ANSim tool's
 // trace file.
 //
-// @author Andras Varga
-//
 simple AnsimMobility extends MovingMobilityBase
 {
     parameters:

@@ -24,7 +24,6 @@ import inet.power.contract.IEpEnergyGenerator;
 // It defines shared signals and statistics.
 //
 // @see ~EpEnergyConsumerBase, ~EpEnergySourceBase, ~EpEnergySinkBase, ~EpEnergyStorageBase
-// @author Levente Meszaros
 //
 simple EpEnergyGeneratorBase like IEpEnergyGenerator
 {

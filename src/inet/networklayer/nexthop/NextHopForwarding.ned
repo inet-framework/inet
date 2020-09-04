@@ -21,8 +21,6 @@ package inet.networklayer.nexthop;
 // This module is a simplified next hop forwarding that routes
 // datagrams using different kind of network addresses.
 //
-// @author Andras Varga
-//
 simple NextHopForwarding
 {
     parameters:

@@ -31,7 +31,6 @@ namespace physicallayer {
  * determined by the radio mode, the transmitter state and the receiver state
  * using constant parameters.
  *
- * @author Levente Meszaros
  */
 class INET_API StateBasedCcEnergyConsumer : public cSimpleModule, public virtual power::ICcEnergyConsumer, public cListener
 {

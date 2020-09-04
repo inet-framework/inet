@@ -44,7 +44,7 @@ import inet.networklayer.contract.IRoutingTable;
 // documentation of the class (Doxygen).
 //
 // @see ~InterfaceTable
-// @author: Jochen Reber, Andras Varga
+// @author: Jochen Reber
 //
 simple Ipv4RoutingTable like IRoutingTable
 {

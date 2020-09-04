@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Author: Levente Meszaros (levy@omnetpp.org)
-//
 
 #ifndef __INET_NODESTATUS_H
 #define __INET_NODESTATUS_H

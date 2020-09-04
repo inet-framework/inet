@@ -16,8 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-//  Author: Andras Varga, 2004
-
 #include <algorithm>
 #include <sstream>
 

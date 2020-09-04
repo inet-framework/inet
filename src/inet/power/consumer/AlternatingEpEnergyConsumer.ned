@@ -26,7 +26,6 @@ import inet.power.base.EpEnergyConsumerBase;
 // another random time interval.
 //
 // @see ~AlternatingEpEnergyGenerator
-// @author Levente Meszaros
 //
 simple AlternatingEpEnergyConsumer extends EpEnergyConsumerBase
 {

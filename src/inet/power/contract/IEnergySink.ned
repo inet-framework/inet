@@ -21,7 +21,6 @@ package inet.power.contract;
 // The energy sink models absorb energy from multiple energy generators.
 //
 // @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergyStorage, ~IEnergyManagement
-// @author Levente Meszaros
 //
 moduleinterface IEnergySink
 {

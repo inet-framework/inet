@@ -29,7 +29,7 @@ namespace inet {
  * @brief Random mobility model for a mobile host with a mass.
  * See NED file for more info.
  *
- * @author Emin Ilker Cetinbas, Andras Varga
+ * @author Emin Ilker Cetinbas
  */
 class INET_API MassMobility : public LineSegmentsMobilityBase
 {
