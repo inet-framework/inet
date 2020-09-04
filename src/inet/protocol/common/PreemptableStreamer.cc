@@ -189,11 +189,6 @@ Packet *PreemptableStreamer::pullPacketProgress(cGate *gate, bps datarate, b pos
     return streamedPacket->dup();
 }
 
-b PreemptableStreamer::getPullPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    return streamedPacket->getTotalLength();
-}
-
 void PreemptableStreamer::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");

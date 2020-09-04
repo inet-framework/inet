@@ -157,12 +157,6 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, bps datar
     updateDisplayString();
 }
 
-b PacketFilterBase::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    checkPacketStreaming(packet);
-    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
-}
-
 void PacketFilterBase::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
@@ -236,12 +230,6 @@ Packet *PacketFilterBase::pullPacketProgress(cGate *gate, bps datarate, b positi
 {
     Enter_Method("pullPacketProgress");
     throw cRuntimeError("Invalid operation");
-}
-
-b PacketFilterBase::getPullPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    checkPacketStreaming(packet);
-    return provider->getPullPacketProcessedLength(packet, inputGate->getPathStartGate());
 }
 
 void PacketFilterBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)

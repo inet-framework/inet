@@ -119,14 +119,6 @@ class INET_API IPassivePacketSink
      * gate of this module and it must support pushing and streaming packets.
      */
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) = 0;
-
-    /**
-     * Returns the processed length of the currently streaming packet.
-     *
-     * The packet must not be nullptr and the gate must support pushing and
-     * streaming packets.
-     */
-    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) = 0;
 };
 
 } // namespace queueing

@@ -148,14 +148,6 @@ void PacketClassifierBase::pushPacketProgress(Packet *packet,  cGate *gate, bps 
     updateDisplayString();
 }
 
-b PacketClassifierBase::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    checkPacketStreaming(packet);
-    auto outputGate = outputGates[inProgressGateIndex];
-    auto consumer = consumers[inProgressGateIndex];
-    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
-}
-
 void PacketClassifierBase::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");

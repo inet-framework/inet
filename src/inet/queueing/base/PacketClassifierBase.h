@@ -70,8 +70,6 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
     virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
 
-    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
-
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
@@ -82,8 +80,6 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
     virtual Packet *pullPacketStart(cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("TODO"); }
-
-    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("TODO"); }
 
     virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override { throw cRuntimeError("TODO"); }

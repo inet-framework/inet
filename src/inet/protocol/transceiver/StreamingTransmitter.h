@@ -42,8 +42,6 @@ class INET_API StreamingTransmitter : public StreamingTransmitterBase
     virtual bool supportsPacketStreaming(cGate *gate) const override { return gate == outputGate; }
 
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-
-    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 };
 
 } // namespace inet

@@ -123,12 +123,5 @@ void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
     scheduleClockEventAt(txEndTime, txEndTimer);
 }
 
-b StreamingTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    ASSERT(isTransmitting());
-    clocktime_t txDuration = getClockTime() - txStartTime;
-    return b(std::floor(txDatarate.get() * txDuration.dbl()));
-}
-
 } // namespace inet
 

@@ -62,7 +62,6 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public virtual IA
     virtual Packet *pullPacketStart(cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation");  }
     virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation");  }
     virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation");  }
-    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation");  }
 
     virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

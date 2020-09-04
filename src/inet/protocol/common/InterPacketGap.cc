@@ -181,12 +181,6 @@ void InterPacketGap::handlePushPacketProcessed(Packet *packet, cGate *gate, bool
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
-b InterPacketGap::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    ASSERT(consumer != nullptr);
-    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
-}
-
 void InterPacketGap::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     auto now = getClockTime();

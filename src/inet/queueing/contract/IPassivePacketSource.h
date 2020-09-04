@@ -119,14 +119,6 @@ class INET_API IPassivePacketSource
      * be nullptr.
      */
     virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) = 0;
-
-    /**
-     * Returns the processed length of the currently streaming packet.
-     *
-     * The packet must not be nullptr and the gate must support pulling and
-     * streaming packets.
-     */
-    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) = 0;
 };
 
 } // namespace queueing

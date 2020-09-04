@@ -153,11 +153,6 @@ Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position
     return streamedPacket->dup();
 }
 
-b PacketStreamer::getPullPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    return streamedPacket->getTotalLength();
-}
-
 void PacketStreamer::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");

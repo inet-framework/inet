@@ -128,12 +128,6 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
     updateDisplayString();
 }
 
-b PacketFlowBase::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    checkPacketStreaming(packet);
-    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
-}
-
 void PacketFlowBase::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
@@ -216,12 +210,6 @@ Packet *PacketFlowBase::pullPacketProgress(cGate *gate, bps datarate, b position
     animateSendPacketProgress(packet, outputGate, datarate, position, extraProcessableLength);
     updateDisplayString();
     return packet;
-}
-
-b PacketFlowBase::getPullPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    checkPacketStreaming(packet);
-    return provider->getPullPacketProcessedLength(packet, inputGate->getPathStartGate());
 }
 
 void PacketFlowBase::handleCanPullPacketChanged(cGate *gate)

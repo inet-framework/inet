@@ -117,11 +117,6 @@ void PacketMultiplexer::pushPacketProgress(Packet *packet, cGate *gate, bps data
     updateDisplayString();
 }
 
-b PacketMultiplexer::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
-}
-
 void PacketMultiplexer::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");

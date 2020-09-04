@@ -98,11 +98,6 @@ void PacketDestreamer::pushPacketProgress(Packet *packet, cGate *gate, bps datar
     EV_INFO << "Progressing destreaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
 }
 
-b PacketDestreamer::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    return packet->getTotalLength();
-}
-
 void PacketDestreamer::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");

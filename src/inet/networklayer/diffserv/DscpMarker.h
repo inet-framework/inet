@@ -58,7 +58,6 @@ class INET_API DscpMarker : public queueing::PacketProcessorBase, public queuein
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handleCanPushPacketChanged(cGate *gate) override { }
-    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
   protected:
     virtual void initialize(int stage) override;

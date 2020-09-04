@@ -73,8 +73,6 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
 
-    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
-
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
@@ -86,8 +84,6 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual Packet *pullPacketStart(cGate *gate, bps datarate) override;
     virtual Packet *pullPacketEnd(cGate *gate) override;
     virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override;
-
-    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override;
 
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
     virtual void handleCanPullPacketChanged(cGate *gate) override;

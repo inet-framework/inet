@@ -212,12 +212,5 @@ void StreamThroughTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b
         startTx(packet, datarate, position);
 }
 
-b StreamThroughTransmitter::getPushPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    ASSERT(isTransmitting());
-    clocktime_t txDuration = getClockTime() - txStartTime;
-    return b(std::floor(txDatarate.get() * txDuration.dbl()));
-}
-
 } // namespace inet
 

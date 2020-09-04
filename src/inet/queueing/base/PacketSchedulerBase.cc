@@ -179,14 +179,6 @@ Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, bps datarate, b pos
     return packet;
 }
 
-b PacketSchedulerBase::getPullPacketProcessedLength(Packet *packet, cGate *gate)
-{
-    checkPacketStreaming(packet);
-    auto inputGate = inputGates[inProgressGateIndex];
-    auto provider = providers[inProgressGateIndex];
-    return provider->getPullPacketProcessedLength(packet, inputGate->getPathStartGate());
-}
-
 void PacketSchedulerBase::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
