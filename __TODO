@@ -1,15 +1,9 @@
-remove getPullPacketProcessedLength and getPushPacketProcessedLength?
-
 handlePullPacketChanged can come from the queue when
  - a high priority frame is already being streamed and it gets interrupted
  - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
-
 in both cases a progress report is sent which is unnecessary and confusing
 
-
-- review all EV statements at least in the queueing and protocol packages
 - adapt Ieee8021dRelayUnit to new structure
-- fix datarate handling PacketStreamer, use the parameter if provided and the component is active!!!
 - review all streamig operation with respect to origPacketId handling
 
 - ethernet preemption example: 2nd out of 3 sends per packet must be avoided
@@ -18,7 +12,6 @@ in both cases a progress report is sent which is unnecessary and confusing
   - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
 
 - reformat source code
-- remove core team members as authors from comments?
 - replace core team members in copyright holders?
 - create release script (remove trailing spaces, replace leading tabs, fix header guards, format source code)
 
