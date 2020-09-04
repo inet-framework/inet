@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2006 Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
- * Copyright (C) 2013 OpenSim Ltd
+ * Copyright (C) 2013 OpenSim Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

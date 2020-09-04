@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2019 Opensim Ltd
+// Copyright (C) 2006-2019 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License

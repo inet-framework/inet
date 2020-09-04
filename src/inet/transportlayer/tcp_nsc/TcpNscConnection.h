@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2006 Sam Jansen, Andras Varga, 2009 Zoltan Bojthe
+// Copyright (C) 2006 Sam Jansen
+// Copyright (C) 2006 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

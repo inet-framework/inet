@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2011 CoCo Communications
-// Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2012 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
