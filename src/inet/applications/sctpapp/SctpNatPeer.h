@@ -1,5 +1,5 @@
 //
-// Copyright 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This library is free software, you can redistribute it and/or modify
 // it under  the terms of the GNU Lesser General Public License

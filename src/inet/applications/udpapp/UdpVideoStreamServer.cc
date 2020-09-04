@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 // Based on the video streaming app of the similar name by Johnny Lai.
 //
 // This program is free software; you can redistribute it and/or

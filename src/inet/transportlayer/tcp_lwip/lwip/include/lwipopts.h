@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Zoltan Bojthe
+ * Copyright (C) 2010 OpenSim Ltd.
  *
  * LWIP settings for Omnet/Omnest simulator INET framework.
  *

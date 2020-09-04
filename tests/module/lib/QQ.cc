@@ -1,5 +1,5 @@
 //
-// Copyright 2012 OpenSim Ltd.
+// Copyright (C) 2012 OpenSim Ltd.
 //
 // This library is free software, you can redistribute it
 // and/or modify

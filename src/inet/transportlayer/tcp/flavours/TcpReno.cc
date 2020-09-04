@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004-2005 Andras Varga
+// Copyright (C) 2004-2005 OpenSim Ltd.
 // Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or

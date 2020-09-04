@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2008 Andras Varga
+// Copyright (C) 2008 OpenSim Ltd.
 // Copyright (C) 2001 Matthias Oppitz
 //
 // This program is free software; you can redistribute it and/or

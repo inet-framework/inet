@@ -2,7 +2,7 @@
 // Copyright (C) 2001  Vincent Oberle (vincent@oberle.com)
 // Institute of Telematics, University of Karlsruhe, Germany.
 // University Comillas, Madrid, Spain.
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public

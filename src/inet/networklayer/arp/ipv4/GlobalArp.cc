@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Andras Varga
+ * Copyright (C) 2004 OpenSim Ltd.
  * Copyright (C) 2008 Alfonso Ariza Quintana (global arp)
  * Copyright (C) 2014 OpenSim Ltd.
  *

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2006 OpenSim Ltd.
 // Copyright (C) 2001 Eric Wu and Steve Woon, Monash University, Melbourne, Australia
 //
 // This program is free software; you can redistribute it and/or

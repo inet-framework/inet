@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
-// Copyright 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 
 #include <vector>

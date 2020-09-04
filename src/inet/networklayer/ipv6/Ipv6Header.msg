@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2018 OpenSim Ltd.
 // Copyright (C) 2005 Wei Yang, Ng
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 // Copyright (C) 2001-2004 CTIE, Monash University
 //
 // This program is free software; you can redistribute it and/or
