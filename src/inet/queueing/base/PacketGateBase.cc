@@ -34,7 +34,7 @@ void PacketGateBase::initialize(int stage)
 void PacketGateBase::open()
 {
     ASSERT(!isOpen_);
-    EV_DEBUG << "Opening gate.\n";
+    EV_DEBUG << "Opening gate" << EV_ENDL;
     isOpen_ = true;
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
@@ -46,7 +46,7 @@ void PacketGateBase::open()
 void PacketGateBase::close()
 {
     ASSERT(isOpen_);
-    EV_DEBUG << "Closing gate.\n";
+    EV_DEBUG << "Closing gate" << EV_ENDL;
     isOpen_ = false;
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());

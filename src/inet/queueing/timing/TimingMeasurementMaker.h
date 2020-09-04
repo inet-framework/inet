@@ -76,11 +76,10 @@ class INET_API TimingMeasurementMaker : public PacketFlowBase
                 auto flowName = timeTag->getFlowNames(i);
                 cMatchableString matchableFlowName(flowName);
                 if (flowNameMatcher.matches(&matchableFlowName)) {
-                    EV_INFO << "Stopping measurement on packet " << packet->getName() << ": "
-                            << "range (" << offset << ", " << offset + length << "), ";
+                    EV_INFO << "Stopping measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
                     if (flowName != nullptr && *flowName != '\0')
-                        EV_INFO << "flowName = " << flowName;
-                    EV_INFO << std::endl;
+                        EV_INFO << EV_FIELD(flowName);
+                    EV_INFO << EV_FIELD(packet) << EV_ENDL;
                     timeTag->eraseFlowNames(i);
                     timeTag->eraseTotalTimes(i);
                     i--;

@@ -73,7 +73,7 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(const Packet *packet)
     }
 
     if (queueLength >= packetCapacity) {   // maxth is also the "hard" limit
-        EV << "Queue len " << queueLength << " >= packetCapacity.\n";
+        EV_DEBUG << "Queue length >= capacity" << EV_FIELD(queueLength) << EV_FIELD(packetCapacity) << EV_ENDL;
         count = 0;
         return QUEUE_FULL;
     }
@@ -82,7 +82,7 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(const Packet *packet)
         const double pb = maxp * (avg - minth) / (maxth - minth);
         const double pa = pb / (1 - count * pb); // TD: Adapted to work as in [Floyd93].
         if (dblrand() < pa) {
-            EV << "Random early packet (avg queue len=" << avg << ", pa=" << pb << ")\n";
+            EV_DEBUG << "Random early packet detected" << EV_FIELD(averageQueueLength, avg) << EV_FIELD(probability, pa) << EV_ENDL;
             count = 0;
             return RANDOMLY_ABOVE_LIMIT;
         }
@@ -90,7 +90,7 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(const Packet *packet)
             return RANDOMLY_BELOW_LIMIT;
     }
     else if (avg >= maxth) {
-        EV << "Avg queue len " << avg << " >= maxth.\n";
+        EV_DEBUG << "Average queue length >= maxth" << EV_FIELD(averageQueueLength, avg) << EV_FIELD(maxth) << EV_ENDL;
         count = 0;
         return ABOVE_MAX_LIMIT;
     }

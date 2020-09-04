@@ -40,9 +40,9 @@ void OrdinalBasedDuplicator::initialize(int stage)
         parseVector(vector);
 
         if (duplicatesVector.size() == 0)
-            EV_WARN << "Empty duplicatesVector" << endl;
+            EV_WARN << "Empty duplicatesVector" << EV_ENDL;
         else {
-            EV_DEBUG << "duplicatesVector=" << vector << endl;
+            EV_DEBUG << EV_FIELD(duplicatesVector, vector) << EV_ENDL;
             generateFurtherDuplicates = true;
         }
     }
@@ -52,11 +52,11 @@ int OrdinalBasedDuplicator::getNumPacketDuplicates(Packet *packet)
 {
     if (generateFurtherDuplicates) {
         if (numPackets == duplicatesVector[0]) {
-            EV_DEBUG << "Duplicating packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet) << endl;
+            EV_DEBUG << "Duplicating packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet) << EV_ENDL;
             numDuplicated++;
             duplicatesVector.erase(duplicatesVector.begin());
             if (duplicatesVector.size() == 0) {
-                EV_DEBUG << "End of duplicatesVector reached." << endl;
+                EV_DEBUG << "End of duplicatesVector reached" << EV_ENDL;
                 generateFurtherDuplicates = false;
             }
             numPackets++;

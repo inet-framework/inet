@@ -133,7 +133,7 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
     if (packetDelay == 0)
         pushOrSendPacket(packet, outputGate, consumer);
     else {
-        EV_INFO << "Inserting packet gap before " << EV_FIELD(packet) << EV_ENDL;
+        EV_INFO << "Inserting packet gap before" << EV_FIELD(packet) << EV_ENDL;
         progress->setContextPointer(packet);
         scheduleClockEventAt(now + packetDelay, progress);
     }

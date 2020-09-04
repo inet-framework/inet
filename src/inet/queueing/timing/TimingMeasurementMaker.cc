@@ -70,12 +70,10 @@ void TimingMeasurementMaker::processPacket(Packet *packet)
 
 void TimingMeasurementMaker::makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t signal, simtime_t value)
 {
-    EV_INFO << "Making measurement on packet " << packet->getName() << ": "
-            << "range (" << offset << ", " << offset + length << "), ";
+    EV_INFO << "Making measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
     if (flowName != nullptr && *flowName != '\0')
-        EV_INFO << "flowName = " << flowName << ", ";
-    EV_INFO << "signal = " << cComponent::getSignalName(signal) << ", "
-            << "value = " << value << std::endl;
+        EV_INFO << EV_FIELD(flowName);
+    EV_INFO << EV_FIELD(signal, cComponent::getSignalName(signal)) << EV_FIELD(value) << EV_FIELD(packet) << EV_ENDL;
     cNamedObject details(flowName);
     emit(signal, value, &details);
 }

@@ -47,11 +47,10 @@ class INET_API TimingMeasurementStarter : public PacketFlowBase
     void startMeasurement(Packet *packet, b offset, b length, simtime_t value) const {
         if (length == b(-1))
             length = packet->getTotalLength();
-        EV_INFO << "Starting measurement on packet " << packet->getName() << ": "
-                << "range (" << offset << ", " << offset + length << "), ";
+        EV_INFO << "Starting measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
         if (flowName != nullptr && *flowName != '\0')
-            EV_INFO << "flowName = " << flowName << ", ";
-        EV_INFO << "class = " << typeid(T).name() << std::endl;
+            EV_INFO << EV_FIELD(flowName);
+        EV_INFO << EV_FIELD(class, typeid(T).name()) << EV_ENDL;
         packet->addRegionTagsWhereAbsent<T>(offset, length);
         packet->mapAllRegionTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& timeTag) {
             timeTag->insertFlowNames(flowName);

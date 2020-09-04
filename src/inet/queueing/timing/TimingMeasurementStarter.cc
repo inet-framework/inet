@@ -75,11 +75,10 @@ void TimingMeasurementStarter::startMeasurements(Packet *packet) const
     if (measurePropagationTime)
         startMeasurement<PropagationTimeTag>(packet, offset, length, 0);
     if (measurePacketEvents) {
-        EV_INFO << "Starting measurement on packet " << packet->getName() << ": "
-                << "range (" << offset << ", " << offset + length << "), ";
+        EV_INFO << "Starting measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
         if (flowName != nullptr && *flowName != '\0')
-            EV_INFO << "flowName = " << flowName << ", ";
-        EV_INFO << "class = PacketEventTag" << std::endl;
+            EV_INFO << EV_FIELD(flowName);
+        EV_INFO << EV_FIELD(class, "PacketEventTag") << EV_FIELD(packet) << EV_ENDL;
         packet->addRegionTagsWhereAbsent<PacketEventTag>(offset, length);
     }
 }

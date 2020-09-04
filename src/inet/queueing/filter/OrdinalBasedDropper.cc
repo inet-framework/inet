@@ -39,9 +39,9 @@ void OrdinalBasedDropper::initialize(int stage)
         parseVector(vector);
 
         if (dropsVector.size() == 0)
-            EV_WARN << "Empty dropsVector" << endl;
+            EV_WARN << "Empty dropsVector" << EV_ENDL;
         else {
-            EV_DEBUG << "dropsVector=" << vector << endl;
+            EV_DEBUG << EV_FIELD(dropsVector, vector) << EV_ENDL;
             generateFurtherDrops = true;
         }
     }
@@ -64,7 +64,7 @@ void OrdinalBasedDropper::dropPacket(Packet *packet)
     numDropped++;
     dropsVector.erase(dropsVector.begin());
     if (dropsVector.size() == 0) {
-        EV_DEBUG << "End of dropsVector reached." << endl;
+        EV_DEBUG << "End of dropsVector reached" << EV_ENDL;
         generateFurtherDrops = false;
     }
 }

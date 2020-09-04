@@ -58,11 +58,11 @@ void PcapFilePacketProducer::schedulePacket()
     auto packet = pair.second;
     emit(packetCreatedSignal, packet);
     if (packet != nullptr) {
-        EV << "Scheduling packet " << packet->getFullName() << " from PCAP file.\n";
+        EV << "Scheduling packet from PCAP file" << EV_FIELD(packet) << EV_ENDL;
         scheduleAt(pair.first, packet);
     }
     else
-        EV << "End of PCAP file reached.\n";
+        EV << "End of PCAP file reached" << EV_ENDL;
 }
 
 void PcapFilePacketProducer::handleCanPushPacketChanged(cGate *gate)

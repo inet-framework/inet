@@ -38,7 +38,7 @@ void EcnMarker::markPacket(Packet *packet)
 {
     const auto& ecnReq = packet->findTag<EcnReq>();
     if (ecnReq != nullptr) {
-        EV_DETAIL << "Marking packet with ECN.\n";
+        EV_DETAIL << "Marking packet with ECN" << EV_ENDL;
         setEcn(packet, static_cast<IpEcnCode>(ecnReq->getExplicitCongestionNotification()));
     }
 }

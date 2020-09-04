@@ -51,7 +51,7 @@ void ContentBasedLabeler::markPacket(Packet *packet)
     for (int i = 0; i < (int)filters.size(); i++) {
         auto filter = filters[i];
         if (filter->matches(packet)) {
-            EV_INFO << "Marking packet " << packet->getName() << " with " << labels[i] << EV_ENDL;
+            EV_INFO << "Marking packet" << EV_FIELD(label, labels[i]) << EV_FIELD(packet) << EV_ENDL;
             labelsTag->insertLabels(labels[i].c_str());
         }
     }
