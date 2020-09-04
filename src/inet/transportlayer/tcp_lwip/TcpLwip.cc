@@ -162,7 +162,9 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     auto tcpsegP = packet->peekAtFront<TcpHeader>();
     srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
     destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
-    interfaceId = (packet->getTag<InterfaceInd>())->getInterfaceId();
+    auto interfaceIndTag = packet->findTag<InterfaceInd>();
+    if (interfaceIndTag)
+        interfaceId = interfaceIndTag->getInterfaceId();
 
     switch(tcpsegP->getCrcMode()) {
         case CRC_DECLARED_INCORRECT:
