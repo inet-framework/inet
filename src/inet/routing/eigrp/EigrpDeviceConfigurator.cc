@@ -652,6 +652,9 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
             throw cRuntimeError("No interface called %s on this device", ifaceName);
         }
 
+        auto int6data = iface->findProtocolData<Ipv6InterfaceData>();
+
+
         // for each IPv6 address - save info about network prefix
         ipv6AddrElem = GetIPv6Address(NULL, ifaceElem);
         while (ipv6AddrElem != NULL)
@@ -668,6 +671,8 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
             }
 
             ipv6 = Ipv6Address(addrFull.substr(0, addrFull.find_last_of('/')).c_str());
+
+            int6data->assignAddress(ipv6, false, SIMTIME_ZERO, SIMTIME_ZERO);
 
             //EV_DEBUG << "IPv6 address: " << ipv6 << "/" << prefixLen << " on iface " << ifaceName << endl;
 

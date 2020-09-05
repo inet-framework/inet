@@ -3,18 +3,12 @@
 	<Router id="10.0.1.0">
         <Interfaces>
             <Interface name="eth0">
-                <!--<IPv6Address>2001:12::1/64</IPv6Address>
-                <NdpAdvSendAdvertisements>false</NdpAdvSendAdvertisements>-->
                 <EIGRP-IPv6 asNumber='1'>
-                	<!--<SplitHorizon>disabled</SplitHorizon>-->
                 </EIGRP-IPv6>
             </Interface>
             <Interface name="eth1">
-            	<!--<IPv6Address>2001:12::3/64</IPv6Address>--> <!-- same prefix on diferent ifaces - should be an error --> 
 				<IPv6Address>2001:3::1/64</IPv6Address>
 				<IPv6Address>2001:A::1/48</IPv6Address>
-				<NdpAdvPrefix>2001:A::/64</NdpAdvPrefix>
-				<NdpAdvSendAdvertisements>true</NdpAdvSendAdvertisements>
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>        
         </Interfaces>
@@ -29,7 +23,6 @@
 	        		<Variance>2</Variance>
 	        		<Stub />
 	        		<MaximumPath>32</MaximumPath>
-	        		<!--<MetricWeights k1="1" k2="1" k3="1" k4="1" k5="1" k6="1" />-->
 	        	</ProcessIPv6>
         	</EIGRP>
         </Routing6>
@@ -40,15 +33,11 @@
     <Router id="10.0.2.0">
         <Interfaces>
             <Interface name="eth0">
-                <!--<IPv6Address>2001:12::2/64</IPv6Address>
-                <NdpAdvSendAdvertisements>false</NdpAdvSendAdvertisements>-->
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>
             <Interface name="eth1">
                 <IPv6Address>2001:4::1/64</IPv6Address>
                 <IPv6Address>2001:B::1/48</IPv6Address>
-                <NdpAdvPrefix>2001:B::/64</NdpAdvPrefix>
-                <NdpAdvSendAdvertisements>true</NdpAdvSendAdvertisements>
                 <EIGRP-IPv6 asNumber='1'/>
             </Interface> 
         </Interfaces>
