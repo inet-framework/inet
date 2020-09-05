@@ -430,17 +430,18 @@ void EigrpIpv6Pdm::processMsgFromRtp(cMessage *msg)
     case EIGRP_HELLO_MSG:
         if (msgReq->getGoodbyeMsg() == true) {       // Goodbye message
             pk = createHelloPacket(eigrpIface->getHoldInt(), this->KVALUES_MAX, destAddress, msgReq);
+            pk->setName("EIGRP_HELLO_MSG");
         }
         else if (msgReq->getAckNumber() > 0)    // Ack message
         {
             pk = createAckPacket(destAddress, msgReq);
+            pk->setName("EIGRP_ACK_MSG");
         }
         else // Hello message
         {
             pk = createHelloPacket(eigrpIface->getHoldInt(), this->kValues, destAddress, msgReq);
+            pk->setName("EIGRP_HELLO_MSG");
         }
-
-        pk->setName("EIGRP_HELLO_MSG");
         break;
 
     case EIGRP_UPDATE_MSG:
