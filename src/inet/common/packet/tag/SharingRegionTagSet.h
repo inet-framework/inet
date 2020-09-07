@@ -56,7 +56,10 @@ class INET_API SharingRegionTagSet : public cObject
         const T *_getTag() const { return tag.get(); }
 
       public:
-        RegionTag(b offset, b length, const Ptr<const T>& tag) : offset(offset), length(length), tag(tag) { }
+        RegionTag(b offset, b length, const Ptr<const T>& tag) : offset(offset), length(length), tag(tag) {
+            ASSERT(offset >= b(0));
+            ASSERT(length >= b(0));
+        }
         RegionTag(const RegionTag<T>& other) : offset(other.offset), length(other.length), tag(other.tag) { }
         RegionTag(RegionTag&& other) : offset(other.offset), length(other.length), tag(other.tag) { other.tag = nullptr; }
 
@@ -76,10 +79,10 @@ class INET_API SharingRegionTagSet : public cObject
         bool operator<(const SharingRegionTagSet::RegionTag<T>& other) const { return offset < other.offset; }
 
         b getOffset() const { return offset; }
-        void setOffset(b offset) { this->offset = offset; }
+        void setOffset(b offset) { ASSERT(offset >= b(0)); this->offset = offset; }
 
         b getLength() const { return length; }
-        void setLength(b length) { this->length = length; }
+        void setLength(b length) { ASSERT(length >= b(0)); this->length = length; }
 
         b getStartOffset() const { return offset; }
         b getEndOffset() const { return offset + length; }

@@ -175,21 +175,25 @@ void SharingRegionTagSet::clearTags(b offset, b length)
             else if (regionTag.getStartOffset() < clearStartOffset && clearEndOffset < regionTag.getEndOffset()) {
                 // clear splits region into two parts
                 prepareTagsVectorForUpdate();
-                RegionTag<TagBase> previousRegion(regionTag.getStartOffset(), clearStartOffset - regionTag.getStartOffset(), regionTag.getTag());
-                regionTags->insert(regionTags->begin() + i++, previousRegion);
+                auto& regionTag = (*regionTags)[i];
+                auto startOffset = regionTag.getStartOffset();
                 regionTag.setLength(regionTag.getEndOffset() - clearEndOffset);
                 regionTag.setOffset(clearEndOffset);
+                RegionTag<TagBase> previousRegion(startOffset, clearStartOffset - startOffset, regionTag.getTag());
+                regionTags->insert(regionTags->begin() + i++, previousRegion);
                 changed = true;
             }
             else if (regionTag.getEndOffset() <= clearEndOffset) {
                 // clear cuts end of region
                 prepareTagsVectorForUpdate();
+                auto& regionTag = (*regionTags)[i];
                 regionTag.setLength(clearStartOffset - regionTag.getStartOffset());
                 changed = true;
             }
             else if (clearStartOffset <= regionTag.getStartOffset()) {
                 // clear cuts beginning of region
                 prepareTagsVectorForUpdate();
+                auto& regionTag = (*regionTags)[i];
                 regionTag.setLength(regionTag.getEndOffset() - clearEndOffset);
                 regionTag.setOffset(clearEndOffset);
                 changed = true;
