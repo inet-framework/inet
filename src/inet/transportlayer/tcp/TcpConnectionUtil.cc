@@ -230,7 +230,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     tcpAlgorithm->setConnection(this);
 
     state = tcpAlgorithm->getStateVariables();
-    configureStateVariables();
+    configureStateVariables(listenerConn->getState());
     tcpAlgorithm->initialize();
 
     // put it into LISTEN, with our localAddr/localPort
@@ -470,10 +470,43 @@ void TcpConnection::configureStateVariables()
     state->sack_support = tcpMain->par("sackSupport");    // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
 
     if (state->sack_support) {
-        std::string algorithmName1 = "TcpReno";
-        std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
+        if (strcmp(tcpAlgorithm->getClassName(), "inet::tcp::TcpReno") != 0) {    // TODO add additional checks for new SACK supporting algorithms here once they are implemented
+            EV_DEBUG << "If you want to use TCP SACK please set tcpAlgorithmClass to TcpReno\n";
 
-        if (algorithmName1 != algorithmName2) {    // TODO add additional checks for new SACK supporting algorithms here once they are implemented
+            ASSERT(false);
+        }
+    }
+}
+
+void TcpConnection::configureStateVariables(TcpStateVariables *baseState)
+{
+    state->dupthresh = baseState->dupthresh;
+    long advertisedWindowPar = baseState->rcv_wnd;
+    state->ws_support = baseState->ws_support;    // if set, this means that current host supports WS (RFC 1323)
+    state->ws_manual_scale = baseState->ws_manual_scale; // scaling factor (set manually) to help for Tcp validation
+    state->ecnWillingness = baseState->ecnWillingness; // if set, current host is willing to use ECN
+    if (!state->ws_support && (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0))
+        throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
+
+    state->rcv_wnd = advertisedWindowPar;
+    state->rcv_adv = advertisedWindowPar;
+
+    if (state->ws_support && advertisedWindowPar > TCP_MAX_WIN) {
+        state->rcv_wnd = TCP_MAX_WIN;    // we cannot to guarantee that the other end is also supporting the Window Scale (header option) (RFC 1322)
+        state->rcv_adv = TCP_MAX_WIN;    // therefore TCP_MAX_WIN is used as initial value for rcv_wnd and rcv_adv
+    }
+
+    state->maxRcvBuffer = advertisedWindowPar;
+    state->delayed_acks_enabled = baseState->delayed_acks_enabled;    // delayed ACK algorithm (RFC 1122) enabled/disabled
+    state->nagle_enabled = baseState->nagle_enabled;    // Nagle's algorithm (RFC 896) enabled/disabled
+    state->limited_transmit_enabled = baseState->limited_transmit_enabled;    // Limited Transmit algorithm (RFC 3042) enabled/disabled
+    state->increased_IW_enabled = baseState->increased_IW_enabled;    // Increased Initial Window (RFC 3390) enabled/disabled
+    state->snd_mss = baseState->snd_mss;    // Maximum Segment Size (RFC 793)
+    state->ts_support = baseState->ts_support;    // if set, this means that current host supports TS (RFC 1323)
+    state->sack_support = baseState->sack_support;    // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+
+    if (state->sack_support) {
+        if (strcmp(tcpAlgorithm->getClassName(), "inet::tcp::TcpReno") != 0) {    // TODO add additional checks for new SACK supporting algorithms here once they are implemented
             EV_DEBUG << "If you want to use TCP SACK please set tcpAlgorithmClass to TcpReno\n";
 
             ASSERT(false);

@@ -471,6 +471,7 @@ class INET_API TcpConnection : public cSimpleModule
 
     /** Utility: set snd_mss, rcv_wnd and sack in newly created state variables block */
     virtual void configureStateVariables();
+    virtual void configureStateVariables(TcpStateVariables *baseState);
 
     /** Utility: generates ISS and initializes corresponding state variables */
     virtual void selectInitialSeqNum();
