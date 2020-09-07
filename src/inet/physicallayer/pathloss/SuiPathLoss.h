@@ -1,10 +1,4 @@
-/***************************************************************************
-* author:      Konrad Polys, Krzysztof Grochla
-*
-* copyright:   (c) 2013 The Institute of Theoretical and Applied Informatics
-*                       of the Polish Academy of Sciences, Project
-*                       LIDER/10/194/L-3/11/ supported by NCBIR
-*
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -18,6 +12,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+/***************************************************************************
+* author:      Konrad Polys, Krzysztof Grochla
+*
+* copyright:   (c) 2013 The Institute of Theoretical and Applied Informatics
+*                       of the Polish Academy of Sciences, Project
+*                       LIDER/10/194/L-3/11/ supported by NCBIR
+*
 ***************************************************************************/
 
 #ifndef __INET_SUIPATHLOSS_H

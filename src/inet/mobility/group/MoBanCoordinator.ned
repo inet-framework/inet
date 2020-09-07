@@ -1,15 +1,4 @@
-//***************************************************************************
-//* file:        MoBanCoordinator.ned
-//*
-//* author:      Majid Nabi <m.nabi@tue.nl>
-//*
-//*              http://www.es.ele.tue.nl/nes
-//*
-//*
-//* copyright:   (C) 2010 Electronic Systems group(ES),
-//*              Eindhoven University of Technology (TU/e), the Netherlands.
-//*
-//*
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -23,6 +12,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//***************************************************************************
+//* file:        MoBanCoordinator.ned
+//*
+//* author:      Majid Nabi <m.nabi@tue.nl>
+//*
+//*              http://www.es.ele.tue.nl/nes
+//*
+//*
+//* copyright:   (C) 2010 Electronic Systems group(ES),
+//*              Eindhoven University of Technology (TU/e), the Netherlands.
+//*
+//*
 //***************************************************************************
 //* part of:    MoBAN (Mobility Model for wireless Body Area Networks)
 //* description:     Coordinator module of the MoBAN mobility model

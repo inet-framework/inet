@@ -15,7 +15,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-//
 
 #include "Ieee80211TesterMac.h"
 //#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

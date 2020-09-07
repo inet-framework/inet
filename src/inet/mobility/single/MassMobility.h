@@ -1,6 +1,4 @@
 //
-// Author: Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)
-// Generalization: Andras Varga
 // Copyright (C) 2005 Emin Ilker Cetinbas, Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -16,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+// Author: Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)
+// Generalization: Andras Varga
 //
 
 #ifndef __INET_MASSMOBILITY_H

@@ -1,11 +1,4 @@
-/***************************************************************************
-                          RtpSenderInfo.cc  -  description
-                             -------------------
-    begin                : Wed Dec 5 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
-***************************************************************************/
-
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -19,6 +12,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+/***************************************************************************
+                          RtpSenderInfo.cc  -  description
+                             -------------------
+    begin                : Wed Dec 5 2001
+    copyright            : (C) 2001 by Matthias Oppitz
+    email                : Matthias.Oppitz@gmx.de
+***************************************************************************/
+
 
 #include "inet/transportlayer/rtp/Reports_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"

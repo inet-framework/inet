@@ -1,14 +1,4 @@
-/* -*- mode:c++ -*- ********************************************************
- * file:        Ieee802154Mac.h
- *
- * author:     Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
- *                Marc Loebbers, Yosia Hadisusanto
- *
- * copyright:    (C) 2007-2009 CSEM SA
- *              (C) 2009 T.U. Eindhoven
- *                (C) 2004 Telecommunication Networks Group (TKN) at
- *              Technische Universitaet Berlin, Germany.
- *
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -22,6 +12,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+/* -*- mode:c++ -*- ********************************************************
+ * file:        Ieee802154Mac.h
+ *
+ * author:     Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
+ *                Marc Loebbers, Yosia Hadisusanto
+ *
+ * copyright:    (C) 2007-2009 CSEM SA
+ *              (C) 2009 T.U. Eindhoven
+ *                (C) 2004 Telecommunication Networks Group (TKN) at
+ *              Technische Universitaet Berlin, Germany.
+ *
  *
  * Funding: This work was partially financed by the European Commission under the
  * Framework 6 IST Project "Wirelessly Accessible Sensor Populations"

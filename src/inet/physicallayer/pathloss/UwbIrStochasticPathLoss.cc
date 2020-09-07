@@ -1,10 +1,4 @@
-/* -*- mode:c++ -*- ********************************************************
- * author:      Jerome Rousselot
- *
- * copyright:   (C) 2008 Centre Suisse d'Electronique et Microtechnique (CSEM) SA
- *              Real-Time Software and Networking
- *              Jaquet-Droz 1, CH-2002 Neuchatel, Switzerland.
- *
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -18,6 +12,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+/* -*- mode:c++ -*- ********************************************************
+ * author:      Jerome Rousselot
+ *
+ * copyright:   (C) 2008 Centre Suisse d'Electronique et Microtechnique (CSEM) SA
+ *              Real-Time Software and Networking
+ *              Jaquet-Droz 1, CH-2002 Neuchatel, Switzerland.
+ *
  * description: this AnalogueModel models free-space pathloss
  ***************************************************************************/
 

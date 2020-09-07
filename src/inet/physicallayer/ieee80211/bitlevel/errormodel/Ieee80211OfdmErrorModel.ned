@@ -39,7 +39,6 @@ import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorMod
 // your own error rates for the signal (IEEE 802.11-2012,
 // 18.3.4) and data field (18.3.5).
 //
-//
 module Ieee80211OfdmErrorModel extends Ieee80211NistErrorModel like ILayeredErrorModel
 {
     parameters:

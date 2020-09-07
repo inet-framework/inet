@@ -1,6 +1,6 @@
-/*
- *  Copyright (C) 2012 Alfonso Ariza, Universidad de Malaga
- *
+//
+// Copyright (C) 2012 Alfonso Ariza, Universidad de Malaga
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+//
 
 #ifndef __INET_STATICLINEARMOBILITY_H
 #define __INET_STATICLINEARMOBILITY_H

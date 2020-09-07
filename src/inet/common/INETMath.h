@@ -1,11 +1,4 @@
-/* -*- mode:c++ -*- ********************************************************
- * file:        INETMath.h
- *
- * author:      Christian Frank
- *
- * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
- *              Technische Universitaet Berlin, Germany.
- *
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -19,6 +12,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+/* -*- mode:c++ -*- ********************************************************
+ * file:        INETMath.h
+ *
+ * author:      Christian Frank
+ *
+ * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
+ *              Technische Universitaet Berlin, Germany.
+ *
  ***************************************************************************
  * part of:     framework implementation developed by tkn
  **************************************************************************/

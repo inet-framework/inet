@@ -35,7 +35,6 @@ import inet.physicallayer.contract.bitlevel.IModulator;
 // However, it can be used with an arbitrary OFDM compatible
 // constellation mapping.
 //
-//
 simple Ieee80211OfdmModulator like IModulator
 {
     parameters:

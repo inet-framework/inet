@@ -1,9 +1,9 @@
+//
+// copyright:   (C) 2008-2010 CSEM SA, Neuchâtel, Switzerland.
 //***************************************************************************
 // file:        ProbabilisticBroadcast.ned
 //
 // author:      Damien Piguet
-//
-// copyright:   (C) 2008-2010 CSEM SA, Neuchâtel, Switzerland.
 //
 // description: Multi-hop ad-hoc data dissemination protocol based on
 //              probabilistic broadcast: depending on application

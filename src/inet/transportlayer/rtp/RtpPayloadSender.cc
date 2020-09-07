@@ -1,11 +1,4 @@
-/***************************************************************************
-                          RtpPayloadSender.cc  -  description
-                             -------------------
-    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
-    (C) 2001 Matthias Oppitz, Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
-
-***************************************************************************/
-
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -19,6 +12,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+/***************************************************************************
+                          RtpPayloadSender.cc  -  description
+                             -------------------
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz, Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
+
+***************************************************************************/
+
 
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"

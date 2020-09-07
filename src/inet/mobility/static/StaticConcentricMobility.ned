@@ -1,7 +1,5 @@
 //
 // Copyright (C) 2014 Florian Meier <florian.meier@tu-harburg.de>
-//
-// Based on:
 // Copyright (C) 2006 Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
 //
 // This program is free software; you can redistribute it and/or

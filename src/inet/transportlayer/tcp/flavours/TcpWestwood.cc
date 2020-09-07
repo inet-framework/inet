@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2013 Maria Fernandez, Carlos Calafate, Juan-Carlos Cano and
-// Pietro Manzoni
+// Copyright (C) 2013 Maria Fernandez, Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License

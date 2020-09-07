@@ -33,7 +33,6 @@ import inet.physicallayer.contract.bitlevel.IScrambler;
 // - Additive scrambler (18.3.5.5 PLCP DATA scrambler and descrambler) (see: ~AdditiveScrambler)
 // - Block interleaver (18.3.5.7 Data interleaving) (see: ~Ieee80211OfdmInterleaver)
 //
-//
 module Ieee80211OfdmEncoder like IEncoder
 {
     parameters:

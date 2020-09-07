@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2012 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or

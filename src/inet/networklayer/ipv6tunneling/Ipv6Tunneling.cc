@@ -1,8 +1,8 @@
-/**
- * Copyright (C) 2007
- * Christian Bauer
- * Institute of Communications and Navigation, German Aerospace Center (DLR)
-
+//
+// Copyright (C) 2007
+// Christian Bauer
+// Institute of Communications and Navigation, German Aerospace Center (DLR)
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+//
 
 //
 // Implementation of RFC 2473

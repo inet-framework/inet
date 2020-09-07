@@ -1,14 +1,4 @@
-/* -*- mode:c++ -*- ********************************************************
- * file:        MovingMobilityBase.cc
- *
- * author:      Daniel Willkomm
- *
- * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
- *              Technische Universitaet Berlin, Germany.
- *
- *              (C) 2005 Andras Varga
- *              (C) 2011 Zoltan Bojthe
- *
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -22,6 +12,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+/* -*- mode:c++ -*- ********************************************************
+ * file:        MovingMobilityBase.cc
+ *
+ * author:      Daniel Willkomm
+ *
+ * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
+ *              Technische Universitaet Berlin, Germany.
+ *
+ *              (C) 2005 Andras Varga
+ *              (C) 2011 Zoltan Bojthe
+ *
  ***************************************************************************
  * part of:     framework implementation developed by tkn
  **************************************************************************/

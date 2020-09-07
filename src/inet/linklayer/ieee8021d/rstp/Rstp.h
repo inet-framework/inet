@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2011 Juan Luis Garrote Molinero
 // Copyright (C) 2013 Zsolt Prontvai
 //

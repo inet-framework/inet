@@ -104,8 +104,6 @@ import inet.mobility.base.MovingMobilityBase;
 // If the repeat count n is omitted for the <repeat> statement, that
 // means an infinite loop.
 //
-//
-//
 // You can find the DTD with the sources: TurtleMobility.dtd.
 //
 //TODO update documentation; <turn heading=".."> is strange
