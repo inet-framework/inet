@@ -413,6 +413,16 @@ class INET_API TcpSocket : public ISocket
     void setTos(short tos);
 
     /**
+     *
+     */
+    void setNagleEnabled(bool b);
+
+    /**
+     *
+     */
+    void setDelayedAcks(bool b);
+
+    /**
      * Required to re-connect with a "used" TcpSocket object.
      * By default, a TcpSocket object is tied to a single TCP connection,
      * via the connectionId. When the connection gets closed or aborted,

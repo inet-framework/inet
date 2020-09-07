@@ -171,6 +171,16 @@ class TcpSetTosCommand extends TcpSetOptionCommand
     short tos;   // type of service for Ipv4 / traffic class for Ipv6
 }
 
+class TcpSetNagleEnabledCommand extends TcpSetOptionCommand
+{
+    bool nagleEnabled;
+}
+
+class TcpSetDelayedAcksCommand extends TcpSetOptionCommand
+{
+    bool delayedAcksEnabled;
+}
+
 //
 // Sent with message kind TCP_I_AVAILABLE, to let the app know
 // about the local and remote IP address and port.

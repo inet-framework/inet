@@ -270,6 +270,24 @@ void TcpSocket::setTos(short dscp)
     sendToTcp(request);
 }
 
+void TcpSocket::setNagleEnabled(bool b)
+{
+    auto request = new Request("setNagle", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetNagleEnabledCommand();
+    cmd->setNagleEnabled(b);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
+void TcpSocket::setDelayedAcks(bool b)
+{
+    auto request = new Request("setDelayedAcks", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetDelayedAcksCommand();
+    cmd->setDelayedAcksEnabled(b);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 // ######################
 // TCP Socket Options End
 // ######################

@@ -203,6 +203,16 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
     }
+    else if (auto cmd = dynamic_cast<TcpSetNagleEnabledCommand *>(tcpCommand)) {
+        if (state == nullptr)
+            throw cRuntimeError("socket state not available");
+        state->nagle_enabled = cmd->getNagleEnabled();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetDelayedAcksCommand *>(tcpCommand)) {
+        if (state == nullptr)
+            throw cRuntimeError("socket state not available");
+        state->delayed_acks_enabled = cmd->getDelayedAcksEnabled();
+    }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
     delete tcpCommand;
