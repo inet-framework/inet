@@ -17,7 +17,7 @@
 	        	<ProcessIPv4 asNumber="1">
 	        		<Networks>
 	        			<Network> 
-	        				<IPAddress>10.0.12.1</IPAddress>						 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
 						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network>
 						<Network> 
@@ -56,12 +56,12 @@
 	        	<ProcessIPv4 asNumber="1">
 	        		<Networks>
 	        			<Network> 
-	        				<IPAddress>10.0.12.2</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
-	        				<IPAddress>10.0.23.2</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
 	        				<IPAddress>10.0.2.0</IPAddress>						 
@@ -95,8 +95,8 @@
 	        	<ProcessIPv4 asNumber="1">
 	        		<Networks>
 	        			<Network> 
-	        				<IPAddress>10.0.23.2</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
 	        				<IPAddress>10.0.3.0</IPAddress>						 

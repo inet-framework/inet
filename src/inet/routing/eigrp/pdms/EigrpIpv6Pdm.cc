@@ -744,6 +744,9 @@ void EigrpIpv6Pdm::processQueryPacket(Packet *pk, Ipv6Address& srcAddress, int i
     for (int i = 0; i < cnt; i++)
     {
         src = processInterRoute(query->getInterRoutes(i), srcAddress, neigh->getNeighborId(), eigrpIface, &notifyDual, &isSourceNew);
+        src->getRouteInfo()->incrementRefCnt(); //RouteInto cannot be removed while processing Query and generating Reply
+
+
         // Always notify DUAL
         eigrpDual->processEvent(EigrpDual<Ipv6Address>::RECV_QUERY, src, neigh->getNeighborId(), isSourceNew);
     }
@@ -902,7 +905,6 @@ Packet* EigrpIpv6Pdm::createQueryPacket(Ipv6Address& destAddress, EigrpMsgReq *m
     msg->setAckNum(msgReq->getAckNumber());
     msg->setSeqNum(msgReq->getSeqNumber());
 
-
     // Add route TLV
     if (routeCnt > 0) addRoutesToMsg(msg, msgReq);
 
@@ -923,7 +925,13 @@ Packet* EigrpIpv6Pdm::createReplyPacket(Ipv6Address& destAddress, EigrpMsgReq *m
     msg->setAckNum(msgReq->getAckNumber());
     msg->setSeqNum(msgReq->getSeqNumber());
 
-    if (routeCnt > 0) addRoutesToMsg(msg, msgReq);
+    // Add route TLV
+    if (routeCnt > 0)
+    {
+        addRoutesToMsg(msg, msgReq);
+        unlockRoutes(msgReq); // Locked RouteInfos are unlocked and can be removed
+    }
+
 
     msg->setChunkLength(B(sizeOfMsg+routeCnt * 68));
 
@@ -966,6 +974,26 @@ void EigrpIpv6Pdm::setRouteTlvMetric(EigrpWideMetricPar *msgMetric, EigrpWideMet
     msgMetric->offset = 0;      // TODO
     msgMetric->priority = 0;    // TODO
     msgMetric->reliability = rtMetric->reliability;
+}
+
+void EigrpIpv6Pdm::unlockRoutes(const EigrpMsgReq *msgReq)
+{
+    int reqCnt = msgReq->getRoutesArraySize();
+    EigrpRoute<Ipv6Address> *route = NULL;
+
+    for (int i = 0; i < reqCnt; i++)
+    {
+        EigrpMsgRoute req = msgReq->getRoutes(i);
+        route = eigrpTt->findRouteInfoById(req.routeId);
+
+        ASSERT(route != NULL);
+        route->decrementRefCnt();
+
+        if (route->getRefCnt() < 1) //Route would have been removed be removed if wasn't locked
+        {
+            eigrpTt->removeRouteInfo(route);
+        }
+    }
 }
 
 void EigrpIpv6Pdm::addRoutesToMsg(const Ptr<EigrpIpv6Message>& msg, const EigrpMsgReq *msgReq)
@@ -1659,7 +1687,7 @@ void EigrpIpv6Pdm::setPassive(bool passive, int ifaceId)
         {
             iface->ipv6Data()->removeAddress(EIGRP_IPV6_MULT);
         }
-        */
+         */
 
         if (ipv6int->hasAddress(EIGRP_IPV6_MULT))
         {
@@ -2000,7 +2028,7 @@ void EigrpIpv6Pdm::setDelayedRemove(int neighId, EigrpRouteSource<Ipv6Address> *
     src->setValid(true);    // Can not be invalid
 
 #ifdef EIGRP_DEBUG
-        EV_DEBUG << "DUAL: route via " << src->getNextHop() << " will be removed from TT after receiving Ack from neighbor" << endl;
+    EV_DEBUG << "DUAL: route via " << src->getNextHop() << " will be removed from TT after receiving Ack from neighbor" << endl;
 #endif
 }
 
