@@ -498,6 +498,8 @@ void EtherBus::copyIncomingsToTap(int outTapIdx)
 
 void EtherBus::finish()
 {
+    for (int i = 0; i < numTaps; i++)
+        cutActiveTxOnTap(i);
     simtime_t t = simTime();
     recordScalar("simulated time", t);
     recordScalar("messages handled", numMessages);
