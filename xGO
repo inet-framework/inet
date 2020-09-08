@@ -1,0 +1,3 @@
+. setenv
+git fetch
+gitk --all &

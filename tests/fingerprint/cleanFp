@@ -1,0 +1,2 @@
+rm *.FAILED *.UPDATED *.ERROR
+rm -r results

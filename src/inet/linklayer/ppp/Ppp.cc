@@ -65,6 +65,11 @@ void Ppp::initialize(int stage)
     }
 }
 
+void Ppp::finish()
+{
+    abortCurrenTransmission();
+}
+
 void Ppp::configureNetworkInterface()
 {
     // data rate
@@ -122,6 +127,22 @@ void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     }
 }
 
+void Ppp::abortCurrenTransmission()
+{
+    if (endTransmissionEvent->isScheduled()) {
+        ASSERT(curTxPacket != nullptr);
+        simtime_t startTransmissionTime = endTransmissionEvent->getSendingTime();
+        simtime_t sentDuration = simTime() - startTransmissionTime;
+        double sentPart = sentDuration / (endTransmissionEvent->getArrivalTime() - startTransmissionTime);
+        b newLength = b(floor(curTxPacket->getBitLength() * sentPart));
+        curTxPacket->removeAtBack(curTxPacket->getDataLength() - newLength);
+        curTxPacket->setBitError(true);
+        send(curTxPacket, SendOptions().updateTx(curTxPacket->getOrigPacketId()).duration(sentDuration), physOutGate);
+        curTxPacket = nullptr;
+        cancelEvent(endTransmissionEvent);
+    }
+}
+
 void Ppp::refreshOutGateConnection(bool connected)
 {
     Enter_Method("refreshOutGateConnection");
@@ -131,18 +152,7 @@ void Ppp::refreshOutGateConnection(bool connected)
         ASSERT(physOutGate->getPathEndGate()->getType() == cGate::INPUT);
 
     if (!connected) {
-        if (endTransmissionEvent->isScheduled()) {
-            ASSERT(curTxPacket != nullptr);
-            simtime_t startTransmissionTime = endTransmissionEvent->getSendingTime();
-            simtime_t sentDuration = simTime() - startTransmissionTime;
-            double sentPart = sentDuration / (endTransmissionEvent->getArrivalTime() - startTransmissionTime);
-            b newLength = b(floor(curTxPacket->getBitLength() * sentPart));
-            curTxPacket->removeAtBack(curTxPacket->getDataLength() - newLength);
-            curTxPacket->setBitError(true);
-            send(curTxPacket, SendOptions().finishTx(curTxPacket->getId()), physOutGate);
-            curTxPacket = nullptr;
-            cancelEvent(endTransmissionEvent);
-        }
+        abortCurrenTransmission();
 
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN); // TODO choose a correct PacketDropReason value
