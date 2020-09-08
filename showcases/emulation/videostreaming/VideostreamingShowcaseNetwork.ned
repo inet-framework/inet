@@ -1,4 +1,4 @@
-package inet.showcases.emulation.videostreaming3;
+package inet.showcases.emulation.videostreaming;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
