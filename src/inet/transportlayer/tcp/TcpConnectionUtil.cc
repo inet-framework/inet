@@ -481,7 +481,7 @@ void TcpConnection::configureStateVariables()
 void TcpConnection::configureStateVariables(TcpStateVariables *baseState)
 {
     state->dupthresh = baseState->dupthresh;
-    long advertisedWindowPar = baseState->rcv_wnd;
+    long advertisedWindowPar = baseState->maxRcvBuffer;
     state->ws_support = baseState->ws_support;    // if set, this means that current host supports WS (RFC 1323)
     state->ws_manual_scale = baseState->ws_manual_scale; // scaling factor (set manually) to help for Tcp validation
     state->ecnWillingness = baseState->ecnWillingness; // if set, current host is willing to use ECN
