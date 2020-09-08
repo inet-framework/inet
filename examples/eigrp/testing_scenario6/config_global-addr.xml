@@ -129,38 +129,4 @@
         	</EIGRP>
         </Routing6>
     </Router>
-    
-
-    <Host id="2001:db8:a::2">
-		<Interfaces>
-			<Interface name="eth0">
-				<IPv6Address>2001:db8:a::2/64</IPv6Address>
-			</Interface>
-		</Interfaces>
-		<DefaultRouter6>2001:db8:a::1</DefaultRouter6>
-	</Host>
-	<Host id="2001:db8:b::2">
-		<Interfaces>
-			<Interface name="eth0">
-				<IPv6Address>2001:db8:b::2/64</IPv6Address>
-			</Interface>
-		</Interfaces>
-		<DefaultRouter6>2001:db8:b::1</DefaultRouter6>
-	</Host>
-	    <Host id="2001:db8:c::2">
-		<Interfaces>
-			<Interface name="eth0">
-				<IPv6Address>2001:db8:c::2/64</IPv6Address>
-			</Interface>
-		</Interfaces>
-		<DefaultRouter6>2001:db8:c::1</DefaultRouter6>
-	</Host>
-	<Host id="2001:db8:d::2">
-		<Interfaces>
-			<Interface name="eth0">
-				<IPv6Address>2001:db8:d::2/64</IPv6Address>
-			</Interface>
-		</Interfaces>
-		<DefaultRouter6>2001:db8:d::1</DefaultRouter6>
-	</Host>
 </Devices>
