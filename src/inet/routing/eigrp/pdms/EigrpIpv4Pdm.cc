@@ -15,15 +15,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 /**
-* @file EigrpIpv4Pdm.cc
-* @author Jan Bloudicek (jbloudicek@gmail.com)
-* @author Vit Rek (rek@kn.vutbr.cz)
-* @author Vladimir Vesely (ivesely@fit.vutbr.cz)
-* @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
-* @brief EIGRP IPv4 Protocol Dependent Module
-* @detail Main module, it mediates control exchange between DUAL, routing table and
+ * @file EigrpIpv4Pdm.cc
+ * @author Jan Bloudicek (jbloudicek@gmail.com)
+ * @author Vit Rek (rek@kn.vutbr.cz)
+ * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
+ * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
+ * @brief EIGRP IPv4 Protocol Dependent Module
+ * @detail Main module, it mediates control exchange between DUAL, routing table and
 topology table.
-*/
+ */
 
 #include <algorithm>
 #include "inet/routing/eigrp/pdms/EigrpIpv4Pdm.h"
@@ -721,6 +721,8 @@ void EigrpIpv4Pdm::processQueryPacket(Packet *pk, Ipv4Address& srcAddress, int i
     for (int i = 0; i < cnt; i++)
     {
         src = processInterRoute(query->getInterRoutes(i), srcAddress, neigh->getNeighborId(), eigrpIface, &notifyDual, &isSourceNew);
+        src->getRouteInfo()->incrementRefCnt(); //RouteInto cannot be removed while processing Query and generating Reply
+
         // Always notify DUAL
         eigrpDual->processEvent(EigrpDual<Ipv4Address>::RECV_QUERY, src, neigh->getNeighborId(), isSourceNew);
     }
@@ -881,7 +883,6 @@ Packet *EigrpIpv4Pdm::createQueryPacket(Ipv4Address& destAddress, EigrpMsgReq *m
     msg->setSeqNum(msgReq->getSeqNumber());
     //addCtrInfo(msg, msgReq->getDestInterface(), destAddress);
 
-
     // Add route TLV
     if (routeCnt > 0) addRoutesToMsg(msg, msgReq);
 
@@ -903,7 +904,11 @@ Packet *EigrpIpv4Pdm::createReplyPacket(Ipv4Address& destAddress, EigrpMsgReq *m
     //addCtrInfo(msg, msgReq->getDestInterface(), destAddress);
 
     // Add route TLV
-    if (routeCnt > 0) addRoutesToMsg(msg, msgReq);
+    if (routeCnt > 0)
+    {
+        addRoutesToMsg(msg, msgReq);
+        unlockRoutes(msgReq); // Locked RouteInfos are unlocked and can be removed
+    }
 
     msg->setChunkLength(B(sizeOfMsg+routeCnt * 44));
 
@@ -946,6 +951,26 @@ void EigrpIpv4Pdm::setRouteTlvMetric(EigrpWideMetricPar *msgMetric, EigrpWideMet
     msgMetric->offset = 0;      // TODO
     msgMetric->priority = 0;    // TODO
     msgMetric->reliability = rtMetric->reliability;
+}
+
+void EigrpIpv4Pdm::unlockRoutes(const EigrpMsgReq *msgReq)
+{
+    int reqCnt = msgReq->getRoutesArraySize();
+    EigrpRoute<Ipv4Address> *route = NULL;
+
+    for (int i = 0; i < reqCnt; i++)
+    {
+        EigrpMsgRoute req = msgReq->getRoutes(i);
+        route = eigrpTt->findRouteInfoById(req.routeId);
+
+        ASSERT(route != NULL);
+        route->decrementRefCnt();
+
+        if (route->getRefCnt() < 1) //Route would have been removed be removed if wasn't locked
+        {
+            eigrpTt->removeRouteInfo(route);
+        }
+    }
 }
 
 void EigrpIpv4Pdm::addRoutesToMsg(const Ptr<EigrpIpv4Message>& msg, const EigrpMsgReq *msgReq)

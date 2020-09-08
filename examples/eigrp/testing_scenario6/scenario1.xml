@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<scenario>
+	<!-- Scenario 1 - delay change on LAN3 -->
+
+	<at t="10">
+		<set-channel-param src-module="R3" src-gate="ethg[2]" dest-module="LAN3" dest-gate="ethg[0]" par="datarate" value="10Mbps"/>
+	</at>
+</scenario>

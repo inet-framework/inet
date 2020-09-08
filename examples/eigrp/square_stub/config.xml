@@ -5,11 +5,11 @@
 	        	<ProcessIPv4 asNumber="1">
 	        		<Networks>
 	        			<Network> 
-	        				<IPAddress>10.0.12.1</IPAddress>						 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
 						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network>
 						<Network> 
-	        				<IPAddress>10.0.13.1</IPAddress>						 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
 						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network>
 						<Network> 
@@ -28,12 +28,12 @@
 	        	<ProcessIPv4 asNumber="1">
 	        		<Networks>
 	        			<Network> 
-	        				<IPAddress>10.0.12.2</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
-	        				<IPAddress>10.0.24.2</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+	        				<IPAddress>10.0.24.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network>
 						<Network> 
 	        				<IPAddress>10.0.2.0</IPAddress>						 
@@ -53,11 +53,11 @@
 	        		<Networks>
 	        			<Network> 
 	        				<IPAddress>10.0.13.0</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
 	        				<IPAddress>10.0.34.0</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
 	        				<IPAddress>10.0.3.0</IPAddress>						 
@@ -76,11 +76,11 @@
 	        		<Networks>
 	        			<Network> 
 	        				<IPAddress>10.0.24.0</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
 	        				<IPAddress>10.0.34.0</IPAddress>						 
-						 	<Wildcard>255.255.255.252</Wildcard>
+						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network> 
 						<Network> 
 	        				<IPAddress>10.0.4.0</IPAddress>						 

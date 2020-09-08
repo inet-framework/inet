@@ -137,6 +137,7 @@ protected:
     Packet* createReplyPacket(Ipv4Address& destAddress, EigrpMsgReq *msgReq);
 
     void addMessageHeader(const Ptr<EigrpMessage>& msg, int opcode, EigrpMsgReq *msgReq);
+    void unlockRoutes(const EigrpMsgReq *msgReq);
 
     void createRouteTlv(EigrpMpIpv4Internal *routeTlv, EigrpRoute<Ipv4Address> *route, bool unreachable = false);
     /**

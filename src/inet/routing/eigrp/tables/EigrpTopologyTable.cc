@@ -455,6 +455,9 @@ typename std::vector<EigrpRouteSource<IPAddress> *>::iterator EigrpTopologyTable
     {
         EV_DEBUG << "EIGRP: remove route info " << route->getRouteAddress() << ", it does not have any source" << endl;
         removeRouteInfo(route);
+    } else
+    {
+        route->decrementRefCnt();
     }
 
     delete source;

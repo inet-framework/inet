@@ -14,11 +14,11 @@
 	        	<ProcessIPv4 asNumber="1">
 	        		<Networks>
 	        			<Network> 
-	        				<IPAddress>10.0.12.1</IPAddress>						 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
 						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network>
 						<Network> 
-	        				<IPAddress>10.0.13.1</IPAddress>						 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
 						 	<Wildcard>0.0.0.3</Wildcard>
 						</Network>
 						<Network> 

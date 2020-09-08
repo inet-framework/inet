@@ -146,6 +146,7 @@ protected:
      */
     //void addCtrInfo(EigrpMessage *msg, int ifaceId, const Ipv6Address &destAddress);
     void addMessageHeader(const Ptr<EigrpMessage>& msg, int opcode, EigrpMsgReq *msgReq);
+    void unlockRoutes(const EigrpMsgReq *msgReq);
     void createRouteTlv(EigrpMpIpv6Internal *routeTlv, EigrpRoute<Ipv6Address> *route, bool unreachable = false);
     /**
      * Add routes from request to the message.
