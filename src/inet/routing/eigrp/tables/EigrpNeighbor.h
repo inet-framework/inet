@@ -18,6 +18,7 @@
  * @file EigrpNeighbor.h
  * @brief File contains interface for neighbor table.
  * @date 7.2.2014
+ * @author Jan Zavrel (honza.zavrel96@gmail.com)
  * @author Jan Bloudicek (jbloudicek@gmail.com)
  * @author Vit Rek (rek@kn.vutbr.cz)
  * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
