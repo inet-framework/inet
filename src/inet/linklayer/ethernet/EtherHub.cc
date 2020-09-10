@@ -209,7 +209,6 @@ void EtherHub::handleMessage(cMessage *msg)
 
 void EtherHub::cutSignalEnd(EthernetSignalBase* signal, simtime_t duration)
 {
-    signal->setRemainingDuration(signal->getArrivalTime() + duration - simTime());
     signal->setDuration(duration);
     int64_t newBitLength = duration.dbl() * datarate;
     if (auto packet = check_and_cast_nullable<Packet*>(signal->decapsulate())) {
@@ -233,6 +232,7 @@ void EtherHub::rxCutOnPort(int inPort)
         EthernetSignalBase *signal = portInfos[inPort].incomingSignal;
         simtime_t duration = now - signal->getArrivalTime();
         cutSignalEnd(signal, duration);
+        signal->setRemainingDuration(SIMTIME_ZERO);
         forwardSignalFrom(inPort);
     }
 }
@@ -315,24 +315,26 @@ void EtherHub::cutActiveTxOnPort(int outPort)
     }
     simtime_t now = simTime();
     cGate *ogate = gate(outputGateBaseId + outPort);
-//    simtime_t duration = now - gateInfos[outPort].outgoingStartTime;
-//    EthernetSignalBase *signalCopy = nullptr;
+    simtime_t duration = now - portInfos[outPort].outgoingStartTime;
+    EthernetSignalBase *signalCopy = nullptr;
     if (!portInfos[outPort].outgoingCollision && portInfos[outPort].forwardFromPorts.size() == 1) {
         // cut a single transmission:
-//        int arrivalPort = *(gateInfos[outPort].forwardFromPorts.begin());
+        int arrivalPort = *(portInfos[outPort].forwardFromPorts.begin());
         ASSERT(ogate->getTransmissionChannel()->isBusy());
-//        signalCopy = gateInfos[arrivalPort].incomingSignal->dup();
+        signalCopy = portInfos[arrivalPort].incomingSignal->dup();
+        cutSignalEnd(signalCopy, duration);
     }
     else {
         // collision
         ASSERT(ogate->getTransmissionChannel()->isBusy());
         ASSERT(portInfos[outPort].outgoingCollision);
-//        signalCopy = new EthernetSignalBase("collision");
+        signalCopy = new EthernetSignalBase("collision");
+        int64_t newBitLength = duration.dbl() * datarate;
+        signalCopy->setBitLength(newBitLength);
     }
-//    signalCopy->setBitLength(duration.dbl() * datarate);
-//    signalCopy->setBitrate(datarate);
-//    signalCopy->setBitError(true);
-//    send(signalCopy, SendOptions().updateTx(gateInfos[outPort].outgoingOrigId).duration(duration), ogate);
+    signalCopy->setBitrate(datarate);
+    signalCopy->setBitError(true);
+    send(signalCopy, SendOptions().updateTx(portInfos[outPort].outgoingOrigId).duration(duration), ogate);
     // transmisssion finished
     portInfos[outPort].forwardFromPorts.clear();
     portInfos[outPort].outgoingOrigId = -1;
