@@ -470,6 +470,14 @@ void EthernetMacBase::printParameters()
 
 void EthernetMacBase::finish()
 {
+    if (currentTxFrame) {
+        numDroppedPkFromHLIfaceDown++;
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        dropCurrentTxFrame(details);
+        lastTxFinishTime = -1.0;    // so that it never equals to the current simtime, used for Burst mode detection.
+    }
+
     {
         simtime_t t = simTime();
         recordScalar("simulated time", t);
