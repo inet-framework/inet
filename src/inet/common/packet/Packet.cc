@@ -437,7 +437,7 @@ std::ostream& Packet::printToStream(std::ostream& stream, int level, int evFlags
 std::string Packet::str() const
 {
     std::stringstream stream;
-    stream << "(" << getDataLength() << ") " << *content;
+    stream << "(" << getDataLength() << ") " << content;
     return stream.str();
 }
 
