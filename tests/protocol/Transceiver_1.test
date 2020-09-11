@@ -4,6 +4,7 @@ Tests signal transmitter and signal receiver.
 
 %file: test.ned
 
+import ned.DatarateChannel;
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
 import inet.protocol.transceiver.PacketTransmitter;
@@ -26,7 +27,7 @@ network TestTransceiver
         }
     connections:
         source.out --> transmitter.in;
-        transmitter.out --> receiver.in;
+        transmitter.out --> DatarateChannel { delay = 1us; } --> receiver.in;
         receiver.out --> sink.in;
 }
 
