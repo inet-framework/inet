@@ -39,39 +39,39 @@ cmdenv-event-banners = false
 *.source.packetLength = 100B
 *.source.productionInterval = 1s
 
-%contains: stdout
-Producing packet source-0.
-Passing through packet source-0.
-Consuming packet source-0.
+%contains-regex: stdout
+Producing packet, .*?source-0.*?
+Passing through packet, .*?source-0.*?
+Consuming packet, .*?source-0.*?
 
 Running simulation...
-Producing packet source-1.
-Passing through packet source-1.
-Consuming packet source-1.
-Producing packet source-2.
-Passing through packet source-2.
-Consuming packet source-2.
-Producing packet source-3.
-Passing through packet source-3.
-Consuming packet source-3.
-Producing packet source-4.
-Passing through packet source-4.
-Consuming packet source-4.
-Producing packet source-5.
-Passing through packet source-5.
-Consuming packet source-5.
-Producing packet source-6.
-Passing through packet source-6.
-Consuming packet source-6.
-Producing packet source-7.
-Passing through packet source-7.
-Consuming packet source-7.
-Producing packet source-8.
-Passing through packet source-8.
-Consuming packet source-8.
-Producing packet source-9.
-Passing through packet source-9.
-Consuming packet source-9.
-Producing packet source-10.
-Passing through packet source-10.
-Consuming packet source-10.
+Producing packet, .*?source-1.*?
+Passing through packet, .*?source-1.*?
+Consuming packet, .*?source-1.*?
+Producing packet, .*?source-2.*?
+Passing through packet, .*?source-2.*?
+Consuming packet, .*?source-2.*?
+Producing packet, .*?source-3.*?
+Passing through packet, .*?source-3.*?
+Consuming packet, .*?source-3.*?
+Producing packet, .*?source-4.*?
+Passing through packet, .*?source-4.*?
+Consuming packet, .*?source-4.*?
+Producing packet, .*?source-5.*?
+Passing through packet, .*?source-5.*?
+Consuming packet, .*?source-5.*?
+Producing packet, .*?source-6.*?
+Passing through packet, .*?source-6.*?
+Consuming packet, .*?source-6.*?
+Producing packet, .*?source-7.*?
+Passing through packet, .*?source-7.*?
+Consuming packet, .*?source-7.*?
+Producing packet, .*?source-8.*?
+Passing through packet, .*?source-8.*?
+Consuming packet, .*?source-8.*?
+Producing packet, .*?source-9.*?
+Passing through packet, .*?source-9.*?
+Consuming packet, .*?source-9.*?
+Producing packet, .*?source-10.*?
+Passing through packet, .*?source-10.*?
+Consuming packet, .*?source-10.*?

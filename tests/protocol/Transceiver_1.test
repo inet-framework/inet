@@ -41,27 +41,27 @@ cmdenv-event-banners = false
 *.transmitter.datarate = 1Mbps
 *.receiver.datarate = 1Mbps
 
-%contains: stdout
-Producing packet source-0.
+%contains-regex: stdout
+Producing packet, .*?source-0.*?
 
 Running simulation...
-Consuming packet source-0.
-Producing packet source-1.
-Consuming packet source-1.
-Producing packet source-2.
-Consuming packet source-2.
-Producing packet source-3.
-Consuming packet source-3.
-Producing packet source-4.
-Consuming packet source-4.
-Producing packet source-5.
-Consuming packet source-5.
-Producing packet source-6.
-Consuming packet source-6.
-Producing packet source-7.
-Consuming packet source-7.
-Producing packet source-8.
-Consuming packet source-8.
-Producing packet source-9.
-Consuming packet source-9.
-Producing packet source-10.
+Consuming packet, .*?source-0.*?
+Producing packet, .*?source-1.*?
+Consuming packet, .*?source-1.*?
+Producing packet, .*?source-2.*?
+Consuming packet, .*?source-2.*?
+Producing packet, .*?source-3.*?
+Consuming packet, .*?source-3.*?
+Producing packet, .*?source-4.*?
+Consuming packet, .*?source-4.*?
+Producing packet, .*?source-5.*?
+Consuming packet, .*?source-5.*?
+Producing packet, .*?source-6.*?
+Consuming packet, .*?source-6.*?
+Producing packet, .*?source-7.*?
+Consuming packet, .*?source-7.*?
+Producing packet, .*?source-8.*?
+Consuming packet, .*?source-8.*?
+Producing packet, .*?source-9.*?
+Consuming packet, .*?source-9.*?
+Producing packet, .*?source-10.*?
