@@ -1,3 +1,7 @@
+replace int8 with int8_t and drop int8 type and the like
+
+license canonical form, replace OpenSim Ltd. sources to LGL-3
+
 handlePullPacketChanged can come from the queue when
  - a high priority frame is already being streamed and it gets interrupted
  - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
