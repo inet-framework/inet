@@ -65,7 +65,7 @@ void PreemptableStreamer::handleMessage(cMessage *message)
 void PreemptableStreamer::endStreaming()
 {
     auto packetLength = streamedPacket->getTotalLength();
-    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
@@ -92,7 +92,7 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     streamDatarate = datarate;
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    EV_INFO << "Starting streaming" << EV_FIELD(packet) << EV_ENDL;
+    EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     pushOrSendPacketStart(packet, outputGate, consumer, datarate);
     if (std::isnan(streamDatarate.get()))
         endStreaming();
@@ -141,7 +141,7 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamStart = simTime();
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
-    EV_INFO << "Starting streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    EV_INFO << "Starting streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     updateDisplayString();
     return packet;
 }
@@ -149,7 +149,7 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
 Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
 {
     Enter_Method("pullPacketEnd");
-    EV_INFO << "Ending streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
     b pulledLength = streamDatarate * s((simTime() - streamStart).dbl());
     b preemptedLength = roundingLength * ((pulledLength + roundingLength - b(1)) / roundingLength);

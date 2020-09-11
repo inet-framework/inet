@@ -79,7 +79,7 @@ void AggregatorBase::pushPacket(Packet *subpacket, cGate *gate)
         startAggregation(subpacket);
     }
     continueAggregation(subpacket);
-    EV_INFO << "Aggregating packet" << EV_FIELD(subpacket) << EV_FIELD(subpacket, *aggregatedPacket) << EV_ENDL;
+    EV_INFO << "Aggregating packet" << EV_FIELD(subpacket) << EV_FIELD(packet, *aggregatedPacket) << EV_ENDL;
     delete subpacket;
     updateDisplayString();
 }
