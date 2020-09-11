@@ -18,7 +18,6 @@
 
 package inet.examples.inet.pcaprecorder;
 
-import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -48,9 +47,6 @@ network PcapRecorderTest
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
-        }
-        netAnimTrace: NetAnimTrace {
-            @display("p=100,200;is=s");
         }
     connections:
         client0.pppg++ <--> C <--> server.pppg++;

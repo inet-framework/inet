@@ -19,7 +19,6 @@
 package inet.test.moduletest.lib;
 
 import ned.DatarateChannel;
-import inet.util.NetAnimTrace;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 

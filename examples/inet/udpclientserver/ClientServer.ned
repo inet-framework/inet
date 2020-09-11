@@ -18,7 +18,6 @@
 
 package inet.examples.inet.udpclientserver;
 
-import inet.common.misc.NetAnimTrace;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
@@ -61,9 +60,6 @@ network UdpClientServer
 //            parameters:
 //                @display("p=53,134");
 //        }
-        netAnimTrace: NetAnimTrace {
-            @display("p=100,200;is=s");
-        }
         scenarioManager: ScenarioManager {
             @display("p=100,300;is=s");
         }

@@ -18,7 +18,6 @@
 
 package inet.examples.inet.tcp_ppp_reconnect;
 
-import inet.common.misc.NetAnimTrace;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
@@ -45,9 +44,6 @@ network ClientServerWithSM
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
-        }
-        netAnimTrace: NetAnimTrace {
-            @display("p=100,200;is=s");
         }
         scenarioManager: ScenarioManager {
             @display("p=100,300;is=s");
