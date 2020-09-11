@@ -112,6 +112,7 @@ void MacProtocolBase::popTxQueue()
         throw cRuntimeError("Model error: incomplete transmission exists");
     ASSERT(txQueue != nullptr);
     currentTxFrame = txQueue->dequeuePacket();
+    currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
     take(currentTxFrame);
 }
 
