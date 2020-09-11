@@ -259,7 +259,7 @@ void VoipStreamSender::openSoundFile(const char *name)
     if (!pCodecEncoder)
         throw cRuntimeError("Codec '%s' not found!", codec);
 
-    pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt;    // FIXME hack!
+    pEncoderCtx->sample_fmt = pCodecEncoder->sample_fmts[0];
 
     if (avcodec_open2(pEncoderCtx, pCodecEncoder, nullptr) < 0)
         throw cRuntimeError("could not open %s encoding codec!", codec);
