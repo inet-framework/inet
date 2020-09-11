@@ -59,6 +59,7 @@ module EtherSwitch
 
         relayUnit.hasStp = hasStp;
         encap.registerProtocol = true;
+        eth[*].mac.promiscuous = default(true);
         ethernet.addressChecker.promiscuous = default(true);
 
     gates:
