@@ -67,7 +67,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=750,596;b=1000,5,,,,1");
         }
-        ethernet: <default("SimpleEthernetLayer")> like IEthernetLayer {
+        ethernet: <default("")> like IEthernetLayer if typename != "" {
             parameters:
                 @display("p=375,526");
         }
@@ -98,8 +98,8 @@ module LinkLayerNodeBase extends NodeBase
         }
 
     connections allowunconnected:
-        ethernet.lowerLayerOut --> li.in++;
-        li.out++ --> ethernet.lowerLayerIn;
+        ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
+        li.out++ --> ethernet.lowerLayerIn if exists(ethernet);
 
         for i=0..sizeof(radioIn)-1 {
             radioIn[i] --> { @display("m=s"); } --> wlan[i].radioIn;

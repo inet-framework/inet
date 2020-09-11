@@ -97,23 +97,25 @@ module EtherSwitch
             parameters:
                 @display("p=250,450,row,150;q=txQueue");
         }
-        ethernet: <default("SimpleEthernetLayer")> like IEthernetLayer {
+        ethernet: <default("")> like IEthernetLayer if typename != "" {
             @display("p=800,300");
         }
         cutthrough: MessageDispatcher if enableCutthrough {
             @display("p=800,420;b=1200,5,,,,1");
         }
     connections:
-        ethernet.lowerLayerOut --> down.in++;
-        down.out++ --> ethernet.lowerLayerIn;
+        ethernet.lowerLayerOut --> down.in++ if exists(ethernet);
+        down.out++ --> ethernet.lowerLayerIn if exists(ethernet);
 
         for i=0..sizeof(ethg)-1 {
             eth[i].cutthroughOut --> cutthrough.in++ if enableCutthrough;
             eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
         }
 
-        relayUnit.ifOut --> ethernet.upperLayerIn;
-        ethernet.upperLayerOut --> relayUnit.ifIn;
+        relayUnit.ifOut --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> relayUnit.ifIn if exists(ethernet);
+        relayUnit.ifOut --> down.in++ if !exists(ethernet);
+        down.out++ --> relayUnit.ifIn if !exists(ethernet);
 
         for i=0..sizeof(ethg)-1 {
             down.out++ --> eth[i].upperLayerIn;
