@@ -32,7 +32,6 @@ module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInte
         @class(NetworkInterface);
         string interfaceTableModule;
         string energySourceModule = default("");
-        string protocol = default("ieee802154mac");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
     gates:

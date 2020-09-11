@@ -29,7 +29,6 @@ module PppInterface extends NetworkInterface like IPppInterface
 {
     parameters:
         string interfaceTableModule;
-        string protocol = default("ppp");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;

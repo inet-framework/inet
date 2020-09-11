@@ -31,7 +31,7 @@ module WirelessInterface extends NetworkInterface like IWirelessInterface
     parameters:
         string interfaceTableModule;
         string energySourceModule;
-        string protocol;
+        string protocol = default("");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
     gates:

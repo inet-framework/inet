@@ -34,7 +34,6 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
     parameters:
         @lifecycleSupport;
         string interfaceTableModule;
-        string protocol = default("ethernetmac");
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
                                             // "auto". "auto" values will be replaced by
                                             // a generated MAC address in init stage 0.

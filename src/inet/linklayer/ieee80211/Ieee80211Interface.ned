@@ -43,7 +43,6 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
     parameters:
         string interfaceTableModule;
         string energySourceModule = default("");
-        string protocol = default("ieee80211mac");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by

@@ -41,7 +41,6 @@ module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
     parameters:
         string interfaceTableModule;
         string energySourceModule = default("");
-        string protocol = default("ackingmac");
         double bitrate @unit(bps);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
