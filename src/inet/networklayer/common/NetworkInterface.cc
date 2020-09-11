@@ -130,7 +130,8 @@ void NetworkInterface::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         if (hasPar("protocol")) {
             const char *protocolName = par("protocol");
-            protocol = Protocol::getProtocol(protocolName);
+            if (*protocolName != '\0')
+                protocol = Protocol::getProtocol(protocolName);
         }
         if (hasPar("address")) {
             const char *address = par("address");
