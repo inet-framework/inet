@@ -16,6 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/common/packet/Packet.h"
 #include "inet/common/Units.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 
@@ -64,6 +65,8 @@ std::ostream& Signal::printToStream(std::ostream& stream, int level, int evFlags
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FAINT << "(" << className << ")" << EV_NORMAL;
     stream << EV_ITALIC << getName() << EV_NORMAL << " (" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
+    auto packet = check_and_cast<Packet *>(getEncapsulatedPacket());
+    packet->printToStream(stream, level + 1, evFlags);
     return stream;
 }
 
@@ -71,6 +74,8 @@ std::string Signal::str() const
 {
     std::stringstream stream;
     stream << "(" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
+    if (auto packet = getEncapsulatedPacket())
+        stream << " " << packet;
     return stream.str();
 }
 
