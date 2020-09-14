@@ -136,6 +136,11 @@ class INET_API FunctionBase : public IFunction<R, D>
         return makeShared<DividedFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
 
+    virtual std::ostream& printOn(std::ostream& os) const override {
+        print(os);
+        return os;
+    }
+
     virtual void print(std::ostream& os, int level = 0) const override {
         print(os, getDomain(), level);
     }
