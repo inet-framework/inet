@@ -1,3 +1,5 @@
+cleanup bitrate vs datarate
+cleanup operator<<, printOn, str, etc. in all classes
 replace int8 with int8_t and drop int8 type and the like
 
 license canonical form, replace OpenSim Ltd. sources to LGL-3
