@@ -33,7 +33,13 @@ Goals
 
 .. Analytical error models are accurate to some extent, however, they are not well suited to corner cases
 
-The default analytical error models in INET are generally accurate, except for some corner cases, which can be abundant in simulations. Symbol-level simulations are very accurate even in corner cases where the analyitcal ones are not, but very computationally intensive.
+Error models are implemented as submodules of receiver modules, and compute the packet error rate, bit error rate or symbol error rate of receptions.
+
+The default setting in radios is packet level simulation, with the analytical error models, such as the NIST error model in 802.11 or the APSK error model with APSKRadio.
+
+The default analytical error models in INET are generally accurate, except for some corner cases, which can be abundant in simulations. Symbol-level simulations are very accurate even in corner cases where the analyitcal ones are not, but very computationally intensive. **TODO** confusing...error models or simulations?
+
+The default analytical error models in INET are generally accurate, except for some corner cases, which can be abundant in simulations. Symbol-level simulations are very accurate even in corner cases where the analyitcal ones are not, but very computationally intensive. **TODO** confusing...error models or simulations?
 
 .. Neural-network-based error models aim to/can potentially achieve the accuracy of symbol level simulations, and the speed of analytical models.
 
