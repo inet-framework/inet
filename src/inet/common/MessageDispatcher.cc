@@ -51,6 +51,8 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
     }
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
+    if (dynamic_cast<MessageDispatcher *>(outGate->getPathEndGate()->getOwner()) == nullptr)
+        getTags(message).removeTagIfPresent<DispatchProtocolReq>();
     outGate->deliver(message, options, time);
     updateDisplayString();
 }
