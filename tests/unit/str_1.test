@@ -1,0 +1,72 @@
+%description:
+Test EV macros.
+
+%includes:
+#include "inet/common/IPrintableObject.h"
+#include "inet/common/Units.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+#define STR_TEST(x) std::cout << "(" << #x << ")->str() -> " << (x)->str() << std::endl;
+#define PRINTON_TEST(x) std::cout << "(" << #x << ")->printOn(std::cout) -> "; (x)->printOn(std::cout); std::cout << std::endl;
+
+%activity:
+    cLog::logLevel = static_cast<LogLevel>(INT_MIN);
+
+    cNamedObject n("name");
+    std::cout << "cNamedObject n(\"name\")" << std::endl;
+    STR_TEST(&n);
+    PRINTON_TEST(&n);
+    std::cout << std::endl;
+
+    W w(42); // has no operator<<
+    std::cout << "W w(42)" << std::endl;
+    STR_TEST(&w);
+    std::cout << std::endl;
+
+    ByteCountChunk c(B(42));
+    std::cout << "ByteCountChunk c(B(42))" << std::endl;
+    STR_TEST(&c);
+    PRINTON_TEST(&c);
+    std::cout << std::endl;
+
+    Packet p("name");
+    std::cout << "Packet p(\"name\")" << std::endl;
+    STR_TEST(&p);
+    PRINTON_TEST(&p);
+    std::cout << std::endl;
+
+    Signal s("name");
+    s.setDuration(42);
+    s.encapsulate(new Packet());
+    std::cout << "Signal s(\"name\")" << std::endl;
+    STR_TEST(&s);
+    PRINTON_TEST(&s);
+    std::cout << std::endl;
+
+%contains: stdout
+cNamedObject n("name")
+(&n)->str() -> 
+(&n)->printOn(std::cout) -> (omnetpp::cNamedObject)name
+
+W w(42)
+(&w)->str() -> 42 W
+
+ByteCountChunk c(B(42))
+(&c)->str() -> length = 42 B, data = 63
+(&c)->printOn(std::cout) -> (inet::ByteCountChunk) length = 42 B, data = 63
+
+Packet p("name")
+(&p)->str() -> (0 B) (inet::EmptyChunk)
+(&p)->printOn(std::cout) -> (inet::Packet)name (0 B) (inet::EmptyChunk)
+
+Signal s("name")
+(&s)->str() -> (42 s 0 B) (inet::Packet) (0 B) (inet::EmptyChunk)
+(&s)->printOn(std::cout) -> (inet::physicallayer::Signal)name (42 s 0 B) (inet::Packet) (0 B) (inet::EmptyChunk)
