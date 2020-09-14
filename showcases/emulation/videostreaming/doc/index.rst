@@ -18,7 +18,7 @@ Note that this showcase requires the ``Emulation`` feature of the INET Framework
 (it's off by default), and it only runs on Linux.
 
 | INET version: ``4.2``
-| Source files location: `inet/showcases/emulation/videostreaming <https://github.com/inet-framework/inet-showcases/tree/master/emulation/TODO>`__
+| Source files location: `inet/showcases/emulation/videostreaming <https://github.com/inet-framework/inet/tree/master/showcases/emulation/videostreaming>`__
 
 The Model
 ---------
