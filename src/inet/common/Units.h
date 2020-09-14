@@ -1430,7 +1430,9 @@ inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::
     // TODO: KLUDGE: there's no direct infinity support in simtime_t
     static auto positiveInfinity = SimTime::getMaxTime() / 2;
     static auto negativeInfinity = -SimTime::getMaxTime() / 2;
-    if (value.get() == positiveInfinity)
+    if (value == values::s(0))
+        os << "0 s";
+    else if (value.get() == positiveInfinity)
         os << "inf s";
     else if (value.get() == negativeInfinity)
         os << "-inf s";
