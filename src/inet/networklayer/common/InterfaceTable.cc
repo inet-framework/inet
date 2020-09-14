@@ -288,7 +288,6 @@ void InterfaceTable::addInterface(NetworkInterface *entry)
 
     // insert
     entry->setInterfaceId(INTERFACEIDS_START + idToInterface.size());
-    entry->setInterfaceTable(this);
     idToInterface.push_back(entry);
     invalidateTmpInterfaceList();
 

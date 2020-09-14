@@ -19,9 +19,8 @@
 #ifndef __INET_NETWORKINTERFACE_H
 #define __INET_NETWORKINTERFACE_H
 
-#include <vector>
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/ModuleRef.h"
 #include "inet/common/packet/tag/TagSet.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
@@ -109,7 +108,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     queueing::IPassivePacketSink *consumer = nullptr;
 
     const Protocol *protocol = nullptr;
-    IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or nullptr
+    ModuleRef<IInterfaceTable> interfaceTable;    ///< IInterfaceTable that contains this interface, or nullptr
     int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
     std::string interfaceName;
     int nodeOutputGateId = -1;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
@@ -161,7 +160,6 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
 
   public:
     // internal: to be invoked from InterfaceTable only!
-    virtual void setInterfaceTable(IInterfaceTable *t) { ownerp = t; }
     virtual void setInterfaceId(int id) { interfaceId = id; }
     virtual void resetInterface();
 
@@ -192,7 +190,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns the IInterfaceTable this interface is in, or nullptr
      */
-    IInterfaceTable *getInterfaceTable() const { return ownerp; }
+    IInterfaceTable *getInterfaceTable() const { return interfaceTable; }
 
     /**
      * Returns the requested state of this interface.

@@ -151,7 +151,8 @@ void NetworkInterface::initialize(int stage)
             setMtu(par("mtu"));
         if (hasPar("pointToPoint"))
             setPointToPoint(par("pointToPoint"));
-        if (auto interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this))
+        interfaceTable.set(this, "interfaceTableModule");
+        if (interfaceTable)
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
     }
@@ -296,14 +297,14 @@ std::string NetworkInterface::str() const
 
 std::string NetworkInterface::getInterfaceFullPath() const
 {
-    return ownerp == nullptr ? getInterfaceName() : ownerp->getHostModule()->getFullPath() + "." + getInterfaceName();
+    return !interfaceTable ? getInterfaceName() : interfaceTable->getHostModule()->getFullPath() + "." + getInterfaceName();
 }
 
 void NetworkInterface::changed(simsignal_t signalID, int fieldId)
 {
-    if (ownerp) {
+    if (interfaceTable) {
         NetworkInterfaceChangeDetails details(this, fieldId);
-        ownerp->interfaceChanged(signalID, &details);
+        interfaceTable->interfaceChanged(signalID, &details);
     }
 }
 
