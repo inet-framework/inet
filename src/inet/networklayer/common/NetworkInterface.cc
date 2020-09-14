@@ -554,5 +554,25 @@ void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
     setCarrier(false);
 }
 
+NetworkInterface *findContainingNicModule(const cModule *from)
+{
+    for (cModule *curmod = const_cast<cModule *>(from); curmod; curmod = curmod->getParentModule()) {
+        if (auto networkInterface = dynamic_cast<NetworkInterface *>(curmod))
+            return networkInterface;
+        cProperties *props = curmod->getProperties();
+        if (props && props->getAsBool("networkNode"))
+            break;
+    }
+    return nullptr;
+}
+
+NetworkInterface *getContainingNicModule(const cModule *from)
+{
+    auto networkInterface = findContainingNicModule(from);
+    if (!networkInterface)
+        throw cRuntimeError("getContainingNicModule(): nic module not found (it should be an NetworkInterface class) for module '%s'", from ? from->getFullPath().c_str() : "<nullptr>");
+    return networkInterface;
+}
+
 } // namespace inet
 

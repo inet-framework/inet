@@ -20,8 +20,6 @@
 
 namespace inet {
 
-class NetworkInterface;
-
 inline bool _isNetworkNode(const cModule *mod)
 {
     cProperties *props = mod->getProperties();
@@ -32,21 +30,6 @@ bool isNetworkNode(const cModule *mod)
 {
     return (mod != nullptr) ? _isNetworkNode(mod) : false;
 }
-
-/*
-static cModule *findSubmodRecursive(cModule *curmod, const char *name)
-{
-    for (cModule::SubmoduleIterator i(curmod); !i.end(); i++) {
-        cModule *submod = i();
-        if (!strcmp(submod->getFullName(), name))
-            return submod;
-        cModule *foundmod = findSubmodRecursive(submod, name);
-        if (foundmod)
-            return foundmod;
-    }
-    return nullptr;
-}
-*/
 
 cModule *findModuleSomewhereUp(const char *name, cModule *from)
 {
@@ -82,26 +65,6 @@ cModule *findModuleUnderContainingNode(const cModule *from)
         prevmod = curmod;
     }
     return nullptr;
-}
-
-NetworkInterface *findContainingNicModule(const cModule *from)
-{
-    for (cModule *curmod = const_cast<cModule *>(from); curmod; curmod = curmod->getParentModule()) {
-        if (auto networkInterface = dynamic_cast<NetworkInterface *>(curmod))
-            return networkInterface;
-        cProperties *props = curmod->getProperties();
-        if (props && props->getAsBool("networkNode"))
-            break;
-    }
-    return nullptr;
-}
-
-NetworkInterface *getContainingNicModule(const cModule *from)
-{
-    auto networkInterface = findContainingNicModule(from);
-    if (!networkInterface)
-        throw cRuntimeError("getContainingNicModule(): nic module not found (it should be an NetworkInterface class) for module '%s'", from ? from->getFullPath().c_str() : "<nullptr>");
-    return networkInterface;
 }
 
 } // namespace inet

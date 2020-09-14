@@ -367,6 +367,18 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
 
 std::ostream& operator <<(std::ostream& o, NetworkInterface::State);
 
+/**
+ * Find the nic module (inside the networkNode) containing the given module.
+ * Returns nullptr, if no containing nic module.
+ */
+INET_API NetworkInterface *findContainingNicModule(const cModule *from);
+
+/**
+ * Find the nic module (inside the networkNode) containing the given module.
+ * throws error if no containing nic module.
+ */
+INET_API NetworkInterface *getContainingNicModule(const cModule *from);
+
 } // namespace inet
 
 #endif

@@ -107,18 +107,6 @@ T *getModuleFromPar(cPar& par, const cModule *from)
 }
 
 /**
- * Find the nic module (inside the networkNode) containing the given module.
- * Returns nullptr, if no containing nic module.
- */
-INET_API NetworkInterface *findContainingNicModule(const cModule *from);
-
-/**
- * Find the nic module (inside the networkNode) containing the given module.
- * throws error if no containing nic module.
- */
-INET_API NetworkInterface *getContainingNicModule(const cModule *from);
-
-/**
  * Returns a gate of a module with type T that is on the path starting at the given gate.
  * Returns nullptr if no such module is found along the path.
  */
