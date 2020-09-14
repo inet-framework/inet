@@ -308,9 +308,6 @@ void EtherMac::handleUpperPacket(Packet *packet)
 
 void EtherMac::processMsgFromNetwork(EthernetSignalBase *signal)
 {
-    if (signal->getBitrate() != curEtherDescr->txrate)
-        throw cRuntimeError("Ethernet misconfiguration: bitrate in module and on the signal must be same.");
-
     simtime_t endRxTime = simTime() + signal->getRemainingDuration();
 
     if (!duplexMode && receiveState == RX_RECONNECT_STATE) {

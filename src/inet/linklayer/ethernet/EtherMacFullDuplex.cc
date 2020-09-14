@@ -209,9 +209,6 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
     if (signal->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
 
-    if (signal->getBitrate() != curEtherDescr->txrate)
-        throw cRuntimeError("Ethernet misconfiguration: bitrate in module and on the signal must be same.");
-
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
         throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");
 
