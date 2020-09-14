@@ -116,4 +116,14 @@ void ChunkQueue::push(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
 
+std::string ChunkQueue::str() const
+{
+    std::stringstream stream;
+    if (iterator.getPosition() == b(0))
+        stream << content;
+    else
+        stream << content->peek(iterator);
+    return stream.str();
+}
+
 } // namespace
