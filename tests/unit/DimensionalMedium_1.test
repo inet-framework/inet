@@ -140,7 +140,7 @@ Transmission 2: function(s, Hz) → WpHz {
 }
 
 SNIR:
-  interval = 0 m x 0 m x 0 m x [0.000000033356 s … 10.000000033356 s) x [990 MHz … 1 GHz), SNIR mean = 9.99983
-  interval = 0 m x 0 m x 0 m x [0.000000033356 s … 10.000000033356 s) x [1 GHz … 1.01 GHz), SNIR mean = 9.99982
+  interval = 0 m x 0 m x 0 m x [33.356 ns … 10.000000033356 s) x [990 MHz … 1 GHz), SNIR mean = 9.99983
+  interval = 0 m x 0 m x 0 m x [33.356 ns … 10.000000033356 s) x [1 GHz … 1.01 GHz), SNIR mean = 9.99982
   interval = 0 m x 0 m x 0 m x [10.000000033356 s … 20.000000033356 s) x [990 MHz … 1 GHz), SNIR mean = 9.99983
   interval = 0 m x 0 m x 0 m x [10.000000033356 s … 20.000000033356 s) x [1 GHz … 1.01 GHz), SNIR mean = 9.99982
