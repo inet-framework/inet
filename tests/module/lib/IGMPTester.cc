@@ -121,8 +121,8 @@ void IGMPTester::initialize(int stage)
         crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
-        networkInterface->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
-        networkInterface->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.0.0"));
+        networkInterface->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
+        networkInterface->getProtocolDataForUpdate<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.0.0"));
     }
 }
 
@@ -262,7 +262,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
 void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie)
 {
     if (sources.empty()) {
-        ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(group);
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(group);
         socketState[group] = Ipv4MulticastSourceList::ALL_SOURCES;
     }
     else {
@@ -272,14 +272,14 @@ void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &
         for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
             sourceList.add(*source);
         if (oldSources != sourceList.sources)
-            ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
+            ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
     }
 }
 
 void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie)
 {
     if (sources.empty()) {
-        ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(group);
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->leaveMulticastGroup(group);
         socketState.erase(group);
     }
     else {
@@ -289,7 +289,7 @@ void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector 
         for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
             sourceList.remove(*source);
         if (oldSources != sourceList.sources)
-            ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
+            ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
         if (sourceList.sources.empty())
             socketState.erase(group);
     }
@@ -304,7 +304,7 @@ void IGMPTester::processBlockCommand(Ipv4Address group, const Ipv4AddressVector 
     for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
         it->second.add(*source);
     if (oldSources != it->second.sources)
-        ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
 }
 
 void IGMPTester::processAllowCommand(Ipv4Address group, const Ipv4AddressVector &sources, NetworkInterface *ie)
@@ -316,7 +316,7 @@ void IGMPTester::processAllowCommand(Ipv4Address group, const Ipv4AddressVector 
     for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
         it->second.remove(*source);
     if (oldSources != it->second.sources)
-        ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
 }
 
 void IGMPTester::processSetFilterCommand(Ipv4Address group, McastSourceFilterMode filterMode, const Ipv4AddressVector &sources, NetworkInterface *ie)
@@ -329,7 +329,7 @@ void IGMPTester::processSetFilterCommand(Ipv4Address group, McastSourceFilterMod
     sourceList.sources = sources;
 
     if (filterMode != oldFilterMode || oldSources != sourceList.sources)
-        ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, oldFilterMode, oldSources, sourceList.filterMode, sourceList.sources);
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, oldFilterMode, oldSources, sourceList.filterMode, sourceList.sources);
     if (sourceList.filterMode == MCAST_INCLUDE_SOURCES && sourceList.sources.empty())
         socketState.erase(group);
 }
@@ -341,7 +341,7 @@ void IGMPTester::processDumpCommand(string what, NetworkInterface *ie)
     if (what == "groups") {
         for (int i = 0; i < ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups(); i++) {
             Ipv4Address group = ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastGroup(i);
-            const Ipv4MulticastSourceList &sourceList = ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastSources(i);
+            const Ipv4MulticastSourceList &sourceList = ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->getJoinedMulticastSources(i);
             EV << (i==0 ? "" : ", ") << group << " " << sourceList.str();
         }
     }

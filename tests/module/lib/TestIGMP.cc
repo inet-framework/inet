@@ -204,13 +204,13 @@ void TestIGMP::processCommand(const cXMLElement &node)
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
         const char *group = node.getAttribute("group");
-        ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(group));
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(group));
     }
     else if (!strcmp(tag, "leave")) {
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
         const char *group = node.getAttribute("group");
-        ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(Ipv4Address(group));
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->leaveMulticastGroup(Ipv4Address(group));
     }
     else if (!strcmp(tag, "dump")) {
         const char *what = node.getAttribute("what");
