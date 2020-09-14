@@ -11,11 +11,11 @@ topologies and behaviors to test a variety of cases.
 
 We'll use INET's emulation feature to interface the real world (the host OS environment) with the simulation.
 INET has various modules which facilitate this interfacing, you can read about them in the
-:doc:`Emulation section </showcases/emulation/index>` of the showcases page.
+:doc:`Emulation section </users-guide/ch-emulation>` of the User's Guide.
 In this scenario, we'll use a real video application to stream a video file to another real video application.
 
 Note that this showcase requires the ``Emulation`` feature of the INET Framework to be turned on
-(it's off by default), and it only runs on Linux.
+(it's off by default), and it only runs on Linux. 
 
 | INET version: ``4.2``
 | Source files location: `inet/showcases/emulation/videostreaming <https://github.com/inet-framework/inet/tree/master/showcases/emulation/videostreaming>`__
