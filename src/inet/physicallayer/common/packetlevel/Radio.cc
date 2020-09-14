@@ -17,8 +17,9 @@
 //
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"

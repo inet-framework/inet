@@ -13,9 +13,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/FingerprintCalculator.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 

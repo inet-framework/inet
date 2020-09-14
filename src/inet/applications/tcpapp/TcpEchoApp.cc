@@ -18,10 +18,11 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TcpEchoApp.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
 namespace inet {

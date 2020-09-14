@@ -20,6 +20,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #ifdef WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // WITH_IEEE80211

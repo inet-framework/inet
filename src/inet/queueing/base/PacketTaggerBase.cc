@@ -24,6 +24,7 @@
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/TosTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/queueing/base/PacketTaggerBase.h"
 

@@ -18,6 +18,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/visualizer/linklayer/InterfaceTableCanvasVisualizer.h"
 
 namespace inet {
