@@ -318,21 +318,20 @@ void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
-    if (signalID != POST_MODEL_CHANGE)
-        return;
-
-    if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
-        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection();
-    }
-    else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
-        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection();
-    }
-    else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
-        cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
-        if (transmissionChannel == gcobj->par->getOwner())
-            refreshConnection();
+    if (signalID == POST_MODEL_CHANGE) {
+        if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
+            if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
+                refreshConnection();
+        }
+        else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
+            if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
+                refreshConnection();
+        }
+        else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
+            cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
+            if (transmissionChannel == gcobj->par->getOwner())
+                refreshConnection();
+        }
     }
 }
 
