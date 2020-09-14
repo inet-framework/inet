@@ -1,3 +1,4 @@
+replace cross module pointers with ModuleRef<T>
 cleanup bitrate vs datarate
 cleanup operator<<, printOn, str, etc. in all classes
 replace int8 with int8_t and drop int8 type and the like
