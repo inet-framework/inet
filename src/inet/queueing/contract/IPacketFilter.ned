@@ -28,5 +28,5 @@ package inet.queueing.contract;
 moduleinterface IPacketFilter extends IPacketFlow
 {
     parameters:
-        @display("i=block/downarrow");
+        @display("i=block/filter");
 }
