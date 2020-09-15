@@ -32,7 +32,8 @@ package inet.linklayer.ethernet;
 module EtherEncapDummy like IEtherEncap
 {
     parameters:
-        @display("i=block/square");
+        @class(::inet::OmittedModule);
+        @display("i=block/square,black,50");
     gates:
         input upperLayerIn @labels(EtherFrame); // higher layer
         output upperLayerOut @labels(EtherFrame); // higher layer
