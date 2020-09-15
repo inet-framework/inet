@@ -57,8 +57,37 @@ Motivation
 
 .. The default error models in scalar (all?) receivers are analytical.
 
+.. Error models calculate whether the received frame has errors. It indicates this to the higher layers.
+
+
+**what are error models?**
+
+The error model is a submodule of the receiver, and calculates the amount of errors in a received frame. It calculates packet, bit or symbol error rate for the MAC layer. In layered mode, it indicates the erroneous bits or symbols as well.
+
+**about the default error models**
+
+TODO
+
+**about analytical error models**
+
 The packet-level analytical error models calculate a packet-error rate based on the reception SNIR. They either use the minimum or the mean of the SNIR during reception. Both methods can lead to unrealistic reception probabilities in corner cases. For example, when using the minimum SNIR, a short spike in an interfering signal can ruin a reception; with mean SNIR, an interfering signal overlapping with a transmission to a large extent (in frequency or time) can still result in a correctly receivable transmission.
+
+**about symbol level simulation**
 
 Using symbol level simulation can accurately model these corner cases, as per-symbol-SNIR can be used, and an accurate symbol-error-rate can be calculated. However, the symbol-level simulations are very computationally intensive.
 
-**TODO** what are error models ?
+.. **TODO** what are error models ?
+
+**the idea**
+
+detailed description
+
+The Model
+---------
+
+The Process
+~~~~~~~~~~~
+
+- creating training dataset
+- training the network
+- using it as an error model
