@@ -20,5 +20,7 @@ package inet.networklayer.configurator.contract;
 
 moduleinterface IIpv4NodeConfigurator
 {
+    parameters:
+        @display("i=block/cogwheel");
 }
 
