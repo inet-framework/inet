@@ -30,6 +30,18 @@ Message::Message(const Message& other) :
 {
 }
 
+std::ostream& Message::printToStream(std::ostream& stream, int level, int evFlags) const
+{
+    std::string className = getClassName();
+    auto index = className.rfind("::");
+    if (index != std::string::npos)
+        className = className.substr(index + 2);
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FAINT << "(" << className << ")" << EV_NORMAL;
+    stream << EV_ITALIC << getName() << EV_NORMAL;
+    return stream;
+}
+
 Request::Request(const char *name, short kind) :
     Message(name, kind)
 {

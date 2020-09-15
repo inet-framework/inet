@@ -16,12 +16,13 @@
 #ifndef __INET_MESSAGE_H
 #define __INET_MESSAGE_H
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/packet/tag/SharingTagSet.h"
 #include "inet/common/TagBase.h"
 
 namespace inet {
 
-class INET_API Message : public cMessage
+class INET_API Message : public cMessage, public IPrintableObject
 {
   friend class MessageDescriptor;
 
@@ -131,6 +132,11 @@ class INET_API Message : public cMessage
         return tags.removeTagIfPresent<T>();
     }
     //@}
+
+    /** @name Utility functions */
+    //@{
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    //@}
 };
 
 class INET_API Request : public Message
@@ -150,10 +156,6 @@ class INET_API Indication : public Message
 
     virtual Indication *dup() const override { return new Indication(*this); }
 };
-
-inline std::ostream& operator<<(std::ostream& os, const Message *message) { return os << message->str(); }
-
-inline std::ostream& operator<<(std::ostream& os, const Message& message) { return os << message.str(); }
 
 } // namespace
 
