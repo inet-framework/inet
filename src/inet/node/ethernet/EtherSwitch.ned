@@ -27,6 +27,7 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
+import inet.linklayer.ethernet.IEtherEncap;
 import inet.linklayer.ethernet.layered.IEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
 
@@ -98,6 +99,9 @@ module EtherSwitch
             parameters:
                 @display("p=250,450,row,150;q=txQueue");
         }
+        encap: <default("EtherEncap")> like IEtherEncap if typename != "" {
+            @display("p=937,200");
+        }
         ethernet: <default("")> like IEthernetLayer if typename != "" {
             @display("p=800,300");
         }
@@ -128,7 +132,11 @@ module EtherSwitch
             stp.relayIn <-- up.out++; // relayUnit.stpOut;
             stp.relayOut --> up.in++; // relayUnit.stpIn;
         }
-        relayUnit.upperLayerOut --> up.in++;
-        up.out++ --> relayUnit.upperLayerIn;
+        relayUnit.upperLayerOut --> up.in++ if !exists(encap);
+        up.out++ --> relayUnit.upperLayerIn if !exists(encap);
+        relayUnit.upperLayerOut --> encap.lowerLayerIn if exists(encap);
+        encap.lowerLayerOut --> relayUnit.upperLayerIn if exists(encap);
+        encap.upperLayerOut --> up.in++ if exists(encap);
+        up.out++ --> encap.upperLayerIn if exists(encap);
 }
 
