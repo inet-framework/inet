@@ -45,7 +45,7 @@ module EtherHost
         eth.csmacdSupport = csmacdSupport;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
-        eth.encap.typename = "EtherEncapDummy";
+        eth.encap.typename = "OmittedEtherEncap";
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:

@@ -29,7 +29,7 @@ package inet.linklayer.ethernet;
 // - packets coming from upper layers will be sent to MAC.
 // - Ethernet frames arriving from MAC will be sent up to the higher layers.
 //
-module EtherEncapDummy like IEtherEncap
+module OmittedEtherEncap like IEtherEncap
 {
     parameters:
         @class(::inet::OmittedModule);

@@ -533,8 +533,8 @@
     <filename>inet.linklayer.ethernet.EtherEncap.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.EtherEncapDummy</name>
-    <filename>inet.linklayer.ethernet.EtherEncapDummy.html</filename>
+    <name>inet.linklayer.ethernet.OmittedEtherEncap</name>
+    <filename>inet.linklayer.ethernet.OmittedEtherEncap.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.EtherFrameClassifier</name>

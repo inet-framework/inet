@@ -51,7 +51,7 @@ module AccessPoint
         wlan[*].llc.typename = default("Ieee80211Portal");
         wlan[*].agent.typename = default("");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
-        eth[*].encap.typename = "EtherEncapDummy";
+        eth[*].encap.typename = "OmittedEtherEncap";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         relayUnit.hasStp = false;
     gates:
