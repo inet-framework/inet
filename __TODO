@@ -1,3 +1,4 @@
+update all EV statements to use EV_FIELD
 replace cross module pointers with ModuleRef<T>
 cleanup bitrate vs datarate
 cleanup operator<<, printOn, str, etc. in all classes
