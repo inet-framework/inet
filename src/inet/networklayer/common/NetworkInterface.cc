@@ -100,12 +100,14 @@ void NetworkInterface::initialize(int stage)
         if (hasGate("phys$i")) {
             rxIn = gate("phys$i");
             rxTransmissionChannel = rxIn->findIncomingTransmissionChannel();
-            rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+            if (rxTransmissionChannel != nullptr)
+                rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
         }
         if (hasGate("phys$o")) {
             txOut = gate("phys$o");
             txTransmissionChannel = txOut->findTransmissionChannel();
-            txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+            if (txTransmissionChannel != nullptr)
+                txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
         }
         consumer = findConnectedModule<IPassivePacketSink>(upperLayerOut);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
