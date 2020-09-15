@@ -181,6 +181,7 @@ void Igmpv2::initialize(int stage)
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
+        registerProtocol(Protocol::igmp, gate("ipOut"), gate("ipIn"));
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             NetworkInterface *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
