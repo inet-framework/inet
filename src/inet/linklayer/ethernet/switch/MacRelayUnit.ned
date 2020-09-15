@@ -17,23 +17,12 @@
 
 package inet.linklayer.ethernet.switch;
 
+import inet.linklayer.base.MacRelayUnitBase;
 import inet.linklayer.contract.IMacRelayUnit;
 
-simple MacRelayUnit like IMacRelayUnit
+simple MacRelayUnit extends MacRelayUnitBase like IMacRelayUnit
 {
     parameters:
-        @display("i=block/switch");
-        string macTableModule = default("^.macTable"); // The path to the MacAddressTable module
-        string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
-        bool hasStp;
-        string displayStringTextFormat = default("proc: %p\ndisc: %d");
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-    gates:
-        input ifIn @labels(EtherFrame);
-        output ifOut @labels(EtherFrame);
-        input upperLayerIn;
-        output upperLayerOut;
+        @class(MacRelayUnit);
 }
 
