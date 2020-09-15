@@ -45,15 +45,23 @@ cmdenv-express-mode=false
 
 %contains: logfile-0.txt
 #1:10000000000000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#1:10000008000000: 'PK at 10: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:10000008000000 (100 byte) discard:0, delay:0, duration:8000000
 #2:10000008960000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
+#2:10000016960000: 'PK at 10: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:10000016960000 (100 byte) discard:0, delay:0, duration:8000000
 #3:20000080600000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000080600000 (100 byte) discard:0, delay:0, duration:8000000
+#3:20000088600000: 'PK at 20: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:20000088600000 (100 byte) discard:0, delay:0, duration:8000000
 #4:20000089560000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000089560000 (100 byte) discard:0, delay:0, duration:8000000
+#4:20000097560000: 'PK at 20: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:20000097560000 (100 byte) discard:0, delay:0, duration:8000000
 
 %contains: logfile-1.txt
 #1:10000000000000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#1:10000008000000: 'PK at 10: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:10000008000000 (100 byte) discard:0, delay:0, duration:8000000
 #2:10000008960000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
+#2:10000016960000: 'PK at 10: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:10000016960000 (100 byte) discard:0, delay:0, duration:8000000
 #3:20000080600000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000080600000 (100 byte) discard:0, delay:0, duration:8000000
+#3:20000088600000: 'PK at 20: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:20000088600000 (100 byte) discard:0, delay:0, duration:8000000
 #4:20000089560000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000089560000 (100 byte) discard:0, delay:0, duration:8000000
+#4:20000097560000: 'PK at 20: 92 Bytes:end' (inet::physicallayer::EthernetSignal) sent:20000097560000 (100 byte) discard:0, delay:0, duration:8000000
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
