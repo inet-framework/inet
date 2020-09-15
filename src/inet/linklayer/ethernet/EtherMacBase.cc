@@ -610,7 +610,7 @@ void EtherMacBase::refreshDisplay() const
                 result = std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
                 break;
             case 'q':
-                result = std::to_string(txQueue->getNumPackets());
+                result = txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
                 break;
             case 'b':
                 if (transmissionChannel == nullptr)
