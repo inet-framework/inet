@@ -3,8 +3,6 @@ replace cross module pointers with ModuleRef<T>
 cleanup bitrate vs datarate
 cleanup operator<<, printOn, str, etc. in all classes
 
-replace license for OpenSim Ltd. sources to LGPL-3
-
 handlePullPacketChanged can come from the queue when
  - a high priority frame is already being streamed and it gets interrupted
  - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
@@ -54,8 +52,6 @@ INET 4.3 release TODO items:
 
  - Choose between the possible Ethernet tag representations.
  - Add Ethernet socket support to layered model.
- - Move layered Ethernet protocol components to the right place.
- - Support having a single queue in the Ethernet network interface.
 
 6. Packet flow
 
@@ -75,31 +71,9 @@ INET 4.3 release TODO items:
 9. General
 
  - Implement fingerprints for figures and values for all example simulations.
- - Rename InterfaceEntry to NetworkInterface.
- - Refactor Ieee8021dRelay similarly to MacRelayUnit.
- - Follow changes related to multiHistogram in OMNeT++
  - Make all tests PASS
 
 ===============================================================================
-
-1. The queue submodule of the MAC layer module should probably go one level up into the network interface module.
-   This can either be the default architecture or it can be optional. We are going to decide later when we have
-   more examples working. In any case, it should work either way.
-
-   The reasoning is that having two separate queue modules when preemption is used with priority queueing either
-   unnecessarily complicates the configuration (by shifting subqueue indices due to optional subqueues) or contains
-   a bunch of unused subqueues and gating components. There can also be central components in the queueing part
-   which has to look at all queues at once (transmission selection).
-
-2. The transmitter submodule of the PHY layer should signal transmission started/ended so that the credit based
-   shaper can stop decreasing the credits for the currently used category. The priority category can be determined
-   from packet tags.
-
-3. The PacketStreamer is not necessary for the MAC layer which is not preemptible. I'm not sure if this would work
-   out of the box, although I have the feeling that it should.
-
-4. We should create a list of examples for the set of features we want to support with the new Ethernet architecture.
-   This would give a clear goal for development and simplify automated testing.
 
 - Add parameters to ScenarioManager disconnect operation to allow cutting connection at either end (source or destination)
   and also support disconnecting bidirectional connections in all four combinations.
