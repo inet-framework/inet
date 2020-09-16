@@ -1,5 +1,6 @@
 //
-// copyright:   (C) 2008 CSEM SA, Neuchâtel, Switzerland.
+// Copyright:   (C) 2008 CSEM SA, Neuchâtel, Switzerland.
+//
 //***************************************************************************
 // file:        ProbabilistcBroadcast.ned
 //
