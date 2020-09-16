@@ -46,9 +46,6 @@ class INET_API IPrintableObject
 
     /**
      * Prints this object to the provided output stream.
-     *
-     * Function calls to operator<< with pointers or references either const
-     * or not are all forwarded to this function.
      */
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const {
         return stream << EV_FAINT << "<object@" << static_cast<const void *>(this) << ">" << EV_NORMAL;
