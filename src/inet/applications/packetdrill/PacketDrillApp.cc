@@ -420,8 +420,8 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
             else if (protocol == IP_PROT_SCTP) {
                 auto sctpHeader = pk->removeAtFront<SctpHeader>();
                 sctpHeader->setVTag(peerVTag);
-                int32 noChunks = sctpHeader->getSctpChunksArraySize();
-                for (int32 cc = 0; cc < noChunks; cc++) {
+                int32_t noChunks = sctpHeader->getSctpChunksArraySize();
+                for (int32_t cc = 0; cc < noChunks; cc++) {
                     SctpChunk *chunk = const_cast<SctpChunk *>(sctpHeader->getSctpChunks(cc));
                     unsigned char chunkType = chunk->getSctpChunkType();
                     switch (chunkType) {
@@ -640,9 +640,9 @@ void PacketDrillApp::closeAllSockets()
     tunSocket.send(pk);
 }
 
-bool PacketDrillApp::findSeqNumMap(uint32 num)
+bool PacketDrillApp::findSeqNumMap(uint32_t num)
 {
-    std::map<uint32, uint32>::iterator it;
+    std::map<uint32_t, uint32_t>::iterator it;
 
     it = seqNumMap.find(num);
     if (it != seqNumMap.end())
@@ -884,10 +884,10 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
         case IP_PROT_SCTP: {
             Packet* cmsg = new Packet("AppData", SCTP_C_SEND_ORDERED);
             auto applicationData = makeShared<BytesChunk>();
-            uint32 sendBytes = syscall->result->getNum();
+            uint32_t sendBytes = syscall->result->getNum();
             std::vector<uint8_t> vec;
             vec.resize(sendBytes);
-            for (uint32 i = 0; i < sendBytes; i++)
+            for (uint32_t i = 0; i < sendBytes; i++)
                 vec[i] = (bytesSent + i) & 0xFF;
             applicationData->setBytes(vec);
             applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -1028,7 +1028,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
             if (rs->srs_number_streams->getNum() > 0 && rs->srs_stream_list != nullptr) {
                 rinfo->setStreamsArraySize(rs->srs_number_streams->getNum());
                 cQueue *qu = rs->srs_stream_list->getList();
-                uint16 i = 0;
+                uint16_t i = 0;
                 for (cQueue::Iterator iter(*qu); !iter.end(); iter++, i++) {
                     rinfo->setStreams(i, check_and_cast<PacketDrillExpression *>(*iter)->getNum());
                     qu->remove((*iter));
@@ -1231,8 +1231,8 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
 {
     int script_fd, count;
     PacketDrillExpression *exp;
-    uint32 flags, ppid, ttl, context;
-    uint16 stream_no;
+    uint32_t flags, ppid, ttl, context;
+    uint16_t stream_no;
 
     if (args->getLength() != 10)
         return STATUS_ERR;
@@ -1270,11 +1270,11 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
         return STATUS_ERR;
 
     Packet* cmsg = new Packet("AppData");
-    uint32 sendBytes = syscall->result->getNum();
+    uint32_t sendBytes = syscall->result->getNum();
     auto applicationData = makeShared<BytesChunk>();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (uint32 i = 0; i < sendBytes; i++)
+    for (uint32_t i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -1297,8 +1297,8 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
 {
     int script_fd, count;
     PacketDrillExpression *exp;
-    uint16 sid = 0, ssn = 0;
-    uint32 ppid = 0;
+    uint16_t sid = 0, ssn = 0;
+    uint32_t ppid = 0;
 
     if (syscall->result->getNum() == -1) {
         return STATUS_OK;
@@ -1323,10 +1323,10 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     }
     Packet* cmsg = new Packet("AppData");
     auto applicationData = makeShared<BytesChunk>();
-    uint32 sendBytes = syscall->result->getNum();
+    uint32_t sendBytes = syscall->result->getNum();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (uint32 i = 0; i < sendBytes; i++)
+    for (uint32_t i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -1763,14 +1763,14 @@ bool PacketDrillApp::compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, 
         return false;
     }
 
-    const uint32 numberOfChunks = storedSctp->getSctpChunksArraySize();
-    for (uint32 i = 0; i < numberOfChunks; i++) {
+    const uint32_t numberOfChunks = storedSctp->getSctpChunksArraySize();
+    for (uint32_t i = 0; i < numberOfChunks; i++) {
         const SctpChunk* storedHeader = storedSctp->getSctpChunks(i);
         const SctpChunk* liveHeader = liveSctp->getSctpChunks(i);
         if (!(storedHeader->getSctpChunkType() == liveHeader->getSctpChunkType())) {
             return false;
         }
-        const uint8 type = storedHeader->getSctpChunkType();
+        const uint8_t type = storedHeader->getSctpChunkType();
 
         if ((type != INIT && type != INIT_ACK) && type != ABORT && (liveSctp->getVTag() != localVTag)) {
             EV_DETAIL << " VTag " << liveSctp->getVTag() << " incorrect. Should be " << localVTag << " peerVTag="
@@ -1899,7 +1899,7 @@ bool PacketDrillApp::compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, 
 
 bool PacketDrillApp::compareDataPacket(const SctpDataChunk* storedDataChunk, const SctpDataChunk* liveDataChunk)
 {
-    uint32 flags = storedDataChunk->getFlags();
+    uint32_t flags = storedDataChunk->getFlags();
     if (!(flags & FLAG_CHUNK_LENGTH_NOCHECK))
         if (storedDataChunk->getByteLength() != liveDataChunk->getByteLength())
             return false;
@@ -1928,7 +1928,7 @@ bool PacketDrillApp::compareDataPacket(const SctpDataChunk* storedDataChunk, con
 
 bool PacketDrillApp::compareInitPacket(const SctpInitChunk* storedInitChunk, const SctpInitChunk* liveInitChunk)
 {
-    uint32 flags = storedInitChunk->getFlags();
+    uint32_t flags = storedInitChunk->getFlags();
     peerVTag = liveInitChunk->getInitTag();
     localDiffTsn = liveInitChunk->getInitTsn() - initLocalTsn;
     initPeerTsn = liveInitChunk->getInitTsn();
@@ -1955,7 +1955,7 @@ bool PacketDrillApp::compareInitPacket(const SctpInitChunk* storedInitChunk, con
 
 bool PacketDrillApp::compareInitAckPacket(const SctpInitAckChunk* storedInitAckChunk, const SctpInitAckChunk* liveInitAckChunk)
 {
-    uint32 flags = storedInitAckChunk->getFlags();
+    uint32_t flags = storedInitAckChunk->getFlags();
     peerVTag = liveInitAckChunk->getInitTag();
     localDiffTsn = liveInitAckChunk->getInitTsn() - initLocalTsn;
     initPeerTsn = liveInitAckChunk->getInitTsn();
@@ -1982,7 +1982,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
 {
     bool found = false;
 
-    uint32 flags = storedReconfigChunk->getFlags();
+    uint32_t flags = storedReconfigChunk->getFlags();
     if (!(storedReconfigChunk->getParametersArraySize() == liveReconfigChunk->getParametersArraySize())) {
         return false;
     }
@@ -2020,7 +2020,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
                 if (!(storedoutparam->getStreamNumbersArraySize() == liveoutparam->getStreamNumbersArraySize()))
                     return false;
                 if (storedoutparam->getStreamNumbersArraySize() > 0) {
-                    for (uint16 i = 0; i < storedoutparam->getStreamNumbersArraySize(); i++) {
+                    for (uint16_t i = 0; i < storedoutparam->getStreamNumbersArraySize(); i++) {
                         if (!(storedoutparam->getStreamNumbers(i) == liveoutparam->getStreamNumbers(i)))
                             return false;
                     }
@@ -2050,7 +2050,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
                 if (!(storedinparam->getStreamNumbersArraySize() == liveinparam->getStreamNumbersArraySize()))
                     return false;
                 if (storedinparam->getStreamNumbersArraySize() > 0) {
-                    for (uint16 i = 0; i < storedinparam->getStreamNumbersArraySize(); i++) {
+                    for (uint16_t i = 0; i < storedinparam->getStreamNumbersArraySize(); i++) {
                         if (!(storedinparam->getStreamNumbers(i) == liveinparam->getStreamNumbers(i)))
                             return false;
                     }
@@ -2160,7 +2160,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
 
 bool PacketDrillApp::compareSackPacket(const SctpSackChunk *storedSackChunk, const SctpSackChunk *liveSackChunk)
 {
-    uint32 flags = storedSackChunk->getFlags();
+    uint32_t flags = storedSackChunk->getFlags();
     if (!(flags & FLAG_SACK_CHUNK_CUM_TSN_NOCHECK))
         if (!(storedSackChunk->getCumTsnAck() == liveSackChunk->getCumTsnAck()))
             return false;

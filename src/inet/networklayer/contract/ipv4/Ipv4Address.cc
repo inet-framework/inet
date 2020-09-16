@@ -146,7 +146,7 @@ Ipv4Address::AddressCategory Ipv4Address::getAddressCategory() const
         return MULTICAST; // 224.0.0.0/4
     if (addr == 0xFFFFFFFFu)
         return BROADCAST; // 255.255.255.255/32
-    uint32 addr24 = addr & 0xFFFFFF00u;
+    uint32_t addr24 = addr & 0xFFFFFF00u;
     if (addr24 == 0xC0000000u)
         return IETF; // 192.0.0.0/24
     if ((addr24 == 0xC0000200u) || (addr24 == 0xC6336400u) || (addr24 == 0xCB007100u))
@@ -223,15 +223,15 @@ bool Ipv4Address::prefixMatches(const Ipv4Address& other, int length) const
     if (length > 31)
         return addr == other.addr;
 
-    uint32 mask = _makeNetmask(length);
+    uint32_t mask = _makeNetmask(length);
     return (addr & mask) == (other.addr & mask);
 }
 
 int Ipv4Address::getNumMatchingPrefixBits(const Ipv4Address& to_cmp) const
 {
-    uint32 addr2 = to_cmp.getInt();
+    uint32_t addr2 = to_cmp.getInt();
 
-    uint32 res = addr ^ addr2;
+    uint32_t res = addr ^ addr2;
     // If the bits are equal, there is a 0, so counting
     // the zeros from the left
     for (int i = 31; i >= 0; i--) {

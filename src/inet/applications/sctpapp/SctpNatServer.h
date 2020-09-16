@@ -35,41 +35,41 @@ namespace inet {
 typedef struct natInfo
 {
     bool multi;
-    uint32 peer1;
+    uint32_t peer1;
     L3Address peer1Address1;
     L3Address peer1Address2;
-    uint32 peer1Assoc;
-    uint32 peer1Port;
-    int32 peer1Gate;
-    uint32 peer2;
+    uint32_t peer1Assoc;
+    uint32_t peer1Port;
+    int32_t peer1Gate;
+    uint32_t peer2;
     L3Address peer2Address1;
     L3Address peer2Address2;
-    uint32 peer2Assoc;
-    uint32 peer2Port;
-    int32 peer2Gate;
+    uint32_t peer2Assoc;
+    uint32_t peer2Port;
+    int32_t peer2Gate;
 } NatInfo;
 typedef std::vector<NatInfo *> NatVector;
 
 class INET_API SctpNatServer : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
-    int32 notifications;
-    uint32 assocId;
+    int32_t notifications;
+    uint32_t assocId;
     SctpSocket *socket;
     bool shutdownReceived;
-    int64 bytesSent;
-    int32 packetsSent;
-    int32 packetsRcvd;
-    int32 numSessions;
-    int32 numRequestsToSend;    // requests to send in this session
+    int64_t bytesSent;
+    int32_t packetsSent;
+    int32_t packetsRcvd;
+    int32_t numSessions;
+    int32_t numRequestsToSend;    // requests to send in this session
     bool ordered;
-    int32 outboundStreams;
-    int32 inboundStreams;
-    int32 lastStream;
+    int32_t outboundStreams;
+    int32_t inboundStreams;
+    int32_t lastStream;
 
     static NatVector natVector;
 
-    int32 ssn;
+    int32_t ssn;
 
   public:
     struct pathStatus

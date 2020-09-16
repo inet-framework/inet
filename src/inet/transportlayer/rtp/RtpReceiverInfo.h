@@ -47,7 +47,7 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     /**
      * Default constructor.
      */
-    RtpReceiverInfo(uint32 ssrc = 0);
+    RtpReceiverInfo(uint32_t ssrc = 0);
 
     /**
      * Copy constructor.
@@ -120,34 +120,34 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     /**
      * The sequence number of the first RtpPacket received.
      */
-    uint16 _sequenceNumberBase = 0;
+    uint16_t _sequenceNumberBase = 0;
 
     /**
      * The highest sequence number of an RtpPacket received.
      */
-    uint16 _highestSequenceNumber = 0;
+    uint16_t _highestSequenceNumber = 0;
 
     /**
      * The highest sequence number of an RtpPacket received
      * before the beginning of the current rtcp interval.
      */
-    uint32 _highestSequenceNumberPrior = 0;
+    uint32_t _highestSequenceNumberPrior = 0;
 
     /**
      * The number of sequence number wrap arounds.
      */
-    uint32 _sequenceNumberCycles = 0;
+    uint32_t _sequenceNumberCycles = 0;
 
     /**
      * How many RTP packets from this source have been received.
      */
-    uint32 _packetsReceived = 0;
+    uint32_t _packetsReceived = 0;
 
     /**
      * How many RTP packets have been received from this source
      * before the current rtcp interval began.
      */
-    uint32 _packetsReceivedPrior = 0;
+    uint32_t _packetsReceivedPrior = 0;
 
     /**
      * The interarrival jitter. See RTP rfc for details.
@@ -172,18 +172,18 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     /**
      * The RTP time stamp of the last SenderReport received from this sender.
      */
-    uint32 _lastSenderReportRTPTimeStamp = 0;
+    uint32_t _lastSenderReportRTPTimeStamp = 0;
 
     /**
      * The ntp time stamp of the last SenderReport received from this sender.
      */
-    uint64 _lastSenderReportNTPTimeStamp = 0;
+    uint64_t _lastSenderReportNTPTimeStamp = 0;
 
     /**
      * The Rtp time stamp of the last RtpPacket received from this sender.
      * Needed for calculating the jitter.
      */
-    uint32 _lastPacketRTPTimeStamp = 0;
+    uint32_t _lastPacketRTPTimeStamp = 0;
 
     /**
      * The arrival time of the last RtpPacket received from this sender.

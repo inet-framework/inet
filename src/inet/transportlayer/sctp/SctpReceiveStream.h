@@ -30,21 +30,21 @@ class INET_API SctpReceiveStream : public cObject
 {
   protected:
     SctpAssociation *assoc;
-    uint16 streamId;
-    int32 expectedStreamSeqNum;
+    uint16_t streamId;
+    int32_t expectedStreamSeqNum;
     SctpQueue *deliveryQ;
     SctpQueue *orderedQ;
     SctpQueue *unorderedQ;
-    uint32 reassemble(SctpQueue *queue, uint32 tsn);
+    uint32_t reassemble(SctpQueue *queue, uint32_t tsn);
 
   public:
-    uint32 enqueueNewDataChunk(SctpDataVariables *dchunk);
+    uint32_t enqueueNewDataChunk(SctpDataVariables *dchunk);
     /**
      * Ctor.
      */
     SctpReceiveStream(SctpAssociation *assoc);
-    int32 getExpectedStreamSeqNum();
-    void setExpectedStreamSeqNum(int32 num);
+    int32_t getExpectedStreamSeqNum();
+    void setExpectedStreamSeqNum(int32_t num);
 
     /**
      * Virtual dtor.
@@ -54,8 +54,8 @@ class INET_API SctpReceiveStream : public cObject
     SctpQueue *getOrderedQ() const { return orderedQ; };
     SctpQueue *getUnorderedQ() const { return unorderedQ; };
 
-    int32 getStreamId() const { return streamId; };
-    void setStreamId(const uint16 id) { streamId = id; };
+    int32_t getStreamId() const { return streamId; };
+    void setStreamId(const uint16_t id) { streamId = id; };
 };
 
 } // namespace sctp

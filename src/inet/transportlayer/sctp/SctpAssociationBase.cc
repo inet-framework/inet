@@ -505,23 +505,23 @@ SctpStateVariables::~SctpStateVariables()
         delete initChunk;
 }
 
-bool SctpStateVariables::findRequestNum(uint32 num)
+bool SctpStateVariables::findRequestNum(uint32_t num)
 {
     if (requests.find(num) != requests.end())
         return true;
     return false;
 }
 
-bool SctpStateVariables::findPeerRequestNum(uint32 num)
+bool SctpStateVariables::findPeerRequestNum(uint32_t num)
 {
     if (peerRequests.find(num) != peerRequests.end())
         return true;
     return false;
 }
 
-bool SctpStateVariables::findPeerStreamToReset(uint16 num)
+bool SctpStateVariables::findPeerStreamToReset(uint16_t num)
 {
-    std::list<uint16>::iterator it;
+    std::list<uint16_t>::iterator it;
     for (it = peerStreamsToReset.begin(); it != peerStreamsToReset.end(); it++) {
         if ((*it) == num)
             return true;
@@ -529,9 +529,9 @@ bool SctpStateVariables::findPeerStreamToReset(uint16 num)
     return false;
 }
 
-bool SctpStateVariables::findMatch(uint16 num)
+bool SctpStateVariables::findMatch(uint16_t num)
 {
-    std::list<uint16>::iterator it;
+    std::list<uint16_t>::iterator it;
     for (it = resetOutStreams.begin(); it != resetOutStreams.end(); it++) {
         if ((*it) == num)
             return true;
@@ -539,7 +539,7 @@ bool SctpStateVariables::findMatch(uint16 num)
     return false;
 }
 
-SctpStateVariables::RequestData* SctpStateVariables::findTypeInRequests(uint16 type)
+SctpStateVariables::RequestData* SctpStateVariables::findTypeInRequests(uint16_t type)
 {
     for (auto & elem : requests) {
         if (elem.second.type == type) {
@@ -549,9 +549,9 @@ SctpStateVariables::RequestData* SctpStateVariables::findTypeInRequests(uint16 t
     return nullptr;
 }
 
-uint16 SctpStateVariables::getNumRequestsNotPerformed()
+uint16_t SctpStateVariables::getNumRequestsNotPerformed()
 {
-    uint16 count = 0;
+    uint16_t count = 0;
     for (auto & elem : requests) {
         if (elem.second.result != PERFORMED && elem.second.result != DEFERRED) {
             count++;
@@ -564,7 +564,7 @@ uint16 SctpStateVariables::getNumRequestsNotPerformed()
 // FSM framework, SCTP FSM
 //
 
-SctpAssociation::SctpAssociation(Sctp *_module, int32 _appGateIndex, int32 _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
+SctpAssociation::SctpAssociation(Sctp *_module, int32_t _appGateIndex, int32_t _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
 {
     // ====== Initialize variables ===========================================
     rt = _rt;
@@ -1005,7 +1005,7 @@ bool SctpAssociation::processSctpMessage(SctpHeader *sctpmsg,
     return process_RCV_Message(sctpmsg, msgSrcAddr, msgDestAddr);
 }
 
-SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32 commandCode)
+SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32_t commandCode)
 {
     switch (commandCode) {
         case SCTP_C_ASSOCIATE:
@@ -1195,7 +1195,7 @@ bool SctpAssociation::performStateTransition(const SctpEventCode& event)
     }
 
     // state machine
-    int32 oldState = fsm->getState();
+    int32_t oldState = fsm->getState();
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
@@ -1427,7 +1427,7 @@ bool SctpAssociation::performStateTransition(const SctpEventCode& event)
         return true;
 }
 
-void SctpAssociation::stateEntered(int32 status)
+void SctpAssociation::stateEntered(int32_t status)
 {
     switch (status) {
         case SCTP_S_COOKIE_WAIT:
@@ -1446,14 +1446,14 @@ void SctpAssociation::stateEntered(int32 status)
             state->enableHeartbeats = sctpMain->getEnableHeartbeats();
             state->sendHeartbeatsOnActivePaths = sctpMain->par("sendHeartbeatsOnActivePaths");
             state->numGapReports = sctpMain->par("numGapReports");
-            state->maxBurst = (uint32)sctpMain->getMaxBurst();
+            state->maxBurst = (uint32_t)sctpMain->getMaxBurst();
             state->rtxMethod = sctpMain->par("RTXMethod");
             state->nrSack = sctpMain->par("nrSack");
             state->disableReneging = sctpMain->par("disableReneging");
             state->checkSackSeqNumber = sctpMain->par("checkSackSeqNumber");
             state->outgoingSackSeqNum = 0;
             state->incomingSackSeqNum = 0;
-            state->fragPoint = (uint32)sctpMain->getFragPoint();
+            state->fragPoint = (uint32_t)sctpMain->getFragPoint();
             state->highSpeedCC = sctpMain->par("highSpeedCC");
             state->initialWindow = sctpMain->par("initialWindow");
             const char *maxBurstVariantPar = sctpMain->par("maxBurstVariant").stringValue();

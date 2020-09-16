@@ -266,7 +266,7 @@ void Rip::stopRIPRouting()
  * Adds a new route the RIP routing table for an existing IRoute.
  * This route will be advertised with the specified metric and routeTag fields.
  */
-RipRoute *Rip::importRoute(IRoute *route, RipRoute::RouteType type, int metric, uint16 routeTag)
+RipRoute *Rip::importRoute(IRoute *route, RipRoute::RouteType type, int metric, uint16_t routeTag)
 {
     ASSERT(metric < RIP_INFINITE_METRIC);
 
@@ -810,7 +810,7 @@ bool Rip::isValidResponse(Packet *packet)
  * - Signal the output process to trigger an update
  */
 void Rip::addRoute(const L3Address& dest, int prefixLength, const NetworkInterface *ie, const L3Address& nextHop,
-        int metric, uint16 routeTag, const L3Address& from)
+        int metric, uint16_t routeTag, const L3Address& from)
 {
     EV_DEBUG << "Add route to " << dest << "/" << prefixLength << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
@@ -843,7 +843,7 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const NetworkInterfa
  *  - If the new metric is infinity, start the deletion process
  *    (described above); otherwise, re-initialize the timeout
  */
-void Rip::updateRoute(RipRoute *ripRoute, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from)
+void Rip::updateRoute(RipRoute *ripRoute, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16_t routeTag, const L3Address& from)
 {
     EV_DEBUG << "Updating route to " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;

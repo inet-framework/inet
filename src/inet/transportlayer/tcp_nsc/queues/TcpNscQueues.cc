@@ -103,7 +103,7 @@ Packet *TcpNscSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLen
     return packet;
 }
 
-void TcpNscSendQueue::discardUpTo(uint32 seqNumP)
+void TcpNscSendQueue::discardUpTo(uint32_t seqNumP)
 {
     // nothing to do here
 }
@@ -153,12 +153,12 @@ Packet *TcpNscReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TcpNscReceiveQueue::getAmountOfBufferedBytes() const
+uint32_t TcpNscReceiveQueue::getAmountOfBufferedBytes() const
 {
     return B(dataBuffer.getLength()).get();
 }
 
-uint32 TcpNscReceiveQueue::getQueueLength() const
+uint32_t TcpNscReceiveQueue::getQueueLength() const
 {
     return B(dataBuffer.getLength()).get();
 }

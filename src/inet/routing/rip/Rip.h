@@ -141,7 +141,7 @@ protected:
     virtual void startRIPRouting();
     virtual void stopRIPRouting();
 
-    virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
+    virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16_t routeTag = 0);
     virtual void sendRIPRequest(const RipNetworkInterface& ripInterface);
 
     virtual void processRequest(Packet *pk);
@@ -150,8 +150,8 @@ protected:
 
     virtual void processResponse(Packet *pk);
     virtual bool isValidResponse(Packet *packet);
-    virtual void updateRoute(RipRoute *route, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
-    virtual void addRoute(const L3Address& dest, int prefixLength, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
+    virtual void updateRoute(RipRoute *route, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16_t routeTag, const L3Address& from);
+    virtual void addRoute(const L3Address& dest, int prefixLength, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16_t routeTag, const L3Address& from);
 
     virtual void checkExpiredRoutes();
     virtual void invalidateRoute(RipRoute *route);

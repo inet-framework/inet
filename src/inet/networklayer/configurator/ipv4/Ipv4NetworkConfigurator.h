@@ -67,10 +67,10 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     class InterfaceInfo : public NetworkConfiguratorBase::InterfaceInfo
     {
       public:
-        uint32 address;    // the bits
-        uint32 addressSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
-        uint32 netmask;    // the bits
-        uint32 netmaskSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
+        uint32_t address;    // the bits
+        uint32_t addressSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
+        uint32_t netmask;    // the bits
+        uint32_t netmaskSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
         std::vector<Ipv4Address> multicastGroups;
 
       public:
@@ -89,12 +89,12 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
       public:
         int color;    // an index into an array representing the different route actions (gateway, interface, metric, etc.)
         bool enabled;    // allows turning of routes without removing them from the list
-        uint32 destination;    // originally copied from the Ipv4Route
-        uint32 netmask;    // originally copied from the Ipv4Route
+        uint32_t destination;    // originally copied from the Ipv4Route
+        uint32_t netmask;    // originally copied from the Ipv4Route
         std::vector<RouteInfo *> originalRouteInfos;    // routes that are routed by this one from the unoptimized original routing table, we keep track of this to be able to skip merge candidates with less computation
 
       public:
-        RouteInfo(int color, uint32 destination, uint32 netmask) { this->color = color; this->enabled = true; this->destination = destination; this->netmask = netmask; }
+        RouteInfo(int color, uint32_t destination, uint32_t netmask) { this->color = color; this->enabled = true; this->destination = destination; this->netmask = netmask; }
         ~RouteInfo() {} // don't delete originalRouteInfos elements, they are not exclusively owned
 
         std::string str() const {
@@ -118,8 +118,8 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
 
         int addRouteInfo(RouteInfo *routeInfo);
         void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(std::find(routeInfos.begin(), routeInfos.end(), routeInfo)); }
-        RouteInfo *findBestMatchingRouteInfo(const uint32 destination, int begin = 0, int end = -1) const { return findBestMatchingRouteInfo(routeInfos, destination, 0, end == -1 ? routeInfos.size() : end); }
-        static RouteInfo *findBestMatchingRouteInfo(const std::vector<RouteInfo *>& routeInfos, const uint32 destination, int begin, int end);
+        RouteInfo *findBestMatchingRouteInfo(const uint32_t destination, int begin = 0, int end = -1) const { return findBestMatchingRouteInfo(routeInfos, destination, 0, end == -1 ? routeInfos.size() : end); }
+        static RouteInfo *findBestMatchingRouteInfo(const std::vector<RouteInfo *>& routeInfos, const uint32_t destination, int begin, int end);
         static bool routeInfoLessThan(const RouteInfo *a, const RouteInfo *b) { return a->netmask != b->netmask ? a->netmask > b->netmask : a->destination < b->destination; }
     };
 
@@ -245,8 +245,8 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     static bool compareInterfaceInfos(InterfaceInfo *i, InterfaceInfo *j);
     void collectCompatibleInterfaces(const std::vector<InterfaceInfo *>& interfaces,    /*in*/
             std::vector<InterfaceInfo *>& compatibleInterfaces,    /*out, and the rest too*/
-            uint32& mergedAddress, uint32& mergedAddressSpecifiedBits, uint32& mergedAddressIncompatibleBits,
-            uint32& mergedNetmask, uint32& mergedNetmaskSpecifiedBits, uint32& mergedNetmaskIncompatibleBits);
+            uint32_t& mergedAddress, uint32_t& mergedAddressSpecifiedBits, uint32_t& mergedAddressIncompatibleBits,
+            uint32_t& mergedNetmask, uint32_t& mergedNetmaskSpecifiedBits, uint32_t& mergedNetmaskIncompatibleBits);
 
     // helpers for routing table optimization
     bool containsRoute(const std::vector<Ipv4Route *>& routes, Ipv4Route *route);
@@ -258,7 +258,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     bool interruptsAnyOriginalRoute(const RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos);
     bool interruptsSubsequentOriginalRoutes(const RoutingTableInfo& routingTableInfo, int index);
     void checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const RoutingTableInfo& originalRoutingTableInfo);
-    void findLongestCommonDestinationPrefix(uint32 destination1, uint32 netmask1, uint32 destination2, uint32 netmask2, uint32& destinationOut, uint32& netmaskOut);
+    void findLongestCommonDestinationPrefix(uint32_t destination1, uint32_t netmask1, uint32_t destination2, uint32_t netmask2, uint32_t& destinationOut, uint32_t& netmaskOut);
     void addOriginalRouteInfos(RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos);
     bool tryToMergeTwoRoutes(RoutingTableInfo& routingTableInfo, int i, int j, RouteInfo *routeInfoI, RouteInfo *routeInfoJ);
     bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);

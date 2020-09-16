@@ -242,7 +242,7 @@ void Rtcp::scheduleInterval()
 
 void Rtcp::chooseSSRC()
 {
-    uint32 ssrc = 0;
+    uint32_t ssrc = 0;
     bool ssrcConflict = false;
     do {
         ssrc = intrand(0x7fffffff);
@@ -336,7 +336,7 @@ void Rtcp::processIncomingRTPPacket(Packet *packet, Ipv4Address address, int por
 {
     bool good = false;
     const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
-    uint32 ssrc = rtpHeader->getSsrc();
+    uint32_t ssrc = rtpHeader->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == nullptr) {
         participantInfo = new RtpParticipantInfo(ssrc);
@@ -403,7 +403,7 @@ void Rtcp::processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int po
 
 void Rtcp::processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderReportPacket>& rtcpSenderReportPacket, Ipv4Address address, int port)
 {
-    uint32 ssrc = rtcpSenderReportPacket->getSsrc();
+    uint32_t ssrc = rtcpSenderReportPacket->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
     if (participantInfo == nullptr) {
@@ -437,7 +437,7 @@ void Rtcp::processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderRepor
 
 void Rtcp::processIncomingRTCPReceiverReportPacket(const Ptr<const RtcpReceiverReportPacket>& rtcpReceiverReportPacket, Ipv4Address address, int port)
 {
-    uint32 ssrc = rtcpReceiverReportPacket->getSsrc();
+    uint32_t ssrc = rtcpReceiverReportPacket->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == nullptr) {
         participantInfo = new RtpReceiverInfo(ssrc);
@@ -477,7 +477,7 @@ void Rtcp::processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSD
             const SdesChunk *sdesChunk = check_and_cast<const SdesChunk *>(sdesChunks.get(j));
             // this is needed to avoid seg faults
             //sdesChunk->setOwner(this);
-            uint32 ssrc = sdesChunk->getSsrc();
+            uint32_t ssrc = sdesChunk->getSsrc();
             RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
             if (participantInfo == nullptr) {
                 participantInfo = new RtpReceiverInfo(ssrc);
@@ -495,7 +495,7 @@ void Rtcp::processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSD
 
 void Rtcp::processIncomingRTCPByePacket(const Ptr<const RtcpByePacket>& rtcpByePacket, Ipv4Address address, int port)
 {
-    uint32 ssrc = rtcpByePacket->getSsrc();
+    uint32_t ssrc = rtcpByePacket->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
     if (participantInfo != nullptr && participantInfo != _senderInfo) {
@@ -508,7 +508,7 @@ void Rtcp::processIncomingRTCPByePacket(const Ptr<const RtcpByePacket>& rtcpByeP
     }
 }
 
-RtpParticipantInfo *Rtcp::findParticipantInfo(uint32 ssrc)
+RtpParticipantInfo *Rtcp::findParticipantInfo(uint32_t ssrc)
 {
     std::string ssrcString = RtpParticipantInfo::ssrcToName(ssrc);
     return check_and_cast_nullable<RtpParticipantInfo *>(_participantInfos.get(ssrcString.c_str()));

@@ -40,7 +40,7 @@ void DcTcp::initialize()
     state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
 }
 
-void DcTcp::receivedDataAck(uint32 firstSeqAcked)
+void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
@@ -57,7 +57,7 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
         bool performSsCa = true; //Stands for: "perform slow start and congestion avoidance"
         if (state && state->ect) {
             // RFC 8257 3.3.1
-            uint32 bytes_acked = state->snd_una - firstSeqAcked;
+            uint32_t bytes_acked = state->snd_una - firstSeqAcked;
 
             bool cut = false;
 
@@ -111,7 +111,7 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
 
                 conn->emit(cwndSignal, state->snd_cwnd);
 
-                uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
+                uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
                 state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
 
                 conn->emit(ssthreshSignal, state->ssthresh);
@@ -136,7 +136,7 @@ void DcTcp::receivedDataAck(uint32 firstSeqAcked)
             }
             else {
                 // perform Congestion Avoidance (RFC 2581)
-                uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
+                uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
                 if (incr == 0)
                     incr = 1;

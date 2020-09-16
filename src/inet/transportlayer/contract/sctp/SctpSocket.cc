@@ -27,7 +27,7 @@
 
 namespace inet {
 
-int32 SctpSocket::nextAssocId = 0;
+int32_t SctpSocket::nextAssocId = 0;
 
 SctpSocket::SctpSocket(bool type)
 {
@@ -191,7 +191,7 @@ void SctpSocket::bindx(AddressVector lAddresses, int lPort)
     getSocketOptions();
 }
 
-void SctpSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesToPush)
+void SctpSocket::listen(bool fork, bool reset, uint32_t requests, uint32_t messagesToPush)
 {
     if (sockstate != CLOSED)
         throw cRuntimeError(sockstate == NOT_BOUND ?
@@ -219,7 +219,7 @@ void SctpSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
     sockstate = LISTENING;
 }
 
-void SctpSocket::listen(uint32 requests, bool fork, uint32 messagesToPush, bool options, int32 fd)
+void SctpSocket::listen(uint32_t requests, bool fork, uint32_t messagesToPush, bool options, int32_t fd)
 {
     if (sockstate != CLOSED)
         throw cRuntimeError(sockstate == NOT_BOUND ?
@@ -249,7 +249,7 @@ void SctpSocket::listen(uint32 requests, bool fork, uint32 messagesToPush, bool 
     sockstate = LISTENING;
 }
 
-void SctpSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
+void SctpSocket::connect(L3Address remoteAddress, int32_t remotePort, bool streamReset, int32_t prMethod, uint32_t numRequests)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
@@ -292,7 +292,7 @@ void SctpSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
         sockstate = CONNECTING;
 }
 
-void SctpSocket::connect(int32 fd, L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options)
+void SctpSocket::connect(int32_t fd, L3Address remoteAddress, int32_t remotePort, uint32_t numRequests, bool options)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
@@ -335,7 +335,7 @@ void SctpSocket::connect(int32 fd, L3Address remoteAddress, int32 remotePort, ui
         sockstate = CONNECTING;
 }
 
-void SctpSocket::accept(int32 assId, int32 fd)
+void SctpSocket::accept(int32_t assId, int32_t fd)
 {
     Request *cmsg = new Request("Accept", SCTP_C_ACCEPT);
     auto cmd = cmsg->addTag<SctpCommandReq>();
@@ -356,7 +356,7 @@ void SctpSocket::acceptSocket(int newSockId)
     check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(cmsg, gateToSctp);
 }
 
-void SctpSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
+void SctpSocket::connectx(AddressVector remoteAddressList, int32_t remotePort, bool streamReset, int32_t prMethod, uint32_t numRequests)
 {
     EV_INFO << "Socket connectx.  sockstate=" << stateName(sockstate) << "\n";
     remoteAddresses = remoteAddressList;
@@ -628,7 +628,7 @@ void SctpSocket::processMessage(cMessage *msg)
     }
 }
 
-void SctpSocket::setStreamPriority(uint32 stream, uint32 priority)
+void SctpSocket::setStreamPriority(uint32_t stream, uint32_t priority)
 {
     Request *msg = new Request("SET_STREAM_PRIO", SCTP_C_SET_STREAM_PRIO);
     auto cmd = msg->addTag<SctpSendReq>();

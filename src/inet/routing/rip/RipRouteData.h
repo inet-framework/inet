@@ -51,11 +51,11 @@ protected:
     L3Address from;                 // from which router did we get the route (only for RTE routes)
     simtime_t lastUpdateTime = 0;   // time of the last change (only for RTE routes)
     bool changed = false;           // true if the route has changed since the update
-    uint16 tag = 0;                 // route tag (only for REDISTRIBUTE routes)
+    uint16_t tag = 0;                 // route tag (only for REDISTRIBUTE routes)
     simtime_t lastInvalid = 0;      // time of the last invalidation
 
 public:
-    RipRoute(IRoute *route, RouteType type, int metric, uint16 routeTag)
+    RipRoute(IRoute *route, RouteType type, int metric, uint16_t routeTag)
     {
         this->route = route;
         this->type = type;
@@ -84,7 +84,7 @@ public:
     L3Address getFrom() const { return from; }
     simtime_t getLastUpdateTime() const { return lastUpdateTime; }
     bool isChanged() const { return changed; }
-    uint16 getRouteTag() const { return tag; }
+    uint16_t getRouteTag() const { return tag; }
     simtime_t getLastInvalidationTime() const { return lastInvalid; }
 
     void setRoute(IRoute *route) { this->route = route; }
@@ -97,7 +97,7 @@ public:
     void setFrom(const L3Address& from) { this->from = from; }
     void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
     void setChanged(bool changed) { this->changed = changed; }
-    void setRouteTag(uint16 routeTag) { this->tag = routeTag; }
+    void setRouteTag(uint16_t routeTag) { this->tag = routeTag; }
     void setLastInvalidationTime(simtime_t time) { this->lastInvalid = time; }
 };
 

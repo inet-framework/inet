@@ -35,8 +35,8 @@ void TcpTahoe::recalculateSlowStartThreshold()
 {
     // set ssthresh to flight size / 2, but at least 2 MSS
     // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
-    // uint32 flight_size = state->snd_max - state->snd_una;
+    uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
+    // uint32_t flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
     conn->emit(ssthreshSignal, state->ssthresh);
@@ -64,7 +64,7 @@ void TcpTahoe::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpTahoe::receivedDataAck(uint32 firstSeqAcked)
+void TcpTahoe::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 

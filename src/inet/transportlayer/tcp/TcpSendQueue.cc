@@ -32,7 +32,7 @@ TcpSendQueue::~TcpSendQueue()
 {
 }
 
-void TcpSendQueue::init(uint32 startSeq)
+void TcpSendQueue::init(uint32_t startSeq)
 {
     begin = startSeq;
     end = startSeq;
@@ -55,22 +55,22 @@ void TcpSendQueue::enqueueAppData(Packet *msg)
     delete msg;
 }
 
-uint32 TcpSendQueue::getBufferStartSeq() const
+uint32_t TcpSendQueue::getBufferStartSeq() const
 {
     return begin;
 }
 
-uint32 TcpSendQueue::getBufferEndSeq() const
+uint32_t TcpSendQueue::getBufferEndSeq() const
 {
     return end;
 }
 
-uint32 TcpSendQueue::getBytesAvailable(uint32 fromSeq) const
+uint32_t TcpSendQueue::getBytesAvailable(uint32_t fromSeq) const
 {
     return seqLess(fromSeq, end) ? end - fromSeq : 0;
 }
 
-Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, uint32 numBytes)
+Packet *TcpSendQueue::createSegmentWithBytes(uint32_t fromSeq, uint32_t numBytes)
 {
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
@@ -83,7 +83,7 @@ Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, uint32 numBytes)
     return tcpSegment;
 }
 
-void TcpSendQueue::discardUpTo(uint32 seqNum)
+void TcpSendQueue::discardUpTo(uint32_t seqNum)
 {
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 

@@ -31,7 +31,7 @@ namespace rtp {
 
 Register_Class(RtpSenderInfo);
 
-RtpSenderInfo::RtpSenderInfo(uint32 ssrc) : RtpParticipantInfo(ssrc)
+RtpSenderInfo::RtpSenderInfo(uint32_t ssrc) : RtpParticipantInfo(ssrc)
 {
     _startTime = 0.0;
     _clockRate = 0;
@@ -97,10 +97,10 @@ SenderReport *RtpSenderInfo::senderReport(simtime_t now)
         SenderReport *senderReport = new SenderReport();
         // ntp time stamp is 64 bit integer
 
-        uint64 ntpSeconds = (uint64)SIMTIME_DBL(now);
-        uint64 ntpFraction = (uint64)((SIMTIME_DBL(now) - ntpSeconds * 65536.0) * 65536.0);
+        uint64_t ntpSeconds = (uint64_t)SIMTIME_DBL(now);
+        uint64_t ntpFraction = (uint64_t)((SIMTIME_DBL(now) - ntpSeconds * 65536.0) * 65536.0);
 
-        senderReport->setNTPTimeStamp((uint64)(ntpSeconds << 32) + ntpFraction);
+        senderReport->setNTPTimeStamp((uint64_t)(ntpSeconds << 32) + ntpFraction);
         senderReport->setRTPTimeStamp(SIMTIME_DBL(now - _startTime) * _clockRate);
         senderReport->setPacketCount(_packetsSent);
         senderReport->setByteCount(_bytesSent);
@@ -121,12 +121,12 @@ void RtpSenderInfo::setClockRate(int clockRate)
     _clockRate = clockRate;
 }
 
-void RtpSenderInfo::setTimeStampBase(uint32 timeStampBase)
+void RtpSenderInfo::setTimeStampBase(uint32_t timeStampBase)
 {
     _timeStampBase = timeStampBase;
 }
 
-void RtpSenderInfo::setSequenceNumberBase(uint16 sequenceNumberBase)
+void RtpSenderInfo::setSequenceNumberBase(uint16_t sequenceNumberBase)
 {
     _sequenceNumberBase = sequenceNumberBase;
 }

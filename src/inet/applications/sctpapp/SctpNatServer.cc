@@ -57,7 +57,7 @@ void SctpNatServer::initialize(int stage)
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-        int32 port = par("localPort");
+        int32_t port = par("localPort");
 
         ordered = par("ordered");
         lastStream = 0;
@@ -192,7 +192,7 @@ void SctpNatServer::generateAndSend()
 
 void SctpNatServer::handleMessage(cMessage *msg)
 {
-    int32 id;
+    int32_t id;
 
     if (msg->isSelfMessage()) {
         handleTimer(msg);
@@ -482,7 +482,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
 
 void SctpNatServer::handleTimer(cMessage *msg)
 {
-    int32 id;
+    int32_t id;
 
     switch (msg->getKind()) {
         case SCTP_C_SEND:

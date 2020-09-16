@@ -53,12 +53,12 @@ class INET_API L3Address
     };
 
   private:
-    uint64 hi;
-    uint64 lo;
+    uint64_t hi;
+    uint64_t lo;
 
   private:
-    uint64 get(AddressType type) const;
-    void set(AddressType type, uint64 lo);
+    uint64_t get(AddressType type) const;
+    void set(AddressType type, uint64_t lo);
 
   public:
     L3Address() { set(NONE, 0); }

@@ -37,7 +37,7 @@ class InterfaceToken;
 class INET_API MacAddress
 {
   private:
-    uint64 address;    // 6*8=48 bit address, lowest 6 bytes are used, highest 2 bytes are always zero
+    uint64_t address;    // 6*8=48 bit address, lowest 6 bytes are used, highest 2 bytes are always zero
     static unsigned int autoAddressCtr;    // global counter for generateAutoAddress()
     static bool simulationLifecycleListenerAdded;
 
@@ -80,7 +80,7 @@ class INET_API MacAddress
     /**
      * Initializes the address from the lower 48 bits of the 64-bit argument
      */
-    explicit MacAddress(uint64 bits) { address = bits & MAC_ADDRESS_MASK; }
+    explicit MacAddress(uint64_t bits) { address = bits & MAC_ADDRESS_MASK; }
 
     /**
      * Constructor which accepts a hex string (12 hex digits, may also
@@ -170,7 +170,7 @@ class INET_API MacAddress
     /**
      * Converts address to 48 bits integer.
      */
-    uint64 getInt() const { return address; }
+    uint64_t getInt() const { return address; }
 
     /**
      * Returns true if the two addresses are equal.

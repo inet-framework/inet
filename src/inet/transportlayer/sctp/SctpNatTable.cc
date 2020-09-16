@@ -30,7 +30,7 @@
 namespace inet {
 namespace sctp {
 
-uint32 SctpNatTable::nextEntryNumber = 0;
+uint32_t SctpNatTable::nextEntryNumber = 0;
 
 Define_Module(SctpNatTable);
 
@@ -45,7 +45,7 @@ SctpNatTable::~SctpNatTable()
     natEntries.clear();
 }
 
-SctpNatEntry *SctpNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Address destAddr, uint16 destPrt, uint32 globalVtag)
+SctpNatEntry *SctpNatTable::findNatEntry(L3Address srcAddr, uint16_t srcPrt, L3Address destAddr, uint16_t destPrt, uint32_t globalVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -58,7 +58,7 @@ SctpNatEntry *SctpNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Add
     return nullptr;
 }
 
-SctpNatEntry *SctpNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
+SctpNatEntry *SctpNatTable::getEntry(L3Address globalAddr, uint16_t globalPrt, L3Address nattedAddr, uint16_t nattedPrt, uint32_t localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -73,7 +73,7 @@ SctpNatEntry *SctpNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3A
     return nullptr;
 }
 
-SctpNatEntry *SctpNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt)
+SctpNatEntry *SctpNatTable::getSpecialEntry(L3Address globalAddr, uint16_t globalPrt, L3Address nattedAddr, uint16_t nattedPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -89,7 +89,7 @@ SctpNatEntry *SctpNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalP
     return nullptr;
 }
 
-SctpNatEntry *SctpNatTable::getLocalInitEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt)
+SctpNatEntry *SctpNatTable::getLocalInitEntry(L3Address globalAddr, uint16_t localPrt, uint16_t globalPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -102,7 +102,7 @@ SctpNatEntry *SctpNatTable::getLocalInitEntry(L3Address globalAddr, uint16 local
     return nullptr;
 }
 
-SctpNatEntry *SctpNatTable::getLocalEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
+SctpNatEntry *SctpNatTable::getLocalEntry(L3Address globalAddr, uint16_t localPrt, uint16_t globalPrt, uint32_t localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();

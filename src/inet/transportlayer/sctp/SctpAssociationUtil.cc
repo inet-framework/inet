@@ -57,9 +57,9 @@ namespace sctp {
 
 void SctpAssociation::calculateRcvBuffer()
 {
-    uint32 sumDelivery = 0;
-    uint32 sumOrdered = 0;
-    uint32 sumUnOrdered = 0;
+    uint32_t sumDelivery = 0;
+    uint32_t sumOrdered = 0;
+    uint32_t sumUnOrdered = 0;
     for (SctpReceiveStreamMap::const_iterator iterator = receiveStreams.begin();
          iterator != receiveStreams.end(); iterator++)
     {
@@ -84,21 +84,21 @@ void SctpAssociation::listOrderedQ()
     }
 }
 
-uint32 SctpAssociation::getBytesInFlightOfStream(uint16 sid)
+uint32_t SctpAssociation::getBytesInFlightOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
     return streamIterator->second->getBytesInFlight();
 }
 
-bool SctpAssociation::orderedQueueEmptyOfStream(uint16 sid)
+bool SctpAssociation::orderedQueueEmptyOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
     return streamIterator->second->getStreamQ()->isEmpty();
 }
 
-bool SctpAssociation::unorderedQueueEmptyOfStream(uint16 sid)
+bool SctpAssociation::unorderedQueueEmptyOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
@@ -106,14 +106,14 @@ bool SctpAssociation::unorderedQueueEmptyOfStream(uint16 sid)
 }
 
 
-bool SctpAssociation::getFragInProgressOfStream(uint16 sid)
+bool SctpAssociation::getFragInProgressOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
     return streamIterator->second->getFragInProgress();
 }
 
-void SctpAssociation::setFragInProgressOfStream(uint16 sid, bool frag)
+void SctpAssociation::setFragInProgressOfStream(uint16_t sid, bool frag)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
@@ -122,8 +122,8 @@ void SctpAssociation::setFragInProgressOfStream(uint16 sid, bool frag)
 
 void SctpAssociation::checkPseudoCumAck(const SctpPathVariables *path)
 {
-    uint32 earliestOutstandingTsn = path->pseudoCumAck;
-    uint32 rtxEarliestOutstandingTsn = path->rtxPseudoCumAck;
+    uint32_t earliestOutstandingTsn = path->pseudoCumAck;
+    uint32_t rtxEarliestOutstandingTsn = path->rtxPseudoCumAck;
 
     retransmissionQ->findEarliestOutstandingTsnsForPath(
             path->remoteAddress,
@@ -147,7 +147,7 @@ void SctpAssociation::printSctpPathMap() const
     }
 }
 
-const char *SctpAssociation::stateName(int32 state)
+const char *SctpAssociation::stateName(int32_t state)
 {
 #define CASE(x)    case x: \
         s = (char *)#x + 7; break
@@ -166,7 +166,7 @@ const char *SctpAssociation::stateName(int32 state)
 #undef CASE
 }
 
-const char *SctpAssociation::eventName(int32 event)
+const char *SctpAssociation::eventName(int32_t event)
 {
 #define CASE(x)    case x: \
         s = (char *)#x + 7; break
@@ -213,7 +213,7 @@ const char *SctpAssociation::eventName(int32 event)
 }
 
 //TODO move this function to contrib
-const char *SctpAssociation::indicationName(int32 code)
+const char *SctpAssociation::indicationName(int32_t code)
 {
 #define CASE(x)    case x: \
         s = (char *)#x + 7; break
@@ -245,7 +245,7 @@ const char *SctpAssociation::indicationName(int32 code)
 #undef CASE
 }
 
-uint16 SctpAssociation::chunkToInt(const char *type)
+uint16_t SctpAssociation::chunkToInt(const char *type)
 {
     EV_STATICCONTEXT;
 
@@ -379,7 +379,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
     sctpmsg->setChecksumOk(true);
     EV_INFO << "SendToIP: localPort=" << localPort << " remotePort=" << remotePort << " dest=" << dest << "\n";
     const SctpChunk *chunk = sctpmsg->peekFirstChunk();
-    uint8 chunkType = chunk->getSctpChunkType();
+    uint8_t chunkType = chunk->getSctpChunkType();
     if (chunkType == ABORT) {
         const SctpAbortChunk *abortChunk = check_and_cast<const SctpAbortChunk *>(chunk);
         if (abortChunk->getT_Bit() == 1) {
@@ -443,7 +443,7 @@ void SctpAssociation::signalConnectionTimeout()
     sendIndicationToApp(SCTP_I_TIMED_OUT);
 }
 
-void SctpAssociation::sendIndicationToApp(int32 code, int32 value)
+void SctpAssociation::sendIndicationToApp(int32_t code, int32_t value)
 {
     EV_INFO << "sendIndicationToApp: " << indicationName(code) << endl;
     assert(code != SCTP_I_SENDQUEUE_ABATED);
@@ -503,7 +503,7 @@ void SctpAssociation::sendEstabIndicationToApp()
     sctpMain->send(msg, "appOut");
 
     char vectorName[128];
-    for (uint16 i = 0; i < inboundStreams; i++) {
+    for (uint16_t i = 0; i < inboundStreams; i++) {
         snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
         streamThroughputVectors[i] = new cOutVector(vectorName);
     }
@@ -565,7 +565,7 @@ void SctpAssociation::initAssociation(SctpOpenReq *openCmd)
 void SctpAssociation::sendInit()
 {
     AddressVector adv;
-    uint32 length = SCTP_INIT_CHUNK_LENGTH;
+    uint32_t length = SCTP_INIT_CHUNK_LENGTH;
 
     if (remoteAddr.isUnspecified() || remotePort == 0)
         throw cRuntimeError("Error processing command ASSOCIATE: foreign socket unspecified");
@@ -579,7 +579,7 @@ void SctpAssociation::sendInit()
     sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
     SctpInitChunk *initChunk = new SctpInitChunk();
     initChunk->setSctpChunkType(INIT);
-    initChunk->setInitTag((uint32)(fmod(RNGCONTEXT intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL);
+    initChunk->setInitTag((uint32_t)(fmod(RNGCONTEXT intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL);
 
     peerVTag = initChunk->getInitTag();
     EV_INFO << "INIT from " << localAddr << ":InitTag=" << peerVTag << "\n";
@@ -607,7 +607,7 @@ void SctpAssociation::sendInit()
     initChunk->setIpv6Supported(false);
 #endif
     if (localAddressList.front().isUnspecified()) {
-        for (int32 i = 0; i < ift->getNumInterfaces(); ++i) {
+        for (int32_t i = 0; i < ift->getNumInterfaces(); ++i) {
 #ifdef WITH_IPv4
             if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
                 adv.push_back(ipv4Data->getIPAddress());
@@ -616,7 +616,7 @@ void SctpAssociation::sendInit()
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
             if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
-                for (int32 j = 0; j < ipv6Data->getNumAddresses(); j++) {
+                for (int32_t j = 0; j < ipv6Data->getNumAddresses(); j++) {
                     EV_DETAIL << "add address " << ipv6Data->getAddress(j) << "\n";
                     adv.push_back(ipv6Data->getAddress(j));
                 }
@@ -633,7 +633,7 @@ void SctpAssociation::sendInit()
     if (initChunk->getIpv4Supported() || initChunk->getIpv6Supported()) {
         length += 8;
     }
-    uint32 addrNum = 0;
+    uint32_t addrNum = 0;
     bool friendly = false;
     if (sctpMain->hasPar("natFriendly")) {
         friendly = sctpMain->par("natFriendly");
@@ -677,15 +677,15 @@ void SctpAssociation::sendInit()
     else
         throw cRuntimeError("Unknown address type: %d", (int)(remoteAddr.getType()));
 
-    uint16 count = 0;
+    uint16_t count = 0;
     if (sctpMain->auth == true) {
         initChunk->setSepChunksArraySize(++count);
         initChunk->setSepChunks(count - 1, AUTH);
         state->keyVector[0] = (uint8_t)RANDOM;
         state->keyVector[2] = 36;
-        for (int32 k = 0; k < 32; k++) {
+        for (int32_t k = 0; k < 32; k++) {
             initChunk->setRandomArraySize(k + 1);
-            initChunk->setRandom(k, (uint8)(RNGCONTEXT intrand(256)));
+            initChunk->setRandom(k, (uint8_t)(RNGCONTEXT intrand(256)));
             state->keyVector[k + 2] = initChunk->getRandom(k);
         }
         state->sizeKeyVector = 36;
@@ -694,7 +694,7 @@ void SctpAssociation::sendInit()
         state->keyVector[state->sizeKeyVector] = state->chunkList.size() + 4;
         state->sizeKeyVector += 2;
         initChunk->setSctpChunkTypesArraySize(state->chunkList.size());
-        int32 k = 0;
+        int32_t k = 0;
         for (auto & elem : state->chunkList) {
             initChunk->setSctpChunkTypes(k, (elem));
             state->keyVector[state->sizeKeyVector] = (elem);
@@ -782,7 +782,7 @@ void SctpAssociation::retransmitInit()
 
 void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
 {
-    uint32 length = SCTP_INIT_CHUNK_LENGTH;
+    uint32_t length = SCTP_INIT_CHUNK_LENGTH;
 
     state->setPrimaryPath(getPath(remoteAddr));
     // create segment
@@ -800,7 +800,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     cookie->setPeerTieTagArraySize(32);
     if (fsm->getState() == SCTP_S_CLOSED) {
         while (peerVTag == 0) {
-            peerVTag = (uint32)RNGCONTEXT intrand(INT32_MAX);
+            peerVTag = (uint32_t)RNGCONTEXT intrand(INT32_MAX);
         }
         initAckChunk->setInitTag(peerVTag);
         initAckChunk->setInitTsn(2000);
@@ -810,7 +810,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         state->streamResetSequenceNumber = state->nextTsn;
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
-        for (int32 i = 0; i < 32; i++) {
+        for (int32_t i = 0; i < 32; i++) {
             cookie->setLocalTieTag(i, 0);
             cookie->setPeerTieTag(i, 0);
         }
@@ -825,11 +825,11 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         state->gapList.forwardCumAckTsn(initPeerTsn - 1);
         cookie->setLocalTag(initChunk->getInitTag());
         cookie->setPeerTag(peerVTag);
-        for (int32 i = 0; i < 32; i++) {
-            cookie->setPeerTieTag(i, (uint8)(RNGCONTEXT intrand(256)));
+        for (int32_t i = 0; i < 32; i++) {
+            cookie->setPeerTieTag(i, (uint8_t)(RNGCONTEXT intrand(256)));
             state->peerTieTag[i] = cookie->getPeerTieTag(i);
             if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
-                cookie->setLocalTieTag(i, (uint8)(RNGCONTEXT intrand(256)));
+                cookie->setLocalTieTag(i, (uint8_t)(RNGCONTEXT intrand(256)));
                 state->localTieTag[i] = cookie->getLocalTieTag(i);
             }
             else
@@ -840,15 +840,15 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     }
     else {
         EV_INFO << "other state\n";
-        uint32 tag = 0;
+        uint32_t tag = 0;
         while (tag == 0) {
-            tag = (uint32)(fmod(RNGCONTEXT intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
+            tag = (uint32_t)(fmod(RNGCONTEXT intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
         }
         initAckChunk->setInitTag(tag);
         initAckChunk->setInitTsn(state->nextTsn);
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
-        for (int32 i = 0; i < 32; i++) {
+        for (int32_t i = 0; i < 32; i++) {
             cookie->setPeerTieTag(i, state->peerTieTag[i]);
             cookie->setLocalTieTag(i, state->localTieTag[i]);
         }
@@ -876,7 +876,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     if (initAckChunk->getIpv4Supported() || initAckChunk->getIpv6Supported()) {
         length += 8;
     }
-    uint32 addrNum = 0;
+    uint32_t addrNum = 0;
     bool friendly = false;
     if (sctpMain->hasPar("natFriendly")) {
         friendly = sctpMain->par("natFriendly");
@@ -892,16 +892,16 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
             }
         }
 
-    uint16 count = 0;
+    uint16_t count = 0;
     if (sctpMain->auth == true) {
         initAckChunk->setSepChunksArraySize(++count);
         initAckChunk->setSepChunks(count - 1, AUTH);
-        for (int32 k = 0; k < 32; k++) {
+        for (int32_t k = 0; k < 32; k++) {
             initAckChunk->setRandomArraySize(k + 1);
-            initAckChunk->setRandom(k, (uint8)(RNGCONTEXT intrand(256)));
+            initAckChunk->setRandom(k, (uint8_t)(RNGCONTEXT intrand(256)));
         }
         initAckChunk->setSctpChunkTypesArraySize(state->chunkList.size());
-        int32 k = 0;
+        int32_t k = 0;
         for (auto & elem : state->chunkList) {
             initAckChunk->setSctpChunkTypes(k, (elem));
             k++;
@@ -910,11 +910,11 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         initAckChunk->setHmacTypes(0, 1);
         length += ADD_PADDING(initAckChunk->getSctpChunkTypesArraySize() + 48);
     }
-    uint32 unknownLen = initChunk->getUnrecognizedParametersArraySize();
+    uint32_t unknownLen = initChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
         EV_INFO << "Found unrecognized Parameters in INIT chunk with a length of " << unknownLen << " bytes.\n";
         initAckChunk->setUnrecognizedParametersArraySize(unknownLen);
-        for (uint32 i = 0; i < unknownLen; i++)
+        for (uint32_t i = 0; i < unknownLen; i++)
             initAckChunk->setUnrecognizedParameters(i, initChunk->getUnrecognizedParameters(i));
         length += unknownLen;
     }
@@ -971,10 +971,10 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
     sctpcookieecho->setDestPort(remotePort);
     SctpCookieEchoChunk *cookieEchoChunk = new SctpCookieEchoChunk();
     cookieEchoChunk->setSctpChunkType(COOKIE_ECHO);
-    int32 len = initAckChunk->getCookieArraySize();
+    int32_t len = initAckChunk->getCookieArraySize();
     cookieEchoChunk->setCookieArraySize(len);
     if (len > 0) {
-        for (int32 i = 0; i < len; i++)
+        for (int32_t i = 0; i < len; i++)
             cookieEchoChunk->setCookie(i, initAckChunk->getCookie(i));
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + len);
     }
@@ -983,11 +983,11 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
         cookieEchoChunk->setStateCookie(cookie);
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + cookie->getLength());
     }
-    uint32 unknownLen = initAckChunk->getUnrecognizedParametersArraySize();
+    uint32_t unknownLen = initAckChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
         EV_INFO << "Found unrecognized Parameters in INIT-ACK chunk with a length of " << unknownLen << " bytes.\n";
         cookieEchoChunk->setUnrecognizedParametersArraySize(unknownLen);
-        for (uint32 i = 0; i < unknownLen; i++)
+        for (uint32_t i = 0; i < unknownLen; i++)
             cookieEchoChunk->setUnrecognizedParameters(i, initAckChunk->getUnrecognizedParameters(i));
     }
     else
@@ -1069,10 +1069,10 @@ void SctpAssociation::sendHeartbeatAck(const SctpHeartbeatChunk *heartbeatChunk,
     heartbeatAckChunk->setSctpChunkType(HEARTBEAT_ACK);
     heartbeatAckChunk->setRemoteAddr(heartbeatChunk->getRemoteAddr());
     heartbeatAckChunk->setTimeField(heartbeatChunk->getTimeField());
-    const int32 len = heartbeatChunk->getInfoArraySize();
+    const int32_t len = heartbeatChunk->getInfoArraySize();
     if (len > 0) {
         heartbeatAckChunk->setInfoArraySize(len);
-        for (int32 i = 0; i < len; i++)
+        for (int32_t i = 0; i < len; i++)
             heartbeatAckChunk->setInfo(i, heartbeatChunk->getInfo(i));
     }
 
@@ -1160,7 +1160,7 @@ void SctpAssociation::sendShutdownComplete()
     sendToIP(fp, sctpshutdowncomplete);
 }
 
-void SctpAssociation::sendAbort(uint16 tBit)
+void SctpAssociation::sendAbort(uint16_t tBit)
 {
     SctpAuthenticationChunk *authChunk;
     const auto& msg = makeShared<SctpHeader>();
@@ -1275,9 +1275,9 @@ void SctpAssociation::sendPacketDrop(const bool flag)
     pktdrop->setQueuedData(state->queuedReceivedBytes);
     pktdrop->setTruncLength(0);
     pktdrop->setByteLength(SCTP_PKTDROP_CHUNK_LENGTH);
-    uint16 mss = getPath(remoteAddr)->pmtu - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH - IP_HEADER_LENGTH;
+    uint16_t mss = getPath(remoteAddr)->pmtu - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH - IP_HEADER_LENGTH;
     if (B(drop->getChunkLength()).get() > mss) {
-        uint16 diff = B(drop->getChunkLength()).get() - mss;
+        uint16_t diff = B(drop->getChunkLength()).get() - mss;
         pktdrop->setTruncLength(B(drop->getChunkLength()).get());
         SctpChunk *sctpchunk = (SctpChunk *)(drop->removeLastChunk());
         if (sctpchunk->getSctpChunkType() == DATA) {
@@ -1288,9 +1288,9 @@ void SctpAssociation::sendPacketDrop(const bool flag)
 
 
             if (smsg->getDataLen() > diff) {
-                uint16 newLength = smsg->getDataLen() - diff;
+                uint16_t newLength = smsg->getDataLen() - diff;
                 smsg->setDataArraySize(newLength);
-                for (uint16 i = 0; i < newLength; i++)
+                for (uint16_t i = 0; i < newLength; i++)
                     smsg->setData(i, 'a');
                 smsg->setDataLen(newLength);
                 smsg->setEncaps(false);
@@ -1359,9 +1359,9 @@ void SctpAssociation::scheduleSack()
 
 SctpForwardTsnChunk *SctpAssociation::createForwardTsnChunk(const L3Address& pid)
 {
-    uint16 chunkLength = SCTP_FORWARD_TSN_CHUNK_LENGTH;
+    uint16_t chunkLength = SCTP_FORWARD_TSN_CHUNK_LENGTH;
     SctpDataVariables *chunk;
-    typedef std::map<uint16, int16> SidMap;
+    typedef std::map<uint16_t, int16_t> SidMap;
     SidMap sidMap;
 
     EV_INFO << "Create forwardTsnChunk for " << pid << "\n";
@@ -1401,7 +1401,7 @@ SctpForwardTsnChunk *SctpAssociation::createForwardTsnChunk(const L3Address& pid
     }
     forwChunk->setSidArraySize(sidMap.size());
     forwChunk->setSsnArraySize(sidMap.size());
-    int32 i = 0;
+    int32_t i = 0;
     for (auto & elem : sidMap) {
         forwChunk->setSid(i, elem.first);
         forwChunk->setSsn(i, elem.second);
@@ -1446,21 +1446,21 @@ inline static bool writeCompressedValue(uint8_t *outputBuffer,
     return true;
 }
 
-static uint32 compressGaps(const SctpGapList *gapList, const SctpGapList::GapType type, size_t& space)
+static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapType type, size_t& space)
 {
-    uint8 compressedDataBuffer[1 + 6 * gapList->getNumGaps(type)];    // Worst-case size
+    uint8_t compressedDataBuffer[1 + 6 * gapList->getNumGaps(type)];    // Worst-case size
 
     size_t outputPos = 0;
     unsigned int entriesWritten = 0;
-    uint32 last = gapList->getCumAckTsn();
+    uint32_t last = gapList->getCumAckTsn();
     for (unsigned int i = 0; i < gapList->getNumGaps(type); i++) {
         assert(SctpAssociation::tsnGt(gapList->getGapStart(type, i), last + 1));
         assert(SctpAssociation::tsnGe(gapList->getGapStop(type, i), gapList->getGapStart(type, i)));
-        const uint16 startOffset = gapList->getGapStart(type, i) - last;
-        const uint16 stopOffset = gapList->getGapStop(type, i) - gapList->getGapStart(type, i);
+        const uint16_t startOffset = gapList->getGapStart(type, i) - last;
+        const uint16_t stopOffset = gapList->getGapStop(type, i) - gapList->getGapStart(type, i);
         const size_t lastOutputPos = outputPos;
-        if ((writeCompressedValue((uint8 *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, startOffset) == false) ||
-            (writeCompressedValue((uint8 *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, stopOffset) == false) ||
+        if ((writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, startOffset) == false) ||
+            (writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, stopOffset) == false) ||
             (outputPos + 1 > space))
         {
             outputPos = lastOutputPos;
@@ -1469,21 +1469,21 @@ static uint32 compressGaps(const SctpGapList *gapList, const SctpGapList::GapTyp
         entriesWritten++;
         last = gapList->getGapStop(type, i);
     }
-    assert(writeCompressedValue((uint8 *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, 0x00) == true);
+    assert(writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, 0x00) == true);
     space = outputPos;
 
     return entriesWritten;
 }
 
-static uint32 copyToRGaps(SctpSackChunk *sackChunk,
+static uint32_t copyToRGaps(SctpSackChunk *sackChunk,
         const SctpGapList *gapList,
         const SctpGapList::GapType type,
         const bool compression,
         size_t& space)
 {
-    const uint32 count = gapList->getNumGaps(type);
-    uint32 last = gapList->getCumAckTsn();
-    uint32 keys = min((uint32)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
+    const uint32_t count = gapList->getNumGaps(type);
+    uint32_t last = gapList->getCumAckTsn();
+    uint32_t keys = min((uint32_t)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
     if (compression) {
         keys = count;    // Get all entries first, compress them later
     }
@@ -1491,7 +1491,7 @@ static uint32 copyToRGaps(SctpSackChunk *sackChunk,
     sackChunk->setGapStopArraySize(keys);
     sackChunk->setNumGaps(keys);
 
-    for (uint32 key = 0; key < keys; key++) {
+    for (uint32_t key = 0; key < keys; key++) {
         // ====== Validity check ========================================
         assert(SctpAssociation::tsnGt(gapList->getGapStart(type, key), last + 1));
         assert(SctpAssociation::tsnGe(gapList->getGapStop(type, key), gapList->getGapStart(type, key)));
@@ -1510,15 +1510,15 @@ static uint32 copyToRGaps(SctpSackChunk *sackChunk,
     return keys;
 }
 
-static uint32 copyToNRGaps(SctpSackChunk *sackChunk,
+static uint32_t copyToNRGaps(SctpSackChunk *sackChunk,
         const SctpGapList *gapList,
         const SctpGapList::GapType type,
         const bool compression,
         size_t& space)
 {
-    const uint32 count = gapList->getNumGaps(type);
-    uint32 last = gapList->getCumAckTsn();
-    uint32 keys = min((uint32)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
+    const uint32_t count = gapList->getNumGaps(type);
+    uint32_t last = gapList->getCumAckTsn();
+    uint32_t keys = min((uint32_t)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
     if (compression) {
         keys = count;    // Get all entries first, compress them later
     }
@@ -1526,7 +1526,7 @@ static uint32 copyToNRGaps(SctpSackChunk *sackChunk,
     sackChunk->setNrGapStopArraySize(keys);
     sackChunk->setNumNrGaps(keys);
 
-    for (uint32 key = 0; key < keys; key++) {
+    for (uint32_t key = 0; key < keys; key++) {
         // ====== Validity check ========================================
         assert(SctpAssociation::tsnGt(gapList->getGapStart(type, key), last + 1));
         assert(SctpAssociation::tsnGe(gapList->getGapStop(type, key), gapList->getGapStart(type, key)));
@@ -1552,15 +1552,15 @@ SctpSackChunk *SctpAssociation::createSack()
     EV_INFO << " localRwnd=" << state->localRwnd << " queuedBytes=" << state->queuedReceivedBytes << "\n";
 
     // ====== Get receiver window size to be advertised ======================
-    uint32 arwnd = 0;
-    uint32 msgRwnd = 0;
+    uint32_t arwnd = 0;
+    uint32_t msgRwnd = 0;
     calculateRcvBuffer();
-    if ((state->messageAcceptLimit > 0 && (int32)(state->localMsgRwnd - state->bufferedMessages) <= 0)
-        || (state->messageAcceptLimit == 0 && (int32)(state->localRwnd - state->queuedReceivedBytes - state->bufferedMessages * state->bytesToAddPerRcvdChunk) <= 0))
+    if ((state->messageAcceptLimit > 0 && (int32_t)(state->localMsgRwnd - state->bufferedMessages) <= 0)
+        || (state->messageAcceptLimit == 0 && (int32_t)(state->localRwnd - state->queuedReceivedBytes - state->bufferedMessages * state->bytesToAddPerRcvdChunk) <= 0))
     {
         msgRwnd = 0;
     }
-    else if ((state->messageAcceptLimit > 0 && (int32)(state->localMsgRwnd - state->bufferedMessages) < 3)
+    else if ((state->messageAcceptLimit > 0 && (int32_t)(state->localMsgRwnd - state->bufferedMessages) < 3)
              || (state->messageAcceptLimit == 0 && state->localRwnd - state->queuedReceivedBytes - state->bufferedMessages * state->bytesToAddPerRcvdChunk < state->swsLimit) || state->swsMsgInvoked == true)
     {
         msgRwnd = 1;
@@ -1581,7 +1581,7 @@ SctpSackChunk *SctpAssociation::createSack()
     }
     else {
         // ====== Receiver buffer is full =====================================
-        if ((int32)(state->localRwnd - state->queuedReceivedBytes) <= 0) {
+        if ((int32_t)(state->localRwnd - state->queuedReceivedBytes) <= 0) {
             arwnd = 0;
             if (state->swsLimit > 0) {
                 state->swsAvoidanceInvoked = true;
@@ -1632,9 +1632,9 @@ SctpSackChunk *SctpAssociation::createSack()
     }
 
     // ====== What has to be stored in the SACK? =============================
-    const uint32 mtu = getPath(remoteAddr)->pmtu;
+    const uint32_t mtu = getPath(remoteAddr)->pmtu;
 
-    uint32 hdrSize;
+    uint32_t hdrSize;
     if (remoteAddr.getType() == L3Address::IPv6)
         hdrSize = 40;
     else if (remoteAddr.getType() == L3Address::IPv4)
@@ -1642,17 +1642,17 @@ SctpSackChunk *SctpAssociation::createSack()
     else
         throw cRuntimeError("Unknown address type");
 
-    const uint32 allowedLength = mtu
+    const uint32_t allowedLength = mtu
         - hdrSize
         - SCTP_COMMON_HEADER
         - SCTP_SACK_CHUNK_LENGTH;
-    uint32 numDups = state->dupList.size();
-    uint32 numRevokableGaps = state->gapList.getNumGaps(SctpGapList::GT_Revokable);
-    uint32 numNonRevokableGaps = state->gapList.getNumGaps(SctpGapList::GT_NonRevokable);
+    uint32_t numDups = state->dupList.size();
+    uint32_t numRevokableGaps = state->gapList.getNumGaps(SctpGapList::GT_Revokable);
+    uint32_t numNonRevokableGaps = state->gapList.getNumGaps(SctpGapList::GT_NonRevokable);
     size_t revokableGapsSpace = ~0;
     size_t nonRevokableGapsSpace = ~0;
     size_t sackHeaderLength = ~0;
-    const uint32 totalGaps = state->gapList.getNumGaps(SctpGapList::GT_Any);
+    const uint32_t totalGaps = state->gapList.getNumGaps(SctpGapList::GT_Any);
     bool compression = false;
 
     // ====== Record statistics ==============================================
@@ -1715,7 +1715,7 @@ SctpSackChunk *SctpAssociation::createSack()
     }
 
     // ====== SACK has to be shortened to fit in MTU ===========================
-    uint32 sackLength = sackHeaderLength + revokableGapsSpace + nonRevokableGapsSpace + numDups * 4;
+    uint32_t sackLength = sackHeaderLength + revokableGapsSpace + nonRevokableGapsSpace + numDups * 4;
     if (sackLength > allowedLength) {
         // Strategy to reduce the SACK size:
         // - Report no duplicates (they are not used for congestion control)
@@ -1764,12 +1764,12 @@ SctpSackChunk *SctpAssociation::createSack()
             else {
                 if (sackLength > allowedLength) {
                     double revokableFraction = 1.0;
-                    const uint32 blocksBeRemoved = (sackLength - allowedLength) / 4;
+                    const uint32_t blocksBeRemoved = (sackLength - allowedLength) / 4;
                     if (numRevokableGaps + numNonRevokableGaps > 0) {
                         revokableFraction = numRevokableGaps / (double)(numRevokableGaps + numNonRevokableGaps);
                     }
-                    const uint32 removeRevokable = (uint32)ceil(blocksBeRemoved * revokableFraction);
-                    const uint32 removeNonRevokable = (uint32)ceil(blocksBeRemoved * (1.0 - revokableFraction));
+                    const uint32_t removeRevokable = (uint32_t)ceil(blocksBeRemoved * revokableFraction);
+                    const uint32_t removeNonRevokable = (uint32_t)ceil(blocksBeRemoved * (1.0 - revokableFraction));
                     numRevokableGaps -= std::min(removeRevokable, numRevokableGaps);
                     numNonRevokableGaps -= std::min(removeNonRevokable, numNonRevokableGaps);
                     revokableGapsSpace = 4 * numRevokableGaps;
@@ -1807,7 +1807,7 @@ SctpSackChunk *SctpAssociation::createSack()
     // ====== Add duplicates =================================================
     if (numDups > 0) {
         sackChunk->setDupTsnsArraySize(numDups);
-        uint32 key = 0;
+        uint32_t key = 0;
         for (auto & elem : state->dupList) {
             sackChunk->setDupTsns(key, elem);
             key++;
@@ -1862,7 +1862,7 @@ void SctpAssociation::sendSack()
     sendSACKviaSelectedPath(sctpmsg);
 }
 
-void SctpAssociation::sendDataArrivedNotification(uint16 sid)
+void SctpAssociation::sendDataArrivedNotification(uint16_t sid)
 {
     EV_INFO << "SendDataArrivedNotification\n";
 
@@ -1876,7 +1876,7 @@ void SctpAssociation::sendDataArrivedNotification(uint16 sid)
     sendToApp(cmsg);
 }
 
-void SctpAssociation::sendInvalidStreamError(uint16 sid)
+void SctpAssociation::sendInvalidStreamError(uint16_t sid)
 {
     const auto& sctpmsg = makeShared<SctpHeader>();
     sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
@@ -1904,7 +1904,7 @@ void SctpAssociation::sendInvalidStreamError(uint16 sid)
     sendSACKviaSelectedPath(sctpmsg);
 }
 
-void SctpAssociation::sendHMacError(const uint16 id)
+void SctpAssociation::sendHMacError(const uint16_t id)
 {
     const auto& sctpmsg = makeShared<SctpHeader>();
     sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
@@ -1919,7 +1919,7 @@ void SctpAssociation::sendHMacError(const uint16 id)
     sctpmsg->insertSctpChunks(errorChunk);
 }
 
-void SctpAssociation::putInDeliveryQ(uint16 sid)
+void SctpAssociation::putInDeliveryQ(uint16_t sid)
 {
     SctpReceiveStream *rStream = receiveStreams.find(sid)->second;
     EV_INFO << "putInDeliveryQ: SSN=" << rStream->getExpectedStreamSeqNum()
@@ -1946,7 +1946,7 @@ void SctpAssociation::putInDeliveryQ(uint16 sid)
                 EV_DETAIL << "data put in deliveryQ; queuedBytes now "
                           << state->queuedReceivedBytes << endl;
                 qCounter.roomSumRcvStreams += ADD_PADDING(chunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
-                int32 seqnum = rStream->getExpectedStreamSeqNum();
+                int32_t seqnum = rStream->getExpectedStreamSeqNum();
                 rStream->setExpectedStreamSeqNum(++seqnum);
                 if (rStream->getExpectedStreamSeqNum() > 65535) {
                     rStream->setExpectedStreamSeqNum(0);
@@ -1961,7 +1961,7 @@ void SctpAssociation::putInDeliveryQ(uint16 sid)
 
 void SctpAssociation::pushUlp()
 {
-    int32 count = 0;
+    int32_t count = 0;
 
     for (unsigned int i = 0; i < inboundStreams; i++) {    //12.06.08
         putInDeliveryQ(i);
@@ -1982,8 +1982,8 @@ void SctpAssociation::pushUlp()
               << " pushMessagesLeft=" << state->pushMessagesLeft
               << " restrict=" << restrict
               << " buffered Messages=" << state->bufferedMessages << endl;
-    uint32 i = state->nextRSid;
-    uint64 tempQueuedBytes = 0;
+    uint32_t i = state->nextRSid;
+    uint64_t tempQueuedBytes = 0;
     do {
         auto iter = receiveStreams.find(i);
         SctpReceiveStream *rStream = iter->second;
@@ -2001,7 +2001,7 @@ void SctpAssociation::pushUlp()
 
             // ====== Non-revokably acknowledge chunks of the message ==========
           /*  bool dummy;
-            for (uint32 j = chunk->tsn; j < chunk->tsn + chunk->fragments; j++)
+            for (uint32_t j = chunk->tsn; j < chunk->tsn + chunk->fragments; j++)
                 state->gapList.updateGapList(j, dummy, false);*/
 
             tempQueuedBytes = state->queuedReceivedBytes;
@@ -2012,22 +2012,22 @@ void SctpAssociation::pushUlp()
                 statisticsQueuedReceivedBytes->record(state->queuedReceivedBytes);
                 /* now check, if user has read enough so that window opens up more than one MTU */
                 if ((state->messageAcceptLimit > 0 &&
-                     (int32)state->localMsgRwnd - state->bufferedMessages >= 3 &&
-                     (int32)state->localMsgRwnd - state->bufferedMessages <= 8)
+                     (int32_t)state->localMsgRwnd - state->bufferedMessages >= 3 &&
+                     (int32_t)state->localMsgRwnd - state->bufferedMessages <= 8)
                     ||
                     (state->messageAcceptLimit == 0 &&
-                     (int32)(state->localRwnd - state->queuedReceivedBytes - state->bufferedMessages * state->bytesToAddPerRcvdChunk) >= (int32)(state->swsLimit) &&
-                     (int32)(state->localRwnd - state->queuedReceivedBytes - state->bufferedMessages * state->bytesToAddPerRcvdChunk) <= (int32)(state->swsLimit + state->assocPmtu)))
+                     (int32_t)(state->localRwnd - state->queuedReceivedBytes - state->bufferedMessages * state->bytesToAddPerRcvdChunk) >= (int32_t)(state->swsLimit) &&
+                     (int32_t)(state->localRwnd - state->queuedReceivedBytes - state->bufferedMessages * state->bytesToAddPerRcvdChunk) <= (int32_t)(state->swsLimit + state->assocPmtu)))
                 {
                     state->swsMsgInvoked = false;
                     /* only if the window has opened up more than one MTU we will send a SACK */
                     state->swsAvoidanceInvoked = false;
-                    EV_DETAIL << "pushUlp: Window opens up to " << (int32)state->localRwnd - state->queuedReceivedBytes << " bytes: sending a SACK. SWS Avoidance INACTIVE\n";
+                    EV_DETAIL << "pushUlp: Window opens up to " << (int32_t)state->localRwnd - state->queuedReceivedBytes << " bytes: sending a SACK. SWS Avoidance INACTIVE\n";
 
                     sendSack();
                 }
             }
-            else if ((int32)(state->swsLimit) == 0) {
+            else if ((int32_t)(state->swsLimit) == 0) {
                 sendSack();
             }
             else if ((tempQueuedBytes > state->localRwnd * 3 / 4) && (state->queuedReceivedBytes <= state->localRwnd * 3 / 4)) {
@@ -2162,7 +2162,7 @@ void SctpAssociation::removePath(const L3Address& addr)
     }
 }
 
-bool SctpAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, const bool uBit)
+bool SctpAssociation::makeRoomForTsn(const uint32_t tsn, const uint32_t length, const bool uBit)
 {
     EV_INFO << simTime() << ":\tmakeRoomForTsn:"
             << " tsn=" << tsn
@@ -2174,8 +2174,8 @@ bool SctpAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
     assert(state->disableReneging == false);
 
     // Get the highest TSN of the GapAck blocks.
-    uint32 tryTsn = state->gapList.getHighestTsnReceived();
-    uint32 sum = 0;
+    uint32_t tryTsn = state->gapList.getHighestTsnReceived();
+    uint32_t sum = 0;
     while ((sum < length) &&
            (tryTsn > state->gapList.getCumAckTsn()))
     {
@@ -2188,7 +2188,7 @@ bool SctpAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
             return false;
         }
 
-        const uint32 oldSum = sum;
+        const uint32_t oldSum = sum;
         // ====== Iterate all streams to find chunk with TSN "tryTsn" =========
         for (auto & elem : receiveStreams) {
             SctpReceiveStream *receiveStream = elem.second;
@@ -2240,9 +2240,9 @@ bool SctpAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
     return true;
 }
 
-bool SctpAssociation::tsnIsDuplicate(const uint32 tsn) const
+bool SctpAssociation::tsnIsDuplicate(const uint32_t tsn) const
 {
-    for (std::list<uint32>::const_iterator iterator = state->dupList.begin();
+    for (std::list<uint32_t>::const_iterator iterator = state->dupList.begin();
          iterator != state->dupList.end(); iterator++)
     {
         if ((*iterator) == tsn)
@@ -2308,8 +2308,8 @@ void SctpAssociation::advancePeerTsn()
 }
 
 SctpDataVariables *SctpAssociation::getOutboundDataChunk(const SctpPathVariables *path,
-        int32 availableSpace,
-        int32 availableCwnd)
+        int32_t availableSpace,
+        int32_t availableCwnd)
 {
     /* are there chunks in the transmission queue ? If Yes -> dequeue and return it */
     EV_INFO << "getOutboundDataChunk(" << path->remoteAddress << "):"
@@ -2324,11 +2324,11 @@ SctpDataVariables *SctpAssociation::getOutboundDataChunk(const SctpPathVariables
             if ((chunkHasBeenAcked(chunk) == false) && !chunk->hasBeenAbandoned &&
                 (chunk->getNextDestinationPath() == path))
             {
-                const int32 len = ADD_PADDING(chunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
+                const int32_t len = ADD_PADDING(chunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
                 EV_DETAIL << "getOutboundDataChunk() found chunk " << chunk->tsn
                           << " in the transmission queue, length=" << len << endl;
                 if ((len <= availableSpace) &&
-                    ((int32)chunk->booksize <= availableCwnd))
+                    ((int32_t)chunk->booksize <= availableCwnd))
                 {
                     // T.D. 05.01.2010: The bookkeeping counters may only be decreased when
                     //                        this chunk is actually dequeued. Therefore, the check
@@ -2450,20 +2450,20 @@ void SctpAssociation::fragmentOutboundDataMsgs() {
         }
 
         if (streamQ) {
-            int32 b = ADD_PADDING(check_and_cast<SctpDataMsg *>(streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
+            int32_t b = ADD_PADDING(check_and_cast<SctpDataMsg *>(streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
 
             /* check if chunk found in queue has to be fragmented */
-            if (b > (int32)state->fragPoint + (int32)SCTP_DATA_CHUNK_LENGTH) {
+            if (b > (int32_t)state->fragPoint + (int32_t)SCTP_DATA_CHUNK_LENGTH) {
                 /* START FRAGMENTATION */
                 SctpDataMsg *datMsgQueued = check_and_cast<SctpDataMsg *>(streamQ->pop());
                 cPacket *datMsgQueuedEncMsg = datMsgQueued->getEncapsulatedPacket();
                 SctpDataMsg *datMsgLastFragment = nullptr;
-                uint32 offset = 0;
-                uint32 msgbytes = state->fragPoint;
-                const uint16 fullSizedPackets = (uint16)(datMsgQueued->getByteLength() / msgbytes);
+                uint32_t offset = 0;
+                uint32_t msgbytes = state->fragPoint;
+                const uint16_t fullSizedPackets = (uint16_t)(datMsgQueued->getByteLength() / msgbytes);
                 EV_DETAIL << "Fragmentation: chunk " << &datMsgQueued << " - size = " << datMsgQueued->getByteLength() << endl;
                 EV_DETAIL << assocId << ": number of fullSizedPackets: " << fullSizedPackets << endl;
-                uint16 pcounter = 0;
+                uint16_t pcounter = 0;
 
                 while (datMsgQueued) {
                     /* detemine size of fragment, either max payload or what's left */
@@ -2513,7 +2513,7 @@ void SctpAssociation::fragmentOutboundDataMsgs() {
                         datMsgFragmentSimple->setDataArraySize(msgbytes);
                         datMsgFragmentSimple->setDataLen(msgbytes);
                         /* copy data */
-                        for (uint32 i = offset; i < offset + msgbytes; i++) {
+                        for (uint32_t i = offset; i < offset + msgbytes; i++) {
                             datMsgFragmentSimple->setData(i - offset, datMsgQueuedSimple->getData(i));
                         }
                     }
@@ -2565,12 +2565,12 @@ void SctpAssociation::fragmentOutboundDataMsgs() {
 }
 
 SctpDataMsg *SctpAssociation::dequeueOutboundDataMsg(SctpPathVariables *path,
-        int32 availableSpace,
-        int32 availableCwnd)
+        int32_t availableSpace,
+        int32_t availableCwnd)
 {
     SctpDataMsg *datMsg = nullptr;
     cPacketQueue *streamQ = nullptr;
-    int32 nextStream = -1;
+    int32_t nextStream = -1;
 
     EV_INFO << "dequeueOutboundDataMsg: " << availableSpace << " bytes left to be sent" << endl;
 
@@ -2600,10 +2600,10 @@ SctpDataMsg *SctpAssociation::dequeueOutboundDataMsg(SctpPathVariables *path,
     }
 
     if (streamQ) {
-        int32 b = ADD_PADDING(check_and_cast<SctpDataMsg *>(streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
+        int32_t b = ADD_PADDING(check_and_cast<SctpDataMsg *>(streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
 
         if ((b <= availableSpace) &&
-            ((int32)check_and_cast<SctpDataMsg *>(streamQ->front())->getBooksize() <= availableCwnd))
+            ((int32_t)check_and_cast<SctpDataMsg *>(streamQ->front())->getBooksize() <= availableCwnd))
         {
             datMsg = check_and_cast<SctpDataMsg *>(streamQ->pop());
             sendQueue->record(streamQ->getLength());
@@ -2632,9 +2632,9 @@ SctpDataMsg *SctpAssociation::dequeueOutboundDataMsg(SctpPathVariables *path,
     return datMsg;
 }
 
-bool SctpAssociation::nextChunkFitsIntoPacket(SctpPathVariables *path, int32 bytes)
+bool SctpAssociation::nextChunkFitsIntoPacket(SctpPathVariables *path, int32_t bytes)
 {
-    int32 nextStream = -1;
+    int32_t nextStream = -1;
     SctpSendStream *stream;
 
     /* Only change stream if we don't have to finish a fragmented message */
@@ -2657,12 +2657,12 @@ bool SctpAssociation::nextChunkFitsIntoPacket(SctpPathVariables *path, int32 byt
             streamQ = stream->getStreamQ();
 
         if (streamQ) {
-            int32 b = ADD_PADDING(check_and_cast<SctpDataMsg *>(streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
+            int32_t b = ADD_PADDING(check_and_cast<SctpDataMsg *>(streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
 
             /* Check if next message would be fragmented */
-            if (b > (int32)state->fragPoint + (int32)SCTP_DATA_CHUNK_LENGTH) {
+            if (b > (int32_t)state->fragPoint + (int32_t)SCTP_DATA_CHUNK_LENGTH) {
                 /* Test if fragment fits */
-                if (bytes >= (int32)state->fragPoint)
+                if (bytes >= (int32_t)state->fragPoint)
                     return true;
                 else
                     return false;
@@ -2681,7 +2681,7 @@ bool SctpAssociation::nextChunkFitsIntoPacket(SctpPathVariables *path, int32 byt
 
 SctpPathVariables *SctpAssociation::getNextPath(const SctpPathVariables *oldPath) const
 {
-    int32 hit = 0;
+    int32_t hit = 0;
     if (sctpPathMap.size() > 1) {
         for (const auto & elem : sctpPathMap) {
             SctpPathVariables *newPath = elem.second;
@@ -2760,7 +2760,7 @@ void SctpAssociation::pmStartPathManagement()
 {
     SctpPathVariables *path;
     const NetworkInterface *rtie;
-    int32 i = 0;
+    int32_t i = 0;
     /* populate path structures !!! */
     /* set a high start value...this is appropriately decreased later (below) */
     state->assocPmtu = state->localRwnd;
@@ -2806,9 +2806,9 @@ void SctpAssociation::pmStartPathManagement()
     }
 }
 
-int32 SctpAssociation::getOutstandingBytes() const
+int32_t SctpAssociation::getOutstandingBytes() const
 {
-    int32 osb = 0;
+    int32_t osb = 0;
     for (const auto & elem : sctpPathMap) {
         osb += elem.second->outstandingBytes;
     }
@@ -2890,9 +2890,9 @@ void SctpAssociation::removeFirstChunk(SctpHeader *sctpmsg)
 void SctpAssociation::disposeOf(SctpHeader *sctpmsg)
 {
     SctpChunk *chunk;
-    uint32 numberOfChunks = sctpmsg->getSctpChunksArraySize();
+    uint32_t numberOfChunks = sctpmsg->getSctpChunksArraySize();
     if (numberOfChunks > 0)
-        for (uint32 i = 0; i < numberOfChunks; i++) {
+        for (uint32_t i = 0; i < numberOfChunks; i++) {
             chunk = sctpmsg->removeFirstChunk();
          /*   if (chunk->getSctpChunkType() == DATA) {
                 delete chunk->Chunk::peek<SctpSimpleMessage>(Chunk::BackwardIterator(B(0)));
@@ -2958,7 +2958,7 @@ int SctpAssociation::getAddressLevel(const L3Address& addr)
     throw cRuntimeError("Unknown address type: %d", (int)(addr.getType()));
 }
 
-void SctpAssociation::putInTransmissionQ(const uint32 tsn, SctpDataVariables *chunk)
+void SctpAssociation::putInTransmissionQ(const uint32_t tsn, SctpDataVariables *chunk)
 {
     if (chunk->countsAsOutstanding) {
         decreaseOutstandingBytes(chunk);

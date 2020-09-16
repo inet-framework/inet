@@ -63,7 +63,7 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, 
     cMessage *timeMsg;
     cMessage *stopTimer;
     cMessage *primaryChangeTimer;
-    int64 bufferSize;
+    int64_t bufferSize;
     bool timer;
     bool sendAllowed;
     const char *stateNameStr;

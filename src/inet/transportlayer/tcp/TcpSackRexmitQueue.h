@@ -36,8 +36,8 @@ class INET_API TcpSackRexmitQueue
 
     struct Region
     {
-        uint32 beginSeqNum;
-        uint32 endSeqNum;
+        uint32_t beginSeqNum;
+        uint32_t endSeqNum;
         bool sacked;    // indicates whether region has already been sacked by data receiver
         bool rexmitted;    // indicates whether region has already been retransmitted by data sender
     };
@@ -45,8 +45,8 @@ class INET_API TcpSackRexmitQueue
     typedef std::list<Region> RexmitQueue;
     RexmitQueue rexmitQueue;    // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
 
-    uint32 begin;    // 1st sequence number stored
-    uint32 end;    // last sequence number stored + 1
+    uint32_t begin;    // 1st sequence number stored
+    uint32_t end;    // last sequence number stored + 1
 
   public:
     /**
@@ -72,7 +72,7 @@ class INET_API TcpSackRexmitQueue
      * init() may be called more than once; every call flushes the existing contents
      * of the queue.
      */
-    virtual void init(uint32 seqNum);
+    virtual void init(uint32_t seqNum);
 
     /**
      * Returns a string for debug purposes.
@@ -87,24 +87,24 @@ class INET_API TcpSackRexmitQueue
     /**
      * Returns the sequence number of the first byte stored in the buffer.
      */
-    virtual uint32 getBufferStartSeq() const { return begin; }
+    virtual uint32_t getBufferStartSeq() const { return begin; }
 
     /**
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */
-    virtual uint32 getBufferEndSeq() const { return end; }
+    virtual uint32_t getBufferEndSeq() const { return end; }
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
      * transmitted and ACKed, so they can be removed from the queue.
      */
-    virtual void discardUpTo(uint32 seqNum);
+    virtual void discardUpTo(uint32_t seqNum);
 
     /**
      * Inserts sent data to the rexmit queue.
      */
-    virtual void enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum);
+    virtual void enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum);
 
     /**
      * Called when data sender received selective acknowledgments.
@@ -112,34 +112,34 @@ class INET_API TcpSackRexmitQueue
      * so they can be skipped if retransmitting segments as long as
      * REXMIT timer did not expired.
      */
-    virtual void setSackedBit(uint32 fromSeqNum, uint32 toSeqNum);
+    virtual void setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum);
 
     /**
      * Returns SackedBit value of seqNum.
      */
-    virtual bool getSackedBit(uint32 seqNum) const;
+    virtual bool getSackedBit(uint32_t seqNum) const;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() const { return rexmitQueue.size(); }
+    virtual uint32_t getQueueLength() const { return rexmitQueue.size(); }
 
     /**
      * Returns the highest sequence number sacked by data receiver.
      */
-    virtual uint32 getHighestSackedSeqNum() const;
+    virtual uint32_t getHighestSackedSeqNum() const;
 
     /**
      * Returns the highest sequence number rexmitted by data sender.
      */
-    virtual uint32 getHighestRexmittedSeqNum() const;
+    virtual uint32_t getHighestRexmittedSeqNum() const;
 
     /**
      * Checks rexmit queue for sacked of rexmitted segments and returns a certain offset
      * (contiguous sacked or rexmitted region) to forward snd->nxt.
      * It is called before retransmitting data.
      */
-    virtual uint32 checkRexmitQueueForSackedOrRexmittedSegments(uint32 fromSeq) const;
+    virtual uint32_t checkRexmitQueueForSackedOrRexmittedSegments(uint32_t fromSeq) const;
 
     /**
      * Called when REXMIT timer expired.
@@ -156,23 +156,23 @@ class INET_API TcpSackRexmitQueue
     /**
      * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.
      */
-    virtual uint32 getTotalAmountOfSackedBytes() const;
+    virtual uint32_t getTotalAmountOfSackedBytes() const;
 
     /**
      * Returns amount of sacked bytes above seqNum.
      */
-    virtual uint32 getAmountOfSackedBytes(uint32 seqNum) const;
+    virtual uint32_t getAmountOfSackedBytes(uint32_t seqNum) const;
 
     /**
      * Returns the number of discontiguous sacked regions (SACKed sequences) above seqNum.
      */
-    virtual uint32 getNumOfDiscontiguousSacks(uint32 seqNum) const;
+    virtual uint32_t getNumOfDiscontiguousSacks(uint32_t seqNum) const;
 
     /*
      * Returns nothing but checks length, sacked bit and rexmitted bit of a given
      * SACK block starting at seqNum.
      */
-    virtual void checkSackBlock(uint32 seqNum, uint32& length, bool& sacked, bool& rexmitted) const;
+    virtual void checkSackBlock(uint32_t seqNum, uint32_t& length, bool& sacked, bool& rexmitted) const;
 
   protected:
     /*

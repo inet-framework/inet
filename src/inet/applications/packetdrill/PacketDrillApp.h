@@ -52,21 +52,21 @@ class INET_API PacketDrillApp : public ApplicationBase,
 
     int getLocalPort() const { return localPort; }
     int getRemotePort() const { return remotePort; }
-    uint32 getIdInbound() const { return idInbound; }
-    uint32 getIdOutbound() const { return idOutbound; }
-    uint32 getPeerTS() { return peerTS; }
+    uint32_t getIdInbound() const { return idInbound; }
+    uint32_t getIdOutbound() const { return idOutbound; }
+    uint32_t getPeerTS() { return peerTS; }
     void increaseIdInbound() { idInbound++; }
     void increaseIdOutbound() { idOutbound++; }
     const L3Address getLocalAddress() { return localAddress; }
     const L3Address getRemoteAddress() { return remoteAddress; }
-    uint32 getPeerVTag() { return peerVTag; }
-    uint32 getLocalVTag() { return localVTag; }
-    uint32 getPeerCumTsn() { return peerCumTsn; }
-    uint32 getInitPeerTsn() { return initPeerTsn; }
+    uint32_t getPeerVTag() { return peerVTag; }
+    uint32_t getLocalVTag() { return localVTag; }
+    uint32_t getPeerCumTsn() { return peerCumTsn; }
+    uint32_t getInitPeerTsn() { return initPeerTsn; }
     simtime_t getPeerHeartbeatTime() { return peerHeartbeatTime; }
-    void setSeqNumMap(uint32 ownNum, uint32 liveNum) { seqNumMap[ownNum] = liveNum; }
-    uint32 getSeqNumMap(uint32 ownNum) { return seqNumMap[ownNum]; }
-    bool findSeqNumMap(uint32 num);
+    void setSeqNumMap(uint32_t ownNum, uint32_t liveNum) { seqNumMap[ownNum] = liveNum; }
+    uint32_t getSeqNumMap(uint32_t ownNum) { return seqNumMap[ownNum]; }
+    bool findSeqNumMap(uint32_t num);
     CrcMode getCrcMode() { return crcMode; }
 
   protected:
@@ -106,26 +106,26 @@ class INET_API PacketDrillApp : public ApplicationBase,
     cPacketQueue *outboundPackets = nullptr;
     simtime_t simStartTime;
     simtime_t simRelTime;
-    uint32 expectedMessageSize = 0;
-    uint32 relSequenceOut = 0;
-    uint32 peerTS = 0;
-    uint16 peerWindow = 0;
-    uint16 peerInStreams = 0;
-    uint16 peerOutStreams = 0;
+    uint32_t expectedMessageSize = 0;
+    uint32_t relSequenceOut = 0;
+    uint32_t peerTS = 0;
+    uint16_t peerWindow = 0;
+    uint16_t peerInStreams = 0;
+    uint16_t peerOutStreams = 0;
     sctp::SctpCookie *peerCookie = nullptr;
-    uint16 peerCookieLength = 0;
-    uint32 initPeerTsn = 0;
-    uint32 initLocalTsn = 0;
-    uint32 localDiffTsn = 0;
-    uint32 peerCumTsn = 0;
-    uint32 localCumTsn = 0;
-    uint32 eventCounter = 0;
-    uint32 numEvents = 0;
-    uint32 idInbound = 0;
-    uint32 idOutbound = 0;
-    uint32 localVTag = 0;
-    uint32 peerVTag = 0;
-    std::map<uint32, uint32> seqNumMap;
+    uint16_t peerCookieLength = 0;
+    uint32_t initPeerTsn = 0;
+    uint32_t initLocalTsn = 0;
+    uint32_t localDiffTsn = 0;
+    uint32_t peerCumTsn = 0;
+    uint32_t localCumTsn = 0;
+    uint32_t eventCounter = 0;
+    uint32_t numEvents = 0;
+    uint32_t idInbound = 0;
+    uint32_t idOutbound = 0;
+    uint32_t localVTag = 0;
+    uint32_t peerVTag = 0;
+    std::map<uint32_t, uint32_t> seqNumMap;
     simtime_t peerHeartbeatTime;
     cMessage *eventTimer = nullptr;
     CrcMode crcMode = CRC_MODE_UNDEFINED;

@@ -25,7 +25,7 @@ namespace inet {
 BitVector::BitVector()
 {
     size = 0;
-    bytes.push_back(uint8(0));
+    bytes.push_back(uint8_t(0));
 }
 
 BitVector::BitVector(const char* bits)
@@ -63,10 +63,10 @@ BitVector::BitVector(unsigned int bits, unsigned int size)
 void BitVector::setBit(int pos, bool value)
 {
     while (containerSize() <= pos)
-        bytes.push_back(uint8(0));
+        bytes.push_back(uint8_t(0));
     if (pos + 1 > size)
         size = pos + 1;
-    uint8& field = bytes[pos / UINT8_LENGTH];
+    uint8_t& field = bytes[pos / UINT8_LENGTH];
     if (value)
         field |= 1 << (pos % UINT8_LENGTH);
     else
@@ -77,7 +77,7 @@ void BitVector::toggleBit(int pos)
 {
     if (pos >= size)
         throw cRuntimeError("Out of range with bit position %d", pos);
-    uint8& field = bytes[pos / UINT8_LENGTH];
+    uint8_t& field = bytes[pos / UINT8_LENGTH];
     field ^= 1 << (pos % UINT8_LENGTH);
 }
 
@@ -85,7 +85,7 @@ bool BitVector::getBit(int pos) const
 {
     if (pos >= size)
         throw cRuntimeError("Out of range with bit position %d", pos);
-    uint8 field = bytes[pos / UINT8_LENGTH];
+    uint8_t field = bytes[pos / UINT8_LENGTH];
     return field & (1 << (pos % UINT8_LENGTH));
 }
 

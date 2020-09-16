@@ -178,7 +178,7 @@ void TcpBaseAlg::established(bool active)
     // lost, the initial window used by a sender after a correctly
     // transmitted SYN MUST be one segment consisting of MSS bytes."
     if (state->increased_IW_enabled && state->syn_rexmit_count == 0) {
-        state->snd_cwnd = std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380));
+        state->snd_cwnd = std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32_t)4380));
         EV_DETAIL << "Enabled Increased Initial Window, CWND is set to " << state->snd_cwnd << "\n";
     }
     // RFC 2001, page 3:
@@ -395,13 +395,13 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     conn->emit(rtoSignal, rto);
 }
 
-void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
+void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32_t echoedTS)
 {
     ASSERT(state->ts_enabled);
 
-    // Note: The TS option is using uint32 values (ms precision) therefore we convert the current simTime also to a uint32 value (ms precision)
+    // Note: The TS option is using uint32_t values (ms precision) therefore we convert the current simTime also to a uint32_t value (ms precision)
     // and then convert back to simtime_t to use rttMeasurementComplete() to update srtt and rttvar
-    uint32 now = conn->convertSimtimeToTS(simTime());
+    uint32_t now = conn->convertSimtimeToTS(simTime());
     simtime_t tSent = conn->convertTSToSimtime(echoedTS);
     simtime_t tAcked = conn->convertTSToSimtime(now);
     rttMeasurementComplete(tSent, tAcked);
@@ -425,7 +425,7 @@ bool TcpBaseAlg::sendData(bool sendCommandInvoked)
         if ((simTime() - state->time_last_data_sent) > state->rexmit_timeout) {
             // RFC 5681, page 11: "For the purposes of this standard, we define RW = min(IW,cwnd)."
             if (state->increased_IW_enabled)
-                state->snd_cwnd = std::min(std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380)), state->snd_cwnd);
+                state->snd_cwnd = std::min(std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32_t)4380)), state->snd_cwnd);
             else
                 state->snd_cwnd = state->snd_mss;
 
@@ -492,7 +492,7 @@ void TcpBaseAlg::receiveSeqChanged()
     }
 }
 
-void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
+void TcpBaseAlg::receivedDataAck(uint32_t firstSeqAcked)
 {
     if (!state->ts_enabled) {
         // if round-trip time measurement is running, check if rtseq has been acked
@@ -591,7 +591,7 @@ void TcpBaseAlg::receivedDuplicateAck()
     //
 }
 
-void TcpBaseAlg::receivedAckForDataNotYetSent(uint32 seq)
+void TcpBaseAlg::receivedAckForDataNotYetSent(uint32_t seq)
 {
     // Note: In this case no immediate ACK will be send because not mentioned
     // in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
@@ -612,7 +612,7 @@ void TcpBaseAlg::ackSent()
         cancelEvent(delayedAckTimer);
 }
 
-void TcpBaseAlg::dataSent(uint32 fromseq)
+void TcpBaseAlg::dataSent(uint32_t fromseq)
 {
     // if retransmission timer not running, schedule it
     if (!rexmitTimer->isScheduled()) {
@@ -633,7 +633,7 @@ void TcpBaseAlg::dataSent(uint32 fromseq)
     state->time_last_data_sent = simTime();
 }
 
-void TcpBaseAlg::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+void TcpBaseAlg::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
 }
 

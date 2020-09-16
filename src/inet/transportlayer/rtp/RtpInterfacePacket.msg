@@ -61,7 +61,7 @@ class RtpControlInfo extends cObject
 // base class
 class RtpSessionControlInfo extends RtpControlInfo
 {
-    uint32 ssrc;
+    uint32_t ssrc;
 };
 
 
@@ -98,7 +98,7 @@ class RtpCiSenderStatus extends RtpSessionControlInfo
     type = RTP_IFP_SENDER_STATUS;
     // from ~RtpSenderStatusMessage:
     RtpSenderStatus status;
-    uint32 timeStamp;
+    uint32_t timeStamp;
 };
 
 // App to ~Rtp

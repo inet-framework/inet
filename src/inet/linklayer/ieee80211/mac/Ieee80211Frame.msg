@@ -220,7 +220,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MacAddress address4;    // optional field, exists when toDS and fromDS are true
     AckPolicy ackPolicy = NORMAL_ACK;
-    uint8 tid;              // optional field, exists when type == ST_DATA_WITH_QOS
+    uint8_t tid;              // optional field, exists when type == ST_DATA_WITH_QOS
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
 
@@ -230,7 +230,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //    type = ST_DATA_WITH_QOS;
 //    chunkLength = DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_PART_LENGTH;
 //    AckPolicy ackPolicy = NORMAL_ACK; //FIXME in real life this is part of the optional qos field above...
-//    uint8 tid;
+//    uint8_t tid;
 //    // TODO: other QoS control field parts
 //}
 

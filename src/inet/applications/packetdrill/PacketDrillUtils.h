@@ -35,7 +35,7 @@ namespace inet {
  * integer values.
  */
 struct int_symbol {
-    int64 value;
+    int64_t value;
     const char *name;
 };
 
@@ -206,13 +206,13 @@ struct errno_spec {
 struct int_symbol *platform_symbols(void);
 
 /* Convert microseconds to a floating-point seconds value. */
-static inline double usecs_to_secs(int64 usecs) { return ((double)usecs) / 1.0e6; };
+static inline double usecs_to_secs(int64_t usecs) { return ((double)usecs) / 1.0e6; };
 
-static inline bool is_valid_u8(int64 x) { return (x >= 0) && (x <= UCHAR_MAX); };
+static inline bool is_valid_u8(int64_t x) { return (x >= 0) && (x <= UCHAR_MAX); };
 
-static inline bool is_valid_u16(int64 x) { return (x >= 0) && (x <= USHRT_MAX); };
+static inline bool is_valid_u16(int64_t x) { return (x >= 0) && (x <= USHRT_MAX); };
 
-static inline bool is_valid_u32(int64 x) { return (x >= 0) && (x <= UINT_MAX); };
+static inline bool is_valid_u32(int64_t x) { return (x >= 0) && (x <= UINT_MAX); };
 
 
 #define ADDR_STR_LEN 66
@@ -300,7 +300,7 @@ struct syscall_spec {
     PacketDrillExpression *result;        /* expected result from call */
     struct errno_spec *error;    /* errno symbol or NULL */
     char *note;                  /* extra note from strace */
-    int64 end_usecs;             /* finish time, if it blocks */
+    int64_t end_usecs;             /* finish time, if it blocks */
 };
 
 /* A shell command line to execute using system(3) */
@@ -503,13 +503,13 @@ class INET_API PacketDrillEvent : public cObject
         int getLineNumber() const { return lineNumber; };
         void setEventNumber(int number) { eventNumber = number; };
         int getEventNumber() const { return eventNumber; };
-        void setEventTime(int64 usecs) { eventTime = SimTime(usecs, SIMTIME_US); };
+        void setEventTime(int64_t usecs) { eventTime = SimTime(usecs, SIMTIME_US); };
         void setEventTime(simtime_t time) { eventTime = time; };
         simtime_t getEventTime() const { return eventTime; };
-        void setEventTimeEnd(int64 usecs) { eventTimeEnd = SimTime(usecs, SIMTIME_US); };
+        void setEventTimeEnd(int64_t usecs) { eventTimeEnd = SimTime(usecs, SIMTIME_US); };
         void setEventTimeEnd(simtime_t time) { eventTimeEnd = time; };
         simtime_t getEventTimeEnd() const { return eventTimeEnd; };
-        void setEventOffset(int64 usecs) { eventOffset = SimTime(usecs, SIMTIME_US); };
+        void setEventOffset(int64_t usecs) { eventOffset = SimTime(usecs, SIMTIME_US); };
         void setEventOffset(simtime_t time) { eventOffset = time; };
         simtime_t getEventOffset() const { return eventOffset; };
         void setTimeType(enum eventTime_t ttype) { timeType = ttype; };
@@ -534,7 +534,7 @@ class INET_API PacketDrillExpression : public cObject
     private:
         enum expression_t type;
         union {
-            int64 num;
+            int64_t num;
             char *string;
             struct binary_expression *binary;
             struct sctp_rtoinfo_expr *sctp_rtoinfo;
@@ -555,8 +555,8 @@ class INET_API PacketDrillExpression : public cObject
     public:
         void setType(enum expression_t t) { type = t; };
         enum expression_t getType() const { return type; };
-        void setNum(int64 n) { value.num = n; };
-        int64 getNum() const { return value.num; };
+        void setNum(int64_t n) { value.num = n; };
+        int64_t getNum() const { return value.num; };
         void setString(char* str) { value.string = str; };
         const char* getString() const { return value.string; };
         void setFormat(const char* format_) { format = format_; };
@@ -589,11 +589,11 @@ class INET_API PacketDrillExpression : public cObject
 
 
         int unescapeCstringExpression(const char *input_string, char **error);
-        int getS32(int32 *value, char **error);
-        int getU16(uint16 *value, char **error);
-        int getU32(uint32 *value, char **error);
-        int symbolToInt(const char *input_symbol, int64 *output_integer, char **error);
-        bool lookupIntSymbol(const char *input_symbol, int64 *output_integer, struct int_symbol *symbols);
+        int getS32(int32_t *value, char **error);
+        int getU16(uint16_t *value, char **error);
+        int getU32(uint32_t *value, char **error);
+        int symbolToInt(const char *input_symbol, int64_t *output_integer, char **error);
+        bool lookupIntSymbol(const char *input_symbol, int64_t *output_integer, struct int_symbol *symbols);
 };
 
 
@@ -627,23 +627,23 @@ class INET_API PacketDrillStruct: public cObject
 {
     public:
         PacketDrillStruct();
-        PacketDrillStruct(int64 v1, int64 v2);
-        PacketDrillStruct(int64 v1, int64 v2, int32 v3, int32 v4, cQueue *streams);
+        PacketDrillStruct(int64_t v1, int64_t v2);
+        PacketDrillStruct(int64_t v1, int64_t v2, int32_t v3, int32_t v4, cQueue *streams);
 
-        int64 getValue1() const { return value1; };
-        void setValue1(uint64 value) { value1 = value; };
-        int64 getValue2() const { return value2; };
-        void setValue2(uint64 value) { value2 = value; };
-        int32 getValue3() const { return value3; }
-        int32 getValue4() const { return value4; }
+        int64_t getValue1() const { return value1; };
+        void setValue1(uint64_t value) { value1 = value; };
+        int64_t getValue2() const { return value2; };
+        void setValue2(uint64_t value) { value2 = value; };
+        int32_t getValue3() const { return value3; }
+        int32_t getValue4() const { return value4; }
         cQueue *getStreams() { return streamNumbers; };
         virtual PacketDrillStruct *dup() const { return new PacketDrillStruct(*this); };
 
     private:
-        int64 value1;
-        int64 value2;
-        int32 value3;
-        int32 value4;
+        int64_t value1;
+        int64_t value2;
+        int32_t value3;
+        int32_t value4;
         cQueue *streamNumbers = nullptr;
 };
 
@@ -668,89 +668,89 @@ class INET_API PacketDrillBytes: public cObject
 {
     public:
         PacketDrillBytes();
-        PacketDrillBytes(uint8 byte);
+        PacketDrillBytes(uint8_t byte);
 
-        void appendByte(uint8 byte);
-        uint32 getListLength() const { return listLength; };
+        void appendByte(uint8_t byte);
+        uint32_t getListLength() const { return listLength; };
         ByteVector* getByteList() { return &byteList; };
 
     private:
         std::vector<uint8_t> byteList;
-        uint32 listLength;
+        uint32_t listLength;
 };
 
 class INET_API PacketDrillTcpOption : public cObject
 {
     public:
-        PacketDrillTcpOption(uint16 kind_, uint16 length_);
+        PacketDrillTcpOption(uint16_t kind_, uint16_t length_);
 
     private:
-        uint16 kind;
-        uint16 length;
-        uint16 mss; /* in network order */
+        uint16_t kind;
+        uint16_t length;
+        uint16_t mss; /* in network order */
         struct
         {
-                uint32 val; /* in network order */
-                uint32 ecr; /* in network order */
+                uint32_t val; /* in network order */
+                uint32_t ecr; /* in network order */
         } timeStamp;
         cQueue *blockList;
-        uint8 windowScale;
-        uint16 blockCount;
+        uint8_t windowScale;
+        uint16_t blockCount;
 
     public:
-        uint16 getKind() { return kind; };
-        uint16 getLength() { return length; };
-        void setLength(uint16 len) {length = len;};
-        uint16 getMss() { return mss; };
-        void setMss(uint16 mss_) { mss = mss_; };
-        uint16 getWindowScale() { return windowScale; };
-        void setWindowScale(uint16 ws_) { windowScale = ws_; };
-        uint32 getVal() { return timeStamp.val; };
-        void setVal(uint32 val_) { timeStamp.val = val_; };
-        uint32 getEcr() { return timeStamp.ecr; };
-        void setEcr(uint32 ecr_) { timeStamp.ecr = ecr_; };
+        uint16_t getKind() { return kind; };
+        uint16_t getLength() { return length; };
+        void setLength(uint16_t len) {length = len;};
+        uint16_t getMss() { return mss; };
+        void setMss(uint16_t mss_) { mss = mss_; };
+        uint16_t getWindowScale() { return windowScale; };
+        void setWindowScale(uint16_t ws_) { windowScale = ws_; };
+        uint32_t getVal() { return timeStamp.val; };
+        void setVal(uint32_t val_) { timeStamp.val = val_; };
+        uint32_t getEcr() { return timeStamp.ecr; };
+        void setEcr(uint32_t ecr_) { timeStamp.ecr = ecr_; };
         cQueue *getBlockList() { return blockList; };
         void setBlockList(cQueue *bList) { blockList = bList; };
-        uint16 getBlockCount() { return blockCount; };
+        uint16_t getBlockCount() { return blockCount; };
         void increaseBlockCount() { blockCount++; };
 };
 
 class INET_API PacketDrillSctpChunk : public cObject
 {
     public:
-        PacketDrillSctpChunk(uint8 type_, sctp::SctpChunk *sctpChunk);
+        PacketDrillSctpChunk(uint8_t type_, sctp::SctpChunk *sctpChunk);
 
     private:
-        uint8 type;
+        uint8_t type;
         sctp::SctpChunk *chunk;
 
     public:
-        uint8 getType() { return type; };
+        uint8_t getType() { return type; };
         sctp::SctpChunk *getChunk() { return chunk; };
 };
 
 class INET_API PacketDrillSctpParameter : public cObject
 {
     public:
-        PacketDrillSctpParameter(uint16 type_, int16 len_, void* content_);
+        PacketDrillSctpParameter(uint16_t type_, int16_t len_, void* content_);
         ~PacketDrillSctpParameter();
 
     private:
-        int32 parameterValue;
+        int32_t parameterValue;
         cQueue* parameterList;
-        int16 parameterLength;
+        int16_t parameterLength;
         ByteVector *bytearray;
-        uint32 flags;
-        uint16 type;
+        uint32_t flags;
+        uint16_t type;
         void *content;
 
     public:
-        int32 getValue() const { return parameterValue; };
+        int32_t getValue() const { return parameterValue; };
         cQueue* getList() { return parameterList; };
-        uint32 getFlags() const { return flags; };
-        void setFlags(uint32 flgs_) { flags = flgs_; };
-        int16 getLength() const { return parameterLength; };
-        uint16 getType() const { return type; };
+        uint32_t getFlags() const { return flags; };
+        void setFlags(uint32_t flgs_) { flags = flgs_; };
+        int16_t getLength() const { return parameterLength; };
+        uint16_t getType() const { return type; };
         ByteVector *getByteList() { return bytearray; };
         void setByteArrayPointer(ByteVector *ptr) { bytearray = ptr; };
         void *getContent() { return content; };

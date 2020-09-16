@@ -37,13 +37,13 @@ class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
-    uint32 v_recoverypoint;
+    uint32_t v_recoverypoint;
     simtime_t v_cwnd_changed;    // last time cwnd changes because of a rtx.
 
     simtime_t v_baseRTT;
     simtime_t v_sumRTT;    // sum of rtt's measured within one RTT
     int v_cntRTT;    // # of rtt's measured within one RTT
-    uint32 v_begseq;    // register next pkt to be sent,for rtt calculation in receivedDataAck
+    uint32_t v_begseq;    // register next pkt to be sent,for rtt calculation in receivedDataAck
     simtime_t v_begtime;    // register time for rtt calculation
 
     simtime_t v_rtt_timeout;    // vegas fine-grained timeout
@@ -52,12 +52,12 @@ class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
 
     TcpSegmentTransmitInfoList regions;
 
-    uint32 ssthresh;    ///< slow start threshold
+    uint32_t ssthresh;    ///< slow start threshold
 
     bool v_inc_flag;    // for slow start: "exponential growth only every other RTT"
     bool v_incr_ss;    // to control no incr. cwnd if during slowstart ssthresh has been exceeded before the rtt is over
-    int32 v_incr;    // incr/decr
-    uint32 v_worried;    // pkts a to retransmit due to vegas fine-grained timeout
+    int32_t v_incr;    // incr/decr
+    uint32_t v_worried;    // pkts a to retransmit due to vegas fine-grained timeout
 };
 
 class INET_API TcpVegas : public TcpBaseAlg
@@ -82,15 +82,15 @@ class INET_API TcpVegas : public TcpBaseAlg
     TcpVegas();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32 firstSeqAcked) override;
+    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck() override;
 
     /** Called after we send data */
-    virtual void dataSent(uint32 fromseq) override;
+    virtual void dataSent(uint32_t fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
+    virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) override;
 };
 
 } // namespace tcp

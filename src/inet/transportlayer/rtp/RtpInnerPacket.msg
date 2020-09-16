@@ -81,7 +81,7 @@ packet RtpInnerPacket
     int port = PORT_UNDEF;
 
     // The SSRC identifier
-    uint32 ssrc;
+    uint32_t ssrc;
 
     // The payload type
     int payloadType;
@@ -136,20 +136,20 @@ cplusplus(RtpInnerPacket) {{
      * for incoming messages from other session participants. It informs the rtp
      * module which later informs the rtp application about the ssrc identifier
      */
-    virtual void setRtcpInitializedPkt(uint32 ssrc);
+    virtual void setRtcpInitializedPkt(uint32_t ssrc);
 
-    virtual void setCreateSenderModulePkt(uint32 ssrc, int payloadType, const char *fileName);
-    virtual void setSenderModuleCreatedPkt(uint32 ssrc);
+    virtual void setCreateSenderModulePkt(uint32_t ssrc, int payloadType, const char *fileName);
+    virtual void setSenderModuleCreatedPkt(uint32_t ssrc);
 
-    virtual void setDeleteSenderModulePkt(uint32 ssrc);
-    virtual void setSenderModuleDeletedPkt(uint32 ssrc);
+    virtual void setDeleteSenderModulePkt(uint32_t ssrc);
+    virtual void setSenderModuleDeletedPkt(uint32_t ssrc);
 
-    virtual void setInitializeSenderModulePkt(uint32 ssrc, const char *fileName, int mtu);
-    virtual void setSenderModuleInitializedPkt(uint32 ssrc, int payloadType, int clockRate,
+    virtual void setInitializeSenderModulePkt(uint32_t ssrc, const char *fileName, int mtu);
+    virtual void setSenderModuleInitializedPkt(uint32_t ssrc, int payloadType, int clockRate,
             int timeStampBase, int sequenceNumberBase);
 
-    virtual void setSenderModuleControlPkt(uint32 ssrc, RtpSenderControlMessage *msg);
-    virtual void setSenderModuleStatusPkt(uint32 ssrc, RtpSenderStatusMessage *msg);
+    virtual void setSenderModuleControlPkt(uint32_t ssrc, RtpSenderControlMessage *msg);
+    virtual void setSenderModuleStatusPkt(uint32_t ssrc, RtpSenderStatusMessage *msg);
 
     /**
      * Called by the rtp module to inform the rtcp module that the session

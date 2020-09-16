@@ -27,7 +27,7 @@ TcpTahoeRenoFamilyStateVariables::TcpTahoeRenoFamilyStateVariables()
 
 }
 
-void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32 newLimit){
+void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32_t newLimit){
     // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
     // to the size of the largest possible advertised window) -> defined by sendQueueLimit
     sendQueueLimit = newLimit;

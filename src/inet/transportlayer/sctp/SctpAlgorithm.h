@@ -69,15 +69,15 @@ class INET_API SctpAlgorithm : public cObject
 
     virtual void sendCommandInvoked(SctpPathVariables *path) = 0;
 
-    virtual void receivedDataAck(uint32 firstSeqAcked) = 0;
+    virtual void receivedDataAck(uint32_t firstSeqAcked) = 0;
 
     virtual void receivedDuplicateAck() = 0;
 
-    virtual void receivedAckForDataNotYetSent(uint32 seq) = 0;
+    virtual void receivedAckForDataNotYetSent(uint32_t seq) = 0;
 
     virtual void sackSent() = 0;
 
-    virtual void dataSent(uint32 fromseq) = 0;
+    virtual void dataSent(uint32_t fromseq) = 0;
 };
 
 } // namespace sctp

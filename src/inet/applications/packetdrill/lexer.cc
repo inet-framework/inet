@@ -1315,7 +1315,7 @@ static char *quoted(const char *s) {
 
 
 /* Convert a hex string prefixed by "0x" to an integer value. */
-static int64 hextol(const char *s) {
+static int64_t hextol(const char *s) {
     return strtol(yytext + 2, NULL, 16);
 }
 

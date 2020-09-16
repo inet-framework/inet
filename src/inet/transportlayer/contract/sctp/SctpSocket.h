@@ -92,7 +92,7 @@ class INET_API SctpSocket : public ISocket
 
   protected:
     int assocId;
-    static int32 nextAssocId;
+    static int32_t nextAssocId;
     int sockstate;
     bool oneToOne;
     bool appLimited;
@@ -152,7 +152,7 @@ class INET_API SctpSocket : public ISocket
      * Generates a new integer, to be used as assocId. (assocId is part of the key
      * which associates connections with their apps).
      */
-    static int32 getNewAssocId() { return getEnvir()->getUniqueNumber(); }
+    static int32_t getNewAssocId() { return getEnvir()->getUniqueNumber(); }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
@@ -191,7 +191,7 @@ class INET_API SctpSocket : public ISocket
     void setInboundStreams(int streams) { appOptions->inboundStreams = streams; };
     void setAppLimited(bool option) { appLimited = option; };
     void setStreamReset(int option) { appOptions->streamReset = option; };
-    void setStreamPriority(uint32 stream, uint32 priority);
+    void setStreamPriority(uint32_t stream, uint32_t priority);
     void setMaxInitRetrans(int option) { sOptions->maxInitRetrans = option; };
     void setMaxInitRetransTimeout(int option) { sOptions->maxInitRetransTimeout = option; };
     void setRtoInitial(double option) { sOptions->rtoInitial = option; };
@@ -251,27 +251,27 @@ class INET_API SctpSocket : public ISocket
      * connection will be accepted, and SCTP will refuse subsequent ones.
      * See SctpOpenCommand documentation (neddoc) for more info.
      */
-    void listen(bool fork = true, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
+    void listen(bool fork = true, bool streamReset = false, uint32_t requests = 0, uint32_t messagesToPush = 0);
 
-    void listen(uint32 requests = 0, bool fork = false, uint32 messagesToPush = 0, bool options = false, int32 fd = -1);
+    void listen(uint32_t requests = 0, bool fork = false, uint32_t messagesToPush = 0, bool options = false, int32_t fd = -1);
 
     void accept(int socketId);
 
     /**
      * Active OPEN to the given remote socket.
      */
-    void connect(L3Address remoteAddress, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
+    void connect(L3Address remoteAddress, int32_t remotePort, bool streamReset = false, int32_t prMethod = 0, uint32_t numRequests = 0);
 
-    void connect(int32 fd, L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options = false);
+    void connect(int32_t fd, L3Address remoteAddress, int32_t remotePort, uint32_t numRequests, bool options = false);
 
     /**
      * Active OPEN to the given remote socket.
      * The current implementation just calls connect() with the first address
      * of the given list. This behaviour may be improved in the future.
      */
-    void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
+    void connectx(AddressVector remoteAddresses, int32_t remotePort, bool streamReset = false, int32_t prMethod = 0, uint32_t numRequests = 0);
 
-    void accept(int32 assocId, int32 fd);
+    void accept(int32_t assocId, int32_t fd);
 
     void acceptSocket(int newSockId);
 

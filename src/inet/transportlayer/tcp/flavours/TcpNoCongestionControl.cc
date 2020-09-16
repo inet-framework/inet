@@ -84,7 +84,7 @@ void TcpNoCongestionControl::processRexmitTimer(TcpEventCode& event)
     ASSERT(state->snd_cwnd == 0x7fffffff);
 }
 
-void TcpNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
+void TcpNoCongestionControl::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpBaseAlg::receivedDataAck(firstSeqAcked);
 

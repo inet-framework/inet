@@ -243,7 +243,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     delete packet;
 }
 
-void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo,
         const void *dataptr, int len)
 {
     TcpLwipConnection *conn = (pcb != nullptr) ? static_cast<TcpLwipConnection *>(pcb->callback_arg) : nullptr;

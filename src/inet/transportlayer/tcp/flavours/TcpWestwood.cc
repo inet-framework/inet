@@ -65,14 +65,14 @@ TcpWestwood::TcpWestwood()
 
 void TcpWestwood::recalculateSlowStartThreshold()
 {
-    state->ssthresh = (uint32)((state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a));
+    state->ssthresh = (uint32_t)((state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a));
 
     conn->emit(ssthreshSignal, state->ssthresh);
 
     EV_DEBUG << "recalculateSlowStartThreshold(), ssthresh=" << state->ssthresh << "\n";
 }
 
-void TcpWestwood::recalculateBWE(uint32 cumul_ack)
+void TcpWestwood::recalculateBWE(uint32_t cumul_ack)
 {
     simtime_t currentTime = simTime();
     simtime_t timeAck = currentTime - state->w_lastAckTime;
@@ -121,7 +121,7 @@ void TcpWestwood::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
+void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpBaseAlg::receivedDataAck(firstSeqAcked);
 
@@ -138,7 +138,7 @@ void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
 
         // cumul_ack: cumulative ack's that acks 2 or more pkts count 1,
         // because DUPACKs count them
-        uint32 cumul_ack = state->snd_una - firstSeqAcked;    // acked bytes
+        uint32_t cumul_ack = state->snd_una - firstSeqAcked;    // acked bytes
         if ((state->dupacks * state->snd_mss) >= cumul_ack)
             cumul_ack = state->snd_mss; // cumul_ack = 1:
         else
@@ -190,7 +190,7 @@ void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
         }
         else {
             // perform Congestion Avoidance (RFC 2581)
-            uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
+            uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
             if (incr == 0)
                 incr = 1;
@@ -220,7 +220,7 @@ void TcpWestwood::receivedDuplicateAck()
 
     {
         // BWE calculation: dupack counts 1
-        uint32 cumul_ack = state->snd_mss;
+        uint32_t cumul_ack = state->snd_mss;
         recalculateBWE(cumul_ack);
     }    // Closes if w_sendtime != nullptr
 
@@ -285,7 +285,7 @@ void TcpWestwood::receivedDuplicateAck()
     }
 }
 
-void TcpWestwood::dataSent(uint32 fromseq)
+void TcpWestwood::dataSent(uint32_t fromseq)
 {
     TcpBaseAlg::dataSent(fromseq);
 
@@ -297,7 +297,7 @@ void TcpWestwood::dataSent(uint32 fromseq)
     state->regions.set(fromseq, state->snd_max, sendtime);
 }
 
-void TcpWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+void TcpWestwood::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
     TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
 

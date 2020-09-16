@@ -37,9 +37,9 @@ class INET_API DcTcpFamilyStateVariables : public TcpTahoeRenoFamilyStateVariabl
 
     //DCTCP
     bool dctcp_ce;
-    uint32 dctcp_windEnd;
-    uint32 dctcp_bytesAcked;
-    uint32 dctcp_bytesMarked; //amount of bytes marked
+    uint32_t dctcp_windEnd;
+    uint32_t dctcp_bytesAcked;
+    uint32_t dctcp_bytesMarked; //amount of bytes marked
     double dctcp_alpha;
     double dctcp_gamma;
 };

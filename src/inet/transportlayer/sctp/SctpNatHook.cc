@@ -172,7 +172,7 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
     if (!local) {
         entry = natTable->getEntry(dgram->getSourceAddress(), sctpMsg->getSrcPort(), dgram->getDestinationAddress(), sctpMsg->getDestPort(), sctpMsg->getVTag());
         EV_INFO << "getEntry for " << dgram->getSourceAddress() << ":" << sctpMsg->getSrcPort() << " to " << dgram->getDestinationAddress() << ":" << sctpMsg->getDestPort() << " peerVTag=" << sctpMsg->getVTag() << "\n";
-        uint32 numberOfChunks = sctpMsg->getSctpChunksArraySize();
+        uint32_t numberOfChunks = sctpMsg->getSctpChunksArraySize();
         if (entry == nullptr) {
             EV_INFO << "no entry found\n";
             if (numberOfChunks == 1)
@@ -206,7 +206,7 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
                /* SctpChunk *schunk = nullptr;
                 if (numberOfChunks > 0) {
                     EV << "number of chunks=" << numberOfChunks << "\n";
-                    for (uint32 i = 0; i < numberOfChunks; i++) {
+                    for (uint32_t i = 0; i < numberOfChunks; i++) {
                         schunk = (SctpChunk *)(sctpMsg->removeChunk());
                         if (schunk->getSctpChunkType() == DATA)
                             delete (SctpSimpleMessage *)schunk->decapsulate();

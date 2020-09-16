@@ -165,7 +165,7 @@ class INET_API Rtcp : public cSimpleModule, public LifecycleUnsupported
      * about the Rtp end system with this ssrc identifier.
      * Returns nullptr if this end system is unknown.
      */
-    virtual RtpParticipantInfo *findParticipantInfo(uint32 ssrc);
+    virtual RtpParticipantInfo *findParticipantInfo(uint32_t ssrc);
 
     /**
      * Recalculates the average size of an RtcpCompoundPacket when

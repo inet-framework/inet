@@ -74,9 +74,9 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
     out << buf;
 
     out << "[sctp] " << srcAddr << " > " << destAddr;
-    uint32 numberOfChunks;
+    uint32_t numberOfChunks;
     const SctpChunk *chunk;
-    uint8 type;
+    uint8_t type;
     // src/dest
     out << srcAddr << "." << sctpmsg->getSrcPort() << " > "
         << destAddr << "." << sctpmsg->getDestPort() << ": ";
@@ -87,7 +87,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
     if (pk->hasBitError())
         out << "Packet has bit error!!\n";
 
-    for (uint32 i = 0; i < numberOfChunks; i++) {
+    for (uint32_t i = 0; i < numberOfChunks; i++) {
         chunk = sctpmsg->getSctpChunks(i);
         type = chunk->getSctpChunkType();
 
@@ -150,7 +150,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
     if (verbose) {
         out << endl;
 
-        for (uint32 i = 0; i < numberOfChunks; i++) {
+        for (uint32_t i = 0; i < numberOfChunks; i++) {
             chunk = sctpmsg->getSctpChunks(i);
             type = chunk->getSctpChunkType();
 
@@ -175,7 +175,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     if (initChunk->getAddressesArraySize() > 0) {
                         out << "; Addresses=";
 
-                        for (uint32 i = 0; i < initChunk->getAddressesArraySize(); i++) {
+                        for (uint32_t i = 0; i < initChunk->getAddressesArraySize(); i++) {
                             if (i > 0)
                                 out << ",";
 
@@ -209,7 +209,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     if (initackChunk->getAddressesArraySize() > 0) {
                         out << "; Addresses=";
 
-                        for (uint32 i = 0; i < initackChunk->getAddressesArraySize(); i++) {
+                        for (uint32_t i = 0; i < initackChunk->getAddressesArraySize(); i++) {
                             if (i > 0)
                                 out << ",";
 
@@ -259,7 +259,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     if (sackChunk->getGapStartArraySize() > 0) {
                         out << "; Gaps=";
 
-                        for (uint32 i = 0; i < sackChunk->getGapStartArraySize(); i++) {
+                        for (uint32_t i = 0; i < sackChunk->getGapStartArraySize(); i++) {
                             if (i > 0)
                                 out << ", ";
 
@@ -270,7 +270,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     if (sackChunk->getDupTsnsArraySize() > 0) {
                         out << "; Dups=";
 
-                        for (uint32 i = 0; i < sackChunk->getDupTsnsArraySize(); i++) {
+                        for (uint32_t i = 0; i < sackChunk->getDupTsnsArraySize(); i++) {
                             if (i > 0)
                                 out << ", ";
 
@@ -326,10 +326,10 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     out << "ERRORTYPE ";
                     const SctpErrorChunk *errorChunk;
                     errorChunk = check_and_cast<const SctpErrorChunk *>(chunk);
-                    uint32 numberOfParameters = errorChunk->getParametersArraySize();
-                    uint32 parameterType;
+                    uint32_t numberOfParameters = errorChunk->getParametersArraySize();
+                    uint32_t parameterType;
 
-                    for (uint32 i = 0; i < numberOfParameters; i++) {
+                    for (uint32_t i = 0; i < numberOfParameters; i++) {
                         const SctpParameter *param = errorChunk->getParameters(i);
                         parameterType = param->getParameterType();
                         out << parameterType << " ";

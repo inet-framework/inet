@@ -93,8 +93,8 @@ class INET_API Sctp : public cSimpleModule
   public:
     struct AppAssocKey
     {
-        int32 appGateIndex;
-        int32 assocId;
+        int32_t appGateIndex;
+        int32_t assocId;
 
         bool operator<(const AppAssocKey& b) const
         {
@@ -109,8 +109,8 @@ class INET_API Sctp : public cSimpleModule
     {
         L3Address localAddr;
         L3Address remoteAddr;
-        uint16 localPort;
-        uint16 remotePort;
+        uint16_t localPort;
+        uint16_t remotePort;
 
         bool operator<(const SockPair& b) const
         {
@@ -127,53 +127,53 @@ class INET_API Sctp : public cSimpleModule
 
     struct VTagPair
     {
-        uint32 peerVTag;
-        uint32 localVTag;
-        uint16 localPort;
-        uint16 remotePort;
+        uint32_t peerVTag;
+        uint32_t localVTag;
+        uint16_t localPort;
+        uint16_t remotePort;
     };
 
     struct AssocStat
     {
-        int32 assocId;
+        int32_t assocId;
         simtime_t start;
         simtime_t stop;
-        uint64 rcvdBytes;
-        uint64 sentBytes;
-        uint64 transmittedBytes;
-        uint64 ackedBytes;
-        uint32 numFastRtx;
-        uint32 numDups;
-        uint32 numT3Rtx;
-        uint32 numPathFailures;
-        uint32 numForwardTsn;
+        uint64_t rcvdBytes;
+        uint64_t sentBytes;
+        uint64_t transmittedBytes;
+        uint64_t ackedBytes;
+        uint32_t numFastRtx;
+        uint32_t numDups;
+        uint32_t numT3Rtx;
+        uint32_t numPathFailures;
+        uint32_t numForwardTsn;
         double throughput;
         simtime_t lifeTime;
-        uint32 numOverfullSACKs;
-        uint64 sumRGapRanges;    // Total sum of RGap ranges (Last RGapStop - CumAck)
-        uint64 sumNRGapRanges;    // Total sum of NRGap ranges (Last NRGapStop - CumAck)
-        uint32 numDropsBecauseNewTsnGreaterThanHighestTsn;
-        uint32 numDropsBecauseNoRoomInBuffer;
-        uint32 numChunksReneged;
-        uint32 numAuthChunksSent;
-        uint32 numAuthChunksAccepted;
-        uint32 numAuthChunksRejected;
-        uint32 numResetRequestsSent;
-        uint32 numResetRequestsPerformed;
+        uint32_t numOverfullSACKs;
+        uint64_t sumRGapRanges;    // Total sum of RGap ranges (Last RGapStop - CumAck)
+        uint64_t sumNRGapRanges;    // Total sum of NRGap ranges (Last NRGapStop - CumAck)
+        uint32_t numDropsBecauseNewTsnGreaterThanHighestTsn;
+        uint32_t numDropsBecauseNoRoomInBuffer;
+        uint32_t numChunksReneged;
+        uint32_t numAuthChunksSent;
+        uint32_t numAuthChunksAccepted;
+        uint32_t numAuthChunksRejected;
+        uint32_t numResetRequestsSent;
+        uint32_t numResetRequestsPerformed;
         simtime_t fairStart;
         simtime_t fairStop;
-        uint64 fairAckedBytes;
+        uint64_t fairAckedBytes;
         double fairThroughput;
         simtime_t fairLifeTime;
-        uint64 numEndToEndMessages;
+        uint64_t numEndToEndMessages;
         SimTime cumEndToEndDelay;
-        uint64 startEndToEndDelay;
-        uint64 stopEndToEndDelay;
+        uint64_t startEndToEndDelay;
+        uint64_t stopEndToEndDelay;
     };
 
-    typedef std::map<int32, AssocStat> AssocStatMap;
+    typedef std::map<int32_t, AssocStat> AssocStatMap;
     AssocStatMap assocStatMap;
-    typedef std::map<int32, VTagPair> SctpVTagMap;
+    typedef std::map<int32_t, VTagPair> SctpVTagMap;
     SctpVTagMap sctpVTagMap;
 
     typedef std::map<AppAssocKey, SctpAssociation *> SctpAppAssocMap;
@@ -194,13 +194,13 @@ class INET_API Sctp : public cSimpleModule
     IInterfaceTable *ift;
     SctpUdpHook udpHook;
 
-    int32 sizeAssocMap;
+    int32_t sizeAssocMap;
 
-    uint16 nextEphemeralPort;
+    uint16_t nextEphemeralPort;
 
-    SctpAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
-    SctpAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
-    int32 findAssocForFd(int32 fd);
+    SctpAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32_t srcPort, uint32_t destPort, bool findListen);
+    SctpAssociation *findAssocForApp(int32_t appGateIndex, int32_t assocId);
+    int32_t findAssocForFd(int32_t fd);
     void sendAbortFromMain(Ptr<SctpHeader>& sctpMsg, L3Address fromAddr, L3Address toAddr);
     void sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpMsg, L3Address fromAddr, L3Address toAddr);
     virtual void refreshDisplay() const override;
@@ -211,14 +211,14 @@ class INET_API Sctp : public cSimpleModule
 
     void removeAssociation(SctpAssociation *assoc);
     simtime_t testTimeout;
-    uint32 numGapReports;
-    uint32 numPacketsReceived;
-    uint32 numPacketsDropped;
+    uint32_t numGapReports;
+    uint32_t numPacketsReceived;
+    uint32_t numPacketsDropped;
     bool auth;
     bool addIP;
     bool pktdrop;
     bool sackNow;
-    uint64 numPktDropReports;
+    uint64_t numPktDropReports;
     int interfaceId = -1;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
@@ -231,7 +231,7 @@ class INET_API Sctp : public cSimpleModule
     virtual void send_to_ip(Packet *msg);
 
 
-    AssocStat *getAssocStat(uint32 assocId)
+    AssocStat *getAssocStat(uint32_t assocId)
     {
         auto found = assocStatMap.find(assocId);
         if (found != assocStatMap.end()) {
@@ -243,7 +243,7 @@ class INET_API Sctp : public cSimpleModule
     /**
      * To be called from SctpAssociation when socket pair    changes
      */
-    void updateSockPair(SctpAssociation *assoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort);
+    void updateSockPair(SctpAssociation *assoc, L3Address localAddr, L3Address remoteAddr, int32_t localPort, int32_t remotePort);
     void addLocalAddress(SctpAssociation *assoc, L3Address address);
     void addLocalAddressToAllRemoteAddresses(SctpAssociation *assoc, L3Address address, std::vector<L3Address> remAddresses);
     bool addRemoteAddress(SctpAssociation *assoc, L3Address localAddress, L3Address remoteAddress);
@@ -253,17 +253,17 @@ class INET_API Sctp : public cSimpleModule
      * Update assocs socket pair, and register newAssoc (which'll keep LISTENing).
      * Also, assoc will get a new assocId (and newAssoc will live on with its old assocId).
      */
-    void addForkedAssociation(SctpAssociation *assoc, SctpAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort);
+    void addForkedAssociation(SctpAssociation *assoc, SctpAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32_t localPort, int32_t remotePort);
 
     /**
      * To be called from SctpAssociation: reserves an ephemeral port for the connection.
      */
-    uint16 getEphemeralPort();
+    uint16_t getEphemeralPort();
 
-    SctpAssociation *getAssoc(int32 assocId);
-    SctpAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
+    SctpAssociation *getAssoc(int32_t assocId);
+    SctpAssociation *findAssocWithVTag(uint32_t peerVTag, uint32_t remotePort, uint32_t localPort);
 
-    SctpAssociation *findAssocForInitAck(SctpInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
+    SctpAssociation *findAssocForInitAck(SctpInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32_t srcPort, uint32_t destPort, bool findListen);
 
     SctpVTagMap getVTagMap() { return sctpVTagMap; };
 

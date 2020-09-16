@@ -31,7 +31,7 @@ namespace rtp {
 
 Register_Class(RtpParticipantInfo);
 
-RtpParticipantInfo::RtpParticipantInfo(uint32 ssrc) :
+RtpParticipantInfo::RtpParticipantInfo(uint32_t ssrc) :
     RtpParticipantInfo_Base(),
     _sdesChunk("SdesChunk", ssrc)
 {
@@ -135,12 +135,12 @@ bool RtpParticipantInfo::toBeDeleted(simtime_t now)
     return false;
 }
 
-uint32 RtpParticipantInfo::getSsrc() const
+uint32_t RtpParticipantInfo::getSsrc() const
 {
     return _sdesChunk.getSsrc();
 }
 
-void RtpParticipantInfo::setSsrc(uint32 ssrc)
+void RtpParticipantInfo::setSsrc(uint32_t ssrc)
 {
     _sdesChunk.setSsrc(ssrc);
 }
@@ -150,7 +150,7 @@ void RtpParticipantInfo::addSDESItem(SdesItem::SdesItemType type, const char *co
     _sdesChunk.addSDESItem(new SdesItem(type, content));
 }
 
-std::string RtpParticipantInfo::ssrcToName(uint32 ssrc)
+std::string RtpParticipantInfo::ssrcToName(uint32_t ssrc)
 {
     char name[9];
     sprintf(name, "%08x", ssrc);

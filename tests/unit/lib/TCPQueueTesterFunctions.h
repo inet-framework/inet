@@ -11,8 +11,8 @@ using namespace tcp;
 
 void enqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes);
 void tryenqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes);
-Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32 fromSeq, uint32 toSeq);
-void discardUpTo(TcpSendQueue *sq, uint32 seqNum);
+Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32_t fromSeq, uint32_t toSeq);
+void discardUpTo(TcpSendQueue *sq, uint32_t seqNum);
 
 //////////////////////////////////////////////////////////////
 
@@ -20,10 +20,10 @@ void discardUpTo(TcpSendQueue *sq, uint32 seqNum);
 
 void insertSegment(TcpReceiveQueue *rq, Packet *tcpseg);
 void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg);
-void extractBytesUpTo(TcpReceiveQueue *rq, uint32 seq);
+void extractBytesUpTo(TcpReceiveQueue *rq, uint32_t seq);
 
-void insertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end);
-void tryinsertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end);
+void insertSegment(TcpReceiveQueue *q, uint32_t beg, uint32_t end);
+void tryinsertSegment(TcpReceiveQueue *q, uint32_t beg, uint32_t end);
 
 /////////////////////////////////////////////////////////////////////////
 

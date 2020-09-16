@@ -72,7 +72,7 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
     auto err = fread(&packetHeader, sizeof(packetHeader), 1, file);
     if (err != 1)
         throw cRuntimeError("Cannot read packetheader, errno is %ld.", err);
-    uint8 buffer[1 << 16];
+    uint8_t buffer[1 << 16];
     memset(buffer, 0, sizeof(buffer));
     err = fread(buffer, packetHeader.incl_len, 1, file);
     if (err != 1)

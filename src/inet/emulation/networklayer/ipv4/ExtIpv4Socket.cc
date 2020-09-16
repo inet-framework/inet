@@ -71,7 +71,7 @@ void ExtIpv4Socket::handleMessage(cMessage *msg)
     ip_addr.sin_port = htons(0);
 
     auto bytesChunk = packet->peekAllAsBytes();
-    uint8 buffer[1 << 16];
+    uint8_t buffer[1 << 16];
     size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
     ASSERT(packetLength == (size_t)packet->getByteLength());
 

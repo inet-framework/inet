@@ -59,7 +59,7 @@ LinearGaugeFigure::LinearGaugeFigure(const char *name) : cGroupFigure(name)
 LinearGaugeFigure::~LinearGaugeFigure()
 {
     // delete figures which is not in canvas
-    for (uint32 i = numTicks; i < tickFigures.size(); ++i) {
+    for (uint32_t i = numTicks; i < tickFigures.size(); ++i) {
         delete tickFigures[i];
         delete numberFigures[i];
     }

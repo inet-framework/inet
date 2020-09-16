@@ -800,38 +800,38 @@ static void testStreaming()
     ASSERT(data[1] == 0xF0);
 
     // 4. uint8_t
-    uint64_t uint8 = 0x42;
+    uint64_t uint8_t = 0x42;
     MemoryOutputStream outputStream1;
-    outputStream1.writeUint8(uint8);
+    outputStream1.writeUint8(uint8_t);
     MemoryInputStream inputStream1(outputStream1.getData());
-    ASSERT(inputStream1.readUint8() == uint8);
+    ASSERT(inputStream1.readUint8() == uint8_t);
     ASSERT(!inputStream1.isReadBeyondEnd());
     ASSERT(inputStream1.getRemainingLength() == b(0));
 
     // 5. uint16_t
-    uint64_t uint16 = 0x4242;
+    uint64_t uint16_t = 0x4242;
     MemoryOutputStream outputStream2;
-    outputStream2.writeUint16Be(uint16);
+    outputStream2.writeUint16Be(uint16_t);
     MemoryInputStream inputStream2(outputStream2.getData());
-    ASSERT(inputStream2.readUint16Be() == uint16);
+    ASSERT(inputStream2.readUint16Be() == uint16_t);
     ASSERT(!inputStream2.isReadBeyondEnd());
     ASSERT(inputStream2.getRemainingLength() == b(0));
 
     // 6. uint32_t
-    uint64_t uint32 = 0x42424242;
+    uint64_t uint32_t = 0x42424242;
     MemoryOutputStream outputStream3;
-    outputStream3.writeUint32Be(uint32);
+    outputStream3.writeUint32Be(uint32_t);
     MemoryInputStream inputStream3(outputStream3.getData());
-    ASSERT(inputStream3.readUint32Be() == uint32);
+    ASSERT(inputStream3.readUint32Be() == uint32_t);
     ASSERT(!inputStream3.isReadBeyondEnd());
     ASSERT(inputStream3.getRemainingLength() == b(0));
 
     // 7. uint64_t
-    uint64_t uint64 = 0x4242424242424242L;
+    uint64_t uint64_t = 0x4242424242424242L;
     MemoryOutputStream outputStream4;
-    outputStream4.writeUint64Be(uint64);
+    outputStream4.writeUint64Be(uint64_t);
     MemoryInputStream inputStream4(outputStream4.getData());
-    ASSERT(inputStream4.readUint64Be() == uint64);
+    ASSERT(inputStream4.readUint64Be() == uint64_t);
     ASSERT(!inputStream4.isReadBeyondEnd());
     ASSERT(inputStream4.getRemainingLength() == b(0));
 

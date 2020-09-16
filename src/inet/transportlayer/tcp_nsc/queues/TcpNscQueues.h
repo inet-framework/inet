@@ -103,7 +103,7 @@ class INET_API TcpNscSendQueue : public cObject
      * Tells the queue that bytes up to (but NOT including) seqNum have been
      * transmitted and ACKed, so they can be removed from the queue.
      */
-    virtual void discardUpTo(uint32 seqNumP);
+    virtual void discardUpTo(uint32_t seqNumP);
 
   protected:
     TcpNscConnection *connM = nullptr;
@@ -161,12 +161,12 @@ class INET_API TcpNscReceiveQueue : public cObject
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-   virtual uint32 getAmountOfBufferedBytes() const;
+   virtual uint32_t getAmountOfBufferedBytes() const;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() const;
+    virtual uint32_t getQueueLength() const;
 
     /**     * Shows current queue status.
      */

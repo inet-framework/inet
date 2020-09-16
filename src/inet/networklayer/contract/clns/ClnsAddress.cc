@@ -38,14 +38,14 @@ ClnsAddress::ClnsAddress()
     nsel = 0;
 }
 
-ClnsAddress::ClnsAddress(uint64 areaID, uint64 systemID, uint8 nsel) :
+ClnsAddress::ClnsAddress(uint64_t areaID, uint64_t systemID, uint8_t nsel) :
     systemID(systemID),
     areaID(areaID),
     nsel(nsel)
 {
 }
 
-void ClnsAddress::set(uint64 areaID, uint64 systemID, uint8 nsel)
+void ClnsAddress::set(uint64_t areaID, uint64_t systemID, uint8_t nsel)
 {
     this->areaID = areaID;
     this->systemID = systemID;
@@ -140,22 +140,22 @@ std::string ClnsAddress::str(bool printUnspec    /* = true */) const
     return buf.str();
 }
 
-uint64 ClnsAddress::getAreaId() const
+uint64_t ClnsAddress::getAreaId() const
 {
     return areaID;
 }
 
-uint8 ClnsAddress::getNsel() const
+uint8_t ClnsAddress::getNsel() const
 {
     return nsel;
 }
 
-void ClnsAddress::setNsel(uint8 nsel)
+void ClnsAddress::setNsel(uint8_t nsel)
 {
     this->nsel = nsel;
 }
 
-uint64 ClnsAddress::getSystemId() const
+uint64_t ClnsAddress::getSystemId() const
 {
     return systemID;
 }

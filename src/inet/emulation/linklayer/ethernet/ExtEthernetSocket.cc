@@ -76,7 +76,7 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
     socket_address.sll_addr[4] = macAddress.getAddressByte(4);
     socket_address.sll_addr[5] = macAddress.getAddressByte(5);
 
-    uint8 buffer[packet->getByteLength()];
+    uint8_t buffer[packet->getByteLength()];
     auto bytesChunk = packet->peekAllAsBytes();
     size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
     ASSERT(packetLength == (size_t)packet->getByteLength());

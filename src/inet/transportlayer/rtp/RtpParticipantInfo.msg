@@ -37,7 +37,7 @@ class RtpParticipantInfo extends cNamedObject
 {
     @customize;  //FIXME need revise, several custommized functions should be moved to a processing module
 
-    abstract uint32 ssrc;
+    abstract uint32_t ssrc;
 
     // Used for storing the ip address of this endsystem.
     Ipv4Address address = Ipv4Address::UNSPECIFIED_ADDRESS;

@@ -34,8 +34,8 @@ class SctpCrcInsertion : public NetfilterBase::HookBase {
     SctpCrcInsertion() {}
     void setCrcMode(CrcMode crcModeP) { crcMode = crcModeP; }
     void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<SctpHeader>& sctpHeader, Packet *packet);
- // uint32 checksum(const std::vector<uint8_t>& buf, uint32 len);
-    uint32 checksum(unsigned char const*, unsigned int);
+ // uint32_t checksum(const std::vector<uint8_t>& buf, uint32_t len);
+    uint32_t checksum(unsigned char const*, unsigned int);
 
   public:
     virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }

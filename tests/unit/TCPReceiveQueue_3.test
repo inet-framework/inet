@@ -19,7 +19,7 @@ EV << sq->str() <<"\n";
 TcpReceiveQueue rcvQueue;
 TcpReceiveQueue *rq = &rcvQueue;
 
-uint32 seq = 0;
+uint32_t seq = 0;
 rq->init(seq);
 EV << rq->str() <<"\n";
 
@@ -40,7 +40,7 @@ while (seqLess(seq, sq->getBufferEndSeq()))
 seq = sq->getBufferStartSeq();
 for(;;)
 {
-    uint32 eseq = seqMin(seq + seglen, sq->getBufferEndSeq());
+    uint32_t eseq = seqMin(seq + seglen, sq->getBufferEndSeq());
     if (seqGE(seq, eseq))
         break;
     extractBytesUpTo(rq, eseq);

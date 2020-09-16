@@ -44,7 +44,7 @@ class INET_API Ipv6FragBuf
     //
     struct Key
     {
-        uint32 id;
+        uint32_t id;
         Ipv6Address src;
         Ipv6Address dest;
 

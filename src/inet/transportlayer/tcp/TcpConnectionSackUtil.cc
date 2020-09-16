@@ -131,7 +131,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
     return true;
 }
 
-bool TcpConnection::isLost(uint32 seqNum)
+bool TcpConnection::isLost(uint32_t seqNum)
 {
     ASSERT(state->sack_enabled);
 
@@ -174,7 +174,7 @@ void TcpConnection::setPipe()
 
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     state->pipe = 0;
-    uint32 length = 0;    // required for rexmitQueue->checkSackBlock()
+    uint32_t length = 0;    // required for rexmitQueue->checkSackBlock()
     bool sacked;    // required for rexmitQueue->checkSackBlock()
     bool rexmitted;    // required for rexmitQueue->checkSackBlock()
 
@@ -184,7 +184,7 @@ void TcpConnection::setPipe()
     // the TCP receiver.  After initializing pipe to zero the following
     // steps are taken for each octet 'S1' in the sequence space between
     // HighACK and HighData that has not been SACKed:"
-    for (uint32 s1 = state->snd_una; seqLess(s1, state->snd_max); s1 += length) {
+    for (uint32_t s1 = state->snd_una; seqLess(s1, state->snd_max); s1 += length) {
         rexmitQueue->checkSackBlock(s1, length, sacked, rexmitted);
 
         if (!sacked) {
@@ -216,7 +216,7 @@ void TcpConnection::setPipe()
     emit(pipeSignal, state->pipe);
 }
 
-bool TcpConnection::nextSeg(uint32& seqNum)
+bool TcpConnection::nextSeg(uint32_t& seqNum)
 {
     ASSERT(state->sack_enabled);
 
@@ -228,8 +228,8 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // transmitted, per the following rules:"
 
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
-    uint32 highestSackedSeqNum = rexmitQueue->getHighestSackedSeqNum();
-    uint32 shift = state->snd_mss;
+    uint32_t highestSackedSeqNum = rexmitQueue->getHighestSackedSeqNum();
+    uint32_t shift = state->snd_mss;
     bool sacked = false;    // required for rexmitQueue->checkSackBlock()
     bool rexmitted = false;    // required for rexmitQueue->checkSackBlock()
 
@@ -251,7 +251,7 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // (1.c) IsLost (S2) returns true."
 
     // Note: state->highRxt == RFC.HighRxt + 1
-    for (uint32 s2 = state->highRxt;
+    for (uint32_t s2 = state->highRxt;
          seqLess(s2, state->snd_max) && seqLess(s2, highestSackedSeqNum);
          s2 += shift
          )
@@ -276,10 +276,10 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // HighData+1 MUST be returned."
     {
         // check how many unsent bytes we have
-        uint32 buffered = sendQueue->getBytesAvailable(state->snd_max);
-        uint32 maxWindow = state->snd_wnd;
+        uint32_t buffered = sendQueue->getBytesAvailable(state->snd_max);
+        uint32_t maxWindow = state->snd_wnd;
         // effectiveWindow: number of bytes we're allowed to send now
-        uint32 effectiveWin = maxWindow - state->pipe;
+        uint32_t effectiveWin = maxWindow - state->pipe;
 
         if (buffered > 0 && effectiveWin >= state->snd_mss) {
             seqNum = state->snd_max;    // HighData = snd_max
@@ -315,7 +315,7 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // the decision of whether or not to use rule (3) to
     // implementors."
     {
-        for (uint32 s3 = state->highRxt;
+        for (uint32_t s3 = state->highRxt;
              seqLess(s3, state->snd_max) && seqLess(s3, highestSackedSeqNum);
              s3 += shift
              )
@@ -339,7 +339,7 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     return false;
 }
 
-void TcpConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
+void TcpConnection::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
@@ -357,12 +357,12 @@ void TcpConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
         // data to send) return without sending anything (i.e., terminate
         // steps C.1 -- C.5)."
 
-        uint32 seqNum;
+        uint32_t seqNum;
 
         if (!nextSeg(seqNum)) // if nextSeg() returns false (=failure): terminate steps C.1 -- C.5
             break;
 
-        uint32 sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
+        uint32_t sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
         // RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
         // network must be updated by incrementing pipe by the number of
         // octets transmitted in (C.1)."
@@ -370,20 +370,20 @@ void TcpConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
     }
 }
 
-uint32 TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
+uint32_t TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
     // start sending from seqNum
     state->snd_nxt = seqNum;
 
-    uint32 old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+    uint32_t old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
 
     // no need to check cwnd and rwnd - has already be done before
     // no need to check nagle - sending mss bytes
-    uint32 sentBytes = sendSegment(state->snd_mss);
+    uint32_t sentBytes = sendSegment(state->snd_mss);
 
-    uint32 sentSeqNum = seqNum + sentBytes;
+    uint32_t sentSeqNum = seqNum + sentBytes;
 
     if(state->send_fin && sentSeqNum == state->snd_fin_seq)
         sentSeqNum = sentSeqNum + 1;
@@ -446,8 +446,8 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
     B used_options_len = tcpHeader->getHeaderOptionArrayLength();
     bool dsack_inserted = false;    // set if dsack is subsets of a bigger sack block recently reported
 
-    uint32 start = state->start_seqno;
-    uint32 end = state->end_seqno;
+    uint32_t start = state->start_seqno;
+    uint32_t end = state->end_seqno;
 
     // delete old sacks (below rcv_nxt), delete duplicates and print previous status of sacks_array:
     auto it = state->sacks_array.begin();
@@ -494,8 +494,8 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
             EV_DETAIL << "inserted DSACK entry: " << nSack.str() << "\n";
         }
         else {
-            uint32 contStart = receiveQueue->getLE(start);
-            uint32 contEnd = receiveQueue->getRE(end);
+            uint32_t contStart = receiveQueue->getLE(start);
+            uint32_t contEnd = receiveQueue->getRE(end);
 
             Sack newSack(contStart, contEnd);
             state->sacks_array.push_front(newSack);

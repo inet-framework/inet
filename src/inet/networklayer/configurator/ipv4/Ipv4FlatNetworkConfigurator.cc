@@ -81,8 +81,8 @@ void Ipv4FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVecto
 void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // assign Ipv4 addresses
-    uint32 networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
-    uint32 netmask = Ipv4Address(par("netmask").stringValue()).getInt();
+    uint32_t networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
+    uint32_t netmask = Ipv4Address(par("netmask").stringValue()).getInt();
     int maxNodes = (~netmask) - 1;    // 0 and ffff have special meaning and cannot be used
     if (topo.getNumNodes() > maxNodes)
         throw cRuntimeError("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
@@ -93,7 +93,7 @@ void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVecto
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        uint32 addr = networkAddress | uint32(++numIPNodes);
+        uint32_t addr = networkAddress | uint32_t(++numIPNodes);
         nodeInfo[i].address.set(addr);
 
         // find interface table and assign address to all (non-loopback) interfaces

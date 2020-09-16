@@ -41,5 +41,5 @@ enum RtpSenderStatus
 packet RtpSenderStatusMessage
 {
     RtpSenderStatus status;
-    uint32 timeStamp;
+    uint32_t timeStamp;
 };

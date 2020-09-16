@@ -94,7 +94,7 @@ void SctpAssociation::process_ASSOCIATE(SctpEventCode& event, SctpCommandReq *sc
 void SctpAssociation::process_OPEN_PASSIVE(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg)
 {
     L3Address lAddr;
-    int16 localPort;
+    int16_t localPort;
 
     SctpOpenReq *openCmd = check_and_cast<SctpOpenReq *>(sctpCommand);
 
@@ -163,9 +163,9 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     iter->second.sentBytes += sendBytes;
 
     // ------ Prepare SctpDataMsg -----------------------------------------
-    const uint32 streamId = sendCommand->getSid();
-    const uint32 sendUnordered = sendCommand->getSendUnordered();
-    const uint32 ppid = sendCommand->getPpid();
+    const uint32_t streamId = sendCommand->getSid();
+    const uint32_t sendUnordered = sendCommand->getSendUnordered();
+    const uint32_t ppid = sendCommand->getPpid();
     SctpSendStream *stream = nullptr;
     auto associter = sendStreams.find(streamId);
     if (associter != sendStreams.end()) {
@@ -200,11 +200,11 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
             break;
 
         case PR_RTX:
-            datMsg->setRtx((uint32)sendCommand->getPrValue());
+            datMsg->setRtx((uint32_t)sendCommand->getPrValue());
             break;
 
         case PR_PRIO:
-            datMsg->setPriority((uint32)sendCommand->getPrValue());
+            datMsg->setPriority((uint32_t)sendCommand->getPrValue());
             state->queuedDroppableBytes += PK(msg)->getByteLength();
             break;
     }
@@ -212,11 +212,11 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     if ((state->appSendAllowed) &&
         (state->sendQueueLimit > 0) &&
         (state->queuedDroppableBytes > 0) &&
-        ((uint64)state->sendBuffer >= state->sendQueueLimit))
+        ((uint64_t)state->sendBuffer >= state->sendQueueLimit))
     {
-        uint32 lowestPriority;
+        uint32_t lowestPriority;
         cQueue *strq;
-        int64 dropsize = state->sendBuffer - state->sendQueueLimit;
+        int64_t dropsize = state->sendBuffer - state->sendQueueLimit;
 
         if (sendUnordered)
             strq = stream->getUnorderedStreamQ();
@@ -292,7 +292,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     // ------ Send buffer full? -------------------------------------------
     if ((state->appSendAllowed) &&
         (state->sendQueueLimit > 0) &&
-        ((uint64)state->sendBuffer >= state->sendQueueLimit)) {
+        ((uint64_t)state->sendBuffer >= state->sendQueueLimit)) {
         // If there are not enough messages that could be dropped,
         // the buffer is really full and the app has to be notified.
         if (state->queuedDroppableBytes < state->sendBuffer - state->sendQueueLimit) {
@@ -325,7 +325,7 @@ void SctpAssociation::process_RECEIVE_REQUEST(SctpEventCode& event, SctpCommandR
 {
     EV_INFO << "SctpAssociation::process_RECEIVE_REQUEST\n";
     SctpSendReq *sendCommand = check_and_cast<SctpSendReq *>(sctpCommand);
-    if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0) {
+    if ((uint32_t)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0) {
         EV_DEBUG << "Application tries to read from invalid stream id....\n";
     }
     state->numMsgsReq[sendCommand->getSid()] += sendCommand->getNumMsgs();
@@ -355,7 +355,7 @@ void SctpAssociation::process_STREAM_RESET(SctpCommandReq *sctpCommand)
         } else if (state->outstandingBytes > 0) {
             if (rinfo->getRequestType() == RESET_OUTGOING || rinfo->getRequestType() == RESET_INCOMING || rinfo->getRequestType() == RESET_BOTH) {
                 if (rinfo->getStreamsArraySize() > 0) {
-                    for (uint16 i = 0; i < rinfo->getStreamsArraySize(); i++) {
+                    for (uint16_t i = 0; i < rinfo->getStreamsArraySize(); i++) {
                         if ((getBytesInFlightOfStream(rinfo->getStreams(i)) > 0) ||
                                 getFragInProgressOfStream(rinfo->getStreams(i)) ||
                                 !orderedQueueEmptyOfStream(rinfo->getStreams(i)) ||
@@ -367,7 +367,7 @@ void SctpAssociation::process_STREAM_RESET(SctpCommandReq *sctpCommand)
                     }
                 } else {
                     if (rinfo->getRequestType() == RESET_OUTGOING) {
-                        for (uint16 i = 0; i < outboundStreams; i++) {
+                        for (uint16_t i = 0; i < outboundStreams; i++) {
                             if ((getBytesInFlightOfStream(i) > 0) || getFragInProgressOfStream(i)) {
                                 state->streamsPending.push_back(i);
                             } else {

@@ -48,7 +48,7 @@ class INET_API TcpReceiveQueue : public cObject
 {
   protected:
     TcpConnection *conn = nullptr;    // the connection that owns this queue
-    uint32 rcv_nxt = 0;
+    uint32_t rcv_nxt = 0;
     ReorderBuffer reorderBuffer;
 
   protected:
@@ -82,7 +82,7 @@ class INET_API TcpReceiveQueue : public cObject
     /**
      * Set initial receive sequence number.
      */
-    virtual void init(uint32 startSeq);
+    virtual void init(uint32_t startSeq);
 
     virtual std::string str() const override;
 
@@ -93,7 +93,7 @@ class INET_API TcpReceiveQueue : public cObject
      *
      * The method should return the sequence number to be ACKed.
      */
-    virtual uint32 insertBytesFromSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
+    virtual uint32_t insertBytesFromSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -101,22 +101,22 @@ class INET_API TcpReceiveQueue : public cObject
      * It should return nullptr if there's no more data to be passed up --
      * this method is called several times until it returns nullptr.
      */
-    virtual Packet *extractBytesUpTo(uint32 seq);
+    virtual Packet *extractBytesUpTo(uint32_t seq);
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes();
+    virtual uint32_t getAmountOfBufferedBytes();
 
     /**
      * Returns the number of bytes currently free (=available) in queue. freeRcvBuffer = maxRcvBuffer - usedRcvBuffer
      */
-    virtual uint32 getAmountOfFreeBytes(uint32 maxRcvBuffer);
+    virtual uint32_t getAmountOfFreeBytes(uint32_t maxRcvBuffer);
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength();
+    virtual uint32_t getQueueLength();
 
     /**
      * Shows current queue status.
@@ -126,15 +126,15 @@ class INET_API TcpReceiveQueue : public cObject
     /**
      * Returns left edge of enqueued region.
      */
-    virtual uint32 getLE(uint32 fromSeqNum);
+    virtual uint32_t getLE(uint32_t fromSeqNum);
 
     /**
      * Returns right edge of enqueued region.
      */
-    virtual uint32 getRE(uint32 toSeqNum);
+    virtual uint32_t getRE(uint32_t toSeqNum);
 
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
-    virtual uint32 getFirstSeqNo();
+    virtual uint32_t getFirstSeqNo();
 };
 
 } // namespace tcp

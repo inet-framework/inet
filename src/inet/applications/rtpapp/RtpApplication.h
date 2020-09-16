@@ -44,7 +44,7 @@ class INET_API RtpApplication : public cSimpleModule, public LifecycleUnsupporte
 
     // state
     Ipv4Address destinationAddress;    // the address of the unicast peer or of the multicast group
-    uint32 ssrc = 0;
+    uint32_t ssrc = 0;
     bool isActiveSession = false;
 
   protected:

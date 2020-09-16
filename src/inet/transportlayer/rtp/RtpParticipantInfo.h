@@ -55,7 +55,7 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
     /**
      * Default constructor.
      */
-    RtpParticipantInfo(uint32 ssrc = 0);
+    RtpParticipantInfo(uint32_t ssrc = 0);
 
     /**
      * Copy constructor.
@@ -160,12 +160,12 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
     /**
      * Returns the ssrc identifier of the RTP endsystem.
      */
-    virtual uint32 getSsrc() const override;
+    virtual uint32_t getSsrc() const override;
 
     /**
      * Sets the ssrc identifier.
      */
-    virtual void setSsrc(uint32 ssrc) override;
+    virtual void setSsrc(uint32_t ssrc) override;
 
     /**
      * Creates a new SdesItem and adds it to the SdesChunk stored in
@@ -181,7 +181,7 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
      * an 8 character hexadecimal number which is used as name
      * of an RtpParticipantInfo object.
      */
-    static std::string ssrcToName(uint32 ssrc);
+    static std::string ssrcToName(uint32_t ssrc);
 
   private:
     void copy(const RtpParticipantInfo& other);

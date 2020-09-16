@@ -212,7 +212,7 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
     Packet *packet = check_and_cast<Packet *>(rinp->getEncapsulatedPacket());
     const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
 
-    uint32 ssrc = rtpHeader->getSsrc();
+    uint32_t ssrc = rtpHeader->getSsrc();
 
     SsrcGate *ssrcGate = findSSRCGate(ssrc);
 
@@ -279,7 +279,7 @@ void RtpProfile::processOutgoingPacket(RtpInnerPacket *rinp)
     // do nothing with the packet
 }
 
-RtpProfile::SsrcGate *RtpProfile::findSSRCGate(uint32 ssrc)
+RtpProfile::SsrcGate *RtpProfile::findSSRCGate(uint32_t ssrc)
 {
     auto objectIndex = _ssrcGates.find(ssrc);
     if (objectIndex == _ssrcGates.end())
@@ -287,7 +287,7 @@ RtpProfile::SsrcGate *RtpProfile::findSSRCGate(uint32 ssrc)
     return objectIndex->second;
 }
 
-RtpProfile::SsrcGate *RtpProfile::newSSRCGate(uint32 ssrc)
+RtpProfile::SsrcGate *RtpProfile::newSSRCGate(uint32_t ssrc)
 {
     SsrcGate *ssrcGate = new SsrcGate(ssrc);
     bool assigned = false;

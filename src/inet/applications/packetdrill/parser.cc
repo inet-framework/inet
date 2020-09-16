@@ -263,7 +263,7 @@ static void semantic_error(const char* message)
 /* Create and initalize a new integer expression with the given
  * literal value and format string.
  */
-static PacketDrillExpression *new_integer_expression(int64 num, const char *format) {
+static PacketDrillExpression *new_integer_expression(int64_t num, const char *format) {
     PacketDrillExpression *expression = new PacketDrillExpression(EXPR_INTEGER);
     expression->setNum(num);
     expression->setFormat(format);
@@ -464,19 +464,19 @@ union YYSTYPE
 {
 #line 222 "parser.y" /* yacc.c:355  */
 
-    int64 integer;
+    int64_t integer;
     double floating;
     char *string;
     char *reserved;
-    int64 time_usecs;
+    int64_t time_usecs;
     enum direction_t direction;
-    uint16 port;
-    int32 window;
-    uint32 sequence_number;
+    uint16_t port;
+    int32_t window;
+    uint32_t sequence_number;
     struct {
         int protocol;    /* IPPROTO_TCP or IPPROTO_UDP */
-        uint32 start_sequence;
-        uint16 payload_bytes;
+        uint32_t start_sequence;
+        uint16_t payload_bytes;
     } tcp_sequence_info;
     PacketDrillEvent *event;
     PacketDrillPacket *packet;
@@ -498,7 +498,7 @@ union YYSTYPE
     cQueue *stream_list;
     cQueue *cause_list;
     PacketDrillBytes *byte_list;
-    uint8 byte;
+    uint8_t byte;
     PacketDrillSctpChunk *sctp_chunk;
 
 #line 505 "parser.cc" /* yacc.c:355  */
@@ -2650,7 +2650,7 @@ yyreduce:
     if ((yyvsp[0].floating) < 0) {
         semantic_error("negative time");
     }
-    (yyval.time_usecs) = (int64)((yyvsp[0].floating) * 1.0e6); /* convert float secs to s64 microseconds */
+    (yyval.time_usecs) = (int64_t)((yyvsp[0].floating) * 1.0e6); /* convert float secs to s64 microseconds */
 }
 #line 2656 "parser.cc" /* yacc.c:1646  */
     break;
@@ -2661,7 +2661,7 @@ yyreduce:
     if ((yyvsp[0].integer) < 0) {
         semantic_error("negative time");
     }
-    (yyval.time_usecs) = (int64)((yyvsp[0].integer) * 1000000); /* convert int secs to s64 microseconds */
+    (yyval.time_usecs) = (int64_t)((yyvsp[0].integer) * 1000000); /* convert int secs to s64 microseconds */
 }
 #line 2667 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3188,7 +3188,7 @@ yyreduce:
   case 83:
 #line 758 "parser.y" /* yacc.c:1646  */
     {
-    uint64 flags;
+    uint64_t flags;
     char *c;
 
     flags = 0;
@@ -3262,7 +3262,7 @@ yyreduce:
   case 87:
 #line 815 "parser.y" /* yacc.c:1646  */
     {
-    uint64 flags;
+    uint64_t flags;
     char *c;
 
     flags = 0;
@@ -3315,7 +3315,7 @@ yyreduce:
   case 91:
 #line 851 "parser.y" /* yacc.c:1646  */
     {
-    uint64 flags;
+    uint64_t flags;
     char *c;
 
     flags = 0;
@@ -4419,7 +4419,7 @@ yyreduce:
   case 221:
 #line 1493 "parser.y" /* yacc.c:1646  */
     {
-    uint32 val, ecr;
+    uint32_t val, ecr;
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_TIMESTAMP, TCPOLEN_TIMESTAMP);
     if (!is_valid_u32((yyvsp[-2].integer))) {
         semantic_error("ts val out of range");

@@ -78,7 +78,7 @@ void TcpConnection::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<cons
 
     if (!tcpHeader->getAckBit()) {
         EV_DETAIL << "ACK bit not set: sending RST+ACK\n";
-        uint32 ackNo = tcpHeader->getSequenceNo() + tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get() + tcpHeader->getSynFinLen();
+        uint32_t ackNo = tcpHeader->getSequenceNo() + tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get() + tcpHeader->getSynFinLen();
         sendRstAck(0, ackNo, destAddr, srcAddr, tcpHeader->getDestPort(), tcpHeader->getSrcPort());
     }
     else {
@@ -125,7 +125,7 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
 
     long int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
     uint32_t payloadSeq = tcpHeader->getSequenceNo();
-    uint32 firstSeq = receiveQueue->getFirstSeqNo();
+    uint32_t firstSeq = receiveQueue->getFirstSeqNo();
     if (seqLess(payloadSeq, firstSeq)) {
         long delta = firstSeq - payloadSeq;
         payloadSeq += delta;
@@ -149,7 +149,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) {    // Header options present? TCP_HEADER_OCTETS = 20
         // PAWS
         if (state->ts_enabled) {
-            uint32 tsval = getTSval(tcpHeader);
+            uint32_t tsval = getTSval(tcpHeader);
             if (tsval != 0 && seqLess(tsval, state->ts_recent) &&
                 (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH)    // PAWS_IDLE_TIME_THRESH = 24 days
             {
@@ -297,7 +297,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         return TCP_E_IGNORE;
     }
 
-    uint32 old_snd_una = state->snd_una;
+    uint32_t old_snd_una = state->snd_una;
 
     TcpEventCode event = TCP_E_IGNORE;
 
@@ -331,7 +331,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         event = TCP_E_RCV_ACK;
     }
 
-    uint32 old_snd_nxt = state->snd_nxt;    // later we'll need to see if snd_nxt changed
+    uint32_t old_snd_nxt = state->snd_nxt;    // later we'll need to see if snd_nxt changed
     // Note: If one of the last data segments is lost while already in LAST-ACK state (e.g. if using TCPEchoApps)
     // TCP must be able to process acceptable acknowledgments, however please note RFC 793, page 73:
     // "LAST-ACK STATE
@@ -455,7 +455,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     //
     // RFC 793: seventh, process the segment text,
     //
-    uint32 old_rcv_nxt = state->rcv_nxt;    // if rcv_nxt changes, we need to send/schedule an ACK
+    uint32_t old_rcv_nxt = state->rcv_nxt;    // if rcv_nxt changes, we need to send/schedule an ACK
 
     if (fsm.getState() == TCP_S_SYN_RCVD || fsm.getState() == TCP_S_ESTABLISHED ||
         fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2)
@@ -506,7 +506,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 // (to avoid "Failure to retain above-sequence data" problem, RFC 2525
                 // section 2.5).
 
-                uint32 old_usedRcvBuffer = state->usedRcvBuffer;
+                uint32_t old_usedRcvBuffer = state->usedRcvBuffer;
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
 
                 if (seqGreater(state->snd_una, old_snd_una)) {
@@ -632,7 +632,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // segment is "above sequence" (ie. RCV.NXT < SEG.SEQ), we cannot
         // advance RCV.NXT over the FIN. Instead we remember this sequence
         // number and do it later.
-        uint32 fin_seq = (uint32)tcpHeader->getSequenceNo() + (uint32)payloadLength;
+        uint32_t fin_seq = (uint32_t)tcpHeader->getSequenceNo() + (uint32_t)payloadLength;
 
         if (state->rcv_nxt == fin_seq) {
             // advance rcv_nxt over FIN now
@@ -1212,7 +1212,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     }
     else if (seqLE(tcpHeader->getAckNo(), state->snd_max)) {
         // ack in window.
-        uint32 old_snd_una = state->snd_una;
+        uint32_t old_snd_una = state->snd_una;
         state->snd_una = tcpHeader->getAckNo();
 
         emit(unackedSignal, state->snd_max - state->snd_una);
@@ -1232,7 +1232,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             tcpAlgorithm->rttMeasurementCompleteUsingTS(getTSecr(tcpHeader));
         // Note: If TS is disabled the RTT measurement is completed in TcpBaseAlg::receivedDataAck()
 
-        uint32 discardUpToSeq = state->snd_una;
+        uint32_t discardUpToSeq = state->snd_una;
 
         // our FIN acked?
         if (state->send_fin && tcpHeader->getAckNo() == state->snd_fin_seq + 1) {

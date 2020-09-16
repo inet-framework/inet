@@ -506,10 +506,10 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
     //      >0       0     not acceptable
     //      >0      >0     RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND
     //                  or RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND"
-    uint32 len = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
-    uint32 seqNo = tcpHeader->getSequenceNo();
-    uint32 ackNo = tcpHeader->getAckNo();
-    uint32 rcvWndEnd = state->rcv_nxt + state->rcv_wnd;
+    uint32_t len = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
+    uint32_t seqNo = tcpHeader->getSequenceNo();
+    uint32_t ackNo = tcpHeader->getAckNo();
+    uint32_t rcvWndEnd = state->rcv_nxt + state->rcv_wnd;
     bool ret;
 
     if (len == 0) {
@@ -636,12 +636,12 @@ void TcpConnection::sendSynAck()
     tcpAlgorithm->ackSent();
 }
 
-void TcpConnection::sendRst(uint32 seqNo)
+void TcpConnection::sendRst(uint32_t seqNo)
 {
     sendRst(seqNo, localAddr, remoteAddr, localPort, remotePort);
 }
 
-void TcpConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort)
+void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int srcPort, int destPort)
 {
     const auto& tcpHeader = makeShared<TcpHeader>();
 
@@ -659,7 +659,7 @@ void TcpConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPo
     sendToIP(fp, tcpHeader, src, dest);
 }
 
-void TcpConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort)
+void TcpConnection::sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Address dest, int srcPort, int destPort)
 {
     const auto& tcpHeader = makeShared<TcpHeader>();
 
@@ -748,12 +748,12 @@ void TcpConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-uint32 TcpConnection::sendSegment(uint32 bytes)
+uint32_t TcpConnection::sendSegment(uint32_t bytes)
 {
     //FIXME check it: where is the right place for the next code (sacked/rexmitted)
     if (state->sack_enabled && state->afterRto) {
         // check rexmitQ and try to forward snd_nxt before sending new data
-        uint32 forward = rexmitQueue->checkRexmitQueueForSackedOrRexmittedSegments(state->snd_nxt);
+        uint32_t forward = rexmitQueue->checkRexmitQueueForSackedOrRexmittedSegments(state->snd_nxt);
 
         if (forward > 0) {
             EV_INFO << "sendSegment(" << bytes << ") forwarded " << forward << " bytes of snd_nxt from " << state->snd_nxt;
@@ -763,7 +763,7 @@ uint32 TcpConnection::sendSegment(uint32 bytes)
         }
     }
 
-    uint32 buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+    uint32_t buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
     if (bytes > buffered) // last segment?
         bytes = buffered;
@@ -781,7 +781,7 @@ uint32 TcpConnection::sendSegment(uint32 bytes)
     if (bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
 
-    uint32 sentBytes = bytes;
+    uint32_t sentBytes = bytes;
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
     Packet *tcpSegment = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
@@ -790,7 +790,7 @@ uint32 TcpConnection::sendSegment(uint32 bytes)
     ASSERT(tcpHeader != nullptr);
 
     //Remember old_snd_next to store in SACK rexmit queue.
-    uint32 old_snd_nxt = state->snd_nxt;
+    uint32_t old_snd_nxt = state->snd_nxt;
 
     tcpHeader->setAckNo(state->rcv_nxt);
     tcpHeader->setAckBit(true);
@@ -835,8 +835,8 @@ uint32 TcpConnection::sendSegment(uint32 bytes)
     sendToIP(tcpSegment, tcpHeader);
 
     // let application fill queue again, if there is space
-    const uint32 alreadyQueued = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
-    const uint32 abated = (state->sendQueueLimit > alreadyQueued) ? state->sendQueueLimit - alreadyQueued : 0;
+    const uint32_t alreadyQueued = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());
+    const uint32_t abated = (state->sendQueueLimit > alreadyQueued) ? state->sendQueueLimit - alreadyQueued : 0;
     if ((state->sendQueueLimit > 0) && !state->queueUpdate && (abated >= state->snd_mss)) {    // request more data if space >= 1 MSS
         // Tell upper layer readiness to accept more data
         sendIndicationToApp(TCP_I_SEND_MSG, abated);
@@ -852,28 +852,28 @@ uint32 TcpConnection::sendSegment(uint32 bytes)
     return sentBytes;
 }
 
-bool TcpConnection::sendData(uint32 congestionWindow)
+bool TcpConnection::sendData(uint32_t congestionWindow)
 {
     // we'll start sending from snd_max, if not after RTO
     if (!state->afterRto)
         state->snd_nxt = state->snd_max;
 
-    uint32 old_highRxt = 0;
+    uint32_t old_highRxt = 0;
 
     if (state->sack_enabled)
         old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
 
     // check how many bytes we have
-    uint32 buffered = sendQueue->getBytesAvailable(state->snd_nxt);
+    uint32_t buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
     if (buffered == 0)
         return false;
 
     // maxWindow is minimum of snd_wnd and congestionWindow (snd_cwnd)
-    uint32 maxWindow = std::min(state->snd_wnd, congestionWindow);
+    uint32_t maxWindow = std::min(state->snd_wnd, congestionWindow);
 
     // effectiveWindow: number of bytes we're allowed to send now
-    int64 effectiveWin = (int64)maxWindow - (state->snd_nxt - state->snd_una);
+    int64_t effectiveWin = (int64_t)maxWindow - (state->snd_nxt - state->snd_una);
 
     if (effectiveWin <= 0) {
         EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd
@@ -881,24 +881,24 @@ bool TcpConnection::sendData(uint32 congestionWindow)
         return false;
     }
 
-    uint32 bytesToSend = std::min(buffered, (uint32)effectiveWin);
+    uint32_t bytesToSend = std::min(buffered, (uint32_t)effectiveWin);
 
-    // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32 bytes)' )
+    // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32_t bytes)' )
     const auto& tmpTcpHeader = makeShared<TcpHeader>();
     tmpTcpHeader->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
     writeHeaderOptions(tmpTcpHeader);
     uint options_len = B(tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get();
     ASSERT(options_len < state->snd_mss);
-    uint32 effectiveMss = state->snd_mss - options_len;
+    uint32_t effectiveMss = state->snd_mss - options_len;
 
-    uint32 old_snd_nxt = state->snd_nxt;
+    uint32_t old_snd_nxt = state->snd_nxt;
 
     // start sending 'bytesToSend' bytes
     EV_INFO << "May send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin << ", in buffer " << buffered << " bytes)\n";
 
     // send whole segments
     while (bytesToSend >= effectiveMss) {
-        uint32 sentBytes = sendSegment(effectiveMss);
+        uint32_t sentBytes = sendSegment(effectiveMss);
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
     }
@@ -945,7 +945,7 @@ bool TcpConnection::sendProbe()
         return false;
     }
 
-    uint32 old_snd_nxt = state->snd_nxt;
+    uint32_t old_snd_nxt = state->snd_nxt;
 
     EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_nxt << "\n";
     sendSegment(1);
@@ -972,13 +972,13 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     if (state && state->ect)
         state->rexmit = true;
 
-    uint32 old_snd_nxt = state->snd_nxt;
+    uint32_t old_snd_nxt = state->snd_nxt;
 
     // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     state->snd_nxt = state->snd_una;
 
     // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
-    uint32 bytes = std::min(std::min(state->snd_mss, state->snd_max - state->snd_nxt),
+    uint32_t bytes = std::min(std::min(state->snd_mss, state->snd_max - state->snd_nxt),
                 sendQueue->getBytesAvailable(state->snd_nxt));
 
     // FIN (without user data) needs to be resent
@@ -1030,7 +1030,7 @@ void TcpConnection::retransmitData()
     // retransmit everything from snd_una
     state->snd_nxt = state->snd_una;
 
-    uint32 bytesToSend = state->snd_max - state->snd_nxt;
+    uint32_t bytesToSend = state->snd_max - state->snd_nxt;
 
     // FIN (without user data) needs to be resent
     if (bytesToSend == 0 && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq()) {
@@ -1048,9 +1048,9 @@ void TcpConnection::retransmitData()
 
     // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend > 0) {
-        uint32 bytes = std::min(bytesToSend, state->snd_mss);
+        uint32_t bytes = std::min(bytesToSend, state->snd_mss);
         bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
-        uint32 sentBytes = sendSegment(bytes);
+        uint32_t sentBytes = sendSegment(bytes);
 
         // Do not send packets after the FIN.
         // fixes bug that occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744
@@ -1144,7 +1144,7 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
     //
     // The value of snd_mss (SMSS) is set to the minimum of snd_mss (local parameter) and
     // the value specified in the MSS option received during connection startup.
-    state->snd_mss = std::min(state->snd_mss, (uint32)option.getMaxSegmentSize());
+    state->snd_mss = std::min(state->snd_mss, (uint32_t)option.getMaxSegmentSize());
 
     if (state->snd_mss == 0)
         state->snd_mss = 536;
@@ -1407,7 +1407,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     return *tcpHeader;
 }
 
-uint32 TcpConnection::getTSval(const Ptr<const TcpHeader>& tcpHeader) const
+uint32_t TcpConnection::getTSval(const Ptr<const TcpHeader>& tcpHeader) const
 {
     for (uint i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
         const TcpOption *option = tcpHeader->getHeaderOption(i);
@@ -1418,7 +1418,7 @@ uint32 TcpConnection::getTSval(const Ptr<const TcpHeader>& tcpHeader) const
     return 0;
 }
 
-uint32 TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpHeader) const
+uint32_t TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpHeader) const
 {
     for (uint i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
         const TcpOption *option = tcpHeader->getHeaderOption(i);
@@ -1443,7 +1443,7 @@ void TcpConnection::updateRcvQueueVars()
 
 unsigned short TcpConnection::updateRcvWnd()
 {
-    uint32 win = 0;
+    uint32_t win = 0;
 
     // update receive queue related state variables and statistics
     updateRcvQueueVars();
@@ -1478,7 +1478,7 @@ unsigned short TcpConnection::updateRcvWnd()
     emit(rcvWndSignal, state->rcv_wnd);
 
     // scale rcv_wnd:
-    uint32 scaled_rcv_wnd = state->rcv_wnd;
+    uint32_t scaled_rcv_wnd = state->rcv_wnd;
     if (state->ws_enabled && state->rcv_wnd_scale) {
         ASSERT(state->rcv_wnd_scale <= 14);   // RFC 1323, page 11: "the shift count must be limited to 14"
         scaled_rcv_wnd = scaled_rcv_wnd >> state->rcv_wnd_scale;
@@ -1491,7 +1491,7 @@ unsigned short TcpConnection::updateRcvWnd()
 
 void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
 {
-    uint32 true_window = tcpHeader->getWindow();
+    uint32_t true_window = tcpHeader->getWindow();
     // RFC 1323, page 10:
     // "The window field (SEG.WND) in the header of every incoming
     // segment, with the exception of SYN segments, is left-shifted
@@ -1516,7 +1516,7 @@ void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool do
     }
 }
 
-void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow)
+void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestionWindow)
 {
     ASSERT(state->limited_transmit_enabled);
 
@@ -1551,28 +1551,28 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
     // receivers."
     if (!state->sack_enabled || (state->sack_enabled && state->sackedBytes_old != state->sackedBytes)) {
         // check how many bytes we have
-        uint32 buffered = sendQueue->getBytesAvailable(state->snd_max);
+        uint32_t buffered = sendQueue->getBytesAvailable(state->snd_max);
 
         if (buffered >= state->snd_mss || (!fullSegmentsOnly && buffered > 0)) {
-            uint32 outstandingData = state->snd_max - state->snd_una;
+            uint32_t outstandingData = state->snd_max - state->snd_una;
 
             // check conditions from RFC 3042
             if (outstandingData + state->snd_mss <= state->snd_wnd &&
                 outstandingData + state->snd_mss <= congestionWindow + 2 * state->snd_mss)
             {
                 // RFC 3042, page 3: "(...)the sender can only send two segments beyond the congestion window (cwnd)."
-                uint32 effectiveWin = std::min(state->snd_wnd, congestionWindow) - outstandingData + 2 * state->snd_mss;
+                uint32_t effectiveWin = std::min(state->snd_wnd, congestionWindow) - outstandingData + 2 * state->snd_mss;
 
                 // bytes: number of bytes we're allowed to send now
-                uint32 bytes = std::min(effectiveWin, state->snd_mss);
+                uint32_t bytes = std::min(effectiveWin, state->snd_mss);
 
                 if (bytes >= state->snd_mss || (!fullSegmentsOnly && bytes > 0)) {
-                    uint32 old_snd_nxt = state->snd_nxt;
+                    uint32_t old_snd_nxt = state->snd_nxt;
                     // we'll start sending from snd_max
                     state->snd_nxt = state->snd_max;
 
                     EV_DETAIL << "Limited Transmit algorithm enabled. Sending one new segment.\n";
-                    uint32 sentBytes = sendSegment(bytes);
+                    uint32_t sentBytes = sendSegment(bytes);
 
                     if (seqGreater(state->snd_nxt, state->snd_max))
                         state->snd_max = state->snd_nxt;
@@ -1592,15 +1592,15 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
     }
 }
 
-uint32 TcpConnection::convertSimtimeToTS(simtime_t simtime)
+uint32_t TcpConnection::convertSimtimeToTS(simtime_t simtime)
 {
     ASSERT(SimTime::getScaleExp() <= -3);
 
-    uint32 timestamp = (uint32)(simtime.inUnit(SIMTIME_MS));
+    uint32_t timestamp = (uint32_t)(simtime.inUnit(SIMTIME_MS));
     return timestamp;
 }
 
-simtime_t TcpConnection::convertTSToSimtime(uint32 timestamp)
+simtime_t TcpConnection::convertTSToSimtime(uint32_t timestamp)
 {
     ASSERT(SimTime::getScaleExp() <= -3);
 

@@ -817,10 +817,10 @@ void TcpNsc::gettime(unsigned int *secP, unsigned int *usecP)
     *usec = (unsigned int)((t - *sec) * 1000000 + 0.5);
 #else // ifdef USE_DOUBLE_SIMTIME
     simtime_t t = simTime();
-    int64 raw = t.raw();
-    int64 scale = t.getScale();
-    int64 secs = raw / scale;
-    int64 usecs = (raw - (secs * scale));
+    int64_t raw = t.raw();
+    int64_t scale = t.getScale();
+    int64_t secs = raw / scale;
+    int64_t usecs = (raw - (secs * scale));
 
     //usecs = usecs * 1000000 / scale;
     if (scale > 1000000) // scale always 10^n

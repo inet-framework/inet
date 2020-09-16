@@ -28,7 +28,7 @@ namespace inet {
 class INET_API BitVector
 {
   private:
-    std::vector<uint8> bytes;
+    std::vector<uint8_t> bytes;
     int size;
 
   private:
@@ -42,7 +42,7 @@ class INET_API BitVector
     BitVector(unsigned int bits);
     BitVector(unsigned int bits, unsigned int fixedSize);
     BitVector(const BitVector& other) { copy(other); }
-    BitVector(const std::vector<uint8>& bytes) : bytes(bytes), size(bytes.size() * 8) { }
+    BitVector(const std::vector<uint8_t>& bytes) : bytes(bytes), size(bytes.size() * 8) { }
 
     unsigned int toDecimal() const;
     unsigned int reverseToDecimal() const;
@@ -54,7 +54,7 @@ class INET_API BitVector
     void appendByte(uint8_t value);
     unsigned int getSize() const { return size; }
     unsigned int getNumberOfBytes() const { return bytes.size(); }
-    const std::vector<uint8>& getBytes() const { return bytes; }
+    const std::vector<uint8_t>& getBytes() const { return bytes; }
     int computeHammingDistance(const BitVector& u) const;
     friend std::ostream& operator<<(std::ostream& out, const BitVector& bitVector);
     BitVector& operator=(const BitVector& rhs);

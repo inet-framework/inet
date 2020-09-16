@@ -39,9 +39,9 @@ class INET_API SctpSendStream : public cObject
 {
   protected:
     SctpAssociation *assoc;
-    uint16 streamId;
-    uint16 nextStreamSeqNum;
-    uint32 bytesInFlight;
+    uint16_t streamId;
+    uint16_t nextStreamSeqNum;
+    uint32_t bytesInFlight;
     bool resetRequested;
     bool fragInProgress;
     cPacketQueue *streamQ;
@@ -49,19 +49,19 @@ class INET_API SctpSendStream : public cObject
 
   public:
 
-    SctpSendStream(SctpAssociation *assoc, const uint16 id);
+    SctpSendStream(SctpAssociation *assoc, const uint16_t id);
     ~SctpSendStream();
 
     cPacketQueue *getStreamQ() const { return streamQ; };
     cPacketQueue *getUnorderedStreamQ() const { return uStreamQ; };
-    uint32 getNextStreamSeqNum();
-    uint32 getBytesInFlight() const { return bytesInFlight; };
-    void setNextStreamSeqNum(const uint16 num);
-    void setBytesInFlight(const uint32 bytes) { bytesInFlight = bytes; };
+    uint32_t getNextStreamSeqNum();
+    uint32_t getBytesInFlight() const { return bytesInFlight; };
+    void setNextStreamSeqNum(const uint16_t num);
+    void setBytesInFlight(const uint32_t bytes) { bytesInFlight = bytes; };
     bool getFragInProgress() const { return fragInProgress; };
     void setFragInProgress(const bool frag) { fragInProgress = frag; };
-    uint16 getStreamId() const { return streamId; };
-    void setStreamId(const uint16 id) { streamId = id; };
+    uint16_t getStreamId() const { return streamId; };
+    void setStreamId(const uint16_t id) { streamId = id; };
     void deleteQueue();
 };
 

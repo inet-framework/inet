@@ -99,7 +99,7 @@ size_t SctpHeader::getSctpChunksArraySize() const
 }
 
 
-void SctpHeader::replaceSctpChunk(SctpChunk *chunk, uint32 k)
+void SctpHeader::replaceSctpChunk(SctpChunk *chunk, uint32_t k)
 {
     setSctpChunks(k, chunk);
 }
@@ -328,7 +328,7 @@ void SctpIncomingSsnResetRequestParameter::copy(const SctpIncomingSsnResetReques
 {
     setSrReqSn(other.getSrReqSn());
     setStreamNumbersArraySize(other.getStreamNumbersArraySize());
-    for (uint16 i = 0; i < other.getStreamNumbersArraySize(); i++) {
+    for (uint16_t i = 0; i < other.getStreamNumbersArraySize(); i++) {
         setStreamNumbers(i, other.getStreamNumbers(i));
     }
 }

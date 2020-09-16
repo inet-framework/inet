@@ -34,7 +34,7 @@ TcpReceiveQueue::~TcpReceiveQueue()
 {
 }
 
-void TcpReceiveQueue::init(uint32 startSeq)
+void TcpReceiveQueue::init(uint32_t startSeq)
 {
     rcv_nxt = startSeq;
 
@@ -112,9 +112,9 @@ Packet *TcpReceiveQueue::extractBytesUpTo(uint32_t seq)
     return nullptr;
 }
 
-uint32 TcpReceiveQueue::getAmountOfBufferedBytes()
+uint32_t TcpReceiveQueue::getAmountOfBufferedBytes()
 {
-    uint32 bytes = 0;
+    uint32_t bytes = 0;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++)
         bytes += B(reorderBuffer.getRegionLength(i)).get();
@@ -122,14 +122,14 @@ uint32 TcpReceiveQueue::getAmountOfBufferedBytes()
     return bytes;
 }
 
-uint32 TcpReceiveQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
+uint32_t TcpReceiveQueue::getAmountOfFreeBytes(uint32_t maxRcvBuffer)
 {
-    uint32 usedRcvBuffer = getAmountOfBufferedBytes();
-    uint32 freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
+    uint32_t usedRcvBuffer = getAmountOfBufferedBytes();
+    uint32_t freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
     return (maxRcvBuffer > usedRcvBuffer) ? freeRcvBuffer : 0;
 }
 
-uint32 TcpReceiveQueue::getQueueLength()
+uint32_t TcpReceiveQueue::getQueueLength()
 {
     return reorderBuffer.getNumRegions();
 }
@@ -139,7 +139,7 @@ void TcpReceiveQueue::getQueueStatus()
     EV_DEBUG << "receiveQLength=" << reorderBuffer.getNumRegions() << " " << str() << "\n";
 }
 
-uint32 TcpReceiveQueue::getLE(uint32 fromSeqNum)
+uint32_t TcpReceiveQueue::getLE(uint32_t fromSeqNum)
 {
     B fs = seqToOffset(fromSeqNum);
 
@@ -151,7 +151,7 @@ uint32 TcpReceiveQueue::getLE(uint32 fromSeqNum)
     return fromSeqNum;
 }
 
-uint32 TcpReceiveQueue::getRE(uint32 toSeqNum)
+uint32_t TcpReceiveQueue::getRE(uint32_t toSeqNum)
 {
     B fs = seqToOffset(toSeqNum);
 
@@ -163,7 +163,7 @@ uint32 TcpReceiveQueue::getRE(uint32 toSeqNum)
     return toSeqNum;
 }
 
-uint32 TcpReceiveQueue::getFirstSeqNo()
+uint32_t TcpReceiveQueue::getFirstSeqNo()
 {
     if (reorderBuffer.getNumRegions() == 0)
         return rcv_nxt;

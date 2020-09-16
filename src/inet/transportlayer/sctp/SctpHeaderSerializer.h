@@ -45,15 +45,15 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
      * the frame over a raw socket.)
      * Returns the length of data written into buffer.
      */
-   // int32 serialize(const SctpHeader *msg, uint8 *buf, uint32 bufsize);
+   // int32_t serialize(const SctpHeader *msg, uint8_t *buf, uint32_t bufsize);
 
     /**
      * Puts a packet sniffed from the wire into an SCTPMessage.
      */
-  //  void parse(const uint8 *buf, uint32 bufsize, SctpHeader *dest);
+  //  void parse(const uint8_t *buf, uint32_t bufsize, SctpHeader *dest);
 
-    static uint32 checksum(const uint8 *buf, uint32 len);
-    static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
+    static uint32_t checksum(const uint8_t *buf, uint32_t len);
+    static void hmacSha1(const uint8_t *buf, uint32_t buflen, const uint8_t *key, uint32_t keylen, uint8_t *digest);
     void calculateSharedKey();
     bool compareRandom();
 

@@ -93,7 +93,7 @@ void DumbTcp::receiveSeqChanged()
     conn->sendAck();
 }
 
-void DumbTcp::receivedDataAck(uint32)
+void DumbTcp::receivedDataAck(uint32_t)
 {
     // ack may have freed up some room in the window, try sending.
     conn->sendData(65535);
@@ -104,7 +104,7 @@ void DumbTcp::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 }
 
-void DumbTcp::receivedAckForDataNotYetSent(uint32 seq)
+void DumbTcp::receivedAckForDataNotYetSent(uint32_t seq)
 {
     EV_INFO << "ACK acks something not yet sent, sending immediate ACK\n";
     conn->sendAck();
@@ -114,12 +114,12 @@ void DumbTcp::ackSent()
 {
 }
 
-void DumbTcp::dataSent(uint32 fromseq)
+void DumbTcp::dataSent(uint32_t fromseq)
 {
     conn->rescheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
 }
 
-void DumbTcp::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+void DumbTcp::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
 }
 
@@ -127,7 +127,7 @@ void DumbTcp::restartRexmitTimer()
 {
 }
 
-void DumbTcp::rttMeasurementCompleteUsingTS(uint32 echoedTS)
+void DumbTcp::rttMeasurementCompleteUsingTS(uint32_t echoedTS)
 {
 }
 

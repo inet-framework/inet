@@ -23,7 +23,7 @@
 namespace inet {
 namespace sctp {
 
-SctpSendStream::SctpSendStream(SctpAssociation *assoc_, const uint16 id)
+SctpSendStream::SctpSendStream(SctpAssociation *assoc_, const uint16_t id)
 {
     assoc = assoc_;
     streamId = id;
@@ -48,7 +48,7 @@ void SctpSendStream::deleteQueue()
 {
     SctpDataMsg *datMsg;
     SctpSimpleMessage *smsg;
-    int32 count = streamQ->getLength();
+    int32_t count = streamQ->getLength();
     while (!streamQ->isEmpty()) {
         datMsg = check_and_cast<SctpDataMsg *>(streamQ->pop());
         smsg = check_and_cast<SctpSimpleMessage *>(datMsg->decapsulate());
@@ -66,11 +66,11 @@ void SctpSendStream::deleteQueue()
     delete uStreamQ;
 }
 
-uint32 SctpSendStream::getNextStreamSeqNum() {
+uint32_t SctpSendStream::getNextStreamSeqNum() {
     return nextStreamSeqNum;
 };
 
-void SctpSendStream::setNextStreamSeqNum(const uint16 num) {
+void SctpSendStream::setNextStreamSeqNum(const uint16_t num) {
     nextStreamSeqNum = num;
 };
 

@@ -450,7 +450,7 @@ void PlotFigure::redrawXTicks()
             xTicks.pop_back();
         }
 
-    for (uint32 i = 0; i < xTicks.size(); ++i) {
+    for (uint32_t i = 0; i < xTicks.size(); ++i) {
         double x = bounds.x + bounds.width * (i * xTickSize + shifting) / (maxX - minX);
         double y = bounds.y + bounds.height;
         if (x > bounds.x && x < bounds.x + bounds.width) {

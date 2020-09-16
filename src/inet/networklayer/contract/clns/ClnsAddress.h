@@ -36,9 +36,9 @@ namespace inet {
 class ClnsAddress
 {
   private:
-    uint64 systemID;
-    uint64 areaID;
-    uint8 nsel; //this field is probably not part of NET, but part of NSAP (still confused)
+    uint64_t systemID;
+    uint64_t areaID;
+    uint8_t nsel; //this field is probably not part of NET, but part of NSAP (still confused)
 
   public:
     enum AddressCategory {
@@ -49,8 +49,8 @@ class ClnsAddress
 
     ClnsAddress();
     ClnsAddress(std::string net);
-    ClnsAddress(uint64 areaID, uint64 systemID, uint8 nsel = 0);   //FIXME remove nsel initialization
-    void set(uint64 areaID, uint64 systemID, uint8 nsel = 0);   //FIXME remove nsel initialization
+    ClnsAddress(uint64_t areaID, uint64_t systemID, uint8_t nsel = 0);   //FIXME remove nsel initialization
+    void set(uint64_t areaID, uint64_t systemID, uint8_t nsel = 0);   //FIXME remove nsel initialization
     virtual ~ClnsAddress();
 
     bool isUnspecified() const;
@@ -66,10 +66,10 @@ class ClnsAddress
      */
     bool equals(const ClnsAddress& toCmp) const { return (systemID == toCmp.systemID && areaID == toCmp.areaID); }
 
-    uint64 getAreaId() const;
-    uint64 getSystemId() const;
-    uint8 getNsel() const;
-    void setNsel(uint8 nsel);
+    uint64_t getAreaId() const;
+    uint64_t getSystemId() const;
+    uint8_t getNsel() const;
+    void setNsel(uint8_t nsel);
 
     /**
      * Returns equals(addr).

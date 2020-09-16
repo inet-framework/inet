@@ -1444,7 +1444,7 @@ void RsvpTe::processPathTearMsg(Packet *pk)
     bool modified = false;
 
     for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->OutInterface.getInt() != (uint32)lspid)
+        if (it->OutInterface.getInt() != (uint32_t)lspid)
             continue;
 
         // merging backup exists

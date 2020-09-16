@@ -37,7 +37,7 @@ void tryenqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes)
     EV << " --> " << sq->str() <<"\n";
 }
 
-Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32 fromSeq, uint32 toSeq)
+Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32_t fromSeq, uint32_t toSeq)
 {
     EV << "SQ:" << "createSegmentWithBytes(" << fromSeq << ", " << toSeq << "):";
 
@@ -65,7 +65,7 @@ Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32 fromSeq, uint32 toSeq)
     return pk;
 }
 
-void discardUpTo(TcpSendQueue *sq, uint32 seqNum)
+void discardUpTo(TcpSendQueue *sq, uint32_t seqNum)
 {
     EV << "SQ:" << "discardUpTo(" << seqNum << "): ";
     sq->discardUpTo(seqNum);
@@ -81,7 +81,7 @@ void insertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
     uint32_t beg = tcphdr->getSequenceNo();
     uint32_t end = beg + tcpseg->getByteLength() - B(tcphdr->getHeaderLength()).get();
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
-    uint32 rcv_nxt = rq->insertBytesFromSegment(tcpseg, tcphdr);
+    uint32_t rcv_nxt = rq->insertBytesFromSegment(tcpseg, tcphdr);
     (void)rcv_nxt;
     delete tcpseg;
     EV << " --> " << rq->str() <<"\n";
@@ -94,7 +94,7 @@ void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
     uint32_t end = beg + tcpseg->getByteLength() - B(tcphdr->getHeaderLength()).get();
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
     try {
-        uint32 rcv_nxt = rq->insertBytesFromSegment(tcpseg,tcphdr);
+        uint32_t rcv_nxt = rq->insertBytesFromSegment(tcpseg,tcphdr);
         (void)rcv_nxt;
     } catch (cRuntimeError& e) {
         EV << " --> Error: " << e.what();
@@ -104,7 +104,7 @@ void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
     EV << " --> " << rq->str() <<"\n";
 }
 
-void extractBytesUpTo(TcpReceiveQueue *rq, uint32 seq)
+void extractBytesUpTo(TcpReceiveQueue *rq, uint32_t seq)
 {
     EV << "RQ:" << "extractUpTo(" << seq << "): <";
     cPacket *msg;
@@ -118,7 +118,7 @@ void extractBytesUpTo(TcpReceiveQueue *rq, uint32 seq)
 
 /////////////////////////////////////////////////////////////////////////
 
-void insertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end)
+void insertSegment(TcpReceiveQueue *q, uint32_t beg, uint32_t end)
 {
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
 
@@ -130,14 +130,14 @@ void insertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end)
     tcpseg->setSequenceNo(beg);
     msg->insertAtFront(tcpseg);
 
-    uint32 rcv_nxt = q->insertBytesFromSegment(msg, tcpseg);
+    uint32_t rcv_nxt = q->insertBytesFromSegment(msg, tcpseg);
     (void)rcv_nxt;
     delete msg;
 
     EV << " --> " << q->str() <<"\n";
 }
 
-void tryinsertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end)
+void tryinsertSegment(TcpReceiveQueue *q, uint32_t beg, uint32_t end)
 {
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
 
@@ -150,7 +150,7 @@ void tryinsertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end)
     msg->insertAtFront(tcpseg);
 
     try {
-        uint32 rcv_nxt = q->insertBytesFromSegment(msg, tcpseg);
+        uint32_t rcv_nxt = q->insertBytesFromSegment(msg, tcpseg);
         (void)rcv_nxt;
     } catch (cRuntimeError& e) {
         EV << " --> Error: " << e.what();

@@ -127,7 +127,7 @@ int SdesItem::getSdesTotalLength() const
 
 Register_Class(SdesChunk);
 
-SdesChunk::SdesChunk(const char *name, uint32 ssrc) : cArray(name)
+SdesChunk::SdesChunk(const char *name, uint32_t ssrc) : cArray(name)
 {
     _ssrc = ssrc;
     _length = 4;
@@ -198,12 +198,12 @@ void SdesChunk::addSDESItem(SdesItem *sdesItem)
     _length += sdesItem->getSdesTotalLength();
 }
 
-uint32 SdesChunk::getSsrc() const
+uint32_t SdesChunk::getSsrc() const
 {
     return _ssrc;
 }
 
-void SdesChunk::setSsrc(uint32 ssrc)
+void SdesChunk::setSsrc(uint32_t ssrc)
 {
     _ssrc = ssrc;
 }

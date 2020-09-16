@@ -381,7 +381,7 @@ void SctpClient::sendRequest(bool last)
     auto applicationData = makeShared<BytesChunk>();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (uint32 i = 0; i < sendBytes; i++)
+    for (uint32_t i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());

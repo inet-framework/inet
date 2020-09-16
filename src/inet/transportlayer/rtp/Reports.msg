@@ -27,16 +27,16 @@ namespace inet::rtp;
 class SenderReport extends cObject
 {
     // The ntp time stamp.
-    uint64 NTPTimeStamp;
+    uint64_t NTPTimeStamp;
 
     // The rtp time stamp.
-    uint32 RTPTimeStamp;
+    uint32_t RTPTimeStamp;
 
     // The number of packets sent.
-    uint32 packetCount;
+    uint32_t packetCount;
 
     // The number of (payload) bytes sent.
-    uint32 byteCount;
+    uint32_t byteCount;
 };
 
 cplusplus(SenderReport) {{
@@ -60,16 +60,16 @@ cplusplus(SenderReport) {{
 class ReceptionReport extends cObject
 {
     // The ssrc identifier of the sender this ~ReceptionReport is for.
-    uint32 ssrc;
+    uint32_t ssrc;
 
     // The fraction lost.
-    uint8 fractionLost;
+    uint8_t fractionLost;
 
     // The number of packets expected minus the number of packets received.
     int packetsLostCumulative;
 
     // The extended highest sequence number received.
-    uint32 sequenceNumber;
+    uint32_t sequenceNumber;
 
     // The interarrival jitter.
     int jitter;

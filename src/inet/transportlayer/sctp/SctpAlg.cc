@@ -69,7 +69,7 @@ void SctpAlg::sendCommandInvoked(SctpPathVariables *path)
     }
 }
 
-void SctpAlg::receivedDataAck(uint32)
+void SctpAlg::receivedDataAck(uint32_t)
 {
 }
 
@@ -78,7 +78,7 @@ void SctpAlg::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << endl;
 }
 
-void SctpAlg::receivedAckForDataNotYetSent(uint32 seq)
+void SctpAlg::receivedAckForDataNotYetSent(uint32_t seq)
 {
     EV_INFO << "ACK acks something not yet sent, sending immediate ACK" << endl;
 }
@@ -87,7 +87,7 @@ void SctpAlg::sackSent()
 {
 }
 
-void SctpAlg::dataSent(uint32)
+void SctpAlg::dataSent(uint32_t)
 {
 }
 

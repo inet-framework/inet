@@ -126,7 +126,7 @@ void TcpLwipReceiveQueue::setConnection(TcpLwipConnection *connP)
     connM = connP;
 }
 
-void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, uint32 seqno, const void *bufferP, size_t bufferLengthP)
+void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, uint32_t seqno, const void *bufferP, size_t bufferLengthP)
 {
     ASSERT(packet);
     ASSERT(bufferP);
@@ -158,12 +158,12 @@ Packet *TcpLwipReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TcpLwipReceiveQueue::getAmountOfBufferedBytes() const
+uint32_t TcpLwipReceiveQueue::getAmountOfBufferedBytes() const
 {
     return B(dataBuffer.getLength()).get();
 }
 
-uint32 TcpLwipReceiveQueue::getQueueLength() const
+uint32_t TcpLwipReceiveQueue::getQueueLength() const
 {
     return B(dataBuffer.getLength()).get();
 }

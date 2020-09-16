@@ -30,14 +30,14 @@ namespace inet {
 struct nat_message
 {
 
-    uint16      multi;
-    uint16      reserved = 0;
-    uint16      peer1;
-    uint16      peer2;
-    uint16      portPeer1;
-    uint16      portPeer2;
-    uint16      numAddrPeer1;
-    uint16      numAddrPeer2;
+    uint16_t      multi;
+    uint16_t      reserved = 0;
+    uint16_t      peer1;
+    uint16_t      peer2;
+    uint16_t      portPeer1;
+    uint16_t      portPeer2;
+    uint16_t      numAddrPeer1;
+    uint16_t      numAddrPeer2;
     uint32_t    peer1Addresses[0];
     uint32_t    peer2Addresses[0];
 };
@@ -51,8 +51,8 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
 {
   protected:
     //SctpAssociation* assoc;
-    int32 notifications;
-    int32 serverAssocId;
+    int32_t notifications;
+    int32_t serverAssocId;
     SctpSocket clientSocket;
     SctpSocket peerSocket;
     SctpSocket rendezvousSocket;
@@ -61,40 +61,40 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     bool schedule;
     bool shutdownReceived;
     //long bytesRcvd;
-    int64 bytesSent;
-    int32 packetsSent;
-    int32 packetsRcvd;
-    int32 numSessions;
-    int32 numRequestsToSend;    // requests to send in this session
+    int64_t bytesSent;
+    int32_t packetsSent;
+    int32_t packetsRcvd;
+    int32_t numSessions;
+    int32_t numRequestsToSend;    // requests to send in this session
     bool ordered;
-    int32 queueSize;
+    int32_t queueSize;
     cMessage *timeoutMsg;
     cMessage *timeMsg;
-    int32 outboundStreams;
-    int32 inboundStreams;
-    int32 bytesRcvd;
-    int32 echoedBytesSent;
-    int32 lastStream;
+    int32_t outboundStreams;
+    int32_t inboundStreams;
+    int32_t bytesRcvd;
+    int32_t echoedBytesSent;
+    int32_t lastStream;
     bool sendAllowed;
-    int32 chunksAbandoned;
-    int32 numPacketsToReceive;
+    int32_t chunksAbandoned;
+    int32_t numPacketsToReceive;
     bool rendezvous;
     L3Address peerAddress;
-    int32 peerPort;
+    int32_t peerPort;
     AddressVector peerAddressList;
     AddressVector localAddressList;
     //cOutVector* rcvdBytes;
-    typedef std::map<int32, int64> RcvdPacketsPerAssoc;
+    typedef std::map<int32_t, int64_t> RcvdPacketsPerAssoc;
     RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
-    typedef std::map<int32, int64> SentPacketsPerAssoc;
+    typedef std::map<int32_t, int64_t> SentPacketsPerAssoc;
     SentPacketsPerAssoc sentPacketsPerAssoc;
-    typedef std::map<int32, int64> RcvdBytesPerAssoc;
+    typedef std::map<int32_t, int64_t> RcvdBytesPerAssoc;
     RcvdBytesPerAssoc rcvdBytesPerAssoc;
-    typedef std::map<int32, cOutVector *> BytesPerAssoc;
+    typedef std::map<int32_t, cOutVector *> BytesPerAssoc;
     BytesPerAssoc bytesPerAssoc;
-    typedef std::map<int32, cHistogram *> HistEndToEndDelay;
+    typedef std::map<int32_t, cHistogram *> HistEndToEndDelay;
     HistEndToEndDelay histEndToEndDelay;
-    typedef std::map<int32, cOutVector *> EndToEndDelay;
+    typedef std::map<int32_t, cOutVector *> EndToEndDelay;
     EndToEndDelay endToEndDelay;
     void sendOrSchedule(cMessage *msg);
     void sendRequest(bool last = true);
@@ -118,8 +118,8 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     /*void setAssociation(SctpAssociation *_assoc) {
        assoc = _assoc;};*/
     void generateAndSend();
-    void connect(L3Address connectAddress, int32 connectPort);
-    void connectx(AddressVector connectAddressList, int32 connectPort);
+    void connect(L3Address connectAddress, int32_t connectPort);
+    void connectx(AddressVector connectAddressList, int32_t connectPort);
 
     virtual void socketAvailable(SctpSocket *socket, Indication *indication) override { throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets"); }
 
@@ -140,7 +140,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     void socketClosed(SctpSocket *socket) override;
 
     /** Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay. */
-    void socketFailure(SctpSocket *socket, int32 code) override;
+    void socketFailure(SctpSocket *socket, int32_t code) override;
 
     /** Redefine to handle incoming SctpStatusInfo. */
     void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) override;

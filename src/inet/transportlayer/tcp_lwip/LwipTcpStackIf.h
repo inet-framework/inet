@@ -69,7 +69,7 @@ class LwipTcpStackIf
      */
     virtual netif *ip_route(L3Address const& ipAddr) = 0;
 
-    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo,
             const void *dataptr, int len) = 0;
 };
 

@@ -64,15 +64,15 @@ class INET_API SctpAlg : public SctpAlgorithm
 
     virtual void sendCommandInvoked(SctpPathVariables *path) override;
 
-    virtual void receivedDataAck(uint32 firstSeqAcked) override;
+    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
     virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32 seq) override;
+    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
 
     virtual void sackSent() override;
 
-    virtual void dataSent(uint32 fromseq) override;
+    virtual void dataSent(uint32_t fromseq) override;
 };
 
 } // namespace sctp

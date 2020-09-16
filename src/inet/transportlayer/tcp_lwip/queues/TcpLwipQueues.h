@@ -176,7 +176,7 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * object should *not* be deleted.
      * //FIXME revise this comment
      */
-    virtual void notifyAboutIncomingSegmentProcessing(Packet *packet, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(Packet *packet, uint32_t seqNo,
             const void *bufferP, size_t bufferLengthP);
 
     /**
@@ -201,12 +201,12 @@ class INET_API TcpLwipReceiveQueue : public cObject
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() const;
+    virtual uint32_t getAmountOfBufferedBytes() const;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() const;
+    virtual uint32_t getQueueLength() const;
 
     /**
      * Shows current queue status.

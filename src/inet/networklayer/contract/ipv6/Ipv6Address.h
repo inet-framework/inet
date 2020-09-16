@@ -42,7 +42,7 @@ class INET_API Ipv6Address
   private:
     // The 128-bit address in four 32-bit integers. d[0] is the most
     // significant word, d[3] is the least significant one.
-    uint32 d[4];
+    uint32_t d[4];
 
   protected:
     bool doTryParse(const char *& addr);
@@ -108,9 +108,9 @@ class INET_API Ipv6Address
     /**
      * Constructs an Ipv6 address from two 64-bit integers.
      */
-    Ipv6Address(uint64 hi, uint64 lo)
+    Ipv6Address(uint64_t hi, uint64_t lo)
     {
-        uint32 mask = 0xFFFFFFFF;
+        uint32_t mask = 0xFFFFFFFF;
         d[0] = (hi >> 32) & mask;
         d[1] = hi & mask;
         d[2] = (lo >> 32) & mask;
@@ -121,7 +121,7 @@ class INET_API Ipv6Address
      * Constructs an Ipv6 address from four 32-bit integers. The most significant
      * word should be passed in the first argument.
      */
-    Ipv6Address(uint32 segment0, uint32 segment1, uint32 segment2, uint32 segment3)
+    Ipv6Address(uint32_t segment0, uint32_t segment1, uint32_t segment2, uint32_t segment3)
     {
         d[0] = segment0;
         d[1] = segment1;
@@ -190,7 +190,7 @@ class INET_API Ipv6Address
      * Sets the Ipv6 address from four 32-bit integers. The most significant
      * word should be passed in the first argument.
      */
-    void set(uint32 d0, uint32 d1, uint32 d2, uint32 d3)
+    void set(uint32_t d0, uint32_t d1, uint32_t d2, uint32_t d3)
     {
         d[0] = d0;
         d[1] = d1;
@@ -202,13 +202,13 @@ class INET_API Ipv6Address
      * Returns a pointer to the internal binary representation of the address:
      * four 32-bit words, most significant word first.
      */
-    uint32 *words() { return d; }
+    uint32_t *words() { return d; }
 
     /**
      * Returns a pointer to the internal binary representation of the address:
      * four 32-bit words, most significant word first.
      */
-    const uint32 *words() const { return d; }
+    const uint32_t *words() const { return d; }
 
     /**
      * Get the Ipv6 address scope.
@@ -224,7 +224,7 @@ class INET_API Ipv6Address
      * Construct a 128-bit mask based on the prefix length. Mask should point
      * to an array of four 32-bit words, most significant word first.
      */
-    static void constructMask(int prefixLength, uint32 *mask);
+    static void constructMask(int prefixLength, uint32_t *mask);
     static Ipv6Address constructMask(int prefixLength);
 
     /**

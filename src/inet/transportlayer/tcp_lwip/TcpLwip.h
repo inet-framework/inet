@@ -78,7 +78,7 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
 
     virtual netif *ip_route(L3Address const& ipAddr) override;
 
-    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo,
             const void *dataptr, int len) override;
 
     // internal event functions:

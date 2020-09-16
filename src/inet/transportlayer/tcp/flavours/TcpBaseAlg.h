@@ -50,12 +50,12 @@ class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
 
     /// congestion window
     //@{
-    uint32 snd_cwnd;    ///< congestion window
+    uint32_t snd_cwnd;    ///< congestion window
     //@}
 
     /// round-trip time measurements
     //@{
-    uint32 rtseq;    ///< starting sequence number of timed data
+    uint32_t rtseq;    ///< starting sequence number of timed data
     simtime_t rtseq_sendtime;    ///< time when rtseq was sent (0 if RTT measurement is not running)
     //@}
 
@@ -67,12 +67,12 @@ class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
 
     /// number of RTOs
     //@{
-    uint32 numRtos;    ///< total number of RTOs
+    uint32_t numRtos;    ///< total number of RTOs
     //@}
 
     /// RFC 3782 variables
     //@{
-    uint32 recover;    ///< recover (RFC 3782)
+    uint32_t recover;    ///< recover (RFC 3782)
     bool firstPartialACK;    ///< first partial acknowledgement (RFC 3782)
     //@}
 };
@@ -141,10 +141,10 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
 
     /**
-     * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
+     * Converting uint32_t echoedTS to simtime_t and calling rttMeasurementComplete()
      * to update state vars with new measured RTT value.
      */
-    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) override;
+    virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) override;
 
     /**
      * Send data, observing Nagle's algorithm and congestion window
@@ -185,17 +185,17 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedDataAck(uint32 firstSeqAcked) override;
+    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
     virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32 seq) override;
+    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
 
     virtual void ackSent() override;
 
-    virtual void dataSent(uint32 fromseq) override;
+    virtual void dataSent(uint32_t fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
+    virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) override;
 
     virtual void restartRexmitTimer() override;
 

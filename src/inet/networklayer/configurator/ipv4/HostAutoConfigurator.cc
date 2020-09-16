@@ -63,7 +63,7 @@ void HostAutoConfigurator::setupNetworkLayer()
     // get our host module
     cModule *host = getContainingNode(this);
 
-    Ipv4Address myAddress = Ipv4Address(addressBase.getInt() + uint32(host->getId()));
+    Ipv4Address myAddress = Ipv4Address(addressBase.getInt() + uint32_t(host->getId()));
 
     // address test
     if (!Ipv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))

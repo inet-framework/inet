@@ -28,7 +28,7 @@ namespace inet {
 
 #define RESERVED_IPV6_ADDRESS_RANGE    0x8000 // IETF reserved address range 8000::/16 (extended)
 
-uint64 L3Address::get(AddressType type) const
+uint64_t L3Address::get(AddressType type) const
 {
     if (getType() == type)
         return lo;
@@ -36,17 +36,17 @@ uint64 L3Address::get(AddressType type) const
         throw cRuntimeError("Address is not of the given type");
 }
 
-void L3Address::set(AddressType type, uint64 lo)
+void L3Address::set(AddressType type, uint64_t lo)
 {
-    this->hi = ((uint64)RESERVED_IPV6_ADDRESS_RANGE << 48) + (uint64)type;
+    this->hi = ((uint64_t)RESERVED_IPV6_ADDRESS_RANGE << 48) + (uint64_t)type;
     this->lo = lo;
 }
 
 void L3Address::set(const Ipv6Address& addr)
 {
-    const uint32 *words = addr.words();
-    hi = ((uint64) * (words + 0) << 32) + *(words + 1);
-    lo = ((uint64) * (words + 2) << 32) + *(words + 3);
+    const uint32_t *words = addr.words();
+    hi = ((uint64_t) * (words + 0) << 32) + *(words + 1);
+    lo = ((uint64_t) * (words + 2) << 32) + *(words + 3);
     if (getType() != IPv6)
         throw cRuntimeError("Cannot set Ipv6 address");
 }
@@ -54,7 +54,7 @@ void L3Address::set(const Ipv6Address& addr)
 void L3Address::set(const ClnsAddress& addr)
 {
 
-    hi = ((uint64)RESERVED_IPV6_ADDRESS_RANGE << 48) | ((addr.getAreaId() & 0xFFFFFFFFL) << 16) | (uint64)addr.getNsel() << 8 | (uint64)L3Address::CLNS;
+    hi = ((uint64_t)RESERVED_IPV6_ADDRESS_RANGE << 48) | ((addr.getAreaId() & 0xFFFFFFFFL) << 16) | (uint64_t)addr.getNsel() << 8 | (uint64_t)L3Address::CLNS;
     lo = addr.getSystemId();
 }
 

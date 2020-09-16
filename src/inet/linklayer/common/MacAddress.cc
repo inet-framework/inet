@@ -48,7 +48,7 @@ void MacAddress::setAddressByte(unsigned int k, unsigned char addrbyte)
     if (k >= MAC_ADDRESS_SIZE)
         throw cRuntimeError("Array of size 6 indexed with %d", k);
     int offset = (MAC_ADDRESS_SIZE - k - 1) * 8;
-    address = (address & (~(((uint64)0xff) << offset))) | (((uint64)addrbyte) << offset);
+    address = (address & (~(((uint64_t)0xff) << offset))) | (((uint64_t)addrbyte) << offset);
 }
 
 bool MacAddress::tryParse(const char *hexstr)
@@ -140,8 +140,8 @@ int MacAddress::compareTo(const MacAddress& other) const
 
 InterfaceToken MacAddress::formInterfaceIdentifier() const
 {
-    uint32 high = ((address >> 16) | 0xff) ^ 0x02000000;
-    uint32 low = (0xfe << 24) | (address & 0xffffff);
+    uint32_t high = ((address >> 16) | 0xff) ^ 0x02000000;
+    uint32_t low = (0xfe << 24) | (address & 0xffffff);
     return InterfaceToken(low, high, 64);
 }
 
@@ -154,7 +154,7 @@ MacAddress MacAddress::generateAutoAddress()
     }
     ++autoAddressCtr;
 
-    uint64 intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL) + getEnvir()->getParsimProcId() * 0x000100000000ULL;
+    uint64_t intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL) + getEnvir()->getParsimProcId() * 0x000100000000ULL;
     MacAddress addr(intAddr);
     return addr;
 }
