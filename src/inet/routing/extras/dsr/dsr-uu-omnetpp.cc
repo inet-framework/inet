@@ -738,7 +738,7 @@ void DSRUU::processLinkBreak(const Packet *pkt)
     auto sender = header80211->getTransmitterAddress();
     auto receiver = header80211->getReceiverAddress();
 
-    const auto& networkHeader = getNetworkProtocolHeader(const_cast<Packet *>(pkt));
+    const auto& networkHeader = findNetworkProtocolHeader(const_cast<Packet *>(pkt));
     if (networkHeader == nullptr)
         return;
 

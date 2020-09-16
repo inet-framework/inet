@@ -390,7 +390,7 @@ void NS_CLASS packetFailed(const Packet *dgram)
 
     auto senderAddr = header80211->getTransmitterAddress();
 
-    const auto& networkHeader = getNetworkProtocolHeader(const_cast<Packet *>(dgram));
+    const auto& networkHeader = findNetworkProtocolHeader(const_cast<Packet *>(dgram));
     if (networkHeader == nullptr)
         return;
 
