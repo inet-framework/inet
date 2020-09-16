@@ -22,6 +22,7 @@
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/tag/SharingRegionTagSet.h"
 #include "inet/common/packet/tag/SharingTagSet.h"
@@ -67,11 +68,19 @@ namespace inet {
  *
  * In general, this class supports the following operations:
  *  - query the length of the packet and the data part
- *  - insert to the beginning or end of the packet
- *  - remove from the beginning or end of the packet
- *  - peek or pop from the front or the back of the data part
+ *  - get and set the front and back offsets
+ *  - peek content anywhere in the packet
+ *  - pop content from the front or the back of the packet
+ *  - check the presense of content anywhere in the packet
+ *  - insert content anywhere in the packet
+ *  - remove and return content anywhere in the packet
+ *  - update content in place destructively anywhere in the packet
+ *  - replace content destructively anywhere in the packet
+ *  - erase content destructively anywhere in the packet
  *  - serialize to and deserialize from a sequence of bits or bytes
- *  - copy the packet, it's a cheap operation
+ *  - copy the packet
+ *  - attach tags (metadata) to the packet as a whole
+ *  - attache tags (metadata) to regions of the content of the packet
  *  - convert to a human readable string
  */
 class INET_API Packet : public cPacket, public IPrintableObject
@@ -120,6 +129,17 @@ class INET_API Packet : public cPacket, public IPrintableObject
 
     /** @name Self checking functions */
     //@{
+    bool isConsistent() {
+        CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
+        CHUNK_CHECK_IMPLEMENTATION(content->getChunkLength() == getTotalLength());
+        CHUNK_CHECK_IMPLEMENTATION(getFrontOffset() <= getTotalLength());
+        CHUNK_CHECK_IMPLEMENTATION(getBackOffset() <= getTotalLength());
+        CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
+        CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(frontIterator));
+        CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(backIterator));
+        return true;
+    }
+
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);
         content->seekIterator(copy, iterator.getPosition());
@@ -150,6 +170,7 @@ class INET_API Packet : public cPacket, public IPrintableObject
     virtual cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
     virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }
     virtual void setControlInfo(cObject *p) override { throw cRuntimeError("Invalid operation"); }
+    virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Length querying functions */
@@ -166,10 +187,15 @@ class INET_API Packet : public cPacket, public IPrintableObject
      */
     virtual int64_t getBitLength() const override { return b(getDataLength()).get(); }
 
-    virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
+    /**
+     * Returns the current length of the data part of the packet. This is the
+     * same as the difference between the front and back offsets.
+     * The returned value is in the range [0, getTotalLength()].
+     */
+    b getDataLength() const { return getTotalLength() - frontIterator.getPosition() - backIterator.getPosition(); }
     //@}
 
-    /** @name Data part front querying functions */
+    /** @name Front and back offset related functions */
     //@{
     /**
      * Returns the front offset measured from the beginning of the packet.
@@ -184,71 +210,6 @@ class INET_API Packet : public cPacket, public IPrintableObject
     void setFrontOffset(b offset);
 
     /**
-     * Returns the designated part as an immutable chunk in its current
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<const Chunk> peekAtFront(b length = b(-1), int flags = 0) const;
-
-    /**
-     * Pops the designated part and returns it as an immutable chunk in its
-     * current representation. Increases the front offset with the length of
-     * the returned chunk. If the length is unspecified, then the length of
-     * the result is chosen according to the current representation. The
-     * flags parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<const Chunk> popAtFront(b length = b(-1), int flags = 0);
-
-    /**
-     * Returns true if the designated part is available in the requested
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation.
-     */
-    template <typename T>
-    bool hasAtFront(b length = b(-1)) const {
-        auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-        return content->has<T>(frontIterator, length == b(-1) ? -dataLength: length);
-    }
-
-    /**
-     * Returns the designated part as an immutable chunk in the requested
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    template <typename T>
-    const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
-        auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-        const auto& chunk = content->peek<T>(frontIterator, length == b(-1) ? -dataLength : length, flags);
-        CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
-        return chunk;
-    }
-
-    /**
-     * Pops the designated part and returns it as an immutable chunk in the
-     * requested representation. Increases the front offset with the length of
-     * the returned chunk. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    template <typename T>
-    const Ptr<const T> popAtFront(b length = b(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-        const auto& chunk = peekAtFront<T>(length, flags);
-        if (chunk != nullptr) {
-            content->moveIterator(frontIterator, chunk->getChunkLength());
-            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
-        }
-        return chunk;
-    }
-    //@}
-
-    /** @name Data part back querying functions */
-    //@{
-    /**
      * Returns the back offset measured from the beginning of the packet.
      * The returned value is in the range [0, getTotalLength()].
      */
@@ -259,110 +220,30 @@ class INET_API Packet : public cPacket, public IPrintableObject
      * The value must be in the range [0, getTotalLength()].
      */
     void setBackOffset(b offset);
-
-    /**
-     * Returns the designated part as an immutable chunk in its current
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<const Chunk> peekAtBack(b length = b(-1), int flags = 0) const;
-
-    /**
-     * Pops the designated part and returns it as an immutable chunk in its
-     * current representation. Decreases the back offset with the length of the
-     * returned chunk. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<const Chunk> popAtBack(b length = b(-1), int flags = 0);
-
-    /**
-     * Returns true if the designated part is available in the requested
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation.
-     */
-    template <typename T>
-    bool hasAtBack(b length) const {
-        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
-        return content->has<T>(backIterator, length);
-    }
-
-    /**
-     * Returns the designated part as an immutable chunk in the requested
-     * representation. Decreases the back offset with the length of the returned
-     * chunk. The flags parameter is a combination of Chunk::PeekFlag enumeration
-     * members.
-     */
-    template <typename T>
-    const Ptr<const T> peekAtBack(b length, int flags = 0) const {
-        auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
-        const auto& chunk = content->peek<T>(backIterator, length, flags);
-        CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
-        return chunk;
-    }
-
-    /**
-     * Pops the designated part and returns it as an immutable chunk in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the current representation. The
-     * flags parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    template <typename T>
-    const Ptr<const T> popAtBack(b length, int flags = 0) {
-        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
-        const auto& chunk = peekAtBack<T>(length, flags);
-        if (chunk != nullptr) {
-            content->moveIterator(backIterator, chunk->getChunkLength());
-            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
-        }
-        return chunk;
-    }
     //@}
 
-    /** @name Data part querying functions */
+    /** @name Content peeking functions */
     //@{
     /**
-     * Returns the current length of the data part of the packet. This is the
-     * same as the difference between the front and back offsets.
-     * The returned value is in the range [0, getTotalLength()].
+     * Returns the designated part from the beginning of the data part of the
+     * packet as an immutable chunk in the current representation. If the length
+     * is unspecified, then the length of the result is chosen according to the
+     * current representation. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
      */
-    b getDataLength() const { return getTotalLength() - frontIterator.getPosition() - backIterator.getPosition(); }
-
-    /**
-     * Returns the designated data part as an immutable chunk in its current
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<const Chunk> peekDataAt(b offset, b length = b(-1), int flags = 0) const;
-
-    /**
-     * Returns true if the designated data part is available in the requested
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation.
-     */
-    template <typename T>
-    bool hasDataAt(b offset, b length = b(-1)) const {
-        auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
-        return content->has<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length == b(-1) ? -(dataLength - offset) : length);
+    const Ptr<const Chunk> peekAtFront(b length = b(-1), int flags = 0) const {
+        return peekAtFront<Chunk>(length, flags);
     }
 
     /**
-     * Returns the designated data part as an immutable chunk in the requested
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
+     * Returns the designated part from the end of the data part of the packet
+     * as an immutable chunk in the current representation. If the length is
+     * unspecified, then the length of the result is chosen according to the
+     * current representation. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
-    const Ptr<const T> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
-        auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
-        return content->peek<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length == b(-1) ? -(dataLength - offset) : length, flags);
+    const Ptr<const Chunk> peekAtBack(b length = b(-1), int flags = 0) const {
+        return peekAtBack<Chunk>(length, flags);
     }
 
     /**
@@ -396,55 +277,6 @@ class INET_API Packet : public cPacket, public IPrintableObject
     }
 
     /**
-     * Returns the data part (excluding front and back popped parts) in the
-     * requested representation. The length of the returned chunk is the same as
-     * the value returned by getDataLength(). The flags parameter is a combination
-     * of Chunk::PeekFlag enumeration members.
-     */
-    template <typename T>
-    const Ptr<const T> peekData(int flags = 0) const {
-        return peekDataAt<T>(b(0), getDataLength(), flags);
-    }
-    //@}
-
-    /** @name Content querying functions */
-    //@{
-    /**
-     * Returns the designated part of the packet as an immutable chunk in its
-     * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<const Chunk> peekAt(b offset, b length = b(-1), int flags = 0) const;
-
-    /**
-     * Returns true if the designated part of the packet is available in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the current representation.
-     */
-    template <typename T>
-    bool hasAt(b offset, b length = b(-1)) const {
-        auto totalLength = getTotalLength();
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
-        return content->has<T>(Chunk::Iterator(true, b(offset), -1), length == b(-1) ? -(totalLength - offset) : length);
-    }
-
-    /**
-     * Returns the designated part of the packet as an immutable chunk in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the current representation. The
-     * flags parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    template <typename T>
-    const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
-        auto totalLength = getTotalLength();
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
-        return content->peek<T>(Chunk::Iterator(true, b(offset), -1), length == b(-1) ? -(totalLength - offset) : length, flags);
-    }
-
-    /**
      * Returns the whole packet (including front and back popped parts) in the
      * current representation. The length of the returned chunk is the same as
      * the value returned by getTotalLength(). The flags parameter is a combination
@@ -475,6 +307,67 @@ class INET_API Packet : public cPacket, public IPrintableObject
     }
 
     /**
+     * Returns the designated data part as an immutable chunk in the current
+     * representation. If the length is unspecified, then the length of the
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<const Chunk> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
+        return peekDataAt<Chunk>(offset, length, flags);
+    }
+
+    /**
+     * Returns the designated part of the packet as an immutable chunk in the
+     * current representation. If the length is unspecified, then the length of
+     * the result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<const Chunk> peekAt(b offset, b length = b(-1), int flags = 0) const {
+        return peekAt<Chunk>(offset, length, flags);
+    }
+
+    /**
+     * Returns the designated part from the beginning of the data part of the
+     * packet as an immutable chunk in the requested representation. If the
+     * length is unspecified, then the length of the result is chosen according
+     * to the current representation. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
+        const auto& chunk = content->peek<T>(frontIterator, length == b(-1) ? -dataLength : length, flags);
+        CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+        return chunk;
+    }
+
+    /**
+     * Returns the designated part from the end of the data part of the packet
+     * as an immutable chunk in the requested representation. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<const T> peekAtBack(b length, int flags = 0) const {
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
+        const auto& chunk = content->peek<T>(backIterator, length, flags);
+        CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+        return chunk;
+    }
+
+    /**
+     * Returns the data part (excluding front and back popped parts) in the
+     * requested representation. The length of the returned chunk is the same as
+     * the value returned by getDataLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<const T> peekData(int flags = 0) const {
+        return peekDataAt<T>(b(0), getDataLength(), flags);
+    }
+
+    /**
      * Returns the whole packet (including front and back popped parts) in the
      * requested representation. The length of the returned chunk is the same as
      * the value returned by getTotalLength(). The flags parameter is a combination
@@ -484,270 +377,629 @@ class INET_API Packet : public cPacket, public IPrintableObject
     const Ptr<const T> peekAll(int flags = 0) const {
         return peekAt<T>(b(0), getTotalLength(), flags);
     }
-    //@}
-
-    /** @name Content erasing functions */
-    //@{
-    /**
-     * Erases the requested amount of data from the beginning of the packet. The
-     * length of front popped part must be zero before calling this function.
-     */
-    void eraseAtFront(b length);
 
     /**
-     * Erases the requested amount of data from the end of the packet. The length
-     * of back popped part must be zero before calling this function.
-     */
-    void eraseAtBack(b length);
-
-    /**
-     * Erases all data from packet and resets both front and back offsets to zero.
-     */
-    void eraseAll();
-
-    /**
-     * Erases the front popped part and sets the front offset to zero. The back
-     * popped part and the data part of the packet isn't affected.
-     */
-    void trimFront();
-
-    /**
-     * Erases the back popped part and sets the back offset to zero. The front
-     * popped part and the data part of the packet isn't affected.
-     */
-    void trimBack();
-
-    /**
-     * Removes both front and back popped parts and sets both front and back
-     * offsets to zero. The data part of the packet isn't affected.
-     */
-    void trim();
-    //@}
-
-    /** @name Content removing functions */
-    //@{
-    /**
-     * Removes the designated part and returns it as a mutable chunk in its
-     * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the current representation. The length
-     * of front popped part must be zero before calling this function. The flags
+     * Returns the designated data part as an immutable chunk in the requested
+     * representation. If the length is unspecified, then the length of the
+     * result is chosen according to the current representation. The flags
      * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<Chunk> removeAtFront(b length = b(-1), int flags = 0);
-
-    /**
-     * Removes the designated part and returns it as a mutable chunk in its
-     * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the current representation. The length
-     * of back popped part must be zero before calling this function. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
-     */
-    const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0);
-
-    /**
-     * Removes the designated part and returns it as a mutable chunk in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the current representation. The
-     * length of front popped part must be zero before calling this function.
-     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    const Ptr<T> removeAtFront(b length = b(-1), int flags = 0) {
+    const Ptr<const T> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
+        return content->peek<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length == b(-1) ? -(dataLength - offset) : length, flags);
+    }
+
+    /**
+     * Returns the designated part of the packet as an immutable chunk in the
+     * requested representation. If the length is unspecified, then the length
+     * of the result is chosen according to the current representation. The
+     * flags parameter is a combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
+        auto totalLength = getTotalLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+        return content->peek<T>(Chunk::Iterator(true, b(offset), -1), length == b(-1) ? -(totalLength - offset) : length, flags);
+    }
+    //@}
+
+    /** @name Content popping functions */
+    //@{
+    /**
+     * Pops the designated part from the beginning of the data part of the
+     * packet and returns it as an immutable chunk in the current representation.
+     * Increases the front offset with the length of the returned chunk. If the
+     * length is unspecified, then the length of the result is chosen according
+     * to the current representation. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<const Chunk> popAtFront(b length = b(-1), int flags = 0) {
+        return popAtFront<Chunk>(length, flags);
+    }
+
+    /**
+     * Pops the designated part from the end of the data part of the packet and
+     * returns it as an immutable chunk in the current representation. Decreases
+     * the back offset with the length of the returned chunk. If the length is
+     * unspecified, then the length of the result is chosen according to the
+     * current representation. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<const Chunk> popAtBack(b length = b(-1), int flags = 0) {
+        return popAtBack<Chunk>(length, flags);
+    }
+
+    /**
+     * Pops the designated part from the beginning of the data part of the packet
+     * and returns it as an immutable chunk in the requested representation.
+     * Increases the front offset with the length of the returned chunk. If the
+     * length is unspecified, then the length of the result is chosen according
+     * to the current representation. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<const T> popAtFront(b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-        CHUNK_CHECK_USAGE(frontIterator.getPosition() == b(0), "front popped length is non-zero");
-        const auto& chunk = popAtFront<T>(length, flags);
-        trimFront();
-        return makeExclusivelyOwnedMutableChunk(chunk);
+        const auto& chunk = peekAtFront<T>(length, flags);
+        if (chunk != nullptr) {
+            content->moveIterator(frontIterator, chunk->getChunkLength());
+            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
+        }
+        return chunk;
     }
 
     /**
-     * Removes the designated part and returns it as a mutable chunk in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the current representation. The
-     * length of back popped part must be zero before calling this function.
-     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
+     * Pops the designated part from the end of the data part of the packet and
+     * returns it as an immutable chunk in the requested representation. Decreases
+     * the back offset with the length of the returned chunk. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    const Ptr<T> removeAtBack(b length, int flags = 0) {
+    const Ptr<const T> popAtBack(b length, int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
-        CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "back popped length is non-zero");
-        const auto& chunk = popAtBack<T>(length, flags);
-        trimBack();
-        return makeExclusivelyOwnedMutableChunk(chunk);
+        const auto& chunk = peekAtBack<T>(length, flags);
+        if (chunk != nullptr) {
+            content->moveIterator(backIterator, chunk->getChunkLength());
+            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
+        }
+        return chunk;
+    }
+    //@}
+
+    /** @name Content presence checking functions */
+    //@{
+    /**
+     * Returns true if the designated part at the beginning of the data part of
+     * the packet is completely available in the requested representation. If
+     * the length is unspecified, then the length of the result is chosen
+     * according to the current representation.
+     */
+    template <typename T>
+    bool hasAtFront(b length = b(-1)) const {
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
+        return content->has<T>(frontIterator, length == b(-1) ? -dataLength: length);
     }
 
     /**
-     * Removes all data from the packet and returns it as a mutable chunk in the
-     * current representation. Resets both front and back offsets to zero.
+     * Returns true if the designated part at the end of the data part of the
+     * packet is completely available in the requested representation.
      */
-    const Ptr<Chunk> removeAll();
+    template <typename T>
+    bool hasAtBack(b length) const {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
+        return content->has<T>(backIterator, length);
+    }
+
+    /**
+     * Returns true if the whole data part of the packet is completely available
+     * in the requested representation.
+     */
+    template <typename T>
+    bool hasData() const {
+        return content->has<T>(frontIterator, getDataLength());
+    }
+
+    /**
+     * Returns true if the whole content of the packet is completely available
+     * in the requested representation.
+     */
+    template <typename T>
+    bool hasAll() const {
+        return content->has<T>(Chunk::ForwardIterator(b(0)), getTotalLength());
+    }
+
+    /**
+     * Returns true if the designated data part is completely available in the
+     * requested representation. If the length is unspecified, then the length
+     * of the result is chosen according to the current representation.
+     */
+    template <typename T>
+    bool hasDataAt(b offset, b length = b(-1)) const {
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
+        return content->has<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length == b(-1) ? -(dataLength - offset) : length);
+    }
+
+    /**
+     * Returns true if the designated part of the packet is completely available
+     * in the requested representation. If the length is unspecified, then the
+     * length of the result is chosen according to the current representation.
+     */
+    template <typename T>
+    bool hasAt(b offset, b length = b(-1)) const {
+        auto totalLength = getTotalLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+        return content->has<T>(Chunk::Iterator(true, b(offset), -1), length == b(-1) ? -(totalLength - offset) : length);
+    }
     //@}
 
     /** @name Content insertion functions */
     //@{
     /**
-     * Inserts the provided part at the beginning of the packet. The inserted
-     * part is automatically marked immutable. The length of front popped part
-     * must be zero before calling this function.
+     * Inserts the provided chunk at the beginning of the data part of the packet.
+     * The inserted chunk is automatically marked immutable. The front and back
+     * offsets are not affected.
      */
-    void insertAtFront(const Ptr<const Chunk>& chunk);
+    void insertAtFront(const Ptr<const Chunk>& chunk) {
+        insertAt(chunk, getFrontOffset());
+    }
 
     /**
-     * Inserts the provided part at the end of the packet. The inserted part is
-     * automatically marked immutable. The length of back popped part must be
-     * zero before calling this function.
+     * Inserts the provided chunk at the end of the data part of the packet. The
+     * inserted chunk is automatically marked immutable. The front and back offsets
+     * are not affected.
      */
-    void insertAtBack(const Ptr<const Chunk>& chunk);
+    void insertAtBack(const Ptr<const Chunk>& chunk) {
+        insertAt(chunk, getBackOffset());
+    }
 
     /**
+     * Inserts the provided chunk as the data part of the packet. The inserted
+     * chunk is automatically marked immutable. The front and back offsets are
+     * not affected. The data part of the packet must be empty before calling
+     * this function.
      */
-    void insertData(const Ptr<const Chunk>& chunk);
+    void insertData(const Ptr<const Chunk>& chunk) {
+        CHUNK_CHECK_USAGE(getDataLength() == b(0), "data part is not empty");
+        insertAt(chunk, getFrontOffset());
+    }
 
     /**
+     * Inserts the provided chunk as the content of the packet. The inserted
+     * chunk is automatically marked immutable. The front and back offsets are
+     * not affected. The packet must be completely empty before calling this
+     * function.
      */
-    void insertDataAt(b offset, const Ptr<const Chunk>& chunk);
+    void insertAll(const Ptr<const Chunk>& chunk) {
+        CHUNK_CHECK_USAGE(getTotalLength() == b(0), "content is not empty");
+        insertAt(chunk, b(0));
+    }
 
     /**
+     * Inserts the provided chunk at the given offset of the data part of the
+     * packet. The inserted chunk is automatically marked immutable. The front
+     * and back offsets are not affected. The offset must be in the range
+     * [0, getDataLength()].
      */
-    void insertAll(const Ptr<const Chunk>& chunk);
+    void insertDataAt(const Ptr<const Chunk>& chunk, b offset) {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
+        insertAt(chunk, getFrontOffset() + offset);
+    }
 
     /**
+     * Inserts the provided chunk at the given offset of the packet. The inserted
+     * chunk is automatically marked immutable. The front and back offsets are
+     * updated according to the offset parameter. The offset must be in the range
+     * [0, getTotalLength()].
      */
-    void insertAt(b offset, const Ptr<const Chunk>& chunk);
+    void insertAt(const Ptr<const Chunk>& chunk, b offset);
+    //@}
+
+    /** @name Content removing functions */
+    //@{
+    /**
+     * Removes the designated part from the beginning of the data part of the
+     * packet and returns it as a mutable chunk in the current representation.
+     * If the length is unspecified, then the length of the result is chosen
+     * according to the current representation. The front and back offsets are
+     * not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
+     */
+    const Ptr<Chunk> removeAtFront(b length = b(-1), int flags = 0) {
+        return removeAtFront<Chunk>(length, flags);
+    }
+
+    /**
+     * Removes the designated part from the end of the data part of the
+     * packet and returns it as a mutable chunk in the current representation.
+     * If the length is unspecified, then the length of the result is chosen
+     * according to the current representation. The front and back offsets are
+     * not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
+     */
+    const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0) {
+        return removeAtBack<Chunk>(length, flags);
+    }
+
+    /**
+     * Removes the data part of the packet and returns it as a mutable chunk in
+     * the current representation. The front and back offsets are not affected.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<Chunk> removeData(int flags = 0) {
+        return removeData<Chunk>(flags);
+    }
+
+    /**
+     * Removes all content from the packet and returns it as a mutable chunk in
+     * the current representation. Resets both front and back offsets to zero.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<Chunk> removeAll(int flags = 0) {
+        return removeAll<Chunk>(flags);
+    }
+
+    /**
+     * Removes the designated part of the data part of the packet and returns
+     * it as a mutable chunk in the current representation. The front and back
+     * offsets are not affected. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<Chunk> removeDataAt(b offset, b length = b(-1), int flags = 0) {
+        return removeDataAt<Chunk>(offset, length, flags);
+    }
+
+    /**
+     * Removes the designated part of the packet and returns it as a mutable
+     * chunk in the current representation. The front and back offsets are
+     * updated according to the offset and length parameters. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
+     */
+    const Ptr<Chunk> removeAt(b offset, b length = b(-1), int flags = 0) {
+        return removeAt<Chunk>(offset, length, flags);
+    }
+
+    /**
+     * Removes the designated part from the beginning of the data part of the
+     * packet and returns it as a mutable chunk in the requested representation.
+     * If the length is unspecified, then the length of the result is chosen
+     * according to the current representation. The front and back offsets are
+     * not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
+     */
+    template <typename T>
+    const Ptr<T> removeAtFront(b length = b(-1), int flags = 0) {
+        const auto& chunk = peekAtFront<T>(length, flags);
+        eraseAtFront(chunk->getChunkLength());
+        return makeExclusivelyOwnedMutableChunk(chunk);
+    }
+
+    /**
+     * Removes the designated part from the end of the data part of the packet
+     * and returns it as a mutable chunk in the requested representation. The
+     * front and back offsets are not affected. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<T> removeAtBack(b length, int flags = 0) {
+        const auto& chunk = peekAtBack<T>(length, flags);
+        eraseAtBack(chunk->getChunkLength());
+        return makeExclusivelyOwnedMutableChunk(chunk);
+    }
+
+    /**
+     * Removes the data part of the packet and returns it as a mutable chunk in
+     * the requested representation. The front and back offsets are not affected.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<T> removeData(int flags = 0) {
+        const auto& chunk = peekData<T>(flags);
+        eraseData();
+        return makeExclusivelyOwnedMutableChunk(chunk);
+    }
+
+    /**
+     * Removes all content from the packet and returns it as a mutable chunk in
+     * the requested representation. Resets both front and back offsets to zero.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<T> removeAll(int flags = 0) {
+        const auto& chunk = peekAll<T>(flags);
+        eraseAll();
+        return makeExclusivelyOwnedMutableChunk(chunk);
+    }
+
+    /**
+     * Removes the designated part of the data part of the packet and returns
+     * it as a mutable chunk in the requested representation. The front and
+     * back offsets are not affected. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<T> removeDataAt(b offset, b length = b(-1), int flags = 0) {
+        const auto& chunk = peekDataAt<T>(offset, length, flags);
+        eraseDataAt(offset, chunk->getChunkLength());
+        return makeExclusivelyOwnedMutableChunk(chunk);
+    }
+
+    /**
+     * Removes the designated part of the packet and returns it as a mutable
+     * chunk in the requested representation. The front and back offsets are
+     * updated according to the offset and length parameters. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
+     */
+    template <typename T>
+    const Ptr<T> removeAt(b offset, b length = b(-1), int flags = 0) {
+        const auto& chunk = peekAt<T>(offset, length, flags);
+        eraseAt(offset, chunk->getChunkLength());
+        return makeExclusivelyOwnedMutableChunk(chunk);
+    }
     //@}
 
     /** @name Content replacing functions */
     //@{
     /**
+     * Replaces the designated part at the beginning of the data part of the
+     * packet with the provided chunk and returns the old part as a mutable
+     * chunk in the current representation. If the length is unspecified, then
+     * the length of the replaced part is chosen according to the current
+     * representation. The inserted part is automatically marked immutable.
+     * The front and back offsets are not affected. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
      */
-    void replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0);
+    const Ptr<Chunk> replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0) {
+        return replaceAtFront<Chunk>(chunk, length, flags);
+    }
 
     /**
+     * Replaces the designated part at the end of the data part of the packet
+     * with the provided chunk and returns the old part as a mutable chunk in
+     * the current representation. If the length is unspecified, then the length
+     * of the replaced part is chosen according to the current representation.
+     * The inserted part is automatically marked immutable. The front and back
+     * offsets are not affected. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
      */
-    void replaceAtBack(const Ptr<const Chunk>& chunk, b length, int flags = 0);
+    const Ptr<Chunk> replaceAtBack(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0) {
+        return replaceAtBack<Chunk>(chunk, length, flags);
+    }
 
     /**
+     * Replaces the data part of the packet with the provided chunk and returns
+     * the old content as a mutable chunk in the current representation. The front
+     * and back offsets are not affected. The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
-    void replaceData(const Ptr<const Chunk>& chunk, int flags = 0);
+    const Ptr<Chunk> replaceData(const Ptr<const Chunk>& chunk, int flags = 0) {
+        return replaceData<Chunk>(chunk, flags);
+    }
 
     /**
+     * Replaces all content in the packet with the provided chunk and returns
+     * the old part as a mutable chunk in the current representation. Resets
+     * both front and back offsets to zero. The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
-    void replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0);
+    const Ptr<Chunk> replaceAll(const Ptr<const Chunk>& chunk, int flags = 0) {
+        return replaceAll<Chunk>(chunk, flags);
+    }
 
     /**
+     * Replaces the designated part of the data part of the packet with the
+     * provided chunk and returns the old content as a mutable chunk in the
+     * current representation. The front and back offsets are not affected.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    void replaceAll(const Ptr<const Chunk>& chunk, int flags = 0);
+    const Ptr<Chunk> replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+        return replaceDataAt<Chunk>(chunk, offset, length, flags);
+    }
 
     /**
+     * Replaces the designated part of the packet with the provided chunk and
+     * returns the old content as a mutable chunk in the current representation.
+     * The front and back offsets are updated according to the offset and length
+     * parameters. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
      */
-    void replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0);
+    const Ptr<Chunk> replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+        return replaceAt<Chunk>(chunk, offset, length, flags);
+    }
 
     /**
+     * Replaces the designated part at the beginning of the data part of the
+     * packet with the provided chunk and returns the old part as a mutable
+     * chunk in the requested representation. If the length is unspecified,
+     * then the length of the replaced part is chosen according to the current
+     * representation. The inserted part is automatically marked immutable.
+     * The front and back offsets are not affected. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    void replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0) {
+    const Ptr<T> replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-        replaceAt<T>(chunk, getFrontOffset(), length, flags);
+        return replaceAt<T>(chunk, getFrontOffset(), length, flags);
     }
 
     /**
+     * Replaces the designated part at the end of the data part of the packet
+     * with the provided chunk and returns the old part as a mutable chunk in
+     * the requested representation. The inserted part is automatically marked
+     * immutable. The front and back offsets are not affected. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    void replaceAtBack(const Ptr<const Chunk>& chunk, b length, int flags = 0) {
+    const Ptr<T> replaceAtBack(const Ptr<const Chunk>& chunk, b length, int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
-        replaceAt<T>(chunk, getBackOffset() - length, length, flags);
+        return replaceAt<T>(chunk, getBackOffset() - length, length, flags);
     }
 
     /**
+     * Replaces the data part of the packet with the provided chunk and returns
+     * the old content as a mutable chunk in the requested representation. The
+     * inserted part is automatically marked immutable. The front and back offsets
+     * are not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
      */
     template <typename T>
-    void replaceData(const Ptr<const Chunk>& chunk, int flags = 0) {
-        replaceAt<T>(chunk, getFrontOffset(), getDataLength(), flags);
+    const Ptr<T> replaceData(const Ptr<const Chunk>& chunk, int flags = 0) {
+        return replaceAt<T>(chunk, getFrontOffset(), getDataLength(), flags);
     }
 
     /**
+     * Replaces all content in the packet with the provided chunk and returns
+     * the old content as a mutable chunk in the requested representation.
+     * The inserted part is automatically marked immutable. Resets both front
+     * and back offsets to zero. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    void replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
-        replaceAt<T>(chunk, getFrontOffset() + offset, length, flags);
+    const Ptr<T> replaceAll(const Ptr<const Chunk>& chunk, int flags = 0) {
+        return replaceAt(chunk, b(0), getTotalLength(), flags);
     }
 
     /**
+     * Replaces the designated part of the data part of the packet with the
+     * provided chunk and returns the old content as a mutable chunk in the
+     * requested representation. The front and back offsets are not affected.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    void replaceAll(const Ptr<const Chunk>& chunk, int flags = 0) {
-        replaceAt<T>(chunk, b(0), getTotalLength(), flags);
+    const Ptr<T> replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
+        return replaceAt<T>(chunk, getFrontOffset() + offset, length, flags);
     }
 
     /**
+     * Replaces the designated part of the packet with the provided chunk and
+     * returns the old content as a mutable chunk in the requested representation.
+     * The front and back offsets are updated accordign to the length and offset
+     * parameters. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
+     *
+     * TODO: current limitation: the new chunk must be the same size as the old one
      */
     template <typename T>
-    void replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+    const Ptr<T> replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+        auto totalLength = getTotalLength();
+        CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
+        CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+        constPtrCast<Chunk>(chunk)->markImmutable();
+        const auto& oldChunk = peekAt<T>(offset, length, flags);
+        b chunkLength = oldChunk->getChunkLength();
+        b frontLength = offset;
+        const auto& frontPart = frontLength > b(0) ? peekAt(b(0), frontLength) : nullptr;
+        b backLength = totalLength - offset - chunkLength;
+        const auto& backPart = backLength > b(0) ? peekAt(totalLength - backLength, backLength) : nullptr;
+        content = EmptyChunk::singleton;
+        const auto& result = makeExclusivelyOwnedMutableChunk(oldChunk);
+        CHUNK_CHECK_USAGE(chunkLength == chunk->getChunkLength(), "length is different");
+        if (frontLength == b(0) && backLength == b(0))
+            content = chunk;
+        else {
+            const auto& sequenceChunk = makeShared<SequenceChunk>();
+            if (frontLength > b(0))
+                sequenceChunk->insertAtBack(frontPart);
+            sequenceChunk->insertAtBack(chunk);
+            if (backLength > b(0))
+                sequenceChunk->insertAtBack(backPart);
+            sequenceChunk->markImmutable();
+            content = sequenceChunk;
+        }
+        CHUNK_CHECK_IMPLEMENTATION(isConsistent());
+        return result;
     }
     //@}
 
     /** @name Content updating functions */
     //@{
     /**
-     * Updates the designated part by applying the provided function on the
-     * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
+     * Updates the designated part at the beginning of the data part of the packet by applying
+     * the provided function on the requested mutable representation. The
+     * changes are reflected in the packet. If the length is unspecified, then
+     * the length of the part is chosen according to the current representation.
+     * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAtFront(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0);
+    void updateAtFront(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+        updateAtFront<Chunk>(f, length, flags);
+    }
+
+    /**
+     * Updates the designated part at the end of the data part of the packet by applying the
+     * provided function on the requested mutable representation. The changes
+     * are reflected in the packet. If the length is unspecified, then the
+     * length of the part is chosen according to the current representation.
+     * The front and back offsets are not affected. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateAtBack(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+        updateAtBack<Chunk>(f, length, flags);
+    }
+
+    /**
+     * Updates the data part of the packet by applying the provided function on
+     * the requested mutable representation. The changes are reflected in the
+     * packet. The front and back offsets are not affected. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateData(std::function<void (const Ptr<Chunk>&)> f, int flags = 0) {
+        updateData<Chunk>(f, flags);
+    }
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * The front and back offsets are not affected. The flags parameter is a
+     * combination of Chunk::PeekFlag enumeration members.
+     */
+    void updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags = 0) {
+        updateAll<Chunk>(f, flags);
+    }
 
     /**
      * Updates the designated part by applying the provided function on the
      * requested mutable representation. The changes are reflected in the packet.
      * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
+     * according to the current representation. The front and back offsets are
+     * not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
      */
-    void updateAtBack(std::function<void (const Ptr<Chunk>&)> f, b length, int flags = 0);
+    void updateDataAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+        updateDataAt<Chunk>(f, offset, length, flags);
+    }
 
     /**
      * Updates the designated part by applying the provided function on the
      * requested mutable representation. The changes are reflected in the packet.
      * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
+     * according to the current representation. The front and back offsets are
+     * updated according to the offset and length parameters. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
      */
-    void updateData(std::function<void (const Ptr<Chunk>&)> f, int flags = 0);
+    void updateAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+        updateAt<Chunk>(f, offset, length, flags);
+    }
 
     /**
-     * Updates the designated part by applying the provided function on the
+     * Updates the designated part at the beginning of the data part of the
+     * packet by applying the provided function on the
      * requested mutable representation. The changes are reflected in the packet.
      * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
-     */
-    void updateDataAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0);
-
-    /**
-     * Updates the designated part by applying the provided function on the
-     * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
-     */
-    void updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags = 0);
-
-    /**
-     * Updates the designated part by applying the provided function on the
-     * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
-     */
-    void updateAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0);
-
-    /**
-     * Updates the designated part by applying the provided function on the
-     * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
+     * according to the current representation. The front and back offsets
+     * are not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
      */
     template <typename T>
     void updateAtFront(std::function<void (const Ptr<T>&)> f, b length = b(-1), int flags = 0) {
@@ -756,11 +1008,11 @@ class INET_API Packet : public cPacket, public IPrintableObject
     }
 
     /**
-     * Updates the designated part by applying the provided function on the
-     * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
+     * Updates the designated part at the end of the data part of the packet by
+     * applying the provided function on the requested mutable representation.
+     * The changes are reflected in the packet. The front and back offsets are
+     * not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
      */
     template <typename T>
     void updateAtBack(std::function<void (const Ptr<T>&)> f, b length, int flags = 0) {
@@ -771,8 +1023,7 @@ class INET_API Packet : public cPacket, public IPrintableObject
     /**
      * Updates the designated part by applying the provided function on the
      * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
+     * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
@@ -783,12 +1034,26 @@ class INET_API Packet : public cPacket, public IPrintableObject
     /**
      * Updates the designated part by applying the provided function on the
      * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
+     * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
+    void updateAll(std::function<void (const Ptr<T>&)> f, int flags = 0) {
+        updateAt<T>(f, b(0), totalLength, flags);
+    }
+
+    /**
+     * Updates the designated part by applying the provided function on the
+     * requested mutable representation. The changes are reflected in the packet.
+     * If the length is unspecified, then the length of the part is chosen
+     * according to the current representation. The front and back offsets are
+     * not affected. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
+     */
+    template <typename T>
     void updateDataAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getFrontOffset() + offset, length, flags);
     }
 
@@ -796,21 +1061,11 @@ class INET_API Packet : public cPacket, public IPrintableObject
      * Updates the designated part by applying the provided function on the
      * requested mutable representation. The changes are reflected in the packet.
      * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
-     */
-    template <typename T>
-    void updateAll(std::function<void (const Ptr<T>&)> f, int flags = 0) {
-        updateAt<T>(f, b(0), getTotalLength(), flags);
-    }
-
-    /**
-     * Updates the designated part by applying the provided function on the
-     * requested mutable representation. The changes are reflected in the packet.
-     * If the length is unspecified, then the length of the part is chosen
-     * according to the current representation. The length of back popped part
-     * must be zero before calling this function. The flags parameter is a
-     * combination of Chunk::PeekFlag enumeration members.
+     * according to the current representation. The front and back offsets are
+     * updated according to the offset and length parameters. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
+     *
+     * TODO: current limitation: the chunk size cannot be changed
      */
     template <typename T>
     void updateAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
@@ -840,6 +1095,83 @@ class INET_API Packet : public cPacket, public IPrintableObject
             content = sequenceChunk;
         }
     }
+    //@}
+
+    /** @name Content erasing functions */
+    //@{
+    /**
+     * Erases the requested amount of data from the beginning of the data part
+     * of the packet. The front and back offsets are not affected. The length
+     * parameter must be in the range [0, getDataLength()].
+     */
+    void eraseAtFront(b length) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+        eraseAt(getFrontOffset(), length);
+    }
+
+    /**
+     * Erases the requested amount of data from the end of the data part of the
+     * packet. The front and back offsets are not affected. The length parameter
+     * must be in the range [0, getDataLength()].
+     */
+    void eraseAtBack(b length) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+        eraseAt(getBackOffset() - length, length);
+    }
+
+    /**
+     * Erases the whole data part of the packet. The front and back offsets are
+     * not affected.
+     */
+    void eraseData() {
+        eraseAt(getFrontOffset(), getDataLength());
+    }
+
+    /**
+     * Erases all content from the packet and sets both front and back offsets
+     * to zero.
+     */
+    void eraseAll() {
+        eraseAt(b(0), getTotalLength());
+    }
+
+    /**
+     * Erases the designated part of the data part of the packet. The front and
+     * back offsets are not affected. The designated part must be in the range
+     * [0, getDataLength()].
+     */
+    void eraseDataAt(b offset, b length) {
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
+        eraseAt(getFrontOffset() + offset, length);
+    }
+
+    /**
+     * Erases the designated content of the packet. The front and back offsets
+     * are updated according to the offset and length parameters. The designated
+     * part must be in the range [0, getTotalLength()].
+     */
+    void eraseAt(b offset, b length);
+
+    /**
+     * Erases the front popped part of the packet and sets the front offset to
+     * zero. The back popped part and the data part of the packet isn't affected.
+     */
+    void trimFront();
+
+    /**
+     * Erases the back popped part of the packet and sets the back offset to
+     * zero. The front popped part and the data part of the packet isn't affected.
+     */
+    void trimBack();
+
+    /**
+     * Erases both the front and the back popped parts of the packet and sets
+     * both the front and the back offsets to zero. The data part of the packet
+     * isn't affected.
+     */
+    void trim();
     //@}
 
     /** @name Whole tagging functions */
@@ -1049,10 +1381,19 @@ class INET_API Packet : public cPacket, public IPrintableObject
     }
     //@}
 
-    virtual const char *getFullName() const override;
-
     /** @name Utility functions */
     //@{
+    /**
+     * Returns the full name of the packet. The full name consists of packet
+     * name followed by either 'start', 'progress', or 'end'.
+     */
+    virtual const char *getFullName() const override;
+
+    /**
+     * Prints a human readable string representation to the output stream. The
+     * level argument controls the printed level of detail. The flags argument
+     * allows formatted and multiline output.
+     */
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     /**
