@@ -674,28 +674,30 @@ void NS_CLASS handleMessageWhenUp(cMessage *msg)
         return;
     }
 
-    Packet *pkt = check_and_cast<Packet *>(msg);
-    const auto aodvMsg = pkt->peekAtFront<AODV_msg>();
-    if (msg->isSelfMessage() && aodvMsg != nullptr) {
-        DelayInfo * delayInfo = check_and_cast<DelayInfo *>(msg->removeControlInfo());
-        auto rrep = dynamicPtrCast <RREP> (constPtrCast < AODV_msg > (aodvMsg));
-        if (rrep) {
-            if (isThisRrepPrevSent(aodvMsg)) {
-                delete msg;
-                msg = nullptr;
+    Packet *pkt = dynamic_cast<Packet *>(msg);
+    if (pkt != nullptr){
+        const auto chunk = pkt->peekAtFront<Chunk>();
+        const auto aodvMsg = dynamicPtrCast<const AODV_msg>(chunk);
+        if (msg->isSelfMessage() && aodvMsg != nullptr) {
+            DelayInfo * delayInfo = check_and_cast<DelayInfo *>(msg->removeControlInfo());
+            auto rrep = dynamicPtrCast <RREP> (constPtrCast < AODV_msg > (aodvMsg));
+            if (rrep) {
+                if (isThisRrepPrevSent(aodvMsg)) {
+                    delete msg;
+                    msg = nullptr;
+                }
             }
+            if (msg)
+                aodv_socket_send(pkt, delayInfo->dst, delayInfo->len,
+                        delayInfo->ttl, delayInfo->dev, 0);
+            delete delayInfo;
+            return;
         }
-        if (msg)
-            aodv_socket_send(pkt, delayInfo->dst, delayInfo->len,
-                    delayInfo->ttl, delayInfo->dev, 0);
-        delete delayInfo;
-        return;
     }
-
     socket.processMessage(msg);
 }
 
-void NS_CLASS  socketDataArrived(UdpSocket *socket, Packet *pkt)
+void NS_CLASS socketDataArrived(UdpSocket *socket, Packet *pkt)
 {
 
     const auto &aodvMsg = pkt->peekAtFront<AODV_msg>();
