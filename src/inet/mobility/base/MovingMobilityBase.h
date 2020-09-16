@@ -13,19 +13,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-/* -*- mode:c++ -*- ********************************************************
- * file:        MovingMobilityBase.h
- *
- * author:      Daniel Willkomm
- *
- * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
- *              Technische Universitaet Berlin, Germany.
- *
- *              (C) 2005 Andras Varga
- *
- ***************************************************************************
- * part of:     framework implementation developed by tkn
- **************************************************************************/
 
 #ifndef __INET_MOVINGMOBILITYBASE_H
 #define __INET_MOVINGMOBILITYBASE_H

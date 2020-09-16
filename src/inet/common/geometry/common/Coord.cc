@@ -15,17 +15,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-/***************************************************************************
- * file:        Coord.cc
- *
- * author:      Christian Frank
- *
- * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
- *              Technische Universitaet Berlin, Germany.
- *
- ***************************************************************************
- * part of:     framework implementation developed by tkn
- **************************************************************************/
 
 #include <assert.h>
 

@@ -13,20 +13,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-/* -*- mode:c++ -*- ********************************************************
- * file:        MobilityBase.cc
- *
- * author:      Daniel Willkomm
- *
- * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
- *              Technische Universitaet Berlin, Germany.
- *
- *              (C) 2005 Andras Varga
- *              (C) 2011 Zoltan Bojthe
- *
- ***************************************************************************
- * part of:     framework implementation developed by tkn
- **************************************************************************/
 
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
