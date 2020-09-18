@@ -52,13 +52,16 @@ using namespace omnetpp;
 #define OMNETPP5_CODE(x) x
 typedef long intval_t;
 typedef unsigned long uintval_t;
-#define scheduleAfter(x, y) scheduleAt(simTime() + (x), (y))
-#define rescheduleAt(x, y) cancelEvent((y)); scheduleAt((x), (y))
-#define rescheduleAfter(x, y) cancelEvent((y)); scheduleAt(simTime() + (x), (y))
-#define setDeliverImmediately setDeliverOnReceptionStart
 #else
 #define OMNETPP5_CODE(x)
 #endif // if OMNETPP_VERSION < 0x0600
+
+#if OMNETPP_BUILDNUM < 1504    // OMNETPP_VERSION is 6.0 pre...
+#define scheduleAfter(x, y)     scheduleAt(simTime() + (x), (y))
+#define rescheduleAt(x, y)      do { cancelEvent((y)); scheduleAt((x), (y)); } while(false)
+#define rescheduleAfter(x, y)   do { cancelEvent((y)); scheduleAt(simTime() + (x), (y)); } while(false)
+#define setDeliverImmediately   setDeliverOnReceptionStart
+#endif // OMNETPP_BUILDNUM < 1504
 
 #if OMNETPP_VERSION >= 0x0600
 #define OMNETPP6_CODE(x) x
