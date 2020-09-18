@@ -40,6 +40,7 @@ simsignal_t Ppp::rxPkOkSignal = registerSignal("rxPkOk");
 Ppp::~Ppp()
 {
     cancelAndDelete(endTransmissionEvent);
+    delete curTxPacket;
 }
 
 void Ppp::initialize(int stage)
@@ -55,6 +56,7 @@ void Ppp::initialize(int stage)
         physOutGate = gate("phys$o");
         lowerLayerOutGateId = physOutGate->getId();
 
+        setTxUpdateSupport(true);
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
         // if we're connected, get the gate with transmission rate
@@ -66,6 +68,7 @@ void Ppp::initialize(int stage)
         WATCH(numDroppedBitErr);
         WATCH(numDroppedIfaceDown);
 
+        subscribe(PRE_MODEL_CHANGE, this);
         subscribe(POST_MODEL_CHANGE, this);
         emit(transmissionStateChangedSignal, 0L);
 
@@ -98,21 +101,26 @@ void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 {
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
-    if (signalID != POST_MODEL_CHANGE)
-        return;
-
-    if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
-        if (physOutGate == gcobj->pathStartGate)
-            refreshOutGateConnection(true);
+    if (signalID == POST_MODEL_CHANGE) {
+        if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
+            if (physOutGate == gcobj->pathStartGate)
+                refreshOutGateConnection(true);
+        }
+        else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
+            if (physOutGate == gcobj->pathStartGate)
+                refreshOutGateConnection(false);
+        }
+        else if (datarateChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {
+            cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
+            if (datarateChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
+                refreshOutGateConnection(true);
+        }
     }
-    else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
-        if (physOutGate == gcobj->pathStartGate)
-            refreshOutGateConnection(false);
-    }
-    else if (datarateChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {
-        cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
-        if (datarateChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
-            refreshOutGateConnection(true);
+    else if (signalID == PRE_MODEL_CHANGE) {
+        if (auto gcobj = dynamic_cast<cPrePathCutNotification *>(obj)) {
+            if (physOutGate == gcobj->pathStartGate)
+                refreshOutGateConnection(false);
+        }
     }
 }
 
@@ -126,10 +134,16 @@ void Ppp::refreshOutGateConnection(bool connected)
 
     if (!connected) {
         if (endTransmissionEvent->isScheduled()) {
+            ASSERT(curTxPacket != nullptr);
+            simtime_t startTransmissionTime = endTransmissionEvent->getSendingTime();
+            simtime_t sentDuration = simTime() - startTransmissionTime;
+            double sentPart = sentDuration / (endTransmissionEvent->getArrivalTime() - startTransmissionTime);
+            b newLength = b(floor(curTxPacket->getBitLength() * sentPart));
+            curTxPacket->removeAtBack(curTxPacket->getDataLength() - newLength);
+            curTxPacket->setBitError(true);
+            send(curTxPacket, SendOptions().finishTx(curTxPacket->getTransmissionId()).duration(sentDuration), physOutGate);
+            curTxPacket = nullptr;
             cancelEvent(endTransmissionEvent);
-
-            if (datarateChannel)
-                datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
 
         PacketDropDetails details;
@@ -177,7 +191,9 @@ void Ppp::startTransmitting()
         pppFrame->eraseAll();
         pppFrame->insertAtFront(bytes);
     }
-    send(pppFrame, physOutGate);
+    curTxPacket = pppFrame->dup();
+    curTxPacket->setTransmissionId(pppFrame->getId());
+    send(pppFrame, SendOptions().transmissionId(curTxPacket->getTransmissionId()), physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
 
@@ -203,6 +219,8 @@ void Ppp::handleSelfMessage(cMessage *message)
 {
     if (message == endTransmissionEvent) {
         deleteCurrentTxFrame();
+        delete curTxPacket;
+        curTxPacket = nullptr;
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
