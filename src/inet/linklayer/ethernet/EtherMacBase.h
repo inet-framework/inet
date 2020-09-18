@@ -204,6 +204,8 @@ class INET_API EtherMacBase : public MacProtocolBase
 
     void changeTransmissionState(MacTransmitState newState);
     void changeReceptionState(MacReceiveState newState);
+
+    virtual void cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration);
 };
 
 } // namespace inet

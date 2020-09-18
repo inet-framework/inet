@@ -49,16 +49,24 @@ class INET_API EtherMac : public EtherMacBase
     virtual void finish() override;
 
   protected:
-    // states
-    int numConcurrentTransmissions = 0;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
-    int backoffs = 0;    // value of backoff for exponential back-off algorithm
-    long currentSendPkTreeID = -1;
+    class RxSignal {
+      public:
+        long transmissionId = -1;
+        EthernetSignalBase *signal = nullptr;
+        simtime_t endRxTime;
+        RxSignal(long transmissionId, EthernetSignalBase *signal, simtime_t_cref endRxTime) : transmissionId(transmissionId), signal(signal), endRxTime(endRxTime) {}
+    };
+    std::vector<RxSignal> rxSignals;
 
-    // other variables
-    EthernetSignalBase *frameBeingReceived = nullptr;
+  protected:
+    // states
+    int backoffs = 0;    // value of backoff for exponential back-off algorithm
+
     cMessage *endRxTimer = nullptr;
     cMessage *endBackoffTimer = nullptr;
     cMessage *endJammingTimer = nullptr;
+    EthernetSignalBase *curTxSignal = nullptr;
+    long curTxId = -1;
 
     // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
     // stores the end time of the reconnect state
@@ -68,8 +76,6 @@ class INET_API EtherMac : public EtherMacBase
         simtime_t endTime;    // end of reception
         PkIdRxTime(long id, simtime_t time) { packetTreeId = id; endTime = time; }
     };
-    typedef std::list<PkIdRxTime> EndRxTimeList;
-    EndRxTimeList endRxTimeList;    // list of incoming packets, ordered by endTime
 
     // statistics
     simtime_t totalCollisionTime;    // total duration of collisions on channel
@@ -97,24 +103,23 @@ class INET_API EtherMac : public EtherMacBase
     // helpers
     virtual void readChannelParameters(bool errorWhenAsymmetric) override;
     virtual void handleUpperPacket(Packet *msg) override;
-    virtual void processJamSignalFromNetwork(EthernetJamSignal *msg);
     virtual void processMsgFromNetwork(EthernetSignalBase *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void fillIFGIfInBurst();
-    virtual void scheduleEndTxPeriod(B sentFrameByteLength);
-    virtual void scheduleEndRxPeriod(EthernetSignalBase *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
     virtual void sendJamSignal();
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete();
     virtual void processReceivedDataFrame(Packet *frame);
-    virtual void processReceivedJam(EthernetJamSignal *jam);
     virtual void processReceivedControlFrame(Packet *packet);
     virtual void processConnectDisconnect() override;
-    virtual void addReception(simtime_t endRxTime);
-    virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);
     virtual void processDetectedCollision();
+    virtual void sendSignal(EthernetSignalBase *signal, simtime_t_cref duration);
+    virtual void handleSignalFromNetwork(EthernetSignalBase *signal);
+    virtual void txFinished();
+    virtual void updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime);
+    virtual void dropCurrentTxFrame(PacketDropDetails& details) override;
 
     B calculateMinFrameLength();
     B calculatePaddedFrameLength(Packet *frame);
