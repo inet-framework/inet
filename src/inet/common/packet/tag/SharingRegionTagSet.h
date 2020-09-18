@@ -114,7 +114,7 @@ class INET_API SharingRegionTagSet : public cObject
     void mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const TagBase>&)> f) const;
     void mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<TagBase>&)> f);
 
-    void splitTags(const std::type_info& typeInfo, b offset);
+    void splitTags(b offset, std::function<bool (const TagBase *)> f = [] (const TagBase *) { return true; });
     template <typename T> void splitTags(b offset);
 
     int getTagIndex(const std::type_info& typeInfo, b offset, b length) const;
@@ -319,7 +319,7 @@ inline int SharingRegionTagSet::getTagIndex(b offset, b length) const
 template <typename T>
 inline void SharingRegionTagSet::splitTags(b offset)
 {
-    splitTags(typeid(T), offset);
+    splitTags(offset, [&] (const TagBase *tag) { return typeid(T) == typeid(*tag); });
 }
 
 template <typename T>
