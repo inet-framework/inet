@@ -221,9 +221,11 @@ void SharingRegionTagSet::copyTags(const SharingRegionTagSet& source, b sourceOf
 
 void SharingRegionTagSet::moveTags(b shift)
 {
-    if (regionTags != nullptr)
+    if (regionTags != nullptr) {
+        prepareTagsVectorForUpdate();
         for (auto& regionTag : *regionTags)
             regionTag.setOffset(regionTag.getOffset() + shift);
+    }
 }
 
 void SharingRegionTagSet::splitTags(b offset, std::function<bool (const TagBase *)> f)
@@ -234,12 +236,12 @@ void SharingRegionTagSet::splitTags(b offset, std::function<bool (const TagBase 
             auto tag = regionTag.getTag();
             auto tagObject = tag.get();
             if (f(tagObject) && regionTag.getStartOffset() < offset && offset < regionTag.getEndOffset()) {
+                prepareTagsVectorForUpdate();
                 insertedRegionTags.push_back(RegionTag<TagBase>(offset, regionTag.getEndOffset() - offset, tag));
                 regionTag.setLength(offset - regionTag.getStartOffset());
             }
         }
         if (!insertedRegionTags.empty()) {
-            prepareTagsVectorForUpdate();
             for (auto regionTag : insertedRegionTags)
                 regionTags->push_back(RegionTag<TagBase>(regionTag.getOffset(), regionTag.getLength(), regionTag.getTag()));
             sortTagsVector();
