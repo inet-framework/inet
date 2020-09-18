@@ -47,6 +47,15 @@ packet EthernetSignal extends EthernetSignalBase
 }
 
 //
+// Represents jam on the Ethernet.
+//
+packet EthernetJamSignal extends EthernetSignalBase
+{
+    srcMacFullDuplex = false;
+    long abortedPkTreeID = 0;  // this field stores the packetTreeId of the aborted packet
+}
+
+//
 // Represents a filled inter-frame gap in burst mode.
 // Also used for calculating IFG times.
 //

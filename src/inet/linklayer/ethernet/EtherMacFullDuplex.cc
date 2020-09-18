@@ -85,11 +85,11 @@ void EtherMacFullDuplex::handleSelfMessage(cMessage *msg)
 {
     EV_TRACE << "Self-message " << msg << " received\n";
 
-    if (msg == endTxTimer)
+    if (msg == endTxMsg)
         handleEndTxPeriod();
-    else if (msg == endIfgTimer)
+    else if (msg == endIFGMsg)
         handleEndIFGPeriod();
-    else if (msg == endPauseTimer)
+    else if (msg == endPauseMsg)
         handleEndPausePeriod();
     else
         throw cRuntimeError("Unknown self message received!");
@@ -126,7 +126,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     signal->encapsulate(frame);
     send(signal, physOutGate);
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxTimer);
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
@@ -215,6 +215,9 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
 
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
         throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");
+
+    if (dynamic_cast<EthernetJamSignal *>(signal))
+        throw cRuntimeError("There is no JAM signal in full-duplex operation: EthernetJamSignal is unexpected");
 
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
@@ -362,7 +365,7 @@ void EtherMacFullDuplex::processPauseCommand(int pauseUnits)
     else if (transmitState == PAUSE_STATE) {
         EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested
                   << " more time units from now\n";
-        cancelEvent(endPauseTimer);
+        cancelEvent(endPauseMsg);
 
         // Terminate PAUSE if pauseUnits == 0; Extend PAUSE if pauseUnits > 0
         scheduleEndPausePeriod(pauseUnits);
@@ -380,7 +383,7 @@ void EtherMacFullDuplex::scheduleEndIFGPeriod()
     ASSERT(nullptr == currentTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
-    scheduleAt(endIFGTime, endIfgTimer);
+    scheduleAt(endIFGTime, endIFGMsg);
 }
 
 void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
@@ -388,7 +391,7 @@ void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
     ASSERT(nullptr == currentTxFrame);
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
-    scheduleAfter(pausePeriod, endPauseTimer);
+    scheduleAfter(pausePeriod, endPauseMsg);
     changeTransmissionState(PAUSE_STATE);
 }
 

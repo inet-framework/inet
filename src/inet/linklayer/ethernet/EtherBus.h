@@ -21,9 +21,12 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 
 namespace inet {
+
+// Direction of frame travel on bus; also used as selfmessage kind
+#define UPSTREAM      0
+#define DOWNSTREAM    1
 
 /**
  * Implements the shared coaxial cable in classic Ethernet. See the NED file
@@ -31,31 +34,26 @@ namespace inet {
  */
 class INET_API EtherBus : public cSimpleModule, cListener
 {
-  public:
+  protected:
+    /**
+     * Implements the physical locations on the bus where each
+     * network entity is connected to on the bus
+     */
     struct BusTap
     {
         int id = -1;    // which tap is this
         double position = NaN;    // Physical location of where each entity is connected to on the bus, (physical location of the tap on the bus)
         simtime_t propagationDelay[2];    // Propagation delays to the adjacent tap points on the bus: 0:upstream, 1:downstream
-        EthernetSignalBase *incomingSignal = nullptr;
-        std::map<long, EthernetSignalBase *> outgoingSignals;
-        long outgoingOrigId = -1;
-        simtime_t outgoingStartTime;
-        bool outgoingCollision = false;
     };
 
-  protected:
-    // Direction of frame travel on bus; also used as selfmessage kind
-    enum Directions { UPSTREAM = 0, DOWNSTREAM = 1 };
     // configuration
     double propagationSpeed = NaN;    // propagation speed of electrical signals through copper
-    std::vector<BusTap> tap;    // array of BusTaps: physical locations taps where that connect stations to the bus
+    BusTap *tap = nullptr;    // array of BusTaps: physical locations taps where that connect stations to the bus
     int numTaps = -1;    // number of tap points on the bus
     int inputGateBaseId = -1;    // gate id of ethg$i[0]
     int outputGateBaseId = -1;    // gate id of ethg$o[0]
 
     // state
-    double datarate = 0;
     bool dataratesDiffer = false;
 
     // statistics
@@ -72,13 +70,6 @@ class INET_API EtherBus : public cSimpleModule, cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual void checkConnections(bool errorWhenAsymmetric);
-    virtual void rxCutOnTap(int inTapIdx);
-    virtual void cutActiveTxOnTap(int outTapIdx);
-    virtual void copyIncomingsToTap(int outTapIdx);
-    virtual void cutSignalEnd(EthernetSignalBase* signal, simtime_t duration);
-    virtual void sendSignalOnTap(int tapPoint, int incomingOrigId);
-    virtual void forwardSignalFrom(int arrivalPort);
-    virtual EthernetSignalBase *mergeSignals(int tapIdx);
 };
 
 } // namespace inet
