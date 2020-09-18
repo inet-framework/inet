@@ -684,6 +684,14 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
         return checkPeekResult<T>(staticPtrCast<T>(chunk), flags);
     }
+
+    /**
+     * Specialization for the case where any the returned type is acceptable.
+     */
+    template <>
+    const Ptr<Chunk> peek(const Iterator& iterator, b length, int flags) const {
+        return peek(iterator, length, flags);
+    }
     //@}
 
     /** @name Region tagging functions */
