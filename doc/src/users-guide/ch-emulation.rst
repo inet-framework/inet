@@ -3,11 +3,6 @@
 Network Emulation
 =================
 
-.. .. _ug:sec:emulation:introduction:
-
-   Introduction
-   ------------
-
 .. _ug:sec:emulation:motivation:
 
 Motivation
@@ -16,19 +11,21 @@ Motivation
 In INET, the word *emulation* is used in a broad sense to describe a system which
 is partially implemented in the real world and partially in simulation.
 Emulation is often used for testing and validating a simulation model with
-its real-world counterparts. It may also be used out of necessity, because
+its real-world counterparts, or in a reverse scenario, during the development
+of a real-world protocol implementation or application, for testing it in
+a simulated environment. It may also be used out of necessity, because
 some part of the system only exists in the real world or only as a simulation
 model.
 
-Developing a protocol, a protocol implementation, or an application that heavily
-relies on network communication is often less expensive, more practical,
-and safer using simulation than directly performing experiments in the real world.
-However, there are potential pitfalls: porting simulation code to the target device
-may be costly and error prone, and also, a model that performs well in simulation
-does not necessarily work equally well when deployed in the real world.
-INET helps reducing these risks by allowing the researcher to mix
-simulation and real world in various ways, thereby reducing the need for porting,
-and offering more possibilities for testing out the code.
+.. Developing a protocol, a protocol implementation, or an application that heavily
+   relies on network communication is often less expensive, more practical,
+   and safer using simulation than directly performing experiments in the real world.
+   However, there are potential pitfalls: porting simulation code to the target device
+   may be costly and error prone, and also, a model that performs well in simulation
+   does not necessarily work equally well when deployed in the real world.
+   INET helps reducing these risks by allowing the researcher to mix
+   simulation and real world in various ways, thereby reducing the need for porting,
+   and offering more possibilities for testing out the code.
 
 .. There are several projects that may benefit from the network emulation
    capabilities of INET, that is, from the ability to mix simulated
@@ -123,8 +120,6 @@ world (communication). This is achieved in INET as the following:
 
   -  :cpp:`RealTimeScheduler`, a socket-aware real-time scheduler class.
 
-
-
 .. note::
 
    It is probably needless to say, but the simulation must be fast enough
@@ -151,16 +146,16 @@ changed in the *Project \| Project Features...* dialog in the IDE.)
 
 Also, in order to be able to send packets through raw sockets
 applications require special permissions. There
-are two ways to achieve this under linux.
+are two ways to achieve this under Linux.
 
 The suggested solution is to use setcap to set the application
 permissions:
 
 .. code::
 
-   $ sudo setcap cap_net_raw,cap_net_admin=eip /*fullpath*/opp_run
-   $ sudo setcap cap_net_raw,cap_net_admin=eip /*fullpath*/opp_run_dbg
-   $ sudo setcap cap_net_raw,cap_net_admin=eip /*fullpath*/opp_run_release
+   $ sudo setcap cap_net_raw,cap_net_admin=eip /path/to/opp_run
+   $ sudo setcap cap_net_raw,cap_net_admin=eip /path/to/opp_run_dbg
+   $ sudo setcap cap_net_raw,cap_net_admin=eip /path/to/opp_run_release
 
 This solution makes running the examples from the IDE possible.
 Alternatively, the application can be started with root privileges from
@@ -181,15 +176,23 @@ command line:
 Configuring
 -----------
 
+Here we show one configuration example where the network nodes contain
+a :ned:`ExtLowerEthernetInterface`.
+
 INET nodes such as :ned:`StandardHost` and :ned:`Router` can be
 configured to have :ned:`ExtLowerEthernetInterface`’s. The simulation
 may contain several nodes with external interfaces, and one node may
 also have several external interfaces.
 
+.. note::
+
+   This is one of the many possible setups. Using other components than
+   :ned:`ExtLowerEthernetInterface`, nodes may be cut into simulated and real
+   parts at any layer, and either the upper or the lower part may be real.
+   See the Showcases for demonstration of some of these use cases.
+
 A network node can be configured to have an external interface in the
 following way:
-
-
 
 .. code-block:: ini
 
@@ -199,8 +202,6 @@ following way:
 Also, the simulation must be configured to run under control the of the
 appropriate real-time scheduler class:
 
-
-
 .. code-block:: ini
 
    scheduler-class = "inet::RealTimeScheduler"
@@ -209,11 +210,9 @@ appropriate real-time scheduler class:
 to be configured. The :par:`device` parameter should be set to the name
 of the real (or virtual) interface on the host OS. The :par:`namespace`
 parameter can be set to utilize the network namespace functionality of
-linux operating systems.
+Linux operating systems.
 
 An example configuration:
-
-
 
 .. code-block:: ini
 
@@ -221,7 +220,6 @@ An example configuration:
    **.eth[0].device = "veth0" # or "eth0" for example
    **.eth[0].namespace = "host0" # optional
    **.eth[0].mtu = 1500B
-
 
 .. note::
 
