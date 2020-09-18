@@ -166,9 +166,9 @@ EtherMacBase::EtherMacBase()
 
 EtherMacBase::~EtherMacBase()
 {
-    cancelAndDelete(endTxMsg);
-    cancelAndDelete(endIFGMsg);
-    cancelAndDelete(endPauseMsg);
+    cancelAndDelete(endTxTimer);
+    cancelAndDelete(endIfgTimer);
+    cancelAndDelete(endPauseTimer);
 }
 
 void EtherMacBase::initialize(int stage)
@@ -189,9 +189,9 @@ void EtherMacBase::initialize(int stage)
         lastTxFinishTime = -1.0;    // not equals with current simtime.
 
         // initialize self messages
-        endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
-        endIFGMsg = new cMessage("EndIFG", ENDIFG);
-        endPauseMsg = new cMessage("EndPause", ENDPAUSE);
+        endTxTimer = new cMessage("EndTransmission", ENDTRANSMISSION);
+        endIfgTimer = new cMessage("EndIFG", ENDIFG);
+        endPauseTimer = new cMessage("EndPause", ENDPAUSE);
 
         // initialize states
         transmitState = TX_IDLE_STATE;
@@ -339,9 +339,9 @@ void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 void EtherMacBase::processConnectDisconnect()
 {
     if (!connected) {
-        cancelEvent(endTxMsg);
-        cancelEvent(endIFGMsg);
-        cancelEvent(endPauseMsg);
+        cancelEvent(endTxTimer);
+        cancelEvent(endIfgTimer);
+        cancelEvent(endPauseTimer);
 
         if (currentTxFrame) {
             EV_DETAIL << "Interface is not connected, dropping packet " << currentTxFrame << endl;

@@ -56,9 +56,9 @@ class INET_API EtherMac : public EtherMacBase
 
     // other variables
     EthernetSignalBase *frameBeingReceived = nullptr;
-    cMessage *endRxMsg = nullptr;
-    cMessage *endBackoffMsg = nullptr;
-    cMessage *endJammingMsg = nullptr;
+    cMessage *endRxTimer = nullptr;
+    cMessage *endBackoffTimer = nullptr;
+    cMessage *endJammingTimer = nullptr;
 
     // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
     // stores the end time of the reconnect state

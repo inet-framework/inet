@@ -51,9 +51,9 @@ simsignal_t EtherMac::backoffSlotsGeneratedSignal = registerSignal("backoffSlots
 EtherMac::~EtherMac()
 {
     delete frameBeingReceived;
-    cancelAndDelete(endRxMsg);
-    cancelAndDelete(endBackoffMsg);
-    cancelAndDelete(endJammingMsg);
+    cancelAndDelete(endRxTimer);
+    cancelAndDelete(endBackoffTimer);
+    cancelAndDelete(endJammingTimer);
 }
 
 void EtherMac::initialize(int stage)
@@ -61,9 +61,9 @@ void EtherMac::initialize(int stage)
     EtherMacBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        endRxMsg = new cMessage("EndReception", ENDRECEPTION);
-        endBackoffMsg = new cMessage("EndBackoff", ENDBACKOFF);
-        endJammingMsg = new cMessage("EndJamming", ENDJAMMING);
+        endRxTimer = new cMessage("EndReception", ENDRECEPTION);
+        endBackoffTimer = new cMessage("EndBackoff", ENDBACKOFF);
+        endJammingTimer = new cMessage("EndJamming", ENDJAMMING);
 
         // initialize state info
         backoffs = 0;
@@ -108,9 +108,9 @@ void EtherMac::processConnectDisconnect()
     if (!connected) {
         delete frameBeingReceived;
         frameBeingReceived = nullptr;
-        cancelEvent(endRxMsg);
-        cancelEvent(endBackoffMsg);
-        cancelEvent(endJammingMsg);
+        cancelEvent(endRxTimer);
+        cancelEvent(endBackoffTimer);
+        cancelEvent(endJammingTimer);
         bytesSentInBurst = B(0);
         framesSentInBurst = 0;
     }
@@ -286,8 +286,8 @@ void EtherMac::addReceptionInReconnectState(long packetTreeId, simtime_t endRxTi
 
     // adjust endRxMsg if needed (we'll exit reconnect mode when endRxMsg expires)
     simtime_t maxRxTime = endRxTimeList.back().endTime;
-    if (endRxMsg->getArrivalTime() != maxRxTime) {
-        rescheduleAt(maxRxTime, endRxMsg);
+    if (endRxTimer->getArrivalTime() != maxRxTime) {
+        rescheduleAt(maxRxTime, endRxTimer);
     }
 }
 
@@ -295,8 +295,8 @@ void EtherMac::addReception(simtime_t endRxTime)
 {
     numConcurrentTransmissions++;
 
-    if (endRxMsg->getArrivalTime() < endRxTime) {
-        rescheduleAt(endRxTime, endRxMsg);
+    if (endRxTimer->getArrivalTime() < endRxTime) {
+        rescheduleAt(endRxTime, endRxTimer);
     }
 }
 
@@ -309,8 +309,8 @@ void EtherMac::processReceivedJam(EthernetJamSignal *jam)
     if (numConcurrentTransmissions < 0)
         throw cRuntimeError("Received JAM without message");
 
-    if (numConcurrentTransmissions == 0 || endRxMsg->getArrivalTime() < endRxTime) {
-        rescheduleAt(endRxTime, endRxMsg);
+    if (numConcurrentTransmissions == 0 || endRxTimer->getArrivalTime() < endRxTime) {
+        rescheduleAt(endRxTime, endRxTimer);
     }
 
     processDetectedCollision();
@@ -418,7 +418,7 @@ void EtherMac::processMsgFromNetwork(EthernetSignalBase *signal)
         delete signal;
 
         EV_DETAIL << "Transmission interrupted by incoming frame, handling collision\n";
-        cancelEvent((transmitState == TRANSMITTING_STATE) ? endTxMsg : endIFGMsg);
+        cancelEvent((transmitState == TRANSMITTING_STATE) ? endTxTimer : endIfgTimer);
 
         EV_DETAIL << "Transmitting jam signal\n";
         sendJamSignal();    // backoff will be executed when jamming finished
@@ -431,7 +431,7 @@ void EtherMac::processMsgFromNetwork(EthernetSignalBase *signal)
         EV_INFO << "Reception of " << signal << " started.\n";
         scheduleEndRxPeriod(signal);
     }
-    else if (receiveState == RECEIVING_STATE && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
+    else if (receiveState == RECEIVING_STATE && endRxTimer->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -441,7 +441,7 @@ void EtherMac::processMsgFromNetwork(EthernetSignalBase *signal)
         EV_DETAIL << "Back-to-back frames: completing reception of current frame, starting reception of next one\n";
 
         // complete reception of previous frame
-        cancelEvent(endRxMsg);
+        cancelEvent(endRxTimer);
         frameReceptionComplete();
 
         // calculate usability
@@ -641,7 +641,7 @@ void EtherMac::handleEndTxPeriod()
 void EtherMac::scheduleEndRxPeriod(EthernetSignalBase *frame)
 {
     ASSERT(frameBeingReceived == nullptr);
-    ASSERT(!endRxMsg->isScheduled());
+    ASSERT(!endRxTimer->isScheduled());
 
     frameBeingReceived = frame;
     changeReceptionState(RECEIVING_STATE);
@@ -713,7 +713,7 @@ void EtherMac::sendJamSignal()
     //emit(packetSentToLowerSignal, jam);
     send(jam, physOutGate);
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingTimer);
     changeTransmissionState(JAMMING_STATE);
 }
 
@@ -746,7 +746,7 @@ void EtherMac::handleRetransmission()
     int slotNumber = intuniform(0, backoffRange - 1);
     EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange -1 << "]" << endl;
 
-    scheduleAfter(slotNumber * curEtherDescr->slotTime, endBackoffMsg);
+    scheduleAfter(slotNumber * curEtherDescr->slotTime, endBackoffTimer);
     changeTransmissionState(BACKOFF_STATE);
     emit(backoffSlotsGeneratedSignal, slotNumber);
 
@@ -887,7 +887,7 @@ void EtherMac::processReceivedControlFrame(Packet *packet)
         else if (transmitState == PAUSE_STATE) {
             EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested
                       << " more time units from now\n";
-            cancelEvent(endPauseMsg);
+            cancelEvent(endPauseTimer);
 
             if (pauseUnits > 0)
                 scheduleEndPausePeriod(pauseUnits);
@@ -906,7 +906,7 @@ void EtherMac::scheduleEndIFGPeriod()
 {
     changeTransmissionState(WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
-    scheduleAt(endIFGTime, endIFGMsg);
+    scheduleAt(endIFGTime, endIfgTimer);
 }
 
 void EtherMac::fillIFGIfInBurst()
@@ -917,10 +917,10 @@ void EtherMac::fillIFGIfInBurst()
     EV_TRACE << "fillIFGIfInBurst(): t=" << simTime() << ", framesSentInBurst=" << framesSentInBurst << ", bytesSentInBurst=" << bytesSentInBurst << endl;
 
     if (currentTxFrame
-        && endIFGMsg->isScheduled()
+        && endIfgTimer->isScheduled()
         && (transmitState == WAIT_IFG_STATE)
         && (simTime() == lastTxFinishTime)
-        && (simTime() == endIFGMsg->getSendingTime())
+        && (simTime() == endIfgTimer->getSendingTime())
         && (framesSentInBurst > 0)
         && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
         && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + calculatePaddedFrameLength(currentTxFrame)
@@ -933,7 +933,7 @@ void EtherMac::fillIFGIfInBurst()
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);
         changeTransmissionState(SEND_IFG_STATE);
-        rescheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
+        rescheduleAt(transmissionChannel->getTransmissionFinishTime(), endIfgTimer);
     }
     else {
         bytesSentInBurst = B(0);
@@ -949,7 +949,7 @@ void EtherMac::scheduleEndTxPeriod(B sentFrameByteLength)
         framesSentInBurst++;
     }
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxTimer);
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
@@ -957,7 +957,7 @@ void EtherMac::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->txrate;
-    scheduleAfter(pausePeriod, endPauseMsg);
+    scheduleAfter(pausePeriod, endPauseTimer);
     changeTransmissionState(PAUSE_STATE);
 }
 

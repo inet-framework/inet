@@ -85,11 +85,11 @@ void EtherMacFullDuplex::handleSelfMessage(cMessage *msg)
 {
     EV_TRACE << "Self-message " << msg << " received\n";
 
-    if (msg == endTxMsg)
+    if (msg == endTxTimer)
         handleEndTxPeriod();
-    else if (msg == endIFGMsg)
+    else if (msg == endIfgTimer)
         handleEndIFGPeriod();
-    else if (msg == endPauseMsg)
+    else if (msg == endPauseTimer)
         handleEndPausePeriod();
     else
         throw cRuntimeError("Unknown self message received!");
@@ -126,7 +126,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     signal->encapsulate(frame);
     send(signal, physOutGate);
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxTimer);
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
@@ -365,7 +365,7 @@ void EtherMacFullDuplex::processPauseCommand(int pauseUnits)
     else if (transmitState == PAUSE_STATE) {
         EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested
                   << " more time units from now\n";
-        cancelEvent(endPauseMsg);
+        cancelEvent(endPauseTimer);
 
         // Terminate PAUSE if pauseUnits == 0; Extend PAUSE if pauseUnits > 0
         scheduleEndPausePeriod(pauseUnits);
@@ -383,7 +383,7 @@ void EtherMacFullDuplex::scheduleEndIFGPeriod()
     ASSERT(nullptr == currentTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
-    scheduleAt(endIFGTime, endIFGMsg);
+    scheduleAt(endIFGTime, endIfgTimer);
 }
 
 void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
@@ -391,7 +391,7 @@ void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
     ASSERT(nullptr == currentTxFrame);
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
-    scheduleAfter(pausePeriod, endPauseMsg);
+    scheduleAfter(pausePeriod, endPauseTimer);
     changeTransmissionState(PAUSE_STATE);
 }
 
