@@ -4,7 +4,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.linklayer.ethernet.EtherBus;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherHost2;
-import inet.physicallayer.ethernet.WireJunction;
+import inet.physicallayer.common.packetlevel.WireJunction;
 import ned.DatarateChannel;
 
 //
@@ -44,10 +44,10 @@ network HostsWithBus
                 @display("p=184,180");
         }
     connections:
-        tap1.ethg++ <--> DatarateChannel <--> hostA.ethg;
-        tap2.ethg++ <--> DatarateChannel <--> hostB.ethg;
-        tap3.ethg++ <--> DatarateChannel <--> hostC.ethg;
-        tap1.ethg++ <--> DatarateChannel <--> tap2.ethg++;
-        tap2.ethg++ <--> DatarateChannel <--> tap3.ethg++;
+        tap1.port++ <--> DatarateChannel <--> hostA.ethg;
+        tap2.port++ <--> DatarateChannel <--> hostB.ethg;
+        tap3.port++ <--> DatarateChannel <--> hostC.ethg;
+        tap1.port++ <--> DatarateChannel <--> tap2.port++;
+        tap2.port++ <--> DatarateChannel <--> tap3.port++;
 }
 

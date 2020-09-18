@@ -15,15 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet;
 
+package inet.physicallayer.common.packetlevel;
 
 //
-// An Ethernet hub model.
+// Models a generic wiring hub.
 //
-// The model simply broadcasts frames (and transmission updates
-// representing aborted frames, etc.) received on one port on all
-// other ports, mimicking the propagation of electrical signals.
+// The model simply broadcasts messages (packets, frames, signals)
+// received on one port on all other ports, mimicking the propagation
+// of electrical signals. Messages are not interpreted by the model
+// in any way, so this module is protocol agnostic.
 //
 // Note that no special attention is made to appropriately model
 // frame truncations that occur when the link breaks, or comes
@@ -31,15 +32,12 @@ package inet.linklayer.ethernet;
 // to precisely model what happens when the link state changes,
 // you cannot use this module.
 //
-simple EtherHub
+simple WireJunction
 {
     parameters:
-        @networkNode();
-        @labels(node,ethernet-node);
-        @display("i=device/hub;bgb=155,104");
+        @display("i=misc/node_vs");
         @signal[packetReceived](type=cMessage);
         @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        inout ethg[] @labels(EtherFrame-conn);
+        inout port[];
 }
-

@@ -22,7 +22,7 @@ package inet.examples.ethernet.lans;
 import inet.linklayer.ethernet.EtherHub;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
-import inet.physicallayer.ethernet.WireJunction;
+import inet.physicallayer.common.packetlevel.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -187,12 +187,12 @@ module LargeLAN
         }
 
         for i=0..b-1 {
-            tap[i].ethg++ <--> cabletobus <--> bhost[i].ethg;
+            tap[i].port++ <--> cabletobus <--> bhost[i].ethg;
         }
-        tap[b].ethg++ <--> cabletobus <--> hub.ethg++;
+        tap[b].port++ <--> cabletobus <--> hub.ethg++;
 
         for i=0..b-1 {
-            tap[i].ethg++ <--> cabletobus <--> tap[i+1].ethg++;
+            tap[i].port++ <--> cabletobus <--> tap[i+1].port++;
         }
 }
 

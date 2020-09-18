@@ -25,7 +25,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
-import inet.physicallayer.ethernet.WireJunction;
+import inet.physicallayer.common.packetlevel.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -135,19 +135,19 @@ network MixedLAN
                 @display("p=650,200");
         }
     connections:
-        tap1.ethg++ <--> Eth10M {  length = 10m; } <--> tap2.ethg++;
-        tap2.ethg++ <--> Eth10M {  length = 10m; } <--> tap3.ethg++;
-        tap3.ethg++ <--> Eth10M {  length = 4m; } <--> tap4.ethg++;
-        tap4.ethg++ <--> Eth10M {  length = 11m; } <--> tap5.ethg++;
-        tap5.ethg++ <--> Eth10M {  length = 8m; } <--> tap6.ethg++;
+        tap1.port++ <--> Eth10M {  length = 10m; } <--> tap2.port++;
+        tap2.port++ <--> Eth10M {  length = 10m; } <--> tap3.port++;
+        tap3.port++ <--> Eth10M {  length = 4m; } <--> tap4.port++;
+        tap4.port++ <--> Eth10M {  length = 11m; } <--> tap5.port++;
+        tap5.port++ <--> Eth10M {  length = 8m; } <--> tap6.port++;
 
         //half-duplex:
-        tap1.ethg++ <--> C <--> busHostA.ethg;
-        tap2.ethg++ <--> C <--> busHostB.ethg;
-        tap3.ethg++ <--> C <--> switch.ethg[4];
-        tap4.ethg++ <--> C <--> busHostC.ethg;
-        tap5.ethg++ <--> C <--> hub.ethg++;
-        tap6.ethg++ <--> C <--> busHostD.ethg;
+        tap1.port++ <--> C <--> busHostA.ethg;
+        tap2.port++ <--> C <--> busHostB.ethg;
+        tap3.port++ <--> C <--> switch.ethg[4];
+        tap4.port++ <--> C <--> busHostC.ethg;
+        tap5.port++ <--> C <--> hub.ethg++;
+        tap6.port++ <--> C <--> busHostD.ethg;
 
         //full-duplex:
         switch.ethg[0] <--> Eth100M {  length = 3m; } <--> switchHostA.ethg;
@@ -320,13 +320,13 @@ network BusLAN
                 @display("p=550,180");
         }
     connections:
-        tap1.ethg++ <--> Eth10M <--> tap2.ethg++;
-        tap2.ethg++ <--> Eth10M <--> tap3.ethg++;
-        tap3.ethg++ <--> Eth10M <--> tap4.ethg++;
-        hostA.ethg <--> C <--> tap1.ethg++;
-        hostB.ethg <--> C <--> tap2.ethg++;
-        hostC.ethg <--> C <--> tap3.ethg++;
-        hostD.ethg <--> C <--> tap4.ethg++;
+        tap1.port++ <--> Eth10M <--> tap2.port++;
+        tap2.port++ <--> Eth10M <--> tap3.port++;
+        tap3.port++ <--> Eth10M <--> tap4.port++;
+        hostA.ethg <--> C <--> tap1.port++;
+        hostB.ethg <--> C <--> tap2.port++;
+        hostC.ethg <--> C <--> tap3.port++;
+        hostD.ethg <--> C <--> tap4.port++;
 }
 
 network SwitchedDuplexLAN

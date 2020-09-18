@@ -24,7 +24,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.ethernet.WireJunction;
+import inet.physicallayer.common.packetlevel.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -178,12 +178,12 @@ module VoIPStreamLargeLAN
         }
 
         for i=0..b-1 {
-            tap[i].ethg++ <--> cable <--> bhost[i].ethg;
+            tap[i].port++ <--> cable <--> bhost[i].ethg;
         }
-        tap[b].ethg++ <--> cable <--> hub.ethg++;
+        tap[b].port++ <--> cable <--> hub.ethg++;
 
         for i=0..b-1 {
-            tap[i].ethg++ <--> cable <--> tap[i+1].ethg++;
+            tap[i].port++ <--> cable <--> tap[i+1].port++;
         }
 }
 
