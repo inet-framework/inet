@@ -43,10 +43,6 @@ class INET_API Ppp : public MacProtocolBase
 
     cMessage *endTransmissionEvent = nullptr;
 
-    // saved current transmission
-    Packet *curTxPacket = nullptr;
-
-
     std::string oldConnColor;
 
     // statistics
