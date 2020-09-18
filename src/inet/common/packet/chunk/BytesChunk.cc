@@ -146,6 +146,11 @@ bool BytesChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
     return chunk->getChunkType() == CT_BYTES;
 }
 
+bool BytesChunk::canInsertAt(const Ptr<const Chunk>& chunk, b offset) const
+{
+    return chunk->getChunkType() == CT_BYTES;
+}
+
 void BytesChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
@@ -158,6 +163,12 @@ void BytesChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
+void BytesChunk::doInsertAt(const Ptr<const Chunk>& chunk, b offset)
+{
+    const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
+    bytes.insert(bytes.begin() + B(offset).get(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
+}
+
 void BytesChunk::doRemoveAtFront(b length)
 {
     bytes.erase(bytes.begin(), bytes.begin() + B(length).get());
@@ -166,6 +177,11 @@ void BytesChunk::doRemoveAtFront(b length)
 void BytesChunk::doRemoveAtBack(b length)
 {
     bytes.erase(bytes.end() - B(length).get(), bytes.end());
+}
+
+void BytesChunk::doRemoveAt(b offset, b length)
+{
+    bytes.erase(bytes.begin() + B(offset).get(), bytes.begin() + B(offset).get() + B(length).get());
 }
 
 std::ostream& BytesChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const

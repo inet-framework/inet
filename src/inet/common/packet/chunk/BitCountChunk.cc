@@ -124,6 +124,11 @@ bool BitCountChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
     return chunk->getChunkType() == CT_BITCOUNT;
 }
 
+bool BitCountChunk::canInsertAt(const Ptr<const Chunk>& chunk, b offset) const
+{
+    return chunk->getChunkType() == CT_BITCOUNT;
+}
+
 void BitCountChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& bitCountChunk = staticPtrCast<const BitCountChunk>(chunk);
@@ -136,12 +141,23 @@ void BitCountChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
     length += bitCountChunk->length;
 }
 
+void BitCountChunk::doInsertAt(const Ptr<const Chunk>& chunk, b offset)
+{
+    const auto& bitCountChunk = staticPtrCast<const BitCountChunk>(chunk);
+    length += bitCountChunk->length;
+}
+
 void BitCountChunk::doRemoveAtFront(b length)
 {
     this->length -= length;
 }
 
 void BitCountChunk::doRemoveAtBack(b length)
+{
+    this->length -= length;
+}
+
+void BitCountChunk::doRemoveAt(b offset, b length)
 {
     this->length -= length;
 }

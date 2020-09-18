@@ -130,6 +130,11 @@ bool BitsChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
     return chunk->getChunkType() == CT_BITS;
 }
 
+bool BitsChunk::canInsertAt(const Ptr<const Chunk>& chunk, b offset) const
+{
+    return chunk->getChunkType() == CT_BITS;
+}
+
 void BitsChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
@@ -142,6 +147,12 @@ void BitsChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
+void BitsChunk::doInsertAt(const Ptr<const Chunk>& chunk, b offset)
+{
+    const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
+    bits.insert(bits.begin() + b(offset).get(), bitsChunk->bits.begin(), bitsChunk->bits.end());
+}
+
 void BitsChunk::doRemoveAtFront(b length)
 {
     bits.erase(bits.begin(), bits.begin() + b(length).get());
@@ -150,6 +161,11 @@ void BitsChunk::doRemoveAtFront(b length)
 void BitsChunk::doRemoveAtBack(b length)
 {
     bits.erase(bits.end() - b(length).get(), bits.end());
+}
+
+void BitsChunk::doRemoveAt(b offset, b length)
+{
+    bits.erase(bits.begin() + b(offset).get(), bits.begin() + b(offset).get() + b(length).get());
 }
 
 std::ostream& BitsChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const

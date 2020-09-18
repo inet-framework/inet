@@ -387,8 +387,10 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
 
     virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void doInsertAt(const Ptr<const Chunk>& chunk, b offset) { throw cRuntimeError("Invalid operation"); }
     virtual void doRemoveAtFront(b length) { throw cRuntimeError("Invalid operation"); }
     virtual void doRemoveAtBack(b length) { throw cRuntimeError("Invalid operation"); }
+    virtual void doRemoveAt(b offset, b length) { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /**
@@ -506,6 +508,11 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const { return false; }
 
     /**
+     * Returns true if this chunk is capable of representing the result.
+     */
+    virtual bool canInsertAt(const Ptr<const Chunk>& chunk, b offset) const { return false; }
+
+    /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
     void insertAtFront(const Ptr<const Chunk>& chunk) {
@@ -526,6 +533,19 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         regionTags.copyTags(chunk->regionTags, b(0), getChunkLength(), chunk->getChunkLength());
         doInsertAtBack(chunk);
     }
+
+    /**
+     * Inserts the provided chunk into this chunk.
+     */
+    void insertAt(const Ptr<const Chunk>& chunk, b offset) {
+        auto chunkLength = getChunkLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= chunkLength, "offset is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canInsertAtBack(chunk));
+        handleChange();
+        regionTags.moveTags(offset, chunkLength - offset, chunk->getChunkLength());
+        regionTags.copyTags(chunk->regionTags, b(0), offset, chunk->getChunkLength());
+        doInsertAt(chunk, offset);
+    }
     //@}
 
     /** @name Removing data related functions */
@@ -539,6 +559,11 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      * Returns true if this chunk is capable of representing the result.
      */
     virtual bool canRemoveAtBack(b length) const { return false; }
+
+    /**
+     * Returns true if this chunk is capable of representing the result.
+     */
+    virtual bool canRemoveAt(b offset, b length) const { return false; }
 
     /**
      * Removes the requested part from the beginning of this chunk.
@@ -559,6 +584,19 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         handleChange();
         doRemoveAtBack(length);
         regionTags.clearTags(getChunkLength(), length);
+    }
+
+    /**
+     * Removes the requested part from this chunk.
+     */
+    void removeAt(b offset, b length) {
+        auto chunkLength = getChunkLength();
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= chunkLength, "length is invalid");
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset + length <= chunkLength, "offset is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canRemoveAt(offset, length));
+        handleChange();
+        doRemoveAt(offset, length);
+        regionTags.moveTags(offset + length, chunkLength - offset - length, -length);
     }
     //@}
 

@@ -44,9 +44,11 @@ class INET_API BitCountChunk : public Chunk
 
     virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
     virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
+    virtual void doInsertAt(const Ptr<const Chunk>& chunk, b offset) override;
 
     virtual void doRemoveAtFront(b length) override;
     virtual void doRemoveAtBack(b length) override;
+    virtual void doRemoveAt(b offset, b length) override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -80,9 +82,11 @@ class INET_API BitCountChunk : public Chunk
 
     virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
+    virtual bool canInsertAt(const Ptr<const Chunk>& chunk, b offset) const override;
 
     virtual bool canRemoveAtFront(b length) const override { return true; }
     virtual bool canRemoveAtBack(b length) const override { return true; }
+    virtual bool canRemoveAt(b offset, b length) const override { return true; }
 
     virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
