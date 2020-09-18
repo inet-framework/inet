@@ -570,6 +570,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      */
     void removeAtFront(b length) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canRemoveAtFront(length));
         handleChange();
         doRemoveAtFront(length);
         regionTags.clearTags(b(0), length);
@@ -580,10 +581,12 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      * Removes the requested part from the end of this chunk.
      */
     void removeAtBack(b length) {
+        auto chunkLength = getChunkLength();
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canRemoveAtBack(length));
         handleChange();
         doRemoveAtBack(length);
-        regionTags.clearTags(getChunkLength(), length);
+        regionTags.clearTags(chunkLength - length, length);
     }
 
     /**
