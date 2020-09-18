@@ -19,12 +19,12 @@
 
 package inet.examples.voipstream.VoIPStreamLargeNet;
 
-import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
+import inet.physicallayer.ethernet.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -154,11 +154,9 @@ module VoIPStreamLargeLAN
                 eth.duplexMode = false;
                 @display("is=s");
         }
-        bus: EtherBus {
+        tap[b+1]: WireJunction {
             parameters:
-                positions = "5 10 15"; // every 5 meters
-                propagationSpeed = 2e8 mps;  // 1us = 200m
-                @display("b=424,6;o=#408060");
+                @display("p=,,r,50");
         }
         bhost[b]: EtherHost {
             parameters:
@@ -180,10 +178,13 @@ module VoIPStreamLargeLAN
         }
 
         for i=0..b-1 {
-            bus.ethg++ <--> cable <--> bhost[i].ethg;
+            tap[i].ethg++ <--> cable <--> bhost[i].ethg;
         }
+        tap[b].ethg++ <--> cable <--> hub.ethg++;
 
-        bus.ethg++ <--> cable <--> hub.ethg++;
+        for i=0..b-1 {
+            tap[i].ethg++ <--> cable <--> tap[i+1].ethg++;
+        }
 }
 
 //

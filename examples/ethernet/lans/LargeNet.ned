@@ -19,10 +19,10 @@
 
 package inet.examples.ethernet.lans;
 
-import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
+import inet.physicallayer.ethernet.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -163,11 +163,9 @@ module LargeLAN
                 eth.duplexMode = false;
                 @display("p=1050,100,col,100");
         }
-        bus: EtherBus {
+        tap[b+1]: WireJunction {
             parameters:
-                positions = "5 10 15"; // every 5 meters
-                propagationSpeed = 2e8 mps;  // 1us = 200m
-                @display("b=800,5;o=#408060;p=450,300");
+                @display("p=,,r,50");
         }
         bhost[b]: EtherHost {
             parameters:
@@ -189,10 +187,13 @@ module LargeLAN
         }
 
         for i=0..b-1 {
-            bus.ethg++ <--> cabletobus <--> bhost[i].ethg;
+            tap[i].ethg++ <--> cabletobus <--> bhost[i].ethg;
         }
+        tap[b].ethg++ <--> cabletobus <--> hub.ethg++;
 
-        bus.ethg++ <--> cabletobus <--> hub.ethg++;
+        for i=0..b-1 {
+            tap[i].ethg++ <--> cabletobus <--> tap[i+1].ethg++;
+        }
 }
 
 //

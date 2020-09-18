@@ -18,12 +18,12 @@
 
 package inet.examples.inet.ipv4largenet;
 
-import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.physicallayer.ethernet.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -119,11 +119,9 @@ module IPv4LargeLAN
         host[n]: StandardHost;
         hub: EtherHub;
         hhost[h]: StandardHost;
-        bus: EtherBus {
+        tap[b+1]: WireJunction {
             parameters:
-                positions = "5 10 15"; // every 5 meters
-                propagationSpeed = 2e8 mps;  // 1us = 200m
-                @display("b=424,6;o=#408060");
+                @display("p=424,6,r,50");
         }
         bhost[b]: StandardHost;
     connections:
@@ -141,10 +139,13 @@ module IPv4LargeLAN
         router.ethg++ <--> cabletobus <--> hub.ethg++;
 
         for i=0..b-1 {
-            bus.ethg++ <--> cabletobus <--> bhost[i].ethg++;
+            tap[i].ethg++ <--> cabletobus <--> bhost[i].ethg++;
         }
 
-        bus.ethg++ <--> cabletobus <--> hub.ethg++;
+        tap[b].ethg++ <--> cabletobus <--> hub.ethg++;
+        for i=0..b-1 {
+            tap[i].ethg++ <--> cabletobus <--> tap[i+1].ethg++;
+        }
 }
 
 //

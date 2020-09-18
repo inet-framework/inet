@@ -76,18 +76,18 @@
 # /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx, ERROR,    # pcap devices not supported
 
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            2b63-2dea/tplx, PASS,
-/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            22d9-8f78/tplx, PASS,
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            d43b-cc75/tplx, PASS,
 
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
-/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            cec2-82de/tplx, PASS,
+/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            4912-cb62/tplx, PASS,
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,             0000-0000/tplx, ERROR,   # not a complete simulations, defaults.ini included by other ini files
 /examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             2a2c-87bb/tplx, PASS,
 /examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            2c41-3791/tplx, PASS,
 /examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             b776-ee17/tplx, PASS,
 /examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            2c41-3791/tplx, PASS,
-/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              e867-0294/tplx, PASS,
-/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            713d-d7be/tplx, PASS,
-/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            2c70-0249/tplx, PASS,
+/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              3d9b-593d/tplx, PASS,
+/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            9b98-33c4/tplx, PASS,
+/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            332c-f062/tplx, PASS,
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            1000s,           4889-07d0/tplx, PASS,
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLanPreconf -r 0,      1000s,           36f5-c062/tplx, PASS,
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            5d3a-c1ed/tplx, PASS,

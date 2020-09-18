@@ -15,18 +15,19 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __INET_ETHERHUB_H
-#define __INET_ETHERHUB_H
+#ifndef __INET_WIREJUNCTION_H
+#define __INET_WIREJUNCTION_H
 
 #include "inet/common/INETDefs.h"
 
 namespace inet {
+namespace physicallayer {
 
 /**
  * Models a wiring hub. It simply broadcasts the received message
  * on all other ports.
  */
-class INET_API EtherHub : public cSimpleModule, protected cListener
+class INET_API WireJunction : public cSimpleModule, protected cListener
 {
   protected:
     int numPorts;    // sizeof(ethg)
@@ -46,7 +47,8 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
     virtual void checkConnections(bool errorWhenAsymmetric);
 };
 
+} //namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_ETHERHUB_H
+#endif // ifndef __INET_WIREJUNCTION_H
 

@@ -15,10 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet;
 
-import inet.physicallayer.ethernet.WireJunction;
-
+package inet.physicallayer.ethernet;
 
 //
 // A generic wiring hub model.
@@ -36,12 +34,12 @@ import inet.physicallayer.ethernet.WireJunction;
 // checks the equivalence of input/output datarates on startup; you are
 // responsible that links added at runtime have have the correct datarate.
 //
-simple EtherHub extends WireJunction
+simple WireJunction
 {
     parameters:
-        @networkNode();
-        @labels(node,ethernet-node);
-        @display("i=device/hub");
-        @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @display("i=misc/node_vs");
+        @signal[packetReceived](type=cMessage);
+    gates:
+        inout ethg[] @labels(EtherFrame-conn);  //TODO rename gates, but EtherHub has ethg
 }
 
