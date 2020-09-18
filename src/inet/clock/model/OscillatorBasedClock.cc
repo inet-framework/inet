@@ -139,7 +139,12 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
                 ASSERT(simTimeDelay >= 0);
                 cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                 cContextSwitcher contextSwitcher(targetModule);
+#if OMNETPP_BUILDNUM < 1504    // OMNETPP_VERSION is 6.0 pre...
+                targetModule->cancelEvent(event);
+                targetModule->scheduleAfter(simTimeDelay, event);
+#else
                 targetModule->rescheduleAfter(simTimeDelay, event);
+#endif
             }
             else {
                 clocktime_t arrivalClockTime = event->getArrivalClockTime();
@@ -147,7 +152,12 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
                 ASSERT(arrivalSimTime >= currentSimTime);
                 cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                 cContextSwitcher contextSwitcher(targetModule);
+#if OMNETPP_BUILDNUM < 1504    // OMNETPP_VERSION is 6.0 pre...
+                targetModule->cancelEvent(event);
+                targetModule->scheduleAt(arrivalSimTime, event);
+#else
                 targetModule->rescheduleAt(arrivalSimTime, event);
+#endif
             }
         }
     }

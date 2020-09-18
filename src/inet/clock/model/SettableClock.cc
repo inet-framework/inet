@@ -91,7 +91,12 @@ void SettableClock::setClockTime(clocktime_t newClockTime, bool resetOscillator)
                 if (event->isScheduled()) {
                     cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                     cContextSwitcher contextSwitcher(targetModule);
+#if OMNETPP_BUILDNUM < 1504    // OMNETPP_VERSION is 6.0 pre...
+                    targetModule->cancelEvent(event);
+                    targetModule->scheduleAt(arrivalSimTime, event);
+#else
                     targetModule->rescheduleAt(arrivalSimTime, event);
+#endif
                 }
             }
         }
