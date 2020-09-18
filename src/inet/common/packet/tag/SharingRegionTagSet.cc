@@ -228,6 +228,24 @@ void SharingRegionTagSet::moveTags(b shift)
     }
 }
 
+void SharingRegionTagSet::moveTags(b offset, b length, b shift)
+{
+    if (regionTags != nullptr) {
+        prepareTagsVectorForUpdate();
+        if (shift > b(0)) {
+            splitTags(offset);
+            clearTags(offset + length, offset + length + shift);
+        }
+        else {
+            splitTags(offset + length);
+            clearTags(offset - shift, offset);
+        }
+        for (auto& regionTag : *regionTags)
+            if (offset <= regionTag.getStartOffset() && regionTag.getEndOffset() <= offset + length)
+                regionTag.setOffset(regionTag.getOffset() + shift);
+    }
+}
+
 void SharingRegionTagSet::splitTags(b offset, std::function<bool (const TagBase *)> f)
 {
     if (regionTags != nullptr) {

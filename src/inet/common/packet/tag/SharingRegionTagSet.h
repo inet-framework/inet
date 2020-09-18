@@ -176,6 +176,11 @@ class INET_API SharingRegionTagSet : public cObject
     void moveTags(b shift);
 
     /**
+     * Moves the region of tags with the provided shift.
+     */
+    void moveTags(b offset, b length, b shift);
+
+    /**
      * Copies the set of tags from the source region to the provided region.
      */
     void copyTags(const SharingRegionTagSet& source, b sourceOffset, b offset, b length);
