@@ -1,0 +1,6 @@
+#! /bin/bash
+cd $(dirname $0)
+echo "| NOTE:"
+echo "| At the container prompt, do this: cd ../models && . setenv_in_docker"
+echo "| Then you can run e.g. the RIP tutorial with: cd rip && inet"
+docker run --rm -it -v "$(pwd):/root/models" -u "$(id -u):$(id -g)"   -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY omnetpp/inet-gui:o5.6.2-4.2.0
