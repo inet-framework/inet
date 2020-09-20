@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<config>
+	<interface hosts='RA1' names='eth[2]' mode='PASSIVE' />
+	<interface hosts='RA2' names='eth[2]' mode='PASSIVE' />
+	<interface hosts='RA3' names='eth[2]' mode='PASSIVE' />
+	<interface hosts='RA4' names='eth[0]' mode='NoRIP' />
+	
+	<interface hosts='RB1' names='eth[2]' mode='NoRIP' />
+	<interface hosts='RB2' names='eth[2]' mode='PASSIVE' />
+	<interface hosts='RB3' names='eth[2]' mode='PASSIVE' />
+	<interface hosts='RB4' names='eth[2]' mode='NoRIP' />
+	
+	<interface hosts='RC1' names='eth[2]' mode='NoRIP' />
+	<interface hosts='RC2' names='eth[2]' mode='PASSIVE' />
+	<interface hosts='RC3' names='eth[2]' mode='PASSIVE' />
+	<interface hosts='RC4' names='eth[2]' mode='PASSIVE' />
+	
+	<interface metric='1' />
+</config>
+

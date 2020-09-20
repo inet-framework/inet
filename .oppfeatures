@@ -1158,6 +1158,42 @@
         linkerFlags = ""
         />
     <feature
+        id="riptutorial"
+        name="RIP routing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to RIP routing."
+        initiallyEnabled = "true"
+        requires = "visualization Ethernet RIP"
+        labels = "tutorial rip routing"
+        nedPackages = "inet.tutorials.rip"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="ospftutorial"
+        name="OSPF routing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to OSPF routing."
+        initiallyEnabled = "true"
+        requires = "visualization Ethernet OSPFv2"
+        labels = "tutorial ospf routing"
+        nedPackages = "inet.tutorials.ospf"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="bgptutorial"
+        name="BGP routing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to BGP routing."
+        initiallyEnabled = "true"
+        requires = "visualization Ethernet OSPFv2 BGP"
+        labels = "tutorial bgp ospf routing"
+        nedPackages = "inet.tutorials.bgp"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="general_showcases"
         name="General showcases"
         description = "Showcases that demonstrate features which are independent of any specific network technology."

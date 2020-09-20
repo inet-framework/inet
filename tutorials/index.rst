@@ -18,3 +18,6 @@ The following tutorials are available:
    Wireless <wireless/doc/index>
    IPv4 Network Configurator <configurator/doc/index>
    Queueing <queueing/doc/index>
+   RIP Routing <rip/doc/index>
+   OSPF Routing <ospf/doc/index>
+   BGP Routing <bgp/doc/index>
