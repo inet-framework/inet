@@ -405,7 +405,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             // ------ Data Arrival Indication ----------------------------------
         case SCTP_I_DATA_NOTIFICATION: {
             // Data has arrived -> request it from the SCTP module.
-            auto& tags = getTags(msg);
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
             auto dataIndication = tags.getTag<SctpCommandReq>();
             // SctpInfoReq* command = new SctpInfoReq("SendCommand");
             SctpInfoReq* command = new SctpInfoReq();
@@ -438,7 +438,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             // ------ Connection established -----------------------------------
         case SCTP_I_ESTABLISHED: {
             Message *message = check_and_cast<Message *>(msg);
-            auto& tags = getTags(message);
+            auto& tags = message->getTags();
             auto connectInfo = tags.getTag<SctpConnectReq>();
             ActualOutboundStreams = connectInfo->getOutboundStreams();
             if (ActualOutboundStreams > RequestedOutboundStreams) {
@@ -456,7 +456,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             // ------ Queue indication -----------------------------------------
         case SCTP_I_SENDQUEUE_ABATED: {
             Message *message = check_and_cast<Message *>(msg);
-            auto& tags = getTags(message);
+            auto& tags = message->getTags();
             const auto& sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
             assert(sendQueueAbatedIndication != nullptr);
             // Queue is underfull again -> give it more data.
@@ -1186,7 +1186,7 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
         const auto& smsg = dataMessage->peekData();
 
         if (TransportProtocol == SCTP) {
-            auto& tags = getTags(msg);
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
             auto& receiveCommand = tags.findTag<SctpRcvReq>();
             streamID = receiveCommand->getSid();
         }

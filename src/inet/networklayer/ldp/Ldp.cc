@@ -192,7 +192,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
             udpSocket.processMessage(msg);
         }
         else {
-            auto& tags = getTags(msg);
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
             int socketId = tags.getTag<SocketInd>()->getSocketId();
             for (auto& s: udpSockets) {
                 if (s.getSocketId() == socketId) {

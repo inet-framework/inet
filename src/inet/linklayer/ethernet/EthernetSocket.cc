@@ -43,7 +43,7 @@ void EthernetSocket::sendToEthernet(cMessage *msg)
         EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
     EV_TRACE << endl;
 
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(gateToEthernet->getOwnerModule())->send(msg, gateToEthernet);
@@ -94,7 +94,7 @@ void EthernetSocket::setCallback(ICallback *callback)
 
 bool EthernetSocket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     const auto& socketInd = tags.findTag<SocketInd>();
     return socketInd != nullptr && socketInd->getSocketId() == socketId;
 }

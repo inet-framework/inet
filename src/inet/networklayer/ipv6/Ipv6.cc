@@ -192,7 +192,7 @@ void Ipv6::refreshDisplay() const
 
 void Ipv6::handleMessage(cMessage *msg)
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
 
 #ifdef WITH_xMIPv6
     // 28.09.07 - CB

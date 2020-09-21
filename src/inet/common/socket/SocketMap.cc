@@ -28,7 +28,7 @@ namespace inet {
 
 ISocket *SocketMap::findSocketFor(cMessage *msg)
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     int connId = tags.getTag<SocketInd>()->getSocketId();
     auto i = socketMap.find(connId);
     ASSERT(i == socketMap.end() || i->first == i->second->getSocketId());

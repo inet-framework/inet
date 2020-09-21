@@ -316,7 +316,7 @@ void UdpSocket::sendToUDP(cMessage *msg)
     if (!gateToUdp)
         throw cRuntimeError("UdpSocket: setOutputGate() must be invoked before socket can be used");
     EV_DEBUG << "Sending to UDP protocol" << EV_FIELD(msg) << EV_ENDL;
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
@@ -382,7 +382,7 @@ void UdpSocket::processMessage(cMessage *msg)
 
 bool UdpSocket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     const auto& socketInd = tags.findTag<SocketInd>();
     return socketInd != nullptr && socketInd->getSocketId() == socketId;
 }

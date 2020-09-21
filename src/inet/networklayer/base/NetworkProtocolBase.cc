@@ -100,7 +100,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        auto& tags = getTags(message);
+        auto& tags = check_and_cast<ITaggedObject *>(message)->getTags();
         tags.removeTagIfPresent<DispatchProtocolReq>();
         tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
@@ -110,7 +110,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             NetworkInterface *networkInterface = interfaceTable->getInterface(i);
             if (networkInterface && !networkInterface->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
-                auto& tags = getTags(duplicate);
+                auto& tags = check_and_cast<ITaggedObject *>(duplicate)->getTags();
                 tags.removeTagIfPresent<DispatchProtocolReq>();
                 tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
                 send(duplicate, "queueOut");

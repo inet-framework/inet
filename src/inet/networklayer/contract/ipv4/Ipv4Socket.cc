@@ -38,7 +38,7 @@ void Ipv4Socket::setCallback(INetworkSocket::ICallback *callback)
 
 bool Ipv4Socket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
     return socketId == msgSocketId;
 }
@@ -124,7 +124,7 @@ void Ipv4Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)
         throw cRuntimeError("Ipv4Socket: setOutputGate() must be invoked before the socket can be used");
-    auto& tags = getTags(message);
+    auto& tags = check_and_cast<ITaggedObject *>(message)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);

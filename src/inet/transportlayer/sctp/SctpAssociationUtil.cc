@@ -511,7 +511,7 @@ void SctpAssociation::sendEstabIndicationToApp()
 
 void SctpAssociation::sendToApp(cMessage *msg)
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<SocketInd>()->setSocketId(assocId);
     sctpMain->send(msg, "appOut");
 }

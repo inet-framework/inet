@@ -40,7 +40,7 @@ void SctpAssociation::process_ASSOCIATE(SctpEventCode& event, SctpCommandReq *sc
     L3Address lAddr, rAddr;
     SctpOpenReq *openCmd = check_and_cast<SctpOpenReq *>(sctpCommand);
     auto request = check_and_cast<Request *>(msg);
-    auto& tags = getTags(request);
+    auto& tags = request->getTags();
     const auto& interfaceReq = tags.findTag<InterfaceReq>();
     if (interfaceReq && interfaceReq->getInterfaceId() != -1) {
         sctpMain->setInterfaceId(interfaceReq->getInterfaceId());
@@ -441,7 +441,7 @@ void SctpAssociation::process_ABORT(SctpEventCode& event)
 
 void SctpAssociation::process_STATUS(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg)
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     auto& statusInfo = tags.addTagIfAbsent<SctpStatusReq>();
     statusInfo->setState(fsm->getState());
     statusInfo->setStateName(stateName(fsm->getState()));

@@ -35,7 +35,7 @@ void TunSocket::setCallback(ICallback *callback)
 
 bool TunSocket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
     return socketId == msgSocketId;
 }
@@ -105,7 +105,7 @@ void TunSocket::sendToTun(cMessage *msg)
 {
     if (!outputGate)
         throw cRuntimeError("TunSocket: setOutputGate() must be invoked before socket can be used");
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(msg, outputGate);

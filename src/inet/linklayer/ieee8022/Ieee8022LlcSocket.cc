@@ -38,7 +38,7 @@ void Ieee8022LlcSocket::setCallback(ICallback *callback)
 
 bool Ieee8022LlcSocket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
     return socketId == msgSocketId;
 }
@@ -109,7 +109,7 @@ void Ieee8022LlcSocket::sendToLlc(cMessage *msg)
 {
     if (!outputGate)
         throw cRuntimeError("LlcSocket: setOutputGate() must be invoked before socket can be used");
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022);
     tags.addTagIfAbsent<Ieee802SapReq>()->setSsap(localSap);

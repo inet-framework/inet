@@ -415,7 +415,7 @@ struct netif *TcpLwip::ip_route(L3Address const& ipAddr)
 
 void TcpLwip::handleAppMessage(cMessage *msgP)
 {
-    auto& tags = getTags(msgP);
+    auto& tags = check_and_cast<ITaggedObject *>(msgP)->getTags();
     int connId = tags.getTag<SocketReq>()->getSocketId();
 
     TcpLwipConnection *conn = findAppConn(connId);

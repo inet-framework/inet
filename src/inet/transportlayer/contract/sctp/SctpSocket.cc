@@ -54,7 +54,7 @@ SctpSocket::SctpSocket(bool type)
 
 SctpSocket::SctpSocket(cMessage *msg)
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     if (tags.getNumTags() == 0)
         throw cRuntimeError("SctpSocket::SctpSocket(cMessage *): no SctpCommandReq in message (not from SCTP?)");
 
@@ -131,7 +131,7 @@ void SctpSocket::sendToSctp(cMessage *msg)
     if (!gateToSctp)
         throw cRuntimeError("SctpSocket::sendToSctp(): setOutputGate() must be invoked before socket can be used");
     EV_INFO << "sendToSctp SocketId is set to " << assocId << endl;
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(assocId == -1 ? this->assocId : assocId);
     if (interfaceIdToTun != -1) {
@@ -589,7 +589,7 @@ void SctpSocket::processMessage(cMessage *msg)
             break;
 
         case SCTP_I_SENDQUEUE_ABATED: {
-            auto& tags = getTags(msg);
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
             auto cmd = tags.getTag<SctpCommandReq>();
             if (cb) {
                 cb->sendqueueAbatedArrived(this, cmd->getNumMsgs());
@@ -613,7 +613,7 @@ void SctpSocket::processMessage(cMessage *msg)
 
         case SCTP_I_ADDRESS_ADDED: {
             EV_INFO << "SCTP_I_ADDRESS_ADDED\n";
-            auto& tags = getTags(msg);
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
             auto cmd = tags.getTag<SctpCommandReq>();
             if (cb) {
                 cb->addressAddedArrived(this, cmd->getLocalAddr(), remoteAddr);

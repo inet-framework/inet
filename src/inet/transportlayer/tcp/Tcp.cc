@@ -103,7 +103,7 @@ void Tcp::handleSelfMessage(cMessage *msg)
 
 void Tcp::handleUpperCommand(cMessage *msg)
 {
-    int socketId = getTags(msg).getTag<SocketReq>()->getSocketId();
+    int socketId = check_and_cast<ITaggedObject *>(msg)->getTags().getTag<SocketReq>()->getSocketId();
     TcpConnection *conn = findConnForApp(socketId);
 
     if (!conn) {

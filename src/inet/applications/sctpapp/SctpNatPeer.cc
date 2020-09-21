@@ -236,7 +236,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                     clientSocket.processMessage(msg);
                 else {
                     Message *message = check_and_cast<Message *>(msg);
-                    auto& msgtags = getTags(message);
+                    auto& msgtags = message->getTags();
                     auto& command = msgtags.findTag<SctpCommandReq>();
                     Request *cmsg = new Request("SCTP_C_ABORT", SCTP_C_ABORT);
                     auto cmd = cmsg->addTag<SctpSendReq>();
@@ -258,7 +258,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 } else {
                     int32_t count = 0;
                     Message *message = check_and_cast<Message *>(msg);
-                    auto& tags = getTags(message);
+                    auto& tags = message->getTags();
                     auto& connectInfo = tags.findTag<SctpConnectReq>();
                     numSessions++;
                     serverAssocId = connectInfo->getSocketId();
@@ -336,7 +336,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 EV_DETAIL << "NatPeer: SCTP_I_DATA_NOTIFICATION arrived\n";
                 notifications++;
                 Message *message = check_and_cast<Message *>(msg);
-                auto& intags = getTags(message);
+                auto& intags = message->getTags();
                 auto& ind = intags.findTag<SctpCommandReq>();
                 id = ind->getSocketId();
                 Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
@@ -536,7 +536,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
 void SctpNatPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
-    auto& intags = getTags(message);
+    auto& intags = message->getTags();
     auto& ind = intags.findTag<SctpCommandReq>();
     Request *cmesg = new Request("SCTP_C_RECEIVE", SCTP_C_RECEIVE);
     auto& cmd = cmesg->addTag<SctpSendReq>();
@@ -798,7 +798,7 @@ void SctpNatPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 
     EV << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
 
-    auto& tags = getTags(msg);
+    auto& tags = msg->getTags();
     const auto& ind = tags.findTag<SctpRcvReq>();
 
     bytesRcvd += msg->getByteLength();

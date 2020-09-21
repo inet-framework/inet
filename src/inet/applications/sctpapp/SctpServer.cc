@@ -165,7 +165,7 @@ void SctpServer::generateAndSend()
 Message *SctpServer::makeReceiveRequest(cMessage *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
-    auto& intags = getTags(message);
+    auto& intags = message->getTags();
     const auto& ind = intags.findTag<SctpCommandReq>();
     Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
     auto cmd = cmsg->addTag<SctpSendReq>();
@@ -353,7 +353,7 @@ void SctpServer::handleMessage(cMessage *msg)
                 packetsRcvd++;
                 EV_INFO << simTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
                 Packet *message = check_and_cast<Packet *>(msg);
-                auto& tags = getTags(message);
+                auto& tags = message->getTags();
                 const auto& ind = tags.findTag<SctpRcvReq>();
                 id = ind->getSocketId();
                 auto j = serverAssocStatMap.find(id);

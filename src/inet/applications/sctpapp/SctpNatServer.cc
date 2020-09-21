@@ -204,7 +204,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
             case SCTP_I_ABORT: {
                 Message *message = check_and_cast<Message *>(msg);
                 assocId = message->getTag<SocketInd>()->getSocketId();
-                auto& indtags = getTags(message);
+                auto& indtags = message->getTags();
                 const auto& ind = indtags.findTag<SctpCommandReq>();
 
                 Request *cmsg = new Request("SCTP_C_ABORT", SCTP_C_ABORT);
@@ -221,7 +221,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
 
             case SCTP_I_ESTABLISHED: {
                 Message *message = check_and_cast<Message *>(msg);
-                auto& tags = getTags(message);
+                auto& tags = message->getTags();
                 const auto& connectInfo = tags.findTag<SctpConnectReq>();
                 numSessions++;
                 assocId = connectInfo->getSocketId();
@@ -254,7 +254,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 EV_DETAIL << "SCTP_I_DATA_NOTIFICATION arrived at server\n";
                 notifications++;
                 Message *message = check_and_cast<Message *>(msg);
-                auto& intags = getTags(message);
+                auto& intags = message->getTags();
                 const auto& ind = intags.findTag<SctpCommandReq>();
                 Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
                 auto cmd = cmsg->addTag<SctpSendReq>();
@@ -273,7 +273,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 EV << "\nData arrived at server: assoc=" << assocId << "\n";
                 printNatVector();
                 Packet *message = check_and_cast<Packet *>(msg);
-                auto& tags = getTags(message);
+                auto& tags = message->getTags();
                 const auto& ind = tags.findTag<SctpRcvReq>();
                 id = ind->getSocketId();
                 const auto& smsg = message->peekDataAsBytes();
@@ -402,7 +402,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
 
             case SCTP_I_ADDRESS_ADDED: {
                 Message *message = check_and_cast<Message *>(msg);
-                auto& intags = getTags(message);
+                auto& intags = message->getTags();
                 const auto& ind = intags.findTag<SctpCommandReq>();
                 bool found = false;
                 printNatVector();

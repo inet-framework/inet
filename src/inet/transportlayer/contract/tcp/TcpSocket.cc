@@ -249,7 +249,7 @@ void TcpSocket::sendToTcp(cMessage *msg, int connId)
     if (!gateToTcp)
         throw cRuntimeError("TcpSocket: setOutputGate() must be invoked before socket can be used");
 
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
@@ -374,7 +374,7 @@ void TcpSocket::processMessage(cMessage *msg)
 
 bool TcpSocket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     const auto& socketInd = tags.findTag<SocketInd>();
     return socketInd != nullptr && socketInd->getSocketId() == connId;
 }

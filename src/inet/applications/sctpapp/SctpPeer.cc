@@ -226,7 +226,7 @@ void SctpPeer::handleMessage(cMessage *msg)
         case SCTP_I_PEER_CLOSED:
         case SCTP_I_ABORT: {
             Message *message = check_and_cast<Message *>(msg);
-            auto& intags = getTags(message);
+            auto& intags = message->getTags();
             const auto& ind = intags.findTag<SctpCommandReq>();
             Request *cmsg = new Request("SCTP_C_ABORT", SCTP_C_ABORT);
             auto& cmd = cmsg->addTag<SctpSendReq>();
@@ -244,7 +244,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                 clientSocket.processMessage(PK(msg));
             else {
                 Message *message = check_and_cast<Message *>(msg);
-                auto& tags = getTags(message);
+                auto& tags = message->getTags();
                 const auto& connectInfo = tags.findTag<SctpConnectReq>();
                 numSessions++;
                 serverAssocId = connectInfo->getSocketId();
@@ -322,7 +322,7 @@ void SctpPeer::handleMessage(cMessage *msg)
         case SCTP_I_DATA_NOTIFICATION: {
             notificationsReceived++;
             Message *message = check_and_cast<Message *>(msg);
-            auto& intags = getTags(message);
+            auto& intags = message->getTags();
             const auto& ind = intags.findTag<SctpCommandReq>();
             id = ind->getSocketId();
             Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
@@ -343,7 +343,7 @@ void SctpPeer::handleMessage(cMessage *msg)
 
         case SCTP_I_DATA: {
             Packet *message = check_and_cast<Packet *>(msg);
-            auto& tags = getTags(message);
+            auto& tags = message->getTags();
             const auto& ind = tags.findTag<SctpRcvReq>();
             id = ind->getSocketId();
             auto j = rcvdBytesPerAssoc.find(id);
@@ -485,7 +485,7 @@ void SctpPeer::handleTimer(cMessage *msg)
 void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
-    auto& intags = getTags(message);
+    auto& intags = message->getTags();
     const auto& ind = intags.findTag<SctpCommandReq>();
     Request *cmesg = new Request("SCTP_C_RECEIVE", SCTP_C_RECEIVE);
     auto& cmd = cmesg->addTag<SctpSendReq>();
@@ -659,7 +659,7 @@ void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
 
-    auto& tags = getTags(msg);
+    auto& tags = msg->getTags();
     const auto& ind = tags.findTag<SctpRcvReq>();
 
     emit(packetReceivedSignal, msg);

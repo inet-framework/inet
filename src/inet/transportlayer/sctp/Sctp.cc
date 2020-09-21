@@ -261,7 +261,7 @@ void Sctp::handleMessage(cMessage *msg)
     }
     else {    // must be from app
         EV_DEBUG << "must be from app\n";
-        auto& tags = getTags(msg);
+        auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
         int32_t assocId = tags.getTag<SocketReq>()->getSocketId();
         EV_INFO << "assocId = " << assocId << endl;
         if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {

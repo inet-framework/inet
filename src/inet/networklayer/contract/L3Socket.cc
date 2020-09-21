@@ -39,7 +39,7 @@ void L3Socket::setCallback(INetworkSocket::ICallback *callback)
 
 bool L3Socket::belongsToSocket(cMessage *msg) const
 {
-    auto& tags = getTags(msg);
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
     return socketId == msgSocketId;
 }
@@ -125,7 +125,7 @@ void L3Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)
         throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
-    auto& tags = getTags(message);
+    auto& tags = check_and_cast<ITaggedObject *>(message)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
