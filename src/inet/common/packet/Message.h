@@ -19,12 +19,12 @@
 #define __INET_MESSAGE_H
 
 #include "inet/common/IPrintableObject.h"
-#include "inet/common/packet/tag/SharingTagSet.h"
+#include "inet/common/packet/tag/ITaggedObject.h"
 #include "inet/common/TagBase.h"
 
 namespace inet {
 
-class INET_API Message : public cMessage, public IPrintableObject
+class INET_API Message : public cMessage, public IPrintableObject, public ITaggedObject
 {
   friend class MessageDescriptor;
 
@@ -48,7 +48,7 @@ class INET_API Message : public cMessage, public IPrintableObject
     /**
      * Returns all tags.
      */
-    SharingTagSet& getTags() { return tags; }
+    virtual SharingTagSet& getTags() override { return tags; }
 
     /**
      * Returns the number of message tags.

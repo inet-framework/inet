@@ -24,8 +24,8 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
-#include "inet/common/packet/tag/SharingRegionTagSet.h"
-#include "inet/common/packet/tag/SharingTagSet.h"
+#include "inet/common/packet/tag/IRegionTaggedObject.h"
+#include "inet/common/packet/tag/ITaggedObject.h"
 #include "inet/common/TagBase.h"
 
 namespace inet {
@@ -83,7 +83,7 @@ namespace inet {
  *  - attache tags (metadata) to regions of the content of the packet
  *  - convert to a human readable string
  */
-class INET_API Packet : public cPacket, public IPrintableObject
+class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedObject, public IRegionTaggedObject
 {
   friend class PacketDescriptor;
 
@@ -1179,7 +1179,7 @@ class INET_API Packet : public cPacket, public IPrintableObject
     /**
      * Returns all tags.
      */
-    SharingTagSet& getTags() { return tags; }
+    virtual SharingTagSet& getTags() override { return tags; }
 
     /**
      * Returns the number of packet tags.
@@ -1268,6 +1268,11 @@ class INET_API Packet : public cPacket, public IPrintableObject
 
     /** @name Region tagging functions */
     //@{
+    /**
+     * Returns all region tags.
+     */
+    virtual SharingRegionTagSet& getRegionTags() override { return regionTags; }
+
     /**
      * Returns the number of region tags.
      */

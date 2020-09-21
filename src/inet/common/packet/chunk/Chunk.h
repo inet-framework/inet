@@ -23,7 +23,7 @@
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
-#include "inet/common/packet/tag/SharingRegionTagSet.h"
+#include "inet/common/packet/tag/IRegionTaggedObject.h"
 #include "inet/common/Ptr.h"
 #include "inet/common/TemporarySharedPtr.h"
 #include "inet/common/Units.h"
@@ -246,7 +246,7 @@ using namespace units::values;
  * e) Inserting a connecting SliceChunk into a SliceChunk merges them
  */
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
-class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject
+class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject, public IRegionTaggedObject
 {
   friend class SliceChunk;
   friend class SequenceChunk;
@@ -696,6 +696,11 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
 
     /** @name Region tagging functions */
     //@{
+    /**
+     * Returns all region tags.
+     */
+    virtual SharingRegionTagSet& getRegionTags() override { return regionTags; }
+
     /**
      * Returns the number of chunk tags.
      */
