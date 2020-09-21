@@ -1408,8 +1408,6 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     //@}
 };
 
-INET_API SharingTagSet& getTags(cMessage *msg);
-
 } // namespace
 
 #endif

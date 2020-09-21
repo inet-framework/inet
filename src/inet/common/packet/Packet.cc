@@ -300,14 +300,5 @@ std::string Packet::str() const
     return stream.str();
 }
 
-// TODO: move?
-SharingTagSet& getTags(cMessage *msg)
-{
-    if (msg->isPacket())
-        return check_and_cast<Packet *>(msg)->getTags();
-    else
-        return check_and_cast<Message *>(msg)->getTags();
-}
-
 } // namespace
 
