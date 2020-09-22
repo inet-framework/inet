@@ -1,6 +1,6 @@
 package inet.tutorials.ospf;
 
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.integrated.IntegratedMultiCanvasVisualizer;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
@@ -17,7 +17,7 @@ module OspfLan
         host[h]: StandardHost {
             @display("p=199,159");
         }
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=750.1,49.399998");
         }
     connections:

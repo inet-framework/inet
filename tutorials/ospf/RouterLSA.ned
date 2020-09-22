@@ -1,7 +1,7 @@
 package inet.tutorials.ospf;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.integrated.IntegratedMultiCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
@@ -32,7 +32,7 @@ network RouterLSA
         configurator: Ipv4NetworkConfigurator {
             @display("p=1222.3688,86.74875");
         }
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=1461.585,86.74875");
         }
         scenarioManager: ScenarioManager {

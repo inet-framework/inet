@@ -1,7 +1,7 @@
 package inet.tutorials.ospf;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.integrated.IntegratedMultiCanvasVisualizer;
 import inet.common.scenario.ScenarioManager;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
@@ -31,7 +31,7 @@ network OspfNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("p=757.8,76.30625");
         }
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=1023.5563,76.30625");
         }
         scenarioManager: ScenarioManager {
