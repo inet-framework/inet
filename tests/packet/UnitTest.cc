@@ -12,6 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
 
+#include "inet/common/IdentityTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/ChunkBuffer.h"
@@ -1979,6 +1980,64 @@ static void testRegionTags()
     }
 }
 
+static void testIdentityTag()
+{
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    chunk->clearTags(B(0), B(500));
+    auto regions = chunk->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 1);
+    ASSERT(regions[0].getOffset() == B(500));
+    ASSERT(regions[0].getLength() == B(500));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart + 4000);
+    }
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    chunk->clearTags(B(500), B(500));
+    auto regions = chunk->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 1);
+    ASSERT(regions[0].getOffset() == B(0));
+    ASSERT(regions[0].getLength() == B(500));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart);
+    }
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    chunk->clearTags(B(100), B(800));
+    auto regions = chunk->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 2);
+    ASSERT(regions[0].getOffset() == B(0));
+    ASSERT(regions[0].getLength() == B(100));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart);
+    ASSERT(regions[1].getOffset() == B(900));
+    ASSERT(regions[1].getLength() == B(100));
+    ASSERT(regions[1].getTag()->getIdentityStart() == identityStart + 7200);
+    }
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    Packet packet;
+    packet.insertAtFront(makeShared<ByteCountChunk>(B(500)));
+    packet.insertAtFront(chunk);
+    packet.insertAtFront(makeShared<ByteCountChunk>(B(500)));
+    auto regions = packet.peekAll()->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 1);
+    ASSERT(regions[0].getOffset() == B(500));
+    ASSERT(regions[0].getLength() == B(1000));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart + 4000);
+    }
+}
+
 void UnitTest::initialize()
 {
     testMutable();
@@ -2022,6 +2081,7 @@ void UnitTest::initialize()
     testPacketTags();
     testPacketRegionTags();
     testRegionTags();
+    testIdentityTag();
 }
 
 } // namespace
