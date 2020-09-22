@@ -19,13 +19,18 @@
 #define __INET_TAGBASE_H
 
 #include "inet/common/Ptr.h"
+#include "inet/common/Units.h"
 
 namespace inet {
+
+using namespace inet::units::values;
 
 class INET_API TagBase : public cObject, public SharedBase<TagBase>
 {
   public:
     virtual const Ptr<TagBase> dupShared() const { return Ptr<TagBase>(static_cast<TagBase *>(dup())); };
+
+    virtual const Ptr<TagBase> changeRegion(b offsetDelta, b lengthDelta) const { return const_cast<TagBase *>(this)->shared_from_this(); }
 
     virtual void parsimPack(cCommBuffer *buffer) const override { }
     virtual void parsimUnpack(cCommBuffer *buffer) override { }
