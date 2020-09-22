@@ -16,13 +16,14 @@
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/queueing/base/PacketSourceBase.h"
+#include "inet/common/IdentityTag_m.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/queueing/base/PacketSourceBase.h"
 
 namespace inet {
 namespace queueing {
@@ -35,6 +36,8 @@ void PacketSourceBase::initialize(int stage)
         packetRepresentation = par("packetRepresentation");
         packetLengthParameter = &par("packetLength");
         packetDataParameter = &par("packetData");
+        attachCreationTimeTag = par("attachCreationTimeTag");
+        attachIdentityTag = par("attachIdentityTag");
     }
 }
 
@@ -117,7 +120,12 @@ Ptr<Chunk> PacketSourceBase::createPacketContent() const
 Packet *PacketSourceBase::createPacket()
 {
     auto packetContent = createPacketContent();
-    packetContent->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    if (attachCreationTimeTag)
+        packetContent->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    if (attachIdentityTag) {
+        auto identityStart = IdentityTag::getNextIdentityStart(packetContent->getChunkLength());
+        packetContent->addTag<IdentityTag>()->setIdentityStart(identityStart);
+    }
     auto packetName = createPacketName(packetContent);
     auto packet = new Packet(packetName, packetContent);
     numProcessedPackets++;

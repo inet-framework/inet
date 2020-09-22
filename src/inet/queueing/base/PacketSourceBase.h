@@ -30,6 +30,8 @@ class INET_API PacketSourceBase : public PacketProcessorBase
     const char *packetRepresentation = nullptr;
     cPar *packetLengthParameter = nullptr;
     cPar *packetDataParameter = nullptr;
+    bool attachCreationTimeTag = false;
+    bool attachIdentityTag = false;
 
   protected:
     virtual void initialize(int stage) override;

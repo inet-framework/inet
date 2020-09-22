@@ -31,6 +31,8 @@ simple PacketSourceBase extends PacketProcessorBase
         string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // determines the chunk of the packet data
         volatile int packetLength @unit(b);
         volatile int packetData = default(-1);
+        bool attachCreationTimeTag = default(true);
+        bool attachIdentityTag = default(true);
         displayStringTextFormat = default("created %p pk (%l)");
         @class(PacketSourceBase);
         @display("i=block/source");
