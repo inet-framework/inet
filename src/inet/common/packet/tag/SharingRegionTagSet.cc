@@ -181,8 +181,10 @@ void SharingRegionTagSet::clearTags(b offset, b length)
                 auto startOffset = regionTag.getStartOffset();
                 regionTag.setLength(regionTag.getEndOffset() - clearEndOffset);
                 regionTag.setOffset(clearEndOffset);
-                RegionTag<TagBase> previousRegion(startOffset, clearStartOffset - startOffset, regionTag.getTag());
-                regionTags->insert(regionTags->begin() + i++, previousRegion);
+                RegionTag<TagBase> previousRegionTag(regionTag);
+                previousRegionTag.setOffset(startOffset);
+                previousRegionTag.setLength(clearStartOffset - startOffset);
+                regionTags->insert(regionTags->begin() + i++, previousRegionTag);
                 changed = true;
             }
             else if (regionTag.getEndOffset() <= clearEndOffset) {
@@ -255,13 +257,16 @@ void SharingRegionTagSet::splitTags(b offset, std::function<bool (const TagBase 
             auto tagObject = tag.get();
             if (f(tagObject) && regionTag.getStartOffset() < offset && offset < regionTag.getEndOffset()) {
                 prepareTagsVectorForUpdate();
-                insertedRegionTags.push_back(RegionTag<TagBase>(offset, regionTag.getEndOffset() - offset, tag));
+                RegionTag<TagBase> otherRegionTag(regionTag);
+                otherRegionTag.setOffset(offset);
+                otherRegionTag.setLength(regionTag.getEndOffset() - offset);
+                insertedRegionTags.push_back(otherRegionTag);
                 regionTag.setLength(offset - regionTag.getStartOffset());
             }
         }
         if (!insertedRegionTags.empty()) {
             for (auto regionTag : insertedRegionTags)
-                regionTags->push_back(RegionTag<TagBase>(regionTag.getOffset(), regionTag.getLength(), regionTag.getTag()));
+                regionTags->push_back(regionTag);
             sortTagsVector();
         }
     }

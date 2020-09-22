@@ -81,10 +81,22 @@ class INET_API SharingRegionTagSet : public cObject
         bool operator<(const SharingRegionTagSet::RegionTag<T>& other) const { return offset < other.offset; }
 
         b getOffset() const { return offset; }
-        void setOffset(b offset) { ASSERT(offset >= b(0)); this->offset = offset; }
+        void setOffset(b offset) {
+            ASSERT(offset >= b(0));
+            if (this->offset != offset) {
+                tag = tag->changeRegion(offset - this->offset, b(0));
+                this->offset = offset;
+            }
+        }
 
         b getLength() const { return length; }
-        void setLength(b length) { ASSERT(length >= b(0)); this->length = length; }
+        void setLength(b length) {
+            ASSERT(length >= b(0));
+            if (this->length != length) {
+                tag = tag->changeRegion(b(0), length - this->length);
+                this->length = length;
+            }
+        }
 
         b getStartOffset() const { return offset; }
         b getEndOffset() const { return offset + length; }
