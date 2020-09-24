@@ -20,7 +20,6 @@ package inet.linklayer.ethernet;
 import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ieee8021q.IIeee8021qEncap;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
 
@@ -51,11 +50,11 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
     submodules:
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             parameters:
-	            @display("p=700,100");
+                @display("p=700,100");
         }
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
             parameters:
-            	@display("p=300,100");
+                @display("p=300,100");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
@@ -66,19 +65,10 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
             parameters:
                 @display("p=500,200");
         }
-        qEncap: <default("")> like IIeee8021qEncap if typename != "" {
-            parameters:
-                @display("p=300,300");
-        }
     connections:
-        mac.upperLayerOut --> qEncap.lowerLayerIn if exists(qEncap);
         mac.upperLayerOut --> encap.lowerLayerIn if !exists(qEncap);
 
-        mac.upperLayerIn <-- qEncap.lowerLayerOut if exists(qEncap);
         mac.upperLayerIn <-- encap.lowerLayerOut if !exists(qEncap);
-
-        encap.lowerLayerOut --> qEncap.upperLayerIn if exists(qEncap);
-        encap.lowerLayerIn <-- qEncap.upperLayerOut if exists(qEncap);
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 
