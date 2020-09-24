@@ -1,6 +1,0 @@
-#! /bin/bash
-pushd /root/inet4
-. setenv
-popd
-export INET_OMNETPP_OPTIONS='-n /root/inet4/src:/root/models:/root/inet4/showcases:/root/inet4/examples --image-path=/root/inet4/images'
-
