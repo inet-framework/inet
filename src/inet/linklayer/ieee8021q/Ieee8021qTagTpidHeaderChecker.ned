@@ -19,12 +19,12 @@ package inet.linklayer.ieee8021q;
 
 import inet.queueing.base.PacketFilterBase;
 
-simple Ieee8021qChecker extends PacketFilterBase like IIeee8021qChecker
+simple Ieee8021qTagTpidHeaderChecker extends PacketFilterBase like IIeee8021qTagTpidHeaderChecker
 {
     parameters:
         string vlanTagType @enum("c","s") = default("c");
         string vlanIdFilter = default("");
-        @class(Ieee8021qChecker);
+        @class(Ieee8021qTagTpidHeaderChecker);
         @display("i=block/cogwheel");
 }
 

@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee8021q;
 
-module OmittedIeee8021qInserter like IIeee8021qInserter
+module OmittedIeee8021qTagTpidHeaderInserter like IIeee8021qTagTpidHeaderInserter
 {
     parameters:
         string vlanTagType = default("");

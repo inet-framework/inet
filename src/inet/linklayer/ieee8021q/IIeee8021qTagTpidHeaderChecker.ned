@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee8021q;
 
-moduleinterface IIeee8021qChecker
+moduleinterface IIeee8021qTagTpidHeaderChecker
 {
     parameters:
         string vlanTagType @enum("c","s");
