@@ -1,0 +1,56 @@
+#! /bin/bash
+# Run the INET 4.2 simulation found in the current directory using
+# a binary omnetpp+INET installation packaged as a Docker container.
+
+# Command to be executed within the container. This is usually "inet".
+CMD="$*"
+if [ -z $CMD ]; then
+    CMD="inet"
+fi
+
+# The Docker image to run. INET is expected to be under /root/inet4 in it.
+IMAGE="omnetpp/inet-gui:o5.6.2-4.2.0"
+
+# This is where the current directory will be mounted inside the container
+DWORK="/work"
+
+# Create a directory that will be $HOME in the container. This is
+# necessary because Qtenv and the IDE save settings into the home dir.
+DHOME="$DWORK/.container_home"
+mkdir -p .container_home
+
+# A package.ned file is needed if the model is in a package
+if grep "^package" *.ned > /dev/null; then
+    if [ ! -f package.ned ]; then
+        echo "Missing 'package.ned' file! Run the following command to create it:"
+        echo "echo '$(grep -h "^package" *.ned | sed 1q)' > package.ned"
+        exit 1
+    fi
+fi
+
+# Create command file to be executed within the container. This file wouldn't
+# be needed if the Docker image sourced INET's "setenv" script on entry, and
+# that "setenv" had a way to add stuff to the NED path.
+cat >.cmd <<EOF
+pushd /root/inet4 >/dev/null
+. setenv >/dev/null
+popd >/dev/null
+export INET_OMNETPP_OPTIONS="-n $DWORK:/root/inet4/src --image-path=/root/inet4/images"
+$CMD
+EOF
+chmod +x .cmd
+
+# run Docker image by mounting the current dir under $DWORK (/home), and executing the
+# temporary script assembled above
+docker run --rm -it \
+   -v "$(pwd):$DWORK" \
+   -w $DWORK  \
+   -u "$(id -u):$(id -g)" \
+   -v /tmp/.X11-unix:/tmp/.X11-unix \
+   -e DISPLAY=$DISPLAY \
+   -e HOME=$DHOME \
+   $IMAGE \
+   bash -il $DWORK/.cmd
+
+# cleanup
+rm -f .cmd
