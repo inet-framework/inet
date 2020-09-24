@@ -27,7 +27,7 @@ using namespace inet::queueing;
 class INET_API Ieee8021qTagTpidHeaderChecker : public PacketFilterBase
 {
   protected:
-    int etherType = -1;
+    int tpid = -1;
     std::vector<int> vlanIdFilter;
 
   protected:

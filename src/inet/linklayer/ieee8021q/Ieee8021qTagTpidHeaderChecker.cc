@@ -33,9 +33,9 @@ void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *vlanTagType = par("vlanTagType");
         if (!strcmp("s", vlanTagType))
-            etherType = 0x88A8;
+            tpid = 0x88A8;
         else if (!strcmp("c", vlanTagType))
-            etherType = 0x8100;
+            tpid = 0x8100;
         else
             throw cRuntimeError("Unknown tag type");
         cStringTokenizer filterTokenizer(par("vlanIdFilter"));
@@ -62,9 +62,13 @@ void Ieee8021qTagTpidHeaderChecker::dropPacket(Packet *packet)
 
 bool Ieee8021qTagTpidHeaderChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& header = packet->peekAtFront<Ieee8021qHeader>();
-    auto vlanId = header->getVid();
-    return vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), vlanId) != vlanIdFilter.end();
+    const auto& header = packet->peekAtFront<Ieee8021qTagTpidHeader>();
+    if (header->getTpid() != tpid)
+        return false;
+    else {
+        auto vlanId = header->getVid();
+        return vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), vlanId) != vlanIdFilter.end();
+    }
 }
 
 } // namespace inet

@@ -27,7 +27,7 @@ using namespace inet::queueing;
 class INET_API Ieee8021qTagTpidHeaderInserter : public PacketFlowBase
 {
   protected:
-    int etherType = -1;
+    int tpid = -1;
 
   protected:
     virtual void initialize(int stage) override;

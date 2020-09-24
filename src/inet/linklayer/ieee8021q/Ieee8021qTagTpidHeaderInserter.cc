@@ -33,9 +33,9 @@ void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *vlanTagType = par("vlanTagType");
         if (!strcmp("s", vlanTagType))
-            etherType = 0x88A8;
+            tpid = 0x88A8;
         else if (!strcmp("c", vlanTagType))
-            etherType = 0x8100;
+            tpid = 0x8100;
         else
             throw cRuntimeError("Unknown tag type");
     }
