@@ -17,31 +17,31 @@
 
 #include <algorithm>
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/linklayer/ieee8021q/Ieee8021qHeader_m.h"
-#include "inet/linklayer/ieee8021q/Ieee8021qHeaderSerializer.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeaderSerializer.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
 
 namespace inet {
 
-Register_Serializer(Ieee8021qHeader, Ieee8021qHeaderSerializer);
+Register_Serializer(Ieee8021qTagTpidHeader, Ieee8021qTagTpidHeaderSerializer);
 Register_Serializer(Ieee8021qTagEpdHeader, Ieee8021qTagEpdHeaderSerializer);
 
 void Ieee8021qTagTpidHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& header = staticPtrCast<const Ieee8021qHeader>(chunk);
-    stream.writeUint16Be(header->getTypeOrLength());
+    const auto& header = staticPtrCast<const Ieee8021qTagTpidHeader>(chunk);
+    stream.writeUint16Be(header->getTpid());
     stream.writeUint16Be((header->getVid() & 0xFFF) |
                          ((header->getPcp() & 7) << 13) |
-                         (header->getDe() ? 0x1000 : 0));
+                         (header->getDei() ? 0x1000 : 0));
 }
 
 const Ptr<Chunk> Ieee8021qTagTpidHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    Ptr<Ieee8021qHeader> header = makeShared<Ieee8021qHeader>();
-    header->setTypeOrLength(stream.readUint16Be());
-    uint16_t qtagValue = stream.readUint16Be();
-    header->setVid(qtagValue & 0xFFF);
-    header->setPcp((qtagValue >> 13) & 7);
-    header->setDe((qtagValue & 0x1000) != 0);
+    const auto& header = makeShared<Ieee8021qTagTpidHeader>();
+    header->setTpid(stream.readUint16Be());
+    uint16_t value = stream.readUint16Be();
+    header->setVid(value & 0xFFF);
+    header->setPcp((value >> 13) & 7);
+    header->setDei((value & 0x1000) != 0);
     return header;
 }
 
