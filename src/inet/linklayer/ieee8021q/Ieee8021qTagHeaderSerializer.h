@@ -15,16 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE8021QHEADERSERIALIZER_H
-#define __INET_IEEE8021QHEADERSERIALIZER_H
+#ifndef __INET_IEEE8021QTAGHEADERSERIALIZER_H
+#define __INET_IEEE8021QTAGHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 
-/**
- * Converts between Ieee8021qHeader and binary (network byte order) IEEE 802.1 Q header.
- */
 class INET_API Ieee8021qTagTpidHeaderSerializer : public FieldsChunkSerializer
 {
   protected:

@@ -15,11 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderInserter.h"
 
