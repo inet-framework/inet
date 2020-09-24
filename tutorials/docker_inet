@@ -40,7 +40,7 @@ $CMD
 EOF
 chmod +x .cmd
 
-# run Docker image by mounting the current dir under $DWORK (/home), and executing the
+# run Docker image by mounting the current dir under $DWORK (/work), and executing the
 # temporary script assembled above
 docker run --rm -it \
    -v "$(pwd):$DWORK" \
