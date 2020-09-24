@@ -35,6 +35,16 @@ class INET_API Ieee8021qTagTpidHeaderSerializer : public FieldsChunkSerializer
     Ieee8021qTagTpidHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
+class INET_API Ieee8021qTagEpdHeaderSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    Ieee8021qTagEpdHeaderSerializer() : FieldsChunkSerializer() {}
+};
+
 } // namespace inet
 
 #endif
