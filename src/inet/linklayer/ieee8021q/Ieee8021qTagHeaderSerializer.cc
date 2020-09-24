@@ -24,7 +24,7 @@ namespace inet {
 
 Register_Serializer(Ieee8021qHeader, Ieee8021qHeaderSerializer);
 
-void Ieee8021qHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee8021qTagTpidHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const Ieee8021qHeader>(chunk);
     stream.writeUint16Be(header->getTypeOrLength());
@@ -33,7 +33,7 @@ void Ieee8021qHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
                          (header->getDe() ? 0x1000 : 0));
 }
 
-const Ptr<Chunk> Ieee8021qHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8021qTagTpidHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<Ieee8021qHeader> header = makeShared<Ieee8021qHeader>();
     header->setTypeOrLength(stream.readUint16Be());

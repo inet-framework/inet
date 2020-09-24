@@ -25,14 +25,14 @@ namespace inet {
 /**
  * Converts between Ieee8021qHeader and binary (network byte order) IEEE 802.1 Q header.
  */
-class INET_API Ieee8021qHeaderSerializer : public FieldsChunkSerializer
+class INET_API Ieee8021qTagTpidHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    Ieee8021qHeaderSerializer() : FieldsChunkSerializer() {}
+    Ieee8021qTagTpidHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace inet
