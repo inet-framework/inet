@@ -20,9 +20,9 @@ package inet.physicallayer.ethernet;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
-simple EthernetFragmentPreambleInserter extends PacketFlowBase like IPacketFlow
+simple EthernetFragmentPhyHeaderInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        @class(EthernetFragmentPreambleInserter);
+        @class(EthernetFragmentPhyHeaderInserter);
         @display("i=block/inserter");
 }

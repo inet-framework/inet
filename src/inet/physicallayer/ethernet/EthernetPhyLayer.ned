@@ -41,7 +41,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        preambleInserter: <default("EthernetPreambleInserter")> like IPacketFlow {
+        preambleInserter: <default("EthernetPhyHeaderInserter")> like IPacketFlow {
             @display("p=200,100");
         }
         interFrameGapInserter: InterPacketGap {
@@ -55,7 +55,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
             datarate = default(bitrate);
             @display("p=200,400");
         }
-        preambleChecker: <default("EthernetPreambleChecker")> like IPacketFilter {
+        preambleChecker: <default("EthernetPhyHeaderChecker")> like IPacketFilter {
             @display("p=500,100");
         }
         inboundEmitter: <default("PacketEmitter")> like IPacketFlow {

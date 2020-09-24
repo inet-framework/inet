@@ -20,9 +20,9 @@ package inet.physicallayer.ethernet;
 import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
-simple EthernetPreambleChecker extends PacketFilterBase like IPacketFilter
+simple EthernetPhyHeaderChecker extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        @class(EthernetPreambleChecker);
+        @class(EthernetPhyHeaderChecker);
         @display("i=block/checker");
 }

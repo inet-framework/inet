@@ -17,22 +17,22 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetPreambleInserter.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeaderInserter.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(EthernetPreambleInserter);
+Define_Module(EthernetPhyHeaderInserter);
 
-void EthernetPreambleInserter::processPacket(Packet *packet)
+void EthernetPhyHeaderInserter::processPacket(Packet *packet)
 {
     const auto& header = makeShared<EthernetPhyHeader>();
     packet->insertAtFront(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
 }
 
-void EthernetPreambleInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void EthernetPhyHeaderInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);

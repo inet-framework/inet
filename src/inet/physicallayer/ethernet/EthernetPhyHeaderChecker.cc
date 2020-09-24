@@ -17,15 +17,15 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetPreambleChecker.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeaderChecker.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(EthernetPreambleChecker);
+Define_Module(EthernetPhyHeaderChecker);
 
-void EthernetPreambleChecker::processPacket(Packet *packet)
+void EthernetPhyHeaderChecker::processPacket(Packet *packet)
 {
     packet->popAtFront<EthernetPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
@@ -34,13 +34,13 @@ void EthernetPreambleChecker::processPacket(Packet *packet)
     dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
 }
 
-bool EthernetPreambleChecker::matchesPacket(const Packet *packet) const
+bool EthernetPhyHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<EthernetPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     return header->isCorrect() && header->isProperlyRepresented();
 }
 
-void EthernetPreambleChecker::dropPacket(Packet *packet)
+void EthernetPhyHeaderChecker::dropPacket(Packet *packet)
 {
     PacketFilterBase::dropPacket(packet, INCORRECTLY_RECEIVED);
 }

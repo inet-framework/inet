@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/ethernet/EthernetFragmentPreambleChecker.h"
+#include "inet/physicallayer/ethernet/EthernetFragmentPhyHeaderChecker.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
@@ -24,9 +24,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(EthernetFragmentPreambleChecker);
+Define_Module(EthernetFragmentPhyHeaderChecker);
 
-bool EthernetFragmentPreambleChecker::matchesPacket(const Packet *packet) const
+bool EthernetFragmentPhyHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<EthernetFragmentPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     if (header->isIncorrect() || header->isImproperlyRepresented())
@@ -41,7 +41,7 @@ bool EthernetFragmentPreambleChecker::matchesPacket(const Packet *packet) const
     }
 }
 
-void EthernetFragmentPreambleChecker::processPacket(Packet *packet)
+void EthernetFragmentPhyHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<EthernetFragmentPhyHeader>();
     const auto& dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
@@ -63,7 +63,7 @@ void EthernetFragmentPreambleChecker::processPacket(Packet *packet)
     fragmentTag->setNumFragments(-1);
 }
 
-void EthernetFragmentPreambleChecker::dropPacket(Packet *packet)
+void EthernetFragmentPhyHeaderChecker::dropPacket(Packet *packet)
 {
     PacketFilterBase::dropPacket(packet, INCORRECTLY_RECEIVED);
 }

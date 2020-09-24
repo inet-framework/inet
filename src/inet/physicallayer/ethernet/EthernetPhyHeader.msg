@@ -40,7 +40,7 @@ class EthernetPhyHeader extends EthernetPhyHeaderBase
 }
 
 // http://www.enodenetworks.com/assets/docs/8023br.pdf
-enum EthernetPreambleType {
+enum EthernetPhyHeaderType {
     SFD = 1;         // 0xD5
     SMD_E = SFD;
     SMD_Verify = 2;  // 0x07
@@ -54,7 +54,7 @@ enum EthernetPreambleType {
 //
 class EthernetFragmentPhyHeader extends EthernetPhyHeaderBase
 {
-    EthernetPreambleType preambleType = SFD;
+    EthernetPhyHeaderType preambleType = SFD;
     uint8_t smdNumber = 0;       // 0-3, see SMD_Sx or SMD_Cx
     uint8_t fragmentNumber = 0;  // 0-3 (real fragment number modulo 4)
 }

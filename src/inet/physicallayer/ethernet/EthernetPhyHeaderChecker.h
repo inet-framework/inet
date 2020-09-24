@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETPREAMBLECHECKER_H
-#define __INET_ETHERNETPREAMBLECHECKER_H
+#ifndef __INET_ETHERNETPHYHEADERCHECKER_H
+#define __INET_ETHERNETPHYHEADERCHECKER_H
 
 #include "inet/queueing/base/PacketFilterBase.h"
 
@@ -26,7 +26,7 @@ using namespace inet::queueing;
 
 namespace physicallayer {
 
-class INET_API EthernetPreambleChecker : public PacketFilterBase
+class INET_API EthernetPhyHeaderChecker : public PacketFilterBase
 {
   protected:
     virtual void processPacket(Packet *packet) override;

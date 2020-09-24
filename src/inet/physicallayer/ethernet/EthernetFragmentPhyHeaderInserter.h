@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
-#define __INET_ETHERNETFRAGMENTPREAMBLEINSERTER_H
+#ifndef __INET_ETHERNETFRAGMENTPHYHEADERINSERTER_H
+#define __INET_ETHERNETFRAGMENTPHYHEADERINSERTER_H
 
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -26,7 +26,7 @@ namespace physicallayer {
 
 using namespace inet::queueing;
 
-class INET_API EthernetFragmentPreambleInserter : public PacketFlowBase
+class INET_API EthernetFragmentPhyHeaderInserter : public PacketFlowBase
 {
   protected:
     uint8_t smdNumber = 0;

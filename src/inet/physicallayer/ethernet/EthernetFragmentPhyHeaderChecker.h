@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETFRAGMENTPREAMBLECHECKER_H
-#define __INET_ETHERNETFRAGMENTPREAMBLECHECKER_H
+#ifndef __INET_ETHERNETFRAGMENTPHYHEADERCHECKER_H
+#define __INET_ETHERNETFRAGMENTPHYHEADERCHECKER_H
 
 #include "inet/queueing/base/PacketFilterBase.h"
 
@@ -26,7 +26,7 @@ namespace physicallayer {
 
 using namespace inet::queueing;
 
-class INET_API EthernetFragmentPreambleChecker : public PacketFilterBase
+class INET_API EthernetFragmentPhyHeaderChecker : public PacketFilterBase
 {
   protected:
     int smdNumber = -1;

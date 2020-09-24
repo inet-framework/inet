@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/ethernet/EthernetFragmentPreambleInserter.h"
+#include "inet/physicallayer/ethernet/EthernetFragmentPhyHeaderInserter.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
@@ -24,9 +24,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(EthernetFragmentPreambleInserter);
+Define_Module(EthernetFragmentPhyHeaderInserter);
 
-void EthernetFragmentPreambleInserter::processPacket(Packet *packet)
+void EthernetFragmentPhyHeaderInserter::processPacket(Packet *packet)
 {
     auto fragmentTag = packet->getTag<FragmentTag>();
     const auto& header = makeShared<EthernetFragmentPhyHeader>();
@@ -40,7 +40,7 @@ void EthernetFragmentPreambleInserter::processPacket(Packet *packet)
     packetProtocolTag->setBackOffset(b(0));
 }
 
-void EthernetFragmentPreambleInserter::handlePacketProcessed(Packet *packet)
+void EthernetFragmentPhyHeaderInserter::handlePacketProcessed(Packet *packet)
 {
     auto fragmentTag = packet->getTag<FragmentTag>();
     if (!fragmentTag->getFirstFragment())
@@ -51,7 +51,7 @@ void EthernetFragmentPreambleInserter::handlePacketProcessed(Packet *packet)
     }
 }
 
-void EthernetFragmentPreambleInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void EthernetFragmentPhyHeaderInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
