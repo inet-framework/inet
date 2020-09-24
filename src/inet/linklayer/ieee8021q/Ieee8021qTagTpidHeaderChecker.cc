@@ -20,13 +20,14 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ieee8021q/Ieee8021qChecker.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderChecker.h"
 
 namespace inet {
 
-Define_Module(Ieee8021qChecker);
+Define_Module(Ieee8021qTagTpidHeaderChecker);
 
-void Ieee8021qChecker::initialize(int stage)
+void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -44,7 +45,7 @@ void Ieee8021qChecker::initialize(int stage)
     }
 }
 
-void Ieee8021qChecker::processPacket(Packet *packet)
+void Ieee8021qTagTpidHeaderChecker::processPacket(Packet *packet)
 {
     const auto& vlanHeader = packet->popAtFront<Ieee8021qHeader>();
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(vlanHeader->getPcp());
@@ -53,13 +54,13 @@ void Ieee8021qChecker::processPacket(Packet *packet)
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() - vlanHeader->getChunkLength());
 }
 
-void Ieee8021qChecker::dropPacket(Packet *packet)
+void Ieee8021qTagTpidHeaderChecker::dropPacket(Packet *packet)
 {
     EV_WARN << "Received packet " << packet->getName() << " is not accepted, dropping packet.\n";
     PacketFilterBase::dropPacket(packet, OTHER_PACKET_DROP);
 }
 
-bool Ieee8021qChecker::matchesPacket(const Packet *packet) const
+bool Ieee8021qTagTpidHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<Ieee8021qHeader>();
     auto vlanId = header->getVid();

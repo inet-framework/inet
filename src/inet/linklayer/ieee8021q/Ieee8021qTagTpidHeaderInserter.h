@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE8021QINSERTER_H
-#define __INET_IEEE8021QINSERTER_H
+#ifndef __INET_IEEE8021QTAGTPIDHEADERINSERTER_H
+#define __INET_IEEE8021QTAGTPIDHEADERINSERTER_H
 
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -24,7 +24,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Ieee8021qInserter : public PacketFlowBase
+class INET_API Ieee8021qTagTpidHeaderInserter : public PacketFlowBase
 {
   protected:
     int etherType = -1;

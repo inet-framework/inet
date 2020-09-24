@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE8021QCHECKER_H
-#define __INET_IEEE8021QCHECKER_H
+#ifndef __INET_IEEE8021QTAGTPIDHEADERCHECKER_H
+#define __INET_IEEE8021QTAGTPIDHEADERCHECKER_H
 
 #include "inet/queueing/base/PacketFilterBase.h"
 
@@ -24,7 +24,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Ieee8021qChecker : public PacketFilterBase
+class INET_API Ieee8021qTagTpidHeaderChecker : public PacketFilterBase
 {
   protected:
     int etherType = -1;

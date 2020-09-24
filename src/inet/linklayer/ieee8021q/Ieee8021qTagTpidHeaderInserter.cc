@@ -20,13 +20,14 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ieee8021q/Ieee8021qInserter.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderInserter.h"
 
 namespace inet {
 
-Define_Module(Ieee8021qInserter);
+Define_Module(Ieee8021qTagTpidHeaderInserter);
 
-void Ieee8021qInserter::initialize(int stage)
+void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -40,7 +41,7 @@ void Ieee8021qInserter::initialize(int stage)
     }
 }
 
-void Ieee8021qInserter::processPacket(Packet *packet)
+void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
 {
     auto vlanHeader = makeShared<Ieee8021qHeader>();
     vlanHeader->setTypeOrLength(etherType);
