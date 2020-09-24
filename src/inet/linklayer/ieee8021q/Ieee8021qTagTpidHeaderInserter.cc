@@ -43,25 +43,25 @@ void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
 
 void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
 {
-    auto vlanHeader = makeShared<Ieee8021qHeader>();
-    vlanHeader->setTypeOrLength(etherType);
+    auto header = makeShared<Ieee8021qTagTpidHeader>();
+    header->setTpid(tpid);
     auto userPriorityReq = packet->removeTagIfPresent<UserPriorityReq>();
     if (userPriorityReq != nullptr) {
         auto userPriority = userPriorityReq->getUserPriority();
         EV_INFO << "Setting PCP to " << userPriority << ".\n";
-        vlanHeader->setPcp(userPriority);
+        header->setPcp(userPriority);
         packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(userPriority);
     }
     auto vlanReq = packet->removeTagIfPresent<VlanReq>();
     if (vlanReq != nullptr) {
         auto vlanId = vlanReq->getVlanId();
         EV_INFO << "Setting VLAN ID to " << vlanId << ".\n";
-        vlanHeader->setVid(vlanId);
+        header->setVid(vlanId);
         packet->addTagIfAbsent<VlanInd>()->setVlanId(vlanId);
     }
-    packet->insertAtFront(vlanHeader);
+    packet->insertAtFront(header);
     auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
-    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + vlanHeader->getChunkLength());
+    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
 }
 
 } // namespace inet

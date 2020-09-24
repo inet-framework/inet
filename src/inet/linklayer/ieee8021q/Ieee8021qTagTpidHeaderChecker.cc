@@ -47,11 +47,11 @@ void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
 
 void Ieee8021qTagTpidHeaderChecker::processPacket(Packet *packet)
 {
-    const auto& vlanHeader = packet->popAtFront<Ieee8021qHeader>();
-    packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(vlanHeader->getPcp());
-    packet->addTagIfAbsent<VlanInd>()->setVlanId(vlanHeader->getVid());
+    const auto& header = packet->popAtFront<Ieee8021qTagTpidHeader>();
+    packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
+    packet->addTagIfAbsent<VlanInd>()->setVlanId(header->getVid());
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
-    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() - vlanHeader->getChunkLength());
+    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() - header->getChunkLength());
 }
 
 void Ieee8021qTagTpidHeaderChecker::dropPacket(Packet *packet)
