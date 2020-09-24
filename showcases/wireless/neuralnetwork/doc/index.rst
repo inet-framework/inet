@@ -3,39 +3,35 @@
 Neural Network Error Model
 ==========================
 
-- the current error model is not very accurate -> especially in corner cases, which are not rare
-- it uses just the SNIR to calculate a PER probability...either the min or the mean
-- with min, a short spike could ruin a reception
-- with mean, a longer (more overlapping in either frequency or time) could not
-- the symbol level bit correct (is that the expression?) can simulate it accurately, but it's slow
-- the idea is to use a neural network, train it with symbol level training data of receptions
-- and use it in the simulation to calculate PER faster than the symbol level simulation
-- comparable to the current analytical error model
-- but just or almost as accurate than the symbol level
+.. - the current error model is not very accurate -> especially in corner cases, which are not rare
+   - it uses just the SNIR to calculate a PER probability...either the min or the mean
+   - with min, a short spike could ruin a reception
+   - with mean, a longer (more overlapping in either frequency or time) could not
+   - the symbol level bit correct (is that the expression?) can simulate it accurately, but it's slow
+   - the idea is to use a neural network, train it with symbol level training data of receptions
+   - and use it in the simulation to calculate PER faster than the symbol level simulation
+   - comparable to the current analytical error model
+   - but just or almost as accurate than the symbol level
 
-this is the motivation
+  this is the motivation
 
-how does it actually work
+  how does it actually work
 
-- create training dataset
-- train network
-- use it in the simulation
+  - create training dataset
+  - train network
+  - use it in the simulation
 
-- check against the analytical and the baseline sybol level (accuracy and performance)
+  - check against the analytical and the baseline sybol level (accuracy and performance)
 
-what can be done with this ?
+  what can be done with this ?
 
-- can create neural network based error model for any model that has symbol level simulation
-- the neural network structure is up for optimization
+  - can create neural network based error model for any model that has symbol level simulation
+  - the neural network structure is up for optimization
 
 Goals
 -----
 
 .. Analytical error models are accurate to some extent, however, they are not well suited to corner cases
-
-x
-
-  Error models describe how the signal-to-noise-plus-interference ratio (SNIR) affects the amount of errors in a received frame or packet. They can calculate the packet error rate, bit error rate or symbol error rate of receptions, depending on the simulated level of detail. They are implemented as replaceable submodules of receivers.
 
 ..  The default setting in radios is packet level simulation, with the analytical error models, such as the NIST error model in 802.11 or the APSK error model with APSKRadio.
 
@@ -43,10 +39,10 @@ x
 
 .. Simulating wireless receptions with flat receiver models and analytical error models is fast and generally accurate, except for some corner cases, which can be abundant in simulations. Detailed, symbol-level simulations are very accurate even in corner cases where the flat/analyitcal models are not, but they are very computationally intensive.
 
-*the goal: show we can do this; how its done; how users can do this with others;
-how users can use this; how good it is; how they can improve it;*
+.. *the goal: show we can do this; how its done; how users can do this with others;
+   how users can use this; how good it is; how they can improve it;*
 
-Simulating wireless receptions with flat receiver models and analytical error models is fast and generally accurate, except for some corner cases, which can be abundant in simulations. Detailed, symbol-level simulations are very accurate even in these corner cases, but they are very computationally intensive.
+Simulating wireless receptions with analytical error models is fast and generally accurate, except for some corner cases, which can be abundant in some simulations. Detailed, symbol-level simulations are very accurate even in these corner cases, but they are very computationally intensive.
 
 .. Simulating the reception process in detail (on the symbol level) is very accurate even in corner cases where the analyitcal ones are not, but very computationally intensive.
 
@@ -65,24 +61,24 @@ Simulating wireless receptions with flat receiver models and analytical error mo
 
 .. A neural network can be trained on reception data from symbol level simulations, and used as accurate error models in packet level simulations
 
-As a best-of-both-worlds approach, a neural network can be trained on reception characteristics/data/properties/measurements/features of detailed symbol-level simulations, and used as an error model in packet-level simulations.
+As a best-of-both-worlds approach, a neural network can be trained on reception characteristics of detailed symbol-level simulations, and used as an error model in packet-level simulations.
 The resulting error model has the potential to be more accurate than packet-level analytical error models, but with comparable performance.
 
-This showcase demonstrates the workflow of creating such a neural network based error model for 802.11, and compares it..
+This showcase demonstrates the workflow of creating such a neural network based error model for 802.11 and :ned:`ApskRadio`, and compares their performance and accuracy to the baseline symbol-level simulation and those using analytical error models.
 
 Motivation
 ----------
 
-*and concepts*
+.. *and concepts*
 
 .. **some concept:**
 
-**the reception process**
+.. **the reception process**
 
-**V1** The reception process is converting a physical signal to a packet that can be sent to the MAC. The conversion process can be configured to be very detailed, simulating the reception of individual symbols and the decoding process (demodulation, deinterleaving, descrambling, forward error correction decoding), or more simple by jumping from the physical signal level to the packet level.
-In this case, the detailed reception and decoding process is replaced with a simple model, the analytical error model.
+.. **V1** The reception process is converting a physical signal to a packet that can be sent to the MAC. The conversion process can be configured to be very detailed, simulating the reception of individual symbols and the decoding process (demodulation, deinterleaving, descrambling, forward error correction decoding), or more simple by jumping from the physical signal level to the packet level.
+   In this case, the detailed reception and decoding process is replaced with a simple model, the analytical error model.
 
-**V2** During the reception process, an analog signal is converted to a packet that can be sent up to the MAC. The conversion process goes through the analog, sample, symbol, bit, and packet domains TODO. The conversion process can be configured to be very detailed, simulating the reception of individual symbols and the decoding process (i.e. demodulation, deinterleaving, descrambling, forward error correction decoding), or more simple by jumping from the analog signal domain to the packet domain.
+**optional** During the reception process, an analog signal is converted to a packet that can be sent up to the MAC. The conversion process goes through the analog, sample, symbol, bit, and packet domains. This conversion process can be configured to be very detailed, simulating the reception of individual symbols and the decoding process (i.e. demodulation, deinterleaving, descrambling, forward error correction decoding), or more simple by jumping from the analog signal domain to the packet domain.
 In this case, the detailed reception and decoding process is replaced with a simple model, the error model.
 
 .. **TODO** the other levels
@@ -94,62 +90,93 @@ In this case, the detailed reception and decoding process is replaced with a sim
 .. Error models calculate whether the received frame has errors. It indicates this to the higher layers.
 
 
-**what are error models?**
+.. **what are error models?**
 
-The error model is a submodule of the receiver, and calculates the amount of errors in a received frame. It calculates packet, bit or symbol error rate for the MAC layer. In layered mode, it indicates the erroneous bits or symbols as well.
+.. The error model is a submodule of the receiver, and calculates the amount of errors in a received frame. It calculates packet, bit or symbol error rate for the MAC layer. In layered mode, it indicates the erroneous bits or symbols as well.
 
-**TODO** in the most detailed configuration, the error model calculates symbol error rate for each symbol from per-symbol SNIR and decides which symbols to corrupt (replace with another) and how.
+  **TODO** in the most detailed configuration, the error model calculates symbol error rate for each symbol from per-symbol SNIR and decides which symbols to corrupt (replace with another) and how.
 
-  - meghatároz az error rateek minden szinten ha lehet
-  - eldönti h a csomag hibás e vagy sem
-  - hogy hol a hiba
-  - el is ronthatja a csomagot bit szinten
-  - legegyszerubb kiszamol error rate es eldonti h hibas e
+    - meghatároz az error rateek minden szinten ha lehet
+    - eldönti h a csomag hibás e vagy sem
+    - hogy hol a hiba
+    - el is ronthatja a csomagot bit szinten
+    - legegyszerubb kiszamol error rate es eldonti h hibas e
 
-  error model egy ugras hogy kihagysz a folyamatban egy csomo lepes -> a fizikai jellemzok dekodolasanak a processet atugorja
-  es reprezentalja -> analog domain -> packet domain (a legegyszerubb)
+    error model egy ugras hogy kihagysz a folyamatban egy csomo lepes -> a fizikai jellemzok dekodolasanak a processet atugorja
+    es reprezentalja -> analog domain -> packet domain (a legegyszerubb)
 
-  TODO kell egy rész a limitationokről
+    TODO kell egy rész a limitationokről
 
-  -> most még nem drop in replacement a default error modelre
+    -> most még nem drop in replacement a default error modelre
 
-so
+  so
 
-- the main purpose of error models is to decide if there was an error in receiving a frame
-- during the reception, the error model determines whether the reception had errors
-- depending the type of the error model, and the detail level of the simulation,
-it might indicate that the packet has errors, or that certain bits are erroneous...
-- it calculates error rates for the higher layers such as packet error rate bit error rate or symbol error rate,
-depending on the detail level of the simulation
+  - the main purpose of error models is to decide if there was an error in receiving a frame
+  - during the reception, the error model determines whether the reception had errors
+  - depending the type of the error model, and the detail level of the simulation,
+  it might indicate that the packet has errors, or that certain bits are erroneous...
+  - it calculates error rates for the higher layers such as packet error rate bit error rate or symbol error rate,
+  depending on the detail level of the simulation
 
-Error models are basically a leap in the decoding process. We start with a signal at the analog level. Then there is symbol, bit and packet level (also sample level but its not implemented). We either simulate each level in the process -> receiving symbols, forward error correction, descrambling, deinterleaving, or *we jump a few levels with the error model. We replace the model of the whole or some of the decoding process with a more simple model, the error model.*
+  Error models are basically a leap in the decoding process. We start with a signal at the analog level. Then there is symbol, bit and packet level (also sample level but its not implemented). We either simulate each level in the process -> receiving symbols, forward error correction, descrambling, deinterleaving, or *we jump a few levels with the error model. We replace the model of the whole or some of the decoding process with a more simple model, the error model.*
 
-**about the default error models**
+**V1** Error models describe how the signal-to-noise-plus-interference ratio (SNIR) affects the amount of errors in a received frame or packet. They can calculate the packet error rate, bit error rate or symbol error rate of receptions, depending on the simulated level of detail. They are implemented as replaceable submodules of receivers.
 
-TODO
+**V2** Error models decide if a frame was correctly received or not. They can calculate error rates (depending on the configured level of detail, symbol-, bit-
+and packet error rate) for higher layers. They can corrupt symbols (replace them with another one) or bits (invert them), or indicate that the frame is
+incorrectly received. They are implemented as replaceable submodules of receivers.
 
-  The most commonly used flat radio models in INET examples and showcases feature packet level simulation with analytical error models, such as the NIST error model in 802.11 or the APSK error model with APSKRadio. **TODO** its kind of the informal default for performance reasons
+.. **about the default error models**
 
-**about analytical error models**
+.. TODO
 
-The packet-level analytical error models calculate a packet-error rate based on the reception SNIR. They either use the minimum or the mean of the SNIR during reception. Both methods can lead to unrealistic reception probabilities in corner cases. For example, when using the minimum SNIR, a short spike in an interfering signal can ruin a reception; with mean SNIR, an interfering signal overlapping with a transmission to a large extent (in frequency or time) can still result in a correctly receivable transmission.
+**optional** The most commonly used flat (packet level) radio models in INET examples and showcases feature analytical error models, such as the NIST error model in 802.11 or the APSK error model with APSKRadio. The flat radio model is an informal default because it's fast.
 
-**about symbol level simulation**
+.. for performance reasons
 
-Using symbol level simulation can accurately model these corner cases, as per-symbol-SNIR can be used, and an accurate symbol-error-rate can be calculated. However, the symbol-level simulations are very computationally intensive.
+.. **TODO** flat implies packet level
+
+.. **TODO** somewhere -> in the detailed case there is an error model for calculating the symbol error rate from the per-symbol SNIR
+
+.. **TODO** analytical error models and the closed formula based on statistics and empirical evidence
+
+.. **about analytical error models**
+
+.. The packet-level analytical error models calculate a packet-error rate based on the reception SNIR.
+
+The packet-level analytical error models either use the minimum or the mean of the SNIR during reception to calculate packet error rate with closed formulas for the different modulations. Both methods can lead to unrealistic reception probabilities in corner cases. For example, when using the minimum SNIR, a short spike in an interfering signal can ruin a reception; with mean SNIR, an interfering signal overlapping with a transmission to a large extent (in frequency or time) can still result in a correctly received transmission.
+
+.. **about symbol level simulation**
+
+Symbol level simulation can accurately model these corner cases, as per-symbol-SNIR can be used, and an accurate symbol-error-rate can be calculated. However, the symbol-level simulations are very computationally intensive.
+
+.. **TODO** layered, the whole reception process is modeled
 
 .. **TODO** what are error models ?
 
-**the idea**
+.. **the idea**
 
-detailed description
+.. detailed description
 
-A neural network error model can potentially be more accurate than the analytical error models, but with comparable performance. The reception probability of a symbol can be calculated analytically in symbol-level bit-correct simulations. We create a big training dataset from accurate, symbol-level simulations, with multiple noise sources, and variable noise spectrum, duration, and power. We record these parameters, along with the reception center frequency, bandwidth, modulation, and SNIR for every symbol.
-**TODO** contains every property of the channel; it contains the success/failure of the frame (not probability). When we have lots of data it becomes probability. -> the training dataset -> packet error rate in the different conditions (cos we wanna replace the default analytical packet-level error model with this)
-Then we train the neural network on this training dataset.
+.. *A neural network error model can potentially be more accurate than the analytical error models, but with comparable performance. The reception probability of a symbol can be calculated analytically in symbol-level bit-correct simulations. We create a big training dataset from accurate, symbol-level simulations, with multiple noise sources, and variable noise spectrum, duration, and power. We record these parameters, along with the reception center frequency, bandwidth, modulation, and SNIR for every symbol.
+.. **TODO** contains every property of the channel; it contains the success/failure of the frame (not probability). When we have lots of data it becomes probability. -> the training dataset -> packet error rate in the different conditions (cos we wanna replace the default analytical packet-level error model with this)
+.. Then we train the neural network on this training dataset.*
 
-We use this neural network as the error model, which gives estimation of packet error rate for similar parameters.
--> relatively good estimation
+.. We use this neural network as the error model, which gives estimation of packet error rate for similar parameters.
+.. -> relatively good estimation
+
+.. so
+
+  - some introduction to the next section/conclusion to this one
+  - create large traning dataset
+  - train network
+  - use it in simulations as error model
+
+.. A neural network trained on the reception data of a lot of detailed symbol-level simulations can be used as an error model, and it is potentially more accurate than analytical error models, with comparable performance.
+
+A neural network error model can potentially be more accurate than the analytical error models, but with comparable performance. We create a large training dataset containing the channel parameters and outcomes of many receptions, and use it to train the neural network. We use this neural network as the error model, which gives an estimation of the packet error rate for similar parameters.
+
+.. -> relatively good estimation
 
 .. We create a large training dataset by running symbol-level simulations. The training data needs to cover a wide range of parameters...
 
@@ -209,7 +236,7 @@ We use this neural network as the error model, which gives estimation of packet 
   - the neural network's input is the per-symbol SNIR and the packet error rate
   - and its actually done for a certain
 
-structure:
+.. structure:
 
   - (we create a) large traning dataset (why is it important? to "prepare" the neural network for generally any channel conditions)
   - (by using) detailed simulation (why is it important? so that the result is as accurate as possible)
@@ -244,7 +271,7 @@ The result is a training dataset with channel conditions represented by per-symb
 
 **TODO** random; evaluate acronyms;
 
-  keywords
+..  keywords
 
   - thousands of channel parameters/ thousands of signal parameters
   - iterate over a wide range on thousands of channel/signal parameters
