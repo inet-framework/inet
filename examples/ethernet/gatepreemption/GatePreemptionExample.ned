@@ -78,9 +78,9 @@ module CustomMacLayer extends EthernetMacLayer
         receiver.typename = default("StreamingReceiver");
         transmitter.typename = default("StreamingTransmitter");
         fcsInserter.typename = default("EthernetFragmentFcsInserter");
-        preambleInserter.typename = default("EthernetFragmentPreambleInserter");
+        preambleInserter.typename = default("EthernetFragmentPhyHeaderInserter");
         fcsChecker.typename = default("EthernetFragmentFcsChecker");
-        preambleChecker.typename = default("EthernetFragmentPreambleChecker");
+        preambleChecker.typename = default("EthernetFragmentPhyHeaderChecker");
         volatile double bitrate @unit(bps);
         server.datarate = bitrate;
     submodules:
