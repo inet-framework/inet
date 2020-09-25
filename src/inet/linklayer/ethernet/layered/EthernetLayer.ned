@@ -17,8 +17,12 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.linklayer.ieee8021q.IIeee8021qChecker;
-import inet.linklayer.ieee8021q.IIeee8021qInserter;
+import inet.linklayer.ieee8021ae.IIeee8021aeTagEpdHeaderChecker;
+import inet.linklayer.ieee8021ae.IIeee8021aeTagEpdHeaderInserter;
+import inet.linklayer.ieee8021q.IIeee8021qTagEpdHeaderChecker;
+import inet.linklayer.ieee8021q.IIeee8021qTagEpdHeaderInserter;
+import inet.linklayer.ieee8021q.IIeee8021qTagTpidHeaderChecker;
+import inet.linklayer.ieee8021q.IIeee8021qTagTpidHeaderInserter;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFilter;
@@ -47,10 +51,10 @@ module SimpleEthernetLayer like IEthernetLayer
             @display("p=200,300");
         }
         typeOrLengthChecker: <default("EthernetTypeOrLengthChecker")> like IPacketFilter {
-            @display("p=700,100");
+            @display("p=500,100");
         }
         addressChecker: <default("EthernetAddressChecker")> like IPacketFilter {
-            @display("p=700,200");
+            @display("p=500,200");
         }
     connections:
         addressInserter.out --> paddingInserter.in;
@@ -62,7 +66,56 @@ module SimpleEthernetLayer like IEthernetLayer
         upperLayerIn --> typeOrLengthInserter.in;
 }
 
-module EthernetLayer
+module EthernetLayerWithQTags like IEthernetLayer
+{
+    parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = default(interfaceTableModule);
+        paddingInserter.minLength = default(60B);
+        @display("i=block/layer");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
+    submodules:
+        cTagHeaderInserter: <default("Ieee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
+            vlanTagType = "c";
+            @display("p=200,100");
+        }
+        sTagHeaderInserter: <default("Ieee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
+            @display("p=200,200");
+        }
+        macHeaderInserter: <default("EthernetMacHeaderInserter")> like IPacketFlow {
+            @display("p=200,300");
+        }
+        paddingInserter: <default("PaddingInserter")> like IPacketFlow {
+            @display("p=200,400");
+        }
+        cTagHeaderChecker: <default("Ieee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
+            vlanTagType = "c";
+            @display("p=500,100");
+        }
+        sTagHeaderChecker: <default("Ieee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
+            @display("p=500,200");
+        }
+        macHeaderChecker: <default("EthernetMacHeaderChecker")> like IPacketFilter {
+            @display("p=500,300");
+        }
+    connections:
+        upperLayerIn --> { @display("m=n"); } --> cTagHeaderInserter.in;
+        cTagHeaderInserter.out --> sTagHeaderInserter.in;
+        sTagHeaderInserter.out --> macHeaderInserter.in;
+        macHeaderInserter.out --> paddingInserter.in;
+        paddingInserter.out --> { @display("m=s"); } --> lowerLayerOut;
+
+        lowerLayerIn --> { @display("m=s"); } --> macHeaderChecker.in;
+        macHeaderChecker.out --> sTagHeaderChecker.in;
+        sTagHeaderChecker.out --> cTagHeaderChecker.in;
+        cTagHeaderChecker.out --> { @display("m=n"); } --> upperLayerOut;
+}
+
+module EthernetLayer like IEthernetLayer
 {
     parameters:
         string interfaceTableModule;
@@ -78,35 +131,32 @@ module EthernetLayer
         c1: <default("PacketClassifier")> like IPacketClassifier {
             @display("p=200,300");
         }
-        ctagInserter: <default("OmittedIeee8021qInserter")> like IIeee8021qInserter {
+        cTagHeaderInserter: <default("OmittedIeee8021qTagTpidHeaderInserter")> like IIeee8021qTagTpidHeaderInserter {
             vlanTagType = "c";
             @display("p=100,200");
         }
-        stagInserter: <default("OmittedIeee8021qInserter")> like IIeee8021qInserter {
+        sTagHeaderInserter: <default("OmittedIeee8021qTagTpidHeaderInserter")> like IIeee8021qTagTpidHeaderInserter {
             vlanTagType = "s";
             @display("p=300,200");
         }
         typeOrLengthInserter: <default("EthernetTypeOrLengthInserter")> like IPacketFlow {
             @display("p=200,400");
         }
-        addressInserter: <default("EthernetAddressInserter")> like IPacketFlow {
+        macHeaderInserter: <default("EthernetMacHeaderInserter")> like IPacketFlow {
             @display("p=200,500");
         }
         paddingInserter: <default("PaddingInserter")> like IPacketFlow {
             @display("p=200,600");
         }
-        typeOrLengthChecker: <default("EthernetTypeOrLengthChecker")> like IPacketFilter {
-            @display("p=700,100");
-        }
-        ctagChecker: <default("OmittedIeee8021qChecker")> like IIeee8021qChecker {
+        cTagHeaderChecker: <default("OmittedIeee8021qTagTpidHeaderChecker")> like IIeee8021qTagTpidHeaderChecker {
             vlanTagType = "c";
             @display("p=800,300");
         }
-        stagChecker: <default("OmittedIeee8021qChecker")> like IIeee8021qChecker {
+        sTagHeaderChecker: <default("OmittedIeee8021qTagTpidHeaderChecker")> like IIeee8021qTagTpidHeaderChecker {
             vlanTagType = "s";
             @display("p=600,300");
         }
-        addressChecker: <default("EthernetAddressChecker")> like IPacketFilter {
+        macHeaderChecker: <default("EthernetMacHeaderChecker")> like IPacketFilter {
             @display("p=700,500");
         }
         m1: PacketMultiplexer {
@@ -119,23 +169,22 @@ module EthernetLayer
             @display("p=700,400");
         }
     connections:
-        addressInserter.out --> paddingInserter.in;
-        typeOrLengthInserter.out --> addressInserter.in;
-        typeOrLengthChecker.out --> upperLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> m1.in++;
+        macHeaderInserter.out --> paddingInserter.in;
+        typeOrLengthInserter.out --> macHeaderInserter.in;
+        c2.out++ --> upperLayerOut;
         paddingInserter.out --> lowerLayerOut;
-        lowerLayerIn --> { @display("m=s"); } --> addressChecker.in;
-        c1.out++ --> ctagInserter.in;
-        c1.out++ --> stagInserter.in;
-        ctagInserter.out --> m1.in++;
+        lowerLayerIn --> { @display("m=s"); } --> macHeaderChecker.in;
+        c1.out++ --> cTagHeaderInserter.in;
+        c1.out++ --> sTagHeaderInserter.in;
+        cTagHeaderInserter.out --> m1.in++;
         c1.out++ --> typeOrLengthInserter.in;
-        stagInserter.out --> m1.in++;
+        sTagHeaderInserter.out --> m1.in++;
         m1.out --> c1.in;
-        upperLayerIn --> m1.in++;
-        addressChecker.out --> m2.in++;
+        macHeaderChecker.out --> m2.in++;
         m2.out --> c2.in;
-        c2.out++ --> stagChecker.in;
-        stagChecker.out --> m2.in++;
-        ctagChecker.out --> m2.in++;
-        c2.out++ --> typeOrLengthChecker.in;
-        c2.out++ --> ctagChecker.in;
+        c2.out++ --> sTagHeaderChecker.in;
+        sTagHeaderChecker.out --> m2.in++;
+        cTagHeaderChecker.out --> m2.in++;
+        c2.out++ --> cTagHeaderChecker.in;
 }
