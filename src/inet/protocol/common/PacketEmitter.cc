@@ -38,8 +38,6 @@ void PacketEmitter::initialize(int stage)
             direction = DIRECTION_UNDEFINED;
         else
             throw cRuntimeError("Unknown direction parameter value");
-        const char *protocolName = par("protocolName");
-        protocol = Protocol::getProtocol(protocolName);
     }
 }
 
