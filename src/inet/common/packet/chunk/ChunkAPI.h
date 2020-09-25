@@ -25,6 +25,7 @@
 #include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
+#include "inet/common/packet/chunk/EncryptedChunk.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/chunk/SliceChunk.h"

@@ -249,6 +249,7 @@ using namespace units::values;
 class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject, public IRegionTaggedObject
 {
   friend class SliceChunk;
+  friend class EncryptedChunk;
   friend class SequenceChunk;
   friend class ChunkDescriptor;
 
@@ -274,6 +275,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         CT_BYTECOUNT,
         CT_BYTES,
         CT_SLICE,
+        CT_ENCRYPTED,
         CT_CPACKET,
         CT_SEQUENCE,
         CT_FIELDS

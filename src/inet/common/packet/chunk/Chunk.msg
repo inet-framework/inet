@@ -25,9 +25,11 @@ cplusplus {{
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/chunk/cPacketChunk.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
+#include "inet/common/packet/chunk/EncryptedChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/chunk/SliceChunk.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 }}
 
 namespace inet;
@@ -100,6 +102,19 @@ class SliceChunk extends Chunk
     @descriptor(readonly);
     b offset;
     b length;
+    Chunk* chunk @getter(_getChunk);
+}
+
+class EmptyChunk extends Chunk
+{
+    @existingClass;
+    @descriptor(readonly);
+}
+
+class EncryptedChunk extends Chunk
+{
+    @existingClass;
+    @descriptor(readonly);
     Chunk* chunk @getter(_getChunk);
 }
 
