@@ -86,6 +86,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x8847, &Protocol::mpls },
     { 0x88A8, &Protocol::ieee8021QStag },
     { 0x88CC, &Protocol::lldp },
+    { 0x88E5, &Protocol::ieee8021ae },
     { 0x891d, &Protocol::tteth },
 });
 
