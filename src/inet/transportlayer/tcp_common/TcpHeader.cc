@@ -72,7 +72,6 @@ void TcpHeader::dropHeaderOptions()
 std::string TcpHeader::str() const
 {
     std::ostringstream stream;
-    stream << getClassName() << ", ";
     static const char *flagStart = " [";
     static const char *flagSepar = " ";
     static const char *flagEnd = "]";
