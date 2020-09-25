@@ -23,6 +23,32 @@
 namespace inet {
 
 /**
+ * Converts between EthernetMacAddressFields and binary (network byte order) 802.3 MAC addresses header.
+ */
+class INET_API EthernetMacAddressFieldsSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    EthernetMacAddressFieldsSerializer() : FieldsChunkSerializer() {}
+};
+
+/**
+ * Converts between EthernetTypeOrLengthField and binary (network byte order) 802.3 MAC type or length header.
+ */
+class INET_API EthernetTypeOrLengthFieldSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    EthernetTypeOrLengthFieldSerializer() : FieldsChunkSerializer() {}
+};
+
+/**
  * Converts between EtherMacHeader and binary (network byte order) Ethernet mac header.
  */
 class INET_API EthernetMacHeaderSerializer : public FieldsChunkSerializer

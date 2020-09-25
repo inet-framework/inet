@@ -17,10 +17,14 @@
 
 #include <algorithm>
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EthernetHeaderSerializer.h"
+#include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeaderSerializer.h"
 
 namespace inet {
+
+Register_Serializer(EthernetMacAddressFields, EthernetMacAddressFieldsSerializer);
+Register_Serializer(EthernetTypeOrLengthField, EthernetTypeOrLengthFieldSerializer);
 
 Register_Serializer(EthernetMacHeader, EthernetMacHeaderSerializer);
 
@@ -28,6 +32,34 @@ Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EthernetFragmentFcs, EthernetFcsSerializer);
+
+void EthernetMacAddressFieldsSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& header = staticPtrCast<const EthernetMacAddressFields>(chunk);
+    stream.writeMacAddress(header->getDest());
+    stream.writeMacAddress(header->getSrc());
+}
+
+const Ptr<Chunk> EthernetMacAddressFieldsSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto header = makeShared<EthernetMacAddressFields>();
+    header->setDest(stream.readMacAddress());
+    header->setSrc(stream.readMacAddress());
+    return header;
+}
+
+void EthernetTypeOrLengthFieldSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& header = staticPtrCast<const EthernetTypeOrLengthField>(chunk);
+    stream.writeUint16Be(header->getTypeOrLength());
+}
+
+const Ptr<Chunk> EthernetTypeOrLengthFieldSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto header = makeShared<EthernetTypeOrLengthField>();
+    header->setTypeOrLength(stream.readUint16Be());
+    return header;
+}
 
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
