@@ -2,6 +2,14 @@
 # Run the INET 4.2 simulation found in the current directory using
 # a binary omnetpp+INET installation packaged as a Docker container.
 
+
+# Things to consider:
+#  - xhost +local
+#  - https://stackoverflow.com/a/58647144/635587
+#  - https://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
+#  - --env="QT_X11_NO_MITSHM=1"
+#  - passing in the video0 device
+
 # Command to be executed within the container. This is usually "inet".
 CMD="$*"
 if [ -z $CMD ]; then
@@ -36,7 +44,10 @@ pushd /root/inet4 >/dev/null
 . setenv >/dev/null
 popd >/dev/null
 export INET_OMNETPP_OPTIONS="-n $DWORK:/root/inet4/src --image-path=/root/inet4/images"
-$CMD
+addgroup --gid \$HOST_GID hostgroup
+adduser --disabled-password --gecos "" --force-badname --ingroup hostgroup --uid \$HOST_UID hostuser
+apt install -y sudo
+sudo -E -u hostuser -g hostgroup env "PATH=\$PATH" $CMD
 EOF
 chmod +x .cmd
 
@@ -45,10 +56,12 @@ chmod +x .cmd
 docker run --rm -it \
    -v "$(pwd):$DWORK" \
    -w $DWORK  \
-   -u "$(id -u):$(id -g)" \
+   -e HOST_UID="$(id -u)" \
+   -e HOST_GID="$(id -g)" \
    -v /tmp/.X11-unix:/tmp/.X11-unix \
    -e DISPLAY=$DISPLAY \
    -e HOME=$DHOME \
+   --network host \
    $IMAGE \
    bash -il $DWORK/.cmd
 
