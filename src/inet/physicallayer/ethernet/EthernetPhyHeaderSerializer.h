@@ -15,55 +15,59 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETHEADERSERIALIZER_H
-#define __INET_ETHERNETHEADERSERIALIZER_H
+#ifndef __INET_ETHERNETPHYHEADERSERIALIZER_H
+#define __INET_ETHERNETPHYHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 
+namespace physicallayer {
+
 /**
- * Converts between EtherMacHeader and binary (network byte order) Ethernet mac header.
+ * Converts between EthernetPhyHeaderBase and binary (network byte order) Ethernet PHY header.
  */
-class INET_API EthernetMacHeaderSerializer : public FieldsChunkSerializer
+class INET_API EthernetPhyHeaderBaseSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    EthernetMacHeaderSerializer() : FieldsChunkSerializer() {}
+    EthernetPhyHeaderBaseSerializer() : FieldsChunkSerializer() {}
 };
 
-class INET_API EthernetControlFrameSerializer : public FieldsChunkSerializer
+/**
+ * Converts between EthernetPhyHeader and binary (network byte order) Ethernet PHY header.
+ */
+class INET_API EthernetPhyHeaderSerializer : public FieldsChunkSerializer
 {
+  friend EthernetPhyHeaderBaseSerializer;
+
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    EthernetControlFrameSerializer() : FieldsChunkSerializer() {}
+    EthernetPhyHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
-class INET_API EthernetPaddingSerializer : public FieldsChunkSerializer
+/**
+ * Converts between EtherFragmentPhyHeader and binary (network byte order) Ethernet fragment PHY header.
+ */
+class INET_API EthernetFragmentPhyHeaderSerializer : public FieldsChunkSerializer
 {
+  friend EthernetPhyHeaderBaseSerializer;
+
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    EthernetPaddingSerializer() : FieldsChunkSerializer() {}
+    EthernetFragmentPhyHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
-class INET_API EthernetFcsSerializer : public FieldsChunkSerializer
-{
-  protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
-
-  public:
-    EthernetFcsSerializer() : FieldsChunkSerializer() {}
-};
+} // namespace physicallayer
 
 } // namespace inet
 
