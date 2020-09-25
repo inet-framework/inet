@@ -15,15 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETPROTOCOLPRINTER_H
-#define __INET_ETHERNETPROTOCOLPRINTER_H
+#ifndef __INET_ETHERNETMACPROTOCOLPRINTER_H
+#define __INET_ETHERNETMACPROTOCOLPRINTER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
 namespace inet {
 
-class INET_API EthernetProtocolPrinter : public ProtocolPrinter
+class INET_API EthernetMacProtocolPrinter : public ProtocolPrinter
 {
   public:
     virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;

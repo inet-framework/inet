@@ -15,17 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/EthernetProtocolPrinter.h"
+#include "inet/linklayer/ethernet/EthernetMacProtocolPrinter.h"
 
 namespace inet {
 
-Register_Protocol_Printer(&Protocol::ethernetMac, EthernetProtocolPrinter);
+Register_Protocol_Printer(&Protocol::ethernetMac, EthernetMacProtocolPrinter);
 
-void EthernetProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
+void EthernetMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (auto header = dynamicPtrCast<const EthernetMacHeader>(chunk)) {
         context.sourceColumn << header->getSrc();
