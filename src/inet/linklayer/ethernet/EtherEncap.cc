@@ -171,9 +171,9 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     ethHeader->setDest(macAddressReq->getDestAddress());
     ethHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethHeader);
-
-    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
-
+    const auto& ethernetFcs = makeShared<EthernetFcs>();
+    ethernetFcs->setFcsMode(fcsMode);
+    packet->insertAtBack(ethernetFcs);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
@@ -287,7 +287,9 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertAtFront(hdr);
-    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
+    const auto& ethernetFcs = makeShared<EthernetFcs>();
+    ethernetFcs->setFcsMode(fcsMode);
+    packet->insertAtBack(ethernetFcs);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
