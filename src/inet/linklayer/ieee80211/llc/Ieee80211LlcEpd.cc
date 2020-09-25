@@ -63,24 +63,24 @@ void Ieee80211LlcEpd::encapsulate(Packet *frame)
     int ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
     if (ethType == -1)
         throw cRuntimeError("EtherType not found for protocol %s", protocol ? protocol->getName() : "(nullptr)");
-    const auto& llcHeader = makeShared<Ieee80211EtherTypeHeader>();
+    const auto& llcHeader = makeShared<Ieee802EpdHeader>();
     llcHeader->setEtherType(ethType);
     frame->insertAtFront(llcHeader);
-    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211EtherType);
-    frame->addTagIfAbsent<LlcProtocolTag>()->setProtocol(&Protocol::ieee80211EtherType);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee802epd);
+    frame->addTagIfAbsent<LlcProtocolTag>()->setProtocol(&Protocol::ieee802epd);
 }
 
 void Ieee80211LlcEpd::decapsulate(Packet *frame)
 {
-    const auto& llcHeader = frame->popAtFront<Ieee80211EtherTypeHeader>();
-    const Protocol *payloadProtocol = llcHeader->getProtocol();
+    const auto& epdHeader = frame->popAtFront<Ieee802EpdHeader>();
+    auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(epdHeader->getEtherType());
     frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
 const Protocol *Ieee80211LlcEpd::getProtocol() const
 {
-    return &Protocol::ieee80211EtherType;
+    return &Protocol::ieee802epd;
 }
 
 } // namespace ieee80211

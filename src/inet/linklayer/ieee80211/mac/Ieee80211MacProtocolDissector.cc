@@ -36,13 +36,13 @@ const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet
     else if (const auto& channelTag = packet->findTag<physicallayer::Ieee80211ChannelInd>()) {
         // EtherType protocol discrimination is mandatory for deployments in the 5.9 GHz band
         if (channelTag->getChannel()->getBand() == &physicallayer::Ieee80211CompliantBands::band5_9GHz)
-            return &Protocol::ieee80211EtherType;
+            return &Protocol::ieee802epd;
     }
     const auto& header = packet->peekAtFront();
     if (dynamicPtrCast<const Ieee8022LlcHeader>(header) != nullptr)
         return &Protocol::ieee8022llc;
-    else if (dynamicPtrCast<const Ieee80211EtherTypeHeader>(header) != nullptr)
-        return &Protocol::ieee80211EtherType;
+    else if (dynamicPtrCast<const Ieee802EpdHeader>(header) != nullptr)
+        return &Protocol::ieee802epd;
     else
         return nullptr;
 }
