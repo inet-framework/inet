@@ -92,7 +92,7 @@ class INET_API Protocol
     static const Protocol ieee802154;
     static const Protocol ieee8021QCtag;
     static const Protocol ieee8021QStag;
-    static const Protocol ieee8022; // TODO: rename to ieee8022llc
+    static const Protocol ieee8022llc;
     static const Protocol ieee8022snap;
     static const Protocol igmp;
     static const Protocol igp;
