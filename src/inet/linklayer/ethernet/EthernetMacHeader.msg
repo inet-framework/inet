@@ -17,6 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.EtherType;
 import inet.linklayer.common.FcsMode;
 import inet.linklayer.common.MacAddress;
 
@@ -98,6 +99,11 @@ class EthernetMacHeader extends FieldsChunk
                            // b) If the value of this field is greater than or equal to 1536 decimal (0600 hexadecimal), then the
                            //    Length/Type field indicates the Ethertype of the MAC client protocol (Type interpretation).
 }
+
+cplusplus {{
+    inline bool isEth2Header(const EthernetMacHeader& hdr) { return isEth2Type(hdr.getTypeOrLength()); }
+    inline bool isIeee8023Header(const EthernetMacHeader& hdr) { return isIeee8023Length(hdr.getTypeOrLength()); }
+}}
 
 //
 // This class represents the variable length padding part of an Ethernet frame
