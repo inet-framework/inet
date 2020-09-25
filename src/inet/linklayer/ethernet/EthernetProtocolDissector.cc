@@ -49,7 +49,7 @@ void EthernetPhyDissector::dissect(Packet *packet, const Protocol *protocol, ICa
 
 void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    const auto& macAddressesHeader = packet->popAtFront<Ieee8023MacAddresses>();
+    const auto& macAddressesHeader = packet->popAtFront<EthernetMacAddressFields>();
     callback.startProtocolDataUnit(&Protocol::ethernetMac);
     callback.visitChunk(macAddressesHeader, &Protocol::ethernetMac);
     const auto& fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
@@ -58,7 +58,7 @@ void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICa
         typeOrLength = macHeader->getTypeOrLength();
     else {
         while (typeOrLength == -1 || typeOrLength == 0x8100 || typeOrLength == 0x88A8) {
-            const auto& typeOrLengthHeader = packet->popAtFront<Ieee8023TypeOrLength>();
+            const auto& typeOrLengthHeader = packet->popAtFront<EthernetTypeOrLengthField>();
             typeOrLength = typeOrLengthHeader->getTypeOrLength();
             callback.visitChunk(typeOrLengthHeader, &Protocol::ethernetMac);
         }

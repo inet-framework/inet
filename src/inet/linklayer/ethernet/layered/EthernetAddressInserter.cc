@@ -35,7 +35,7 @@ void EthernetAddressInserter::initialize(int stage)
 
 void EthernetAddressInserter::processPacket(Packet *packet)
 {
-    const auto& header = makeShared<Ieee8023MacAddresses>();
+    const auto& header = makeShared<EthernetMacAddressFields>();
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto srcAddress = macAddressReq->getSrcAddress();
     auto interfaceReq = packet->getTag<InterfaceReq>();

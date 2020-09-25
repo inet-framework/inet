@@ -503,7 +503,7 @@ void EtherMac::handleEndTxPeriod()
 
     const auto& header = currentTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
-        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
+        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrameBase>(header->getChunkLength(), b(-1));
         if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
             const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
             numPauseFramesSent++;
@@ -791,7 +791,7 @@ void EtherMac::processReceivedDataFrame(Packet *packet)
 void EtherMac::processReceivedControlFrame(Packet *packet)
 {
     packet->popAtFront<EthernetMacHeader>();
-    const auto& controlFrame = packet->peekAtFront<EthernetControlFrame>();
+    const auto& controlFrame = packet->peekAtFront<EthernetControlFrameBase>();
 
     if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
         const auto& pauseFrame = packet->peekAtFront<EthernetPauseFrame>();
