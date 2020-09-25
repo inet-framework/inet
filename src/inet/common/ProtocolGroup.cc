@@ -76,9 +76,9 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x22F0, &Protocol::tsn},
     { 0x22F3, &Protocol::trill},
     { 0x22F4, &Protocol::l2isis},
+    { 0x36FC, &Protocol::flooding },         // ETHERTYPE_INET_FLOODING, not in any standards
     { 0x8100, &Protocol::ieee8021QCtag },
     { 0x86DD, &Protocol::ipv6 },
-    { 0x36FC, &Protocol::flooding },         // ETHERTYPE_INET_FLOODING, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
     { 0x86FE, &Protocol::wiseRoute },         // ETHERTYPE_INET_WISE, not in any standards
     { 0x86FF, &Protocol::nextHopForwarding },         // ETHERTYPE_INET_NEXTHOP
@@ -135,8 +135,8 @@ ProtocolGroup ProtocolGroup::snapOui("snapOui", {
 
 ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
     { 0x4242, &Protocol::stp },
-    { 0xFE00, &Protocol::isis },
     { 0xAAAA, &Protocol::ieee8022snap },
+    { 0xFE00, &Protocol::isis },
 });
 
 ProtocolGroup ProtocolGroup::udpprotocol("udpprotocol", {
