@@ -15,21 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETPROTOCOLDISSECTOR_H
-#define __INET_ETHERNETPROTOCOLDISSECTOR_H
+#ifndef __INET_ETHERNETPHYPROTOCOLDISSECTOR_H
+#define __INET_ETHERNETPHYPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 
-class INET_API EthernetMacDissector : public ProtocolDissector
-{
-  public:
-    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
-};
-
-class INET_API EthernetPhyDissector : public DefaultProtocolDissector
+class INET_API EthernetPhyProtocolDissector : public DefaultProtocolDissector
 {
   public:
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;

@@ -21,36 +21,16 @@
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/EthernetProtocolDissector.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
+#include "inet/linklayer/ethernet/EthernetMacProtocolDissector.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 
-using namespace inet::physicallayer;
+Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacProtocolDissector);
 
-Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacDissector);
-Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyDissector);
-
-void EthernetPhyDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
+void EthernetMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    const auto& header = packet->popAtFront<EthernetPhyHeaderBase>();
-    callback.startProtocolDataUnit(&Protocol::ethernetPhy);
-    callback.visitChunk(header, &Protocol::ethernetPhy);
-    if (auto phyHeader = dynamicPtrCast<const EthernetFragmentPhyHeader>(header)) {
-        const auto& fragmentTag = packet->findTag<FragmentTag>();
-        if (phyHeader->getPreambleType() == SMD_Sx && fragmentTag != nullptr && fragmentTag->getLastFragment())
-            callback.dissectPacket(packet, nullptr); // TODO: the Ethernet MAC protocol could be dissected here (but the packet cannot be dissected deeper, so providing that protocol is incorrect)
-        else
-            callback.dissectPacket(packet, nullptr);
-    }
-    else
-        callback.dissectPacket(packet, &Protocol::ethernetMac);
-    callback.endProtocolDataUnit(&Protocol::ethernetPhy);
-}
-
-void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
-{
+    return;
     const auto& macAddressesHeader = packet->popAtFront<EthernetMacAddressFields>();
     callback.startProtocolDataUnit(&Protocol::ethernetMac);
     callback.visitChunk(macAddressesHeader, &Protocol::ethernetMac);
