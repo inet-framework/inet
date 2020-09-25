@@ -17,23 +17,23 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeProtocolDissector.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
+#include "inet/linklayer/ieee802/Ieee802EpdProtocolDissector.h"
 
 namespace inet {
-namespace ieee80211 {
 
-Register_Protocol_Dissector(&Protocol::ieee80211EtherType, Ieee80211EtherTypeProtocolDissector);
+Register_Protocol_Dissector(&Protocol::ieee802epd, Ieee802EpdProtocolDissector);
 
-void Ieee80211EtherTypeProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
+void Ieee802EpdProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    const auto& header = packet->popAtFront<inet::Ieee80211EtherTypeHeader>();
-    callback.startProtocolDataUnit(&Protocol::ieee80211EtherType);
-    callback.visitChunk(header, &Protocol::ieee80211EtherType);
-    callback.dissectPacket(packet, header->getProtocol());
-    callback.endProtocolDataUnit(&Protocol::ieee80211EtherType);
+    const auto& header = packet->popAtFront<Ieee802EpdHeader>();
+    callback.startProtocolDataUnit(&Protocol::ieee802epd);
+    callback.visitChunk(header, &Protocol::ieee802epd);
+    auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getEtherType());
+    callback.dissectPacket(packet, payloadProtocol);
+    callback.endProtocolDataUnit(&Protocol::ieee802epd);
 }
 
-} // namespace ieee80211
 } // namespace inet
 

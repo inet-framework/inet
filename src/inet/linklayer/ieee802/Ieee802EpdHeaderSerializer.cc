@@ -17,27 +17,25 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeaderSerializer.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeaderSerializer.h"
 
 namespace inet {
-namespace ieee80211 {
 
-Register_Serializer(Ieee80211EtherTypeHeader, Ieee80211EtherTypeHeaderSerializer);
+Register_Serializer(Ieee802EpdHeader, Ieee802EpdHeaderSerializer);
 
-void Ieee80211EtherTypeHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ieee802EpdHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& llcHeader = CHK(dynamicPtrCast<const Ieee80211EtherTypeHeader>(chunk));
+    const auto& llcHeader = CHK(dynamicPtrCast<const Ieee802EpdHeader>(chunk));
     stream.writeUint16Be(llcHeader->getEtherType());
 }
 
-const Ptr<Chunk> Ieee80211EtherTypeHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee802EpdHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    Ptr<Ieee80211EtherTypeHeader> llcHeader = makeShared<Ieee80211EtherTypeHeader>();
+    Ptr<Ieee802EpdHeader> llcHeader = makeShared<Ieee802EpdHeader>();
     llcHeader->setEtherType(stream.readUint16Be());
     return llcHeader;
 }
 
-} // namepsace ieee80211
 } // namespace inet
 

@@ -16,25 +16,23 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_IEEE80211ETHERTYPEHEADERSERIALIZER_H
-#define __INET_IEEE80211ETHERTYPEHEADERSERIALIZER_H
+#ifndef __INET_IEEE802EPDHEADERSERIALIZER_H
+#define __INET_IEEE802EPDHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
-namespace ieee80211 {
 
-class INET_API Ieee80211EtherTypeHeaderSerializer : public FieldsChunkSerializer
+class INET_API Ieee802EpdHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    Ieee80211EtherTypeHeaderSerializer() : FieldsChunkSerializer() {}
+    Ieee802EpdHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
-} // namespace ieee80211
 } // namespace inet
 
 #endif

@@ -16,23 +16,19 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_IEEE80211ETHERTYPEPROTOCOLDISSECTOR_H
-#define __INET_IEEE80211ETHERTYPEPROTOCOLDISSECTOR_H
+#ifndef __INET_IEEE802EPDPROTOCOLDISSECTOR_H
+#define __INET_IEEE802EPDPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
-namespace ieee80211 {
 
-class INET_API Ieee80211EtherTypeProtocolDissector : public ProtocolDissector
+class INET_API Ieee802EpdProtocolDissector : public ProtocolDissector
 {
   public:
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
-} // namespace ieee80211
 } // namespace inet
 
 #endif
-

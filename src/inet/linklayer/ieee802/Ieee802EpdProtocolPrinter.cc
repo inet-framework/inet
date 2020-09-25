@@ -18,22 +18,20 @@
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeProtocolPrinter.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
+#include "inet/linklayer/ieee802/Ieee802EpdProtocolPrinter.h"
 
 namespace inet {
-namespace ieee80211 {
 
-Register_Protocol_Printer(&Protocol::ieee80211EtherType, Ieee80211EtherTypeProtocolPrinter);
+Register_Protocol_Printer(&Protocol::ieee802epd, Ieee802EpdProtocolPrinter);
 
-void Ieee80211EtherTypeProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
+void Ieee802EpdProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
-    if (auto header = dynamicPtrCast<const Ieee80211EtherTypeHeader>(chunk))
+    if (auto header = dynamicPtrCast<const Ieee802EpdHeader>(chunk))
         context.infoColumn << "etherType: " << header->getEtherType();
     else
-        context.infoColumn << "(IEEE 802.11 LLC)" << chunk;
+        context.infoColumn << "(IEEE 802 EPD)" << chunk;
 }
 
-} // namespace ieee80211
 } // namespace inet
 

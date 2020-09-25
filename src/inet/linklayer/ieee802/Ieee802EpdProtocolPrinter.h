@@ -16,22 +16,19 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_IEEE80211ETHERTYPEPROTOCOLPRINTER_H
-#define __INET_IEEE80211ETHERTYPEPROTOCOLPRINTER_H
+#ifndef __INET_IEEE802EPDPROTOCOLPRINTER_H
+#define __INET_IEEE802EPDPROTOCOLPRINTER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
 namespace inet {
-namespace ieee80211 {
 
-class INET_API Ieee80211EtherTypeProtocolPrinter : public ProtocolPrinter
+class INET_API Ieee802EpdProtocolPrinter : public ProtocolPrinter
 {
   public:
     virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
 };
 
-} // namespace ieee80211
 } // namespace inet
 
 #endif
