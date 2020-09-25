@@ -15,44 +15,21 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETHEADERSERIALIZER_H
-#define __INET_ETHERNETHEADERSERIALIZER_H
+#ifndef __INET_ETHERNETCONTROLFRAMESERIALIZER_H
+#define __INET_ETHERNETCONTROLFRAMESERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 
-/**
- * Converts between EtherMacHeader and binary (network byte order) Ethernet mac header.
- */
-class INET_API EthernetMacHeaderSerializer : public FieldsChunkSerializer
+class INET_API EthernetControlFrameSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    EthernetMacHeaderSerializer() : FieldsChunkSerializer() {}
-};
-
-class INET_API EthernetPaddingSerializer : public FieldsChunkSerializer
-{
-  protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
-
-  public:
-    EthernetPaddingSerializer() : FieldsChunkSerializer() {}
-};
-
-class INET_API EthernetFcsSerializer : public FieldsChunkSerializer
-{
-  protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
-
-  public:
-    EthernetFcsSerializer() : FieldsChunkSerializer() {}
+    EthernetControlFrameSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace inet

@@ -24,8 +24,6 @@ namespace inet {
 
 Register_Serializer(EthernetMacHeader, EthernetMacHeaderSerializer);
 
-Register_Serializer(EthernetControlFrame, EthernetControlFrameSerializer);
-Register_Serializer(EthernetPauseFrame, EthernetControlFrameSerializer);
 Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
@@ -46,37 +44,6 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
     ethernetMacHeader->setSrc(stream.readMacAddress());
     ethernetMacHeader->setTypeOrLength(stream.readUint16Be());
     return ethernetMacHeader;
-}
-
-void EthernetControlFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
-{
-    const auto& frame = staticPtrCast<const EthernetControlFrame>(chunk);
-    stream.writeUint16Be(frame->getOpCode());
-    if (frame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
-        auto pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(frame);
-        ASSERT(pauseFrame != nullptr);
-        stream.writeUint16Be(pauseFrame->getPauseTime());
-    }
-    else
-        throw cRuntimeError("Cannot serialize '%s' (EthernetControlFrame with opCode = %d)", frame->getClassName(), frame->getOpCode());
-}
-
-const Ptr<Chunk> EthernetControlFrameSerializer::deserialize(MemoryInputStream& stream) const
-{
-    Ptr<EthernetControlFrame> controlFrame = nullptr;
-    uint16_t opCode = stream.readUint16Be();
-    if (opCode == ETHERNET_CONTROL_PAUSE) {
-        auto pauseFrame = makeShared<EthernetPauseFrame>();
-        pauseFrame->setOpCode(opCode);
-        pauseFrame->setPauseTime(stream.readUint16Be());
-        controlFrame = pauseFrame;
-    }
-    else {
-        controlFrame = makeShared<EthernetControlFrame>();
-        controlFrame->setOpCode(opCode);
-        controlFrame->markImproperlyRepresented();
-    }
-    return controlFrame;
 }
 
 void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
