@@ -80,7 +80,6 @@ class INET_API Protocol
     static const Protocol icmpv6;
     static const Protocol ieee80211DsssPhy;
     static const Protocol ieee80211ErpOfdmPhy;
-    static const Protocol ieee80211EtherType;
     static const Protocol ieee80211FhssPhy;
     static const Protocol ieee80211HrDsssPhy;
     static const Protocol ieee80211HtPhy;
@@ -95,6 +94,7 @@ class INET_API Protocol
     static const Protocol ieee8021qSTag;
     static const Protocol ieee8022llc;
     static const Protocol ieee8022snap;
+    static const Protocol ieee802epd;
     static const Protocol igmp;
     static const Protocol igp;
     static const Protocol ipv4;
