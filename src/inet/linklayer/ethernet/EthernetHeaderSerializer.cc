@@ -38,53 +38,20 @@ Register_Serializer(EthernetPhyHeaderBase, EthernetPhyHeaderBaseSerializer);
 Register_Serializer(EthernetPhyHeader, EthernetPhyHeaderSerializer);
 Register_Serializer(EthernetFragmentPhyHeader, EthernetFragmentPhyHeaderSerializer);
 
-static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ieee8021qHeader *qtag)
-{
-    stream.writeUint16Be(ethType);
-    stream.writeUint16Be((qtag->getVid() & 0xFFF) |
-                         ((qtag->getPcp() & 7) << 13) |
-                         (qtag->getDe() ? 0x1000 : 0));
-}
-
-static Ieee8021qHeader *deserializeQtag(MemoryInputStream& stream)
-{
-    auto qtag = new Ieee8021qHeader();
-    uint16_t qtagValue = stream.readUint16Be();
-    qtag->setVid(qtagValue & 0xFFF);
-    qtag->setPcp((qtagValue >> 13) & 7);
-    qtag->setDe((qtagValue & 0x1000) != 0);
-    return qtag;
-}
-
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetMacHeader = staticPtrCast<const EthernetMacHeader>(chunk);
     stream.writeMacAddress(ethernetMacHeader->getDest());
     stream.writeMacAddress(ethernetMacHeader->getSrc());
-    if (ethernetMacHeader->getSTag() != nullptr)
-        serializeQtag(stream, 0x88A8, ethernetMacHeader->getSTag());
-    if (ethernetMacHeader->getCTag() != nullptr)
-        serializeQtag(stream, 0x8100, ethernetMacHeader->getCTag());
     stream.writeUint16Be(ethernetMacHeader->getTypeOrLength());
 }
 
 const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
-    MacAddress destAddr = stream.readMacAddress();
-    MacAddress srcAddr = stream.readMacAddress();
-    uint16_t value = stream.readUint16Be();
-    ethernetMacHeader->setDest(destAddr);
-    ethernetMacHeader->setSrc(srcAddr);
-    if (value == 0x88A8) {
-        ethernetMacHeader->setSTag(deserializeQtag(stream));
-        value = stream.readUint16Be();
-    }
-    if (value == 0x8100) {
-        ethernetMacHeader->setCTag(deserializeQtag(stream));
-        value = stream.readUint16Be();
-    }
-    ethernetMacHeader->setTypeOrLength(value);
+    ethernetMacHeader->setDest(stream.readMacAddress());
+    ethernetMacHeader->setSrc(stream.readMacAddress());
+    ethernetMacHeader->setTypeOrLength(stream.readUint16Be());
     return ethernetMacHeader;
 }
 
