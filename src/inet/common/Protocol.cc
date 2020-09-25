@@ -105,8 +105,8 @@ const Protocol Protocol::ieee80211OfdmPhy("ieee80211ofdmphy", "IEEE 802.11 OFDM 
 const Protocol Protocol::ieee80211VhtPhy("ieee80211vhtphy", "IEEE 802.11 VHT PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8021ae("ieee8021ae", "IEEE 802.1AE");
-const Protocol Protocol::ieee8021QCtag("ieee8021qctag", "IEEE 802.1Q ctag");
-const Protocol Protocol::ieee8021QStag("ieee8021qstag", "IEEE 802.1Q stag");
+const Protocol Protocol::ieee8021qCTag("ieee8021ctag", "IEEE 802.1Q C-TAG");
+const Protocol Protocol::ieee8021qSTag("ieee8021stag", "IEEE 802.1Q S-TAG");
 const Protocol Protocol::ieee8022llc("ieee8022llc", "IEEE 802.2 LLC", Protocol::LinkLayer);
 const Protocol Protocol::ieee8022snap("ieee8022snap", "IEEE 802.2 SNAP", Protocol::LinkLayer);
 const Protocol Protocol::igmp("igmp", "IGMP", Protocol::NetworkLayer);
