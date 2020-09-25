@@ -77,14 +77,14 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x22F3, &Protocol::trill},
     { 0x22F4, &Protocol::l2isis},
     { 0x36FC, &Protocol::flooding },          // INET specific non-standard protocol
-    { 0x8100, &Protocol::ieee8021QCtag },
+    { 0x8100, &Protocol::ieee8021qCTag },
     { 0x86DD, &Protocol::ipv6 },
     { 0x86FD, &Protocol::probabilistic },     // INET specific non-standard protocol
     { 0x86FE, &Protocol::wiseRoute },         // INET specific non-standard protocol
     { 0x86FF, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
     { 0x8808, &Protocol::ethernetFlowCtrl },
     { 0x8847, &Protocol::mpls },
-    { 0x88A8, &Protocol::ieee8021QStag },
+    { 0x88A8, &Protocol::ieee8021qSTag },
     { 0x88CC, &Protocol::lldp },
     { 0x88E5, &Protocol::ieee8021ae },
     { 0x891d, &Protocol::tteth },

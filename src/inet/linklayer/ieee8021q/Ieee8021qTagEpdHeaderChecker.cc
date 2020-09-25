@@ -33,9 +33,9 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *vlanTagType = par("vlanTagType");
         if (!strcmp("s", vlanTagType))
-            qtagProtocol = &Protocol::ieee8021qstag;
+            qtagProtocol = &Protocol::ieee8021qSTag;
         else if (!strcmp("c", vlanTagType))
-            qtagProtocol = &Protocol::ieee8021qctag;
+            qtagProtocol = &Protocol::ieee8021qCTag;
         else
             throw cRuntimeError("Unknown tag type");
         cStringTokenizer filterTokenizer(par("vlanIdFilter"));
