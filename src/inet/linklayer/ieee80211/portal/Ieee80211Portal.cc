@@ -79,7 +79,7 @@ void Ieee80211Portal::encapsulate(Packet *packet)
         ieee8022SnapHeader->setOui(0);
         ieee8022SnapHeader->setProtocolId(ethernetHeader->getTypeOrLength());
         packet->insertAtFront(ieee8022SnapHeader);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
     }
     else
         throw cRuntimeError("Unknown packet: '%s'", packet->getFullName());

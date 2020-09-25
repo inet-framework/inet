@@ -64,7 +64,7 @@ Register_Packet_Classifier_Function(PacketEthernetPreambleTypeClassifier, classi
 static int classifyPacketByLlcProtocol(Packet *packet)
 {
     auto protocolTag = packet->findTag<PacketProtocolTag>();
-    return (protocolTag != nullptr && *protocolTag->getProtocol() == Protocol::ieee8022) ? 1 : 0;
+    return (protocolTag != nullptr && *protocolTag->getProtocol() == Protocol::ieee8022llc) ? 1 : 0;
 }
 
 Register_Packet_Classifier_Function(EthernetLlcClassifier, classifyPacketByLlcProtocol);

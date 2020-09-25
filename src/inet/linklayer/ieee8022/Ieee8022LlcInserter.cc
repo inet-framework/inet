@@ -29,8 +29,8 @@ void Ieee8022LlcInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        registerService(Protocol::ieee8022, inputGate, nullptr);
-        registerProtocol(Protocol::ieee8022, outputGate, outputGate);
+        registerService(Protocol::ieee8022llc, inputGate, nullptr);
+        registerProtocol(Protocol::ieee8022llc, outputGate, outputGate);
     }
 }
 
@@ -52,7 +52,7 @@ void Ieee8022LlcInserter::processPacket(Packet *packet)
         llcHeader->setControl(3);       //TODO get from sapTag
     }
     packet->insertAtFront(llcHeader);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
 }
 
 const Protocol *Ieee8022LlcInserter::getProtocol(const Ptr<const Ieee8022LlcHeader>& llcHeader)

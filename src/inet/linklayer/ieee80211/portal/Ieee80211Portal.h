@@ -42,7 +42,7 @@ class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
     virtual void decapsulate(Packet *packet);
 
   public:
-    const Protocol *getProtocol() const override { return &Protocol::ieee8022; }
+    const Protocol *getProtocol() const override { return &Protocol::ieee8022llc; }
 };
 
 } // namespace ieee80211

@@ -33,7 +33,7 @@ void Ieee80211LlcLpd::encapsulate(Packet *frame)
 
 const Protocol *Ieee80211LlcLpd::getProtocol() const
 {
-    return &Protocol::ieee8022;
+    return &Protocol::ieee8022llc;
 }
 
 } // namespace ieee80211

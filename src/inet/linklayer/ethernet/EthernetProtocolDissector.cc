@@ -72,7 +72,7 @@ void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICa
         auto ethEndOffset = packet->getFrontOffset() + B(typeOrLength);
         auto trailerOffset = packet->getBackOffset();
         packet->setBackOffset(ethEndOffset);
-        callback.dissectPacket(packet, &Protocol::ieee8022);
+        callback.dissectPacket(packet, &Protocol::ieee8022llc);
         packet->setBackOffset(trailerOffset);
     }
     auto paddingLength = packet->getDataLength();

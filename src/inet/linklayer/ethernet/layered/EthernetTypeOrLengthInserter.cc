@@ -36,7 +36,7 @@ void EthernetTypeOrLengthInserter::processPacket(Packet *packet)
 {
     const auto& header = makeShared<Ieee8023TypeOrLength>();
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &Protocol::ieee8022)
+    if (protocol == &Protocol::ieee8022llc)
         header->setTypeOrLength(packet->getByteLength());
     else
         header->setTypeOrLength(ProtocolGroup::ethertype.findProtocolNumber(protocol));

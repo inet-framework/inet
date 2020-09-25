@@ -32,7 +32,7 @@ Define_Module(Ieee8021dRelay);
 static bool isBpdu(Packet *packet)
 {
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &Protocol::ieee8022) {
+    if (protocol == &Protocol::ieee8022llc) {
         auto sapInd = packet->findTag<Ieee802SapInd>();
         return sapInd != nullptr && sapInd->getSsap() == 0x42 && sapInd->getDsap() == 0x42; // TODO: && sapInd->getControl() == 3;
     }

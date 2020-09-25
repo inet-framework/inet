@@ -32,7 +32,7 @@ void EthernetTypeOrLengthChecker::processPacket(Packet *packet)
     auto typeOrLength = header->getTypeOrLength();
     const Protocol *protocol;
     if (isIeee8023Length(typeOrLength))
-        protocol = &Protocol::ieee8022;
+        protocol = &Protocol::ieee8022llc;
     else
         protocol = ProtocolGroup::ethertype.getProtocol(typeOrLength);
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();

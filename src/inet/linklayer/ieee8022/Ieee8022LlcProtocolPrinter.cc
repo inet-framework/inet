@@ -22,7 +22,7 @@
 
 namespace inet {
 
-Register_Protocol_Printer(&Protocol::ieee8022, Ieee8022LlcProtocolPrinter);
+Register_Protocol_Printer(&Protocol::ieee8022llc, Ieee8022LlcProtocolPrinter);
 
 void Ieee8022LlcProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {

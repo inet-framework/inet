@@ -111,7 +111,7 @@ void Ieee8022LlcSocket::sendToLlc(cMessage *msg)
         throw cRuntimeError("LlcSocket: setOutputGate() must be invoked before socket can be used");
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
     tags.addTagIfAbsent<Ieee802SapReq>()->setSsap(localSap);
     if (interfaceId != -1)
         tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);

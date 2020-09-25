@@ -30,8 +30,8 @@ void Ieee8022LlcChecker::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ieee8022, nullptr, outputGate);
-        registerProtocol(Protocol::ieee8022, nullptr, inputGate);
+        registerService(Protocol::ieee8022llc, nullptr, outputGate);
+        registerProtocol(Protocol::ieee8022llc, nullptr, inputGate);
     }
 }
 

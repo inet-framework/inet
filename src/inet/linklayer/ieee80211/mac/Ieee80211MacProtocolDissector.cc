@@ -40,7 +40,7 @@ const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet
     }
     const auto& header = packet->peekAtFront();
     if (dynamicPtrCast<const Ieee8022LlcHeader>(header) != nullptr)
-        return &Protocol::ieee8022;
+        return &Protocol::ieee8022llc;
     else if (dynamicPtrCast<const Ieee80211EtherTypeHeader>(header) != nullptr)
         return &Protocol::ieee80211EtherType;
     else

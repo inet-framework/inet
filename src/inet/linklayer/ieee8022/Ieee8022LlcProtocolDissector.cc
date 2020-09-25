@@ -24,16 +24,16 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
+Register_Protocol_Dissector(&Protocol::ieee8022llc, Ieee802LlcDissector);
 
 void Ieee802LlcDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& header = packet->popAtFront<inet::Ieee8022LlcHeader>();
-    callback.startProtocolDataUnit(&Protocol::ieee8022);
-    callback.visitChunk(header, &Protocol::ieee8022);
+    callback.startProtocolDataUnit(&Protocol::ieee8022llc);
+    callback.visitChunk(header, &Protocol::ieee8022llc);
     auto dataProtocol = Ieee8022Llc::getProtocol(header);
     callback.dissectPacket(packet, dataProtocol);
-    callback.endProtocolDataUnit(&Protocol::ieee8022);
+    callback.endProtocolDataUnit(&Protocol::ieee8022llc);
 }
 
 } // namespace inet
