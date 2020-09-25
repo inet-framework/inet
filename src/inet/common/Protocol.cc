@@ -92,16 +92,16 @@ const Protocol Protocol::gpsr("gpsr", "GPSR");
 const Protocol Protocol::http("http", "HTTP");
 const Protocol Protocol::icmpv4("icmpv4", "ICMPv4", Protocol::NetworkLayer);
 const Protocol Protocol::icmpv6("icmpv6", "ICMPv6", Protocol::NetworkLayer);
+const Protocol Protocol::ieee80211DsssPhy("ieee80211dsssphy", "IEEE 802.11 DSSS PHY", Protocol::PhysicalLayer);
+const Protocol Protocol::ieee80211ErpOfdmPhy("ieee80211erpofdmphy", "IEEE 802.11 ERP OFDM PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee80211EtherType("ieee80211ethertype", "IEEE 802.11 LLC (EtherType)", Protocol::LinkLayer);
+const Protocol Protocol::ieee80211FhssPhy("ieee80211fhssphy", "IEEE 802.11 FHSS PHY", Protocol::PhysicalLayer);
+const Protocol Protocol::ieee80211HrDsssPhy("ieee80211hrdsssphy", "IEEE 802.11 HR/DSSS PHY", Protocol::PhysicalLayer);
+const Protocol Protocol::ieee80211HtPhy("ieee80211htphy", "IEEE 802.11 HT PHY", Protocol::PhysicalLayer);
+const Protocol Protocol::ieee80211IrPhy("ieee80211irphy", "IEEE 802.11 IR PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee80211Mac("ieee80211mac", "IEEE 802.11 MAC", Protocol::LinkLayer);
 const Protocol Protocol::ieee80211Mgmt("ieee80211mgmt", "IEEE 802.11 MGMT", Protocol::LinkLayer);
-const Protocol Protocol::ieee80211FhssPhy("ieee80211fhssphy", "IEEE 802.11 FHSS PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::ieee80211IrPhy("ieee80211irphy", "IEEE 802.11 IR PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::ieee80211DsssPhy("ieee80211dsssphy", "IEEE 802.11 DSSS PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::ieee80211HrDsssPhy("ieee80211hrdsssphy", "IEEE 802.11 HR/DSSS PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee80211OfdmPhy("ieee80211ofdmphy", "IEEE 802.11 OFDM PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::ieee80211ErpOfdmPhy("ieee80211erpofdmphy", "IEEE 802.11 ERP OFDM PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::ieee80211HtPhy("ieee80211htphy", "IEEE 802.11 HT PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee80211VhtPhy("ieee80211vhtphy", "IEEE 802.11 VHT PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8021QCtag("ieee8021qctag", "IEEE 802.1Q ctag");
@@ -144,8 +144,8 @@ const Protocol Protocol::apskPhy("apskphy", "APSK PHY", Protocol::PhysicalLayer)
 const Protocol Protocol::csmaCaMac("csmacamac", "CSMA/CA MAC");
 const Protocol Protocol::echo("echo", "Echo"); // Echo protocol (ping request/reply)
 const Protocol Protocol::flooding("flooding", "Flooding", Protocol::NetworkLayer);
-const Protocol Protocol::nextHopForwarding("nexthopforwarding", "Next Hop Forwarding"); // Next Hop Forwarding
 const Protocol Protocol::linkStateRouting("linkstaterouting", "LinkStateRouting");
+const Protocol Protocol::nextHopForwarding("nexthopforwarding", "Next Hop Forwarding"); // Next Hop Forwarding
 const Protocol Protocol::probabilistic("probabilistic", "Probabilistic", Protocol::NetworkLayer); // Probabilistic Network Protocol
 const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC");
 const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY", Protocol::PhysicalLayer);
