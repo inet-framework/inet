@@ -19,22 +19,16 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 
-cplusplus {{
-#include "inet/common/ProtocolGroup.h"
-}}
-
 namespace inet;
 
-// IEEE 802.11 in 5.9 GHz band requires EtherType Protocol Discrimination (EPD)
-class Ieee80211EtherTypeHeader extends FieldsChunk
+//
+// This class represents an IEEE 802 EtherType Protocol Discrimination (EPD)
+// header as defined in the section 9.2 EtherTypes of the IEEE Std 802-2014,
+// IEEE Standard for Local and Metropolitan Area Networks: Overview and
+// Architecture.
+//
+class Ieee802EpdHeader extends FieldsChunk
 {
     chunkLength = B(2);
-    int etherType = -1; // ~EtherType (2 bytes)
+    uint16_t etherType; // Protocol identification values are assigned by the IEEE RA 19 and are used to identify the protocol that is to be invoked to process the user data in the frame.
 }
-
-cplusplus(Ieee80211EtherTypeHeader) {{
-    virtual const Protocol* getProtocol() const
-    {
-        return ProtocolGroup::ethertype.findProtocol(getEtherType());
-    }
-}}
