@@ -18,28 +18,36 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 
-cplusplus {{
-#include "inet/linklayer/ethernet/Ethernet.h"
-}}
-
 namespace inet::physicallayer;
 
 //
-// Base class for Ethernet PHY headers.
+// This is a base class for all IEEE 802.3 Ethernet PHY headers defined the IEEE
+// Std 802.3-2018, IEEE Standard for Ethernet.
 //
 class EthernetPhyHeaderBase extends FieldsChunk
 {
-    chunkLength = PREAMBLE_BYTES + SFD_BYTES;
+    chunkLength = B(8);
 }
 
 //
-// Represents an Ethernet PHY header.
+// This class represents an Ethernet PHY header as defined in the IEEE Std
+// 802.3-2018, IEEE Standard for Ethernet.
+//
+//  0                   1                   2                   3
+//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+// +---------------------------------------------------------------+
+// |                        Preamble (0x55)                        |
+// +                                               +---------------+
+// |                                               |      SFD      |
+// +-----------------------------------------------+---------------+
 //
 class EthernetPhyHeader extends EthernetPhyHeaderBase
 {
 }
 
+//
 // http://www.enodenetworks.com/assets/docs/8023br.pdf
+//
 enum EthernetPhyHeaderType {
     SFD = 1;         // 0xD5
     SMD_E = SFD;
@@ -50,7 +58,24 @@ enum EthernetPhyHeaderType {
 };
 
 //
-// Represents an Ethernet fragment PHY header.
+// This class represents an Ethernet fragment PHY header as defined in the IEEE
+// Std 802.3-2018, IEEE Standard for Ethernet.
+//
+//  0                   1                   2                   3
+//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+// +---------------------------------------------------------------+
+// |                        Preamble (0x55)                        |
+// +                                               +---------------+
+// |                                               |     SMD-Sx    |
+// +-----------------------------------------------+---------------+
+//
+//  0                   1                   2                   3
+//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+// +---------------------------------------------------------------+
+// |                        Preamble (0x55)                        |
+// +                               +---------------+---------------+
+// |                               |     SMD-Cx    |   FragNumber  |
+// +-------------------------------+---------------+---------------+
 //
 class EthernetFragmentPhyHeader extends EthernetPhyHeaderBase
 {
@@ -58,6 +83,4 @@ class EthernetFragmentPhyHeader extends EthernetPhyHeaderBase
     uint8_t smdNumber = 0;       // 0-3, see SMD_Sx or SMD_Cx
     uint8_t fragmentNumber = 0;  // 0-3 (real fragment number modulo 4)
 }
-// preamble bytes: 0x55
-
 
