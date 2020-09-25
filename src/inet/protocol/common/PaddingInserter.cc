@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/protocol/common/PaddingInserter.h"
 
 namespace inet {
@@ -39,8 +40,14 @@ void PaddingInserter::processPacket(Packet *packet)
     if (length + paddingLength < minLength)
         paddingLength = minLength - length;
     if (paddingLength > b(0)) {
-        const auto& padding = makeShared<BitCountChunk>(paddingLength);
-        insertHeader<BitCountChunk>(packet, padding, insertionPosition);
+        if (b(paddingLength).get() % 8 == 0) {
+            const auto& padding = makeShared<ByteCountChunk>(paddingLength, 0);
+            insertHeader<ByteCountChunk>(packet, padding, insertionPosition);
+        }
+        else {
+            const auto& padding = makeShared<BitCountChunk>(paddingLength);
+            insertHeader<BitCountChunk>(packet, padding, insertionPosition);
+        }
     }
 }
 
