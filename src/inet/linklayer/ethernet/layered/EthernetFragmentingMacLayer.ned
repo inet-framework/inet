@@ -26,10 +26,10 @@ module EthernetFragmentingMacLayer extends EthernetMacLayer
         streamer.typename = default("PreemptableStreamer");
         streamer.minPacketLength = 60B;
         fcsInserter.typename = default("EthernetFragmentFcsInserter");
-        preambleInserter.typename = default("EthernetFragmentPreambleInserter");
+        phyHeaderInserter.typename = default("EthernetFragmentPhyHeaderInserter");
         transmitter.typename = default("StreamThroughTransmitter");
         fcsChecker.typename = default("EthernetFragmentFcsChecker");
-        preambleChecker.typename = default("EthernetFragmentPreambleChecker");
+        phyHeaderChecker.typename = default("EthernetFragmentPhyHeaderChecker");
     submodules:
         defragmenter: FragmentTagBasedDefragmenter {
             @display("p=500,300");
