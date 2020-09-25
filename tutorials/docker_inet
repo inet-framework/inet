@@ -7,8 +7,9 @@
 #  - xhost +local
 #  - https://stackoverflow.com/a/58647144/635587
 #  - https://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
-#  - --env="QT_X11_NO_MITSHM=1"
 #  - passing in the video0 device
+#  - -e LIBGL_ALWAYS_SOFTWARE=1
+#  - -e QT_X11_NO_MITSHM=1
 
 # Command to be executed within the container. This is usually "inet".
 CMD="$*"
@@ -47,6 +48,8 @@ export INET_OMNETPP_OPTIONS="-n $DWORK:/root/inet4/src --image-path=/root/inet4/
 addgroup --gid \$HOST_GID hostgroup
 adduser --disabled-password --gecos "" --force-badname --ingroup hostgroup --uid \$HOST_UID hostuser
 apt install -y sudo
+mkdir -m 0700 /tmp/xdg-runtime-root
+chown \$HOST_GID:\$HOST_UID /tmp/xdg-runtime-root
 sudo -E -u hostuser -g hostgroup env "PATH=\$PATH" $CMD
 EOF
 chmod +x .cmd
@@ -61,6 +64,7 @@ docker run --rm -it \
    -v /tmp/.X11-unix:/tmp/.X11-unix \
    -e DISPLAY=$DISPLAY \
    -e HOME=$DHOME \
+   -e LIBGL_ALWAYS_SOFTWARE=1 \
    --network host \
    $IMAGE \
    bash -il $DWORK/.cmd
