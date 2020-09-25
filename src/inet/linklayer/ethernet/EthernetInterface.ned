@@ -17,7 +17,6 @@
 
 package inet.linklayer.ethernet;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.NetworkInterface;
@@ -48,46 +47,35 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         output cutthroughOut @loose;
         inout phys @labels(EtherFrame);
     submodules:
-        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
-            parameters:
-                @display("p=700,100");
-        }
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
             parameters:
                 @display("p=300,100");
         }
-        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
+        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             parameters:
-                queue.packetCapacity = default(10000);
-                @display("p=500,400");
+                @display("p=700,100");
         }
         encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 @display("p=500,200");
         }
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
+            parameters:
+                queue.packetCapacity = default(10000);
+                @display("p=500,300");
+        }
     connections:
-        mac.upperLayerOut --> encap.lowerLayerIn if !exists(qEncap);
-
-        mac.upperLayerIn <-- encap.lowerLayerOut if !exists(qEncap);
+        mac.upperLayerOut --> encap.lowerLayerIn;
+        mac.upperLayerIn <-- encap.lowerLayerOut;
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        // no ingressTC
         encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if !exists(ingressTC);
+        encap.upperLayerOut --> ingressTC.in if exists(ingressTC);
+        ingressTC.out --> { @display("m=n"); } --> upperLayerOut if exists(ingressTC);
 
-        // there is ingressTC
-        if exists(ingressTC) {
-            encap.upperLayerOut --> ingressTC.in;
-            ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
-        }
-
-        // no egressTC
         upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if !exists(egressTC);
-
-        // there is egressTC
-        if exists(egressTC) {
-            upperLayerIn --> { @display("m=n"); } --> egressTC.in;
-            egressTC.out --> encap.upperLayerIn;
-        }
+        upperLayerIn --> { @display("m=n"); } --> egressTC.in if exists(egressTC);
+        egressTC.out --> encap.upperLayerIn if exists(egressTC);
 }
 
