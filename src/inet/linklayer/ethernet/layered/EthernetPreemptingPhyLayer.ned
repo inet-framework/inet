@@ -48,10 +48,10 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
             classifierClass = default("inet::PacketFragmentTagClassifier");
             @display("p=200,100");
         }
-        preambleInserter: <default("EthernetPreambleInserter")> like IPacketFlow {
+        phyHeaderInserter: <default("EthernetPhyHeaderInserter")> like IPacketFlow {
             @display("p=100,200");
         }
-        fragmentPreambleInserter: <default("EthernetFragmentPreambleInserter")> like IPacketFlow {
+        fragmentPhyHeaderInserter: <default("EthernetFragmentPhyHeaderInserter")> like IPacketFlow {
             @display("p=300,200");
         }
         m1: PacketMultiplexer {
@@ -71,10 +71,10 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
         m2: PacketMultiplexer {
             @display("p=600,100");
         }
-        fragmentPreambleChecker: <default("EthernetFragmentPreambleChecker")> like IPacketFilter {
+        fragmentPhyHeaderChecker: <default("EthernetFragmentPhyHeaderChecker")> like IPacketFilter {
             @display("p=700,200");
         }
-        preambleChecker: <default("EthernetPreambleChecker")> like IPacketFilter {
+        phyHeaderChecker: <default("EthernetPhyHeaderChecker")> like IPacketFilter {
             @display("p=500,200");
         }
         c2: PacketClassifier {
@@ -90,10 +90,10 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> c1.in;
-        c1.out++ --> preambleInserter.in;
-        c1.out++ --> fragmentPreambleInserter.in;
-        preambleInserter.out --> m1.in++;
-        fragmentPreambleInserter.out --> m1.in++;
+        c1.out++ --> phyHeaderInserter.in;
+        c1.out++ --> fragmentPhyHeaderInserter.in;
+        phyHeaderInserter.out --> m1.in++;
+        fragmentPhyHeaderInserter.out --> m1.in++;
         m1.out --> interFrameGapInserter.in;
         interFrameGapInserter.out --> outboundEmitter.in;
         outboundEmitter.out --> transmitter.in;
@@ -102,9 +102,9 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
         lowerLayerIn --> { @display("m=s"); } --> receiver.in;
         receiver.out --> inboundEmitter.in;
         inboundEmitter.out --> c2.in;
-        c2.out++ --> preambleChecker.in;
-        c2.out++ --> fragmentPreambleChecker.in;
-        preambleChecker.out --> m2.in++;
-        fragmentPreambleChecker.out --> m2.in++;
+        c2.out++ --> phyHeaderChecker.in;
+        c2.out++ --> fragmentPhyHeaderChecker.in;
+        phyHeaderChecker.out --> m2.in++;
+        fragmentPhyHeaderChecker.out --> m2.in++;
         m2.out --> { @display("m=n"); } --> upperLayerOut;
 }

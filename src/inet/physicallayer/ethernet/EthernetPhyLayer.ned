@@ -41,7 +41,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        preambleInserter: <default("EthernetPhyHeaderInserter")> like IPacketFlow {
+        phyHeaderInserter: <default("EthernetPhyHeaderInserter")> like IPacketFlow {
             @display("p=200,100");
         }
         interFrameGapInserter: InterPacketGap {
@@ -55,7 +55,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
             datarate = default(bitrate);
             @display("p=200,400");
         }
-        preambleChecker: <default("EthernetPhyHeaderChecker")> like IPacketFilter {
+        phyHeaderChecker: <default("EthernetPhyHeaderChecker")> like IPacketFilter {
             @display("p=500,100");
         }
         inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
@@ -66,14 +66,14 @@ module EthernetPhyLayer like IEthernetPhyLayer
             @display("p=500,400");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> preambleInserter.in;
-        preambleInserter.out --> interFrameGapInserter.in;
+        upperLayerIn --> { @display("m=n"); } --> phyHeaderInserter.in;
+        phyHeaderInserter.out --> interFrameGapInserter.in;
         interFrameGapInserter.out --> outboundEmitter.in;
         outboundEmitter.out --> transmitter.in;
         transmitter.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> receiver.in;
         receiver.out --> inboundEmitter.in;
-        inboundEmitter.out --> preambleChecker.in;
-        preambleChecker.out --> { @display("m=n"); } --> upperLayerOut;
+        inboundEmitter.out --> phyHeaderChecker.in;
+        phyHeaderChecker.out --> { @display("m=n"); } --> upperLayerOut;
 }
