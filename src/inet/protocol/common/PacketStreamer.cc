@@ -127,6 +127,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamedPacket = packet->dup();
     streamedPacket->setOrigPacketId(packet->getId());
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    animateSendPacketStart(packet, outputGate, streamDatarate);
     updateDisplayString();
     return packet;
 }
@@ -140,6 +141,7 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate)
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
+    animateSendPacketEnd(packet, outputGate);
     updateDisplayString();
     return packet;
 }
@@ -149,8 +151,10 @@ Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position
     Enter_Method("pullPacketProgress");
     streamDatarate = datarate;
     EV_INFO << "Progressing streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
+    auto packet = streamedPacket->dup();
+    animateSendPacketProgress(packet, outputGate, streamDatarate, position, extraProcessableLength);
     updateDisplayString();
-    return streamedPacket->dup();
+    return packet;
 }
 
 void PacketStreamer::handleCanPullPacketChanged(cGate *gate)
