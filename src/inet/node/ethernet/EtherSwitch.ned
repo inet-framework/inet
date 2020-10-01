@@ -82,31 +82,31 @@ module EtherSwitch
             @display("p=100,100;is=s");
         }
         relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
-            @display("p=800,215;is=m");
+            @display("p=800,300;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
-            @display("p=474,92");
+            @display("p=500,100");
         }
         up: MessageDispatcher {
             parameters:
-                @display("p=800,160;b=1200,5");
+                @display("p=800,200;b=1200,5");
         }
         down: MessageDispatcher {
             parameters:
-                @display("p=800,380;b=1200,5");
+                @display("p=800,500;b=1200,5");
         }
         eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=250,450,row,150;q=txQueue");
+                @display("p=250,700,row,150;q=txQueue");
         }
         encap: <default("EtherEncap")> like IEtherEncap if typename != "" {
-            @display("p=937,200");
+            @display("p=800,250");
         }
         ethernet: <default("")> like IEthernetLayer if typename != "" {
-            @display("p=800,300");
+            @display("p=800,400");
         }
         cutthrough: MessageDispatcher if enableCutthrough {
-            @display("p=800,420;b=1200,5,,,,1");
+            @display("p=800,600;b=1200,5,,,,1");
         }
     connections:
         ethernet.lowerLayerOut --> down.in++ if exists(ethernet);
