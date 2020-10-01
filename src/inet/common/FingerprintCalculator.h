@@ -20,20 +20,22 @@
 
 namespace inet {
 
-#define INET_FINGERPRINT_INGREDIENTS "~NID"
+#define INET_FINGERPRINT_INGREDIENTS "~UNID"
 
 class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
 {
   protected:
     enum FingerprintIngredient {
         NETWORK_COMMUNICATION_FILTER = '~',
+        PACKET_UPDATE_FILTER         = 'U',
         NETWORK_NODE_PATH            = 'N',
         NETWORK_INTERFACE_PATH       = 'I',
         PACKET_DATA                  = 'D',
     };
 
   protected:
-    bool filterEvents = false;
+    bool networkCommunicationFilter = false;
+    bool packetUpdateFilter = false;
 
   protected:
     virtual void parseIngredients(const char *s) override;
