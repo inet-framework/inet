@@ -67,6 +67,6 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         macLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 
         cutthroughLayer.cutthroughOut --> { @display("m=e"); } --> cutthroughOut;
-        cutthroughIn --> { @display("m=e"); } --> cutthroughLayer.cutthroughIn;
+        cutthroughIn --> { @display("m=w"); } --> cutthroughLayer.cutthroughIn;
 }
 
