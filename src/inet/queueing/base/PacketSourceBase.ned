@@ -33,6 +33,7 @@ simple PacketSourceBase extends PacketProcessorBase
         volatile int packetData = default(-1);
         bool attachCreationTimeTag = default(true);
         bool attachIdentityTag = default(true);
+        bool attachDirectionTag = default(true);
         displayStringTextFormat = default("created %p pk (%l)");
         @class(PacketSourceBase);
         @display("i=block/source");

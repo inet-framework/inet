@@ -16,6 +16,7 @@
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/common/DirectionTag_m.h"
 #include "inet/common/IdentityTag_m.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
@@ -38,6 +39,7 @@ void PacketSourceBase::initialize(int stage)
         packetDataParameter = &par("packetData");
         attachCreationTimeTag = par("attachCreationTimeTag");
         attachIdentityTag = par("attachIdentityTag");
+        attachDirectionTag = par("attachDirectionTag");
     }
 }
 
@@ -128,6 +130,8 @@ Packet *PacketSourceBase::createPacket()
     }
     auto packetName = createPacketName(packetContent);
     auto packet = new Packet(packetName, packetContent);
+    if (attachDirectionTag)
+        packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     emit(packetCreatedSignal, packet);

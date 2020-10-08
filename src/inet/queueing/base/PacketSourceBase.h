@@ -32,6 +32,7 @@ class INET_API PacketSourceBase : public PacketProcessorBase
     cPar *packetDataParameter = nullptr;
     bool attachCreationTimeTag = false;
     bool attachIdentityTag = false;
+    bool attachDirectionTag = false;
 
   protected:
     virtual void initialize(int stage) override;
