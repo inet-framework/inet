@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/protocol/transceiver/base/PacketReceiverBase.h"
 
@@ -75,6 +76,7 @@ Packet *PacketReceiverBase::decodePacket(Signal *signal) const
 {
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     // TODO: check signal physical properties such as datarate, modulation, etc.
+    packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_INBOUND);
     return packet;
 }
 
