@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -47,6 +48,7 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
         if (interfaceId != -1 && cutthroughConsumer->canPushPacket(streamedPacket, cutthroughOutputGate)) {
             streamedPacket->trim();
             streamedPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+            streamedPacket->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
             streamedPacket->removeTagIfPresent<DispatchProtocolReq>();
             EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
             pushOrSendPacketStart(streamedPacket, cutthroughOutputGate, cutthroughConsumer, streamDatarate);
@@ -84,6 +86,7 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
         int interfaceId = macTable->getInterfaceIdForAddress(header->getDest());
         packet->trim();
         packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
         packet->removeTagIfPresent<DispatchProtocolReq>();
         delete streamedPacket;
         streamedPacket = packet;
