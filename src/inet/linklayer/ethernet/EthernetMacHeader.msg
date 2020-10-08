@@ -84,13 +84,9 @@ class EthernetTypeOrLengthField extends FieldsChunk
 // |           EtherType           |
 // +-------------------------------+
 //
-class EthernetMacHeader extends FieldsChunk
+class EthernetMacHeader extends EthernetMacAddressFields
 {
     chunkLength = B(14); // B(6) + B(6) + B(2)
-    // TODO: rename to destinationAddress
-    MacAddress dest; // The Destination Address field specifies the station(s) for which the MAC frame is intended. It may be an individual or multicast (including broadcast) address.
-    // TODO: rename to sourceAddress
-    MacAddress src; // The Source Address field specifies the station sending the MAC frame.
     uint16_t typeOrLength; // This two-octet field takes one of two meanings, depending on its numeric value. For numerical evaluation,
                            // the first octet is the most significant octet of this field.
                            // a) If the value of this field is less than or equal to 1500 decimal (05DC hexadecimal), then the Length/
@@ -150,11 +146,7 @@ class EthernetFcs extends FieldsChunk
 // |                              FCS                              |
 // +---------------------------------------------------------------+
 //
-class EthernetFragmentFcs extends FieldsChunk
+class EthernetFragmentFcs extends EthernetFcs
 {
-    chunkLength = B(4);
-    uint32_t fcs; // actual value may be omitted depending on the selected fcsMode
-
-    FcsMode fcsMode = FCS_MODE_UNDEFINED; // meta information, not represented directly in the frame
     bool mCrc; // meta information, not represented directly in the frame
 }
