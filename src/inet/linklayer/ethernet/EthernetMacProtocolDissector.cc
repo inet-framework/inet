@@ -22,7 +22,6 @@
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/EthernetMacProtocolDissector.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 
@@ -30,21 +29,11 @@ Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacProtocolDissector
 
 void EthernetMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    return;
-    const auto& macAddressesHeader = packet->popAtFront<EthernetMacAddressFields>();
+    const auto& macHeader = packet->popAtFront<EthernetMacHeader>();
     callback.startProtocolDataUnit(&Protocol::ethernetMac);
-    callback.visitChunk(macAddressesHeader, &Protocol::ethernetMac);
+    callback.visitChunk(macHeader, &Protocol::ethernetMac);
     const auto& fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-    int typeOrLength = -1;
-    if (auto macHeader = dynamicPtrCast<const EthernetMacHeader>(macAddressesHeader))
-        typeOrLength = macHeader->getTypeOrLength();
-    else {
-        while (typeOrLength == -1 || typeOrLength == 0x8100 || typeOrLength == 0x88A8) {
-            const auto& typeOrLengthHeader = packet->popAtFront<EthernetTypeOrLengthField>();
-            typeOrLength = typeOrLengthHeader->getTypeOrLength();
-            callback.visitChunk(typeOrLengthHeader, &Protocol::ethernetMac);
-        }
-    }
+    int typeOrLength = macHeader->getTypeOrLength();
     if (isEth2Type(typeOrLength)) {
         auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(typeOrLength);
         callback.dissectPacket(packet, payloadProtocol);
@@ -59,7 +48,7 @@ void EthernetMacProtocolDissector::dissect(Packet *packet, const Protocol *proto
     }
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
-        const auto& padding = packet->popAtFront(paddingLength);        // remove padding (type is not EthernetPadding!)
+        const auto& padding = packet->popAtFront(paddingLength);
         callback.visitChunk(padding, &Protocol::ethernetMac);
     }
     callback.visitChunk(fcs, &Protocol::ethernetMac);
