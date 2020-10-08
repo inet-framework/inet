@@ -43,7 +43,15 @@ void PacketEmitter::initialize(int stage)
 
 void PacketEmitter::processPacket(Packet *packet)
 {
-    // void
+    if (direction != DIRECTION_UNDEFINED) {
+        const auto& directionTag = packet->addTagIfAbsent<DirectionTag>();
+        if (directionTag->getDirection() == DIRECTION_UNDEFINED)
+            directionTag->setDirection(direction);
+        else if (directionTag->getDirection() != direction)
+            throw cRuntimeError("Packet direction tag doesn't match direction parameter");
+    }
+    delete processedPacket;
+    processedPacket = packet->dup();
 }
 
 void PacketEmitter::pushPacket(Packet *packet, cGate *gate)
@@ -54,20 +62,14 @@ void PacketEmitter::pushPacket(Packet *packet, cGate *gate)
 
 void PacketEmitter::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
-    emitPacket(packet);
+    emitPacket(processedPacket);
     PacketFlowBase::handlePushPacketProcessed(packet, gate, successful);
 }
 
 void PacketEmitter::emitPacket(Packet *packet)
 {
-    if (packetFilter.matches(packet)) {
-        auto clone = new Packet(packet->getName(), packet->peekAll());
-        clone->copyTags(*packet);
-        clone->addTagIfAbsent<DirectionTag>()->setDirection(direction);
-        clone->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
-        emit(signal, clone);
-        delete clone;
-    }
+    if (packetFilter.matches(packet))
+        emit(signal, packet);
 }
 
 } // namespace inet

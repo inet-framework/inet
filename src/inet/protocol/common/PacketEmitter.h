@@ -34,12 +34,16 @@ class INET_API PacketEmitter : public PacketFlowBase
     PacketFilter packetFilter;
     Direction direction = DIRECTION_UNDEFINED;
 
+    Packet *processedPacket = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
     virtual void emitPacket(Packet *packet);
 
   public:
+    virtual ~PacketEmitter() { delete processedPacket; }
+
     virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
