@@ -31,13 +31,9 @@ void EthernetPhyProtocolDissector::dissect(Packet *packet, const Protocol *proto
     const auto& header = packet->popAtFront<EthernetPhyHeaderBase>();
     callback.startProtocolDataUnit(&Protocol::ethernetPhy);
     callback.visitChunk(header, &Protocol::ethernetPhy);
-    if (auto phyHeader = dynamicPtrCast<const EthernetFragmentPhyHeader>(header)) {
-        const auto& fragmentTag = packet->findTag<FragmentTag>();
-        if (phyHeader->getPreambleType() == SMD_Sx && fragmentTag != nullptr && fragmentTag->getLastFragment())
-            callback.dissectPacket(packet, nullptr); // TODO: the Ethernet MAC protocol could be dissected here (but the packet cannot be dissected deeper, so providing that protocol is incorrect)
-        else
-            callback.dissectPacket(packet, nullptr);
-    }
+    if (auto phyHeader = dynamicPtrCast<const EthernetFragmentPhyHeader>(header))
+        // the Ethernet MAC protocol cannot be dissected here because this is just a fragment of a complete packet
+        callback.dissectPacket(packet, nullptr);
     else
         callback.dissectPacket(packet, &Protocol::ethernetMac);
     callback.endProtocolDataUnit(&Protocol::ethernetPhy);
