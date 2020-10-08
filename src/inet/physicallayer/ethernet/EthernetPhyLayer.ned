@@ -29,10 +29,8 @@ module EthernetPhyLayer like IEthernetPhyLayer
         volatile double bitrate @unit(bps);
         outboundEmitter.signalName = "packetSentToLower";
         outboundEmitter.direction = "outbound";
-        outboundEmitter.protocolName = "ethernetphy";
         inboundEmitter.signalName = "packetReceivedFromLower";
         inboundEmitter.direction = "inbound";
-        inboundEmitter.protocolName = "ethernetphy";
         *.bitrate = default(bitrate);
         @display("i=block/layer");
     gates:

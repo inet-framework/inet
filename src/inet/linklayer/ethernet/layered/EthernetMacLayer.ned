@@ -27,10 +27,8 @@ module EthernetMacLayer like IEthernetMacLayer
     parameters:
         outboundEmitter.signalName = "packetSentToLower";
         outboundEmitter.direction = "outbound";
-        outboundEmitter.protocolName = "ethernetmac";
         inboundEmitter.signalName = "packetReceivedFromLower";
         inboundEmitter.direction = "inbound";
-        inboundEmitter.protocolName = "ethernetmac";
         @display("i=block/layer");
     gates:
         input upperLayerIn;
