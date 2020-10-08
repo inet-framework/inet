@@ -28,13 +28,13 @@ Define_Module(EthernetFragmentPhyHeaderInserter);
 
 void EthernetFragmentPhyHeaderInserter::processPacket(Packet *packet)
 {
-    auto fragmentTag = packet->getTag<FragmentTag>();
+    const auto& fragmentTag = packet->getTag<FragmentTag>();
     const auto& header = makeShared<EthernetFragmentPhyHeader>();
     header->setPreambleType(fragmentTag->getFirstFragment() ? SMD_Sx : SMD_Cx);
     header->setSmdNumber(smdNumber);
     header->setFragmentNumber(fragmentNumber % 4);
     packet->insertAtFront(header);
-    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setProtocol(&Protocol::ethernetPhy);
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));

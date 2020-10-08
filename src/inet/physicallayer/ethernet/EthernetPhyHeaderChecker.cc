@@ -28,6 +28,8 @@ Define_Module(EthernetPhyHeaderChecker);
 void EthernetPhyHeaderChecker::processPacket(Packet *packet)
 {
     packet->popAtFront<EthernetPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    const auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
+    packetProtocolTag->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     const auto& dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
     dispatchProtocolReq->setProtocol(&Protocol::ethernetMac);

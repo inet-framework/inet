@@ -44,6 +44,8 @@ bool EthernetFragmentPhyHeaderChecker::matchesPacket(const Packet *packet) const
 void EthernetFragmentPhyHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<EthernetFragmentPhyHeader>();
+    const auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
+    packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() - header->getChunkLength());
     const auto& dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
     dispatchProtocolReq->setProtocol(&Protocol::ethernetMac);
     dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
