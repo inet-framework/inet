@@ -16,18 +16,13 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/common/ProtocolGroup.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetPhyProtocolDissector.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/ethernet/EthernetPhyProtocolDissector.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 
-using namespace inet::physicallayer;
+namespace physicallayer {
 
 Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyProtocolDissector);
 
@@ -47,6 +42,8 @@ void EthernetPhyProtocolDissector::dissect(Packet *packet, const Protocol *proto
         callback.dissectPacket(packet, &Protocol::ethernetMac);
     callback.endProtocolDataUnit(&Protocol::ethernetPhy);
 }
+
+} // namespace physicallayer
 
 } // namespace inet
 

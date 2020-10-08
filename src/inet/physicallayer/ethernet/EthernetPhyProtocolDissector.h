@@ -22,11 +22,15 @@
 
 namespace inet {
 
+namespace physicallayer {
+
 class INET_API EthernetPhyProtocolDissector : public DefaultProtocolDissector
 {
   public:
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
+
+} // namespace physicallayer
 
 } // namespace inet
 
