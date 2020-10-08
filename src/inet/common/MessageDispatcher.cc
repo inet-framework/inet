@@ -118,6 +118,10 @@ void MessageDispatcher::handleCanPushPacketChanged(cGate *outGate)
     }
 }
 
+void MessageDispatcher::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+}
+
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 {
     const auto& socketInd = packet->findTag<SocketInd>();

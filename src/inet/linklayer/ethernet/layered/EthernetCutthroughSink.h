@@ -28,6 +28,9 @@ class INET_API EthernetCutthroughSink : public PacketStreamer
 {
   protected:
     cGate *cutthroughInputGate = nullptr;
+    IActivePacketSource *cutthroughProducer = nullptr;
+
+    bool cutthrough = false;
 
   protected:
     virtual void initialize(int stage) override;
@@ -37,6 +40,8 @@ class INET_API EthernetCutthroughSink : public PacketStreamer
 
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
     virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
+
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace inet

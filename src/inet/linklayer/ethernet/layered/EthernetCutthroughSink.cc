@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ethernet/layered/EthernetCutthroughSink.h"
 
 namespace inet {
@@ -24,8 +25,10 @@ Define_Module(EthernetCutthroughSink);
 void EthernetCutthroughSink::initialize(int stage)
 {
     PacketStreamer::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         cutthroughInputGate = gate("cutthroughIn");
+        cutthroughProducer = findConnectedModule<IActivePacketSource>(cutthroughInputGate);
+    }
 }
 
 bool EthernetCutthroughSink::canPushPacket(Packet *packet, cGate *gate) const
@@ -43,13 +46,16 @@ void EthernetCutthroughSink::pushPacketStart(Packet *packet, cGate *gate, bps da
         take(packet);
         delete streamedPacket;
         streamedPacket = packet;
+        cutthrough = true;
         EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
         pushOrSendPacketStart(streamedPacket, outputGate, consumer, datarate);
         streamedPacket = nullptr;
         updateDisplayString();
     }
-    else
+    else {
+        cutthrough = false;
         PacketStreamer::pushPacketStart(packet, gate, datarate);
+    }
 }
 
 void EthernetCutthroughSink::pushPacketEnd(Packet *packet, cGate *gate)
@@ -66,6 +72,15 @@ void EthernetCutthroughSink::pushPacketEnd(Packet *packet, cGate *gate)
     }
     else
         PacketStreamer::pushPacketEnd(packet, gate);
+}
+
+void EthernetCutthroughSink::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    if (!cutthrough && producer != nullptr)
+        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+    else if (cutthrough && cutthroughProducer != nullptr)
+        cutthroughProducer->handlePushPacketProcessed(packet, cutthroughInputGate->getPathStartGate(), successful);
 }
 
 } // namespace inet

@@ -84,7 +84,7 @@ class INET_API MessageDispatcher : public queueing::PacketProcessorBase, public 
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { throw cRuntimeError("Invalid operation"); }
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual void handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in) override;
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
