@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/DirectionTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/StringFormat.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/base/MacRelayUnitBase.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -74,6 +75,7 @@ void MacRelayUnitBase::broadcastPacket(Packet *outgoingPacket, const MacAddress&
 void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *outgoingInterface)
 {
     EV_INFO << "Sending packet to peer" << EV_FIELD(destinationAddress) << EV_FIELD(outgoingInterface) << EV_FIELD(packet) << EV_ENDL;
+    packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
     emit(packetSentToLowerSignal, packet);
     send(packet, "ifOut");
