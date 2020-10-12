@@ -85,7 +85,7 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
     Ieee8021dInterfaceData();
 
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     bool isLearning() const { return portData.state == LEARNING || portData.state == FORWARDING; }
 

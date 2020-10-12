@@ -147,7 +147,7 @@ class INET_API TcpStateVariables : public cObject
   public:
     TcpStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
   public:
     bool active;    // set if the connection was initiated by an active open

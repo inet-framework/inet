@@ -43,7 +43,7 @@ class INET_API Ospfv3Instance : public cObject
     int getUniqueId() { return ospfv3IfIndex++; }
     int getAreaCount() { return this->areas.size(); }
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
-    std::string detailedInfo() const OMNETPP5_CODE(override);
+    std::string detailedInfo() const;
 
   public:
     IInterfaceTable* ift = nullptr;

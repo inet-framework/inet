@@ -52,7 +52,7 @@ class INET_API NextHopInterfaceData : public InterfaceProtocolData
   public:
     NextHopInterfaceData() : InterfaceProtocolData(InterfaceEntry::F_NEXTHOP_DATA) { metric = 0; }
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     /** @name Getters */
     //@{

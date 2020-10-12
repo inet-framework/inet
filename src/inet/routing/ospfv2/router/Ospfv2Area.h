@@ -129,8 +129,8 @@ class INET_API Ospfv2Area : public cObject
     void recheckSummaryLSAs(std::vector<Ospfv2RoutingTableEntry *>& newRoutingTable);
 
     std::string str() const override;
-    std::string info() const OMNETPP5_CODE(override);
-    std::string detailedInfo() const OMNETPP5_CODE(override);
+    std::string info() const;
+    std::string detailedInfo() const;
 
   private:
     SummaryLsa *originateSummaryLSA(const SummaryLsa *summaryLSA);

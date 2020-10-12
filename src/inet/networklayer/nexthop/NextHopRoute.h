@@ -53,7 +53,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     virtual ~NextHopRoute() { delete protocolData; }
 
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     bool equals(const IRoute& route) const;
 

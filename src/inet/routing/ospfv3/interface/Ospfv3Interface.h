@@ -171,7 +171,7 @@ class INET_API Ospfv3Interface : public cObject
     void addNeighbor(Ospfv3Neighbor*);
 
     std::string str() const override;
-    std::string detailedInfo() const OMNETPP5_CODE(override);
+    std::string detailedInfo() const;
     void acknowledgeLSA(const Ospfv3LsaHeader& lsaHeader, AcknowledgementFlags ackFlags, Ipv4Address routerID);
 
     // LINK LSA
