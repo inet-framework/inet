@@ -22,7 +22,7 @@ import inet.linklayer.contract.INetworkInterface;
 //
 // This module interface is implemnted by virtual network interfaces.
 //
-moduleinterface IVlanInterface extends INetworkInterface
+moduleinterface IVirtualInterface extends INetworkInterface
 {
     parameters:
         @display("i=block/tunnel");
