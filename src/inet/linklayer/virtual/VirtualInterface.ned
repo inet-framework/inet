@@ -18,7 +18,6 @@
 package inet.linklayer.virtual;
 
 import inet.linklayer.contract.IVirtualInterface;
-import inet.linklayer.vlan.VlanTunnel;
 import inet.networklayer.common.NetworkInterface;
 
 //
@@ -34,7 +33,7 @@ module VirtualInterface extends NetworkInterface like IVirtualInterface
         input upperLayerIn;
         output upperLayerOut;
     submodules:
-        tunnel: VlanTunnel {
+        tunnel: VirtualTunnel {
             parameters:
                 @display("p=300,100");
         }

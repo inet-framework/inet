@@ -21,14 +21,14 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/vlan/VlanTunnel.h"
+#include "inet/linklayer/virtual/VirtualTunnel.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
-Define_Module(VlanTunnel);
+Define_Module(VirtualTunnel);
 
-void VlanTunnel::initialize(int stage)
+void VirtualTunnel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         vlanId = par("vlanId");
@@ -62,7 +62,7 @@ void VlanTunnel::initialize(int stage)
     }
 }
 
-void VlanTunnel::handleMessage(cMessage *message)
+void VirtualTunnel::handleMessage(cMessage *message)
 {
     if (socket.belongsToSocket(message))
         socket.processMessage(message);
@@ -73,14 +73,14 @@ void VlanTunnel::handleMessage(cMessage *message)
     }
 }
 
-void VlanTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
+void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     send(packet, "upperLayerOut");
 }
 
-void VlanTunnel::socketErrorArrived(EthernetSocket *socket, Indication *indication)
+void VirtualTunnel::socketErrorArrived(EthernetSocket *socket, Indication *indication)
 {
     throw cRuntimeError("Invalid operation");
 }

@@ -15,15 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.vlan;
+package inet.linklayer.virtual;
 
-import inet.linklayer.contract.INetworkInterface;
-
-simple VlanTunnel
+simple VirtualTunnel
 {
     parameters:
         string interfaceTableModule;
-        string address @enum("auto", "copy") = default("copy");
+        string address @enum("auto","copy") = default("copy");
         int vlanId;
         string realInterfaceName;
         @display("i=block/cogwheel");

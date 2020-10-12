@@ -15,15 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_VLANTUNNEL_H
-#define __INET_VLANTUNNEL_H
+#ifndef __INET_VIRTUALTUNNEL_H
+#define __INET_VIRTUALTUNNEL_H
 
 #include "inet/linklayer/ethernet/EthernetSocket.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
-class VlanTunnel : public cSimpleModule, public EthernetSocket::ICallback
+class VirtualTunnel : public cSimpleModule, public EthernetSocket::ICallback
 {
   protected:
     int vlanId = -1;
