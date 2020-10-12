@@ -38,7 +38,7 @@ module LinkLayerNodeBase extends NodeBase
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         int numPppInterfaces = default(0);  // minimum number of PPP interfaces
         int numTunInterfaces = default(0);
-        int numVlanInterfaces = default(0);
+        int numVirtInterfaces = default(0);
         pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
@@ -91,7 +91,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=975,766,row,150;q=txQueue");
         }
-        vlan[numVlanInterfaces]: <default("VlanInterface")> like IVlanInterface {
+        virt[numVirtInterfaces]: <default("VirtualInterface")> like IVirtualInterface {
             parameters:
                 @display("p=975,766,row,150;q=txQueue");
         }
@@ -137,9 +137,9 @@ module LinkLayerNodeBase extends NodeBase
             tun[i].upperLayerIn <-- li.out++;
         }
 
-        for i=0..numVlanInterfaces-1 {
-            vlan[i].upperLayerOut --> li.in++;
-            vlan[i].upperLayerIn <-- li.out++;
+        for i=0..numVirtInterfaces-1 {
+            virt[i].upperLayerOut --> li.in++;
+            virt[i].upperLayerIn <-- li.out++;
         }
 }
 
