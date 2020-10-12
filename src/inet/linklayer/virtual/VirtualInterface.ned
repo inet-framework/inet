@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.vlan;
+package inet.linklayer.virtual;
 
-import inet.linklayer.contract.IVlanInterface;
+import inet.linklayer.contract.IVirtualInterface;
+import inet.linklayer.vlan.VlanTunnel;
 import inet.networklayer.common.NetworkInterface;
 
 //
 // This module implements a virtual network interface.
 //
-module VlanInterface extends NetworkInterface like IVlanInterface
+module VirtualInterface extends NetworkInterface like IVirtualInterface
 {
     parameters:
         string interfaceTableModule;
@@ -35,7 +36,7 @@ module VlanInterface extends NetworkInterface like IVlanInterface
     submodules:
         tunnel: VlanTunnel {
             parameters:
-	            @display("p=300,100");
+                @display("p=300,100");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> tunnel.upperLayerIn;
