@@ -41,7 +41,6 @@ import inet.networklayer.common.InterfaceTable;
 // it must be set to false, otherwise it can be set to true.
 // By default used half duples CSMA/CD mac
 //
-//
 module EtherSwitch
 {
     parameters:
@@ -57,8 +56,8 @@ module EtherSwitch
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         eth[*].encap.typename = default("OmittedEtherEncap");
         *.fcsMode = fcsMode;
-        *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.macTableModule = default(absPath(".macTable"));
+        **.interfaceTableModule = default(absPath(".interfaceTable"));
+        **.macTableModule = default(absPath(".macTable"));
 
         relayUnit.hasStp = hasStp;
         encap.registerProtocol = true;
