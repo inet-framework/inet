@@ -26,9 +26,11 @@ import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
+import inet.linklayer.contract.IPolicyLayer;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.ethernet.IEtherEncap;
 import inet.linklayer.ethernet.layered.IEthernetLayer;
+import inet.linklayer.ieee8021q.Ieee8021qLayer;
 import inet.networklayer.common.InterfaceTable;
 
 //
@@ -102,8 +104,18 @@ module EtherSwitch
         encap: <default("EtherEncap")> like IEtherEncap if typename != "" {
             @display("p=800,250");
         }
+        policy: <default("OmittedPolicyLayer")> like IPolicyLayer  {
+            @display("p=800,350");
+        }
+        middle: MessageDispatcher {
+            parameters:
+                @display("p=800,400;b=1200,5");
+        }
         ethernet: <default("")> like IEthernetLayer if typename != "" {
-            @display("p=800,400");
+            @display("p=500,450");
+        }
+        ieee8021q: Ieee8021qLayer {
+            @display("p=700,450");
         }
         cutthrough: MessageDispatcher if enableCutthrough {
             @display("p=800,600;b=1200,5,,,,1");
@@ -112,13 +124,29 @@ module EtherSwitch
         ethernet.lowerLayerOut --> down.in++ if exists(ethernet);
         down.out++ --> ethernet.lowerLayerIn if exists(ethernet);
 
+        ieee8021q.lowerLayerOut --> down.in++ if exists(ieee8021q);
+        down.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
+
         for i=0..sizeof(ethg)-1 {
             eth[i].cutthroughOut --> cutthrough.in++ if enableCutthrough;
             eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
         }
 
-        relayUnit.ifOut --> ethernet.upperLayerIn if exists(ethernet);
-        ethernet.upperLayerOut --> relayUnit.ifIn if exists(ethernet);
+        relayUnit.ifOut --> policy.upperLayerIn;
+        policy.upperLayerOut --> relayUnit.ifIn;
+
+        policy.lowerLayerOut --> middle.in++;
+        middle.out++ --> policy.lowerLayerIn;
+
+        middle.out++ --> down.in++;
+        down.out++ --> middle.in++;
+
+        ieee8021q.upperLayerOut --> middle.in++ if exists(ieee8021q);
+        middle.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+
+        middle.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> middle.in++ if exists(ethernet);
+
         relayUnit.ifOut --> down.in++ if !exists(ethernet);
         down.out++ --> relayUnit.ifIn if !exists(ethernet);
 
