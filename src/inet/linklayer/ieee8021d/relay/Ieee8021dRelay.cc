@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
@@ -118,6 +119,8 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
     else {
         auto outgoingPacket = new Packet(incomingPacket->getName(), incomingPacket->peekData());
         outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
+        if (auto vlanInd = incomingPacket->findTag<VlanInd>())
+            outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
         auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();
         macAddressReq->setSrcAddress(sourceAddress);
         macAddressReq->setDestAddress(destinationAddress);

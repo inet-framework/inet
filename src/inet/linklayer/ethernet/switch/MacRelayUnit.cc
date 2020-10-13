@@ -18,6 +18,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/switch/MacRelayUnit.h"
 
 namespace inet {
@@ -38,6 +39,8 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
     updatePeerAddress(incomingInterface, sourceAddress);
     auto outgoingPacket = new Packet(incomingPacket->getName(), incomingPacket->peekData());
     outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
+    if (auto vlanInd = incomingPacket->findTag<VlanInd>())
+        outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
     auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(sourceAddress);
     macAddressReq->setDestAddress(destinationAddress);
