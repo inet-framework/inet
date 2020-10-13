@@ -64,6 +64,9 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         ethernet.upperLayerOut --> nl.in++ if exists(ethernet);
         nl.out++ --> ethernet.upperLayerIn if exists(ethernet);
 
+        ieee8021q.upperLayerOut --> nl.in++ if exists(ieee8021q);
+        nl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+
         nl.out++ --> li.in++;
         nl.in++ <-- li.out++;
 }

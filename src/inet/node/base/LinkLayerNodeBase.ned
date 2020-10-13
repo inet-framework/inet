@@ -23,10 +23,12 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
-import inet.linklayer.contract.IVlanInterface;
+import inet.linklayer.contract.IVirtualInterface;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.ethernet.layered.IEthernetLayer;
+import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.networklayer.common.InterfaceTable;
+
 
 module LinkLayerNodeBase extends NodeBase
 {
@@ -70,6 +72,10 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=375,526");
         }
+        ieee8021q: <default("")> like IIeee8021qLayer if typename != "" {
+            parameters:
+                @display("p=525,526");
+        }
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             parameters:
                 @display("p=750,676,row,150");
@@ -97,6 +103,9 @@ module LinkLayerNodeBase extends NodeBase
         }
 
     connections allowunconnected:
+        ieee8021q.lowerLayerOut --> li.in++ if exists(ieee8021q);
+        li.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
+
         ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
         li.out++ --> ethernet.lowerLayerIn if exists(ethernet);
 
