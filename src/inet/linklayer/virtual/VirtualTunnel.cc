@@ -72,7 +72,8 @@ void VirtualTunnel::handleMessage(cMessage *message)
         socket.processMessage(message);
     else {
         auto packet = check_and_cast<Packet *>(message);
-        packet->addTag<VlanReq>()->setVlanId(vlanId);
+        if (vlanId != -1)
+            packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
         if (protocol != nullptr)
             packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
         socket.send(packet);
