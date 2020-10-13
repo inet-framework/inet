@@ -50,10 +50,27 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
     }
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
-    if (dynamic_cast<MessageDispatcher *>(outGate->getPathEndGate()->getOwner()) == nullptr)
-        check_and_cast<ITaggedObject *>(message)->getTags().removeTagIfPresent<DispatchProtocolReq>();
+    updateTags(message, outGate);
     outGate->deliver(message, options, time);
     updateDisplayString();
+}
+
+void MessageDispatcher::updateTags(cMessage *msg, cGate *outGate)
+{
+    if (dynamic_cast<MessageDispatcher *>(outGate->getPathEndGate()->getOwner()) == nullptr) {
+        if (msg->isPacket()) {
+            auto packet = check_and_cast<Packet *>(msg);
+            const auto& dispatchProtocolReq = packet->removeTagIfPresent<DispatchProtocolReq>();
+            if (dispatchProtocolReq != nullptr)
+                packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(dispatchProtocolReq->getProtocol());
+        }
+        else {
+            auto message = check_and_cast<Message *>(msg);
+            const auto& dispatchProtocolReq = message->removeTagIfPresent<DispatchProtocolReq>();
+            if (dispatchProtocolReq != nullptr)
+                message->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(dispatchProtocolReq->getProtocol());
+        }
+    }
 }
 
 bool MessageDispatcher::canPushSomePacket(cGate *inGate) const
@@ -82,6 +99,7 @@ void MessageDispatcher::pushPacket(Packet *packet, cGate *inGate)
     auto outGate = handlePacket(packet, inGate);
     auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
     handlePacketProcessed(packet);
+    updateTags(packet, outGate);
     pushOrSendPacket(packet, outGate, consumer);
     updateDisplayString();
 }
@@ -92,6 +110,7 @@ void MessageDispatcher::pushPacketStart(Packet *packet, cGate *inGate, bps datar
     take(packet);
     auto outGate = handlePacket(packet, inGate);
     auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
+    updateTags(packet, outGate);
     pushOrSendPacketStart(packet, outGate, consumer, datarate);
     updateDisplayString();
 }
@@ -103,6 +122,7 @@ void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate)
     auto outGate = handlePacket(packet, inGate);
     auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
     handlePacketProcessed(packet);
+    updateTags(packet, outGate);
     pushOrSendPacketEnd(packet, outGate, consumer);
     updateDisplayString();
 }
