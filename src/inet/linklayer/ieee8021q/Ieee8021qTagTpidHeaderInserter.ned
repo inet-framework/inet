@@ -24,6 +24,6 @@ simple Ieee8021qTagTpidHeaderInserter extends PacketFlowBase like IIeee8021qTagT
     parameters:
         string vlanTagType @enum("c","s") = default("c");
         @class(Ieee8021qTagTpidHeaderInserter);
-        @display("i=block/cogwheel");
+        @display("i=block/inserter");
 }
 

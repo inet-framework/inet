@@ -22,7 +22,7 @@ module OmittedIeee8021qTagEpdHeaderInserter like IIeee8021qTagEpdHeaderInserter
     parameters:
         string vlanTagType = default("");
         @class(::inet::OmittedModule);
-        @display("i=block/cogwheel,black,50");
+        @display("i=block/inserter,black,50");
     gates:
         input in;
         output out;

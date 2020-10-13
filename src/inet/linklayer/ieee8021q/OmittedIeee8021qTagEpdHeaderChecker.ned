@@ -22,7 +22,7 @@ module OmittedIeee8021qTagEpdHeaderChecker like IIeee8021qTagEpdHeaderChecker
     parameters:
         string vlanTagType = default("");
         @class(::inet::OmittedModule);
-        @display("i=block/cogwheel,black,50");
+        @display("i=block/checker,black,50");
     gates:
         input in;
         output out;

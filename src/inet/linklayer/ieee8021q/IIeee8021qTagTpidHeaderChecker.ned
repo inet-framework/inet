@@ -21,7 +21,7 @@ moduleinterface IIeee8021qTagTpidHeaderChecker
 {
     parameters:
         string vlanTagType @enum("c","s");
-        @display("i=block/cogwheel");
+        @display("i=block/checker");
     gates:
         input in;
         output out;

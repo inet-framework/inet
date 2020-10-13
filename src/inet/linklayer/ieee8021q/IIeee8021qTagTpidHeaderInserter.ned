@@ -21,7 +21,7 @@ moduleinterface IIeee8021qTagTpidHeaderInserter
 {
     parameters:
         string vlanTagType @enum("c","s");
-        @display("i=block/cogwheel");
+        @display("i=block/inserter");
     gates:
         input in;
         output out;
