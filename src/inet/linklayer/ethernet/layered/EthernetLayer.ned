@@ -17,15 +17,8 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.linklayer.ieee8021ae.IIeee8021aeTagEpdHeaderChecker;
-import inet.linklayer.ieee8021ae.IIeee8021aeTagEpdHeaderInserter;
-import inet.linklayer.ieee8021q.IIeee8021qTagEpdHeaderChecker;
-import inet.linklayer.ieee8021q.IIeee8021qTagEpdHeaderInserter;
-import inet.linklayer.ieee8021q.IIeee8021qTagTpidHeaderChecker;
-import inet.linklayer.ieee8021q.IIeee8021qTagTpidHeaderInserter;
-import inet.queueing.common.PacketMultiplexer;
-import inet.queueing.contract.IPacketClassifier;
-import inet.queueing.contract.IPacketFilter;
+import inet.protocol.contract.IProtocolHeaderChecker;
+import inet.protocol.contract.IProtocolHeaderInserter;
 import inet.queueing.contract.IPacketFlow;
 
 module EthernetLayer like IEthernetLayer
@@ -41,40 +34,20 @@ module EthernetLayer like IEthernetLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        cTagHeaderInserter: <default("OmittedIeee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
-            vlanTagType = "c";
+        macHeaderInserter: <default("EthernetMacHeaderInserter")> like IProtocolHeaderInserter {
             @display("p=200,100");
         }
-        sTagHeaderInserter: <default("OmittedIeee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
-            vlanTagType = "s";
+        paddingInserter: <default("PaddingInserter")> like IPacketFlow {
             @display("p=200,200");
         }
-        macHeaderInserter: <default("EthernetMacHeaderInserter")> like IPacketFlow {
-            @display("p=200,300");
-        }
-        paddingInserter: <default("PaddingInserter")> like IPacketFlow {
-            @display("p=200,400");
-        }
-        cTagHeaderChecker: <default("OmittedIeee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
-            vlanTagType = "c";
+        macHeaderChecker: <default("EthernetMacHeaderChecker")> like IProtocolHeaderChecker {
             @display("p=500,100");
         }
-        sTagHeaderChecker: <default("OmittedIeee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
-            vlanTagType = "s";
-            @display("p=500,200");
-        }
-        macHeaderChecker: <default("EthernetMacHeaderChecker")> like IPacketFilter {
-            @display("p=500,300");
-        }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> cTagHeaderInserter.in;
-        cTagHeaderInserter.out --> sTagHeaderInserter.in;
-        sTagHeaderInserter.out --> macHeaderInserter.in;
+        upperLayerIn --> { @display("m=n"); } --> macHeaderInserter.in;
         macHeaderInserter.out --> paddingInserter.in;
         paddingInserter.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> macHeaderChecker.in;
-        macHeaderChecker.out --> sTagHeaderChecker.in;
-        sTagHeaderChecker.out --> cTagHeaderChecker.in;
-        cTagHeaderChecker.out --> { @display("m=n"); } --> upperLayerOut;
+        macHeaderChecker.out --> { @display("m=n"); } --> upperLayerOut;
 }
