@@ -20,6 +20,7 @@
 
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
@@ -32,6 +33,8 @@ using namespace inet::physicallayer;
 class INET_API PacketReceiverBase : public OperationalMixin<PacketProcessorBase>, public virtual IActivePacketSource
 {
   protected:
+    const NetworkInterface *networkInterface = nullptr;
+
     bps rxDatarate = bps(NaN);
 
     cGate *inputGate = nullptr;

@@ -17,6 +17,7 @@
 
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/protocol/transceiver/base/PacketReceiverBase.h"
 
 namespace inet {
@@ -35,6 +36,7 @@ void PacketReceiverBase::initialize(int stage)
         rxDatarate = bps(par("datarate"));
         inputGate = gate("in");
         outputGate = gate("out");
+        networkInterface = findContainingNicModule(this);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING)
@@ -77,6 +79,8 @@ Packet *PacketReceiverBase::decodePacket(Signal *signal) const
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     // TODO: check signal physical properties such as datarate, modulation, etc.
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_INBOUND);
+    if (networkInterface != nullptr)
+        packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     return packet;
 }
 
