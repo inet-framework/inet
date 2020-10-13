@@ -141,6 +141,10 @@ void Rx::recomputeMediumFree()
     if (mediumFree != oldMediumFree) {
         for (auto contention : contentions)
             contention->mediumStateChanged(mediumFree);
+        if (mediumFree)
+            lastFree = simTime();
+        else
+            timeMediumFree += (simTime() - lastFree);
     }
 }
 
