@@ -17,13 +17,12 @@
 
 package inet.linklayer.ieee8021q;
 
-moduleinterface IIeee8021qTagTpidHeaderChecker
+import inet.protocol.contract.IProtocolHeaderChecker;
+
+moduleinterface IIeee8021qTagTpidHeaderChecker extends IProtocolHeaderChecker
 {
     parameters:
         string vlanTagType @enum("c","s");
         @display("i=block/checker");
-    gates:
-        input in;
-        output out;
 }
 
