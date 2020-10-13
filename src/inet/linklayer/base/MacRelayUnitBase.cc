@@ -77,6 +77,11 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
     EV_INFO << "Sending packet to peer" << EV_FIELD(destinationAddress) << EV_FIELD(outgoingInterface) << EV_FIELD(packet) << EV_ENDL;
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
+    auto protocol = outgoingInterface->getProtocol();
+    if (protocol != nullptr)
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    else
+        packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
     send(packet, "ifOut");
 }
