@@ -23,7 +23,7 @@ namespace inet {
 void registerService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
-    if (otherGate != nullptr) {
+    if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterService(protocol, otherGate, servicePrimitive);
     }
@@ -49,7 +49,7 @@ void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicati
 void registerProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
-    if (otherGate != nullptr) {
+    if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterProtocol(protocol, otherGate, servicePrimitive);
     }
