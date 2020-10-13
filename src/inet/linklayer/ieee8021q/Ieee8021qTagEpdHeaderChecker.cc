@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
@@ -43,6 +44,8 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
             vlanIdFilter.push_back(atoi(filterTokenizer.nextToken()));
         WATCH_VECTOR(vlanIdFilter);
     }
+    else if (stage == INITSTAGE_LINK_LAYER)
+        registerProtocol(*qtagProtocol, nullptr, inputGate);
 }
 
 void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
