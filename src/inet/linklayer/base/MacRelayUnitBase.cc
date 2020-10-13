@@ -17,6 +17,7 @@
 
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/base/MacRelayUnitBase.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -35,8 +36,13 @@ void MacRelayUnitBase::initialize(int stage)
         WATCH(numProcessedFrames);
         WATCH(numDroppedFrames);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("ifIn"));
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        for (int i = 0; i < ProtocolGroup::ethertype.getNumElements(); i++) {
+            auto protocol = ProtocolGroup::ethertype.getElement(i);
+            if (std::find(registeredServices.begin(), registeredServices.end(), protocol) == registeredServices.end())
+                registerProtocol(*protocol, gate("ifOut"), gate("ifIn"));
+        }
+    }
 }
 
 void MacRelayUnitBase::updateDisplayString() const
@@ -90,6 +96,13 @@ void MacRelayUnitBase::updatePeerAddress(NetworkInterface *incomingInterface, Ma
 {
     EV_INFO << "Learning peer address" << EV_FIELD(sourceAddress) << EV_FIELD(incomingInterface) << EV_ENDL;
     macAddressTable->updateTableWithAddress(incomingInterface->getInterfaceId(), sourceAddress);
+}
+
+void MacRelayUnitBase::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+    if (servicePrimitive == SP_REQUEST)
+        registeredServices.push_back(&protocol);
 }
 
 void MacRelayUnitBase::finish()
