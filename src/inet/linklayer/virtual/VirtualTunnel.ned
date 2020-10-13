@@ -21,9 +21,9 @@ simple VirtualTunnel
 {
     parameters:
         string interfaceTableModule;
+        string realInterface;
         string address @enum("auto","copy") = default("copy");
         int vlanId;
-        string realInterfaceName;
         @display("i=block/cogwheel");
     gates:
         input upperLayerIn;

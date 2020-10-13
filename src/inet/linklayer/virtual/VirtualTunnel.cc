@@ -36,7 +36,7 @@ void VirtualTunnel::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        realNetworkInterface = CHK(interfaceTable->findInterfaceByName(par("realInterfaceName")));
+        realNetworkInterface = CHK(interfaceTable->findInterfaceByName(par("realInterface")));
         const char *addressString = par("address");
         MacAddress address;
         if (!strcmp(addressString, "auto"))
