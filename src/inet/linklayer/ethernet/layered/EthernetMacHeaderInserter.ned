@@ -17,10 +17,10 @@
 
 package inet.linklayer.ethernet.layered;
 
+import inet.protocol.contract.IProtocolHeaderInserter;
 import inet.queueing.base.PacketFlowBase;
-import inet.queueing.contract.IPacketFlow;
 
-simple EthernetMacHeaderInserter extends PacketFlowBase like IPacketFlow
+simple EthernetMacHeaderInserter extends PacketFlowBase like IProtocolHeaderInserter
 {
     parameters:
         string interfaceTableModule;

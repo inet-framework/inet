@@ -17,10 +17,10 @@
 
 package inet.linklayer.ethernet.layered;
 
+import inet.protocol.contract.IProtocolHeaderChecker;
 import inet.queueing.base.PacketFilterBase;
-import inet.queueing.contract.IPacketFilter;
 
-simple EthernetMacHeaderChecker extends PacketFilterBase like IPacketFilter
+simple EthernetMacHeaderChecker extends PacketFilterBase like IProtocolHeaderChecker
 {
     parameters:
         string interfaceTableModule;
