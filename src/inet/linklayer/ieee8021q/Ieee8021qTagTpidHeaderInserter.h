@@ -28,6 +28,9 @@ class INET_API Ieee8021qTagTpidHeaderInserter : public PacketFlowBase
 {
   protected:
     int tpid = -1;
+    const Protocol *nextProtocol = nullptr;
+    int defaultVlanId = -1;
+    int defaultUserPriority = -1;
 
   protected:
     virtual void initialize(int stage) override;

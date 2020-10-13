@@ -23,6 +23,9 @@ simple Ieee8021qTagEpdHeaderInserter extends PacketFlowBase like IIeee8021qTagEp
 {
     parameters:
         string vlanTagType @enum("c","s") = default("c");
+        string nextProtocol = default("ethernetmac");
+        int defaultVlanId = default(-1);
+        int defaultUserPriority = default(-1);
         @class(Ieee8021qTagEpdHeaderInserter);
         @display("i=block/inserter");
 }

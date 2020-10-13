@@ -38,24 +38,30 @@ void Ieee8021qTagEpdHeaderInserter::initialize(int stage)
             qtagProtocol = &Protocol::ieee8021qCTag;
         else
             throw cRuntimeError("Unknown tag type");
-        registerService(Protocol::ethernetMac, inputGate, nullptr);
+        const char *nextProtocolAsString = par("nextProtocol");
+        if (*nextProtocolAsString != '\0')
+            nextProtocol = Protocol::getProtocol(nextProtocolAsString);
+        defaultVlanId = par("defaultVlanId");
+        defaultUserPriority = par("defaultUserPriority");
     }
+    else if (stage == INITSTAGE_LINK_LAYER)
+        registerService(*qtagProtocol, inputGate, nullptr);
 }
 
 void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
 {
     auto header = makeShared<Ieee8021qTagEpdHeader>();
     auto userPriorityReq = packet->removeTagIfPresent<UserPriorityReq>();
-    if (userPriorityReq != nullptr) {
-        auto userPriority = userPriorityReq->getUserPriority();
-        EV_INFO << "Setting PCP to " << userPriority << ".\n";
+    auto userPriority = userPriorityReq != nullptr ? userPriorityReq->getUserPriority() : defaultUserPriority;
+    if (userPriority != -1) {
+        EV_INFO << "Setting PCP" << EV_FIELD(pcp, userPriority) << EV_ENDL;
         header->setPcp(userPriority);
         packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(userPriority);
     }
     auto vlanReq = packet->removeTagIfPresent<VlanReq>();
-    if (vlanReq != nullptr) {
-        auto vlanId = vlanReq->getVlanId();
-        EV_INFO << "Setting VLAN ID to " << vlanId << ".\n";
+    auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : defaultVlanId;
+    if (vlanId != -1) {
+        EV_INFO << "Setting VID" << EV_FIELD(vid, vlanId) << EV_ENDL;
         header->setVid(vlanId);
         packet->addTagIfAbsent<VlanInd>()->setVlanId(vlanId);
     }
@@ -68,6 +74,8 @@ void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
     packet->insertAtFront(header);
     packetProtocolTag->setProtocol(qtagProtocol);
     packetProtocolTag->setFrontOffset(b(0));
+    if (nextProtocol != nullptr)
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(nextProtocol);
 }
 
 } // namespace inet

@@ -36,6 +36,11 @@ void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
             tpid = 0x8100;
         else
             throw cRuntimeError("Unknown tag type");
+        const char *nextProtocolAsString = par("nextProtocol");
+        if (*nextProtocolAsString != '\0')
+            nextProtocol = Protocol::getProtocol(nextProtocolAsString);
+        defaultVlanId = par("defaultVlanId");
+        defaultUserPriority = par("defaultUserPriority");
     }
 }
 
@@ -44,22 +49,24 @@ void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
     auto header = makeShared<Ieee8021qTagTpidHeader>();
     header->setTpid(tpid);
     auto userPriorityReq = packet->removeTagIfPresent<UserPriorityReq>();
-    if (userPriorityReq != nullptr) {
-        auto userPriority = userPriorityReq->getUserPriority();
-        EV_INFO << "Setting PCP to " << userPriority << ".\n";
+    auto userPriority = userPriorityReq != nullptr ? userPriorityReq->getUserPriority() : defaultUserPriority;
+    if (userPriority != -1) {
+        EV_INFO << "Setting PCP" << EV_FIELD(pcp, userPriority) << EV_ENDL;
         header->setPcp(userPriority);
         packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(userPriority);
     }
     auto vlanReq = packet->removeTagIfPresent<VlanReq>();
-    if (vlanReq != nullptr) {
-        auto vlanId = vlanReq->getVlanId();
-        EV_INFO << "Setting VLAN ID to " << vlanId << ".\n";
+    auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : defaultVlanId;
+    if (vlanId != -1) {
+        EV_INFO << "Setting VID" << EV_FIELD(vid, vlanId) << EV_ENDL;
         header->setVid(vlanId);
         packet->addTagIfAbsent<VlanInd>()->setVlanId(vlanId);
     }
     packet->insertAtFront(header);
     auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
+    if (nextProtocol != nullptr)
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(nextProtocol);
 }
 
 } // namespace inet
