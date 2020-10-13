@@ -22,6 +22,7 @@ simple VirtualTunnel
     parameters:
         string interfaceTableModule;
         string realInterface;
+        string protocol = default(vlanId != -1 ? "ieee8021qctag" : "");
         string address @enum("auto","copy") = default("copy");
         int vlanId;
         @display("i=block/cogwheel");

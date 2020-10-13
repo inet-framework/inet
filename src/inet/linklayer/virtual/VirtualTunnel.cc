@@ -19,6 +19,7 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/virtual/VirtualTunnel.h"
@@ -33,6 +34,9 @@ void VirtualTunnel::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         vlanId = par("vlanId");
         networkInterface = getContainingNicModule(this);
+        const char *protocolAsString = par("protocol");
+        if (*protocolAsString != '\0')
+            protocol = Protocol::findProtocol(protocolAsString);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -69,6 +73,8 @@ void VirtualTunnel::handleMessage(cMessage *message)
     else {
         auto packet = check_and_cast<Packet *>(message);
         packet->addTag<VlanReq>()->setVlanId(vlanId);
+        if (protocol != nullptr)
+            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
         socket.send(packet);
     }
 }

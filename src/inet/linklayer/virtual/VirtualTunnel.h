@@ -27,6 +27,7 @@ class VirtualTunnel : public cSimpleModule, public EthernetSocket::ICallback
 {
   protected:
     int vlanId = -1;
+    const Protocol *protocol = nullptr;
     NetworkInterface *realNetworkInterface = nullptr;
     NetworkInterface *networkInterface = nullptr;
     EthernetSocket socket;
