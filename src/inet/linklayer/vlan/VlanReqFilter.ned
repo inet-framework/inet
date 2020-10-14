@@ -29,6 +29,6 @@ simple VlanReqFilter extends PacketFilterBase like IPacketFilter
         string interfaceTableModule;
         object acceptedVlanIds = default({}); // maps network interface name to a list of accepted VLAN ids, '*' as interface name matches all interfaces, -1 VLAN id matches if no tag is present
         @class(VlanReqFilter);
-        @display("i=block/cogwheel");
+        @display("i=block/filter");
 }
 
