@@ -26,6 +26,7 @@ class INET_API ProtocolGroup
 {
   protected:
     const char *name;
+    std::vector<const Protocol *> protocols;
     std::map<int, const Protocol *> protocolNumberToProtocol;
     std::map<const Protocol *, int> protocolToProtocolNumber;
 
@@ -33,6 +34,8 @@ class INET_API ProtocolGroup
     ProtocolGroup(const char *name, std::map<int, const Protocol *> protocolNumberToProtocol);
 
     const char *getName() const { return name; }
+    int getNumElements() const { return protocols.size(); }
+    const Protocol *getElement(int index) const { return protocols.at(index); }
 
     const Protocol *findProtocol(int protocolNumber) const;
     const Protocol *getProtocol(int protocolNumber) const;
