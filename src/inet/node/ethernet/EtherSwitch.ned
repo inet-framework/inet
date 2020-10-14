@@ -92,7 +92,7 @@ module EtherSwitch
             parameters:
                 @display("p=800,200;b=1200,5");
         }
-        down: MessageDispatcher {
+        li: MessageDispatcher {
             parameters:
                 @display("p=800,500;b=1200,5");
         }
@@ -103,10 +103,10 @@ module EtherSwitch
         encap: <default("EtherEncap")> like IEtherEncap if typename != "" {
             @display("p=800,250");
         }
-        policy: <default("OmittedPolicyLayer")> like IPolicyLayer  {
+        policy: <default("OmittedPolicyLayer")> like IPolicyLayer {
             @display("p=800,350");
         }
-        middle: MessageDispatcher {
+        pl: MessageDispatcher {
             parameters:
                 @display("p=800,400;b=1200,5");
         }
@@ -120,11 +120,11 @@ module EtherSwitch
             @display("p=800,600;b=1200,5,,,,1");
         }
     connections:
-        ethernet.lowerLayerOut --> down.in++ if exists(ethernet);
-        down.out++ --> ethernet.lowerLayerIn if exists(ethernet);
+        ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
+        li.out++ --> ethernet.lowerLayerIn if exists(ethernet);
 
-        ieee8021q.lowerLayerOut --> down.in++ if exists(ieee8021q);
-        down.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
+        ieee8021q.lowerLayerOut --> li.in++ if exists(ieee8021q);
+        li.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
 
         for i=0..sizeof(ethg)-1 {
             eth[i].cutthroughOut --> cutthrough.in++ if enableCutthrough;
@@ -134,24 +134,24 @@ module EtherSwitch
         relayUnit.ifOut --> policy.upperLayerIn;
         policy.upperLayerOut --> relayUnit.ifIn;
 
-        policy.lowerLayerOut --> middle.in++;
-        middle.out++ --> policy.lowerLayerIn;
+        policy.lowerLayerOut --> pl.in++;
+        pl.out++ --> policy.lowerLayerIn;
 
-        middle.out++ --> down.in++;
-        down.out++ --> middle.in++;
+        pl.out++ --> li.in++;
+        li.out++ --> pl.in++;
 
-        ieee8021q.upperLayerOut --> middle.in++ if exists(ieee8021q);
-        middle.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+        ieee8021q.upperLayerOut --> pl.in++ if exists(ieee8021q);
+        pl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
 
-        middle.out++ --> ethernet.upperLayerIn if exists(ethernet);
-        ethernet.upperLayerOut --> middle.in++ if exists(ethernet);
+        pl.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> pl.in++ if exists(ethernet);
 
-        relayUnit.ifOut --> down.in++ if !exists(ethernet);
-        down.out++ --> relayUnit.ifIn if !exists(ethernet);
+        relayUnit.ifOut --> li.in++ if !exists(ethernet);
+        li.out++ --> relayUnit.ifIn if !exists(ethernet);
 
         for i=0..sizeof(ethg)-1 {
-            down.out++ --> eth[i].upperLayerIn;
-            down.in++ <-- eth[i].upperLayerOut;
+            li.out++ --> eth[i].upperLayerIn;
+            li.in++ <-- eth[i].upperLayerOut;
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
         }
 
