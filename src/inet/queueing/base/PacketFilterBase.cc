@@ -83,14 +83,15 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     emit(packetPushedSignal, packet);
     if (matchesPacket(packet)) {
         processPacket(packet);
+        handlePacketProcessed(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
+        handlePacketProcessed(packet);
         dropPacket(packet);
     }
-    handlePacketProcessed(packet);
     updateDisplayString();
 }
 
@@ -198,9 +199,9 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
     while (true) {
         auto packet = provider->pullPacket(providerGate);
         take(packet);
-        handlePacketProcessed(packet);
         if (matchesPacket(packet)) {
             processPacket(packet);
+            handlePacketProcessed(packet);
             EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
             animateSendPacket(packet, outputGate);
             updateDisplayString();
@@ -209,6 +210,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
         }
         else {
             EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
+            handlePacketProcessed(packet);
             dropPacket(packet);
         }
     }

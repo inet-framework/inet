@@ -77,8 +77,8 @@ void PacketFlowBase::pushPacket(Packet *packet, cGate *gate)
     take(packet);
     checkPacketStreaming(nullptr);
     processPacket(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
     handlePacketProcessed(packet);
+    pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
 }
 
