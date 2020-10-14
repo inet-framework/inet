@@ -115,12 +115,7 @@ void DumbTcp::ackSent()
 
 void DumbTcp::dataSent(uint32 fromseq)
 {
-#if OMNETPP_VERSION < 0x0600
-    conn->cancelEvent(rexmitTimer);
-    conn->scheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
-#else
     conn->rescheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
-#endif
 }
 
 void DumbTcp::segmentRetransmitted(uint32 fromseq, uint32 toseq)

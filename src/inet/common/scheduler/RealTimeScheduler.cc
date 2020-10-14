@@ -69,11 +69,6 @@ void RealTimeScheduler::removeCallback(int fd, ICallback *callback)
 void RealTimeScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_nsecs();
-    // TODO: delete eventually
-#if OMNETPP_VERSION <= 0x0505 && OMNETPP_BUILDNUM <= 1022
-    // this event prevents Qtenv fast forwarding to the first event
-    sim->getFES()->insert(new BeginSimulationEvent("BeginSimulation"));
-#endif
 }
 
 void RealTimeScheduler::endRun()

@@ -39,11 +39,7 @@ void MessageDispatcher::initialize(int stage)
     }
 }
 
-#if OMNETPP_VERSION < 0x0600
-void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t time)
-#else
 void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOptions& options, simtime_t time)
-#endif
 {
     Enter_Method_Silent();
     cGate *outGate = nullptr;
@@ -54,11 +50,7 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
     }
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
-#if OMNETPP_VERSION < 0x0600
-    outGate->deliver(message, time);
-#else
     outGate->deliver(message, options, time);
-#endif
     updateDisplayString();
 }
 

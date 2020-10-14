@@ -109,11 +109,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
     /**
      * Adds statistics and live display to the channel.
      */
-#if OMNETPP_VERSION < 0x0600
-    virtual void processMessage(cMessage *msg, simtime_t t, result_t& result) override;
-#else
     virtual cChannel::Result processMessage(cMessage *msg, const SendOptions& options, simtime_t t) override;
-#endif
 };
 
 } // namespace inet
