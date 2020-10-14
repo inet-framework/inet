@@ -47,6 +47,7 @@ void DestreamingReceiver::handleMessageWhenUp(cMessage *message)
     }
     else
         StreamingReceiverBase::handleMessage(message);
+    updateDisplayString();
 }
 
 void DestreamingReceiver::sendToUpperLayer(Packet *packet)
@@ -69,6 +70,7 @@ void DestreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps da
     rxSignal = check_and_cast<Signal *>(cpacket);
     emit(receptionEndedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
+    handlePacketProcessed(packet);
     sendToUpperLayer(packet);
     delete rxSignal;
     rxSignal = nullptr;

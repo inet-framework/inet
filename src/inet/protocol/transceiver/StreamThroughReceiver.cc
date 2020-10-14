@@ -47,6 +47,7 @@ void StreamThroughReceiver::handleMessageWhenUp(cMessage *message)
     }
     else
         StreamingReceiverBase::handleMessage(message);
+    updateDisplayString();
 }
 
 void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bps datarate)
@@ -83,6 +84,7 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
         delete rxSignal;
         rxSignal = nullptr;
         auto packet = decodePacket(signal);
+        handlePacketProcessed(packet);
         packet->setOrigPacketId(origPacketId);
         pushOrSendPacketEnd(packet, outputGate, consumer);
         delete signal;

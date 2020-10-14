@@ -36,6 +36,7 @@ void StreamThroughTransmitter::handleMessageWhenUp(cMessage *message)
         throw cRuntimeError("Buffer underrun during transmission");
     else
         StreamingTransmitterBase::handleMessageWhenUp(message);
+    updateDisplayString();
 }
 
 void StreamThroughTransmitter::handleStopOperation(LifecycleOperation *operation)
@@ -116,6 +117,7 @@ void StreamThroughTransmitter::endTx()
     // 2. send signal end to receiver and notify subscribers
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
     EV_INFO << "Ending transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
+    handlePacketProcessed(packet);
     emit(transmissionEndedSignal, txSignal);
     sendPacketEnd(txSignal);
     // 3. clear internal state
@@ -151,6 +153,7 @@ void StreamThroughTransmitter::abortTx()
     txSignal = nullptr;
     // 4. send signal end to receiver and notify subscribers
     EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
+    handlePacketProcessed(packet);
     emit(transmissionEndedSignal, signal);
     sendPacketEnd(signal);
     // 5. clear internal state
@@ -194,6 +197,7 @@ void StreamThroughTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps 
     Enter_Method("pushPacketStart");
     take(packet);
     startTx(packet, datarate, b(0));
+    updateDisplayString();
 }
 
 void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
@@ -202,6 +206,7 @@ void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
     ASSERT(txSignal != nullptr);
     take(packet);
     progressTx(packet, bps(NaN), packet->getTotalLength());
+    updateDisplayString();
 }
 
 void StreamThroughTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
@@ -212,6 +217,7 @@ void StreamThroughTransmitter::pushPacketProgress(Packet *packet, cGate *gate, b
         progressTx(packet, datarate, position);
     else
         startTx(packet, datarate, position);
+    updateDisplayString();
 }
 
 } // namespace inet

@@ -27,6 +27,7 @@ void PacketTransmitter::handleMessageWhenUp(cMessage *message)
         endTx();
     else
         PacketTransmitterBase::handleMessageWhenUp(message);
+    updateDisplayString();
 }
 
 void PacketTransmitter::handleStopOperation(LifecycleOperation *operation)
@@ -44,6 +45,7 @@ void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     startTx(packet);
+    updateDisplayString();
 }
 
 void PacketTransmitter::startTx(Packet *packet)
@@ -65,8 +67,9 @@ void PacketTransmitter::endTx()
     // 1. check current state
     ASSERT(isTransmitting());
     // 2. notify subscribers
-    emit(transmissionStartedSignal, txSignal);
-    auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
+    auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
+    handlePacketProcessed(packet);
+    emit(transmissionEndedSignal, txSignal);
     // 3. clear internal state
     delete txSignal;
     txSignal = nullptr;

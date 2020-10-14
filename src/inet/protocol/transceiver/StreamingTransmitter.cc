@@ -28,6 +28,7 @@ void StreamingTransmitter::handleMessageWhenUp(cMessage *message)
         endTx();
     else
         PacketTransmitterBase::handleMessageWhenUp(message);
+    updateDisplayString();
 }
 
 void StreamingTransmitter::handleStopOperation(LifecycleOperation *operation)
@@ -47,6 +48,7 @@ void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     startTx(packet);
+    updateDisplayString();
 }
 
 void StreamingTransmitter::startTx(Packet *packet)
@@ -75,6 +77,7 @@ void StreamingTransmitter::endTx()
     // 2. send signal end to receiver and notify subscribers
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
     EV_INFO << "Ending transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
+    handlePacketProcessed(packet);
     emit(transmissionEndedSignal, txSignal);
     sendPacketEnd(txSignal);
     // 3. clear internal state
@@ -104,7 +107,8 @@ void StreamingTransmitter::abortTx()
     txSignal = nullptr;
     // 4. send signal end to receiver and notify subscribers
     EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
-    emit(transmissionEndedSignal, txSignal);
+    handlePacketProcessed(packet);
+    emit(transmissionEndedSignal, signal);
     sendPacketEnd(signal);
     // 5. clear internal state
     txStartTime = -1;

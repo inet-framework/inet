@@ -27,11 +27,13 @@ void PacketReceiver::handleMessageWhenUp(cMessage *message)
         receiveSignal(check_and_cast<Signal *>(message));
     else
         PacketReceiverBase::handleMessageWhenUp(message);
+    updateDisplayString();
 }
 
 void PacketReceiver::receiveSignal(Signal *signal)
 {
     auto packet = decodePacket(signal);
+    handlePacketProcessed(packet);
     emit(receptionEndedSignal, signal);
     pushOrSendPacket(packet, outputGate, consumer);
     delete signal;
