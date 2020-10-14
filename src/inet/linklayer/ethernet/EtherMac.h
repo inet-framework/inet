@@ -66,7 +66,6 @@ class INET_API EtherMac : public EtherMacBase
     cMessage *endBackoffTimer = nullptr;
     cMessage *endJammingTimer = nullptr;
     EthernetSignalBase *curTxSignal = nullptr;
-    long curTxId = -1;
 
     // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
     // stores the end time of the reconnect state
