@@ -68,7 +68,6 @@ void InterPacketGap::handleMessage(cMessage *message)
         }
         else
             throw cRuntimeError("Unknown message");
-        updateDisplayString();
     }
     else {
         // if an asynchronous message is received from the input gate
@@ -86,6 +85,7 @@ void InterPacketGap::handleMessage(cMessage *message)
         else
             throw cRuntimeError("Unknown message");
     }
+    updateDisplayString();
 }
 
 void InterPacketGap::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
@@ -130,13 +130,16 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
         packetDelay = 0;
     packetStartTime = now + packetDelay;
     packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
-    if (packetDelay == 0)
+    if (packetDelay == 0) {
+        handlePacketProcessed(packet);
         pushOrSendPacket(packet, outputGate, consumer);
+    }
     else {
         EV_INFO << "Inserting packet gap before" << EV_FIELD(packet) << EV_ENDL;
         progress->setContextPointer(packet);
         scheduleClockEventAt(now + packetDelay, progress);
     }
+    updateDisplayString();
 }
 
 void InterPacketGap::handleCanPushPacketChanged(cGate *gate)
@@ -158,6 +161,7 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
     Enter_Method("pushPacketStart");
     take(packet);
     pushOrSendOrSchedulePacketProgress(packet, gate, datarate, b(0), b(0));
+    updateDisplayString();
 }
 
 void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
@@ -165,6 +169,7 @@ void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
     Enter_Method("pushPacketEnd");
     take(packet);
     pushOrSendOrSchedulePacketProgress(packet, gate, bps(NaN), packet->getDataLength(), b(0));
+    updateDisplayString();
 }
 
 void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
@@ -172,6 +177,7 @@ void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
     Enter_Method("pushPacketProgress");
     take(packet);
     pushOrSendOrSchedulePacketProgress(packet, gate, datarate, position, extraProcessableLength);
+    updateDisplayString();
 }
 
 void InterPacketGap::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
@@ -191,8 +197,11 @@ void InterPacketGap::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *g
         packetStartTime = now + packetDelay;
     }
     packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
-    if (progress == nullptr || !progress->isScheduled())
+    if (progress == nullptr || !progress->isScheduled()) {
+        if (packet->getTotalLength() == position + extraProcessableLength)
+            handlePacketProcessed(packet);
         pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
+    }
     else {
         EV_INFO << "Inserting packet gap before" << EV_FIELD(packet) << EV_ENDL;
         cancelClockEvent(progress);
