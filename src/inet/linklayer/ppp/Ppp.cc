@@ -141,7 +141,7 @@ void Ppp::refreshOutGateConnection(bool connected)
             b newLength = b(floor(curTxPacket->getBitLength() * sentPart));
             curTxPacket->removeAtBack(curTxPacket->getDataLength() - newLength);
             curTxPacket->setBitError(true);
-            send(curTxPacket, SendOptions().finishTx(curTxPacket->getTransmissionId()).duration(sentDuration), physOutGate);
+            send(curTxPacket, SendOptions().finishTx(curTxPacket->getId()).duration(sentDuration), physOutGate);
             curTxPacket = nullptr;
             cancelEvent(endTransmissionEvent);
         }
@@ -192,8 +192,7 @@ void Ppp::startTransmitting()
         pppFrame->insertAtFront(bytes);
     }
     curTxPacket = pppFrame->dup();
-    curTxPacket->setTransmissionId(pppFrame->getId());
-    send(pppFrame, SendOptions().transmissionId(curTxPacket->getTransmissionId()), physOutGate);
+    send(pppFrame, SendOptions().transmissionId(curTxPacket->getId()), physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
 
