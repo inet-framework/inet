@@ -69,6 +69,8 @@ bool VlanIndFilter::matchesPacket(const Packet *packet) const
 void VlanIndFilter::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
+    if (gate == outputGate)
+        registerService(protocol, inputGate, servicePrimitive);
 }
 
 void VlanIndFilter::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
