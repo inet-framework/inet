@@ -2,44 +2,35 @@ review new examples preemption, cutthrough, gating, vlan
 
 INET 4.3 release TODO items:
 
-1. Clock model
+1. Packet API
 
- - Add documentation to the User's Guide.
+ - Update tags and region tags documentation in Developer's Guide with respect to share pointers.
+ - Extend Packet API documentation in Developer's Guide with new packet data insertion, replace and update API.
 
-2. Packet API
+2. Queueing model
 
- - Review packet data insertion, replace and update API.
- - Update tags and region tags documentation in Developer's Guide.
-
-3. Queueing model
-
- - Review interfaces in contract folder with respect to packet streaming.
  - Review streaming implementation in all components.
 
-4. Protocol support model
+3. Protocol support model
 
  - Review all added components.
 
-5. Ethernet model
-
- - Choose between the possible Ethernet tag representations.
-
-6. Packet flow
+4. Packet flow
 
  - Add examples that demonstrate the feature.
  - Add documentation to the User's Guide.
 
-7. Timing measurement
+5. Timing measurement
 
  - Add examples that demonstrate the feature.
  - Add documentation to the User's Guide.
 
-8. Packet events
+6. Packet events
 
  - Add examples that demonstrate the feature.
  - Add documentation to the User's Guide.
 
-9. General
+7. General
 
  - Make all tests PASS
 
