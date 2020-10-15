@@ -55,10 +55,10 @@ return values. The interface contains functions such as :fun:`getClockTime()`,
 :fun:`cancelClockEvent()`.
  
 INET contains optional clock modules (not used by default) at the network node
-and the network interface levels. The following clock models available:
+and the network interface levels. The following clock models are available:
 
 -  :ned:`IdealClock`: clock time is identical to the simulation time.
--  :ned:`OscillatorBaseClock`: clock time is the number of oscillator ticks
+-  :ned:`OscillatorBasedClock`: clock time is the number of oscillator ticks
    multiplied by the nominal tick length.
 -  :ned:`SettableClock`: a clock which can be set to a different clock time. 
 
@@ -81,10 +81,10 @@ Note that these macros don't change the numerical value, they simply convert
 between the C++ types.
 
 When the actual clock time is used by a clock, the value may be rounded according
-to the clock granularity and rounding mode (e.g. :ned:`OscillatorBaseClock`). For
+to the clock granularity and rounding mode (e.g. :ned:`OscillatorBasedClock`). For
 example, when a clock with a us granularity is instructed to wait for 100 ns,
 while its oscillator is right in the middle of its ticking period, it may actually
-wait for the next tick to happen to start the timer and wait another tick to
+wait for the next tick to happen to start the timer, and wait another tick to
 happen to account for the requested wait time interval.
 
 Oscillators
@@ -96,7 +96,7 @@ based clock model.
 
 An oscillator efficiently models the periodic generation of ticks that are usually
 counted by a clock module. The tick period is not necessarily constant, it can
-change over time. Oscillators implement the :ned:`IOscillator`: module interface
+change over time. Oscillators implement the :ned:`IOscillator` module interface
 and the corresponding :cpp:`IOscillator` C++ interface.
 
 The following oscillator models are available:
