@@ -33,7 +33,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetTapDevice.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 
 namespace inet {
 

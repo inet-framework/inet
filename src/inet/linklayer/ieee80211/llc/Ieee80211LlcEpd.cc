@@ -20,8 +20,8 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/Simsignals_m.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/Ieee80211LlcEpd.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 
 namespace inet {

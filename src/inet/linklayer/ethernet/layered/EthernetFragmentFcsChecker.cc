@@ -17,7 +17,7 @@
 
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/layered/EthernetFragmentFcsChecker.h"
 #include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
 

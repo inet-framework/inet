@@ -17,11 +17,12 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 

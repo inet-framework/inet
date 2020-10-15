@@ -19,12 +19,13 @@
 #define __INET_IEEE8022LLC_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/Protocol.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/Protocol.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022SnapHeader_m.h"
 
 namespace inet {
 

@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 

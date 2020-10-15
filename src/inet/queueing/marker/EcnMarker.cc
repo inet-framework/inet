@@ -17,11 +17,12 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/queueing/marker/EcnMarker.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #endif // #ifdef WITH_ETHERNET
 

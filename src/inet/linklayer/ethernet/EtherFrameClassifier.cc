@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/ethernet/EtherFrameClassifier.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 
 namespace inet {
 

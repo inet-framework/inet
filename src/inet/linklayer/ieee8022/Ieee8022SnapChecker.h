@@ -19,6 +19,7 @@
 #define __INET_IEEE8022SNAPCHECKER_H
 
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022SnapHeader_m.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {

@@ -21,7 +21,7 @@
 #include "inet/linklayer/acking/AckingMacHeaderSerializer.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #endif
 
 namespace inet {

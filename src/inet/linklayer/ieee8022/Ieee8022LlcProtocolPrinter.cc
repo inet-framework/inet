@@ -19,6 +19,7 @@
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcProtocolPrinter.h"
+#include "inet/linklayer/ieee8022/Ieee8022SnapHeader_m.h"
 
 namespace inet {
 
