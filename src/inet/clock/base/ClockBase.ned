@@ -23,5 +23,7 @@ module ClockBase
         string displayStringTextFormat = default("%t"); // determines the text that is written on top of the submodule
         @class(ClockBase);
         @display("i=block/timer");
+        @signal[timeChanged](type=simtime_t);
+        @statistic[timeChanged](title="Clock time"; record=vector; interpolationmode=linear);
 }
 

@@ -26,6 +26,9 @@ namespace inet {
 
 class INET_API ClockBase : public cSimpleModule, public IClock, public StringFormat::IDirectiveResolver
 {
+  public:
+    static simsignal_t timeChangedSignal;
+
   protected:
     const char *displayStringTextFormat = nullptr;
 

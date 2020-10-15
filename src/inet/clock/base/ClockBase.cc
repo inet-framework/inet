@@ -19,6 +19,8 @@
 
 namespace inet {
 
+simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChanged");
+
 void ClockBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
