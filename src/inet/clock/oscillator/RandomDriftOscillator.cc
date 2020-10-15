@@ -24,8 +24,10 @@ Define_Module(RandomDriftOscillator);
 void RandomDriftOscillator::initialize(int stage)
 {
     ConstantDriftOscillator::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        timer = new cMessage("ChangeTimer");
         scheduleAfter(par("changeInterval"), timer);
+    }
 }
 
 void RandomDriftOscillator::handleMessage(cMessage *message)
