@@ -19,6 +19,7 @@
 #define __INET_IPROTOCOLREGISTRATIONLISTENER_H
 
 #include "inet/common/Protocol.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
@@ -38,6 +39,14 @@ INET_API void registerService(const Protocol& protocol, cGate *gate, ServicePrim
 INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut);
 INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut);
 
+INET_API void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive);
+INET_API void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut);
+INET_API void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut);
+
+INET_API void registerAnyService(cGate *gate, ServicePrimitive servicePrimitive);
+INET_API void registerAnyService(cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut);
+INET_API void registerAnyService(cGate *requestIn, cGate *indicationOut);
+
 /**
  * Registers a protocol primitive (PDU processing) at the given gate.
  *
@@ -51,6 +60,14 @@ INET_API void registerProtocol(const Protocol& protocol, cGate *gate, ServicePri
 INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn);
 INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn);
 
+INET_API void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive);
+INET_API void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn);
+INET_API void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn);
+
+INET_API void registerAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive);
+INET_API void registerAnyProtocol(cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn);
+INET_API void registerAnyProtocol(cGate *requestOut, cGate *indicationIn);
+
 /**
  * This interface defines methods that are called during protocol service
  * primitve registration.
@@ -60,6 +77,63 @@ class INET_API IProtocolRegistrationListener
   public:
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) = 0;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) = 0;
+
+    virtual void handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) = 0;
+    virtual void handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) = 0;
+
+    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) = 0;
+    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) = 0;
+};
+
+class INET_API DefaultProtocolRegistrationListener : public virtual IProtocolRegistrationListener
+{
+  public:
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override { }
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override { }
+
+    virtual void handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override { }
+    virtual void handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override { }
+
+    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override { }
+    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override { }
+};
+
+#define Enter_Method2 cMethodCallContextSwitcher __ctx(check_and_cast<cComponent *>(this)); __ctx.methodCall
+
+class INET_API TransparentProtocolRegistrationListener : public virtual IProtocolRegistrationListener
+{
+  public:
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) = 0;
+
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {
+        Enter_Method2("handleRegisterService");
+        registerService(protocol, getRegistrationForwardingGate(gate), servicePrimitive);
+    }
+
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {
+        Enter_Method2("handleRegisterProtocol");
+        registerProtocol(protocol, getRegistrationForwardingGate(gate), servicePrimitive);
+    }
+
+    virtual void handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {
+        Enter_Method2("handleRegisterServiceGroup");
+        registerServiceGroup(protocolGroup, getRegistrationForwardingGate(gate), servicePrimitive);
+    }
+
+    virtual void handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {
+        Enter_Method2("handleRegisterProtocolGroup");
+        registerProtocolGroup(protocolGroup, getRegistrationForwardingGate(gate), servicePrimitive);
+    }
+
+    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override {
+        Enter_Method2("handleRegisterAnyService");
+        registerAnyService(getRegistrationForwardingGate(gate), servicePrimitive);
+    }
+
+    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override {
+        Enter_Method2("handleRegisterAnyProtocol");
+        registerAnyProtocol(getRegistrationForwardingGate(gate), servicePrimitive);
+    }
 };
 
 } // namespace inet
