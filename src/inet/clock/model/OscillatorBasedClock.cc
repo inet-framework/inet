@@ -168,6 +168,7 @@ void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject
 #endif
             }
         }
+        emit(timeChangedSignal, CLOCKTIME_AS_SIMTIME(getClockTime()));
     }
 }
 
