@@ -57,48 +57,48 @@ but only :cpp:`Packet` instances are allowed.
 
 There are two new important operations on queueing model elements defined in
 :cpp:`IPassivePacketSource` and :cpp:`IPassivePacketSink`. Packets can be *pushed*
-into gates and packets can be *popped* from gates. Both of these operations are
+into gates and packets can be *pulled* from gates. Both of these operations are
 synchronous, they either finish successfully or throw an exception. The main
-difference between pushing and popping is the subject of the activity. In the
+difference between pushing and pulling is the subject of the activity. In the
 former case, when a packet is pushed, the activity is initiated by the source
-of the packet. In contrast, when a packet is popped, the activity is initiated
+of the packet. In contrast, when a packet is pulled, the activity is initiated
 by the sink of the packet. In both cases, the passive elements can be asked
-via separate methods to tell if they can be pushed or popped in their current
+via separate methods to tell if they can be pushed or pulled in their current
 state either with respect to a specific packet or any packet thereof.
 
 Queueing model elements can be divided into two categories with respect to the
 operation on a given gate: *passive* and *active*. The passive model elements
-are pushed into and popped from by other connected modules. In contrast, the
-active model elements push into and pop from other connected modules as they see
+are pushed into and pulled from by other connected modules. In contrast, the
+active model elements push into and pull from other connected modules as they see
 fit. They implement the interfaces :cpp:`IActivePacketSource` and :cpp:`IActivePacketSink`.
 
 The active queueing elements take into consideration the state of the connected
-passive elements. That is, they push or pop packets only when the passive end is
+passive elements. That is, they push or pull packets only when the passive end is
 able to consume or provide, respectively. The queueing model elements also validate
 the assembled structure during module initialization with respect to the active
 and passive behavior of the connected gates. That is, active output gates must
 be connected to passive input gates, and active input gates must be connected
 to passive output gates.
 
-Pushing a packet into a gate (and similarly popping a packet from a gate) can
+Pushing a packet into a gate (and similarly pulling a packet from a gate) can
 have far reaching consequences by triggering a chain of operations potentially
 by passing through multiple connected elements. For example, pushing a packet
 into a classifier will immediately push the packet into one of the connected
 queueing elements, and will also potentially lead to additional operations on
-further connected elements. Similarly, popping a packet from a scheduler will
-immediately pop a packet from one of the connected queueing elements, and will
+further connected elements. Similarly, pulling a packet from a scheduler will
+immediately pull a packet from one of the connected queueing elements, and will
 also potentially lead to additional operations on further connected elements.
 
 In general, the following equation about the number of packets holds true for
 all queueing model elements:
 
-#created + #pushed - #popped - #removed - #dropped = #available + #delayed
+#created + #pushed - #pulled - #removed - #dropped = #available + #delayed
 
 Sources
 -------
 
 These modules act as sources of packets. An active packet source pushes packets
-to its output. A passive packet source returns a packet when it is popped by
+to its output. A passive packet source returns a packet when it is pulled by
 other queueing model elements.
 
 -  :ned:`ActivePacketSource`: generic source that produces packets periodically
@@ -111,7 +111,7 @@ other queueing model elements.
 Sinks
 -----
 
-These modules act as sinks of packets. An active packet sink pops packets from
+These modules act as sinks of packets. An active packet sink pulls packets from
 its input. A passive packet sink is pushed with packets by other queueing model
 elements.
 
@@ -126,12 +126,12 @@ Queues
 These modules store packets and maintain an ordering among them. Queues do not
 delay packets, so if a queue is not empty, then a packet is always available.
 When a packet is pushed into the input of a queue, then the packet is either
-stored, or if the queue is overloaded, it is dropped. When a packet is popped
+stored, or if the queue is overloaded, it is dropped. When a packet is pulled
 from the output of a queue, then one of the stored packets is returned.
 
 The following simpler equation about the number of packets always holds true for queues:
 
-#pushed - #popped - #dropped - #removed = #queueLength = #available
+#pushed - #pulled - #dropped - #removed = #queueLength = #available
 
 -  :ned:`PacketQueue`: generic queue that provides ordering and selective dropping
 
@@ -148,7 +148,7 @@ Buffers
 
 These modules deal with memory allocation of packets without considering the
 ordering among them. A packet buffer generally doesn't have gates, and packets
-are not pushed into or popped from it.
+are not pushed into or pulled from it.
 
 -  :ned:`PacketBuffer`: generic buffer that provides shared storage between several queues
 
@@ -162,7 +162,7 @@ Filters
 These modules filter for specific packets while dropping the rest. When a packet
 is pushed into the input of a packet filter, then the filter either pushes the
 packet to its output or it simply drops the packet. In contrast, when a packet
-is popped from the output of a packet filter, then it continuously pops and drops
+is pulled from the output of a packet filter, then it continuously pulls and drops
 packets from its input until it finds one that matches the filter criteria.
 
 -  :ned:`PacketFilter`: generic packet filter
@@ -195,8 +195,8 @@ one of its outputs.
 Schedulers
 ----------
 
-These modules schedule packets from one of their inputs. When a packet is popped
-from the output of a packet scheduler, then it immediately pops a packet from one
+These modules schedule packets from one of their inputs. When a packet is pulled
+from the output of a packet scheduler, then it immediately pulls a packet from one
 of its inputs and returns that packet.
 
 -  :ned:`PacketScheduler`: generic packet scheduler
@@ -212,7 +212,7 @@ of its inputs and returns that packet.
 Servers
 -------
 
-These modules process packets in order one by one. A packet server actively pops
+These modules process packets in order one by one. A packet server actively pulls
 packets from its input when it sees fit, and it also actively pushes packets into
 its output.
 
@@ -223,7 +223,7 @@ Markers
 -------
 
 These modules attach some information to packets on an individual basis. Packets
-can be both pushed into the input and popped from the output of packet markers.
+can be both pushed into the input and pulled from the output of packet markers.
 
 -  :ned:`PacketLabeler`: generic marker which attaches labels to matching packets
 
@@ -240,7 +240,7 @@ Meters
 ------
 
 These modules measure some property of a stream of packets. Packets can be both
-pushed into the input and popped from the output of packet meters.
+pushed into the input and pulled from the output of packet meters.
 
 -  :ned:`RateMeter`: measures the packetrate and datarate of the packet stream 
 
@@ -248,7 +248,7 @@ Token generators
 ----------------
 
 These modules generate tokens for other modules. A token generator generally
-doesn't have gates and packets are not pushed into or popped from it.
+doesn't have gates and packets are not pushed into or pulled from it.
 
 -  :ned:`TimeBasedTokenGenerator`: generates tokens based on elapsed simulation time
 -  :ned:`PacketBasedTokenGenerator`: generates tokens based on received packets
@@ -272,9 +272,9 @@ Other queueing elements
 There are also some other generic queueing model elements which don't fit well
 into any of the above categories.
 
--  :ned:`PacketGate`: allows or prevents packets to pass through, either pushed or popped
+-  :ned:`PacketGate`: allows or prevents packets to pass through, either pushed or pulled
 -  :ned:`PacketMultiplexer`: passively connects multiple inputs to a single output, packets are pushed into the inputs
--  :ned:`PacketDemultiplexer`: passively connects a single input to multiple outputs, packets are popped from the outputs 
+-  :ned:`PacketDemultiplexer`: passively connects a single input to multiple outputs, packets are pulled from the outputs 
 -  :ned:`PacketDelayer`: sends received packets to the output with some delay independently
 -  :ned:`PacketCloner`: sends one copy of each received packet to all outputs
 -  :ned:`PacketHistory`: keeps track of the last N packets which can be inspected in Qtenv
