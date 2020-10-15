@@ -62,6 +62,7 @@ void ConstantDriftOscillator::setDriftRate(double newDriftRate)
         driftRate = newDriftRate;
         relativeSpeed = 1.0 + driftRate;
         origin = currentSimTime;
+        emit(driftRateChangedSignal, driftRate);
         emit(postOscillatorStateChangedSignal, this);
         updateDisplayString();
     }
