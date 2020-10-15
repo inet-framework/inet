@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
