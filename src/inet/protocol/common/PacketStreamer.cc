@@ -147,7 +147,7 @@ b PacketStreamer::getPullPacketProcessedLength(Packet *packet, cGate *gate)
 void PacketStreamer::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    if (collector != nullptr)
+    if (collector != nullptr && !isStreaming())
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
