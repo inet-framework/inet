@@ -31,6 +31,7 @@ class INET_API IdealOscillator : public OscillatorBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void finish() override;
 
   public:
     virtual simtime_t getComputationOrigin() const override { return origin; }
