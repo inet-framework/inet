@@ -25,6 +25,9 @@ namespace inet {
 
 class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public StringFormat::IDirectiveResolver
 {
+  public:
+    static simsignal_t driftRateChangedSignal;
+
   protected:
     const char *displayStringTextFormat = nullptr;
 

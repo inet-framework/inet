@@ -23,5 +23,7 @@ simple OscillatorBase
         string displayStringTextFormat = default("%n"); // determines the text that is written on top of the submodule
         @class(OscillatorBase);
         @display("i=block/tunnel");
+        @signal[driftRateChanged](type=double);
+        @statistic[driftRateChanged](title="Oscillator drift rate"; record=vector; interpolationmode=sample-hold);
 }
 
