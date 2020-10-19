@@ -24,12 +24,12 @@
 #include "inet/linklayer/common/TxNotifDetails.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/base/MACBase.h"
 
 namespace inet {
 
 class InterfaceEntry;
-class IPassiveQueue;
 
 /**
  * PPP implementation.
@@ -43,8 +43,11 @@ class INET_API PPP : public MACBase
 
     cQueue txQueue;
     cMessage *endTransmissionEvent = nullptr;
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     IPassiveQueue *queueModule = nullptr;
-
+#else
+    opp_component_ptr<IPassiveQueue> queueModule;
+#endif
     TxNotifDetails notifDetails;
 
     std::string oldConnColor;
