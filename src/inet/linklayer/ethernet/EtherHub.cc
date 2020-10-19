@@ -67,8 +67,19 @@ void EtherHub::checkConnections(bool errorWhenAsymmetric)
             continue;
         }
 
+        cChannel *inTrChannel = igate->findIncomingTransmissionChannel();
+        cChannel *outTrChannel = ogate->findTransmissionChannel();
+        if (!inTrChannel || !outTrChannel) {
+            // half connected gate
+            if (errorWhenAsymmetric)
+                throw cRuntimeError("The input or output gate not connected at port %i", i);
+            dataratesDiffer = true;
+            EV << "The input or output gate not connected at port " << i << ".\n";
+            continue;
+        }
+
         numActivePorts++;
-        double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
+        double drate = inTrChannel->getNominalDatarate();
 
         if (numActivePorts == 1)
             datarate = drate;
@@ -79,7 +90,6 @@ void EtherHub::checkConnections(bool errorWhenAsymmetric)
             EV << "The input datarate at port " << i << " differs from datarates of previous ports.\n";
         }
 
-        cChannel *outTrChannel = ogate->getTransmissionChannel();
         drate = outTrChannel->getNominalDatarate();
 
         if (datarate != drate) {
