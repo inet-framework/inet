@@ -42,19 +42,19 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     virtual void checkPacketOperationSupport(cGate *gate) const;
 
     virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
-    virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate);
-    virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
-    virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength);
+    virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, int transmissionId);
+    virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, int transmissionId);
+    virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength, int transmissionId);
 
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
 
     virtual void updateDisplayString() const;
 
-    virtual void animateSend(Packet *packet, cGate *gate, simtime_t duration, simtime_t remainingDuration) const;
+    virtual void animateSend(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
     virtual void animateSendPacket(Packet *packet, cGate *gate) const;
-    virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const;
-    virtual void animateSendPacketEnd(Packet *packet, cGate *gate) const;
-    virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength) const;
+    virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const;
+    virtual void animateSendPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
+    virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const;
 
   public:
     virtual bool supportsPacketSending(cGate *gate) const override { return true; }

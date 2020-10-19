@@ -119,47 +119,58 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate, IPassive
         send(packet, gate);
 }
 
-void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate)
+void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, int transmissionId)
 {
+    simtime_t duration = s(packet->getTotalLength() / datarate).get();
+    SendOptions sendOptions;
+    sendOptions.duration(duration);
+    sendOptions.updateTx(transmissionId, duration);
     if (consumer != nullptr) {
-        animateSendPacketStart(packet, gate, datarate);
+        animateSendPacketStart(packet, gate, datarate, sendOptions);
         consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
         progressTag->setDatarate(datarate);
         progressTag->setPosition(b(0));
-        send(packet, SendOptions().duration(packet->getDuration()), gate);
+        send(packet, sendOptions, gate);
     }
 }
 
-void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
+void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, int transmissionId)
 {
+    // NOTE: duration is unknown due to arbitrarily changing datarate
+    SendOptions sendOptions;
+    sendOptions.updateTx(transmissionId, 0);
     if (consumer != nullptr) {
-        animateSendPacketEnd(packet, gate);
+        animateSendPacketEnd(packet, gate, sendOptions);
         consumer->pushPacketEnd(packet, gate->getPathEndGate());
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
         progressTag->setDatarate(bps(NaN));
         progressTag->setPosition(packet->getTotalLength());
-        send(packet, SendOptions().duration(packet->getDuration()), gate);
+        send(packet, sendOptions, gate);
     }
 }
 
-void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength)
+void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength, int transmissionId)
 {
+    // NOTE: duration is unknown due to arbitrarily changing datarate
+    simtime_t remainingDuration = s((packet->getTotalLength() - position) / datarate).get();
+    SendOptions sendOptions;
+    sendOptions.updateTx(transmissionId, remainingDuration);
     if (consumer != nullptr) {
         if (position == b(0)) {
-            animateSendPacketStart(packet, gate, datarate);
+            animateSendPacketStart(packet, gate, datarate, sendOptions);
             consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
         }
         else if (position == packet->getTotalLength()) {
-            animateSendPacketEnd(packet, gate);
+            animateSendPacketEnd(packet, gate, sendOptions);
             consumer->pushPacketEnd(packet, gate->getPathEndGate());
         }
         else {
-            animateSendPacketProgress(packet, gate, datarate, position, extraProcessableLength);
+            animateSendPacketProgress(packet, gate, datarate, position, extraProcessableLength, sendOptions);
             consumer->pushPacketProgress(packet, gate->getPathEndGate(), datarate, position, extraProcessableLength);
         }
     }
@@ -168,7 +179,7 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, 
         progressTag->setDatarate(datarate);
         progressTag->setPosition(position);
         progressTag->setExtraProcessableLength(extraProcessableLength);
-        send(packet, SendOptions().duration(packet->getDuration()), gate);
+        send(packet, sendOptions, gate);
     }
 }
 
@@ -189,25 +200,19 @@ void PacketProcessorBase::updateDisplayString() const
     }
 }
 
-void PacketProcessorBase::animateSend(Packet *packet, cGate *gate, simtime_t duration, simtime_t remainingDuration) const
+void PacketProcessorBase::animateSend(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
 {
     auto endGate = gate->getPathEndGate();
+    packet->setTransmissionId(sendOptions.transmissionId_);
     packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
     packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
     auto envir = getEnvir();
     if (envir->isGUI() && gate->getNextGate() != nullptr) {
-        if (packet->getOrigPacketId() == -1) {
-            ASSERT(duration != -1);
-            envir->beginSend(packet, SendOptions().duration(duration));
-        }
-        else {
-            ASSERT(duration == -1);
-            envir->beginSend(packet, SendOptions().updateTx(packet->getOrigPacketId(), remainingDuration));
-        }
+        envir->beginSend(packet, sendOptions);
         while (gate->getNextGate() != nullptr) {
             ChannelResult result;
-            result.duration = duration;
-            result.remainingDuration = remainingDuration;
+            result.duration = sendOptions.duration_;
+            result.remainingDuration = sendOptions.remainingDuration;
             envir->messageSendHop(packet, gate, result);
             gate = gate->getNextGate();
         }
@@ -217,29 +222,22 @@ void PacketProcessorBase::animateSend(Packet *packet, cGate *gate, simtime_t dur
 
 void PacketProcessorBase::animateSendPacket(Packet *packet, cGate *gate) const
 {
-    animateSend(packet, gate, 0, 0);
+    animateSend(packet, gate, SendOptions());
 }
 
-void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bps datarate) const
+void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const
 {
-    simtime_t duration = s(packet->getTotalLength() / datarate).get();
-    animateSend(packet, gate, duration, duration);
+    animateSend(packet, gate, sendOptions);
 }
 
-void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate) const
+void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
 {
-    // NOTE: duration is unknown due to arbitrarily changing datarate
-    animateSend(packet, gate, -1, 0);
+    animateSend(packet, gate, sendOptions);
 }
 
-void PacketProcessorBase::animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength) const
+void PacketProcessorBase::animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const
 {
-    // NOTE: duration is unknown due to arbitrarily changing datarate
-    simtime_t remainingDuration = s((packet->getTotalLength() - position) / datarate).get();
-    if (packet->getOrigPacketId() == -1)
-        animateSend(packet, gate, remainingDuration, remainingDuration);
-    else
-        animateSend(packet, gate, -1, remainingDuration);
+    animateSend(packet, gate, sendOptions);
 }
 
 const char *PacketProcessorBase::resolveDirective(char directive) const
