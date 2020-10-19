@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/OmittedModule.h"
 #include "inet/common/SubmoduleLayout.h"
 
@@ -29,13 +30,15 @@ static double getPosition(cModule *submodule, int dimensionIndex)
 
 void layoutSubmodulesWithoutGates(cModule *module, int dimensionIndex, double moduleSpacing)
 {
-    double submodulePosition = moduleSpacing;
+    double position = moduleSpacing;
     for (cModule::SubmoduleIterator it(module); !it.end(); it++) {
         auto submodule = *it;
         if (submodule->getGateNames().empty()) {
             auto& displayString = submodule->getDisplayString();
-            displayString.setTagArg("p", dimensionIndex, submodulePosition);
-            submodulePosition += moduleSpacing;
+            const char *dimension = dimensionIndex == 0 ? "x" : "y";
+            EV_INFO << "Setting submodule position" << EV_FIELD(submodule, submodule->getFullPath()) << EV_FIELD(dimension) << EV_FIELD(position) << EV_ENDL;
+            displayString.setTagArg("p", dimensionIndex, position);
+            position += moduleSpacing;
         }
     }
 }
@@ -54,6 +57,8 @@ void layoutSubmodulesWithGates(cModule *module, int dimensionIndex, double modul
     for (int i = 0; i < (int)submodules.size(); i++) {
         auto submodule = submodules[i];
         double maxPosition = 0;
+        if (*submodule->getDisplayString().getTagArg("p", 2) != '\0')
+            continue;
         for (cModule::GateIterator it(submodule); !it.end(); it++) {
             auto gate = *it;
             cModule *connectedModule = nullptr;
@@ -73,9 +78,18 @@ void layoutSubmodulesWithGates(cModule *module, int dimensionIndex, double modul
                 maxPosition = std::max(maxPosition, connectedPosition);
             }
         }
-        auto submodulePosition = maxPosition + moduleSpacing;
+        for (int j = 0; j < i; j++) {
+            auto alignedSubmodule = submodules[j];
+            if (getPosition(submodule, 1 - dimensionIndex) == getPosition(alignedSubmodule, 1 - dimensionIndex)) {
+                auto alignedPosition = getPosition(alignedSubmodule, dimensionIndex);
+                maxPosition = std::max(maxPosition, alignedPosition);
+            }
+        }
+        auto position = maxPosition + moduleSpacing;
         auto& displayString = submodule->getDisplayString();
-        displayString.setTagArg("p", dimensionIndex, submodulePosition);
+        const char *dimension = dimensionIndex == 0 ? "x" : "y";
+        EV_INFO << "Setting submodule position" << EV_FIELD(submodule, submodule->getFullPath()) << EV_FIELD(dimension) << EV_FIELD(position) << EV_ENDL;
+        displayString.setTagArg("p", dimensionIndex, position);
     }
 }
 
