@@ -33,15 +33,14 @@ class INET_API VlanReqFilter : public PacketFilterBase, public TransparentProtoc
     cValueMap *acceptedVlanIds = nullptr;
 
   protected:
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
     virtual void dropPacket(Packet *packet) override;
 
   public:
     virtual bool matchesPacket(const Packet *packet) const override;
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 } // namespace inet

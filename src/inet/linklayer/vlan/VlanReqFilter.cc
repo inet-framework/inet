@@ -34,6 +34,16 @@ void VlanReqFilter::initialize(int stage)
     }
 }
 
+cGate *VlanReqFilter::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void VlanReqFilter::processPacket(Packet *packet)
 {
     if (packet->findTag<DispatchProtocolReq>() == nullptr) {
@@ -64,20 +74,6 @@ bool VlanReqFilter::matchesPacket(const Packet *packet) const
                 return true;
     }
     return false;
-}
-
-void VlanReqFilter::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-    if (gate == outputGate)
-        registerService(protocol, inputGate, servicePrimitive);
-}
-
-void VlanReqFilter::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (gate == outputGate)
-        registerProtocol(protocol, inputGate, servicePrimitive);
 }
 
 } // namespace inet
