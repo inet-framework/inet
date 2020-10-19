@@ -31,10 +31,10 @@ Define_Module(EthernetMacHeaderInserter);
 void EthernetMacHeaderInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    else if (stage == INITSTAGE_LINK_LAYER)
         registerService(Protocol::ethernetMac, inputGate, nullptr);
-    }
 }
 
 void EthernetMacHeaderInserter::processPacket(Packet *packet)
@@ -56,6 +56,7 @@ void EthernetMacHeaderInserter::processPacket(Packet *packet)
         header->setTypeOrLength(ProtocolGroup::ethertype.findProtocolNumber(protocol));
     packet->insertAtFront(header);
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());
+    packet->removeTagIfPresent<DispatchProtocolReq>();
 }
 
 } // namespace inet
