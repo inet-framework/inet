@@ -58,9 +58,9 @@ void InterPacketGap::handleMessage(cMessage *message)
         }
         else if (message == progress) {
             auto packet = static_cast<Packet *>(message->getContextPointer());
-            if (packet->getOrigPacketId() != -1) {
+            if (packet->isUpdate()) {
                 auto progressTag = packet->getTag<ProgressTag>();
-                pushOrSendPacketProgress(packet, outputGate, consumer, progressTag->getDatarate(), progressTag->getPosition(), progressTag->getExtraProcessableLength());
+                pushOrSendPacketProgress(packet, outputGate, consumer, progressTag->getDatarate(), progressTag->getPosition(), progressTag->getExtraProcessableLength(), packet->getTransmissionId());
             }
             else
                 pushOrSendPacket(packet, outputGate, consumer);
@@ -74,9 +74,9 @@ void InterPacketGap::handleMessage(cMessage *message)
         // then it's processed as if it were pushed as synchronous message
         if (message->isPacket()) {
             auto packet = check_and_cast<Packet *>(message);
-            if (packet->getOrigPacketId() != -1) {
+            if (packet->isUpdate()) {
                 auto progressTag = packet->getTag<ProgressTag>();
-                pushOrSendPacketProgress(packet, outputGate, consumer, progressTag->getDatarate(), progressTag->getPosition(), progressTag->getExtraProcessableLength());
+                pushOrSendPacketProgress(packet, outputGate, consumer, progressTag->getDatarate(), progressTag->getPosition(), progressTag->getExtraProcessableLength(), packet->getTransmissionId());
             }
             else
                 pushPacket(packet, packet->getArrivalGate());
@@ -91,19 +91,19 @@ void InterPacketGap::handleMessage(cMessage *message)
 void InterPacketGap::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    pushOrSendPacketStart(packet, outputGate, consumer, bps(datarate));
+    pushOrSendPacketStart(packet, outputGate, consumer, bps(datarate), packet->getTransmissionId());
 }
 
 void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    pushOrSendPacketProgress(packet, outputGate, consumer, bps(datarate), b(bitPosition), b(extraProcessableBitLength));
+    pushOrSendPacketProgress(packet, outputGate, consumer, bps(datarate), b(bitPosition), b(extraProcessableBitLength), packet->getTransmissionId());
 }
 
 void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
-    pushOrSendPacketEnd(packet, outputGate, consumer);
+    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
 }
 
 bool InterPacketGap::canPushSomePacket(cGate *gate) const
@@ -200,7 +200,7 @@ void InterPacketGap::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *g
     if (progress == nullptr || !progress->isScheduled()) {
         if (packet->getTotalLength() == position + extraProcessableLength)
             handlePacketProcessed(packet);
-        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
+        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     }
     else {
         EV_INFO << "Inserting packet gap before" << EV_FIELD(packet) << EV_ENDL;

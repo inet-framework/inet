@@ -24,8 +24,6 @@ namespace inet {
 
 class INET_API StreamThroughReceiver : public StreamingReceiverBase
 {
-  int origPacketId = -1;
-
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;

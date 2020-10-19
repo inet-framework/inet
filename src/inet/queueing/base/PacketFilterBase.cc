@@ -104,7 +104,7 @@ void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate
     if (matchesPacket(packet)) {
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
-        pushOrSendPacketStart(packet, outputGate, consumer, datarate);
+        pushOrSendPacketStart(packet, outputGate, consumer, datarate, packet->getTransmissionId());
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
@@ -125,7 +125,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
-        pushOrSendPacketEnd(packet, outputGate, consumer);
+        pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
@@ -148,7 +148,7 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, bps datar
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         if (packet->getTotalLength() == position + extraProcessableLength)
             endPacketStreaming(packet);
-        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength);
+        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;

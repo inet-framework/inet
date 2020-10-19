@@ -84,26 +84,23 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
     return signal;
 }
 
-void PacketTransmitterBase::sendPacketStart(Signal *signal)
+void PacketTransmitterBase::sendPacketStart(Signal *signal, int transmissionId)
 {
-    ASSERT(signal->getOrigPacketId() == -1);
     EV_INFO << "Sending signal start to channel" << EV_FIELD(signal) << EV_ENDL;
-    send(signal, SendOptions().duration(signal->getDuration()), outputGate);
+    send(signal, SendOptions().duration(signal->getDuration()).transmissionId(transmissionId), outputGate);
 }
 
-void PacketTransmitterBase::sendPacketProgress(Signal *signal, b bitPosition, clocktime_t timePosition)
+void PacketTransmitterBase::sendPacketProgress(Signal *signal, int transmissionId, b bitPosition, clocktime_t timePosition)
 {
-    ASSERT(signal->getOrigPacketId() != -1);
     simtime_t remainingDuration = signal->getDuration() - CLOCKTIME_AS_SIMTIME(timePosition);
-    EV_INFO << "Sending signal progress to channel" << EV_FIELD(signal) << EV_FIELD(origPacketId, signal->getOrigPacketId()) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
-    send(signal, SendOptions().duration(signal->getDuration()).updateTx(signal->getOrigPacketId(), remainingDuration), outputGate);
+    EV_INFO << "Sending signal progress to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
+    send(signal, SendOptions().duration(signal->getDuration()).updateTx(transmissionId, remainingDuration), outputGate);
 }
 
-void PacketTransmitterBase::sendPacketEnd(Signal *signal)
+void PacketTransmitterBase::sendPacketEnd(Signal *signal, int transmissionId)
 {
-    ASSERT(signal->getOrigPacketId() != -1);
-    EV_INFO << "Sending signal end to channel" << EV_FIELD(signal) << EV_FIELD(origPacketId, signal->getOrigPacketId()) << EV_ENDL;
-    send(signal, SendOptions().duration(signal->getDuration()).finishTx(signal->getOrigPacketId()), outputGate);
+    EV_INFO << "Sending signal end to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_ENDL;
+    send(signal, SendOptions().duration(signal->getDuration()).finishTx(transmissionId), outputGate);
 }
 
 clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const

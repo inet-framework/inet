@@ -48,9 +48,8 @@ void PreemptingServer::startStreaming()
     auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
     take(packet);
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
-    streamedPacket = packet->dup();
-    streamedPacket->setOrigPacketId(packet->getId());
-    pushOrSendPacketStart(packet, outputGate, consumer, datarate);
+    streamedPacket = packet;
+    pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, datarate, packet->getTransmissionId());
     scheduleAt(simTime() + s(streamedPacket->getTotalLength() / datarate).get(), timer);
     handlePacketProcessed(streamedPacket);
     updateDisplayString();
@@ -60,11 +59,10 @@ void PreemptingServer::endStreaming()
 {
     auto packet = provider->pullPacketEnd(inputGate->getPathStartGate());
     take(packet);
-    packet->setOrigPacketId(streamedPacket->getOrigPacketId());
     delete streamedPacket;
     streamedPacket = packet;
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, packet->getTransmissionId());
     streamedPacket = nullptr;
     updateDisplayString();
 }

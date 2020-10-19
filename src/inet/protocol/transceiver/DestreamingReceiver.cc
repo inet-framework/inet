@@ -52,7 +52,6 @@ void DestreamingReceiver::handleMessageWhenUp(cMessage *message)
 
 void DestreamingReceiver::sendToUpperLayer(Packet *packet)
 {
-    packet->setOrigPacketId(-1);
     pushOrSendPacket(packet, outputGate, consumer);
 }
 

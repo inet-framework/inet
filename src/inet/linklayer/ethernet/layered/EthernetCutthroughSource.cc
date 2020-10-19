@@ -51,7 +51,7 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
             streamedPacket->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
             streamedPacket->removeTagIfPresent<DispatchProtocolReq>();
             EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
-            pushOrSendPacketStart(streamedPacket, cutthroughOutputGate, cutthroughConsumer, streamDatarate);
+            pushOrSendPacketStart(streamedPacket, cutthroughOutputGate, cutthroughConsumer, streamDatarate, streamedPacket->getTransmissionId());
             streamedPacket = nullptr;
             cutthroughInProgress = true;
             updateDisplayString();
@@ -92,7 +92,7 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
         streamedPacket = packet;
         streamDatarate = datarate;
         EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
-        pushOrSendPacketEnd(streamedPacket, cutthroughOutputGate, cutthroughConsumer);
+        pushOrSendPacketEnd(streamedPacket, cutthroughOutputGate, cutthroughConsumer, streamedPacket->getTransmissionId());
         streamedPacket = nullptr;
         cutthroughInProgress = false;
         updateDisplayString();

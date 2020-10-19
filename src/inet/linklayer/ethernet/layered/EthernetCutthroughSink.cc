@@ -48,7 +48,7 @@ void EthernetCutthroughSink::pushPacketStart(Packet *packet, cGate *gate, bps da
         streamedPacket = packet;
         cutthrough = true;
         EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
-        pushOrSendPacketStart(streamedPacket, outputGate, consumer, datarate);
+        pushOrSendPacketStart(streamedPacket, outputGate, consumer, datarate, streamedPacket->getTransmissionId());
         streamedPacket = nullptr;
         updateDisplayString();
     }
@@ -66,7 +66,7 @@ void EthernetCutthroughSink::pushPacketEnd(Packet *packet, cGate *gate)
         delete streamedPacket;
         streamedPacket = packet;
         EV_INFO << "Ending streaming packet " << streamedPacket->getName() << "." << std::endl;
-        pushOrSendPacketEnd(streamedPacket, outputGate, consumer);
+        pushOrSendPacketEnd(streamedPacket, outputGate, consumer, streamedPacket->getTransmissionId());
         streamedPacket = nullptr;
         updateDisplayString();
     }

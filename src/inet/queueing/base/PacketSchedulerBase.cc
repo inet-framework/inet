@@ -143,7 +143,7 @@ Packet *PacketSchedulerBase::pullPacketStart(cGate *gate, bps datarate)
     auto packet = providers[inProgressGateIndex]->pullPacketStart(inputGates[inProgressGateIndex]->getPathStartGate(), datarate);
     take(packet);
     inProgressStreamId = packet->getTreeId();
-    animateSendPacketStart(packet, outputGate, datarate);
+    animateSendPacketStart(packet, outputGate, datarate, SendOptions().updateTx(packet->getTransmissionId(), 0));
     updateDisplayString();
     return packet;
 }
@@ -158,7 +158,7 @@ Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
     endPacketStreaming(packet);
-    animateSendPacketEnd(packet, outputGate);
+    animateSendPacketEnd(packet, outputGate, SendOptions().updateTx(packet->getTransmissionId(), 0));
     updateDisplayString();
     return packet;
 }
@@ -174,7 +174,7 @@ Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, bps datarate, b pos
     inProgressStreamId = packet->getTreeId();
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    animateSendPacketProgress(packet, outputGate, datarate, position, extraProcessableLength);
+    animateSendPacketProgress(packet, outputGate, datarate, position, extraProcessableLength, SendOptions().updateTx(packet->getTransmissionId(), 0));
     updateDisplayString();
     return packet;
 }

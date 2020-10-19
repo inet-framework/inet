@@ -57,8 +57,7 @@ void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bp
     rxSignal = check_and_cast<Signal *>(cpacket);
     emit(receptionStartedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
-    origPacketId = packet->getId();
-    pushOrSendPacketStart(packet, outputGate, consumer, datarate);
+    pushOrSendPacketStart(packet, outputGate, consumer, datarate, rxSignal->getTransmissionId());
 }
 
 void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration)
@@ -82,12 +81,12 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
     emit(receptionEndedSignal, signal);
     if (rxSignal) {
         delete rxSignal;
-        rxSignal = nullptr;
-        auto packet = decodePacket(signal);
+        rxSignal = signal;
+        auto packet = decodePacket(rxSignal);
         handlePacketProcessed(packet);
-        packet->setOrigPacketId(origPacketId);
-        pushOrSendPacketEnd(packet, outputGate, consumer);
-        delete signal;
+        pushOrSendPacketEnd(packet, outputGate, consumer, rxSignal->getTransmissionId());
+        delete rxSignal;
+        rxSignal = nullptr;
     }
     else {
         EV_WARN << "Dropping signal end because signal start was not received" << EV_FIELD(signal) << EV_ENDL;
