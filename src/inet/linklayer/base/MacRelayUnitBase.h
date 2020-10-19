@@ -18,7 +18,6 @@
 #ifndef __INET_MACRELAYUNITBASE_H
 #define __INET_MACRELAYUNITBASE_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleRef.h"
@@ -27,7 +26,7 @@
 
 namespace inet {
 
-class INET_API MacRelayUnitBase : public LayeredProtocolBase, public IProtocolRegistrationListener
+class INET_API MacRelayUnitBase : public LayeredProtocolBase
 {
   protected:
     ModuleRef<IInterfaceTable> interfaceTable;
@@ -35,8 +34,6 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase, public IProtocolRe
 
     long numProcessedFrames = 0;
     long numDroppedFrames = 0;
-
-    std::vector<const Protocol *> registeredServices;
 
   protected:
     virtual void initialize(int stage) override;
@@ -59,9 +56,6 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase, public IProtocolRe
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
     //@}
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override { }
 };
 
 } // namespace inet
