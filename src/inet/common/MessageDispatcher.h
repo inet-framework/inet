@@ -74,7 +74,6 @@ class INET_API MessageDispatcher : public queueing::PacketProcessorBase, public 
     virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
 
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void updateTags(cMessage *message, cGate *outGate);
 
     virtual bool canPushSomePacket(cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
