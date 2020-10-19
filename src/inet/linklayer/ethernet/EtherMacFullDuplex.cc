@@ -19,6 +19,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 #include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
@@ -340,6 +341,9 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, packet);
 
+    const auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
+    macAddressInd->setSrcAddress(frame->getSrc());
+    macAddressInd->setDestAddress(frame->getDest());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     if (networkInterface)
