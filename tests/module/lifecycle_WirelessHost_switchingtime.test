@@ -7,7 +7,7 @@ Test shutdown and startup operations on WirelessHost with nonzero radiostate swi
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 record-eventlog = true

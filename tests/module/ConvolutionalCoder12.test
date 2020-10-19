@@ -17,7 +17,7 @@ network ConvCoder
 %inifile: omnetpp.ini
 
 [General]
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 record-eventlog = true

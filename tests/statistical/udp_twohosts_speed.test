@@ -53,7 +53,7 @@ network UdpClientServer
 [General]
 network = UdpClientServer
 total-stack = 7MiB
-tkenv-plugin-path = ../../../etc/plugins
+
 #debug-on-errors = true
 #record-eventlog = true
 #**.vector-recording = false

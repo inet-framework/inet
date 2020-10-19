@@ -6,7 +6,7 @@ Test for basic DHCP lifecycle handling.
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 sim-time-limit = 1000s

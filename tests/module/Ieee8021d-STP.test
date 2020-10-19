@@ -70,7 +70,7 @@ network LargeNet
 [General]
 sim-time-limit = 50s
 cmdenv-express-mode = false
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

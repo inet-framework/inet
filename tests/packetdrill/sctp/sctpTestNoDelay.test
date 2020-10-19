@@ -11,7 +11,7 @@ SUT is a client. The socket option SCTP_NODELAY is tested.
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestNoDelay.pkt"

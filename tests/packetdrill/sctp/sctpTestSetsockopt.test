@@ -13,7 +13,7 @@ These values must be set in the INIT chunk.
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestSetsockopt.pkt"

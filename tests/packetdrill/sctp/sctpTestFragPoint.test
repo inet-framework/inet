@@ -12,7 +12,7 @@ All DATA chunks should be fragmented to 500 Bytes.
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestFragPoint.pkt"

@@ -13,7 +13,7 @@ A timer based retransmission is expected after at most 200 ms.
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestRto.pkt"

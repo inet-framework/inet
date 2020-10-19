@@ -68,7 +68,7 @@ seed-0-mt = 5
 network = Net80211_aodv_test
 
 cmdenv-express-mode = false
-tkenv-plugin-path = ../../../etc/plugins
+
 
 description = "Aodv Simple test"
 

@@ -60,7 +60,7 @@ network AODVTest
 [General]
 network = AODVTest
 record-eventlog = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

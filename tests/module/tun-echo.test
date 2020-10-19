@@ -8,7 +8,7 @@ Testing the functionality of the TUN interface:
 
 network = TunTest
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

@@ -70,7 +70,7 @@ network AODVTest
 [General]
 network = AODVTest
 record-eventlog = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 num-rngs = 3
 sim-time-limit = 100s
