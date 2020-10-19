@@ -41,7 +41,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener
 {
   protected:
     /**

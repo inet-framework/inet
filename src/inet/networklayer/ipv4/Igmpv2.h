@@ -34,7 +34,7 @@ namespace inet {
 class IInterfaceTable;
 class IIpv4RoutingTable;
 
-class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListener, public cListener
+class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistrationListener, public cListener
 {
   protected:
     enum RouterState {

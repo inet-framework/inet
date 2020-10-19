@@ -37,7 +37,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, public IProtocolRegistrationListener
+class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, public DefaultProtocolRegistrationListener
 {
   public:
     /**

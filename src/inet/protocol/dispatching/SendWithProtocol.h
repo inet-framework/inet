@@ -25,7 +25,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API SendWithProtocol : public PacketFlowBase, public IProtocolRegistrationListener
+class INET_API SendWithProtocol : public PacketFlowBase, public DefaultProtocolRegistrationListener
 {
   protected:
     virtual void processPacket(Packet *packet) override;

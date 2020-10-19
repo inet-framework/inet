@@ -26,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource, public virtual IProtocolRegistrationListener
+class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource, public DefaultProtocolRegistrationListener
 {
   protected:
     std::vector<cGate *> inputGates;

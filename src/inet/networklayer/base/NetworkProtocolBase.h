@@ -28,7 +28,7 @@
 
 namespace inet {
 
-class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtocolRegistrationListener
+class INET_API NetworkProtocolBase : public LayeredProtocolBase, public DefaultProtocolRegistrationListener
 {
   protected:
     struct SocketDescriptor

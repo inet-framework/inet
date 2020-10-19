@@ -48,11 +48,6 @@ void ProtocolChecker::dropPacket(Packet *packet)
     PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
 }
 
-void ProtocolChecker::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
 void ProtocolChecker::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");

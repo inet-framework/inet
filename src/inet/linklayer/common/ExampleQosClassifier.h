@@ -27,7 +27,7 @@ namespace inet {
 /**
  * An example packet classifier based on the UDP/TCP port number.
  */
-class INET_API ExampleQosClassifier : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API ExampleQosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
     virtual int getUserPriority(cMessage *msg);

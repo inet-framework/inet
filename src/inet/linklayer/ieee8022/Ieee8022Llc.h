@@ -29,7 +29,7 @@
 
 namespace inet {
 
-class INET_API Ieee8022Llc : public OperationalBase, public IProtocolRegistrationListener
+class INET_API Ieee8022Llc : public OperationalBase, public DefaultProtocolRegistrationListener
 {
 protected:
     struct SocketDescriptor

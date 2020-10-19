@@ -27,7 +27,7 @@ namespace inet {
  * A QoS classifier that assigns a random User Priority. This is useful
  * for testing purposes.
  */
-class INET_API RandomQosClassifier : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API RandomQosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;

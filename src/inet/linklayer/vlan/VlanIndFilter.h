@@ -26,7 +26,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API VlanIndFilter : public PacketFilterBase, public IProtocolRegistrationListener
+class INET_API VlanIndFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
 {
   protected:
     IInterfaceTable *interfaceTable = nullptr;

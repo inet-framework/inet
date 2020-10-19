@@ -25,7 +25,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API ProtocolChecker : public PacketFilterBase, public IProtocolRegistrationListener
+class INET_API ProtocolChecker : public PacketFilterBase, public DefaultProtocolRegistrationListener
 {
   protected:
     std::set<const Protocol *> protocols;
@@ -34,7 +34,6 @@ class INET_API ProtocolChecker : public PacketFilterBase, public IProtocolRegist
     virtual void initialize(int stage) override;
     virtual void dropPacket(Packet *packet) override;
 
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:

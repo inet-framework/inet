@@ -26,7 +26,7 @@ namespace inet {
 /**
  * This module classifies and assigns User Priority to packets.
  */
-class INET_API QosClassifier : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API QosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
     int defaultUp;
