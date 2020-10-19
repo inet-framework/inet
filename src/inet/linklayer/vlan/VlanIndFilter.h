@@ -34,7 +34,7 @@ class INET_API VlanIndFilter : public PacketFilterBase, public TransparentProtoc
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void processPacket(Packet *packet) override;
+    virtual void processPacket(Packet *packet) override { }
     virtual void dropPacket(Packet *packet) override;
 
   public:

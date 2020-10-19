@@ -36,7 +36,7 @@ class INET_API VlanReqFilter : public PacketFilterBase, public TransparentProtoc
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual void initialize(int stage) override;
-    virtual void processPacket(Packet *packet) override;
+    virtual void processPacket(Packet *packet) override { }
     virtual void dropPacket(Packet *packet) override;
 
   public:
