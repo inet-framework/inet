@@ -50,7 +50,6 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
         // Find output interface of destination address and send packet to output interface
         // if not found then broadcasts to all other interfaces instead
         int outgoingInterfaceId = macAddressTable->getInterfaceIdForAddress(destinationAddress);
-        auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
         // should not send out the same packet on the same interface
         // (although wireless interfaces are ok to receive the same message)
         if (incomingInterfaceId == outgoingInterfaceId) {
@@ -61,8 +60,10 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
             emit(packetDroppedSignal, outgoingPacket, &details);
             delete outgoingPacket;
         }
-        else if (outgoingInterfaceId != -1)
+        else if (outgoingInterfaceId != -1) {
+            auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
             sendPacket(outgoingPacket->dup(), destinationAddress, outgoingInterface);
+        }
         else
             broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
     }
