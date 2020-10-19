@@ -90,7 +90,7 @@ void MessageDispatcher::pushPacketStart(Packet *packet, cGate *inGate, bps datar
     take(packet);
     auto outGate = handlePacket(packet, inGate);
     auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
-    pushOrSendPacketStart(packet, outGate, consumer, datarate);
+    pushOrSendPacketStart(packet, outGate, consumer, datarate, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -101,7 +101,7 @@ void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate)
     auto outGate = handlePacket(packet, inGate);
     auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
     handlePacketProcessed(packet);
-    pushOrSendPacketEnd(packet, outGate, consumer);
+    pushOrSendPacketEnd(packet, outGate, consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -147,15 +147,25 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
             auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));
             if (it != serviceToGateIndex.end())
                 return gate("out", it->second);
-            else
-                throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            else {
+                auto it = serviceToGateIndex.find(Key(-1, servicePrimitive));
+                if (it != serviceToGateIndex.end())
+                    return gate("out", it->second);
+                else
+                    throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            }
         }
         else if (servicePrimitive == SP_INDICATION) {
             auto it = protocolToGateIndex.find(Key(protocol->getId(), servicePrimitive));
             if (it != protocolToGateIndex.end())
                 return gate("out", it->second);
-            else
-                throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            else {
+                auto it = protocolToGateIndex.find(Key(-1, servicePrimitive));
+                if (it != protocolToGateIndex.end())
+                    return gate("out", it->second);
+                else
+                    throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            }
         }
         else
             throw cRuntimeError("handlePacket(): Unknown service primitive");
@@ -203,15 +213,25 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
             auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));
             if (it != serviceToGateIndex.end())
                 return gate("out", it->second);
-            else
-                throw cRuntimeError("handleMessage(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
+            else {
+                auto it = serviceToGateIndex.find(Key(-1, servicePrimitive));
+                if (it != serviceToGateIndex.end())
+                    return gate("out", it->second);
+                else
+                    throw cRuntimeError("handleMessage(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
+            }
         }
         else if (servicePrimitive == SP_INDICATION) {
             auto it = protocolToGateIndex.find(Key(protocol->getId(), servicePrimitive));
             if (it != protocolToGateIndex.end())
                 return gate("out", it->second);
-            else
-                throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            else {
+                auto it = protocolToGateIndex.find(Key(-1, servicePrimitive));
+                if (it != protocolToGateIndex.end())
+                    return gate("out", it->second);
+                else
+                    throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            }
         }
         else
             throw cRuntimeError("handlePacket(): Unknown service primitive");
@@ -252,6 +272,30 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
     }
 }
 
+void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterAnyService");
+    EV_INFO << "Registering any service" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+    auto key = Key(-1, servicePrimitive);
+    auto it = serviceToGateIndex.find(key);
+    if (it != serviceToGateIndex.end()) {
+        if (it->second != g->getIndex())
+            throw cRuntimeError("handleRegisterAnyService(): any service is already registered");
+    }
+    else {
+        serviceToGateIndex[key] = g->getIndex();
+        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
+        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+        int size = gateSize(gateName);
+        for (int i = 0; i < size; i++) {
+            auto otherGate = gate(gateName, i);
+            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
+            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
+                registerAnyService(otherGate, servicePrimitive);
+        }
+    }
+}
+
 void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
@@ -272,6 +316,30 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
             auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
             if (connectedGate->getOwner() != otherConnectedGate->getOwner())
                 registerProtocol(protocol, otherGate, servicePrimitive);
+        }
+    }
+}
+
+void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterAnyProtocol");
+    EV_INFO << "Registering any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+    auto key = Key(-1, servicePrimitive);
+    auto it = protocolToGateIndex.find(key);
+    if (it != protocolToGateIndex.end()) {
+        if (it->second != g->getIndex())
+            throw cRuntimeError("handleRegisterAnyProtocol(): any protocol is already registered");
+    }
+    else {
+        protocolToGateIndex[key] = g->getIndex();
+        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
+        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+        int size = gateSize(gateName);
+        for (int i = 0; i < size; i++) {
+            auto otherGate = gate(gateName, i);
+            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
+            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
+                registerAnyProtocol(otherGate, servicePrimitive);
         }
     }
 }

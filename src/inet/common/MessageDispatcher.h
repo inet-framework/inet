@@ -31,7 +31,7 @@ namespace inet {
 /**
  * This class implements the corresponding module. See module documentation for more details.
  */
-class INET_API MessageDispatcher : public queueing::PacketProcessorBase, public IProtocolRegistrationListener, public IInterfaceRegistrationListener, public queueing::IActivePacketSource, public queueing::IPassivePacketSink
+class INET_API MessageDispatcher : public queueing::PacketProcessorBase, public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener, public queueing::IActivePacketSource, public queueing::IPassivePacketSink
 {
   public:
     class Key
@@ -87,8 +87,12 @@ class INET_API MessageDispatcher : public queueing::PacketProcessorBase, public 
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual void handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in) override;
+
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override;
+
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {
