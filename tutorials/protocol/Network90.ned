@@ -34,7 +34,6 @@ import inet.queueing.queue.PacketQueue;
 import inet.queueing.server.InstantServer;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
-import ned.TransmissionChannel;
 
 module SenderHost
 {
@@ -192,5 +191,5 @@ network Network90
             @display("p=200,100");
         }
     connections:
-        sender.g --> TransmissionChannel {  delay = 1us; } --> receiver.g;
+        sender.g --> { delay = 1us; } --> receiver.g;
 }
