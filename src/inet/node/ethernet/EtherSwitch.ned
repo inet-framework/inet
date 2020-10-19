@@ -88,7 +88,7 @@ module EtherSwitch
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,100");
         }
-        up: MessageDispatcher {
+        nr: MessageDispatcher {
             parameters:
                 @display("p=800,200;b=1200,5");
         }
@@ -106,7 +106,7 @@ module EtherSwitch
         policy: <default("OmittedPolicyLayer")> like IPolicyLayer {
             @display("p=800,350");
         }
-        pl: MessageDispatcher {
+        rl: MessageDispatcher {
             parameters:
                 @display("p=800,400;b=1200,5");
         }
@@ -117,7 +117,7 @@ module EtherSwitch
             @display("p=700,450");
         }
         cutthrough: MessageDispatcher if enableCutthrough {
-            @display("p=800,600;b=1200,5,,,,1");
+            @display("p=800,600;b=1200,5");
         }
     connections:
         ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
@@ -131,23 +131,23 @@ module EtherSwitch
             eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
         }
 
-        relayUnit.ifOut --> policy.upperLayerIn;
-        policy.upperLayerOut --> relayUnit.ifIn;
+        relayUnit.ifOut --> policy.upperLayerIn if exists(policy);
+        policy.upperLayerOut --> relayUnit.ifIn if exists(policy);
 
-        policy.lowerLayerOut --> pl.in++;
-        pl.out++ --> policy.lowerLayerIn;
+        policy.lowerLayerOut --> rl.in++;
+        rl.out++ --> policy.lowerLayerIn;
 
-        pl.out++ --> li.in++;
-        li.out++ --> pl.in++;
+        rl.out++ --> li.in++;
+        li.out++ --> rl.in++;
 
-        ieee8021q.upperLayerOut --> pl.in++ if exists(ieee8021q);
-        pl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+        ieee8021q.upperLayerOut --> rl.in++ if exists(ieee8021q);
+        rl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
 
-        pl.out++ --> ethernet.upperLayerIn if exists(ethernet);
-        ethernet.upperLayerOut --> pl.in++ if exists(ethernet);
+        rl.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> rl.in++ if exists(ethernet);
 
-        relayUnit.ifOut --> li.in++ if !exists(ethernet);
-        li.out++ --> relayUnit.ifIn if !exists(ethernet);
+        relayUnit.ifOut --> li.in++ if !exists(policy);
+        li.out++ --> relayUnit.ifIn if !exists(policy);
 
         for i=0..sizeof(ethg)-1 {
             li.out++ --> eth[i].upperLayerIn;
@@ -156,14 +156,14 @@ module EtherSwitch
         }
 
         if hasStp {
-            stp.relayIn <-- up.out++; // relayUnit.stpOut;
-            stp.relayOut --> up.in++; // relayUnit.stpIn;
+            stp.relayIn <-- nr.out++; // relayUnit.stpOut;
+            stp.relayOut --> nr.in++; // relayUnit.stpIn;
         }
-        relayUnit.upperLayerOut --> up.in++ if !exists(encap);
-        up.out++ --> relayUnit.upperLayerIn if !exists(encap);
+        relayUnit.upperLayerOut --> nr.in++ if !exists(encap);
+        nr.out++ --> relayUnit.upperLayerIn if !exists(encap);
         relayUnit.upperLayerOut --> encap.lowerLayerIn if exists(encap);
         encap.lowerLayerOut --> relayUnit.upperLayerIn if exists(encap);
-        encap.upperLayerOut --> up.in++ if exists(encap);
-        up.out++ --> encap.upperLayerIn if exists(encap);
+        encap.upperLayerOut --> nr.in++ if exists(encap);
+        nr.out++ --> encap.upperLayerIn if exists(encap);
 }
 
