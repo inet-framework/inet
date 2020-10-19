@@ -125,8 +125,10 @@ const char *Chunk::getHexDumpLine(int index)
 const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto chunkType = chunk->getChunkType();
-    if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES)
-        throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag to peek)");
+    if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES) {
+        auto chunkObject = chunk.get();
+        throw cRuntimeError("Implicit data reinterpretation via chunk serialization/deserialization (%s -> %s) is disabled to prevent unexpected behavior due to reinterpretation and unpredictable performance degradation due to overhead (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag)", opp_typename(typeid(*chunkObject)), opp_typename(typeInfo));
+    }
     MemoryOutputStream outputStream;
     serialize(outputStream, chunk, offset, length < b(0) ? std::min(-length, chunk->getChunkLength() - offset) : length);
     MemoryInputStream inputStream(outputStream.getData());
