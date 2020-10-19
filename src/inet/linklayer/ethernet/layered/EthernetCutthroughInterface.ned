@@ -27,6 +27,7 @@ import inet.physicallayer.ethernet.IEthernetPhyLayer;
 module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
+        string protocol = default("ethernetmac");
         bool broadcast = default(true);
         bool multicast = default(true);
         string address = default("auto");
