@@ -124,7 +124,9 @@ TCP_lwIP::~TCP_lwIP()
 
     while (!tcpAppConnMapM.empty()) {
         auto i = tcpAppConnMapM.begin();
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9 KLUDGE
         delete i->second;
+#endif
         tcpAppConnMapM.erase(i);
     }
 

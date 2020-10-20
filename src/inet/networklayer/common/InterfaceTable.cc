@@ -61,8 +61,11 @@ InterfaceTable::InterfaceTable()
 
 InterfaceTable::~InterfaceTable()
 {
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     for (auto & elem : idToInterface)
         delete elem;
+#endif
+
     delete[] tmpInterfaceList;
 }
 

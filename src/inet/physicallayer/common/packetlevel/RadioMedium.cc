@@ -72,10 +72,12 @@ RadioMedium::RadioMedium() :
 RadioMedium::~RadioMedium()
 {
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9 KLUDGE
     for (const auto transmission : transmissions) {
         delete communicationCache->getCachedFrame(transmission);
         delete transmission;
     }
+#endif
     if (recordCommunicationLog)
         communicationLog.close();
 }
