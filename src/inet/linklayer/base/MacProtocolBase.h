@@ -43,7 +43,11 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     Packet *currentTxFrame = nullptr;
 
     /** Messages received from upper layer and to be transmitted later */
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     queueing::IPacketQueue *txQueue = nullptr;
+#else
+    opp_component_ptr<queueing::IPacketQueue> txQueue;
+#endif
 
     cModule *hostModule = nullptr;
 
