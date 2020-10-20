@@ -230,8 +230,8 @@
 
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,     5s,              22ce-5b66/tplx, PASS,
 
-/examples/inet/tcpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         f581-3160/tplx, PASS,
-/examples/inet/tcpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         d037-fc50/tplx, PASS,
+/examples/inet/tcpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         fb1f-f23b/tplx, PASS,
+/examples/inet/tcpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         978e-77bc/tplx, PASS,
 
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c default_tcp -r 0,            100s,            84ae-42e9/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet -r 0,             100s,            84ae-42e9/tplx, PASS,
@@ -293,8 +293,8 @@
 /examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0,                 10s,             1025-9a06/tplx, PASS,
 /examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0,                 10s,             bf75-e8bf/tplx, PASS,
 
-/examples/inet/udpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         0b36-9d13/tplx, PASS,
-/examples/inet/udpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         803d-2648/tplx, PASS,
+/examples/inet/udpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         4d04-cbe8/tplx, PASS,
+/examples/inet/udpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         6e73-9cb3/tplx, PASS,
 
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           badd-c767/tplx, PASS,
 
