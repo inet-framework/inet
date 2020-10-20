@@ -27,7 +27,11 @@ void PacketQueueingElementBase::animateSend(Packet *packet, cGate *gate)
     if (envir->isGUI()) {
         packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
         if (gate->getNextGate() != nullptr) {
+#if OMNETPP_BUILDNUM >= 1504
+            envir->beginSend(packet, SendOptions());
+#else
             envir->beginSend(packet);
+#endif
             while (gate->getNextGate() != nullptr) {
                 envir->messageSendHop(packet, gate);
                 gate = gate->getNextGate();
