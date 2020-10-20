@@ -50,7 +50,7 @@ void PacketTaggerBase::initialize(int stage)
         if (strlen(interfaceName) != 0) {
             auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
             auto interface = CHK(interfaceTable->findInterfaceByName(interfaceName));
-            interfaceId = interface->getId();
+            interfaceId = interface->getInterfaceId();
         }
     }
 }
