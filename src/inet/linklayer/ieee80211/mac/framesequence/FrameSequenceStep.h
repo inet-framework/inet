@@ -35,8 +35,13 @@ class INET_API TransmitStep : public ITransmitStep
             frameToTransmit(frame),
             ifs(ifs)
         { }
-
-        virtual ~TransmitStep() { if (!dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(frameToTransmit->peekAtFront<Ieee80211MacHeader>())) delete frameToTransmit; }
+        virtual ~TransmitStep()
+        {
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
+            if (!dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(frameToTransmit->peekAtFront<Ieee80211MacHeader>()))
+                delete frameToTransmit;
+#endif
+        }
 
         virtual Completion getCompletion() override { return completion; }
         virtual void setCompletion(Completion completion) override { this->completion = completion; }

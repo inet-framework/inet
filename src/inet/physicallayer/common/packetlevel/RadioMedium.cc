@@ -74,10 +74,12 @@ RadioMedium::RadioMedium() :
 RadioMedium::~RadioMedium()
 {
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9 KLUDGE
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
         delete communicationCache->getCachedSignal(transmission);
         delete transmission;
     });
+#endif
     if (recordCommunicationLog)
         communicationLog.close();
 }

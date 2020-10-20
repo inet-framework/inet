@@ -70,7 +70,9 @@ FrameSequenceContext::~FrameSequenceContext()
         delete step;
     delete nonQoSContext;
     delete qosContext;
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     inProgressFrames->clearDroppedFrames();
+#endif
 }
 
 Register_ResultFilter("frameSequenceDuration", FrameSequenceDurationFilter);
