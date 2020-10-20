@@ -19,10 +19,12 @@
 #define __INET_IINTERFACETABLE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/NetworkInterface.h"    // not strictly required, but clients will need it anyway
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
+
+class NetworkInterface;
+class NetworkInterfaceChangeDetails;
 
 struct MulticastGroup
 {
