@@ -22,7 +22,7 @@
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
 	        		</Networks>
-	        		
+	        		<PassiveInterface>eth3</PassiveInterface>
 	        	</ProcessIPv4>
         	</EIGRP>
         </Routing>
@@ -55,7 +55,7 @@
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
 	        		</Networks>
-	        		
+	        		<PassiveInterface>eth3</PassiveInterface>
 	        		<Stub connected='enabled' summary='enabled'/>
 	        	</ProcessIPv4>
         	</EIGRP>
@@ -89,7 +89,7 @@
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
 	        		</Networks>
-	        		
+	        		<PassiveInterface>eth3</PassiveInterface>
 	        	</ProcessIPv4>
         	</EIGRP>
         </Routing>
@@ -122,7 +122,7 @@
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
 	        		</Networks>
-	        		
+	        		<PassiveInterface>eth3</PassiveInterface>
 	        		<Stub connected='enabled' summary='enabled'/>
 	        	</ProcessIPv4>
         	</EIGRP>

@@ -73,7 +73,7 @@ EigrpWideMetricPar EigrpMetricHelper::adjustParam(const EigrpWideMetricPar& ifPa
     else
     {
         newMetricPar.delay = ifParam.delay + neighParam.delay;
-        newMetricPar.bandwidth = getMax(ifParam.bandwidth, neighParam.bandwidth);
+        newMetricPar.bandwidth = getMin(ifParam.bandwidth, neighParam.bandwidth);
     }
 
     return newMetricPar;

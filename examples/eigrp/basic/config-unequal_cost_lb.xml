@@ -37,7 +37,9 @@
     <Router id="10.0.3.0">
         <Interfaces>
             <Interface name="eth0">
-                <Delay>11</Delay>
+                <EIGRP-IPv4 asNumber="1">
+                	<Delay>11</Delay>
+                </EIGRP-IPv4>
             </Interface>
         </Interfaces>
         

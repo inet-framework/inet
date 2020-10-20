@@ -16,6 +16,7 @@
 //
 /**
 * @file EigrpIpv6Pdm.h
+* @author Jan Zavrel (honza.zavrel96@gmail.com)
 * @author Vit Rek (rek@kn.vutbr.cz)
 * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
 * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
@@ -313,6 +314,7 @@ protected:
     ~EigrpIpv6Pdm();
 
     //-- INTERFACE IEigrpModule
+    virtual void updateInterface(int interfaceId) override { processIfaceConfigChange(this->eigrpIft->findInterfaceById(interfaceId)); }
     void addInterface(int ifaceId, int networkId, bool enabled) override { /* useful only for IPv4 */ }
     void addInterface(int ifaceId, bool enabled) override { addInterfaceToEigrp(ifaceId, enabled); }
     EigrpNetwork<Ipv6Address> *addNetwork(Ipv6Address address, Ipv6Address mask) override;

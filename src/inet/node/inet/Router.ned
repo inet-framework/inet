@@ -87,6 +87,8 @@ module Router extends ApplicationLayerNodeBase
         }
         eigrp: <"EigrpProcessDS"> like IEigrp if hasEigrp {
             parameters:
+                enableIPv6 = hasIpv6;
+                enableIPv4 = hasIpv4;
                 @display("p=1113,225");
         }
 

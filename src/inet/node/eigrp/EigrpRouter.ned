@@ -31,7 +31,7 @@ module EigrpRouter extends Router
 {
     parameters:
         hasEigrp = true;
-        hasIpv6 = true;
+        hasIpv6 = default(true);
         *.routingTableModule = default("^.^.ipv4.routingTable");
         *.routingTableModule6 = default("^.^.ipv6.routingTable");     
 }

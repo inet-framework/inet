@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <scenario>
-	<!-- Scenario 2 - link between R2 and R3 goes down -->
+	<!-- Scenario - link between R2 and R3 goes down -->
 
   	<at t="9">
 		<disconnect src-module="R2" src-gate="ethg[1]"/>
