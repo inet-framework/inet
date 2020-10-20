@@ -51,15 +51,20 @@ std::vector<pcap_t *> cSocketRTScheduler::pds;
 std::vector<int32> cSocketRTScheduler::datalinks;
 std::vector<int32> cSocketRTScheduler::headerLengths;
 
+#if OMNETPP_VERSION < 0x0600
 timeval cSocketRTScheduler::baseTime;
+#else
+int64_t cSocketRTScheduler::baseTime;
+#endif
 
 Register_Class(cSocketRTScheduler);
 
+#if OMNETPP_VERSION < 0x0600
 inline std::ostream& operator<<(std::ostream& out, const timeval& tv)
 {
     return out << (uint32)tv.tv_sec << "s" << tv.tv_usec << "us";
 }
-
+#endif
 
 cSocketRTScheduler::cSocketRTScheduler() : cScheduler()
 {
@@ -72,7 +77,11 @@ cSocketRTScheduler::~cSocketRTScheduler()
 
 void cSocketRTScheduler::startRun()
 {
+#if OMNETPP_VERSION < 0x0600
     gettimeofday(&baseTime, nullptr);
+#else
+    baseTime = opp_get_monotonic_clock_usecs();
+#endif
 
     // Enabling sending makes no sense when we can't receive...
     fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
@@ -106,8 +115,13 @@ void cSocketRTScheduler::endRun()
 
 void cSocketRTScheduler::executionResumed()
 {
+#if OMNETPP_VERSION < 0x0600
     gettimeofday(&baseTime, nullptr);
     baseTime = timeval_substract(baseTime, sim->getSimTime().dbl());
+#else
+    baseTime = opp_get_monotonic_clock_usecs();
+    baseTime = baseTime - sim->getSimTime().inUnit(SIMTIME_US);
+ #endif
 }
 
 void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const char *filter)
@@ -207,10 +221,15 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
 
     // signalize new incoming packet to the interface via cMessage
     EV << "Captured " << hdr->caplen - headerLength << " bytes for an IP packet.\n";
+#if OMNETPP_VERSION < 0x0600
     timeval curTime;
     gettimeofday(&curTime, nullptr);
     curTime = timeval_substract(curTime, cSocketRTScheduler::baseTime);
     simtime_t t = curTime.tv_sec + curTime.tv_usec * 1e-6;
+#else
+    int64_t curTime = opp_get_monotonic_clock_usecs();
+    simtime_t t(curTime - cSocketRTScheduler::baseTime, SIMTIME_US);
+#endif
     // TBD assert that it's somehow not smaller than previous event's time
 #if OMNETPP_BUILDNUM <= 1003
     notificationMsg->setArrival(module, -1, t);
@@ -263,24 +282,42 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
     return found;
 }
 
+#if OMNETPP_VERSION < 0x0600
 int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
+#else
+int cSocketRTScheduler::receiveUntil(int64_t targetTime)
+#endif
 {
     // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking getEnvir()->idle()
+#if OMNETPP_VERSION < 0x0600
     timeval curTime;
     gettimeofday(&curTime, nullptr);
     while (targetTime.tv_sec-curTime.tv_sec >=2 ||
            timeval_diff_usec(targetTime, curTime) >= 2*UI_REFRESH_TIME)
+#else
+    int64_t curTime = opp_get_monotonic_clock_usecs();
+    while ((targetTime - curTime) >= 2000000 || (targetTime - curTime) >= 2*UI_REFRESH_TIME)
+#endif
     {
         if (receiveWithTimeout(UI_REFRESH_TIME))
             return 1;
         if (getEnvir()->idle())
             return -1;
+#if OMNETPP_VERSION < 0x0600
         gettimeofday(&curTime, nullptr);
+#else
+        curTime = opp_get_monotonic_clock_usecs();
+#endif
     }
 
     // difference is now at most UI_REFRESH_TIME, do it at once
+#if OMNETPP_VERSION < 0x0600
     long usec = timeval_diff_usec(targetTime, curTime);
+#else
+    int64_t usec = targetTime - curTime;
+#endif
+
     if (usec>0)
         if (receiveWithTimeout(usec))
             return 1;
@@ -294,24 +331,44 @@ cEvent *cSocketRTScheduler::guessNextEvent()
 
 cEvent *cSocketRTScheduler::takeNextEvent()
 {
+#if OMNETPP_VERSION < 0x0600
     timeval targetTime;
+#else
+    int64_t targetTime;
+#endif
 
     // calculate target time
     cEvent *event = FES(sim)->peekFirst();
     if (!event) {
+#if OMNETPP_VERSION < 0x0600
         targetTime.tv_sec = LONG_MAX;
         targetTime.tv_usec = 0;
+#else
+        // This way targetTime will always be "as far in the future as possible", considering
+        // how integer overflows work in conjunction with comparisons in C++ (in practice...)
+        targetTime = baseTime + INT64_MAX;
+#endif
     }
     else {
         // use time of next event
         simtime_t eventSimtime = event->getArrivalTime();
+#if OMNETPP_VERSION < 0x0600
         targetTime = timeval_add(baseTime, eventSimtime.dbl());
+#else
+        targetTime = baseTime + eventSimtime.inUnit(SIMTIME_US);
+#endif
     }
 
     // if needed, wait until that time arrives
+#if OMNETPP_VERSION < 0x0600
     timeval curTime;
     gettimeofday(&curTime, nullptr);
     if (timeval_greater(targetTime, curTime))
+#else
+    int64_t curTime = opp_get_monotonic_clock_usecs();
+
+    if (targetTime > curTime)
+#endif
     {
         int status = receiveUntil(targetTime);
         if (status == -1)
@@ -322,8 +379,13 @@ cEvent *cSocketRTScheduler::takeNextEvent()
     else {
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
+#if OMNETPP_VERSION < 0x0600
         timeval diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
+#else
+        int64_t diffTime = curTime - targetTime;
+        EV << "We are behind: " << diffTime * 1e-6 << " seconds\n";
+#endif
     }
     cEvent *tmp = FES(sim)->removeFirst();
     ASSERT(tmp == event);
