@@ -44,7 +44,7 @@ using namespace omnetpp;
 #endif // if OMNETPP_VERSION < 0x0503
 
 #define INET_VERSION  0x0306
-#define INET_PATCH_LEVEL 0x07
+#define INET_PATCH_LEVEL 0x08
 
 #if OMNETPP_VERSION < 0x0600
 #define OMNETPP5_CODE(x) x

@@ -45,7 +45,7 @@ echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
 cd $INET_ROOT/out/$DIRNAME
 # patching files
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
-perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
+perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet/inet-index.ned
 
 # cleanup
 rm -rf _scripts obsolete doc
