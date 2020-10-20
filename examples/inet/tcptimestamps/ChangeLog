@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2020-02-10  Rudolf Hornig
+
+	examples: removed tkenv related config keys
+
 2019-11-04  ------ inet-3.6.7 released ------
 
 2019-08-16  ------ inet-3.6.6 released ------

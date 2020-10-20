@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2020-10-19  Zoltan Bojthe
+
+	EtherHub: checkConnnections also check the transmission channels
+
 2019-11-04  ------ inet-3.6.7 released ------
 
 2019-08-16  ------ inet-3.6.6 released ------

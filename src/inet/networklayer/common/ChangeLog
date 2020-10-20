@@ -1,3 +1,11 @@
+2020-10-20  Zoltan Bojthe
+
+	KLUDGEs - for omnetpp6 delete module sequence
+
+	for memory leak instead of crash with OMNeT 6
+
+----------- lines above this marker have been added from git log -----------
+
 ====== inet-3.x ======
 
 2019-11-04  ------ inet-3.6.7 released ------

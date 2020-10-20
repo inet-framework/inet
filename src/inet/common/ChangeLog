@@ -1,5 +1,18 @@
 ====== inet-3.x ======
 
+2020-10-20  Rudolf Hornig
+
+	prod: updated to v3.6.8 with OMNeT++ 6.0 preview 9 compatibility
+
+2020-10-16  Zoltan Bojthe
+
+	compat: replace getModuleByPath() to findModuleByPath() for OMNeT 6 with
+	macro
+
+2020-10-16  Andras Varga
+
+	ThruputMeteringChannel to support both omnetpp5 and 6
+
 2019-11-04  ------ inet-3.6.7 released ------
 
 2019-08-16  ------ inet-3.6.6 released ------
