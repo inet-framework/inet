@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MODULEREF_H
-#define __INET_MODULEREF_H
+#ifndef __INET_MODULEREFBYGATE_H
+#define __INET_MODULEREFBYGATE_H
 
 #include "inet/common/ModuleAccess.h"
 
@@ -32,14 +32,20 @@ namespace inet {
  * TODO: follow connection
  */
 template <typename T>
-class INET_API ModuleRef
+class INET_API ModuleRefByGate
 {
   private:
     opp_component_ptr<T> referencedModule;
+    cGate *gate = nullptr;
 
     void checkReference() const {
-        if (referencedModule.getNullable() == nullptr)
-            throw cRuntimeError("Dereferencing uninitialized reference of type '%s'", opp_typename(typeid(T)));
+        if (referencedModule.getNullable() == nullptr) {
+            if (gate == nullptr)
+                throw cRuntimeError("Dereferencing uninitialized reference of type '%s'", opp_typename(typeid(T)));
+            else
+                throw cRuntimeError("Dereferencing nullptr of type '%s' referenced by '(%s)%s' through gate '%s'",
+                                    opp_typename(typeid(T)), gate->getOwnerModule()->getClassName(), gate->getOwnerModule()->getFullPath().c_str(), gate->getFullName());
+        }
     }
 
   public:
@@ -54,6 +60,7 @@ class INET_API ModuleRef
     }
 
     operator T *() const {
+        checkReference();
         return referencedModule;
     }
 
@@ -65,18 +72,15 @@ class INET_API ModuleRef
     T *get() { checkReference(); return get(); }
     const T *get() const { checkReference(); return get(); }
 
-    void reference(cModule *referencingModule, const char *parameterName, bool mandatory) {
-        if (referencingModule == nullptr)
-            throw cRuntimeError("Referencing module is nullptr");
-        if (parameterName == nullptr)
-            throw cRuntimeError("Parameter name is nullptr");
-        auto& parameter = referencingModule->par(parameterName);
-        referencedModule = mandatory ? getModuleFromPar<T>(parameter, referencingModule) : findModuleFromPar<T>(parameter, referencingModule);
-    }
+    cGate *getGate() { return gate; }
+    const cGate *getGate() const { return gate; }
 
     void reference(cGate *gate, bool mandatory) {
         if (gate == nullptr)
             throw cRuntimeError("Gate is nullptr");
+        if (this->gate != nullptr)
+            throw cRuntimeError("Reference is already initialized");
+        this->gate = gate;
         referencedModule = mandatory ? getConnectedModule<T>(gate) : findConnectedModule<T>(gate);
     }
 };
