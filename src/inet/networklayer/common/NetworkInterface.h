@@ -19,7 +19,7 @@
 #define __INET_NETWORKINTERFACE_H
 
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/ModuleRef.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/tag/TagSet.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
@@ -27,6 +27,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
@@ -107,7 +108,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     queueing::IPassivePacketSink *consumer = nullptr;
 
     const Protocol *protocol = nullptr;
-    ModuleRef<IInterfaceTable> interfaceTable;    ///< IInterfaceTable that contains this interface, or nullptr
+    ModuleRefByPar<IInterfaceTable> interfaceTable;    ///< IInterfaceTable that contains this interface, or nullptr
     int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
     std::string interfaceName;
     int nodeOutputGateId = -1;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)

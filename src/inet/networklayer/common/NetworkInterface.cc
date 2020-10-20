@@ -25,7 +25,6 @@
 #include "inet/common/SubmoduleLayout.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 #ifdef WITH_IPv4
@@ -109,6 +108,7 @@ void NetworkInterface::initialize(int stage)
                 txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
         }
         consumer = findConnectedModule<IPassivePacketSink>(upperLayerOut);
+        interfaceTable.reference(this, "interfaceTableModule", false);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         setCarrier(computeCarrier());
         setDatarate(computeDatarate());
@@ -152,7 +152,6 @@ void NetworkInterface::initialize(int stage)
             setMtu(par("mtu"));
         if (hasPar("pointToPoint"))
             setPointToPoint(par("pointToPoint"));
-        interfaceTable.set(this, "interfaceTableModule");
         if (interfaceTable)
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));

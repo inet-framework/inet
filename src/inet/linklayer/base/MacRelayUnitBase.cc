@@ -21,6 +21,7 @@
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/base/MacRelayUnitBase.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -30,8 +31,8 @@ void MacRelayUnitBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        macAddressTable.set(this, "macTableModule");
-        interfaceTable.set(this, "interfaceTableModule");
+        macAddressTable.reference(this, "macTableModule", true);
+        interfaceTable.reference(this, "interfaceTableModule", true);
         numProcessedFrames = numDroppedFrames = 0;
         WATCH(numProcessedFrames);
         WATCH(numDroppedFrames);

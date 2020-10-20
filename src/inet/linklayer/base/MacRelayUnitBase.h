@@ -20,8 +20,9 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/ModuleRef.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -29,8 +30,8 @@ namespace inet {
 class INET_API MacRelayUnitBase : public LayeredProtocolBase
 {
   protected:
-    ModuleRef<IInterfaceTable> interfaceTable;
-    ModuleRef<IMacAddressTable> macAddressTable;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
+    ModuleRefByPar<IMacAddressTable> macAddressTable;
 
     long numProcessedFrames = 0;
     long numDroppedFrames = 0;
