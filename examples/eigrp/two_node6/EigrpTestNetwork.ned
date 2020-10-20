@@ -18,7 +18,7 @@
 // @author 
 
 
-//testovaci sit pro praci s EIGRP pro IPv6-only
+//Testing topology for EIGRP in Ipv6-only mode
 
 package inet.examples.eigrp.two_node6;
 

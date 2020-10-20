@@ -78,11 +78,11 @@ cXMLElement * EigrpDeviceConfigurator::GetIPv6Address(cXMLElement *addr, cXMLEle
 
    // initial call of the method - get first "Ipv6Address" child node
    if (iface != NULL){
-      addr = iface->getFirstChildWithTag("Ipv6Address");
+      addr = iface->getFirstChildWithTag("IPv6Address");
 
    // repeated call - get another "Ipv6Address" sibling node
    }else if (addr != NULL){
-      addr = addr->getNextSiblingWithTag("Ipv6Address");
+      addr = addr->getNextSiblingWithTag("IPv6Address");
    }else{
       addr = NULL;
    }
@@ -418,7 +418,6 @@ void EigrpDeviceConfigurator::loadEigrpInterfacesConfig(cXMLElement *device, IEi
         }
         int ifaceId = iface->getInterfaceId();
 
-        loadEigrpInterfaceParams(ifaceElem, eigrpModule, ifaceId, ifaceName);
 
 
         // Get EIGRP configuration for interface
@@ -435,17 +434,22 @@ void EigrpDeviceConfigurator::loadEigrpInterfacesConfig(cXMLElement *device, IEi
             if (!success || tempNumber < 1 || tempNumber > 65535)
                 throw cRuntimeError("Bad value for EIGRP autonomous system number (<1, 65535>) on interface %s", ifaceName);
             // TODO vybrat podle AS spravny PDM a pro ten nastavovat nasledujici
+            if( tempNumber == eigrpModule->getASNum())
+            {
+                loadEigrpInterface(eigrpIfaceElem, eigrpModule, ifaceId, ifaceName);
 
-            loadEigrpInterface(eigrpIfaceElem, eigrpModule, ifaceId, ifaceName);
+                if (loadEigrpInterfaceParams(eigrpIfaceElem, eigrpModule, ifaceId, ifaceName))
+                    eigrpModule->updateInterface(ifaceId);
+            }
         }
         ifaceElem = GetInterface(ifaceElem, NULL);
     }
 }
 
-void EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, IEigrpModule<Ipv4Address> *eigrpModule, int ifaceId, const char *ifaceName)
+bool EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, IEigrpModule<Ipv4Address> *eigrpModule, int ifaceId, const char *ifaceName)
 {
     int tempNumber;
-    bool tempBool, success;
+    bool success, changed = false;
 
     cXMLElementList ifDetails = eigrpIface->getChildren();
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++)
@@ -458,6 +462,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, 
             if (!success || tempNumber < 0 || tempNumber > 16777215)
                 throw cRuntimeError("Bad value for EIGRP Delay on interface %s", ifaceName);
             eigrpModule->setDelay(tempNumber, ifaceId);
+            changed = true;
         }
         else if (nodeName == "Bandwidth")
         {
@@ -465,6 +470,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, 
             if (!success || tempNumber < 0 || tempNumber > 10000000)
                 throw cRuntimeError("Bad value for EIGRP Bandwidth on interface %s", ifaceName);
             eigrpModule->setBandwidth(tempNumber, ifaceId);
+            changed = true;
         }
         else if (nodeName == "Reliability")
         {
@@ -472,6 +478,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, 
             if (!success || tempNumber < 1 || tempNumber > 255)
                 throw cRuntimeError("Bad value for EIGRP Reliability on interface %s", ifaceName);
             eigrpModule->setReliability(tempNumber, ifaceId);
+            changed = true;
         }
         else if (nodeName == "Load")
         {
@@ -479,9 +486,11 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, 
             if (!success || tempNumber < 1 || tempNumber > 255)
                 throw cRuntimeError("Bad value for EIGRP Load on interface %s", ifaceName);
             eigrpModule->setLoad(tempNumber, ifaceId);
+            changed = true;
         }
 
     }
+    return changed;
 }
 
 void EigrpDeviceConfigurator::loadEigrpInterface(cXMLElement *eigrpIface, IEigrpModule<Ipv4Address> *eigrpModule, int ifaceId, const char *ifaceName)
@@ -689,10 +698,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
             ipv6AddrElem = GetIPv6Address(ipv6AddrElem, NULL);
         }
 
-
         int ifaceId = iface->getInterfaceId();
-
-        loadEigrpInterfaceParams6(ifaceElem, eigrpModule, ifaceId, ifaceName);
 
         // Get EIGRP configuration for interface
         eigrpIfaceElem = ifaceElem->getFirstChildWithTag("EIGRP-IPv6");
@@ -713,6 +719,9 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
             {// same AS number of process
                 loadEigrpInterface6(eigrpIfaceElem, eigrpModule, ifaceId, ifaceName);
 
+                if (loadEigrpInterfaceParams6(eigrpIfaceElem, eigrpModule, ifaceId, ifaceName))
+                    eigrpModule->updateInterface(ifaceId);
+
                 eigrpModule->addInterface(iface->getInterfaceId(), true); // interface included to EIGRP process -> add
 
             }
@@ -722,10 +731,10 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
     }
 }
 
-void EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface, IEigrpModule<Ipv6Address> *eigrpModule, int ifaceId, const char *ifaceName)
+bool EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface, IEigrpModule<Ipv6Address> *eigrpModule, int ifaceId, const char *ifaceName)
 {
     int tempNumber;
-    bool tempBool, success;
+    bool success, changed=false;
 
     cXMLElementList ifDetails = eigrpIface->getChildren();
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++)
@@ -738,6 +747,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface,
             if (!success || tempNumber < 0 || tempNumber > 16777215)
                 throw cRuntimeError("Bad value for EIGRP Delay on interface %s", ifaceName);
             eigrpModule->setDelay(tempNumber, ifaceId);
+            changed=true;
         }
         else if (nodeName == "Bandwidth")
         {
@@ -745,6 +755,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface,
             if (!success || tempNumber < 0 || tempNumber > 10000000)
                 throw cRuntimeError("Bad value for EIGRP Bandwidth on interface %s", ifaceName);
             eigrpModule->setBandwidth(tempNumber, ifaceId);
+            changed=true;
         }
         else if (nodeName == "Reliability")
         {
@@ -752,6 +763,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface,
             if (!success || tempNumber < 1 || tempNumber > 255)
                 throw cRuntimeError("Bad value for EIGRP Reliability on interface %s", ifaceName);
             eigrpModule->setReliability(tempNumber, ifaceId);
+            changed=true;
         }
         else if (nodeName == "Load")
         {
@@ -759,9 +771,11 @@ void EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface,
             if (!success || tempNumber < 1 || tempNumber > 255)
                 throw cRuntimeError("Bad value for EIGRP Load on interface %s", ifaceName);
             eigrpModule->setLoad(tempNumber, ifaceId);
+            changed=true;
         }
 
     }
+    return changed;
 }
 
 void EigrpDeviceConfigurator::loadEigrpInterface6(cXMLElement *eigrpIface, IEigrpModule<Ipv6Address> *eigrpModule, int ifaceId, const char *ifaceName)

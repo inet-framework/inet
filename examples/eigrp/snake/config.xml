@@ -1,17 +1,6 @@
 <Devices>
 	<!-- R1 -->
-	<Router id="10.0.1.0">
-        <Interfaces>
-            <Interface name="eth0">
-                <EIGRP-IPv4 asNumber='1'>
-                </EIGRP-IPv4>
-            </Interface>
-            <Interface name="eth1">
-                <EIGRP-IPv4 asNumber='1'>
-                </EIGRP-IPv4>
-            </Interface>        
-        </Interfaces>
-        
+	<Router id="10.0.1.0">       
         <Routing>
         	<EIGRP>
 	        	<ProcessIPv4 asNumber="1">
@@ -35,22 +24,7 @@
     </Router>
     
     <!-- R2 -->
-    <Router id="10.0.2.0">
-        <Interfaces>
-            <Interface name="eth0">
-                <EIGRP-IPv4 asNumber='1'>
-                </EIGRP-IPv4>
-            </Interface>
-            <Interface name="eth1">
-                <EIGRP-IPv4 asNumber='1'>
-                </EIGRP-IPv4>
-            </Interface>
-            <Interface name="eth2">
-                <EIGRP-IPv4 asNumber='1'>
-                </EIGRP-IPv4>
-            </Interface> 
-        </Interfaces>
-        
+    <Router id="10.0.2.0">       
         <Routing>
         	<EIGRP>
 	        	<ProcessIPv4 asNumber="1">
@@ -79,17 +53,6 @@
     
     <!-- R3 -->
     <Router id="10.0.3.0">
-        <Interfaces>
-            <Interface name="eth0">
-                <EIGRP-IPv4 asNumber='1'>
-                </EIGRP-IPv4>
-            </Interface>
-            <Interface name="eth1">
-                <EIGRP-IPv4 asNumber='1'>
-                </EIGRP-IPv4>
-            </Interface> 
-        </Interfaces>
-        
         <Routing>
         	<EIGRP>
 	        	<ProcessIPv4 asNumber="1">

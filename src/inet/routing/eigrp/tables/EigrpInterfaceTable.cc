@@ -100,26 +100,22 @@ void EigrpInterface::setInterfaceDatarate(double datarate){
     switch ((long)datarate)
         {
         case 64000: //56k modem
-            bandwidth = 64;
             delay = 20000;
             break;
         case 56000: //56k modem
-            bandwidth = 56;
             delay = 20000;
             break;
         case 1544000: //T1
-            bandwidth = 1544;
             delay = 20000;
             break;
         case 10000000: //Eth10
-            bandwidth = 10000;
             delay = 1000;
             break;
         default: //>Eth10
-            bandwidth = 100000;
             delay = 100;
             break;
         }
+        bandwidth = datarate/1000;
 }
 
 

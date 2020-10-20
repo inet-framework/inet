@@ -3,17 +3,16 @@
 	<Router id="2001:db8:a::1">
         <Interfaces>
             <Interface name="eth2">
+                <IPv6Address>fe80:a::1/10</IPv6Address>
                 <IPv6Address>2001:db8:a::1/64</IPv6Address>                
                 <EIGRP-IPv6 asNumber='1'>
                 </EIGRP-IPv6>
             </Interface>
             <Interface name="eth0">
-				<!--<IPv6Address>2001:db8:12::1/64</IPv6Address>-->
 				<IPv6Address>fe80:12::1/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>
             <Interface name="eth1">
-				<!--<IPv6Address>2001:db8:13::1/64</IPv6Address>-->
 				<IPv6Address>fe80:13::1/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>        
@@ -40,17 +39,14 @@
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>
             <Interface name="eth0">
-                <!--<IPv6Address>2001:db8:12::2/64</IPv6Address>-->
                 <IPv6Address>fe80:12::2/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1'/>
             </Interface>
             <Interface name="eth1">
-                <!--<IPv6Address>2001:db8:23::2/64</IPv6Address>-->
                 <IPv6Address>fe80:23::2/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1'/>
             </Interface> 
             <Interface name="eth2">
-                <!--<IPv6Address>2001:db8:24::2/64</IPv6Address>-->
                 <IPv6Address>fe80:24::2/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1'/>
             </Interface>
@@ -78,12 +74,10 @@
                 </EIGRP-IPv6>
             </Interface>
             <Interface name="eth1">
-				<!--<IPv6Address>2001:db8:23::3/64</IPv6Address>-->
 				<IPv6Address>fe80:23::3/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>
             <Interface name="eth0">
-				<!--<IPv6Address>2001:db8:13::3/64</IPv6Address>-->
 				<IPv6Address>fe80:13::3/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>        
@@ -111,7 +105,6 @@
                 </EIGRP-IPv6>
             </Interface>
             <Interface name="eth0">
-				<!--<IPv6Address>2001:db8:24::4/64</IPv6Address>-->
 				<IPv6Address>fe80:24::4/10</IPv6Address>
                 <EIGRP-IPv6 asNumber='1' />
             </Interface>        

@@ -65,6 +65,7 @@ class IEigrpModule
     virtual void setStub(const EigrpStub& stub) = 0;
 
     // Interface configuration
+    virtual void updateInterface(int interfaceId) = 0;
     virtual void setLoad(int load, int interfaceId) = 0;
     virtual void setBandwidth(int bandwith, int interfaceId) = 0;
     virtual void setDelay(int delay, int interfaceId) = 0;

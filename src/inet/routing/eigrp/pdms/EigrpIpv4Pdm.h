@@ -303,6 +303,7 @@ public:
     ~EigrpIpv4Pdm();
 
     //-- INTERFACE IEigrpModule
+    virtual void updateInterface(int interfaceId) override { processIfaceConfigChange(this->eigrpIft->findInterfaceById(interfaceId)); }
     void addInterface(int ifaceId, int networkId, bool enabled) override { addInterfaceToEigrp(ifaceId, networkId, enabled); }
     void addInterface(int ifaceId, bool enabled) override { /* useful only for IPv6 */ }
     EigrpNetwork<Ipv4Address> *addNetwork(Ipv4Address address, Ipv4Address mask) override;

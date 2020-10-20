@@ -16,7 +16,8 @@
 	        				<IPAddress>10.0.1.0</IPAddress>						 
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
-	        		</Networks>	        		
+	        		</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>	        		
 	        	</ProcessIPv4>
         	</EIGRP>
         </Routing>      
@@ -39,7 +40,8 @@
 	        				<IPAddress>10.0.2.0</IPAddress>						 
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
-	        		</Networks>	        		
+	        		</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>	        		
 	        		<Stub connected='enabled' summary='enabled'/>
 	        	</ProcessIPv4>
         	</EIGRP>
@@ -64,6 +66,7 @@
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
 	        		</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>
 	        	</ProcessIPv4>
         	</EIGRP>
         </Routing>       
@@ -87,6 +90,7 @@
 						 	<Wildcard>0.0.0.255</Wildcard>
 						</Network>
 	        		</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>
 	        		<Stub connected='enabled' summary='enabled'/>
 	        	</ProcessIPv4>
         	</EIGRP>
