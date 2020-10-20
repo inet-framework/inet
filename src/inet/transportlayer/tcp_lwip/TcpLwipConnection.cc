@@ -95,9 +95,19 @@ void TcpLwipConnection::initConnection(TcpLwipConnection& connP, int connIdP, Lw
 
 TcpLwipConnection::~TcpLwipConnection()
 {
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     ASSERT(!pcbM);
+#endif
     delete receiveQueueM;
     delete sendQueueM;
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION >= 0x0600    // 6.0 pre9
+    if (pcbM) {
+        pcbM->callback_arg = nullptr;
+        tcpLwipM->getLwipTcpLayer()->tcp_pcb_purge(pcbM);
+        memp_free(MEMP_TCP_PCB, pcbM);
+        pcbM = nullptr;
+    }
+#endif
 }
 
 void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)

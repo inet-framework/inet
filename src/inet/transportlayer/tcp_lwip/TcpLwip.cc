@@ -134,6 +134,7 @@ TcpLwip::~TcpLwip()
     EV_TRACE << this << ": destructor\n";
     isAliveM = false;
 
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     while (!tcpAppConnMapM.empty()) {
         auto i = tcpAppConnMapM.begin();
         auto& pcb = i->second->pcbM;
@@ -146,6 +147,7 @@ TcpLwip::~TcpLwip()
         i->second->deleteModule();
         tcpAppConnMapM.erase(i);
     }
+#endif
 
     if (pLwipFastTimerM)
         cancelAndDelete(pLwipFastTimerM);
