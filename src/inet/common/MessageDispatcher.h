@@ -59,7 +59,7 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
 
   protected:
     virtual void initialize() override;
-    virtual void arrived(cMessage *message, cGate *inGate, simtime_t t) override;
+    virtual void arrived(cMessage *message, cGate *inGate SENDOPTIONS_ARG, simtime_t t) override;
     virtual cGate *handlePacket(Packet *packet, cGate *inGate);
     virtual cGate *handleMessage(Message *request, cGate *inGate);
 
