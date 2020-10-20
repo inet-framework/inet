@@ -20,6 +20,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/transportlayer/common/L4Tools.h"

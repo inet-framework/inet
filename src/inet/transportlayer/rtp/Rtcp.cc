@@ -22,8 +22,9 @@
 ***************************************************************************/
 
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"

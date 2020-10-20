@@ -19,6 +19,7 @@
 
 #include "inet/applications/udpapp/UdpVideoStreamServer.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
