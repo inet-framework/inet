@@ -57,6 +57,15 @@ inline double fmax(double a, double b)
 
 #endif    // _MSC_VER
 
+// Around OMNeT++ 6.0 pre9, send() functions and arrived() function received
+// an extra SendOptions& options argument.
+#if OMNETPP_BUILDNUM >= 1504
+#define SENDOPTIONS_ARG        , const SendOptions& options
+#define SENDOPTIONS_ARG_NAME   , options
+#else
+#define SENDOPTIONS_ARG
+#define SENDOPTIONS_ARG_NAME
+#endif
 } // namespace inet
 
 #endif // ifndef __INET_COMPAT_H
