@@ -81,7 +81,8 @@ void InterfaceTableOsgVisualizer::removeInterfaceVisualization(const InterfaceVi
 {
     InterfaceTableVisualizerBase::removeInterfaceVisualization(interfaceVisualization);
     auto interfaceOsgVisualization = static_cast<const InterfaceOsgVisualization *>(interfaceVisualization);
-    interfaceOsgVisualization->networkNodeVisualization->removeAnnotation(interfaceOsgVisualization->node);
+    if (networkNodeVisualizer != nullptr)
+        interfaceOsgVisualization->networkNodeVisualization->removeAnnotation(interfaceOsgVisualization->node);
 }
 
 void InterfaceTableOsgVisualizer::refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface)

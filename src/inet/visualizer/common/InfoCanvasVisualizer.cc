@@ -84,7 +84,8 @@ void InfoCanvasVisualizer::removeInfoVisualization(const InfoVisualization *info
     InfoVisualizerBase::removeInfoVisualization(infoVisualization);
     auto infoCanvasVisualization = static_cast<const InfoCanvasVisualization *>(infoVisualization);
     auto figure = infoCanvasVisualization->figure;
-    infoCanvasVisualization->networkNodeVisualization->removeAnnotation(figure);
+    if (networkNodeVisualizer != nullptr)
+        infoCanvasVisualization->networkNodeVisualization->removeAnnotation(figure);
 }
 
 void InfoCanvasVisualizer::refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const

@@ -119,7 +119,8 @@ void Ieee80211CanvasVisualizer::removeIeee80211Visualization(const Ieee80211Visu
 {
     Ieee80211VisualizerBase::removeIeee80211Visualization(ieee80211Visualization);
     auto ieee80211CanvasVisualization = static_cast<const Ieee80211CanvasVisualization *>(ieee80211Visualization);
-    ieee80211CanvasVisualization->networkNodeVisualization->removeAnnotation(ieee80211CanvasVisualization->figure);
+    if (networkNodeVisualizer != nullptr)
+        ieee80211CanvasVisualization->networkNodeVisualization->removeAnnotation(ieee80211CanvasVisualization->figure);
 }
 
 } // namespace visualizer

@@ -86,7 +86,8 @@ void EnergyStorageCanvasVisualizer::removeEnergyStorageVisualization(const Energ
     EnergyStorageVisualizerBase::removeEnergyStorageVisualization(energyStorageVisualization);
     auto energyStorageCanvasVisualization = static_cast<const EnergyStorageCanvasVisualization *>(energyStorageVisualization);
     auto figure = energyStorageCanvasVisualization->figure;
-    energyStorageCanvasVisualization->networkNodeVisualization->removeAnnotation(figure);
+    if (networkNodeVisualizer != nullptr)
+        energyStorageCanvasVisualization->networkNodeVisualization->removeAnnotation(figure);
 }
 
 void EnergyStorageCanvasVisualizer::refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const

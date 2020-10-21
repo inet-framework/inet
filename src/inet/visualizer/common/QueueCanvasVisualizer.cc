@@ -86,7 +86,8 @@ void QueueCanvasVisualizer::removeQueueVisualization(const QueueVisualization *q
     QueueVisualizerBase::removeQueueVisualization(queueVisualization);
     auto queueCanvasVisualization = static_cast<const QueueCanvasVisualization *>(queueVisualization);
     auto figure = queueCanvasVisualization->figure;
-    queueCanvasVisualization->networkNodeVisualization->removeAnnotation(figure);
+    if (networkNodeVisualizer != nullptr)
+        queueCanvasVisualization->networkNodeVisualization->removeAnnotation(figure);
 }
 
 void QueueCanvasVisualizer::refreshQueueVisualization(const QueueVisualization *queueVisualization) const

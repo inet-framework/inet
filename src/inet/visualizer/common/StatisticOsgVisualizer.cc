@@ -80,7 +80,8 @@ void StatisticOsgVisualizer::removeStatisticVisualization(const StatisticVisuali
 {
     StatisticVisualizerBase::removeStatisticVisualization(statisticVisualization);
     auto statisticOsgVisualization = static_cast<const StatisticOsgVisualization *>(statisticVisualization);
-    statisticOsgVisualization->networkNodeVisualization->removeAnnotation(statisticOsgVisualization->node);
+    if (networkNodeVisualizer != nullptr)
+        statisticOsgVisualization->networkNodeVisualization->removeAnnotation(statisticOsgVisualization->node);
 }
 
 void StatisticOsgVisualizer::refreshStatisticVisualization(const StatisticVisualization *statisticVisualization)

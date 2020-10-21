@@ -118,7 +118,7 @@ void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const Interfac
         if (gate != nullptr && gate->getChannel())
             gate->getDisplayString().setTagArg("t", 0, "");
     }
-    else
+    else if (networkNodeVisualizer != nullptr)
         interfaceCanvasVisualization->networkNodeVisualization->removeAnnotation(interfaceCanvasVisualization->figure);
 }
 

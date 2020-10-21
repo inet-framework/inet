@@ -110,7 +110,8 @@ void StatisticCanvasVisualizer::removeStatisticVisualization(const StatisticVisu
 {
     StatisticVisualizerBase::removeStatisticVisualization(statisticVisualization);
     auto statisticCanvasVisualization = static_cast<const StatisticCanvasVisualization *>(statisticVisualization);
-    statisticCanvasVisualization->networkNodeVisualization->removeAnnotation(statisticCanvasVisualization->figure);
+    if (networkNodeVisualizer != nullptr)
+        statisticCanvasVisualization->networkNodeVisualization->removeAnnotation(statisticCanvasVisualization->figure);
 }
 
 void StatisticCanvasVisualizer::refreshStatisticVisualization(const StatisticVisualization *statisticVisualization)

@@ -92,7 +92,8 @@ void Ieee80211OsgVisualizer::removeIeee80211Visualization(const Ieee80211Visuali
 {
     Ieee80211VisualizerBase::removeIeee80211Visualization(ieee80211Visualization);
     auto ieee80211OsgVisualization = static_cast<const Ieee80211OsgVisualization *>(ieee80211Visualization);
-    ieee80211OsgVisualization->networkNodeVisualization->removeAnnotation(ieee80211OsgVisualization->node);
+    if (networkNodeVisualizer != nullptr)
+        ieee80211OsgVisualization->networkNodeVisualization->removeAnnotation(ieee80211OsgVisualization->node);
 }
 
 #endif // ifdef WITH_OSG

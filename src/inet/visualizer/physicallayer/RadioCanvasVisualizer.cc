@@ -145,16 +145,18 @@ void RadioCanvasVisualizer::removeRadioVisualization(const RadioVisualization *r
 {
     RadioVisualizerBase::removeRadioVisualization(radioVisualization);
     auto radioCanvasVisualization = static_cast<const RadioCanvasVisualization *>(radioVisualization);
-    if (displayRadioMode)
-        radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->radioModeFigure);
-    if (displayReceptionState)
-        radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->receptionStateFigure);
-    if (displayTransmissionState)
-        radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->transmissionStateFigure);
-    if (displayAntennaLobes) {
-        radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeFigure);
-        radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
-        radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
+    if (networkNodeVisualizer != nullptr) {
+        if (displayRadioMode)
+            radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->radioModeFigure);
+        if (displayReceptionState)
+            radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->receptionStateFigure);
+        if (displayTransmissionState)
+            radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->transmissionStateFigure);
+        if (displayAntennaLobes) {
+            radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeFigure);
+            radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
+            radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
+        }
     }
 }
 
