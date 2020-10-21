@@ -36,12 +36,6 @@ InfoCanvasVisualizer::InfoCanvasVisualization::~InfoCanvasVisualization()
     delete figure;
 }
 
-InfoCanvasVisualizer::~InfoCanvasVisualizer()
-{
-    if (displayInfos)
-        removeAllInfoVisualizations();
-}
-
 void InfoCanvasVisualizer::initialize(int stage)
 {
     InfoVisualizerBase::initialize(stage);

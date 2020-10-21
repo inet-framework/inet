@@ -103,10 +103,10 @@ bool PacketDropVisualizerBase::DetailsFilter::matches(const PacketDropDetails *d
 
 PacketDropVisualizerBase::~PacketDropVisualizerBase()
 {
-    for (auto packetDropVisualization : packetDropVisualizations)
-        delete packetDropVisualization;
-    if (displayPacketDrops)
+    if (displayPacketDrops) {
         unsubscribe();
+        removeAllPacketDropVisualizations();
+    }
 }
 
 void PacketDropVisualizerBase::initialize(int stage)

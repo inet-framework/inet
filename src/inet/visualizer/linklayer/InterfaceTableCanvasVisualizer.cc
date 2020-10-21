@@ -38,12 +38,6 @@ InterfaceTableCanvasVisualizer::InterfaceCanvasVisualization::~InterfaceCanvasVi
     delete figure;
 }
 
-InterfaceTableCanvasVisualizer::~InterfaceTableCanvasVisualizer()
-{
-    if (displayInterfaceTables)
-        removeAllInterfaceVisualizations();
-}
-
 void InterfaceTableCanvasVisualizer::initialize(int stage)
 {
     InterfaceTableVisualizerBase::initialize(stage);

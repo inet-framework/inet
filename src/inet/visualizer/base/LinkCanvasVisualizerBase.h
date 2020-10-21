@@ -52,9 +52,6 @@ class INET_API LinkCanvasVisualizerBase : public LinkVisualizerBase
     virtual void removeLinkVisualization(const LinkVisualization *linkVisualization) override;
     virtual void setAlpha(const LinkVisualization *linkVisualization, double alpha) const override;
     virtual void refreshLinkVisualization(const LinkVisualization *linkVisualization, cPacket *packet) override;
-
-  public:
-    virtual ~LinkCanvasVisualizerBase();
 };
 
 } // namespace visualizer

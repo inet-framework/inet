@@ -31,6 +31,12 @@ EnergyStorageVisualizerBase::EnergyStorageVisualization::EnergyStorageVisualizat
 {
 }
 
+EnergyStorageVisualizerBase::~EnergyStorageVisualizerBase()
+{
+    if (displayEnergyStorages)
+        removeAllEnergyStorageVisualizations();
+}
+
 void EnergyStorageVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);

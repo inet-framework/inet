@@ -48,9 +48,6 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
     virtual void removeLinkVisualization(const LinkVisualization *linkVisualization) override;
     virtual void setAlpha(const LinkVisualization *linkVisualization, double alpha) const override;
 
-  public:
-    virtual ~LinkOsgVisualizerBase();
-
 #else // ifdef WITH_OSG
 
   protected:

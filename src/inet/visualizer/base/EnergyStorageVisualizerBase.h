@@ -68,6 +68,9 @@ class INET_API EnergyStorageVisualizerBase : public VisualizerBase
     virtual void removeEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization);
     virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const = 0;
     virtual void removeAllEnergyStorageVisualizations();
+
+  public:
+    virtual ~EnergyStorageVisualizerBase();
 };
 
 } // namespace visualizer

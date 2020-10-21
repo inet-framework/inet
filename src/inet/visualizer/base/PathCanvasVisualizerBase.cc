@@ -70,12 +70,6 @@ PathCanvasVisualizerBase::PathCanvasVisualization::~PathCanvasVisualization()
     delete figure;
 }
 
-PathCanvasVisualizerBase::~PathCanvasVisualizerBase()
-{
-    if (displayRoutes)
-        removeAllPathVisualizations();
-}
-
 void PathCanvasVisualizerBase::initialize(int stage)
 {
     PathVisualizerBase::initialize(stage);

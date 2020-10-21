@@ -88,6 +88,7 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     virtual const RadioVisualization *getRadioVisualization(int radioModuleId);
     virtual void addRadioVisualization(const RadioVisualization *radioVisualization);
     virtual void removeRadioVisualization(const RadioVisualization *radioVisualization);
+    virtual void removeAllRadioVisualizations();
     virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const = 0;
 
   public:

@@ -33,12 +33,6 @@ StatisticCanvasVisualizer::StatisticCanvasVisualization::StatisticCanvasVisualiz
 {
 }
 
-StatisticCanvasVisualizer::~StatisticCanvasVisualizer()
-{
-    if (displayStatistics)
-        removeAllStatisticVisualizations();
-}
-
 void StatisticCanvasVisualizer::initialize(int stage)
 {
     StatisticVisualizerBase::initialize(stage);

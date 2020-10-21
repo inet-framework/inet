@@ -37,8 +37,10 @@ TransportConnectionVisualizerBase::TransportConnectionVisualization::TransportCo
 
 TransportConnectionVisualizerBase::~TransportConnectionVisualizerBase()
 {
-    if (displayTransportConnections)
+    if (displayTransportConnections) {
         unsubscribe();
+        removeAllConnectionVisualizations();
+    }
 }
 
 void TransportConnectionVisualizerBase::initialize(int stage)

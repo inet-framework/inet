@@ -66,8 +66,10 @@ const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char
 
 RoutingTableVisualizerBase::~RoutingTableVisualizerBase()
 {
-    if (displayRoutingTables)
+    if (displayRoutingTables) {
         unsubscribe();
+        removeAllRouteVisualizations();
+    }
 }
 
 void RoutingTableVisualizerBase::initialize(int stage)

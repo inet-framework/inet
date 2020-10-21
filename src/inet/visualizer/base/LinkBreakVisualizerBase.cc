@@ -39,8 +39,10 @@ LinkBreakVisualizerBase::LinkBreakVisualization::LinkBreakVisualization(int tran
 
 LinkBreakVisualizerBase::~LinkBreakVisualizerBase()
 {
-    if (displayLinkBreaks)
+    if (displayLinkBreaks) {
         unsubscribe();
+        removeAllLinkBreakVisualizations();
+    }
 }
 
 void LinkBreakVisualizerBase::initialize(int stage)

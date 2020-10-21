@@ -39,12 +39,6 @@ Ieee80211OsgVisualizer::Ieee80211OsgVisualization::Ieee80211OsgVisualization(Net
 {
 }
 
-Ieee80211OsgVisualizer::~Ieee80211OsgVisualizer()
-{
-    if (displayAssociations)
-        removeAllIeee80211Visualizations();
-}
-
 void Ieee80211OsgVisualizer::initialize(int stage)
 {
     Ieee80211VisualizerBase::initialize(stage);

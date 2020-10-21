@@ -43,12 +43,6 @@ LinkOsgVisualizerBase::LinkOsgVisualization::~LinkOsgVisualization()
     // TODO: delete node;
 }
 
-LinkOsgVisualizerBase::~LinkOsgVisualizerBase()
-{
-    if (displayLinks)
-        removeAllLinkVisualizations();
-}
-
 void LinkOsgVisualizerBase::initialize(int stage)
 {
     LinkVisualizerBase::initialize(stage);

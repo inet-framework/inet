@@ -36,6 +36,12 @@ QueueVisualizerBase::QueueVisualization::QueueVisualization(queueing::IPacketQue
 {
 }
 
+QueueVisualizerBase::~QueueVisualizerBase()
+{
+    if (displayQueues)
+        removeAllQueueVisualizations();
+}
+
 void QueueVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);

@@ -36,12 +36,6 @@ Define_Module(TracingObstacleLossOsgVisualizer);
 
 #ifdef WITH_OSG
 
-TracingObstacleLossOsgVisualizer::~TracingObstacleLossOsgVisualizer()
-{
-    if (displayIntersections)
-        removeAllObstacleLossVisualizations();
-}
-
 void TracingObstacleLossOsgVisualizer::initialize(int stage)
 {
     TracingObstacleLossVisualizerBase::initialize(stage);

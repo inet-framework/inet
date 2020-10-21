@@ -50,6 +50,12 @@ const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directi
     return result.c_str();
 }
 
+InfoVisualizerBase::~InfoVisualizerBase()
+{
+    if (displayInfos)
+        removeAllInfoVisualizations();
+}
+
 void InfoVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);

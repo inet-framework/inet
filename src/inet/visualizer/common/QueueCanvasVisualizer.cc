@@ -37,12 +37,6 @@ QueueCanvasVisualizer::QueueCanvasVisualization::~QueueCanvasVisualization()
     delete figure;
 }
 
-QueueCanvasVisualizer::~QueueCanvasVisualizer()
-{
-    if (displayQueues)
-        removeAllQueueVisualizations();
-}
-
 void QueueCanvasVisualizer::initialize(int stage)
 {
     QueueVisualizerBase::initialize(stage);

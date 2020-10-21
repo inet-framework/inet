@@ -121,8 +121,10 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
 
 InterfaceTableVisualizerBase::~InterfaceTableVisualizerBase()
 {
-    if (displayInterfaceTables)
+    if (displayInterfaceTables) {
         unsubscribe();
+        removeAllInterfaceVisualizations();
+    }
 }
 
 void InterfaceTableVisualizerBase::initialize(int stage)

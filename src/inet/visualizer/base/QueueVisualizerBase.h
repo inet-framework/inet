@@ -76,6 +76,9 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     virtual void removeQueueVisualization(const QueueVisualization *queueVisualization);
     virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const = 0;
     virtual void removeAllQueueVisualizations();
+
+  public:
+    virtual ~QueueVisualizerBase();
 };
 
 } // namespace visualizer

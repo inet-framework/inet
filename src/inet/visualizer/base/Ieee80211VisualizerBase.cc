@@ -36,8 +36,10 @@ Ieee80211VisualizerBase::Ieee80211Visualization::Ieee80211Visualization(int netw
 
 Ieee80211VisualizerBase::~Ieee80211VisualizerBase()
 {
-    if (displayAssociations)
+    if (displayAssociations) {
         unsubscribe();
+        removeAllIeee80211Visualizations();
+    }
 }
 
 void Ieee80211VisualizerBase::initialize(int stage)

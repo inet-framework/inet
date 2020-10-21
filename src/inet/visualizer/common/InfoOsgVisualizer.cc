@@ -33,12 +33,6 @@ InfoOsgVisualizer::InfoOsgVisualization::InfoOsgVisualization(NetworkNodeOsgVisu
 {
 }
 
-InfoOsgVisualizer::~InfoOsgVisualizer()
-{
-    if (displayInfos)
-        removeAllInfoVisualizations();
-}
-
 void InfoOsgVisualizer::initialize(int stage)
 {
     InfoVisualizerBase::initialize(stage);

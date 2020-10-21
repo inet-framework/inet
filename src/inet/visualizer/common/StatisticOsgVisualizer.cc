@@ -34,12 +34,6 @@ StatisticOsgVisualizer::StatisticOsgVisualization::StatisticOsgVisualization(Net
 {
 }
 
-StatisticOsgVisualizer::~StatisticOsgVisualizer()
-{
-    if (displayStatistics)
-        removeAllStatisticVisualizations();
-}
-
 void StatisticOsgVisualizer::initialize(int stage)
 {
     StatisticVisualizerBase::initialize(stage);

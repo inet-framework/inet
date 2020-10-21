@@ -53,9 +53,6 @@ class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerB
     virtual void addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) override;
-
-  public:
-    virtual ~InterfaceTableCanvasVisualizer();
 };
 
 } // namespace visualizer

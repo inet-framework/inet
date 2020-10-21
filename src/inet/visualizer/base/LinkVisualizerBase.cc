@@ -48,8 +48,10 @@ const char *LinkVisualizerBase::DirectiveResolver::resolveDirective(char directi
 
 LinkVisualizerBase::~LinkVisualizerBase()
 {
-    if (displayLinks)
+    if (displayLinks) {
         unsubscribe();
+        removeAllLinkVisualizations();
+    }
 }
 
 void LinkVisualizerBase::initialize(int stage)

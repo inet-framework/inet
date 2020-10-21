@@ -46,9 +46,6 @@ class INET_API LinkBreakOsgVisualizer : public LinkBreakVisualizerBase
     virtual void removeLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization) override;
     virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const override;
 
-  public:
-    virtual ~LinkBreakOsgVisualizer();
-
 #else // ifdef WITH_OSG
 
   protected:

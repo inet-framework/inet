@@ -59,8 +59,10 @@ const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directi
 
 PathVisualizerBase::~PathVisualizerBase()
 {
-    if (displayRoutes)
+    if (displayRoutes) {
         unsubscribe();
+        removeAllPathVisualizations();
+    }
 }
 
 void PathVisualizerBase::initialize(int stage)

@@ -31,8 +31,10 @@ RadioVisualizerBase::RadioVisualization::RadioVisualization(const int radioModul
 
 RadioVisualizerBase::~RadioVisualizerBase()
 {
-    if (displayRadios)
+    if (displayRadios) {
         unsubscribe();
+        removeAllRadioVisualizations();
+    }
 }
 
 void RadioVisualizerBase::initialize(int stage)
@@ -130,6 +132,14 @@ void RadioVisualizerBase::addRadioVisualization(const RadioVisualization *radioV
 void RadioVisualizerBase::removeRadioVisualization(const RadioVisualization *radioVisualization)
 {
     radioVisualizations.erase(radioVisualizations.find(radioVisualization->radioModuleId));
+}
+
+void RadioVisualizerBase::removeAllRadioVisualizations()
+{
+    for (auto radioVisualization : std::map<int, const RadioVisualization *>(radioVisualizations)) {
+        removeRadioVisualization(radioVisualization.second);
+        delete radioVisualization.second;
+    }
 }
 
 void RadioVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)

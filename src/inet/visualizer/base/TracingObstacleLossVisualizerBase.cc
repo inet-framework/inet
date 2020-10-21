@@ -29,8 +29,10 @@ using namespace inet::physicallayer;
 
 TracingObstacleLossVisualizerBase::~TracingObstacleLossVisualizerBase()
 {
-    if (displayIntersections)
+    if (displayIntersections) {
         unsubscribe();
+        removeAllObstacleLossVisualizations();
+    }
 }
 
 void TracingObstacleLossVisualizerBase::initialize(int stage)

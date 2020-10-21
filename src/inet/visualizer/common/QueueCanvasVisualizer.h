@@ -52,9 +52,6 @@ class INET_API QueueCanvasVisualizer : public QueueVisualizerBase
     virtual void addQueueVisualization(const QueueVisualization *queueVisualization) override;
     virtual void removeQueueVisualization(const QueueVisualization *queueVisualization) override;
     virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override;
-
-  public:
-    virtual ~QueueCanvasVisualizer();
 };
 
 } // namespace visualizer

@@ -79,6 +79,9 @@ class INET_API InfoVisualizerBase : public VisualizerBase
     virtual void removeAllInfoVisualizations();
 
     virtual const char *getInfoVisualizationText(cModule *module) const;
+
+  public:
+    virtual ~InfoVisualizerBase();
 };
 
 } // namespace visualizer

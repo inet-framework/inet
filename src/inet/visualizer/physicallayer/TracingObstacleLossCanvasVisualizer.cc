@@ -40,12 +40,6 @@ TracingObstacleLossCanvasVisualizer::ObstacleLossCanvasVisualization::~ObstacleL
     delete faceNormalFigure2;
 }
 
-TracingObstacleLossCanvasVisualizer::~TracingObstacleLossCanvasVisualizer()
-{
-    if (displayIntersections)
-        removeAllObstacleLossVisualizations();
-}
-
 void TracingObstacleLossCanvasVisualizer::initialize(int stage)
 {
     TracingObstacleLossVisualizerBase::initialize(stage);

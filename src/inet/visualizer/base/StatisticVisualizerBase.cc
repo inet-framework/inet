@@ -35,8 +35,10 @@ StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int modu
 
 StatisticVisualizerBase::~StatisticVisualizerBase()
 {
-    if (displayStatistics)
+    if (displayStatistics) {
         unsubscribe();
+        removeAllStatisticVisualizations();
+    }
 }
 
 const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
