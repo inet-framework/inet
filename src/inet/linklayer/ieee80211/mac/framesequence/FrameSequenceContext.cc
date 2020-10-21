@@ -70,7 +70,6 @@ FrameSequenceContext::~FrameSequenceContext()
         delete step;
     delete nonQoSContext;
     delete qosContext;
-    inProgressFrames->clearDroppedFrames();
 }
 
 Register_ResultFilter("frameSequenceDuration", FrameSequenceDurationFilter);
