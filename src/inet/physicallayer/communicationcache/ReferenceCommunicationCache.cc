@@ -26,8 +26,9 @@ Define_Module(ReferenceCommunicationCache);
 ReferenceCommunicationCache::~ReferenceCommunicationCache()
 {
     for (auto& transmissionCacheEntry : transmissionCache) {
+        delete transmissionCacheEntry.signal;
+        delete transmissionCacheEntry.transmission;
         delete transmissionCacheEntry.receptionCacheEntries;
-        transmissionCacheEntry.receptionCacheEntries = nullptr;
     }
 }
 

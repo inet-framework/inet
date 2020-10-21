@@ -26,8 +26,9 @@ Define_Module(VectorCommunicationCache);
 VectorCommunicationCache::~VectorCommunicationCache()
 {
     for (auto& transmissionCacheEntry : transmissionCache) {
+        delete transmissionCacheEntry.signal;
+        delete transmissionCacheEntry.transmission;
         delete transmissionCacheEntry.receptionCacheEntries;
-        transmissionCacheEntry.receptionCacheEntries = nullptr;
     }
 }
 
@@ -142,6 +143,8 @@ void VectorCommunicationCache::addTransmission(const ITransmission *transmission
 
 void VectorCommunicationCache::removeTransmission(const ITransmission *transmission)
 {
+    delete getCachedSignal(transmission);
+    delete transmission;
 }
 
 const ITransmission *VectorCommunicationCache::getTransmission(int id) const
@@ -185,8 +188,11 @@ void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<v
                 delete receptionCacheEntries;
                 transmissionCacheEntry.receptionCacheEntries = nullptr;
             }
-            if (transmissionCacheEntry.transmission != nullptr)
+            if (transmissionCacheEntry.transmission != nullptr) {
                 f(transmissionCacheEntry.transmission);
+                delete transmissionCacheEntry.signal;
+                delete transmissionCacheEntry.transmission;
+            }
         }
         else
             break;

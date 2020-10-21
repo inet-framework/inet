@@ -75,10 +75,6 @@ RadioMedium::RadioMedium() :
 RadioMedium::~RadioMedium()
 {
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
-    communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
-        delete communicationCache->getCachedSignal(transmission);
-        delete transmission;
-    });
     if (recordCommunicationLog)
         communicationLog.close();
 }
@@ -237,10 +233,7 @@ bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, c
 void RadioMedium::removeNonInterferingTransmissions()
 {
     communicationCache->removeNonInterferingTransmissions([&] (const ITransmission *transmission) {
-        const IWirelessSignal *signal = communicationCache->getCachedSignal(transmission);
         emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
-        delete signal;
-        delete transmission;
     });
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
         auto interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
@@ -499,11 +492,8 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 void RadioMedium::removeTransmission(const ITransmission *transmission)
 {
     Enter_Method("removeTranmsission");
-    const IWirelessSignal *signal = communicationCache->getCachedSignal(transmission);
-    communicationCache->removeTransmission(transmission);
     emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
-    delete signal;
-    delete transmission;
+    communicationCache->removeTransmission(transmission);
 }
 
 IWirelessSignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packet)
