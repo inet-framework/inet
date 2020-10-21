@@ -95,6 +95,12 @@ TcpLwipConnection::~TcpLwipConnection()
 {
     delete receiveQueueM;
     delete sendQueueM;
+    if (pcbM) {
+        pcbM->callback_arg = nullptr;
+        tcpLwipM->getLwipTcpLayer()->tcp_pcb_purge(pcbM);
+        memp_free(MEMP_TCP_PCB, pcbM);
+        pcbM = nullptr;
+    }
 }
 
 void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
