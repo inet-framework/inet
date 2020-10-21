@@ -101,6 +101,9 @@ void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 {
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
+    if (getSimulation()->getSimulationStage() == CTX_CLEANUP)
+        return;
+
     if (signalID == POST_MODEL_CHANGE) {
         if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
             if (physOutGate == gcobj->pathStartGate)
