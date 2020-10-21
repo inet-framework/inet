@@ -124,10 +124,8 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
 
     frame->nb_samples = samples;
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = c->sample_rate;
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 
     int ret = avcodec_fill_audio_frame(frame,    /*channels*/ 1, c->sample_fmt,
                 (const uint8_t *)(decBuf), pktBytes, 1);

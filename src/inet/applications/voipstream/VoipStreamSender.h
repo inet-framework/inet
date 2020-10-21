@@ -34,12 +34,10 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 #ifndef HAVE_FFMPEG_AVRESAMPLE
 #error Please install libavresample or disable 'VoIPStream' feature
 #endif // ifndef HAVE_FFMPEG_AVRESAMPLE
 #include <libavresample/avresample.h>
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 };
 
 #include "inet/applications/voipstream/AudioOutFile.h"
@@ -116,13 +114,7 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     AVFormatContext *pFormatCtx = nullptr;
     AVCodecContext *pCodecCtx = nullptr;
     AVCodec *pCodec = nullptr;    // input decoder codec
-
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     AVAudioResampleContext *pReSampleCtx = nullptr;
-#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    ReSampleContext *pReSampleCtx = nullptr;
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-
     AVCodecContext *pEncoderCtx = nullptr;
     AVCodec *pCodecEncoder = nullptr;    // output encoder codec
 
