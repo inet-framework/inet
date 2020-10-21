@@ -453,8 +453,8 @@ void VoipStreamSender::Buffer::align()
 
 void VoipStreamSender::readFrame()
 {
-    short int inBytesPerSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
-    short int outBytesPerSample = av_get_bytes_per_sample(pCodecCtx->sample_fmt);
+    short int inBytesPerSample = av_get_bytes_per_sample(pCodecCtx->sample_fmt);
+    short int outBytesPerSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
     if (sampleBuffer.length() >= samplesPerPacket * inBytesPerSample)
         return;
 
