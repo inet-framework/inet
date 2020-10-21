@@ -20,6 +20,7 @@
 
 #include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/TransportConnectionVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 
@@ -42,7 +43,7 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

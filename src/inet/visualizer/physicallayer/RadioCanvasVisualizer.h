@@ -19,6 +19,7 @@
 #define __INET_RADIOCANVASVISUALIZER_H
 
 #include "inet/common/figures/IndexedImageFigure.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
@@ -49,7 +50,7 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
     // parameters
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

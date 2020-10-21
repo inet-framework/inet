@@ -19,6 +19,7 @@
 #define __INET_INTERFACETABLECANVASVISUALIZER_H
 
 #include "inet/common/figures/BoxedLabelFigure.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
@@ -42,7 +43,7 @@ class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerB
 
   protected:
     double zIndex = NaN;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

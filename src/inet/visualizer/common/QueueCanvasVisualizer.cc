@@ -49,7 +49,7 @@ void QueueCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
 

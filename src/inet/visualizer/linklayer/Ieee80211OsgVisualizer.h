@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE80211OSGVISUALIZER_H
 #define __INET_IEEE80211OSGVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/Ieee80211VisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
@@ -40,7 +41,7 @@ class INET_API Ieee80211OsgVisualizer : public Ieee80211VisualizerBase
     };
 
   protected:
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

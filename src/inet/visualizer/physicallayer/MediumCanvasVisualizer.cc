@@ -75,7 +75,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         }
         animationSpeedInterpolator.setCurrentAnimationSpeed(0);
         animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, 0, 0);
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
     else if (stage == INITSTAGE_LAST) {
         canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());

@@ -45,7 +45,7 @@ void InterfaceTableOsgVisualizer::initialize(int stage)
     InterfaceTableVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
 

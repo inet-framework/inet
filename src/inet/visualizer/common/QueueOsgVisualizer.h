@@ -18,6 +18,7 @@
 #ifndef __INET_QUEUEOSGVISUALIZER_H
 #define __INET_QUEUEOSGVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/QueueVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
@@ -42,7 +43,7 @@ class INET_API QueueOsgVisualizer : public QueueVisualizerBase
 
   protected:
     // parameters
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

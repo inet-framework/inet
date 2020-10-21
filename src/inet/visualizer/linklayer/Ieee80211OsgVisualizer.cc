@@ -50,7 +50,7 @@ void Ieee80211OsgVisualizer::initialize(int stage)
     Ieee80211VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
 

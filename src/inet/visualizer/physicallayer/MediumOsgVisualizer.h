@@ -52,7 +52,7 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 
     /** @name Internal state */
     //@{
-    NetworkNodeOsgVisualizer *networkNodeVisualizer;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
     /**
      * The list of ongoing transmissions.
      */

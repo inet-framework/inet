@@ -19,10 +19,11 @@
 #define __INET_MEDIUMCANVASVISUALIZER_H
 
 #include "inet/common/figures/HeatMapFigure.h"
+#include "inet/common/figures/HeatMapPlotFigure.h"
 #include "inet/common/figures/PlotFigure.h"
 #include "inet/common/figures/TrailFigure.h"
-#include "inet/common/figures/HeatMapPlotFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 #include "inet/visualizer/util/AnimationSpeedInterpolator.h"
@@ -70,7 +71,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     };
     SignalInProgress lastSignalInProgress = SIP_NONE;
     AnimationSpeedInterpolator animationSpeedInterpolator;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
     /**
      * The list of ongoing transmissions.
      */

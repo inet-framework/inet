@@ -45,7 +45,7 @@ void TransportConnectionCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         auto canvas = visualizationTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
 

@@ -81,7 +81,7 @@ void MediumOsgVisualizer::initialize(int stage)
             if (imageStream != nullptr)
                 imageStream->play();
         }
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
 void MediumOsgVisualizer::refreshDisplay() const

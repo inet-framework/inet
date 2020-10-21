@@ -18,6 +18,7 @@
 #ifndef __INET_STATISTICOSGVISUALIZER_H
 #define __INET_STATISTICOSGVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
@@ -45,7 +46,7 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
     };
 
   protected:
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

@@ -18,6 +18,7 @@
 #ifndef __INET_STATISTICCANVASVISUALIZER_H
 #define __INET_STATISTICCANVASVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
@@ -40,7 +41,7 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
 
   protected:
     double zIndex = NaN;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

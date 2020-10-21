@@ -18,6 +18,7 @@
 #ifndef __INET_TRANSPORTCONNECTIONOSGVISUALIZER_H
 #define __INET_TRANSPORTCONNECTIONOSGVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/TransportConnectionVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
@@ -40,7 +41,7 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
     };
 
   protected:
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

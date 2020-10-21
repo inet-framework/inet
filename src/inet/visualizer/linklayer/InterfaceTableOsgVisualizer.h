@@ -18,6 +18,7 @@
 #ifndef __INET_INTERFACETABLEOSGVISUALIZER_H
 #define __INET_INTERFACETABLEOSGVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
@@ -45,7 +46,7 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
     };
 
   protected:
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

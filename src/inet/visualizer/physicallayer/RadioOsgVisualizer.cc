@@ -40,7 +40,7 @@ void RadioOsgVisualizer::initialize(int stage)
     RadioVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
     else if (stage == INITSTAGE_LAST) {
         for (auto it : radioVisualizations) {

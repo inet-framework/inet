@@ -19,6 +19,7 @@
 #define __INET_QUEUECANVASVISUALIZER_H
 
 #include "inet/common/figures/QueueFigure.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/QueueVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 
@@ -42,7 +43,7 @@ class INET_API QueueCanvasVisualizer : public QueueVisualizerBase
   protected:
     // parameters
     double zIndex = NaN;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;

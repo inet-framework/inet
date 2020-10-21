@@ -18,6 +18,7 @@
 #ifndef __INET_RADIOOSGVISUALIZER_H
 #define __INET_RADIOOSGVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
@@ -42,7 +43,7 @@ class INET_API RadioOsgVisualizer : public RadioVisualizerBase
 
   protected:
     // parameters
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;
