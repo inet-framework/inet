@@ -93,7 +93,7 @@ void StreamingTransmitter::abortTx()
     // 1. check current state
     ASSERT(isTransmitting());
     // 2. create new truncated signal
-    auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
+    auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
     // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
     clocktime_t timePosition = getClockTime() - txStartTime;
     b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
