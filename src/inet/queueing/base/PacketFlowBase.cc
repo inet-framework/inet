@@ -27,10 +27,10 @@ void PacketFlowBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        producer.reference(inputGate, false);
+        consumer.reference(outputGate, false);
+        provider.reference(inputGate, false);
+        collector.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

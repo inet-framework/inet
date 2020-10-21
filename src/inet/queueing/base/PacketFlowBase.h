@@ -18,6 +18,7 @@
 #ifndef __INET_PACKETFLOWBASE_H
 #define __INET_PACKETFLOWBASE_H
 
+#include "inet/common/ModuleRef.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
@@ -28,12 +29,12 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
 {
   protected:
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRef<IActivePacketSource> producer;
+    ModuleRef<IPassivePacketSource> provider;
 
     cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
-    IActivePacketSink *collector = nullptr;
+    ModuleRef<IPassivePacketSink> consumer;
+    ModuleRef<IActivePacketSink> collector;
 
     int inProgressStreamId = -1;
 
