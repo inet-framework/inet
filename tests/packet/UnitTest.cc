@@ -911,12 +911,12 @@ static void testConversion()
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
     packet1.insertAtBack(applicationHeader1->Chunk::peek<BytesChunk>(B(0), B(5)));
     packet1.insertAtBack(applicationHeader1->Chunk::peek(B(5), B(5)));
-    ASSERT_ERROR(packet1.peekAtFront<ApplicationHeader>(B(10)), "serialization is disabled");
+    ASSERT_ERROR(packet1.peekAtFront<ApplicationHeader>(B(10)), "is disabled");
 
     // 2. implicit conversion via serialization is an error by default (would result in hard to debug errors)
     Packet packet2;
     packet2.insertAtBack(makeImmutableIpHeader());
-    ASSERT_ERROR(packet2.peekAtFront<ApplicationHeader>(), "serialization is disabled");
+    ASSERT_ERROR(packet2.peekAtFront<ApplicationHeader>(), "is disabled");
 }
 
 static void testIteration()
