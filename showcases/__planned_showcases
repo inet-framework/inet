@@ -18,4 +18,9 @@ Planned Showcases:
  - TODO: regular expr.
  - TODO: OSI level
 -Neuralnetworkerrormodel -> training data generation, training, error model generation -> include these
--Timing measurement and packet flows
+-Timing measurement and packet flows and packet events
+-Time sensitive Ethernet:
+ -preemption
+ -cut-through
+ -gating
+ -VLAN
