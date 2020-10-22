@@ -71,5 +71,5 @@ class INET_API WireJunction : public cSimpleModule, protected cListener
 } //namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_WIREJUNCTION_H
+#endif
 

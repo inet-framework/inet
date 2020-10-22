@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETHEADERSERIALIZER_H
-#define __INET_ETHERNETHEADERSERIALIZER_H
+#ifndef __INET_ETHERNETMACHEADERSERIALIZER_H
+#define __INET_ETHERNETMACHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
