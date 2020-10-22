@@ -35,7 +35,6 @@ recommend the :doc:`INET Developer's Guide </developers-guide/index>`.)
    ch-80211
    ch-802154
    ch-sensor-macs
-   ch-protocol
    ch-clock
    ch-physicallayer
    ch-transmission-medium
