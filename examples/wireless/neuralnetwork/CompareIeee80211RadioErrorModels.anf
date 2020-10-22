@@ -96,7 +96,10 @@ plt.ylim(0, 100)
 utils.set_plot_title("Received Packets vs Number of Noise Sources")
 utils.postconfigure_plot(props)
 
+plt.legend(loc='best')
+
 fig = plt.gcf()
+fig.figsize=(4,4)
 duration_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03])
 duration_slider = Slider(duration_slider_ax, 'Duration', 1, len(durations), valstep=1)
 def duration_sliders_on_changed(val):
@@ -114,14 +117,17 @@ def power_sliders_on_changed(val):
     power = powers[int(val) - 1]
     power_slider.valtext.set_text(str(power))
     plot()
+    filename = str(power) + " " + str(duration) + ".png"
+    print(filename)
+    plt.savefig(filename, transparent=True, dpi=120)
     fig.canvas.draw_idle()
 power_slider.on_changed(power_sliders_on_changed)
 plt.gcf().subplots_adjust(bottom=0.25)
 
-html_str = mpld3.fig_to_html(fig)
-Html_file= open("index.html","w")
-Html_file.write(html_str)
-Html_file.close()
+#html_str = mpld3.fig_to_html(fig)
+#Html_file= open("index.html","w")
+#Html_file.write(html_str)
+#Html_file.close()
 ]]>
             </script>
             <dialogPage id="Input" label="Input">
