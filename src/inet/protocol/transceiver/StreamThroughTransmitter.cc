@@ -71,7 +71,7 @@ void StreamThroughTransmitter::startTx(Packet *packet, bps datarate, b position)
     // 5. send signal start and notify subscribers
     EV_INFO << "Starting transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
     emit(transmissionStartedSignal, signal);
-    sendPacketStart(signal, packet->getTransmissionId());
+    sendSignalStart(signal, packet->getTransmissionId());
     // 6. schedule transmission end timer and buffer underrun timer
     scheduleTxEndTimer(txSignal);
     scheduleBufferUnderrunTimer();
@@ -102,7 +102,7 @@ void StreamThroughTransmitter::progressTx(Packet *packet, bps datarate, b positi
         txSignal = signal->dup();
         // 5. send signal progress
         EV_INFO << "Progressing transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
-        sendPacketProgress(signal, packet->getTransmissionId(), lastTxProgressPosition, timePosition);
+        sendSignalProgress(signal, packet->getTransmissionId(), lastTxProgressPosition, timePosition);
     }
     // 6. reschedule timers
     scheduleTxEndTimer(txSignal);
@@ -118,7 +118,7 @@ void StreamThroughTransmitter::endTx()
     EV_INFO << "Ending transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
     handlePacketProcessed(packet);
     emit(transmissionEndedSignal, txSignal);
-    sendPacketEnd(txSignal, packet->getTransmissionId());
+    sendSignalEnd(txSignal, packet->getTransmissionId());
     // 3. clear internal state
     txSignal = nullptr;
     txDatarate = bps(NaN);
@@ -155,7 +155,7 @@ void StreamThroughTransmitter::abortTx()
     EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
     handlePacketProcessed(packet);
     emit(transmissionEndedSignal, signal);
-    sendPacketEnd(signal, packet->getTransmissionId());
+    sendSignalEnd(signal, packet->getTransmissionId());
     // 5. clear internal state
     txDatarate = bps(NaN);
     txStartTime = -1;

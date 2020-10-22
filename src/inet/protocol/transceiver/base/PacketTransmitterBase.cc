@@ -84,20 +84,20 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
     return signal;
 }
 
-void PacketTransmitterBase::sendPacketStart(Signal *signal, int transmissionId)
+void PacketTransmitterBase::sendSignalStart(Signal *signal, int transmissionId)
 {
     EV_INFO << "Sending signal start to channel" << EV_FIELD(signal) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()).transmissionId(transmissionId), outputGate);
 }
 
-void PacketTransmitterBase::sendPacketProgress(Signal *signal, int transmissionId, b bitPosition, clocktime_t timePosition)
+void PacketTransmitterBase::sendSignalProgress(Signal *signal, int transmissionId, b bitPosition, clocktime_t timePosition)
 {
     simtime_t remainingDuration = signal->getDuration() - CLOCKTIME_AS_SIMTIME(timePosition);
     EV_INFO << "Sending signal progress to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()).updateTx(transmissionId, remainingDuration), outputGate);
 }
 
-void PacketTransmitterBase::sendPacketEnd(Signal *signal, int transmissionId)
+void PacketTransmitterBase::sendSignalEnd(Signal *signal, int transmissionId)
 {
     EV_INFO << "Sending signal end to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()).finishTx(transmissionId), outputGate);
