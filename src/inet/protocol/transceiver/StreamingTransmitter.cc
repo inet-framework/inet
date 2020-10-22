@@ -57,7 +57,8 @@ void StreamingTransmitter::startTx(Packet *packet)
     ASSERT(!isTransmitting());
     // 2. store transmission progress
     txDatarate = bps(*dataratePar);
-    txStartTime = getClockTime();
+    txStartTime = simTime();
+    txStartClockTime = getClockTime();
     // 3. create signal
     auto signal = encodePacket(packet);
     txSignal = signal->dup();
@@ -82,6 +83,7 @@ void StreamingTransmitter::endTx()
     // 3. clear internal state
     txSignal = nullptr;
     txStartTime = -1;
+    txStartClockTime = -1;
     // 4. notify producer
     auto gate = inputGate->getPathStartGate();
     producer->handlePushPacketProcessed(packet, gate, true);
@@ -95,11 +97,12 @@ void StreamingTransmitter::abortTx()
     // 2. create new truncated signal
     auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
     // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
-    clocktime_t timePosition = getClockTime() - txStartTime;
+    simtime_t timePosition = simTime() - txStartTime;
     b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
     packet->eraseAtBack(packet->getTotalLength() - dataPosition);
     packet->setBitError(true);
     auto signal = encodePacket(packet);
+    signal->setDuration(timePosition);
     // 3. send signal end to receiver and notify subscribers
     EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
     handlePacketProcessed(packet);
@@ -110,6 +113,7 @@ void StreamingTransmitter::abortTx()
     txSignal = nullptr;
     // 5. clear internal state
     txStartTime = -1;
+    txStartClockTime = -1;
     // 6. notify producer
     auto gate = inputGate->getPathStartGate();
     producer->handlePushPacketProcessed(packet, gate, true);
@@ -118,8 +122,8 @@ void StreamingTransmitter::abortTx()
 
 void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
 {
-    ASSERT(txStartTime != -1);
-    clocktime_t txEndTime = txStartTime + SIMTIME_AS_CLOCKTIME(signal->getDuration());
+    ASSERT(txStartClockTime != -1);
+    clocktime_t txEndTime = txStartClockTime + SIMTIME_AS_CLOCKTIME(signal->getDuration());
     EV_INFO << "Scheduling transmission end timer" << EV_FIELD(at, txEndTime.ustr()) << EV_ENDL;
     cancelClockEvent(txEndTimer);
     scheduleClockEventAt(txEndTime, txEndTimer);

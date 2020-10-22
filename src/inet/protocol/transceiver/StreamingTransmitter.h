@@ -25,9 +25,6 @@ namespace inet {
 class INET_API StreamingTransmitter : public StreamingTransmitterBase
 {
   protected:
-    clocktime_t txStartTime = -1;
-
-  protected:
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;

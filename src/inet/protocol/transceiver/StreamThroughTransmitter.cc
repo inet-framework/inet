@@ -61,7 +61,8 @@ void StreamThroughTransmitter::startTx(Packet *packet, bps datarate, b position)
     lastInputProgressPosition = position;
     // 3. store transmission progress
     txDatarate = bps(*dataratePar);
-    txStartTime = getClockTime();
+    txStartTime = simTime();
+    txStartClockTime = getClockTime();
     lastTxProgressTime = simTime();
     lastTxProgressPosition = b(0);
     // 4. create signal
@@ -89,7 +90,7 @@ void StreamThroughTransmitter::progressTx(Packet *packet, bps datarate, b positi
     lastInputProgressTime = simTime();
     lastInputProgressPosition = position;
     // 3. store transmission progress
-    clocktime_t timePosition = getClockTime() - txStartTime;
+    clocktime_t timePosition = getClockTime() - txStartClockTime;
     lastTxProgressTime = simTime();
     lastTxProgressPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
     if (isPacketUnchangedSinceLastProgress)
@@ -122,6 +123,7 @@ void StreamThroughTransmitter::endTx()
     txSignal = nullptr;
     txDatarate = bps(NaN);
     txStartTime = -1;
+    txStartClockTime = -1;
     lastTxProgressTime = -1;
     lastTxProgressPosition = b(-1);
     lastInputDatarate = bps(NaN);
@@ -140,11 +142,12 @@ void StreamThroughTransmitter::abortTx()
     // 2. create new truncated signal
     auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
     // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
-    clocktime_t timePosition = getClockTime() - txStartTime;
+    simtime_t timePosition = simTime() - txStartTime;
     b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
     packet->eraseAtBack(packet->getTotalLength() - dataPosition);
     packet->setBitError(true);
     auto signal = encodePacket(packet);
+    signal->setDuration(timePosition);
     // 3. delete old signal
     delete txSignal;
     txSignal = nullptr;
@@ -156,6 +159,7 @@ void StreamThroughTransmitter::abortTx()
     // 5. clear internal state
     txDatarate = bps(NaN);
     txStartTime = -1;
+    txStartClockTime = -1;
     lastTxProgressTime = -1;
     lastTxProgressPosition = b(-1);
     lastInputDatarate = bps(NaN);
@@ -182,8 +186,8 @@ void StreamThroughTransmitter::scheduleBufferUnderrunTimer()
 
 void StreamThroughTransmitter::scheduleTxEndTimer(Signal *signal)
 {
-    ASSERT(txStartTime != -1);
-    clocktime_t txEndTime = txStartTime + SIMTIME_AS_CLOCKTIME(signal->getDuration());
+    ASSERT(txStartClockTime != -1);
+    clocktime_t txEndTime = txStartClockTime + SIMTIME_AS_CLOCKTIME(signal->getDuration());
     EV_INFO << "Scheduling transmission end timer" << EV_FIELD(at, txEndTime.ustr()) << EV_ENDL;
     cancelClockEvent(txEndTimer);
     scheduleClockEventAt(txEndTime, txEndTimer);

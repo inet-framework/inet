@@ -25,8 +25,6 @@ namespace inet {
 class INET_API StreamThroughTransmitter : public StreamingTransmitterBase
 {
   protected:
-    clocktime_t txStartTime = -1;
-
     // parameters of last sent transmission progress report
     simtime_t lastTxProgressTime = -1;
     b lastTxProgressPosition = b(-1);
