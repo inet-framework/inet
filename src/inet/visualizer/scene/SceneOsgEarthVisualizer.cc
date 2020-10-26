@@ -100,11 +100,7 @@ void SceneOsgEarthVisualizer::initializeViewpoint()
     auto euclideanCenter = boundingSphere.center();
     auto geographicSrsEye = coordinateSystem->computeGeographicCoordinate(Coord(euclideanCenter.x(), euclideanCenter.y(), euclideanCenter.z()));
     auto osgCanvas = visualizationTargetModule->getOsgCanvas();
-#if OMNETPP_BUILDNUM >= 1012
     osgCanvas->setEarthViewpoint(cOsgCanvas::EarthViewpoint(deg(geographicSrsEye.longitude).get(), deg(geographicSrsEye.latitude).get(), m(geographicSrsEye.altitude).get(), -45, -45, cameraDistanceFactor * radius));
-#else
-    osgCanvas->setEarthViewpoint(osgEarth::Viewpoint("home", deg(geographicSrsEye.longitude).get(), deg(geographicSrsEye.latitude).get(), m(geographicSrsEye.altitude).get(), -45, -45, cameraDistanceFactor * radius));
-#endif
 }
 
 #endif // ifdef WITH_OSGEARTH
