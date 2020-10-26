@@ -41,9 +41,9 @@ namespace inet {
 using namespace omnetpp;
 }
 
-#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1505
+#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1506
 #  error At least OMNeT++/OMNEST version 6.0pre9 required
-#endif // if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1505
+#endif // if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1506
 
 #define INET_VERSION  0x0402
 #define INET_PATCH_LEVEL 0x00
