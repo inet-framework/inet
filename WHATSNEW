@@ -1,6 +1,16 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.2.1 (October 2020) - Stable
+----------------------------------
+
+This release contains a compatibility fix to be able to build INET with
+OMNeT++ 6.0 Preview 9. It requires OMNeT++ 5.4.1 or later.
+
+NOTE: OMNeT++ 6.0 Preview 5-8 will NOT work with this releasre. Use INET 4.2.0
+with those versions or rather upgrade your OMNeT++ installation.
+
+
 INET-4.2 (January 2020) - Stable
 --------------------------------
 
