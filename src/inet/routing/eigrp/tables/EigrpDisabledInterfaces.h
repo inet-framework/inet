@@ -41,6 +41,10 @@ class EigrpDisabledInterfaces {
     virtual ~EigrpDisabledInterfaces();
 
     /**
+     * Returns number of interfaces in the table.
+     */
+    int getNumInterfaces() const { return ifVector.size(); }
+    /**
      * Removes specified interface from table and returns it. If interface does not exist in the table, returns null.
      */
     EigrpInterface *removeInterface(EigrpInterface *iface);
@@ -52,6 +56,10 @@ class EigrpDisabledInterfaces {
      * Finds interface by ID in table and returns it. If interface with specified ID does not exist in the table, returns null.
      */
     EigrpInterface *findInterface(int ifaceId);
+    /**
+     * Returns interface by its position in the table.
+     */
+    EigrpInterface *getInterface(int k) const { return ifVector[k]; }
 };
 
 }// namespace eigrp

@@ -70,6 +70,7 @@ EigrpIpv6Pdm::EigrpIpv6Pdm() : EIGRP_IPV6_MULT(Ipv6Address("FF02::A"))
 
 EigrpIpv6Pdm::~EigrpIpv6Pdm()
 {
+    cancelHelloTimers();
     delete this->routingForNetworks;
     delete this->eigrpIftDisabled;
     delete this->eigrpDual;
@@ -1191,6 +1192,47 @@ void EigrpIpv6Pdm::cancelHoldTimer(EigrpNeighbor<Ipv6Address> *neigh)
         if (timer->isScheduled()) {
             timer->getOwner();
             cancelEvent(timer);
+        }
+    }
+}
+
+void EigrpIpv6Pdm::cancelHelloTimers()
+{
+    EigrpInterface *iface;
+    EigrpTimer *timer;
+
+    int cnt = this->eigrpIft->getNumInterfaces();
+    for (int i = 0; i < cnt; i++)
+    {
+        iface = this->eigrpIft->getInterface(i);
+
+        if ((timer = iface->getHelloTimer()) != NULL)
+        {
+            if (timer->isScheduled())
+            {
+                timer->getOwner();
+                cancelEvent(timer);
+            }
+
+            delete timer;
+        }
+    }
+
+
+    cnt = this->eigrpIftDisabled->getNumInterfaces();
+    for (int i = 0; i < cnt; i++)
+    {
+        iface = this->eigrpIftDisabled->getInterface(i);
+
+        if ((timer = iface->getHelloTimer()) != NULL)
+        {
+            if (timer->isScheduled())
+            {
+                timer->getOwner();
+                cancelEvent(timer);
+            }
+
+            delete timer;
         }
     }
 }

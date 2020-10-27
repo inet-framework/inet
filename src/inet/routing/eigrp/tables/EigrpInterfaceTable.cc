@@ -126,11 +126,8 @@ EigrpInterfaceTable::~EigrpInterfaceTable()
 
     for (int i = 0; i < cnt; i++)
     {
+
         iface = eigrpInterfaces[i];
-
-        // Must be there
-        //cancelHelloTimer(iface);
-
         eigrpInterfaces[i] = NULL;
         delete iface;
     }
@@ -149,18 +146,6 @@ void EigrpInterfaceTable::initialize(int stage)
 void EigrpInterfaceTable::handleMessage(cMessage *msg)
 {
     // TODO - Generated method body
-}
-
-void EigrpInterfaceTable::cancelHelloTimer(EigrpInterface *iface)
-{
-    EigrpTimer *timer;
-
-    if ((timer = iface->getHelloTimer()) != NULL)
-    {
-        if (timer->isScheduled()) {
-            cancelEvent(timer);
-        }
-    }
 }
 
 void EigrpInterfaceTable::addInterface(EigrpInterface *interface)

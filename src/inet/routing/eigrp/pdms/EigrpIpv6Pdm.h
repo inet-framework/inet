@@ -134,6 +134,11 @@ protected:
      * Stops Hold timer.
      */
     void cancelHoldTimer(EigrpNeighbor<Ipv6Address> *neigh);
+    /**
+     * Stops Hello Timers on all interfaces.
+     */
+    void cancelHelloTimers();
+
 
 
     //-- METHODS FOR CREATING MESSAGES

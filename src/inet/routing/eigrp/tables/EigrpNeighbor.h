@@ -60,7 +60,7 @@ class EigrpNeighbor : public cObject
   public:
     static const int UNSPEC_ID = 0;
 
-    virtual ~EigrpNeighbor() { holdt = nullptr; }
+    virtual ~EigrpNeighbor() { delete holdt; }
     EigrpNeighbor(int ifaceId, const char *ifaceNname, IPAddress ipAddress) :
         ifaceId(ifaceId), ifaceName(ifaceNname), neighborId(UNSPEC_ID), ipAddress(ipAddress), isUp(false), holdt(NULL)
     { seqNumber = 0; holdInt = 0; routesForDeletion = false; waitForAck = 0; stubEnabled = false; }

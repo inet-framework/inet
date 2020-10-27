@@ -1,4 +1,5 @@
-  
+//
+// Copyright (C) 2009 - today Brno University of Technology, Czech Republic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -15,9 +16,13 @@
 // 
 
 // @file EigrpTestNetwork.ned
-// @date 24.11.2014
-// @author xrekvi00@stud.fit.vutbr.cz
-// @brief Network for testing purposes of EIGRP for IPv6-only
+// @date 27.10.2020
+// @author Jan Zavrel (honza.zavrel96@gmail.com)
+// @author Jan Bloudicek (jbloudicek@gmail.com)
+// @author Vit Rek (rek@kn.vutbr.cz)
+// @author Vladimir Vesely (ivesely@fit.vutbr.cz)
+// @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
+
 
 package inet.examples.eigrp.testing_scenario6;
 
