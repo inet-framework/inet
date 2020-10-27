@@ -680,19 +680,19 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      */
     template <typename T>
     const Ptr<T> peek(const Iterator& iterator, b length = unspecifiedLength, int flags = 0) const {
-        CHUNK_CHECK_USAGE((flags & PF_ALLOW_EMPTY) == 0, "peeking with a specific chunk type with PF_ALLOW_EMPTY is an invalid operation");
-        const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || dynamicPtrCast<T>(chunk); };
-        const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, b length, int flags) -> const Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
-        const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
-        return checkPeekResult<T>(staticPtrCast<T>(chunk), flags);
-    }
-
-    /**
-     * Specialization for the case where any the returned type is acceptable.
-     */
-    template <>
-    const Ptr<Chunk> peek(const Iterator& iterator, b length, int flags) const {
-        return peek(iterator, length, flags);
+        if (std::is_same<T, Chunk>::value)
+            // NOTE: this code used to be a simple peek template specialization for the Chunk type but
+            // explicit specialization in non-namespace scope does not compile in GCC:
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282
+            // specialization for the case where any returned type is acceptable.
+            return staticPtrCast<T>(peek(iterator, length, flags));
+        else {
+            CHUNK_CHECK_USAGE((flags & PF_ALLOW_EMPTY) == 0, "peeking with a specific chunk type with PF_ALLOW_EMPTY is an invalid operation");
+            const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || dynamicPtrCast<T>(chunk); };
+            const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, b length, int flags) -> const Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
+            const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
+            return checkPeekResult<T>(staticPtrCast<T>(chunk), flags);
+        }
     }
     //@}
 
