@@ -129,6 +129,10 @@ protected:
      * Stops Hold timer.
      */
     void cancelHoldTimer(EigrpNeighbor<Ipv4Address> *neigh);
+    /**
+     * Stops Hello Timers on all interfaces.
+     */
+    void cancelHelloTimers();
 
     //-- METHODS FOR CREATING MESSAGES
     Packet* createHelloPacket(int holdInt, EigrpKValues kValues, Ipv4Address& destAddress, EigrpMsgReq *msgReq);

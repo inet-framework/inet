@@ -169,11 +169,6 @@ class EigrpInterfaceTable : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
-    /**
-     * Stops hello timer.
-     */
-    void cancelHelloTimer(EigrpInterface *iface);
-
   public:
     ~EigrpInterfaceTable();
 

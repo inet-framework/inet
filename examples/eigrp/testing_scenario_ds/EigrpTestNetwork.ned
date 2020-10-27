@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2009 - today Brno University of Technology, Czech Republic
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -14,9 +16,12 @@
 // 
 
 // @file EigrpTestNetwork.ned
-// @date 1.12.2014
-// @author xrekvi00@stud.fit.vutbr.cz
-// @brief Network for testing purposes of EIGRP Dual-stack
+// @date 27.10.2020
+// @author Jan Zavrel (honza.zavrel96@gmail.com)
+// @author Jan Bloudicek (jbloudicek@gmail.com)
+// @author Vit Rek (rek@kn.vutbr.cz)
+// @author Vladimir Vesely (ivesely@fit.vutbr.cz)
+// @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
 
 package inet.examples.eigrp.testing_scenario_ds;
 

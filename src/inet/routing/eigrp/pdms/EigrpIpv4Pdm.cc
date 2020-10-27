@@ -68,6 +68,7 @@ EigrpIpv4Pdm::EigrpIpv4Pdm() : EIGRP_IPV4_MULT(Ipv4Address(224, 0, 0, 10))
 
 EigrpIpv4Pdm::~EigrpIpv4Pdm()
 {
+    cancelHelloTimers();
     delete this->routingForNetworks;
     delete this->eigrpIftDisabled;
     delete this->eigrpDual;
@@ -1172,6 +1173,47 @@ void EigrpIpv4Pdm::cancelHoldTimer(EigrpNeighbor<Ipv4Address> *neigh)
     {
         if (timer->isScheduled()) {
             cancelEvent(timer);
+        }
+    }
+}
+
+void EigrpIpv4Pdm::cancelHelloTimers()
+{
+    EigrpInterface *iface;
+    EigrpTimer *timer;
+
+    int cnt = this->eigrpIft->getNumInterfaces();
+    for (int i = 0; i < cnt; i++)
+    {
+        iface = this->eigrpIft->getInterface(i);
+
+        if ((timer = iface->getHelloTimer()) != NULL)
+        {
+            if (timer->isScheduled())
+            {
+                timer->getOwner();
+                cancelEvent(timer);
+            }
+
+            delete timer;
+        }
+    }
+
+
+    cnt = this->eigrpIftDisabled->getNumInterfaces();
+    for (int i = 0; i < cnt; i++)
+    {
+        iface = this->eigrpIftDisabled->getInterface(i);
+
+        if ((timer = iface->getHelloTimer()) != NULL)
+        {
+            if (timer->isScheduled())
+            {
+                timer->getOwner();
+                cancelEvent(timer);
+            }
+
+            delete timer;
         }
     }
 }
