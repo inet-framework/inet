@@ -506,6 +506,9 @@ class Olsr : public ManetRoutingBase
     virtual void finish() override;
     //virtual void processPromiscuous(const cObject *details){};
     virtual void processLinkBreak(const Packet *) override;
+    virtual void processLinkBreakManagement(const Packet *details) override {return;}
+    virtual void processLinkBreakCsma(const Packet *details) override {return;}
+    virtual void processLinkBreakManagementCsma(const Packet *details) override {return;}
 
     L3Address getIfaceAddressFromIndex(int index);
 

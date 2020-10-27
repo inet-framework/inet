@@ -271,6 +271,10 @@ class DYMOFau : public ManetRoutingBase
     virtual bool getDestAddress(Packet *, L3Address &) override {return false;};
 
     virtual void processLinkBreak(const Packet *) override;
+    virtual void processLinkBreakManagement(const Packet *details) override {return;}
+    virtual void processLinkBreakCsma(const Packet *details) override {return;}
+    virtual void processLinkBreakManagementCsma(const Packet *details) override {return;}
+
     void packetFailed(const Packet *dgram);
     void rescheduleTimer();
 

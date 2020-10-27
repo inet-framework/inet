@@ -712,6 +712,9 @@ private:
 
     // virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void processLinkBreak(const Packet* details) override;
+    virtual void processLinkBreakManagement(const Packet *details) override {return;}
+    virtual void processLinkBreakCsma(const Packet *details) override {return;}
+    virtual void processLinkBreakManagementCsma(const Packet *details) override {return;}
 
   protected:
     struct in_addr ifaddr;

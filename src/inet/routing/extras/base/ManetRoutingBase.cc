@@ -484,8 +484,10 @@ void ManetRoutingBase::registerPosition()
     curSpeed = imod->getCurrentVelocity();
 }
 
-void ManetRoutingBase::processLinkBreak(const Packet *details) {return;}
-void ManetRoutingBase::processLinkBreakManagement(const Packet *details) {return;}
+void ManetRoutingBase::processLinkBreak(const Packet *details) {throw cRuntimeError("ManetRouting link layer feedback Mac Header doesn't supported"); return;}
+void ManetRoutingBase::processLinkBreakManagement(const Packet *details) {throw cRuntimeError("ManetRouting link layer feedback Mac Header doesn't supported"); return;}
+void ManetRoutingBase::processLinkBreakCsma(const Packet *details) {throw cRuntimeError("ManetRouting link layer feedback Mac Header doesn't supported"); return;}
+void ManetRoutingBase::processLinkBreakManagementCsma(const Packet *details) {throw cRuntimeError("ManetRouting link layer feedback Mac Header doesn't supported"); return;}
 void ManetRoutingBase::processLocatorAssoc(const Packet *details) {return;}
 void ManetRoutingBase::processLocatorDisAssoc(const Packet *details) {return;}
 
@@ -894,8 +896,14 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, c
         if (obj == nullptr)
             return;
         Packet *datagram = check_and_cast<Packet *>(obj);
+        const auto & header = datagram->peekAtFront<Chunk>();
 
-        const auto & header80211 = datagram->peekAtFront<Ieee80211MacHeader>();
+        auto header80211 = dynamicPtrCast<const Ieee80211MacHeader>(header);
+        if (header80211 == nullptr) {
+            EV << "Mac header type isn't supported by rtge link layer feedback mechanism " << endl;
+            return;
+        }
+
         auto dataOrMfmHeader80211 = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header80211);
         auto dataHeader80211 = dynamicPtrCast<const Ieee80211DataHeader>(header80211);
 

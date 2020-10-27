@@ -324,6 +324,8 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void processLinkBreak(const Packet* details);
     virtual void processLinkBreakManagement(const Packet *details);
+    virtual void processLinkBreakCsma(const Packet *details);
+    virtual void processLinkBreakManagementCsma(const Packet *details);
     virtual void processLocatorAssoc(const Packet *details);
     virtual void processLocatorDisAssoc(const Packet *details);
     virtual void processChangeInterface(simsignal_t signalID, const cObject *details);

@@ -428,6 +428,10 @@ class AODVUU : public ManetRoutingBase
 
     // used for break link notification
     virtual void processLinkBreak(const Packet *details) override;
+    virtual void processLinkBreakManagement(const Packet *details) override {return;}
+    virtual void processLinkBreakCsma(const Packet *details) override {return;}
+    virtual void processLinkBreakManagementCsma(const Packet *details) override {return;}
+
     virtual bool isOurType(const Packet *) override;
     virtual bool getDestAddress(Packet *,L3Address &) override;
 

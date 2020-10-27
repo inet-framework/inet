@@ -149,6 +149,10 @@ class Batman : public ManetRoutingBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void processLinkBreak(const Packet*) override{};
+    virtual void processLinkBreakManagement(const Packet *details) override {return;}
+    virtual void processLinkBreakCsma(const Packet *details) override {return;}
+    virtual void processLinkBreakManagementCsma(const Packet *details) override {return;}
+
     virtual void packetFailed(const Packet*) {}
     virtual void scheduleNextEvent();
     virtual void processChangeInterface(simsignal_t signalID, const cObject *details) override;
