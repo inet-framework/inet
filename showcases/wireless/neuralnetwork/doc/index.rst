@@ -64,7 +64,7 @@ Simulating wireless receptions with analytical error models is fast and generall
 As a best-of-both-worlds approach, a neural network can be trained on the reception characteristics of detailed symbol-level simulations, and used as an error model in packet-level simulations.
 The resulting error model has the potential to be more accurate than packet-level analytical error models, but with comparable performance.
 
-This showcase demonstrates the workflow of creating such a neural network based error model for 802.11 and :ned:`ApskRadio`, and compares their performance and accuracy to the baseline symbol-level simulation and those using analytical error models.
+This showcase demonstrates the workflow of creating such a neural network based error model for 802.11 and compares its performance and accuracy to the baseline symbol-level simulation and those using analytical error models.
 
 Overview
 --------
@@ -120,9 +120,9 @@ In this case, the detailed reception and decoding process is replaced with a sim
 
   Error models are basically a leap in the decoding process. We start with a signal at the analog level. Then there is symbol, bit and packet level (also sample level but its not implemented). We either simulate each level in the process -> receiving symbols, forward error correction, descrambling, deinterleaving, or *we jump a few levels with the error model. We replace the model of the whole or some of the decoding process with a more simple model, the error model.*
 
-**V1** Error models describe how the signal-to-noise-plus-interference ratio (SNIR) affects the amount of errors in a received frame. They can calculate the packet error rate, bit error rate or symbol error rate of receptions, depending on the simulated level of detail. They are implemented as replaceable submodules of receivers.
+.. **V1** Error models describe how the signal-to-noise-plus-interference ratio (SNIR) affects the amount of errors in a received frame. They can calculate the packet error rate, bit error rate or symbol error rate of receptions, depending on the simulated level of detail. They are implemented as replaceable submodules of receivers.
 
-**V2** Error models decide if a frame was correctly received or not. They can calculate error rates (depending on the configured level of detail, symbol-, bit-
+Error models decide if a frame was correctly received or not. They can calculate error rates (depending on the configured level of detail, symbol-, bit-
 and packet error rate) for higher layers. They can corrupt symbols (replace them with another one) or bits (invert them), or indicate that the frame is
 incorrectly received. They are implemented as replaceable submodules of receivers.
 
@@ -130,7 +130,9 @@ incorrectly received. They are implemented as replaceable submodules of receiver
 
 .. TODO
 
-The most commonly used packet level radio models in INET examples and showcases feature analytical error models, such as the NIST error model in 802.11 or the APSK error model with :ned:`ApskRadio`. The packet-level radio model is an informal default because it's fast and accurate enough most of the time.
+The most commonly used packet level radio models in INET examples and showcases feature analytical error models, such as the NIST error model in 802.11. The packet-level radio model is an informal default because it's fast and accurate enough most of the time.
+
+..  or the APSK error model with :ned:`ApskRadio`
 
 .. for performance reasons
 
@@ -184,7 +186,11 @@ Symbol level simulation can model these corner cases more accurately, as per-sym
 .. TODO neural network jo comprimise a ketto kozott
 
 The neural network error model is a good compromise between these two methods.
-The idea is to create a large training dataset containing the channel parameters and outcomes of many receptions using symbol-level simulation, and use it to train the neural network. We use this neural network as the error model, which gives an estimation of the packet error rate for similar channel conditions.
+The idea is to create a large training dataset containing the channel parameters and outcomes of many receptions using symbol-level simulation, and use it to train the neural network. We use this neural network as the error model, which gives an estimation of the packet error rate for similar channel conditions in packet level simulations.
+
+.. .. note:: With this process, a neural network error model can be created for any wireless technology which has a symbol-level simulation model.
+
+.. **TODO** its used instead of the packet level
 
 .. -> relatively good estimation
 
@@ -270,13 +276,13 @@ The Model
 
 We create a large training dataset by running thousands of simulations. The simulations cover a broad range of channel conditions, to prepare the neural network for generally any channel condition. The simulations are as detailed as possible, to make the resulting neural network error model as accurate as possible.
 
-To do that, we use symbol level of detail dimensional analog signal representation, i.e. the transmission and reception of each symbol of each subcarrier is simulated. Also, the complete coding and decoding process is simulated, i.e. scrambling, interleaving and forward error correction (and the inverse process in the receiver). We use the :ned:`Ieee80211OfdmErrorModel`, which calculates a symbol error rate from the modulation, spectrum, and per-symbol SNIR at reception. Based on the calculated SER, it corrupts the received symbol when necessary, i.e. it replaces it with another symbol. Then the symbols of the signal undergo the decoding process. The higher layers can either correct the errors and receive the packet correctly or drop the packet; this reception outcome is recorded. (The reception process only makes use of random numbers when deciding how to corrupt symbols based on the SER.)
+To do that, we use symbol level of detail and dimensional analog signal representation, i.e. the transmission and reception of each symbol of each subcarrier is simulated. Also, the complete coding and decoding process is simulated, i.e. scrambling, interleaving and forward error correction (and the inverse process in the receiver). We use the :ned:`Ieee80211OfdmErrorModel`, which calculates a symbol error rate from the modulation, spectrum, and per-symbol SNIR at reception. Based on the calculated SER, it corrupts the received symbol when necessary, i.e. it replaces it with another symbol. Then the symbols of the signal undergo the decoding process. The higher layers can either correct the errors and receive the packet correctly or find it erroneous and drop the packet; this reception outcome is recorded. (The reception process only makes use of random numbers when deciding how to corrupt symbols based on the SER.)
 
-  **V1** After the decoding process, the outcome of the reception is either successful or failed.)
+.. **V1** After the decoding process, the outcome of the reception is either successful or failed.)
 
-  **V2** The decoding process after that is not stochastic.
+.. **V2** The decoding process after that is not stochastic.
 
-  **V3** After the decoding process, the received frame is either verified as correct or found erroneous and dropped.
+.. **V3** After the decoding process, the received frame is either verified as correct or found erroneous and dropped.
 
 .. After that, the decoding process doesn't use random numbers, and the output is a reception outcome - successful or failed).**TODO**
 
@@ -289,13 +295,13 @@ We iterate over a wide range of signal and channel parameters, such as the numbe
 We simulate reception in a given iteration many times. A packet error rate is calculated from the many reception outcomes.
 The input of the neural network is the per-symbol SNIR and the estimated packet error rate.
 
-**V1** When using the neural network as the error model, the network estimates a packet error rate from the per-symbol SNIR vector (or the SNIR in the time intervals corresponding to symbols). This works with dimensional and scalar analog models as well, though the dimensional is more accurate.
+.. **V1** When using the neural network as the error model, the network estimates a packet error rate from the per-symbol SNIR vector (or the SNIR in the time intervals corresponding to symbols). This works with dimensional and scalar analog models as well, though the dimensional is more accurate.
 
-**V2** When using the neural network as the error model, the network estimates a packet error rate from the per-symbol SNIR vector with the dimensional analog model, or the SNIR in the time intervals corresponding to symbols with the scalar analog model.
+When using the neural network as the error model, the network estimates a packet error rate from the per-symbol SNIR vector with the dimensional analog model, or the SNIR in the time intervals corresponding to symbols with the scalar analog model.
 
 .. The result is a training dataset with channel conditions represented by per-symbol SNIR values and corresponding PER.
 
-**TODO** random; evaluate acronyms;
+.. **TODO** random; evaluate acronyms;
 
 ..  keywords
 
@@ -327,7 +333,9 @@ The :ned:`NeuralNetworkErrorModelTrainingDatasetGenerator` uses the radio module
 
 .. The simulations that generate the training data are defined in generate-training-dataset.ini.
 
-There are two configurations in :download:`generate-training-dataset.ini <../generate-training-dataset.ini>`, ``ApskRadio`` and ``Ieee802.11Radio``. The following are some excerpts from these configurations.
+.. There are two configurations in :download:`generate-training-dataset.ini <../generate-training-dataset.ini>`, ``ApskRadio`` and ``Ieee802.11Radio``. The following are some excerpts from these configurations.
+
+The following are some excerpts from the ``Ieee802.11Radio`` configuration in :download:`generate-training-dataset.ini <../generate-training-dataset.ini>`:
 
 .. The following are some excerpts from generate-training-dataset.ini for the 802.11 configuration.
 
@@ -337,29 +345,13 @@ There are two configurations in :download:`generate-training-dataset.ini <../gen
 
 .. Configuring the trainingDatasetGenerator module in the ``Ieee80211Radio`` configuration:
 
-In the ``Ieee80211Radio`` configuration, the training dataset generator is configured to create file names which contain the class name, bitrate, modulation, center frequency, bandwidth and repetition number. Each reception is simulated 10000 times, with 64-Byte packets; the distribution of the background noise power is specified:
+The training dataset generator is configured to create file names which contain the class name, bitrate, modulation, subcarrier modulation, center frequency, bandwidth and repetition number. Each reception is simulated 1000 times, with 64-Byte packets; the distribution of the background noise and interfering signal power is specified:
 
-.. literalinclude:: ../generate-training-dataset.ini
+.. the subcarrier modulation is added to the filename; additionally, interfering signals are added.
+
+.. .. literalinclude:: ../generate-training-dataset.ini
    :start-at: trainingDatasetGenerator.filenameFormat
    :end-at: backgroundNoisePowerStddev
-   :language: ini
-
-.. Configuring the radio:
-
-The radio is configured to use the dimensional analog model and symbol level of detail, in addition to the center frequency, bandwidth, modulation, etc; forward error correction is enabled:
-
-.. literalinclude:: ../generate-training-dataset.ini
-   :start-at: ApskLayeredDimensionalRadio"
-   :end-at: bandwidth
-   :language: ini
-
-This radio uses the :ned:`ApskLayeredErrorModel` by default.
-
-In the ``Ieee80211Radio`` configuration, the training dataset generator is configured similarly to the APSK Radio configuration, but the subcarrier modulation is added to the filename; additionally, interfering signals are added.
-
-.. literalinclude:: ../generate-training-dataset.ini
-   :start-at: 36Mbps
-   :end-at: fecEncoder.typename
    :language: ini
 
 .. literalinclude:: ../generate-training-dataset.ini
@@ -367,7 +359,16 @@ In the ``Ieee80211Radio`` configuration, the training dataset generator is confi
    :end-at: interferingSignalNoisePowerStddev
    :language: ini
 
-The radio is configured to use the dimensional analog model and symbol level of detail. The Ieee80211LayeredOfdmReceiver module doesn't have a default error model, so it is selected. **TODO** why?
+.. Configuring the radio:
+
+.. The radio is configured to use the dimensional analog model and symbol level of detail, in addition to the center frequency, bandwidth, modulation, etc; forward error correction is enabled:
+
+The radio is configured to use the dimensional analog model and symbol level of detail. The :ned:`Ieee80211LayeredOfdmReceiver` module doesn't have a default error model, so it is selected. **TODO** why?
+
+.. .. literalinclude:: ../generate-training-dataset.ini
+   :start-at: ApskLayeredDimensionalRadio"
+   :end-at: bandwidth
+   :language: ini
 
 .. literalinclude:: ../generate-training-dataset.ini
    :start-at: Ieee80211OfdmRadio
@@ -375,16 +376,51 @@ The radio is configured to use the dimensional analog model and symbol level of 
    :language: ini
 
 .. literalinclude:: ../generate-training-dataset.ini
+   :start-at: Ieee80211LayeredOfdmTransmitter
+   :end-at: power
+   :language: ini
+
+.. literalinclude:: ../generate-training-dataset.ini
    :start-at: Ieee80211OfdmErrorModel
    :end-at: Ieee80211OfdmErrorModel
    :language: ini
+
+The layered 802.11 model simulates the coding and decoding process by default (forward error correction, scrambling, interleaving).
+
+.. This radio uses the :ned:`ApskLayeredErrorModel` by default.
+
+.. In the ``Ieee80211Radio`` configuration, the training dataset generator is configured similarly to the APSK Radio configuration, but the subcarrier modulation is added to the filename; additionally, interfering signals are added.
+
+  .. literalinclude:: ../generate-training-dataset.ini
+     :start-at: 36Mbps
+     :end-at: fecEncoder.typename
+     :language: ini
+
+  .. literalinclude:: ../generate-training-dataset.ini
+     :start-after: error model of Ieee80211Radio
+     :end-at: interferingSignalNoisePowerStddev
+     :language: ini
+
+  The radio is configured to use the dimensional analog model and symbol level of detail. The Ieee80211LayeredOfdmReceiver module doesn't have a default error model, so it is selected. **TODO** why?
+
+  .. literalinclude:: ../generate-training-dataset.ini
+     :start-at: Ieee80211OfdmRadio
+     :end-at: bandwidth
+     :language: ini
+
+  .. literalinclude:: ../generate-training-dataset.ini
+     :start-at: Ieee80211OfdmErrorModel
+     :end-at: Ieee80211OfdmErrorModel
+     :language: ini
 
 .. **TODO** not sure its needed -> describe and some excerpt ?
 
 .. - apsk config
    - 802.11 config
 
-The module creates log files which contain the iteration variables, the per-symbol SNIR and the packet error rate. Here is the header and the first line of a log file (each line describes a reception):
+The :ned:`NeuralNetworkErrorModelTrainingDatasetGenerator` module creates log files which contain the iteration variables, the per-symbol SNIR and the packet error rate. Here is the header and the first line of a log file (each line describes a reception):
+
+.. **TODO** this is the training dataset
 
 .. :download:`log <../log>`
 
@@ -397,14 +433,13 @@ The module creates log files which contain the iteration variables, the per-symb
    - For this showcase, we just created the 24Mbps QAM-16 20MHz BW 2.412GHz center frequency
    - Now, it works with fixed packet sizes (1000B)
 
-Our approach is to create a neural network model for each modulation, bit rate, Wifi channel and bandwidth used in IEEE 802.11g. (One could also create just one model which can be used for all modulations, bit rates, channels and bandwidth). We chose the multiple models approach because these models are less complex, smaller, and easier to train and run, compared to using just one model (the error model module will automatically choose the neural network needed for the given modulation when used in the simulation, based on the filename). For this showcase, we only created the model for 802.11g 24Mbps QAM-16 20MHz bandwidth 2.412GHz center frequency version,
-and the 36Mbps BPSK 20MHz bandwidth 2.4GHz center frequency version for :ned:`ApskRadio`.
+Our approach is to create a neural network model for each modulation, bit rate, Wifi channel and bandwidth used in IEEE 802.11g. (One could also create just one model which can be used for all modulations, bit rates, channels and bandwidth). We chose the multiple models approach because these models are less complex, smaller, and easier to train and run, compared to using just one model (the error model module will automatically choose the neural network needed for the given modulation when used in the simulation, based on the filename). For this showcase, we only created the model for 802.11g 24Mbps QAM-16 20MHz bandwidth 2.412GHz center frequency version.
 
 .. **TODO** the error model will automatically choose the neural network needed when used in the simulation
 
 .. **TODO** - Now, it works with fixed packet sizes (1000B)
 
-.. note:: Our model currently only works with fixed packet sizes of 1000B
+.. note:: Our model currently only works with fixed packet sizes of 64B
 
 Training the neural network
 ---------------------------
@@ -417,6 +452,8 @@ Training the neural network
   - the result is model and h5 files
 
 We use Keras to build and train the neural network. The network used in this showcase has the following structure:
+
+**TODO** better figures
 
 .. figure:: graph.svg
    :width: 90%
@@ -465,19 +502,19 @@ The ``train-neural-network.py`` script creates the Keras model, and trains it on
 
 When running the script, specify the list of log files as an argument (note that there are eight log files hence the ``*``):
 
-- For ApskRadio:
+.. - For ApskRadio:
 
   .. code-block:: bash
 
      ./train-neural-network.py ApskRadio_36Mbps_Bpsk_2.4GHz_20MHz_*.log
 
-- For 802.11:
+.. - For 802.11:
 
-  .. code-block:: bash
+.. code-block:: bash
 
-     ./train-neural-network.py Ieee80211OfdmRadio_24Mbps_Ieee80211Ofdm_Qam16_2.412GHz_20MHz_*.log
+   ./train-neural-network.py Ieee80211OfdmRadio_24Mbps_Ieee80211Ofdm_Qam16_2.412GHz_20MHz_*.log
 
-After the training process is completed, the structure and weights of the neural network model are saved to a ``.model`` file, e.g. ``ApskRadio_36Mbps_Bpsk_2.4GHz_20MHz.model``, which can be used by INET's integrated inference library (keras2cpp) at runtime.
+After the training process is completed, the structure and weights of the neural network model are saved to a ``.model`` file, e.g. ``Ieee80211Radio_24Mbps_Ieee80211Ofdm_Qam16_2.412GHz_20MHz.model``, which can be used by INET's integrated inference library (keras2cpp) at runtime.
 
 .. **TODO** which contains the TODO in the filename, more on this in the next section
 
@@ -505,12 +542,14 @@ For example, in this showcase the error model for 802.11 is configured as follow
 
 Note that the model name format also includes the subcarrier modulation (``%M``).
 
-And the same for :ned:`ApskRadio`:
+.. .. note:: With this process, a neural network error model can be created for any wireless technology which has a symbol-level simulation model.
 
-.. literalinclude:: ../compare-apskradio-error-models.ini
-   :start-at: errorModel.typename = "NeuralNetworkErrorModel"
-   :end-at: neuralNetworkModelFilenames
-   :language: ini
+.. And the same for :ned:`ApskRadio`:
+
+  .. literalinclude:: ../compare-apskradio-error-models.ini
+     :start-at: errorModel.typename = "NeuralNetworkErrorModel"
+     :end-at: neuralNetworkModelFilenames
+     :language: ini
 
 .. **TODO** ini files and scripts
 
@@ -523,22 +562,22 @@ Comparison
 
 .. in terms of accuracy and performance
 
-The ``compare-error-models.py`` script can be used to generate results for these three cases, which then can be compared with the analysis tool of the IDE. The script takes an ini file as argument, and runs simulations of receptions for the three cases.
-The simulations are defined in :download:`compare-apskradio-error-models.ini <../compare-apskradio-error-models.ini>` and :download:`compare-ieee80211radio-error-models.ini <../compare-ieee80211radio-error-models.ini>`.
+The ``compare-error-models.py`` script can be used to generate results for the three cases (symbol-level, packet-level analytical, packet-level neural network), which then can be compared with the analysis tool of the IDE. The script takes an ini file as argument, and runs simulations of receptions for the three cases.
+The simulations are defined in :download:`compare-ieee80211radio-error-models.ini <../compare-ieee80211radio-error-models.ini>`.
 
 .. note:: The simulations take several minutes to finish (it runs in Cmdenv).
 
-**TODO** include models and results in the repo? (because it takes long)
+.. **TODO** include models and results in the repo? (because it takes long)
 
-``CompareIeee80211RadioErrorModels.anf`` and ``CompareApskRadioErrorModels.anf`` contain the charts for Received packets (%) vs Number of noise sources, for the different values of noise duration and power. The displayed noise duration and power values can be changed with sliders interactively. Some of the charts are included in the following sections.
+``CompareIeee80211RadioErrorModels.anf`` contains the charts for Received packets (%) vs Number of noise sources, for the different values of noise duration and power. The displayed noise duration and power values can be changed with sliders interactively. Some of the charts are included in the following sections.
 
 .. Here are some of the charts:
 
-ApskRadio
-~~~~~~~~~
+.. ApskRadio
+   ~~~~~~~~~
 
-Ieee80211Radio
-~~~~~~~~~~~~~~
+.. Ieee80211Radio
+   ~~~~~~~~~~~~~~
 
 .. The ``CompareIeee80211RadioErrorModels.anf`` file contains the charts for Received packets (%) vs Number of noise sources, for the different values of noise duration and power. The displayed noise duration and power values can be changed with sliders interactively. Here are some of the charts:
 
@@ -548,21 +587,23 @@ At low power and duration, both the packet level and the neural network match th
    :align: center
    :width: 100%
 
-At higher duration, the neural network gives a better estimation than the analytical. The difference from the baseline gets increasingly larger for the analytical model; at 20 noise sources, the difference is substantial, ~95% vs ~1% (100x difference). However, this difference for the neural network is around 50% at most in the whole range (2x difference).
+At higher duration, the neural network gives a better estimation than the analytical. The difference from the baseline gets increasingly larger for the analytical model; at 20 noise sources, the difference is substantial, ~95% vs ~1% (100x difference). However, this difference for the neural network is around 50% at most in the whole range (2x difference):
 
 .. figure:: 1_8.png
    :align: center
    :width: 100%
 
-At even higher duration, the neural network is still a better match, because the analytical model gives incorrect results in most of the range.
+At even higher duration, the neural network is still a better match, because the analytical model gives incorrect results in most of the range:
 
 .. figure:: 1_16.png
    :align: center
    :width: 100%
 
-At higher power, the analytical error models estimation is mostly incorrect, except when no packets can be received due to the high number of noise sources. The neural network still follows the baseline better:
+At higher power, the analytical error models estimation is mostly incorrect, except when no packets can be received due to the high number of noise sources. The neural network still follows the baseline better when packets can be received:
 
-- at high number of noise sources, the analytical follows the baseline better. At lower number of noise sources, the relative difference between the analytical and the baseline is large (up to 1000x), for the neural network at most 2x. However, 
+.. - at high number of noise sources, the analytical follows the baseline better. At lower number of noise sources, the relative difference between the analytical and the baseline is large (up to 1000x), for the neural network at most 2x. However,
+
+.. **TODO**
 
 .. figure:: 5_10.png
    :align: center
@@ -617,3 +658,5 @@ Further research is needed, e.g. in the following areas:
 
 - The structure of the neural network can be fine-tuned to the problem
 - Use one network for all modulations, or several smaller networks for each modulation
+
+This showcases demonstrated a 802.11 neural network error model, but this method can create neural network error models for any wireless technology which has symbol-level simulation.
