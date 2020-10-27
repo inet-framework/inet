@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2020-10-27  ------ inet-4.2.1 released ------
+
+2020-10-21  Zoltan Bojthe
+
+	VoipStreamServer: bugfix: swapped inBytesPerSample, outBytesPerSample
+
+2020-09-11  Levente Mészáros
+
+	VoipStreamSender: updated for avcodec-7:4.2.4
+
+	Fixed sample format, old hack didn't work under Ubuntu 20.04. BUT: This
+	change alters the fingerprints of VoIP simulations.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-28  Zoltan Bojthe

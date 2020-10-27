@@ -9,8 +9,8 @@ import string
 import subprocess
 
 # configuration
-since = '2019-12-10'  # empty means "since last entry in the ChangeLog file"
-fromtag = '' # alternative for 'since': from the given tag or branch
+since = ''  # empty means "since last entry in the ChangeLog file"
+fromtag = 'v4.2.0' # alternative for 'since': from the given tag or branch
 
 entriesToIgnore = [
 """2017-03-03  Rudolf Hornig

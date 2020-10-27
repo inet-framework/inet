@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2020-10-27  ------ inet-4.2.1 released ------
+
+2020-10-16  Andras Varga
+
+	ThruputMeteringChannel to support both omnetpp5 and 6
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-27  Zoltan Bojthe
