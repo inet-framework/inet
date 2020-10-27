@@ -117,7 +117,9 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
     else if (in_range(registeredMacAddresses, destinationAddress))
         sendUp(incomingPacket);
     else {
-        auto outgoingPacket = new Packet(incomingPacket->getName(), incomingPacket->peekData());
+        auto outgoingPacket = incomingPacket->dup();
+        outgoingPacket->trim();
+        outgoingPacket->clearTags();
         outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
         if (auto vlanInd = incomingPacket->findTag<VlanInd>())
             outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
