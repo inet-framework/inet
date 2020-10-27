@@ -583,19 +583,19 @@ The simulations are defined in :download:`compare-ieee80211radio-error-models.in
 
 At low power and duration, both the packet level and the neural network match the baseline fairly well. At high number of noise sources, the analytical model has around 10% difference from the baseline:
 
-.. figure:: 1_2.png
+.. figure:: media/1_2.png
    :align: center
    :width: 100%
 
 At higher duration, the neural network gives a better estimation than the analytical. The difference from the baseline gets increasingly larger for the analytical model; at 20 noise sources, the difference is substantial, ~95% vs ~1% (100x difference). However, this difference for the neural network is around 50% at most in the whole range (2x difference):
 
-.. figure:: 1_8.png
+.. figure:: media/1_8.png
    :align: center
    :width: 100%
 
 At even higher duration, the neural network is still a better match, because the analytical model gives incorrect results in most of the range:
 
-.. figure:: 1_16.png
+.. figure:: media/1_16.png
    :align: center
    :width: 100%
 
@@ -605,13 +605,13 @@ At higher power, the analytical error models estimation is mostly incorrect, exc
 
 .. **TODO**
 
-.. figure:: 5_10.png
+.. figure:: media/5_10.png
    :align: center
    :width: 100%
 
 At high power the neural network error model's estimation is has around 2x difference. The analytical error model gives incorrect results in the first half of the range:
 
-.. figure:: 10_6.png
+.. figure:: media/10_6.png
    :align: center
    :width: 100%
 
@@ -619,7 +619,7 @@ At high power the neural network error model's estimation is has around 2x diffe
 
 At the highest power and duration, the analytical model drops to zero, while the neural network model follows the baseline:
 
-.. figure:: 10_16.png
+.. figure:: media/10_16.png
    :align: center
    :width: 100%
 
