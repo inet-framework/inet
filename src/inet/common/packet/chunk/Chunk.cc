@@ -161,7 +161,6 @@ std::ostream& Chunk::printToStream(std::ostream& stream, int level, int evFlags)
     std::string className = getClassName();
     auto index = className.rfind("::");
     if (index != std::string::npos)
-    if (index != -1)
         className = className.substr(index + 2);
     stream << EV_FAINT << className << EV_NORMAL;
     return printFieldsToStream(stream, level, evFlags);
