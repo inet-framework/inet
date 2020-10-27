@@ -238,7 +238,7 @@ void EtherMac::handleSignalFromNetwork(EthernetSignalBase *signal)
     if (duplexMode && jamSignal)
         throw cRuntimeError("Stray jam signal arrived in full-duplex mode");
 
-    if (auto jamSignal = dynamic_cast<EthernetJamSignal *>(signal)) {
+    if (dynamic_cast<EthernetJamSignal *>(signal)) {
         updateRxSignals(signal, simTime() + signal->getRemainingDuration());
         processDetectedCollision();
     }
