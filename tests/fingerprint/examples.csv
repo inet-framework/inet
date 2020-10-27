@@ -475,6 +475,8 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            a2d0-ff3c/tplx, PASS,
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            6f4c-c6fd/tplx, PASS,
 
+/examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             4249-d4c8/tplx, PASS,
+
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            635a-0571/tplx, PASS,
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            eb50-fbaa/tplx, PASS,
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            4095-fad1/tplx, PASS,
