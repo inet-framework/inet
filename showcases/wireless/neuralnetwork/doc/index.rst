@@ -439,7 +439,7 @@ Our approach is to create a neural network model for each modulation, bit rate, 
 
 .. **TODO** - Now, it works with fixed packet sizes (1000B)
 
-.. note:: Our model currently only works with fixed packet sizes of 64B
+.. note:: Our model currently only works with a fixed packet size of 64B
 
 Training the neural network
 ---------------------------
@@ -581,13 +581,17 @@ The simulations are defined in :download:`compare-ieee80211radio-error-models.in
 
 .. The ``CompareIeee80211RadioErrorModels.anf`` file contains the charts for Received packets (%) vs Number of noise sources, for the different values of noise duration and power. The displayed noise duration and power values can be changed with sliders interactively. Here are some of the charts:
 
-At low power and duration, both the packet level and the neural network match the baseline fairly well. At high number of noise sources, the analytical model has around 10% difference from the baseline:
+At low power and duration, both the analytical and the neural network based packet level error models match the baseline symbol level simulation fairly well. At high number of noise sources, the analytical model has around 10% difference from the baseline:
+
+itt rövid zajok kicsi a power igy az analytical se rossz
 
 .. figure:: media/1_2.png
    :align: center
    :width: 100%
 
-At higher duration, the neural network gives a better estimation than the analytical. The difference from the baseline gets increasingly larger for the analytical model; at 20 noise sources, the difference is substantial, ~95% vs ~1% (100x difference). However, this difference for the neural network is around 50% at most in the whole range (2x difference):
+At longer duration, the neural network based error model gives a better estimation than the analytical. The difference from the baseline gets increasingly larger for the analytical model; at 20 noise sources, the difference is substantial, ~95% vs ~1% (100x difference). However, this difference for the neural network is less than 50% at most in the whole range (2x difference):
+
+miért van ez? -> ha a packet levelben sok noise van es idoben osszeernek akkor tobb lesz a power -> ? we dont know
 
 .. figure:: media/1_8.png
    :align: center
@@ -600,6 +604,8 @@ At even higher duration, the neural network is still a better match, because the
    :width: 100%
 
 At higher power, the analytical error models estimation is mostly incorrect, except when no packets can be received due to the high number of noise sources. The neural network still follows the baseline better when packets can be received:
+
+1 noise sourcenal a packet level ugy veszi hogy vegig az a snir -> minSnir-t néz
 
 .. - at high number of noise sources, the analytical follows the baseline better. At lower number of noise sources, the relative difference between the analytical and the baseline is large (up to 1000x), for the neural network at most 2x. However,
 
@@ -659,4 +665,4 @@ Further research is needed, e.g. in the following areas:
 - The structure of the neural network can be fine-tuned to the problem
 - Use one network for all modulations, or several smaller networks for each modulation
 
-This showcases demonstrated a 802.11 neural network error model, but this method can create neural network error models for any wireless technology which has symbol-level simulation.
+This showcases demonstrated a 802.11 neural network based error model, but this method can create neural network based wireless error models for any wireless technology which has symbol-level simulation.
