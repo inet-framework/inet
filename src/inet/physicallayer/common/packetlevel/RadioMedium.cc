@@ -238,10 +238,14 @@ bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, c
 void RadioMedium::removeNonInterferingTransmissions()
 {
     communicationCache->removeNonInterferingTransmissions([&] (const ITransmission *transmission) {
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
         const ISignal *signal = communicationCache->getCachedSignal(transmission);
+#endif
         emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
         delete signal;
         delete transmission;
+#endif
     });
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
         auto interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
@@ -496,11 +500,17 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 
 void RadioMedium::removeTransmission(const ITransmission *transmission)
 {
+    Enter_Method("removeTransmission");
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     const ISignal *signal = communicationCache->getCachedSignal(transmission);
     communicationCache->removeTransmission(transmission);
     emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
     delete signal;
     delete transmission;
+#else
+    emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
+    communicationCache->removeTransmission(transmission);
+#endif
 }
 
 ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packet)

@@ -26,8 +26,14 @@ Define_Module(VectorCommunicationCache);
 VectorCommunicationCache::~VectorCommunicationCache()
 {
     for (auto& transmissionCacheEntry : transmissionCache) {
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION >= 0x0600    // 6.0 pre9
+        delete transmissionCacheEntry.signal;
+        delete transmissionCacheEntry.transmission;
+#endif
         delete transmissionCacheEntry.receptionCacheEntries;
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
         transmissionCacheEntry.receptionCacheEntries = nullptr;
+#endif
     }
 }
 
@@ -142,6 +148,10 @@ void VectorCommunicationCache::addTransmission(const ITransmission *transmission
 
 void VectorCommunicationCache::removeTransmission(const ITransmission *transmission)
 {
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION >= 0x0600    // 6.0 pre9
+    delete getCachedSignal(transmission);
+    delete transmission;
+#endif
 }
 
 const ITransmission *VectorCommunicationCache::getTransmission(int id) const
@@ -185,8 +195,13 @@ void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<v
                 delete receptionCacheEntries;
                 transmissionCacheEntry.receptionCacheEntries = nullptr;
             }
-            if (transmissionCacheEntry.transmission != nullptr)
+            if (transmissionCacheEntry.transmission != nullptr) {
                 f(transmissionCacheEntry.transmission);
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION >= 0x0600    // 6.0 pre9
+                delete transmissionCacheEntry.signal;
+                delete transmissionCacheEntry.transmission;
+#endif
+            }
         }
         else
             break;

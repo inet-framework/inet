@@ -26,8 +26,14 @@ Define_Module(ReferenceCommunicationCache);
 ReferenceCommunicationCache::~ReferenceCommunicationCache()
 {
     for (auto& transmissionCacheEntry : transmissionCache) {
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION >= 0x0600    // 6.0 pre9
+        delete transmissionCacheEntry.signal;
+        delete transmissionCacheEntry.transmission;
+#endif
         delete transmissionCacheEntry.receptionCacheEntries;
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
         transmissionCacheEntry.receptionCacheEntries = nullptr;
+#endif
     }
 }
 
