@@ -18,7 +18,7 @@
  * distribution.
  */
 
-#include "inet/common/int128.h"
+#include "inet/common/Int128.h"
 
 namespace inet {
 
