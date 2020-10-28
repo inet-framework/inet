@@ -80,8 +80,10 @@ void Edca::releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback* ca
 
 Edca::~Edca()
 {
+#if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
     for (int i = 0; i < numEdcafs; i++)
         edcafs[i]->deleteModule();
+#endif
     delete[] edcafs;
 }
 
