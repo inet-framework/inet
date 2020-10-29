@@ -80,8 +80,8 @@ class INET_API TunSocket : public ISocket
     virtual int getSocketId() const override { return socketId; }
 
     void open(int interfaceId);
-    void send(Packet *packet);
-    void close() override;
+    virtual void send(Packet *packet) override;
+    virtual void close() override;
     virtual void destroy() override;
     virtual bool isOpen() const override { return isOpen_; }
 

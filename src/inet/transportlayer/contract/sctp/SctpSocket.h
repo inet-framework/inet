@@ -278,7 +278,7 @@ class INET_API SctpSocket : public ISocket
     /**
      * Send data message
      */
-    void send(Packet *packet);
+    virtual void send(Packet *packet) override;
 
     /**
      * Send notification.

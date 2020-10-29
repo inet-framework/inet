@@ -107,7 +107,7 @@ class INET_API EthernetSocket : public ISocket
      * Sends a data packet to the address and port specified previously
      * in a connect() call.
      */
-    void send(Packet *packet);
+    virtual void send(Packet *packet) override;
 
     virtual bool isOpen() const override { return isOpen_; }
     /**

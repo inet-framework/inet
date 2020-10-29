@@ -311,7 +311,7 @@ class INET_API TcpSocket : public ISocket
     /**
      * Sends data packet.
      */
-    void send(Packet *msg);
+    virtual void send(Packet *msg) override;
 
     /**
      * Sends command.

@@ -75,11 +75,6 @@ class INET_API INetworkSocket : public ISocket
     virtual void connect(L3Address remoteAddress) = 0;
 
     /**
-     * Sends a packet using the associated network protocol.
-     */
-    virtual void send(Packet *packet) = 0;
-
-    /**
      * Sends a packet to the given remote address using the associated network protocol.
      */
     virtual void sendTo(Packet *packet, L3Address remoteAddress) = 0;

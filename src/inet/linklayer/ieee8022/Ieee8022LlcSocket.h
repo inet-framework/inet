@@ -90,7 +90,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
     virtual int getLocalSap() const { return localSap; }
 
     void open(int interfaceId, int localSap);
-    void send(Packet *packet);
+    virtual void send(Packet *packet) override;
     virtual void close() override;
     virtual bool isOpen() const override { return isOpen_; }
 

@@ -264,13 +264,13 @@ class INET_API UdpSocket : public ISocket
      * Sends a data packet to the address and port specified previously
      * in a connect() call.
      */
-    void send(Packet *msg);
+    virtual void send(Packet *msg) override;
 
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.
      */
-    void close() override;
+    virtual void close() override;
     //@}
 
     virtual void destroy() override;
