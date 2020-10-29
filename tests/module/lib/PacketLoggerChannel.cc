@@ -78,8 +78,12 @@ cChannel::Result PacketLoggerChannel::processMessage(cMessage *msg, const SendOp
 #if OMNETPP_BUILDNUM < 1504    // OMNETPP_VERSION is 6.0 pre9
     counter++;
 #else
-    if (!options.isUpdate) {
+    if (options.transmissionId_ == -1) {
+        counter++;
+    }
+    else if (!options.isUpdate) {
         status = ":start";
+        counter++;
     }
     else {
         status = (options.remainingDuration == SIMTIME_ZERO) ? ":end" : ":update";
