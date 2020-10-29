@@ -18,19 +18,20 @@
 #ifndef __INET_VIRTUALTUNNEL_H
 #define __INET_VIRTUALTUNNEL_H
 
-#include "inet/linklayer/ethernet/EthernetSocket.h"
+#include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
-class VirtualTunnel : public cSimpleModule, public EthernetSocket::ICallback
+class VirtualTunnel : public cSimpleModule, public EthernetSocket::ICallback, public Ieee8021qSocket::ICallback
 {
   protected:
-    int vlanId = -1;
-    const Protocol *protocol = nullptr;
     NetworkInterface *realNetworkInterface = nullptr;
     NetworkInterface *networkInterface = nullptr;
-    EthernetSocket socket;
+    const Protocol *protocol = nullptr;
+    int vlanId = -1;
+
+    ISocket *socket = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -38,8 +39,15 @@ class VirtualTunnel : public cSimpleModule, public EthernetSocket::ICallback
     virtual void handleMessage(cMessage *message) override;
 
     virtual void socketDataArrived(EthernetSocket *socket, Packet *packet) override;
-    virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override;
-    virtual void socketClosed(EthernetSocket *socket) override {}
+    virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override { throw cRuntimeError("Invalid operation"); }
+    virtual void socketClosed(EthernetSocket *socket) override { }
+
+    virtual void socketDataArrived(Ieee8021qSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(Ieee8021qSocket *socket, Indication *indication) override { throw cRuntimeError("Invalid operation"); }
+    virtual void socketClosed(Ieee8021qSocket *socket) override { }
+
+  public:
+    virtual ~VirtualTunnel() { delete socket; }
 };
 
 } // namespace inet

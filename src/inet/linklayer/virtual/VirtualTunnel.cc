@@ -22,6 +22,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/linklayer/ethernet/EthernetSocket.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qSocket.h"
 #include "inet/linklayer/virtual/VirtualTunnel.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -59,25 +61,38 @@ void VirtualTunnel::initialize(int stage)
         // KLUDGE: depends on other interface
         if (!strcmp(par("address"), "copy"))
             networkInterface->setMacAddress(realNetworkInterface->getMacAddress());
-        socket.setCallback(this);
-        socket.setOutputGate(gate("upperLayerOut"));
-        socket.setNetworkInterface(realNetworkInterface);
-        socket.bind(networkInterface->getMacAddress(), MacAddress(), nullptr, vlanId);
+        if (protocol == &Protocol::ethernetMac) {
+            auto ethernetSocket = new EthernetSocket();
+            ethernetSocket->setCallback(this);
+            ethernetSocket->setOutputGate(gate("upperLayerOut"));
+            ethernetSocket->setNetworkInterface(realNetworkInterface);
+            ethernetSocket->bind(networkInterface->getMacAddress(), MacAddress(), nullptr, par("steal"));
+            socket = ethernetSocket;
+        }
+        else if (protocol == &Protocol::ieee8021qCTag || protocol == &Protocol::ieee8021qSTag) {
+            auto ieee8021qSocket = new Ieee8021qSocket();
+            ieee8021qSocket->setCallback(this);
+            ieee8021qSocket->setOutputGate(gate("upperLayerOut"));
+            ieee8021qSocket->setNetworkInterface(realNetworkInterface);
+            ieee8021qSocket->setProtocol(protocol);
+            ieee8021qSocket->bind(nullptr, vlanId, par("steal"));
+            socket = ieee8021qSocket;
+        }
+        else
+            throw cRuntimeError("Unknown protocol");
     }
 }
 
 void VirtualTunnel::handleMessage(cMessage *message)
 {
-    if (socket.belongsToSocket(message))
-        socket.processMessage(message);
+    if (socket->belongsToSocket(message))
+        socket->processMessage(message);
     else {
         auto packet = check_and_cast<Packet *>(message);
         if (vlanId != -1)
             packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
-        if (protocol != nullptr)
-            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
         packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(networkInterface->getMacAddress());
-        socket.send(packet);
+        socket->send(packet);
     }
 }
 
@@ -88,9 +103,11 @@ void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
     send(packet, "upperLayerOut");
 }
 
-void VirtualTunnel::socketErrorArrived(EthernetSocket *socket, Indication *indication)
+void VirtualTunnel::socketDataArrived(Ieee8021qSocket *socket, Packet *packet)
 {
-    throw cRuntimeError("Invalid operation");
+    packet->removeTag<SocketInd>();
+    packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+    send(packet, "upperLayerOut");
 }
 
 } // namespace inet
