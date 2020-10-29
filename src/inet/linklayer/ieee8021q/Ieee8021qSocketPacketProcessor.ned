@@ -17,10 +17,10 @@
 
 package inet.linklayer.ieee8021q;
 
-import inet.queueing.base.PacketFlowBase;
+import inet.queueing.base.PacketPusherBase;
 import inet.queueing.contract.IPacketFlow;
 
-simple Ieee8021qSocketPacketProcessor extends PacketFlowBase like IPacketFlow
+simple Ieee8021qSocketPacketProcessor extends PacketPusherBase like IPacketFlow
 {
     parameters:
         @class(Ieee8021qSocketPacketProcessor);
