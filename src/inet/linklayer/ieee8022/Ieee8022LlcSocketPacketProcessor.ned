@@ -17,14 +17,13 @@
 
 package inet.linklayer.ieee8022;
 
-simple LlcSocketPacketProcessor
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
+
+simple Ieee8022LlcSocketPacketProcessor extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        @display("i=block/inserter");
+        @class(Ieee8022LlcSocketPacketProcessor);
+        @display("i=block/cogwheel");
         string socketTableModule;
-    gates:
-        input in @labels(send);
-        output out @labels(send);
-        output socketOut @labels(send);
 }
-

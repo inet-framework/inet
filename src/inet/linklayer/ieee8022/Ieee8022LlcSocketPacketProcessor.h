@@ -15,27 +15,26 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_LLCSOCKETCOMMANDPROCESSOR_H
-#define __INET_LLCSOCKETCOMMANDPROCESSOR_H
+#ifndef __INET_IEEE8022LLCSOCKETPACKETPROCESSOR_H
+#define __INET_IEEE8022LLCSOCKETPACKETPROCESSOR_H
 
-#include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
-#include "inet/linklayer/ieee8022/LlcSocketTable.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketTable.h"
+#include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 
-class INET_API LlcSocketCommandProcessor : public cSimpleModule
+class INET_API Ieee8022LlcSocketPacketProcessor : public queueing::PacketPusherBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    LlcSocketTable *socketTable = nullptr;
+    Ieee8022LlcSocketTable *socketTable = nullptr;
 
   protected:
-    virtual void initialize() override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void initialize(int stage) override;
 
-  protected:
-    void handleLlcSocketCommand(Request *msg, Ieee8022LlcSocketCommand *command);
+  public:
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_LLCSOCKETTABLE_H
-#define __INET_LLCSOCKETTABLE_H
+#ifndef __INET_IEEE8022LLCSOCKETTABLE_H
+#define __INET_IEEE8022LLCSOCKETTABLE_H
 
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class INET_API LlcSocketTable : public cSimpleModule
+class INET_API Ieee8022LlcSocketTable : public cSimpleModule
 {
   public:
     struct Socket
@@ -33,9 +33,9 @@ class INET_API LlcSocketTable : public cSimpleModule
         int localSap = -1;
         int remoteSap = -1;
 
-        friend std::ostream& operator << (std::ostream& o, const Socket& t);
+        friend std::ostream& operator<<(std::ostream& o, const Socket& t);
 
-        Socket(int socketId) : socketId(socketId) {}
+        Socket(int socketId) : socketId(socketId) { }
     };
 
 
@@ -46,9 +46,9 @@ class INET_API LlcSocketTable : public cSimpleModule
     virtual void initialize() override;
 
   public:
-    bool createSocket(int socketId, int localSap, int remoteSap);
-    bool deleteSocket(int socketId);
-    std::vector<Socket*> findSocketsFor(const Packet *packet) const;
+    void addSocket(int socketId, int localSap, int remoteSap);
+    void removeSocket(int socketId);
+    std::vector<Socket *> findSockets(int localSap, int remoteSap) const;
 };
 
 } // namespace inet

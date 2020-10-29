@@ -17,38 +17,40 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
-#include "inet/linklayer/ieee8022/LlcSocketPacketProcessor.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketPacketProcessor.h"
 
 namespace inet {
 
-Define_Module(LlcSocketPacketProcessor);
+Define_Module(Ieee8022LlcSocketPacketProcessor);
 
-void LlcSocketPacketProcessor::initialize()
+void Ieee8022LlcSocketPacketProcessor::initialize(int stage)
 {
-    socketTable = getModuleFromPar<LlcSocketTable>(par("socketTableModule"), this);
+    PacketPusherBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        socketTable = getModuleFromPar<Ieee8022LlcSocketTable>(par("socketTableModule"), this);
 }
 
-void LlcSocketPacketProcessor::handleMessage(cMessage *msg)
+cGate *Ieee8022LlcSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)
 {
-    if (msg->arrivedOn("in"))
-        processPacket(check_and_cast<Packet *>(msg));
-    else if (msg->arrivedOn("cmdIn"))
-        send(msg, "cmdOut");
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
     else
-        throw cRuntimeError("Unknown gate: %s", msg->getArrivalGate()->getFullName());
+        throw cRuntimeError("Unknown gate");
 }
 
-void LlcSocketPacketProcessor::processPacket(Packet *packet)
+void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
 {
-    auto sockets = socketTable->findSocketsFor(packet);
+    const auto& sap = packet->findTag<Ieee802SapInd>();
+    auto sockets = socketTable->findSockets(sap->getDsap(), sap->getSsap());
     for (auto socket : sockets) {
         auto packetCopy = packet->dup();
-        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
-        EV_INFO << "Passing up to socket " << socket->socketId << "\n";
         packetCopy->setKind(IEEE8022_LLC_I_DATA);
+        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
+        EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
         send(packetCopy, "upperLayerOut");
     }
 

@@ -15,29 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_LLCSOCKETPACKETPROCESSOR_H
-#define __INET_LLCSOCKETPACKETPROCESSOR_H
+package inet.linklayer.ieee8022;
 
-#include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ieee8022/LlcSocketTable.h"
-
-namespace inet {
-
-class INET_API LlcSocketPacketProcessor : public cSimpleModule
+simple Ieee8022LlcSocketTable
 {
-  protected:
-    LlcSocketTable *socketTable = nullptr;
-
-  protected:
-    virtual void initialize() override;
-    virtual void handleMessage(cMessage *msg) override;
-
-  protected:
-    void processPacket(Packet *packet);
-};
-
-} // namespace inet
-
-#endif
+    parameters:
+        @display("i=block/table");
+}
 
