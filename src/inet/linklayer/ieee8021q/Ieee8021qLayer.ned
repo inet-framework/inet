@@ -17,11 +17,16 @@
 
 package inet.linklayer.ieee8021q;
 
+import inet.queueing.contract.IPacketFlow;
+
+
 module Ieee8021qLayer like IIeee8021qLayer
 {
     parameters:
         string vlanTagType = default("c");
+        bool hasSocketSupport = default(false);
         *.vlanTagType = default(vlanTagType);
+        *.socketTableModule = default(absPath(".socketTable"));
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -29,18 +34,27 @@ module Ieee8021qLayer like IIeee8021qLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
+        socketTable: Ieee8021qSocketTable if hasSocketSupport {
+            @display("p=100,100");
+        }
+        socketCommandProcessor: <default(hasSocketSupport ? "Ieee8021qSocketCommandProcessor" : "OmittedPacketFlow")> like IPacketFlow {
+            @display("p=300,100");
+        }
         qTagHeaderInserter: <default("Ieee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
-            parameters:
-                @display("p=200,100");
+            @display("p=300,200");
         }
         qTagHeaderChecker: <default("Ieee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
-            parameters:
-                @display("p=500,100");
+            @display("p=600,200");
+        }
+        socketPacketProcessor: <default(hasSocketSupport ? "Ieee8021qSocketPacketProcessor" : "OmittedPacketFlow")> like IPacketFlow {
+            @display("p=600,100");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> qTagHeaderInserter.in;
+        upperLayerIn --> { @display("m=n"); } --> socketCommandProcessor.in;
+        socketCommandProcessor.out --> qTagHeaderInserter.in;
         qTagHeaderInserter.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> qTagHeaderChecker.in;
-        qTagHeaderChecker.out --> { @display("m=n"); } --> upperLayerOut;
+        qTagHeaderChecker.out --> socketPacketProcessor.in;
+        socketPacketProcessor.out --> { @display("m=n"); } --> upperLayerOut;
 }
