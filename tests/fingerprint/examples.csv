@@ -97,7 +97,7 @@
 /examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenHosts -r 0,           10ms,            47b5-c0bb/tplx, PASS,
 /examples/ethernet/vlan/,            -f omnetpp.ini -c Asymmetric -r 0,             10ms,            403b-d618/tplx, PASS,
 /examples/ethernet/vlan/,            -f omnetpp.ini -c DoubleTagged -r 0,           10ms,            ce1c-dcf1/tplx, PASS,
-/examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            07e8-fc83/tplx, PASS,
+/examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            470b-277d/tplx, PASS,
 
 /examples/ethernet/cutthrough/,      -f omnetpp.ini -c General -r 0,                1s,              6cb3-398f/tplx, PASS, ethernet layered
 /examples/ethernet/preemption/,      -f omnetpp.ini -c General -r 0,                1s,              13c0-0255/tplx, PASS, ethernet layered
