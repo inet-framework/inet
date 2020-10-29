@@ -46,6 +46,7 @@ void EthernetSocket::sendToEthernet(cMessage *msg)
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    tags.addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     check_and_cast<cSimpleModule *>(gateToEthernet->getOwnerModule())->send(msg, gateToEthernet);
 }
 
