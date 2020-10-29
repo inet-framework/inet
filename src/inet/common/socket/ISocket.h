@@ -18,7 +18,7 @@
 #ifndef __INET_ISOCKET_H
 #define __INET_ISOCKET_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -44,6 +44,8 @@ class INET_API ISocket
      * Examines the message, takes ownership, and updates socket state.
      */
     virtual void processMessage(cMessage *msg) = 0;
+
+    virtual void send(Packet *packet) = 0;
 
     /**
      * Close the socket.
