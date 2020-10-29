@@ -15,80 +15,63 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/layered/EthernetSocketTable.h"
 
 namespace inet {
 
 Define_Module(EthernetSocketTable);
 
-std::ostream& operator << (std::ostream& o, const EthernetSocketTable::Socket& t)
+std::ostream& operator<<(std::ostream& os, const EthernetSocketTable::Socket& socket)
 {
-    o << "(id:" << t.socketId << ", local:" << t.localAddress << ",remote:" << t.remoteAddress
-            << ", prot:" << (t.protocol ? t.protocol->getName() : "-") << ", vlan:" << t.vlanId << ")";
-    return o;
+    os << "(id:" << socket.socketId << ", local:" << socket.localAddress << ",remote:" << socket.remoteAddress
+       << ", prot:" << (socket.protocol ? socket.protocol->getName() : "-") << ")";
+    return os;
 }
 
-void EthernetSocketTable::initialize()
+void EthernetSocketTable::initialize(int stage)
 {
-    WATCH_PTRMAP(socketIdToSocketMap);
+    if (stage == INITSTAGE_LOCAL)
+        WATCH_PTRMAP(socketIdToSocketMap);
 }
 
-bool EthernetSocketTable::createSocket(int socketId, MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol, int vlanId)
+void EthernetSocketTable::addSocket(int socketId, MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol, bool steal)
 {
     auto it = socketIdToSocketMap.find(socketId);
     if (it != socketIdToSocketMap.end())
-        return false;
-
+        throw cRuntimeError("Socket already added");
     Socket *socket = new Socket(socketId);
     socket->localAddress = localAddress;
     socket->remoteAddress = remoteAddress;
     socket->protocol = protocol;
-    socket->vlanId = vlanId;
+    socket->steal = steal;
     socketIdToSocketMap[socketId] = socket;
-    return true;
 }
 
-bool EthernetSocketTable::deleteSocket(int socketId)
+void EthernetSocketTable::removeSocket(int socketId)
 {
     auto it = socketIdToSocketMap.find(socketId);
-    if (it == socketIdToSocketMap.end())
-        return false;
-
-    delete it->second;
-    socketIdToSocketMap.erase(it);
-    return true;
+    if (it != socketIdToSocketMap.end()) {
+        delete it->second;
+        socketIdToSocketMap.erase(it);
+    }
+    else
+        throw cRuntimeError("Socket not found");
 }
 
-std::vector<EthernetSocketTable::Socket*> EthernetSocketTable::findSocketsFor(const Packet *packet) const
+std::vector<EthernetSocketTable::Socket *> EthernetSocketTable::findSockets(MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol) const
 {
-    std::vector<EthernetSocketTable::Socket*> retval;
-    auto protocolTag = packet->findTag<PacketProtocolTag>();
-    auto protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
-    MacAddress localMac, remoteMac;
-    if (auto macAddressInd = packet->findTag<MacAddressInd>()) {
-        localMac = macAddressInd->getDestAddress();
-        remoteMac = macAddressInd->getSrcAddress();
-    }
-    auto vlanInd = packet->findTag<VlanInd>();
-    auto vlanId = vlanInd ? vlanInd->getVlanId() : -1;
-
-    for (auto s : socketIdToSocketMap) {
-        auto socket = s.second;
-        if (!socket->localAddress.isUnspecified() && !localMac.isBroadcast() && localMac != socket->localAddress)
+    std::vector<EthernetSocketTable::Socket*> result;
+    for (auto& it : socketIdToSocketMap) {
+        auto socket = it.second;
+        if (!socket->localAddress.isUnspecified() && !localAddress.isBroadcast() && localAddress != socket->localAddress)
             continue;
-        if (!socket->remoteAddress.isUnspecified() && !remoteMac.isBroadcast() && remoteMac != socket->remoteAddress)
+        if (!socket->remoteAddress.isUnspecified() && !remoteAddress.isBroadcast() && remoteAddress != socket->remoteAddress)
             continue;
         if (socket->protocol != nullptr && protocol != socket->protocol)
             continue;
-        if (socket->vlanId != -1 && vlanId != socket->vlanId)
-            continue;
-        retval.push_back(socket);
+        result.push_back(socket);
     }
-    return retval;
+    return result;
 }
 
 } // namespace inet

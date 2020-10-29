@@ -17,7 +17,6 @@
 
 package inet.linklayer.ethernet.layered;
 
-
 simple EthernetSocketTable
 {
     parameters:

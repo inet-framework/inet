@@ -18,26 +18,26 @@
 #ifndef __INET_ETHERNETSOCKETCOMMANDPROCESSOR_H
 #define __INET_ETHERNETSOCKETCOMMANDPROCESSOR_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/EthernetCommand_m.h"
+#include "inet/queueing/base/PacketFlowBase.h"
 #include "inet/linklayer/ethernet/layered/EthernetSocketTable.h"
 
 namespace inet {
 
-class INET_API EthernetSocketCommandProcessor : public cSimpleModule
+class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
     EthernetSocketTable *socketTable = nullptr;
 
   protected:
-    virtual void initialize() override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
+    virtual void handleCommand(Request *request);
+    virtual void processPacket(Packet *packet) override { }
 
-  protected:
-    void handleEthernetSocketCommand(Request *msg, EthernetCommandBase *etherctrl);
+  public:
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

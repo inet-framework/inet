@@ -19,48 +19,52 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ethernet/EthernetCommand_m.h"
 #include "inet/linklayer/ethernet/layered/EthernetSocketPacketProcessor.h"
 
 namespace inet {
 
 Define_Module(EthernetSocketPacketProcessor);
 
-void EthernetSocketPacketProcessor::initialize()
+void EthernetSocketPacketProcessor::initialize(int stage)
 {
-    socketTable = getModuleFromPar<EthernetSocketTable>(par("socketTableModule"), this);
+    PacketFlowBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        socketTable = getModuleFromPar<EthernetSocketTable>(par("socketTableModule"), this);
 }
 
-void EthernetSocketPacketProcessor::handleMessage(cMessage *msg)
+cGate *EthernetSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)
 {
-    if (msg->arrivedOn("in"))
-        processPacket(check_and_cast<Packet *>(msg));
-    else if (msg->arrivedOn("cmdIn"))
-        send(msg, "cmdOut");
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
     else
-        throw cRuntimeError("Unknown gate: %s", msg->getArrivalGate()->getFullName());
+        throw cRuntimeError("Unknown gate");
 }
 
 void EthernetSocketPacketProcessor::processPacket(Packet *packet)
 {
-    bool stealPacket = false;
-    auto sockets = socketTable->findSocketsFor(packet);
+    const auto& protocolTag = packet->findTag<PacketProtocolTag>();
+    auto protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
+    MacAddress localAddress, remoteAddress;
+    if (const auto& macAddressInd = packet->findTag<MacAddressInd>()) {
+        localAddress = macAddressInd->getDestAddress();
+        remoteAddress = macAddressInd->getSrcAddress();
+    }
+    auto sockets = socketTable->findSockets(localAddress, remoteAddress, protocol);
+    bool steal = false;
     for (auto socket : sockets) {
         auto packetCopy = packet->dup();
         packetCopy->setKind(ETHERNET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
-        EV_INFO << "Passing up to socket " << socket->socketId << "\n";
-        send(packetCopy, "socketOut");
-        stealPacket |= socket->vlanId != -1;    //TODO Why?
+        EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
+        pushOrSendPacket(packetCopy, outputGate, consumer);
+        steal |= socket->steal;
     }
-
-    // TODO: should the socket configure if it steals packets or not?
-    if (stealPacket) {
-        delete packet;
-        return;
-    }
-
-    //TODO mark packet when sent to any socket
-    send(packet, "out");
+    // TODO: the socket should be configurable if it steals packets or not
+//    if (stealPacket)
+//        delete packet;
 }
 
 } // namespace inet

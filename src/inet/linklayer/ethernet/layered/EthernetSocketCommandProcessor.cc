@@ -17,54 +17,64 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/layered/EthernetSocketCommandProcessor.h"
-#include "inet/linklayer/ethernet/layered/EthernetSocketTable.h"
+#include "inet/linklayer/ethernet/EthernetCommand_m.h"
 
 namespace inet {
 
 Define_Module(EthernetSocketCommandProcessor);
 
-void EthernetSocketCommandProcessor::initialize()
+void EthernetSocketCommandProcessor::initialize(int stage)
 {
-    socketTable = getModuleFromPar<EthernetSocketTable>(par("socketTableModule"), this);
+    PacketFlowBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        socketTable = getModuleFromPar<EthernetSocketTable>(par("socketTableModule"), this);
 }
 
-void EthernetSocketCommandProcessor::handleMessage(cMessage *msg)
+cGate *EthernetSocketCommandProcessor::getRegistrationForwardingGate(cGate *gate)
 {
-    if (auto rq = dynamic_cast<Request *>(msg)) {
-        auto ctrl = msg->getControlInfo();
-        if (auto cmd = dynamic_cast<EthernetCommandBase *>(ctrl)) {
-            handleEthernetSocketCommand(rq, cmd);
-            return;
-        }
-    }
-    send(msg, "out");
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
 }
 
-void EthernetSocketCommandProcessor::handleEthernetSocketCommand(Request *request, EthernetCommandBase *ctrl)
+void EthernetSocketCommandProcessor::handleMessage(cMessage *message)
 {
-    if (auto cmd = dynamic_cast<EthernetBindCommand *>(ctrl)) {
+    if (auto request = dynamic_cast<Request *>(message))
+        handleCommand(request);
+    else
+        PacketFlowBase::handleMessage(message);
+}
+
+void EthernetSocketCommandProcessor::handleCommand(Request *request)
+{
+    auto controlInfo = request->getControlInfo();
+    if (auto bindCommand = dynamic_cast<EthernetBindCommand *>(controlInfo)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        socketTable->createSocket(socketId, cmd->getLocalAddress(), cmd->getRemoteAddress(), cmd->getProtocol(), cmd->getVlanId());
+        socketTable->addSocket(socketId, bindCommand->getLocalAddress(), bindCommand->getRemoteAddress(), bindCommand->getProtocol(), bindCommand->getSteal());
         delete request;
     }
-    else if (dynamic_cast<EthernetCloseCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<EthernetCloseCommand *>(controlInfo) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        socketTable->deleteSocket(socketId);
+        socketTable->removeSocket(socketId);
         delete request;
-        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
-        auto ctrl = new EthernetSocketClosedIndication();
-        indication->setControlInfo(ctrl);
-        indication->addTag<SocketInd>()->setSocketId(socketId);
-        send(indication, "cmdOut");
+// TODO: move to EthernetSocketPacketProcessor module into a listener on the EthernetSocketTable
+//        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
+//        auto ctrl = new EthernetSocketClosedIndication();
+//        indication->setControlInfo(ctrl);
+//        indication->addTag<SocketInd>()->setSocketId(socketId);
+//        send(indication, "cmdOut");
     }
-    else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<EthernetDestroyCommand *>(controlInfo) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        socketTable->deleteSocket(socketId);
+        socketTable->removeSocket(socketId);
         delete request;
     }
+    else
+        throw cRuntimeError("Unknown request");
 }
 
 } // namespace inet

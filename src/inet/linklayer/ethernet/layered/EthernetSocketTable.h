@@ -18,11 +18,8 @@
 #ifndef __INET_ETHERNETSOCKETTABLE_H
 #define __INET_ETHERNETSOCKETTABLE_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/EthernetCommand_m.h"
+#include "inet/common/Protocol.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
@@ -35,24 +32,23 @@ class INET_API EthernetSocketTable : public cSimpleModule
         MacAddress localAddress;
         MacAddress remoteAddress;
         const Protocol *protocol = nullptr;
-        int vlanId = -1;
+        bool steal = false;
 
         Socket(int socketId) : socketId(socketId) {}
-        bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
 
-        friend std::ostream& operator << (std::ostream& o, const Socket& t);
+        friend std::ostream& operator<<(std::ostream& o, const Socket& t);
     };
 
   protected:
     std::map<int, Socket *> socketIdToSocketMap;
 
   protected:
-    virtual void initialize() override;
+    virtual void initialize(int stage) override;
 
   public:
-    bool createSocket(int socketId, MacAddress loaclAddress, MacAddress remoteAddress, const Protocol *protocol, int vlanId);
-    bool deleteSocket(int socketId);
-    std::vector<Socket*> findSocketsFor(const Packet *packet) const;
+    virtual void addSocket(int socketId, MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol, bool steal);
+    virtual void removeSocket(int socketId);
+    virtual std::vector<Socket *> findSockets(MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol) const;
 };
 
 } // namespace inet

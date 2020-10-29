@@ -17,14 +17,14 @@
 
 package inet.linklayer.ethernet.layered;
 
-simple EthernetSocketCommandProcessor
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
+
+simple EthernetSocketCommandProcessor extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        @display("i=block/inserter");
+        @class(EthernetSocketCommandProcessor);
+        @display("i=block/cogwheel");
         string socketTableModule;
-    gates:
-        input in @labels(send);
-        output out @labels(send);
-        output cmdOut @labels(send);
 }
 
