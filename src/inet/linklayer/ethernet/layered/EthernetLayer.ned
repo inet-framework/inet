@@ -48,11 +48,11 @@ module EthernetLayer like IEthernetLayer
         paddingInserter: <default("PaddingInserter")> like IPacketFlow {
             @display("p=300,300");
         }
-        macHeaderChecker: <default("EthernetMacHeaderChecker")> like IProtocolHeaderChecker {
-            @display("p=600,200");
-        }
         socketPacketProcessor: <default(hasSocketSupport ? "EthernetSocketPacketProcessor" : "OmittedPacketFlow")> like IPacketFlow {
             @display("p=600,100");
+        }
+        macHeaderChecker: <default("EthernetMacHeaderChecker")> like IProtocolHeaderChecker {
+            @display("p=600,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> socketCommandProcessor.in;

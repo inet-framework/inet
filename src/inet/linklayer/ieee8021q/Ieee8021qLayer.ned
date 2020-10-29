@@ -43,11 +43,11 @@ module Ieee8021qLayer like IIeee8021qLayer
         qTagHeaderInserter: <default("Ieee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
             @display("p=300,200");
         }
-        qTagHeaderChecker: <default("Ieee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
-            @display("p=600,200");
-        }
         socketPacketProcessor: <default(hasSocketSupport ? "Ieee8021qSocketPacketProcessor" : "OmittedPacketFlow")> like IPacketFlow {
             @display("p=600,100");
+        }
+        qTagHeaderChecker: <default("Ieee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
+            @display("p=600,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> socketCommandProcessor.in;
