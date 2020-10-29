@@ -28,7 +28,7 @@ Define_Module(EthernetSocketPacketProcessor);
 
 void EthernetSocketPacketProcessor::initialize(int stage)
 {
-    PacketFlowBase::initialize(stage);
+    PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         socketTable = getModuleFromPar<EthernetSocketTable>(par("socketTableModule"), this);
 }
@@ -43,8 +43,10 @@ cGate *EthernetSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
-void EthernetSocketPacketProcessor::processPacket(Packet *packet)
+void EthernetSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
     MacAddress localAddress, remoteAddress;
@@ -62,9 +64,12 @@ void EthernetSocketPacketProcessor::processPacket(Packet *packet)
         pushOrSendPacket(packetCopy, outputGate, consumer);
         steal |= socket->steal;
     }
-    // TODO: the socket should be configurable if it steals packets or not
-//    if (stealPacket)
-//        delete packet;
+    handlePacketProcessed(packet);
+    if (steal)
+        delete packet;
+    else
+        pushOrSendPacket(packet, outputGate, consumer);
+    updateDisplayString();
 }
 
 } // namespace inet

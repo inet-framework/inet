@@ -20,20 +20,20 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/linklayer/ethernet/layered/EthernetSocketTable.h"
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 
-class INET_API EthernetSocketPacketProcessor : public queueing::PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API EthernetSocketPacketProcessor : public queueing::PacketPusherBase, public TransparentProtocolRegistrationListener
 {
   protected:
     EthernetSocketTable *socketTable = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void processPacket(Packet *packet) override;
 
   public:
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 

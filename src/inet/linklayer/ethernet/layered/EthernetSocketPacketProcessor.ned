@@ -17,10 +17,10 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.queueing.base.PacketFlowBase;
+import inet.queueing.base.PacketPusherBase;
 import inet.queueing.contract.IPacketFlow;
 
-simple EthernetSocketPacketProcessor extends PacketFlowBase like IPacketFlow
+simple EthernetSocketPacketProcessor extends PacketPusherBase like IPacketFlow
 {
     parameters:
         @class(EthernetSocketPacketProcessor);
