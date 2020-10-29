@@ -58,8 +58,6 @@ bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHead
         return false;
     if (protocol != nullptr && packet->getTag<PacketProtocolTag>()->getProtocol() != protocol)
         return false;
-    if (vlanId != -1 && packet->getTag<VlanInd>()->getVlanId() != vlanId)
-        return false;
     return true;
 }
 
@@ -98,7 +96,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         socket->localAddress = bindCommand->getLocalAddress();
         socket->remoteAddress = bindCommand->getRemoteAddress();
         socket->protocol = bindCommand->getProtocol();
-        socket->vlanId = bindCommand->getVlanId();
+        socket->steal = bindCommand->getSteal();
         socketIdToSocketMap[socketId] = socket;
         delete msg;
     }
@@ -228,7 +226,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
             packet->removeTagIfPresent<PacketProtocolTag>();
             packet->removeTagIfPresent<DispatchProtocolReq>();
         }
-        bool stealPacket = false;
+        bool steal = false;
         for (auto it : socketIdToSocketMap) {
             auto socket = it.second;
             if (socket->matches(packet, ethHeader)) {
@@ -236,11 +234,10 @@ void EtherEncap::processPacketFromMac(Packet *packet)
                 packetCopy->setKind(ETHERNET_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
                 send(packetCopy, "upperLayerOut");
-                stealPacket |= socket->vlanId != -1;    //TODO Why?
+                steal |= socket->steal;
             }
         }
-        // TODO: should the socket configure if it steals packets or not?
-        if (stealPacket)
+        if (steal)
             delete packet;
         else if (payloadProtocol != nullptr && upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
             EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"

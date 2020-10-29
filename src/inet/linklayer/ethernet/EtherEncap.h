@@ -53,7 +53,7 @@ class INET_API EtherEncap : public Ieee8022Llc
         MacAddress localAddress;
         MacAddress remoteAddress;
         const Protocol *protocol = nullptr;
-        int vlanId = -1;
+        bool steal = false;
 
         Socket(int socketId) : socketId(socketId) {}
         bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);

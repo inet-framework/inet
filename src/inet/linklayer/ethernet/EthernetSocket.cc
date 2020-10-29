@@ -49,14 +49,14 @@ void EthernetSocket::sendToEthernet(cMessage *msg)
     check_and_cast<cSimpleModule *>(gateToEthernet->getOwnerModule())->send(msg, gateToEthernet);
 }
 
-void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, int vlanId)
+void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)
 {
     auto request = new Request("BIND", ETHERNET_C_BIND);
     EthernetBindCommand *ctrl = new EthernetBindCommand();
     ctrl->setLocalAddress(localAddress);
     ctrl->setRemoteAddress(remoteAddress);
     ctrl->setProtocol(protocol);
-    ctrl->setVlanId(vlanId);
+    ctrl->setSteal(steal);
     request->setControlInfo(ctrl);
     isOpen_ = true;
     sendToEthernet(request);

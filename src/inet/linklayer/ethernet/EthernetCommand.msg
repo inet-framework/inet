@@ -44,8 +44,8 @@ class EthernetBindCommand extends EthernetCommandBase
 {
     MacAddress localAddress;
     MacAddress remoteAddress;
-    int vlanId;
     const Protocol *protocol;
+    bool steal;
 }
 
 class EthernetCloseCommand extends EthernetCommandBase

@@ -101,7 +101,7 @@ class INET_API EthernetSocket : public ISocket
     /**
      * Binds the socket to the MAC address.
      */
-    void bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, int vlanId);
+    void bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal);
 
     /**
      * Sends a data packet to the address and port specified previously
