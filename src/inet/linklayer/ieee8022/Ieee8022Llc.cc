@@ -88,7 +88,7 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
         socketIdToSocketDescriptor[socketId] = descriptor;
         delete request;
     }
-    else if (dynamic_cast<Ieee8022LlcSocketCloseCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
@@ -96,14 +96,14 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
             socketIdToSocketDescriptor.erase(it);
         }
         delete request;
-        auto indication = new Indication("closed", IEEE8022_LLC_I_SOCKET_CLOSED);
-        auto ctrl = new Ieee8022LlcSocketClosedIndication();
+        auto indication = new Indication("closed", SOCKET_I_CLOSED);
+        auto ctrl = new SocketClosedIndication();
         indication->setControlInfo(ctrl);
         indication->addTag<SocketInd>()->setSocketId(socketId);
         send(indication, "upperLayerOut");
 
     }
-    else if (dynamic_cast<Ieee8022LlcSocketDestroyCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<SocketDestroyCommand *>(ctrl) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
@@ -131,7 +131,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
                 auto *packetCopy = packet->dup();
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
-                packetCopy->setKind(IEEE8022_LLC_I_DATA);
+                packetCopy->setKind(SOCKET_I_DATA);
                 send(packetCopy, "upperLayerOut");
                 isSent = true;
             }

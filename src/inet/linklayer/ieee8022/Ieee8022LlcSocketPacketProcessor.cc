@@ -48,7 +48,7 @@ void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
     auto sockets = socketTable->findSockets(sap->getDsap(), sap->getSsap());
     for (auto socket : sockets) {
         auto packetCopy = packet->dup();
-        packetCopy->setKind(IEEE8022_LLC_I_DATA);
+        packetCopy->setKind(SOCKET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
         EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
         send(packetCopy, "upperLayerOut");

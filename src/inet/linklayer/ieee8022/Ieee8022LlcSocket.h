@@ -18,12 +18,11 @@
 #ifndef __INET_IEEE8022LLCSOCKET_H
 #define __INET_IEEE8022LLCSOCKET_H
 
-#include "inet/common/packet/Packet.h"
-#include "inet/common/socket/ISocket.h"
+#include "inet/common/socket/SocketBase.h"
 
 namespace inet {
 
-class INET_API Ieee8022LlcSocket : public ISocket
+class INET_API Ieee8022LlcSocket : public SocketBase
 {
   public:
     class INET_API ICallback
@@ -33,28 +32,16 @@ class INET_API Ieee8022LlcSocket : public ISocket
         virtual void socketDataArrived(Ieee8022LlcSocket *socket, Packet *packet) = 0;
         virtual void socketClosed(Ieee8022LlcSocket *socket) = 0;
     };
+
   protected:
-    int socketId = -1;
     int interfaceId = -1;
     int localSap = -1;
     ICallback *callback = nullptr;
-    void *userData = nullptr;
-    cGate *outputGate = nullptr;
-    bool isOpen_ = false;
 
   protected:
-    void sendToLlc(cMessage *msg);
+    virtual void sendOut(cMessage *msg) override;
 
   public:
-    Ieee8022LlcSocket();
-    ~Ieee8022LlcSocket() {}
-
-    /**
-     * Sets the gate on which to send raw packets. Must be invoked before socket
-     * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
-     */
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
-
     /**
      * Sets a callback object, to be used with processMessage().
      * This callback object may be your simple module itself (if it
@@ -69,15 +56,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
      * LlcSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      */
-    void setCallback(ICallback *cb);
-
-    void *getUserData() const { return userData; }
-    void setUserData(void *userData) { this->userData = userData; }
-
-    /**
-     * Returns the internal socket Id.
-     */
-    virtual int getSocketId() const override { return socketId; }
+    void setCallback(ICallback *callback) { this->callback = callback; }
 
     /**
      * Returns the interface Id.
@@ -89,14 +68,8 @@ class INET_API Ieee8022LlcSocket : public ISocket
      */
     virtual int getLocalSap() const { return localSap; }
 
-    void open(int interfaceId, int localSap);
-    virtual void send(Packet *packet) override;
-    virtual void close() override;
-    virtual bool isOpen() const override { return isOpen_; }
-
-    virtual bool belongsToSocket(cMessage *msg) const override;
+    virtual void open(int interfaceId, int localSap);
     virtual void processMessage(cMessage *msg) override;
-    virtual void destroy() override;
 };
 
 } // namespace inet
