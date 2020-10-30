@@ -18,43 +18,12 @@
 
 import inet.common.INETDefs;
 import inet.common.Protocol;
+import inet.common.socket.SocketCommand;
 
 namespace inet;
 
-enum Ieee8021qCommandCode
-{
-    IEEE8021Q_C_DATA = 0;
-    IEEE8021Q_C_BIND = 1;
-    IEEE8021Q_C_CLOSE = 2;
-    IEEE8021Q_C_DESTROY = 3;
-}
-
-enum Ieee8021qStatusInd
-{
-    IEEE8021Q_I_DATA = 0;
-    IEEE8021Q_I_SOCKET_CLOSED = 2;
-}
-
-class Ieee8021qCommandBase extends cObject
-{
-}
-
-class Ieee8021qBindCommand extends Ieee8021qCommandBase
+class Ieee8021qBindCommand extends SocketBindCommand
 {
     const Protocol *protocol;
     int vlanId;
-    bool steal;
 }
-
-class Ieee8021qCloseCommand extends Ieee8021qCommandBase
-{
-}
-
-class Ieee8021qDestroyCommand extends Ieee8021qCommandBase
-{
-}
-
-class Ieee8021qSocketClosedIndication extends Ieee8021qCommandBase
-{
-}
-

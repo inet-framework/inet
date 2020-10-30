@@ -19,14 +19,12 @@
 #define __INET_IEEE8021QSOCKET_H
 
 #include "inet/common/Protocol.h"
-#include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/socket/ISocket.h"
+#include "inet/common/socket/SocketBase.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
-class INET_API Ieee8021qSocket : public ISocket
+class INET_API Ieee8021qSocket : public SocketBase
 {
   public:
     class INET_API ICallback
@@ -49,30 +47,16 @@ class INET_API Ieee8021qSocket : public ISocket
          */
         virtual void socketClosed(Ieee8021qSocket *socket) = 0;
     };
+
   protected:
-    int socketId;
     ICallback *callback = nullptr;
-    void *userData = nullptr;
     NetworkInterface *networkInterface = nullptr;
     const Protocol *protocol = nullptr;
-    cGate *gateToIeee8021q = nullptr;
-    bool isOpen_ = false;
 
   protected:
-    void sendToIeee8021q(cMessage *msg);
+    virtual void sendOut(cMessage *msg) override;
 
   public:
-    Ieee8021qSocket();
-    virtual ~Ieee8021qSocket() {}
-
-    void *getUserData() const { return userData; }
-    void setUserData(void *userData) { this->userData = userData; }
-
-    /**
-     * Returns the internal socket Id.
-     */
-    int getSocketId() const override { return socketId; }
-
     /** @name Opening and closing connections, sending data */
     //@{
     /**
@@ -89,14 +73,7 @@ class INET_API Ieee8021qSocket : public ISocket
      * Ieee8021qSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      */
-    void setCallback(ICallback *cb);
-
-    /**
-     * Sets the gate on which to send to Ieee8021q. Must be invoked before socket
-     * can be used. Example: <tt>socket.setOutputGate(gate("out"));</tt>
-     */
-    void setOutputGate(cGate *gate) { gateToIeee8021q = gate; }
-
+    void setCallback(ICallback *callback) { this->callback = callback; }
     void setNetworkInterface(NetworkInterface *networkInterface) { this->networkInterface = networkInterface; }
     void setProtocol(const Protocol *protocol) { this->protocol = protocol; }
 
@@ -104,33 +81,13 @@ class INET_API Ieee8021qSocket : public ISocket
      * Binds the socket to the MAC address.
      */
     void bind(const Protocol *protocol, int vlanId, bool steal);
-
-    /**
-     * Sends a data packet to the address and port specified previously
-     * in a connect() call.
-     */
-    virtual void send(Packet *packet) override;
-
-    virtual bool isOpen() const override { return isOpen_; }
-    /**
-     * Unbinds the socket. Once closed, a closed socket may be bound to another
-     * (or the same) port, and reused.
-     */
-    virtual void close() override;
     //@}
-
-    /**
-     * Notify the protocol that the owner of ISocket has destroyed the socket.
-     * Typically used when the owner of ISocket has crashed.
-     */
-    virtual void destroy() override;
 
     /** @name Handling of messages arriving from Ieee8021q */
     //@{
     /**
      * Returns true if the message belongs to this socket instance.
      */
-    virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
     //@}
 };

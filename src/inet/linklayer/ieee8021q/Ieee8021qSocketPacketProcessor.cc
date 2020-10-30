@@ -55,7 +55,7 @@ void Ieee8021qSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
     bool steal = false;
     for (auto socket : sockets) {
         auto packetCopy = packet->dup();
-        packetCopy->setKind(IEEE8021Q_I_DATA);
+        packetCopy->setKind(SOCKET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
         EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacket(packetCopy, outputGate, consumer);

@@ -57,7 +57,7 @@ void Ieee8021qSocketCommandProcessor::handleCommand(Request *request)
         socketTable->addSocket(socketId, bindCommand->getProtocol(), bindCommand->getVlanId(), bindCommand->getSteal());
         delete request;
     }
-    else if (dynamic_cast<Ieee8021qCloseCommand *>(controlInfo) != nullptr) {
+    else if (dynamic_cast<SocketCloseCommand *>(controlInfo) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         socketTable->removeSocket(socketId);
         delete request;
@@ -68,7 +68,7 @@ void Ieee8021qSocketCommandProcessor::handleCommand(Request *request)
 //        indication->addTag<SocketInd>()->setSocketId(socketId);
 //        send(indication, "cmdOut");
     }
-    else if (dynamic_cast<Ieee8021qDestroyCommand *>(controlInfo) != nullptr) {
+    else if (dynamic_cast<SocketDestroyCommand *>(controlInfo) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         socketTable->removeSocket(socketId);
         delete request;
