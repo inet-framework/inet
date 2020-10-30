@@ -23,10 +23,9 @@ cd /$TRAVIS_REPO_SLUG
 
 cp -r /root/nsc-0.5.3 3rdparty
 
-# enabling some features only with native compilation, because we don't [want to?] have cross-compiled ffmpeg and NSC
-if [ "$TARGET_PLATFORM" = "linux" ]; then
-    opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
+opp_featuretool enable all
 
+if [ "$TARGET_PLATFORM" = "linux" ]; then
     # In the fingerprints stage we have to force enable diagnostics coloring
     # to make ccache work well, see https://github.com/ccache/ccache/issues/222
     # We do it here as well to make the compiler arguments match.
@@ -43,6 +42,12 @@ else
     # And we don't need ccache here anyway (only the linux build is used in the second stage).
     # When compiling to macos, it doesn't really matter, but let's enable them just in case.
     PCH=yes
+    # Disabling some features when cross-compiling, because:
+    # - we don't [want to?] have cross-compiled ffmpeg
+    #   (and leaving it enabled messes up the include paths)
+    # - ExternalInterface is only supported on Linux
+    # - lwIP and NSC does not seem to compile on at least Windows, oh well...
+    opp_featuretool disable VoIPStream VoIPStream_examples ExternalInterface ExternalInterface_examples emulation_showcases TCP_lwIP TCP_NSC
 fi
 
 if [ "$TARGET_PLATFORM" = "windows" ]; then

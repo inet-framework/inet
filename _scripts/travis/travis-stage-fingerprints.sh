@@ -25,7 +25,7 @@ cd /$TRAVIS_REPO_SLUG
 
 cp -r /root/nsc-0.5.3 3rdparty
 
-opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
+opp_featuretool enable all
 
 # We have to explicitly enable diagnostics coloring to make ccache work,
 # since we redirect stderr here, but not in the build stage.
