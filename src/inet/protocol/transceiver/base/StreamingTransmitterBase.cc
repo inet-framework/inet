@@ -40,7 +40,6 @@ bool StreamingTransmitterBase::canPushSomePacket(cGate *gate) const
 
 void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
     PacketTransmitterBase::receiveSignal(source, signal, object, details);
     if (signal == PRE_MODEL_CHANGE) {
         if (auto notification = dynamic_cast<cPrePathCutNotification *>(object)) {

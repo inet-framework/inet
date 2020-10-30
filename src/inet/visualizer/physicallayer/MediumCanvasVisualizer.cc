@@ -1163,8 +1163,10 @@ void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *receptio
 
 void MediumCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signal == IMobility::mobilityStateChangedSignal)
+    if (signal == IMobility::mobilityStateChangedSignal) {
+        Enter_Method("receiveSignal");
         invalidDisplay = true;
+    }
     else
         MediumVisualizerBase::receiveSignal(source, signal, object, details);
 }

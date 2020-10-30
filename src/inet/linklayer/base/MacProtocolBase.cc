@@ -170,6 +170,7 @@ void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
 
 void MacProtocolBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("receiveSignal");
     if (signalID == interfaceDeletedSignal) {
         if (networkInterface == check_and_cast<const NetworkInterface *>(obj))
             networkInterface = nullptr;

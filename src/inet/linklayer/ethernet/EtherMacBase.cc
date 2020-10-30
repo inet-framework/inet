@@ -315,10 +315,7 @@ void EtherMacBase::processAtHandleMessageFinished()
 
 void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
-
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
-
     if (signalID == POST_MODEL_CHANGE) {
         if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
             if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
