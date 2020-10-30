@@ -17,6 +17,20 @@
         linkerFlags = ""
         />
     <feature
+        id="clocksupport_examples"
+        name="Clock support examples"
+        description = "Examples for clock support"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.clock
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="TCP_common"
         name="TCP Common"
         description = "The common part of TCP implementations"
