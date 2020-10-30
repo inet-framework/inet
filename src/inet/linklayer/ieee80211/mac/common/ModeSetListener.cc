@@ -31,7 +31,7 @@ void ModeSetListener::initialize(int stage)
 
 void ModeSetListener::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
-    Enter_Method_Silent("receiveSignal");
+    Enter_Method("receiveSignal");
     if (signalID == modesetChangedSignal)
         modeSet = check_and_cast<physicallayer::Ieee80211ModeSet*>(obj);
 }

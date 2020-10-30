@@ -69,7 +69,7 @@ void EpEnergyStorageBase::removeEnergyGenerator(const IEnergyGenerator *energyGe
 
 void EpEnergyStorageBase::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
-    Enter_Method_Silent("receiveSignal");
+    Enter_Method("receiveSignal");
     if (signal == IEpEnergyConsumer::powerConsumptionChangedSignal)
         updateTotalPowerConsumption();
     else if (signal == IEpEnergyGenerator::powerGenerationChangedSignal)

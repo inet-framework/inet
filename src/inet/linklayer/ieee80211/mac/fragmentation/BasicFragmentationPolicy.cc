@@ -30,7 +30,7 @@ void BasicFragmentationPolicy::initialize()
 
 std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
 {
-    Enter_Method_Silent("computeFragmentSizes");
+    Enter_Method("computeFragmentSizes");
     if (fragmentationThreshold < frame->getByteLength()) {
         EV_DEBUG << "Computing fragment sizes: fragmentationThreshold = " << fragmentationThreshold << ", packet = " << *frame << ".\n";
         std::vector<int> sizes;

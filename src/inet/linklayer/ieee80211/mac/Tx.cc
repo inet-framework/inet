@@ -53,7 +53,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
 
 void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback)
 {
-    Enter_Method_Silent("transmitFrame(\"%s\")", packet->getName());
+    Enter_Method("transmitFrame(\"%s\")", packet->getName());
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
     take(packet);

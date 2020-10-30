@@ -50,7 +50,7 @@ void RateControlBase::emitDatarateChangedSignal()
 
 void RateControlBase::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
-    Enter_Method_Silent("receiveSignal");
+    Enter_Method("receiveSignal");
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         double initRate = par("initialRate");

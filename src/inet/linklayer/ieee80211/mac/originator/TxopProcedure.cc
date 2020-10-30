@@ -78,7 +78,7 @@ simtime_t TxopProcedure::getLimit() const
 
 void TxopProcedure::startTxop(AccessCategory ac)
 {
-    Enter_Method_Silent("startTxop");
+    Enter_Method("startTxop");
     if (start != -1)
         throw cRuntimeError("Txop is already running");
     if (limit == -1) {
@@ -96,7 +96,7 @@ void TxopProcedure::startTxop(AccessCategory ac)
 
 void TxopProcedure::endTxop()
 {
-    Enter_Method_Silent("endTxop");
+    Enter_Method("endTxop");
     emit(txopEndedSignal, this);
     start = -1;
     protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;

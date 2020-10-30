@@ -81,7 +81,7 @@ void Contention::startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_
 {
     startTime = simTime();
     ASSERT(ifs >= 0 && eifs >= 0 && slotTime >= 0 && cw >= 0);
-    Enter_Method_Silent("startContention");
+    Enter_Method("startContention");
     cancelEvent(channelGrantedEvent);
     ASSERT(fsm.getState() == IDLE);
     this->ifs = ifs;
@@ -189,7 +189,7 @@ void Contention::handleMessage(cMessage *msg)
 
 void Contention::corruptedFrameReceived()
 {
-    Enter_Method_Silent("corruptedFrameReceived");
+    Enter_Method("corruptedFrameReceived");
     handleWithFSM(CORRUPTED_FRAME_RECEIVED);
 }
 

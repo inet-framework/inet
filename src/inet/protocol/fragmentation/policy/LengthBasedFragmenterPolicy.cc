@@ -33,7 +33,7 @@ void LengthBasedFragmenterPolicy::initialize(int stage)
 
 std::vector<b> LengthBasedFragmenterPolicy::computeFragmentLengths(Packet *packet) const
 {
-    Enter_Method_Silent("computeFragmentLengths");
+    Enter_Method("computeFragmentLengths");
     std::vector<b> fragmentLengths;
     if (maxFragmentLength >= packet->getTotalLength())
         fragmentLengths.push_back(packet->getTotalLength());
