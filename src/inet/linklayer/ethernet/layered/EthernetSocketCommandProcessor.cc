@@ -57,7 +57,7 @@ void EthernetSocketCommandProcessor::handleCommand(Request *request)
         socketTable->addSocket(socketId, bindCommand->getLocalAddress(), bindCommand->getRemoteAddress(), bindCommand->getProtocol(), bindCommand->getSteal());
         delete request;
     }
-    else if (dynamic_cast<EthernetCloseCommand *>(controlInfo) != nullptr) {
+    else if (dynamic_cast<SocketCloseCommand *>(controlInfo) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         socketTable->removeSocket(socketId);
         delete request;
@@ -68,7 +68,7 @@ void EthernetSocketCommandProcessor::handleCommand(Request *request)
 //        indication->addTag<SocketInd>()->setSocketId(socketId);
 //        send(indication, "cmdOut");
     }
-    else if (dynamic_cast<EthernetDestroyCommand *>(controlInfo) != nullptr) {
+    else if (dynamic_cast<SocketDestroyCommand *>(controlInfo) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         socketTable->removeSocket(socketId);
         delete request;

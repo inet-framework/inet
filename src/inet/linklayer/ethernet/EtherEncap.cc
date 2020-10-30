@@ -100,19 +100,19 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         socketIdToSocketMap[socketId] = socket;
         delete msg;
     }
-    else if (dynamic_cast<EthernetCloseCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketMap.find(socketId);
         delete it->second;
         socketIdToSocketMap.erase(it);
         delete msg;
-        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
-        auto ctrl = new EthernetSocketClosedIndication();
+        auto indication = new Indication("closed", SOCKET_I_CLOSED);
+        auto ctrl = new SocketClosedIndication();
         indication->setControlInfo(ctrl);
         indication->addTag<SocketInd>()->setSocketId(socketId);
         send(indication, "transportOut");
     }
-    else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<SocketDestroyCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketMap.find(socketId);
         delete it->second;
@@ -231,7 +231,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
             auto socket = it.second;
             if (socket->matches(packet, ethHeader)) {
                 auto packetCopy = packet->dup();
-                packetCopy->setKind(ETHERNET_I_DATA);
+                packetCopy->setKind(SOCKET_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
                 send(packetCopy, "upperLayerOut");
                 steal |= socket->steal;

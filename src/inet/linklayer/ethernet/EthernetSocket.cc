@@ -24,35 +24,17 @@
 
 namespace inet {
 
-EthernetSocket::EthernetSocket()
+void EthernetSocket::sendOut(cMessage *msg)
 {
-    // don't allow user-specified socketIds because they may conflict with
-    // automatically assigned ones.
-    socketId = getEnvir()->getUniqueNumber();
-    gateToEthernet = nullptr;
-}
-
-void EthernetSocket::sendToEthernet(cMessage *msg)
-{
-    if (!gateToEthernet)
-        throw cRuntimeError("EthernetSocket: setOutputGate() must be invoked before socket can be used");
-
-    cObject *ctrl = msg->getControlInfo();
-    EV_TRACE << "EthernetSocket: Send (" << msg->getClassName() << ")" << msg->getFullName();
-    if (ctrl)
-        EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
-    EV_TRACE << endl;
-
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     tags.addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
-    check_and_cast<cSimpleModule *>(gateToEthernet->getOwnerModule())->send(msg, gateToEthernet);
+    SocketBase::sendOut(msg);
 }
 
 void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)
 {
-    auto request = new Request("BIND", ETHERNET_C_BIND);
+    auto request = new Request("BIND", SOCKET_C_BIND);
     EthernetBindCommand *ctrl = new EthernetBindCommand();
     ctrl->setLocalAddress(localAddress);
     ctrl->setRemoteAddress(remoteAddress);
@@ -60,57 +42,20 @@ void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remo
     ctrl->setSteal(steal);
     request->setControlInfo(ctrl);
     isOpen_ = true;
-    sendToEthernet(request);
-}
-
-void EthernetSocket::send(Packet *packet)
-{
-    packet->setKind(ETHERNET_C_DATA);
-    isOpen_ = true;
-    sendToEthernet(packet);
-}
-
-void EthernetSocket::close()
-{
-    auto request = new Request("CLOSE", ETHERNET_C_CLOSE);
-    auto *ctrl = new EthernetCloseCommand();
-    request->setControlInfo(ctrl);
-    isOpen_ = true;
-    sendToEthernet(request);
-}
-
-void EthernetSocket::destroy()
-{
-    auto request = new Request("destroy", ETHERNET_C_DESTROY);
-    auto *ctrl = new EthernetDestroyCommand();
-    request->setControlInfo(ctrl);
-    sendToEthernet(request);
-    isOpen_ = false;
-}
-
-void EthernetSocket::setCallback(ICallback *callback)
-{
-    this->callback = callback;
-}
-
-bool EthernetSocket::belongsToSocket(cMessage *msg) const
-{
-    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
-    const auto& socketInd = tags.findTag<SocketInd>();
-    return socketInd != nullptr && socketInd->getSocketId() == socketId;
+    sendOut(request);
 }
 
 void EthernetSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
     switch (msg->getKind()) {
-        case ETHERNET_I_DATA:
+        case SOCKET_I_DATA:
             if (callback)
                 callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
             else
                 delete msg;
             break;
-        case ETHERNET_I_SOCKET_CLOSED:
+        case SOCKET_I_CLOSED:
             isOpen_ = false;
             if (callback)
                 callback->socketClosed(this);
