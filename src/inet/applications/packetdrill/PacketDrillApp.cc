@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/applications/packetdrill/PacketDrillApp.h"
 #include "inet/applications/packetdrill/PacketDrillInfo_m.h"
 #include "inet/applications/packetdrill/PacketDrillUtils.h"

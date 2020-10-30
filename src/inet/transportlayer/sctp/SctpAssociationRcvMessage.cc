@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/packet/Message.h"
 
 #ifdef WITH_IPv4

@@ -22,7 +22,7 @@
 #include <string.h>
 #include <algorithm>    // min,max
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"

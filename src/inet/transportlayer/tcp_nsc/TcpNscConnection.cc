@@ -20,7 +20,7 @@
 #include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 
 #include <sim_interface.h>    // NSC header
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"

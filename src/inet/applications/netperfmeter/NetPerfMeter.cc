@@ -28,7 +28,7 @@
 #include "NetPerfMeter.h"
 #include "NetPerfMeter_m.h"
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Message.h"

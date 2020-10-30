@@ -17,7 +17,7 @@
 
 #include <omnetpp/platdep/sockets.h>
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/BytesChunk.h"

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/applications/tcpapp/TcpServerSocketIo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
