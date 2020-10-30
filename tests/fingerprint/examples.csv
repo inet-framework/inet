@@ -31,6 +31,8 @@
 /examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c General -r 0,                1000s,           2f3a-6477/tplx, PASS, ospf
 /examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c General -r 0,                1000s,           7892-9f9a/tplx, PASS, ospf
 
+/examples/clock/,                    -f omnetpp.ini -c General -r 0,                10ms,            a3ab-b355/tplx, PASS,
+
 /examples/communicationcache/,       -f omnetpp.ini -c ReferenceCommunicationCache -r 0,  10s,       e4f0-d0a0/tplx, PASS, wireless
 /examples/communicationcache/,       -f omnetpp.ini -c MapCommunicationCache -r 0,        10s,       e4f0-d0a0/tplx, PASS, wireless
 /examples/communicationcache/,       -f omnetpp.ini -c VectorCommunicationCache -r 0,     10s,       e4f0-d0a0/tplx, PASS, wireless
