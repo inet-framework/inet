@@ -121,7 +121,7 @@ void HttpController::handleMessage(cMessage *msg)
 
 void HttpController::registerServer(HttpServerBase *serverAppModule, const char *objectName, const char *wwwName, int port, int rank, simtime_t activationTime)
 {
-    Enter_Method_Silent();
+    Enter_Method("registerServer");
 
     std::string serverName = extractServerName(wwwName);
 
@@ -174,7 +174,7 @@ void HttpController::registerServer(HttpServerBase *serverAppModule, const char 
 
 cModule *HttpController::getServerModule(const char *wwwName)
 {
-    Enter_Method_Silent();
+    Enter_Method("getServerModule");
 
     std::string serverUrl = extractServerName(wwwName);
 
@@ -196,7 +196,7 @@ cModule *HttpController::getServerModule(const char *wwwName)
 
 cModule *HttpController::getAnyServerModule()
 {
-    Enter_Method_Silent();
+    Enter_Method("getAnyServerModule");
 
     if (webSiteList.size() == 0) {
         EV_WARN << "No modules registered. Cannot select a random module" << endl;
@@ -221,7 +221,7 @@ cModule *HttpController::getAnyServerModule()
 
 int HttpController::getServerInfo(const char *wwwName, char *module, int& port)
 {
-    Enter_Method_Silent();
+    Enter_Method("getServerInfo");
 
     std::string serverUrl = extractServerName(wwwName);
 
@@ -244,7 +244,7 @@ int HttpController::getServerInfo(const char *wwwName, char *module, int& port)
 
 int HttpController::getAnyServerInfo(char *wwwName, char *module, int& port)
 {
-    Enter_Method_Silent();
+    Enter_Method("getAnyServerInfo");
 
     if (webSiteList.size() == 0) {
         EV_WARN << "No modules registered. Cannot select a random module" << endl;

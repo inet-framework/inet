@@ -167,7 +167,7 @@ void PcapRecorder::updateDisplayString() const
 
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     cPacket *packet = dynamic_cast<cPacket *>(obj);
 
     if (packet) {

@@ -508,7 +508,7 @@ void NetworkInterface::setCarrier(bool b)
 
 bool NetworkInterface::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
 
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {

@@ -1401,7 +1401,7 @@ INetfilter::IHook::Result Ipv4::datagramLocalOutHook(Packet *packet)
 
 void Ipv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
 
     if (signalID == IArp::arpResolutionCompletedSignal) {
         arpResolutionCompleted(check_and_cast<IArp::Notification *>(obj));

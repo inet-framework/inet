@@ -24,7 +24,7 @@ Define_Module(TestRadio);
 
 bool TestRadio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {
         if (stage == 0) {
             scheduleAfter(1, &turnOnTransmitter);

@@ -192,7 +192,7 @@ void PacketDropVisualizerBase::unsubscribe()
 
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == packetDroppedSignal) {
         auto module = check_and_cast<cModule *>(source);
         auto packet = check_and_cast<cPacket *>(object);

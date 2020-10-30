@@ -76,7 +76,7 @@ INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(Packet *datag
 
 INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram)
 {
-    Enter_Method_Silent();
+    Enter_Method("datagramForwardHook");
 
     auto ifInd = datagram->getTag<InterfaceInd>();
     int srcID = ifInd ? ifInd->getInterfaceId() : -1;

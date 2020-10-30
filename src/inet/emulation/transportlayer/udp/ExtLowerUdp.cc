@@ -292,7 +292,7 @@ void ExtLowerUdp::processPacketFromUpper(Packet *packet)
 
 void ExtLowerUdp::processPacketFromLower(int fd)
 {
-    Enter_Method_Silent();
+    Enter_Method("processPacketFromLower");
     auto it = fdToSocketMap.find(fd);
     if (it == fdToSocketMap.end())
         throw cRuntimeError("Unknown socket");

@@ -95,7 +95,7 @@ bool Rx::lowerFrameReceived(Packet *packet)
 
 void Rx::frameTransmitted(simtime_t durationField)
 {
-    Enter_Method_Silent();
+    Enter_Method("frameTransmitted");
     // the txIndex that transmitted the frame should already own the TXOP, so
     // it has no need to (and should not) check the NAV.
     setOrExtendNav(durationField);
@@ -146,21 +146,21 @@ void Rx::recomputeMediumFree()
 
 void Rx::receptionStateChanged(IRadio::ReceptionState state)
 {
-    Enter_Method_Silent();
+    Enter_Method("receptionStateChanged");
     receptionState = state;
     recomputeMediumFree();
 }
 
 void Rx::receivedSignalPartChanged(IRadioSignal::SignalPart part)
 {
-    Enter_Method_Silent();
+    Enter_Method("receivedSignalPartChanged");
     receivedPart = part;
     recomputeMediumFree();
 }
 
 void Rx::transmissionStateChanged(IRadio::TransmissionState state)
 {
-    Enter_Method_Silent();
+    Enter_Method("transmissionStateChanged");
     transmissionState = state;
     recomputeMediumFree();
 }

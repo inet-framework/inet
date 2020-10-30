@@ -24,7 +24,7 @@ Define_Module(TestProtocol);
 
 bool TestProtocol::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {
         if (stage == 0 || stage == 3)
             return true;

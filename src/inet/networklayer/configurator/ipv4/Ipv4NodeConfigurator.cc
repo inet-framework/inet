@@ -74,7 +74,7 @@ void Ipv4NodeConfigurator::initialize(int stage)
 
 bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LINK_LAYER)
@@ -160,7 +160,7 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
     if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize
 
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {

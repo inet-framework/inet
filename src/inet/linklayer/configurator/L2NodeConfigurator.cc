@@ -44,7 +44,7 @@ void L2NodeConfigurator::initialize(int stage)
 
 bool L2NodeConfigurator::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(operation->getCurrentStage()) == ModuleStartOperation::STAGE_LINK_LAYER) {
             prepareNode();

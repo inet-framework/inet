@@ -144,7 +144,7 @@ void RadioVisualizerBase::removeAllRadioVisualizations()
 
 void RadioVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == IRadio::radioModeChangedSignal || signal == IRadio::receptionStateChangedSignal || signal == IRadio::transmissionStateChangedSignal) {
         auto module = check_and_cast<cModule *>(source);
         auto radio = check_and_cast<IRadio *>(module);

@@ -178,7 +178,7 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize
 
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {
@@ -877,7 +877,7 @@ void Ipv6RoutingTable::deleteInterfaceRoutes(const NetworkInterface *entry)
 
 bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)

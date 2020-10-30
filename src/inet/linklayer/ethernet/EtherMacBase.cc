@@ -423,7 +423,7 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
 
 void EtherMacBase::refreshConnection()
 {
-    Enter_Method_Silent();
+    Enter_Method("refreshConnection");
 
     bool oldConn = connected;
     readChannelParameters(false);

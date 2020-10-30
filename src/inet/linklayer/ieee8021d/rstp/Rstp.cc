@@ -878,7 +878,7 @@ void Rstp::flushOtherPorts(unsigned int portId)
 //void Rstp::receiveChangeNotification(int signalID, const cObject *obj)
 void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveChangeNotification");
 
     if (signalID == interfaceStateChangedSignal) {
         NetworkInterface *changedIE = check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface();

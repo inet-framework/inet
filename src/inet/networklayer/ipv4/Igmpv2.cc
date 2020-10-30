@@ -231,7 +231,7 @@ void Igmpv2::addWatches()
 
 void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
 
     NetworkInterface *ie;
     int interfaceId;

@@ -122,7 +122,7 @@ void Tcp::handleUpperCommand(cMessage *msg)
 
 void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
 {
-    Enter_Method_Silent();
+    Enter_Method("sendFromConn");
     take(msg);
     send(msg, gatename, gateindex);
 }

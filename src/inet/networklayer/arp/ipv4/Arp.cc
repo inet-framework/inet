@@ -443,7 +443,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const NetworkInterfac
 
 L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
 {
-    Enter_Method_Silent();
+    Enter_Method("getL3AddressFor");
 
     if (macAddr.isUnspecified())
         return Ipv4Address::UNSPECIFIED_ADDRESS;
@@ -460,7 +460,7 @@ L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
 // Also known as ARP Announcement
 void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode)
 {
-    Enter_Method_Silent();
+    Enter_Method("sendArpGratuitous");
 
     // both must be set
     ASSERT(!srcAddr.isUnspecified());
@@ -505,7 +505,7 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
 // Refer to RFC 5227, IPv4 Address Conflict Detection
 void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr)
 {
-    Enter_Method_Silent();
+    Enter_Method("sendArpProbe");
 
     // both must be set
     ASSERT(!srcAddr.isUnspecified());

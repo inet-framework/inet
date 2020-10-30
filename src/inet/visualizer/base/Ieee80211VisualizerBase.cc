@@ -131,7 +131,7 @@ void Ieee80211VisualizerBase::removeAllIeee80211Visualizations()
 void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
 #ifdef WITH_IEEE80211
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == l2AssociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {

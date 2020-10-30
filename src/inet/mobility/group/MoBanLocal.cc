@@ -125,7 +125,7 @@ void MoBanLocal::computeMaxSpeed()
 
 void MoBanLocal::setMoBANParameters(Coord referencePoint, double radius, double speed)
 {
-    Enter_Method_Silent();
+    Enter_Method("setMoBANParameters");
     this->referencePosition = referencePoint;
     this->radius = radius;
     this->speed = speed;

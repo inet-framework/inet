@@ -209,7 +209,7 @@ std::string TcpStateVariables::detailedInfo() const
 
 void TcpConnection::initConnection(Tcp *_mod, int _socketId)
 {
-    Enter_Method_Silent();
+    Enter_Method("initConnection");
 
     tcpMain = _mod;
     socketId = _socketId;
@@ -293,7 +293,7 @@ bool TcpConnection::processTimer(cMessage *msg)
 
 bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address segSrcAddr, L3Address segDestAddr)
 {
-    Enter_Method_Silent();
+    Enter_Method("processTCPSegment");
 
     printConnBrief();
     if (!localAddr.isUnspecified()) {
@@ -318,7 +318,7 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
 
 bool TcpConnection::processAppCommand(cMessage *msg)
 {
-    Enter_Method_Silent();
+    Enter_Method("processAppCommand");
 
     printConnBrief();
 

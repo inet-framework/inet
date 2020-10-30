@@ -133,7 +133,7 @@ void RoutingTableVisualizerBase::unsubscribe()
 
 void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == routeAddedSignal || signal == routeDeletedSignal || signal == routeChangedSignal) {
         auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));

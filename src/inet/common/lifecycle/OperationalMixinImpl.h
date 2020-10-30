@@ -92,7 +92,7 @@ void OperationalMixin<T>::handleMessageWhenDown(cMessage *message)
 template <typename T>
 bool OperationalMixin<T>::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (isModuleStartStage(stage)) {

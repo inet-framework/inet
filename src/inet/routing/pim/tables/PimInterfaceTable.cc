@@ -106,7 +106,7 @@ PimInterface *PimInterfaceTable::getInterfaceById(int interfaceId)
 
 void PimInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {

@@ -136,7 +136,7 @@ void IGMPTester::handleMessage(cMessage *msg)
 
 void IGMPTester::processCommand(const cXMLElement &node)
 {
-    Enter_Method_Silent();
+    Enter_Method("processCommand");
 
     string tag = node.getTagName();
     const char *ifname = node.getAttribute("ifname");

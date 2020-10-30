@@ -129,7 +129,7 @@ void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 
 void Ppp::refreshOutGateConnection(bool connected)
 {
-    Enter_Method_Silent();
+    Enter_Method("refreshOutGateConnection");
 
     // we're connected if other end of connection path is an input gate
     if (connected)

@@ -194,7 +194,7 @@ void TestIGMP::sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& de
 
 void TestIGMP::processCommand(const cXMLElement &node)
 {
-    Enter_Method_Silent();
+    Enter_Method("processCommand");
 
     const char *tag = node.getTagName();
     const char *ifname = node.getAttribute("ifname");

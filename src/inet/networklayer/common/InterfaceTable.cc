@@ -100,7 +100,7 @@ void InterfaceTable::handleMessageWhenUp(cMessage *msg)
 void InterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     // nothing needed here at the moment
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 }
 
@@ -379,7 +379,7 @@ void InterfaceTable::invalidateTmpInterfaceList()
 
 void InterfaceTable::interfaceChanged(simsignal_t signalID, const NetworkInterfaceChangeDetails *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("interfaceChanged");
     emit(signalID, const_cast<NetworkInterfaceChangeDetails *>(details));
 }
 
@@ -419,7 +419,7 @@ void InterfaceTable::updateLinkDisplayString(NetworkInterface *entry) const
 NetworkInterface *InterfaceTable::findInterfaceByNodeOutputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
-    Enter_Method_Silent();
+    Enter_Method("findInterfaceByNodeOutputGateId");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->getNodeOutputGateId() == id)
@@ -431,7 +431,7 @@ NetworkInterface *InterfaceTable::findInterfaceByNodeOutputGateId(int id) const
 NetworkInterface *InterfaceTable::findInterfaceByNodeInputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
-    Enter_Method_Silent();
+    Enter_Method("findInterfaceByNodeInputGateId");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->getNodeInputGateId() == id)
@@ -475,7 +475,7 @@ NetworkInterface *InterfaceTable::findInterfaceByInterfaceModule(cModule *ifmod)
 
 NetworkInterface *InterfaceTable::findInterfaceByName(const char *name) const
 {
-    Enter_Method_Silent();
+    Enter_Method("findInterfaceByName");
     if (!name)
         return nullptr;
     int n = idToInterface.size();
@@ -488,7 +488,7 @@ NetworkInterface *InterfaceTable::findInterfaceByName(const char *name) const
 
 NetworkInterface *InterfaceTable::findFirstLoopbackInterface() const
 {
-    Enter_Method_Silent();
+    Enter_Method("findFirstLoopbackInterface");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->isLoopback())
@@ -499,7 +499,7 @@ NetworkInterface *InterfaceTable::findFirstLoopbackInterface() const
 
 NetworkInterface *InterfaceTable::findFirstNonLoopbackInterface() const
 {
-    Enter_Method_Silent();
+    Enter_Method("findFirstNonLoopbackInterface");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && !idToInterface[i]->isLoopback())
@@ -510,7 +510,7 @@ NetworkInterface *InterfaceTable::findFirstNonLoopbackInterface() const
 
 NetworkInterface *InterfaceTable::findFirstMulticastInterface() const
 {
-    Enter_Method_Silent();
+    Enter_Method("findFirstMulticastInterface");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->isMulticast() && !idToInterface[i]->isLoopback())

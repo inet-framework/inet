@@ -168,7 +168,7 @@ void Ospfv2::handleCrashOperation(LifecycleOperation *operation)
 
 void Ospfv2::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 {
-    Enter_Method_Silent();
+    Enter_Method("insertExternalRoute");
     Ospfv2AsExternalLsaContents newExternalContents;
     newExternalContents.setExternalTOSInfoArraySize(1);
     const Ipv4Address netmask = netAddr.mask;
@@ -185,7 +185,7 @@ void Ospfv2::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 
 int Ospfv2::checkExternalRoute(const Ipv4Address& route)
 {
-    Enter_Method_Silent();
+    Enter_Method("checkExternalRoute");
     for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();

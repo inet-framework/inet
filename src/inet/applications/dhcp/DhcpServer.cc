@@ -79,7 +79,7 @@ void DhcpServer::openSocket()
 
 void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
 
     if (signalID == interfaceDeletedSignal) {
         if (isUp()) {

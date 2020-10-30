@@ -92,7 +92,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
 
 void Tx::radioTransmissionFinished()
 {
-    Enter_Method_Silent();
+    Enter_Method("radioTransmissionFinished");
     if (transmitting) {
         EV_DETAIL << "Tx: radioTransmissionFinished()\n";
         transmitting = false;

@@ -95,7 +95,7 @@ void AckingMac::configureNetworkInterface()
 
 void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
@@ -192,7 +192,7 @@ void AckingMac::handleSelfMessage(cMessage *message)
 
 void AckingMac::acked(Packet *frame)
 {
-    Enter_Method_Silent();
+    Enter_Method("acked");
     ASSERT(useAck);
 
     if (currentTxFrame == nullptr)

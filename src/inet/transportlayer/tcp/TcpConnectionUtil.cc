@@ -210,7 +210,7 @@ void TcpConnection::printSegmentBrief(Packet *tcpSegment, const Ptr<const TcpHea
 
 void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
 {
-    Enter_Method_Silent();
+    Enter_Method("initClonedConnection");
     listeningSocketId = listenerConn->getSocketId();
 
     // following code to be kept consistent with initConnection()

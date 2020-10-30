@@ -41,7 +41,7 @@ void MessageDispatcher::initialize(int stage)
 
 void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOptions& options, simtime_t time)
 {
-    Enter_Method_Silent();
+    Enter_Method("arrived");
     cGate *outGate = nullptr;
     if (message->isPacket()) {
         auto packet = check_and_cast<Packet *>(message);

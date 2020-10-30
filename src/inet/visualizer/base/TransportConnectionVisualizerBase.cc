@@ -121,7 +121,7 @@ void TransportConnectionVisualizerBase::removeAllConnectionVisualizations()
 void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
 #ifdef WITH_TCP_INET
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == inet::tcp::Tcp::tcpConnectionAddedSignal) {
         auto tcpConnection = check_and_cast<inet::tcp::TcpConnection *>(object);
         L3AddressResolver resolver;

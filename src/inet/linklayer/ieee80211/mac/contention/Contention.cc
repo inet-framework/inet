@@ -165,7 +165,7 @@ void Contention::handleWithFSM(EventType event)
 
 void Contention::mediumStateChanged(bool mediumFree)
 {
-    Enter_Method_Silent(mediumFree ? "medium FREE" : "medium BUSY");
+    Enter_Method(mediumFree ? "medium FREE" : "medium BUSY");
     this->mediumFree = mediumFree;
     lastChannelBusyTime = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED);

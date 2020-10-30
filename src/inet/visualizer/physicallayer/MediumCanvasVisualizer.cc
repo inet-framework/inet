@@ -936,7 +936,7 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
 
 void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleRadioAdded");
     auto module = check_and_cast<const cModule *>(radio);
     auto networkNode = getContainingNode(module);
     if (networkNodeFilter.matches(networkNode)) {
@@ -1003,7 +1003,7 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
 
 void MediumCanvasVisualizer::handleRadioRemoved(const IRadio *radio)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleRadioRemoved");
     auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
     auto networkNode = getContainingNode(module);
     if (networkNodeFilter.matches(networkNode)) {
@@ -1025,7 +1025,7 @@ void MediumCanvasVisualizer::handleRadioRemoved(const IRadio *radio)
 
 void MediumCanvasVisualizer::handleSignalAdded(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalAdded");
     MediumVisualizerBase::handleSignalAdded(transmission);
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
@@ -1042,7 +1042,7 @@ void MediumCanvasVisualizer::handleSignalAdded(const ITransmission *transmission
 
 void MediumCanvasVisualizer::handleSignalRemoved(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalRemoved");
     MediumVisualizerBase::handleSignalRemoved(transmission);
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
@@ -1060,7 +1060,7 @@ void MediumCanvasVisualizer::handleSignalRemoved(const ITransmission *transmissi
 
 void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalDepartureStarted");
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
@@ -1086,7 +1086,7 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
 
 void MediumCanvasVisualizer::handleSignalDepartureEnded(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalDepartureEnded");
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
@@ -1104,7 +1104,7 @@ void MediumCanvasVisualizer::handleSignalDepartureEnded(const ITransmission *tra
 
 void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *reception)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalArrivalStarted");
     MediumVisualizerBase::handleSignalArrivalStarted(reception);
     if (matchesTransmission(reception->getTransmission())) {
         invalidDisplay = true;
@@ -1144,7 +1144,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
 
 void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *reception)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalArrivalEnded");
     if (matchesTransmission(reception->getTransmission())) {
         invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)

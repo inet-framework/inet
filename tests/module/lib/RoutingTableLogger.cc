@@ -104,7 +104,7 @@ void RoutingTableLogger::finish()
 }
 
 void RoutingTableLogger::processCommand(const cXMLElement &command) {
-    Enter_Method_Silent();
+    Enter_Method("processCommand");
 
     const char *tag = command.getTagName();
 

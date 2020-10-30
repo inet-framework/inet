@@ -109,7 +109,7 @@ void PimNeighborTable::processLivenessTimer(cMessage *livenessTimer)
 
 bool PimNeighborTable::addNeighbor(PimNeighbor *entry, double holdTime)
 {
-    Enter_Method_Silent();
+    Enter_Method("addNeighbor");
 
     PimNeighborVector& neighborsOnInterface = neighbors[entry->getInterfaceId()];
 
@@ -131,7 +131,7 @@ bool PimNeighborTable::addNeighbor(PimNeighbor *entry, double holdTime)
 
 bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
 {
-    Enter_Method_Silent();
+    Enter_Method("deleteNeighbor");
 
     auto it = neighbors.find(neighbor->getInterfaceId());
     if (it != neighbors.end()) {
@@ -154,7 +154,7 @@ bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
 
 void PimNeighborTable::restartLivenessTimer(PimNeighbor *neighbor, double holdTime)
 {
-    Enter_Method_Silent();
+    Enter_Method("restartLivenessTimer");
     rescheduleAfter(holdTime, neighbor->getLivenessTimer());
 }
 

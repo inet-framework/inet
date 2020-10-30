@@ -108,7 +108,7 @@ void Ipv4NatTable::parseConfig()
 
 INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter::IHook::Type type)
 {
-    Enter_Method_Silent();
+    Enter_Method("processPacket");
     auto lt = natEntries.lower_bound(type);
     auto ut = natEntries.upper_bound(type);
     for (; lt != ut; lt++) {

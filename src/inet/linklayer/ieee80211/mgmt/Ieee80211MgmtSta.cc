@@ -296,7 +296,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
 
 void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     // Note that we are only subscribed during scanning!
     if (signalID == IRadio::receptionStateChangedSignal) {
         IRadio::ReceptionState newReceptionState = static_cast<IRadio::ReceptionState>(value);

@@ -503,7 +503,7 @@ void DhcpClient::handleDhcpMessage(Packet *packet)
 
 void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     // host associated. link is up. change the state to init.

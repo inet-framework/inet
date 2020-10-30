@@ -123,7 +123,7 @@ void ExtIpv4Socket::closeSocket()
 
 bool ExtIpv4Socket::notify(int fd)
 {
-    Enter_Method_Silent();
+    Enter_Method("notify");
     ASSERT(this->fd == fd);
     uint8_t buffer[1 << 16];
     memset(&buffer, 0, sizeof(buffer));

@@ -95,7 +95,7 @@ void Ieee80211MgmtAp::handleCommand(int msgkind, cObject *ctrl)
 
 void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signalID == Ieee80211Radio::radioChannelChangedSignal) {
         EV << "updating channel number\n";
         channelNumber = value;

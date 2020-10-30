@@ -139,7 +139,7 @@ void ExtEthernetTapDevice::closeTap()
 
 bool ExtEthernetTapDevice::notify(int fd)
 {
-    Enter_Method_Silent();
+    Enter_Method("notify");
     ASSERT(fd == this->fd);
     uint8_t buffer[1 << 16];
     ssize_t nread = read(fd, buffer, sizeof(buffer));

@@ -807,7 +807,7 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
 void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, NetworkInterface *ie)
 {
 #ifdef WITH_xMIPv6
-    Enter_Method_Silent();
+    Enter_Method("initiateDad");
     EV_INFO << "----------INITIATING DUPLICATE ADDRESS DISCOVERY----------" << endl;
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(true);
 #endif /* WITH_xMIPv6 */
@@ -1820,7 +1820,7 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
         const Ipv6Address& dgSrcAddr, NetworkInterface *ie)
 {
 #ifdef WITH_xMIPv6
-    Enter_Method_Silent();
+    Enter_Method("createAndSendNsPacket");
 #endif /* WITH_xMIPv6 */
 
     MacAddress myMacAddr = ie->getMacAddress();
@@ -2102,7 +2102,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     //RFC 2461
     //Section 7.2.6: Sending Unsolicited Neighbor Advertisements
 #ifdef WITH_xMIPv6
-    Enter_Method_Silent();
+    Enter_Method("sendUnsolicitedNa");
 #endif /* WITH_xMIPv6 */
 
 #ifndef WITH_xMIPv6

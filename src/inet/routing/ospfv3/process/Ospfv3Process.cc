@@ -660,7 +660,7 @@ void Ospfv3Process::setTimer(cMessage* msg, double delay = 0)
 
 void Ospfv3Process::activateProcess()
 {
-    Enter_Method_Silent();
+    Enter_Method("activateProcess");
     this->isActive=true;
     cMessage* init = new cMessage();
     init->setKind(HELLO_TIMER_INIT);

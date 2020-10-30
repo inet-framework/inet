@@ -96,7 +96,7 @@ void TracingObstacleLossVisualizerBase::unsubscribe()
 
 void TracingObstacleLossVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == ITracingObstacleLoss::obstaclePenetratedSignal) {
         if (displayIntersections || displayFaceNormalVectors) {
             auto event = static_cast<ITracingObstacleLoss::ObstaclePenetratedEvent *>(object);

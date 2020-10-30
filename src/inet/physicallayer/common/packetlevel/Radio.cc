@@ -104,7 +104,7 @@ std::ostream& Radio::printToStream(std::ostream& stream, int level, int evFlags)
 
 void Radio::setRadioMode(RadioMode newRadioMode)
 {
-    Enter_Method_Silent();
+    Enter_Method("setRadioMode");
     if (newRadioMode < RADIO_MODE_OFF || newRadioMode > RADIO_MODE_SWITCHING)
         throw cRuntimeError("Unknown radio mode: %d", newRadioMode);
     else if (newRadioMode == RADIO_MODE_SWITCHING)

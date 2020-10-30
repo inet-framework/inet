@@ -124,7 +124,7 @@ void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& 
 
 void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == IMobility::mobilityStateChangedSignal) {
         if (moduleFilter.matches(check_and_cast<cModule *>(source)))
             ensureMobilityVisualization(dynamic_cast<IMobility *>(source));

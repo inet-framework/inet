@@ -29,7 +29,7 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computePacketErrorRate");
     auto transmission = snir->getReception()->getTransmission();
     auto flatTransmission = dynamic_cast<const FlatTransmissionBase *>(transmission);
     auto ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
@@ -55,13 +55,13 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadio
 
 double Ieee80211ErrorModelBase::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeBitErrorRate");
     return NaN;
 }
 
 double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeSymbolErrorRate");
     return NaN;
 }
 

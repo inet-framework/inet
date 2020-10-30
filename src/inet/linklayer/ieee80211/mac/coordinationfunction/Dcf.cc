@@ -145,7 +145,7 @@ void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
 
 void Dcf::scheduleStartRxTimer(simtime_t timeout)
 {
-    Enter_Method_Silent();
+    Enter_Method("scheduleStartRxTimer");
     scheduleAfter(timeout, startRxTimer);
 }
 

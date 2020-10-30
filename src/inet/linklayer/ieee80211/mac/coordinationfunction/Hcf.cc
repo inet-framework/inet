@@ -147,13 +147,13 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
 {
-    Enter_Method_Silent();
+    Enter_Method("scheduleStartRxTimer");
     scheduleAfter(timeout, startRxTimer);
 }
 
 void Hcf::scheduleInactivityTimer(simtime_t timeout)
 {
-    Enter_Method_Silent();
+    Enter_Method("scheduleInactivityTimer");
     rescheduleAfter(timeout, inactivityTimer);
 }
 

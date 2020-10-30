@@ -243,7 +243,7 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
 
 void xMIPv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
 {
-    Enter_Method_Silent();    // can be called by NeighborDiscovery module
+    Enter_Method("initiateMipv6Protocol");    // can be called by NeighborDiscovery module
 
     if (!(ie->isLoopback()) && rt6->isMobileNode()) {
         EV_INFO << "Initiating Mobile Ipv6 protocol..." << endl;
@@ -276,7 +276,7 @@ void xMIPv6::initiateMipv6Protocol(NetworkInterface *ie, const Ipv6Address& CoA)
  */
 void xMIPv6::returningHome(const Ipv6Address& CoA, NetworkInterface *ie)
 {
-    Enter_Method_Silent();    // can be called by NeighborDiscovery module
+    Enter_Method("returningHome");    // can be called by NeighborDiscovery module
 
     /*11.5.4
        A mobile node detects that it has returned to its home link through

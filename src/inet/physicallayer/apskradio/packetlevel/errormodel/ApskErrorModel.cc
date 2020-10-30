@@ -32,7 +32,7 @@ std::ostream& ApskErrorModel::printToStream(std::ostream& stream, int level, int
 
 double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computePacketErrorRate");
     double bitErrorRate = computeBitErrorRate(snir, part);
     if (bitErrorRate == 0.0)
         return 0.0;
@@ -59,7 +59,7 @@ double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::S
 
 double ApskErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeBitErrorRate");
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
     const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
     return modulation->calculateBER(getScalarSnir(snir), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
@@ -67,7 +67,7 @@ double ApskErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::Sign
 
 double ApskErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeSymbolErrorRate");
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
     const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
     return modulation->calculateSER(getScalarSnir(snir), flatTransmission->getBandwidth(), flatTransmission->getBitrate());

@@ -1278,7 +1278,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
 
 void Ldp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     ASSERT(signalID == routeAddedSignal || signalID == routeDeletedSignal);

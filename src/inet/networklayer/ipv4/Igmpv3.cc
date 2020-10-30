@@ -149,7 +149,7 @@ void Igmpv3::addWatches()
 
 void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
 
     NetworkInterface *ie;
     int interfaceId;

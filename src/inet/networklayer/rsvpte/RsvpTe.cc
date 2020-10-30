@@ -1746,14 +1746,14 @@ std::vector<RsvpTe::traffic_session_t>::iterator RsvpTe::findSession(const Sessi
 
 void RsvpTe::addSession(const cXMLElement& node)
 {
-    Enter_Method_Silent();
+    Enter_Method("addSession");
 
     readTrafficSessionFromXML(&node);
 }
 
 void RsvpTe::delSession(const cXMLElement& node)
 {
-    Enter_Method_Silent();
+    Enter_Method("delSession");
 
     checkTags(&node, "tunnel_id extended_tunnel_id endpoint paths");
 
