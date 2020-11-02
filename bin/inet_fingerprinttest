@@ -133,9 +133,10 @@ class FingerprintTestCaseGenerator():
                     fingerprints = str2FpGroup(simulation['fingerprint'])
                     if len(fpFilterList) > 0 or len(excludeFpFilterList):
                         fingerprints = filteringFpGroup(fingerprints, fpFilterList, excludeFpFilterList)
-                    simulation['expectedFingerprint'] = fingerprints
-                    testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'],
-                            simulation['simtimelimit'], fingerprints, simulation['expectedResult'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation), repeat))
+                    if len(fingerprints):
+                        simulation['expectedFingerprint'] = fingerprints
+                        testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'],
+                                simulation['simtimelimit'], fingerprints, simulation['expectedResult'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation), repeat))
         return testcases
 
     def commentRemover(self, csvData):
