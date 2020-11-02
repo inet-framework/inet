@@ -1,41 +1,33 @@
-rename timing -> flow, PacketFlowMeasurementStarter, etc.
-AccessoryProtocols chapter
-
-review new examples preemption, cutthrough, gating, vlan
-
 INET 4.3 release TODO items:
 
-1. Packet API
+1. Review
 
- - Update tags and region tags documentation in Developer's Guide with respect to share pointers.
- - Extend Packet API documentation in Developer's Guide with new packet data insertion, replace and update API.
+ - Review new examples preemption, cutthrough, gating, and vlan.
+ - Review socket table, socket command processor and socket packet processor components.
+ - Review packet streaming API and implementation in all affected components.
+ - Review all added components in protocol support model.
+ - Review folder names and module names.
 
-2. Queueing model
+2. User's Guide
 
- - Review streaming implementation in all components.
+ - Add packet flow documentation.
+ - Add packet events documentation.
+ - Add timing measurement documentation.
 
-3. Protocol support model
+3. Developer's Guide 
 
- - Review all added components.
+ - Update packet API tags and region tags documentation with respect to shared pointers.
+ - Extend packet API documentation with new packet data insertion, replace and update API.
 
-4. Packet flow
+4. Release
 
- - Add examples that demonstrate the feature.
- - Add documentation to the User's Guide.
+ - Fix important bugs from github.
+ - Merge important pull requests from github.
+ - Complete WHATSNEW and ChangeLog.
 
-5. Timing measurement
+5. Testing
 
- - Add examples that demonstrate the feature.
- - Add documentation to the User's Guide.
-
-6. Packet events
-
- - Add examples that demonstrate the feature.
- - Add documentation to the User's Guide.
-
-7. General
-
- - Make all tests PASS
+ - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.
 
 ===============================================================================
 
