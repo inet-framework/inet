@@ -440,7 +440,7 @@ class FingerprintTestCase(SimulationTestCase):
         if anyFingerprintBad:
             fp = fpGroup2Str(computedFingerprints)
             self.storeFingerprintCallback(computedFingerprints)
-            assert False, "some fingerprint mismatch; actual " + " '" + fp +"'"
+            assert False, "some fingerprint mismatch: actual '" + fp + "', expected: '" + fpGroup2Str(self.fingerprint) + "'"
 
     def __str__(self):
         return self.title
