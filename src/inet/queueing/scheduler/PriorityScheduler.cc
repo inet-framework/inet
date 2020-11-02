@@ -84,7 +84,7 @@ void PriorityScheduler::removePacket(Packet *packet)
 int PriorityScheduler::schedulePacket()
 {
     for (size_t i = 0; i < providers.size(); i++) {
-        size_t inputIndex = getInputGateIndex(i);
+        int inputIndex = getInputGateIndex(i);
         if (inputIndex == inProgressGateIndex || providers[inputIndex]->canPullSomePacket(inputGates[inputIndex]->getPathStartGate()))
             return inputIndex;
     }

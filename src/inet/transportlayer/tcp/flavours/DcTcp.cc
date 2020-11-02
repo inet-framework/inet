@@ -59,7 +59,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             // RFC 8257 3.3.1
             uint32_t bytes_acked = state->snd_una - firstSeqAcked;
 
-            bool cut = false;
+//            bool cut = false; TODO: unused?
 
             // RFC 8257 3.3.2
             state->dctcp_bytesAcked += bytes_acked;
@@ -78,7 +78,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             if (state->snd_una > state->dctcp_windEnd) {
 
                 if (state->dctcp_bytesMarked) {
-                    cut = true;
+//                    cut = true;  TODO: unused?
                 }
 
                 // RFC 8257 3.3.5

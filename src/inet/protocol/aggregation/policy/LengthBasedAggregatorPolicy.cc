@@ -34,9 +34,9 @@ void LengthBasedAggregatorPolicy::initialize(int stage)
 bool LengthBasedAggregatorPolicy::isAggregatablePacket(Packet *aggregatedPacket, std::vector<Packet *>& aggregatedSubpackets, Packet *newSubpacket)
 {
 //    b aggregatedLength = aggregatedPacket == nullptr ? b(0) : aggregatedPacket->getTotalLength();
-    return aggregatedSubpackets.size() < minNumSubpackets ||
+    return (int)aggregatedSubpackets.size() < minNumSubpackets ||
            aggregatedPacket->getTotalLength() < minAggregatedLength ||
-           (aggregatedSubpackets.size() + 1 <= maxNumSubpackets &&
+           ((int)aggregatedSubpackets.size() + 1 <= maxNumSubpackets &&
             aggregatedPacket->getTotalLength() + newSubpacket->getTotalLength() <= maxAggregatedLength);
 }
 
