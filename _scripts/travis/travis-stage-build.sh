@@ -63,6 +63,16 @@ if [ "$TARGET_PLATFORM" = "windows" ]; then
 fi
 
 make makefiles
+
+if [ "$TARGET_PLATFORM" = "windows" ]; then
+    # This is here to stop make from invoking the final .dll linker twice, seeing that
+    # both the .dll and the import lib for it (.dll.a) are targets, that have to be
+    # made the same way. This is a problem because when cross-compiling to mingw, in
+    # debug mode, one linker needs 5GB+ RAM, and it won't fit twice on the CI machines.
+    sed -i 's|  TARGET_FILES+= $(TARGET_DIR)/$(TARGET_IMPLIB)||g' src/Makefile
+    sed -i 's|$O/$(TARGET) $O/$(TARGET_IMPLIB): $(OBJS)|$O/$(TARGET): $(OBJS)|g' src/Makefile
+fi
+
 make MODE=$MODE USE_PRECOMPILED_HEADER=$PCH -j $(nproc)
 
 echo -e "\nccache summary:\n"
