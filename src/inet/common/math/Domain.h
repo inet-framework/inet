@@ -40,7 +40,7 @@ class INET_API Domain
 namespace internal {
 
 template<typename ... T, size_t ... IS>
-inline std::ostream& print(std::ostream& os, const Domain<T ...>& d, integer_sequence<size_t, IS...>) {
+inline std::ostream& print(std::ostream& os, const Domain<T ...>& d, std::integer_sequence<size_t, IS...>) {
     (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : ", "), printUnit(os, T()), true) ... };
     return os;
 }
@@ -50,7 +50,7 @@ inline std::ostream& print(std::ostream& os, const Domain<T ...>& d, integer_seq
 template<typename ... T>
 inline std::ostream& operator<<(std::ostream& os, const Domain<T ...>& d) {
     os << "(";
-    internal::print(os, d, index_sequence_for<T ...>{});
+    internal::print(os, d, std::index_sequence_for<T ...>{});
     os << ")";
     return os;
 }

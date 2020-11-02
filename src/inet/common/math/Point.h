@@ -19,7 +19,6 @@
 #define __INET_POINT_H
 
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/common/IndexSequence.h"
 #include "inet/common/Units.h"
 
 namespace inet {
@@ -68,30 +67,30 @@ template<int DIMS, int SIZE>
 struct bits_to_indices_sequence { };
 
 template<>
-struct bits_to_indices_sequence<0b0, 0> { typedef integer_sequence<size_t> type; };
+struct bits_to_indices_sequence<0b0, 0> { typedef std::integer_sequence<size_t> type; };
 
 template<>
-struct bits_to_indices_sequence<0b0, 1> { typedef integer_sequence<size_t> type; };
+struct bits_to_indices_sequence<0b0, 1> { typedef std::integer_sequence<size_t> type; };
 
 template<>
-struct bits_to_indices_sequence<0b00, 2> { typedef integer_sequence<size_t, 0> type; }; // TODO: shouldn't be empty set?
+struct bits_to_indices_sequence<0b00, 2> { typedef std::integer_sequence<size_t, 0> type; }; // TODO: shouldn't be empty set?
 template<>
-struct bits_to_indices_sequence<0b01, 2> { typedef integer_sequence<size_t, 1> type; };
+struct bits_to_indices_sequence<0b01, 2> { typedef std::integer_sequence<size_t, 1> type; };
 template<>
-struct bits_to_indices_sequence<0b10, 2> { typedef integer_sequence<size_t, 0> type; };
+struct bits_to_indices_sequence<0b10, 2> { typedef std::integer_sequence<size_t, 0> type; };
 
 template<>
-struct bits_to_indices_sequence<0b00011, 5> { typedef integer_sequence<size_t, 3, 4> type; };
+struct bits_to_indices_sequence<0b00011, 5> { typedef std::integer_sequence<size_t, 3, 4> type; };
 template<>
-struct bits_to_indices_sequence<0b11000, 5> { typedef integer_sequence<size_t, 0, 1> type; };
+struct bits_to_indices_sequence<0b11000, 5> { typedef std::integer_sequence<size_t, 0, 1> type; };
 template<>
-struct bits_to_indices_sequence<0b11110, 5> { typedef integer_sequence<size_t, 0, 1, 2, 3> type; };
+struct bits_to_indices_sequence<0b11110, 5> { typedef std::integer_sequence<size_t, 0, 1, 2, 3> type; };
 
 template<int DIMS, int SIZE>
 using make_bits_to_indices_sequence = typename bits_to_indices_sequence<DIMS, SIZE>::type;
 
 template<typename S, size_t ... SIS, typename D, size_t ... DIS>
-void copyTupleElements(const S& source, integer_sequence<size_t, SIS ...>, D& destination, integer_sequence<size_t, DIS ...>) {
+void copyTupleElements(const S& source, std::integer_sequence<size_t, SIS ...>, D& destination, std::integer_sequence<size_t, DIS ...>) {
     (void)std::initializer_list<double>{ toDouble(std::get<DIS>(destination) = std::get<SIS>(source)) ... };
 }
 
@@ -108,34 +107,34 @@ class INET_API Point : public std::tuple<T ...>
 
   protected:
     template<size_t ... IS>
-    double getImpl(int index, integer_sequence<size_t, IS...>) const {
+    double getImpl(int index, std::integer_sequence<size_t, IS...>) const {
         double result = 0;
         (void)std::initializer_list<double>{ result = (IS == index ? toDouble(std::get<IS>(*this)) : result) ... };
         return result;
     }
 
     template<size_t ... IS>
-    void setImpl(int index, double value, integer_sequence<size_t, IS...>) {
+    void setImpl(int index, double value, std::integer_sequence<size_t, IS...>) {
         (void)std::initializer_list<double>{ (IS == index ? toDouble(std::get<IS>(*this) = T(value)) : 0) ... };
     }
 
     template<size_t ... IS>
-    Point<T ...> add(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
+    Point<T ...> add(const Point<T ...>& o, std::integer_sequence<size_t, IS ...>) const {
         return Point<T ...>{ (std::get<IS>(*this) + std::get<IS>(o)) ... };
     }
 
     template<size_t ... IS>
-    Point<T ...> subtract(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
+    Point<T ...> subtract(const Point<T ...>& o, std::integer_sequence<size_t, IS ...>) const {
         return Point<T ...>{ (std::get<IS>(*this) - std::get<IS>(o)) ... };
     }
 
     template<size_t ... IS>
-    Point<T ...> multiply(double d, integer_sequence<size_t, IS ...>) const {
+    Point<T ...> multiply(double d, std::integer_sequence<size_t, IS ...>) const {
         return Point<T ...>{ (std::get<IS>(*this) * d) ... };
     }
 
     template<size_t ... IS>
-    Point<T ...> divide(double d, integer_sequence<size_t, IS ...>) const {
+    Point<T ...> divide(double d, std::integer_sequence<size_t, IS ...>) const {
         return Point<T ...>{ (std::get<IS>(*this) / d) ... };
     }
 
@@ -143,43 +142,43 @@ class INET_API Point : public std::tuple<T ...>
     Point(T ... t) : std::tuple<T ...>(t ...) { }
 
     double get(int index) const {
-        return getImpl(index, index_sequence_for<T ...>{});
+        return getImpl(index, std::index_sequence_for<T ...>{});
     }
 
     void set(int index, double value) {
-        return setImpl(index, value, index_sequence_for<T ...>{});
+        return setImpl(index, value, std::index_sequence_for<T ...>{});
     }
 
     Point<T ...> operator-() const {
-        return multiply(-1, index_sequence_for<T ...>{});
+        return multiply(-1, std::index_sequence_for<T ...>{});
     }
 
     Point<T ...> operator+(const Point<T ...>& o) const {
-        return add(o, index_sequence_for<T ...>{});
+        return add(o, std::index_sequence_for<T ...>{});
     }
 
     Point<T ...> operator-(const Point<T ...>& o) const {
-        return subtract(o, index_sequence_for<T ...>{});
+        return subtract(o, std::index_sequence_for<T ...>{});
     }
 
     Point<T ...> operator*(double d) const {
-        return multiply(d, index_sequence_for<T ...>{});
+        return multiply(d, std::index_sequence_for<T ...>{});
     }
 
     Point<T ...> operator/(double d) const {
-        return divide(d, index_sequence_for<T ...>{});
+        return divide(d, std::index_sequence_for<T ...>{});
     }
 
     /// Copy the dimensions selected by the 1 bits of DIMS into p.
     template<typename P, int DIMS>
     void copyTo(P& p) const {
-        internal::copyTupleElements(*this, index_sequence_for<T ...>{}, p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{});
+        internal::copyTupleElements(*this, std::index_sequence_for<T ...>{}, p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{});
     }
 
     /// Copy the coordinates selected by the 1 bits of DIMS from p.
     template<typename P, int DIMS>
     void copyFrom(const P& p) {
-        internal::copyTupleElements(p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{}, *this, index_sequence_for<T ...>{});
+        internal::copyTupleElements(p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{}, *this, std::index_sequence_for<T ...>{});
     }
 
     template<typename X, int DIMENSION>
@@ -211,17 +210,17 @@ class INET_API Point : public std::tuple<T ...>
 namespace internal {
 
 template<std::size_t ... NS, typename T, typename ... TS>
-inline Point<TS ...> tailImpl(index_sequence<NS ...>, const Point<T, TS ...>& p) {
+inline Point<TS ...> tailImpl(std::index_sequence<NS ...>, const Point<T, TS ...>& p) {
    return Point<TS ...>( std::get<NS + 1u>(p) ... );
 }
 
 template<typename ... TS1, size_t ... IS1, typename ... TS2, size_t ... IS2>
-inline Point<TS1 ..., TS2 ...> concatImpl(const Point<TS1 ...>& p1, integer_sequence<size_t, IS1 ...>, const Point<TS2 ...>& p2, integer_sequence<size_t, IS2 ...>) {
+inline Point<TS1 ..., TS2 ...> concatImpl(const Point<TS1 ...>& p1, std::integer_sequence<size_t, IS1 ...>, const Point<TS2 ...>& p2, std::integer_sequence<size_t, IS2 ...>) {
     return Point<TS1 ..., TS2 ...> { (std::get<IS1>(p1)) ..., (std::get<IS2>(p2)) ... };
 }
 
 template<typename ... T, size_t ... IS>
-inline std::ostream& print(std::ostream& os, const Point<T ...>& p, integer_sequence<size_t, IS...>) {
+inline std::ostream& print(std::ostream& os, const Point<T ...>& p, std::integer_sequence<size_t, IS...>) {
     (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : ", ") << std::get<IS>(p), true) ... };
     return os;
 }
@@ -237,13 +236,13 @@ T head(const Point<T, TS ...>& p) {
 /// Returns all but the first coordinate of p.
 template<typename T, typename ... TS>
 Point<TS ...> tail(const Point<T, TS ...>& p) {
-   return internal::tailImpl(make_index_sequence<sizeof...(TS)>() , p);
+   return internal::tailImpl(std::make_index_sequence<sizeof...(TS)>() , p);
 }
 
 /// Returns a point by concatenating the coordinates of p1 and p2.
 template<typename ... TS1, typename ... TS2>
 Point<TS1 ..., TS2 ...> concat(const Point<TS1 ...>& p1, const Point<TS2 ...>& p2) {
-    return internal::concatImpl(p1, index_sequence_for<TS1 ...>{}, p2, index_sequence_for<TS2 ...>{});
+    return internal::concatImpl(p1, std::index_sequence_for<TS1 ...>{}, p2, std::index_sequence_for<TS2 ...>{});
 }
 
 template<typename T0>
@@ -253,7 +252,7 @@ inline std::ostream& operator<<(std::ostream& os, const Point<T0>& p) {
 
 template<typename ... T>
 inline std::ostream& operator<<(std::ostream& os, const Point<T ...>& p) {
-    os << "("; internal::print(os, p, index_sequence_for<T ...>{}); os << ")";
+    os << "("; internal::print(os, p, std::index_sequence_for<T ...>{}); os << ")";
     return os;
 }
 
