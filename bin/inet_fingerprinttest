@@ -32,7 +32,6 @@ import traceback
 import unittest
 from io import StringIO
 
-# FIXME this is a hard coded path!!! must be specified from command line or dicovered automatically
 rootDir = os.path.abspath(".")  # the working directory in the CSV file is relative to this dir
 cpuTimeLimit = "600s"
 logFile = "test.out"
@@ -579,7 +578,7 @@ class SimulationTextTestResult(ThreadedTestResult):
     def startTest(self, test):
         super(SimulationTextTestResult, self).startTest(test)
         if self.showAll:
-            self.stream.write(""+self.getDescription(test))  # NOTE: the empty "" string is needed here for python2/3 compatibility (unicode vs. str) - can be removed if only python3 is used
+            self.stream.write(self.getDescription(test))
             self.stream.write(" ... ")
             self.stream.flush()
 
