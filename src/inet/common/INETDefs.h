@@ -68,6 +68,9 @@ typedef unsigned long ulong;
 // used at several places as
 #define SPEED_OF_LIGHT    299792458.0
 
+template< class... >
+using void_t = void;
+
 //
 // Macro to protect expressions like gate("out")->getToGate()->getToGate()
 // from crashing if something in between returns nullptr.

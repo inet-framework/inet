@@ -110,14 +110,14 @@ template <typename, typename = void>
 struct has_print_to_string : std::false_type { };
 
 template <typename T>
-struct has_print_to_string<T, std::void_t<decltype(std::declval<T>().printToString())>>
+struct has_print_to_string<T, inet::void_t<decltype(std::declval<T>().printToString())>>
     : std::true_type { };
 
 template <typename, typename = void>
 struct has_str : std::false_type { };
 
 template <typename T>
-struct has_str<T, std::void_t<decltype(std::declval<T>().str())>>
+struct has_str<T, inet::void_t<decltype(std::declval<T>().str())>>
     : std::true_type { };
 
 template <typename T>
