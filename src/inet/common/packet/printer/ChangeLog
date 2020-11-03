@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-04-20  Levente Mészáros
+
+	Switched to use the new dissectPacket method.
+
+2020-04-14  Levente Mészáros
+
+	Added guard against dissection errors during printing a packet from Qtenv.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-01-28  ------ inet-4.1.0 released ------

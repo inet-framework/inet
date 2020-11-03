@@ -1,5 +1,59 @@
 ====== inet-4.x ======
 
+2020-10-27  Levente Mészáros
+
+	Fixed GCC compilation error: explicit specialization in non-namespace scope.
+
+2020-10-19  Levente Mészáros
+
+	Enhanced error message when reinterpretation is required.
+
+2020-09-25  Levente Mészáros
+
+	Added EncryptedChunk to Chunk API.
+
+2020-09-21  Levente Mészáros
+
+	Implemented ITaggedObject and IRegionTaggedObject with Message, Packet, and Chunk.
+
+2020-09-18  Levente Mészáros
+
+	Added a template specialization for peek.
+	Added local variables for getChunkLength().
+	Added canInsertAt/canRemoveAt methods and insertAt/removeAt methods and
+	various implementations.
+
+2020-09-11  Levente Mészáros
+
+	Added PacketAPI and ChunkAPI headers.
+
+2020-09-03  Levente Mészáros
+
+	Added constainsSameData() method to check if two chunks represent the same
+	data without serialization.
+
+2020-08-31  Levente Mészáros
+
+	Implemented IPrintableObject interface in Packet and Chunk classes to support
+	formatted output.
+
+2020-08-26  Levente Mészáros
+
+	Added str() method to FieldsChunk which prints fields declared on the chunk.
+
+2020-08-25  Levente Mészáros
+
+	Changed str() methods to use EV_FIELD where possible.
+	Changed str() to remove C++ namespace and use escape sequences.
+
+2020-08-04  Zoltan Bojthe
+
+	Added support to ByteCountChunk for peeking partial bytes.
+
+2020-06-10  Levente Mészáros
+
+	Added parsimPack/parsimUnpack to the Packet class, all Chunk classes and tag sets.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-13  Levente Mészáros

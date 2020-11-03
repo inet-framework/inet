@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-06-17  Zoltan Bojthe
+
+	Replaced several findProtocolData calls with getProtocolData.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-11  Zoltan Bojthe

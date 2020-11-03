@@ -1,0 +1,3 @@
+2020-07-31  Levente Mészáros and Zoltán Böjthe
+
+	Added new C++ types: ClockEvent and ClockTime.

@@ -1,5 +1,44 @@
 ====== inet-4.x ======
 
+2020-09-22  Levente Mészáros
+
+	Added support in SharingRegionTagSet for IdentityTag and other tags which
+	are not attached to all bits uniformly in a coherent region.
+
+2020-09-21  Levente Mészáros
+
+	Added ITaggedObject and IRegionTaggedObject.
+
+2020-09-18  Levente Mészáros
+
+	Added a more generic moveTags method to SharingRegionTagSet.
+	Changed splitTags to take a bool predicate instead of a type info.
+
+2020-09-07  Levente Mészáros
+
+	Fixed clearTags incorrectly updating the vector in SharingRegionTagSet.
+
+2020-06-18  Levente Mészáros
+
+	Fixed the copy-on-write mechanism for the shared vector when updating individual tags.
+
+2020-06-10  Levente Mészáros
+
+	Added parsimPack/parsimUnpack to the Packet class, all Chunk classes and tag sets.
+
+2020-06-02  Levente Mészáros
+
+	Extended TagSet with findTagForUpdate/getTagForUpdate.
+	Refactored RegionTagSet into SharingRegionTagSet to support shared pointers.
+
+2020-05-29  Levente Mészáros
+
+	Fixed clearTags in RegionTagSet for the case when vector reallocation occurs in the loop.
+
+2020-05-28  Levente Mészáros
+
+	Added SharedTagSet to support shared pointers.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-01-28  ------ inet-4.1.0 released ------

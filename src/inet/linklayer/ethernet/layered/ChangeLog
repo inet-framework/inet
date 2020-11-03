@@ -1,0 +1,17 @@
+2020-10-30  Levente Mészáros
+
+	Added new layered Ethernet model package with more composable modules. The
+	new model contains separate modules for header insertion, header checking,
+	socket handling, etc. It supports more advanced features such as Ethernet
+	preemption and cut-through. The model provides great flexibility for research.
+
+	Added new modules: EthernetAddressChecker, EthernetAddressInserter,
+	EthernetCutthroughInterface, EthernetCutthroughLayer, EthernetCutthroughSink,
+	EthernetCutthroughSource, EthernetFcsChecker, EthernetFcsInserter,
+	EthernetFragmentFcsChecker, EthernetFragmentFcsInserter, EthernetFragmentingMacLayer,
+	EthernetLayer, EthernetMacHeaderChecker, EthernetMacHeaderInserter, EthernetMacLayer,
+	EthernetPauseCommandProcessor, EthernetPreemptingMacLayer, EthernetPriorityQueue,
+	EthernetQueue, EthernetSelectiveQueue, EthernetSocketCommandProcessor,
+	EthernetSocketPacketProcessor, EthernetSocketTable, EthernetStreamingMacLayer,
+	EthernetTypeOrLengthChecker, EthernetTypeOrLengthInserter, IEthernetLayer,
+	IEthernetMacLayer, LayeredEthernetInterface.

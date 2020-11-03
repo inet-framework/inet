@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-06-08  Levente Mészáros
+
+	Changed interface to return const references for performance reasons.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-08-28  Zoltan Bojthe

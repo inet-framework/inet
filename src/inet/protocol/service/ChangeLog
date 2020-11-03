@@ -1,0 +1,4 @@
+2020-08-05  Levente Mészáros
+
+	Added new service package with modules: DataService, ForwardingService,
+	InterfaceService, MacService, and SelectivityService.

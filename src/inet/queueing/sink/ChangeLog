@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2020-08-25  Levente Mészáros
+
+	Adapted to new EV_FIELD macro.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-05-05  Levente Mészáros
+
+	Fixed active packet source/sink to immediately process a packet during initialize.
+
+2020-05-04  Levente Mészáros
+
+	Fixed edge cases in active packet source/sink, and changed implementation to be symmetric.
+
+2020-04-14  Levente Mészáros
+
+	Implemented handle handlePushPacketProcessed and handlePullPacketProcessed.
+
+2020-04-14  Zoltan Bojthe
+
+	Added outbound NED parameter to PcapFilePacketConsumer.
+
+2020-04-08  Levente Mészáros
+
+	Moved taking packet ownership from protected base class method to public methods.
+	Added the virtual qualifier to interface base classes to allow arbitrary multiple inheritance.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

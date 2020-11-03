@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-10-29  Levente Mészáros
+
+	Added virtual and override qualifieres to socket send method.
+
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-09-02  Zoltan Bojthe

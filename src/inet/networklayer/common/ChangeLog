@@ -1,5 +1,72 @@
 ====== inet-4.x ======
 
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-09-14  Levente Mészáros
+
+	Replaced plain IInterfaceTable pointer with ModuleRef smart pointer in NetworkInterface.
+	Moved get/findContainingNicModule to NetworkInterface to remove IInterfaceTable
+	depenceny from ModuleAccess.h.
+
+2020-09-11  Levente Mészáros
+
+	Allowed the protocol parameter to be not specified in NetworkInterface.
+
+2020-08-05  Levente Mészáros
+
+	Added automatic carrier setting to NetworkInterface based on channel
+	connectedness and disabled state.
+	Added automatic datarate setting to NetworkInterface based on module and
+	channel parameters.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-06-30  Levente Mészáros
+
+	Added protocol field to InterfaceEntry to be able to dispatch to L2 protocols
+	from L3 before dispatching to the actual interface.
+
+2020-05-07  Levente Mészáros
+
+	Added optional clock submodule to InterfaceEntry.
+
+2020-04-28  Levente Mészáros
+
+	Added automatic layout for submodules without gates in network interfaces.
+
+2020-04-27  Zoltan Bojthe
+
+	Added lifecycle support to InterfaceEntry.
+
+2020-04-21  Levente Mészáros
+
+	Changed InterfaceEntry to automatically add InterfaceInd to packets going up.
+	Added packet processor API support to InterfaceEntry.
+
+2020-04-20  Levente Mészáros
+
+	Added PCAP recorders to network interfaces and network base modules.
+
+2020-04-15  Levente Mészáros
+
+	Added matchesMacAddress to InterfaceEntry.
+
+2020-04-01  Zoltan Bojthe
+
+	InterfaceEntry address parameter: replace "auto" with generated MAC address.
+
+2020-03-17  Zoltan Bojthe
+
+	Added WATCHes to InterfaceEntry.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-20  Zoltan Bojthe

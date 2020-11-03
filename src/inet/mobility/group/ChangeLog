@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-06-09  Levente Mészáros
+
+	Fixed storing and returning a reference to the current position/velocity.
+
+2020-06-08  Levente Mészáros
+
+	Refactored mobility models to support returning const references.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-09-30  Levente Mészáros

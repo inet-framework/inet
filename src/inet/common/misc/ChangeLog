@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-09-11  Zoltan Bojthe
+
+	Removed obsolete NetAnimTrace
+
+2020-07-31  Zoltan Bojthe
+
+	Follow changed omnetpp cChannel::processMessage() signature in ThruputMeteringChannel.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-27  Zoltan Bojthe

@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2020-10-19  Levente Mészáros
+
+	Switched to the new any protocol registration mechanism in MacRelayUnitBase.
+
+2020-10-13  Levente Mészáros
+
+	Added DispatchProtocolReq in MacRelayUnitBase if the outgoing interface
+	requires a specific protocol.
+
+2020-10-08  Levente Mészáros
+
+	Added DirectionTag ti MacRelayUnitBase for outgoing packets.
+
+2020-09-15  Levente Mészáros
+
+	Added MacRelayUnitBase module for different relay unit implementations.
+
+2020-09-11  Levente Mészáros
+
+	Set arrival gate in MacProtocolBase for packets pulled from the queue.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-14  Zoltan Bojthe
@@ -49,7 +74,8 @@
 
 2018-09-27  Levente Mészáros
 
-	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
 
 2018-08-28  Zoltan Bojthe
 

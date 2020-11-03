@@ -1,0 +1,4 @@
+2020-10-22  Levente Mészáros
+
+	Added new ieee802 package with Ieee802EpdHeader, Ieee802EpdHeaderSerializer,
+	Ieee802EpdProtocolDissector, and Ieee802EpdProtocolPrinter.

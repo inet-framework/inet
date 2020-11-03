@@ -1,0 +1,3 @@
+2020-07-31  Levente Mészáros and Zoltán Böjthe
+
+	Added new clock base package with modules: ClockBase and OscillatorBase.

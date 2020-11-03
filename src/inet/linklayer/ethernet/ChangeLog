@@ -1,5 +1,157 @@
 ====== inet-4.x ======
 
+2020-10-30  Levente Mészáros
+
+	Reused SocketBase and default socket commands in socket and related processing.
+
+2020-10-29  Levente Mészáros
+
+	Added missing DispatchProtocolReq to EthernetSocket make it work with the
+	layered socket handling mechanism.
+	Removed vlanId parameter from bind command, and added steal parameter.
+
+2020-10-19  Levente Mészáros
+
+	Added missing MacAddressInd tag to EtherMacFullDuplex for packets going up.
+	Moved protocol registration in EthernetMacHeader* to link layer stage.
+
+2020-10-14  Zoltan Bojthe
+
+	Switch EtherMac to use curTxSignal->getId() as transmissionId.
+
+2020-10-08  Levente Mészáros
+
+	Changed EthernetMacHeader base classes to use the appropriate fields chunk.
+	Simplified EthernetMacProtocolDissector for the updated MAC header structure.
+
+2020-09-25  Levente Mészáros
+
+	Dropped Ieee8021qHeader fields from EthernetMacHeader.
+	Renamed file to EtherFrame.msg to EthernetMacHeader.msg.
+	Copied EthernetMacHeader.msg to EthernetControlFrame.msg.
+	Refactored and documented the Ethernet MAC header chunks according to the standard.
+	Refactored and documented the Ethernet control frame chunks according to the standard.
+	Extracted EthernetControlFrameSerializer.cc from EthernetMacHeaderSerializer.cc.
+	Extracted EthernetPhyHeaderSerializer.cc from EthernetHeaderSerializer.cc.
+	Renamed EthernetHeaderSerialier.cc to EthernetMacHeaderSerializer.cc.
+	Added EthernetMacAddressFieldsSerializer and EthernetTypeOrLengthFieldSerializer.
+	Removed obsolete EthernetHeaderSerialier.cc replaced by separate files.
+	Removed obsolete Ieee8023TypeOrLength.msg file.
+	Simplified EthernetInterface connection syntax and reordered submodules
+	according to layout.
+	Split EthernetProtocolDissector.cc into EthernetMacProtocolDissector.cc and
+	EthernetPhyProtocolDissector.cc.
+	Renamed EthernetProtocolPrinter to EthernetMacProtocolPrinter.
+
+2020-09-24  Levente Mészáros
+
+	Removed obsolete qEncap from EthernetInterface submodule.
+
+2020-09-18  Zoltan Bojthe
+
+	Ported EtherMac to the new transmission updates API.
+	Renamed EtherMac timer messages.
+	EtherHub turned into quasi-generic WireJunction.
+	EtherHub renamed to WireJunction and moved to physicallayer folder.
+	EtherBus is now modeled as a series of connected taps,
+	each tap modeled with a WireJunction.
+
+2020-09-15  Levente Mészáros
+
+	Fixed refreshDisplay in EtherMacBase when it's called before initialize.
+	Renamed EtherEncapDummy to OmittedEtherEncap.
+	Changed EtherEncapDummy C++ class to OmittedModule.
+
+2020-09-14  Zoltan Bojthe
+
+	Accept packets without checking bitrate in EtherMac and EtherMacFullDuplex.
+	Added MacAddressInd Tag to EtherMac for packets before send to upper layer.
+
+2020-08-28  Levente Mészáros
+
+	Split EtherPhyFrame.msg into EthernetPhyHeader.msg and EthernetSignal.msg files.
+
+2020-08-07  Levente Mészáros
+
+	Moved EtherPhyFrame to the physicallayer/ethernet folder.
+
+2020-08-03  Zoltan Bojthe
+
+	Changed EtherMac, EtherHub, EtherBus to use packet streaming api instead of
+	forceTransmissionFinishTime().
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-31  Zoltan Bojthe
+
+	Optimized sendRawBytes.
+
+2020-07-24  Levente Mészáros
+
+	Added protocol parameter to EthernetInterface.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-05-22  Zoltan Bojthe
+
+	Rename addresses in EthernetSocket to loacalAddress/remoteAddress.
+
+2020-05-05  Levente Mészáros
+
+	Disabled dissecting Ethernet fragments because the packet may be incomplete.
+
+2020-04-27  Zoltan Bojthe
+
+	Added lifecycle support to InterfaceEntry.
+
+2020-04-20  Levente Mészáros
+
+	Fixed EthernetProtocolDissector to work with both single chunk and multi-chunk representations.
+
+2020-04-03  Zoltan Bojthe
+
+	Added bitrate NED parameter to Ethernet interfaces.
+
+2020-04-01  Zoltan Bojthe
+
+	Set src MAC address in EtherEncap if unspecified.
+
+2020-03-27  Levente Mészáros
+
+	Added EthernetFragmentFcs chunk.
+
+2020-02-10  Zoltan Bojthe
+
+	Rx time utilization calculation fixed in EtherMacFullDuplex.
+	Reduced differences between EtherMac and EtherMacFullDuplex.
+	Added duplexMode parameter for EthernetInterface.
+
+2020-02-03  Zoltan Bojthe
+
+	Fixed EtherMac waiting IFG at end reception in duplexmode.
+	EthernetFrameSignal renamed to EthernetSignal
+
+2020-01-31  Zoltan Bojthe
+
+	EthernetSignal renamed to EthernetSignalBase, uses EthernetFrameSignal for dataframes
+
+2020-01-29  Zoltan Bojthe
+
+	Added bitrate meta-info to EthernetSignal.
+	Removed the obsolete 'disabled' flag.
+
+2020-01-27  Zoltan Bojthe
+
+	Added EthernetFrameSignal to EtherPhyFrame.msg.
+
+2020-01-13  Levente Mészáros
+
+	Added Signal baseclass to EthernetSignalBase.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-11  Zoltan Bojthe

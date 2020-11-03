@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-08-25  Andras Varga
+
+	Fixed #558: Nagle was not obeyed for data > MSS sent (credit: Marius Poke)
+
+2020-06-03  Zoltan Bojthe
+
+	Fixed duptresh value in EV outs, removed the obsolete "DUPTRESH = 3" comments.
+
+2020-06-03  Marcel Marek
+
+	Added new Tcp flavour - DcTcp (RFC 8257)
+	Make ECN handling customizable in TcpAlgorithm.	The default implementaion
+	(in TcpAlgorithm) marks an Ack when in ecnEchoState. ecnEchoState is reset
+	when CWR (congestion window reduced) is received.
+	Added parameter for initial value of ssthresh.
+
+2020-06-02  Marcel Marek
+
+	Made DUPTHRESH configurable from NED.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-13  Zoltan Bojthe

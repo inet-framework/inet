@@ -1,5 +1,64 @@
 ====== inet-4.x ======
 
+2020-09-21  Levente Mészáros
+
+	Removed getTags global function obsoleted by ITaggedObject.
+	Implemented ITaggedObject and IRegionTaggedObject with Message, Packet, and Chunk.
+
+2020-09-16  Levente Mészáros
+
+	Added implementation of missing Packt methods and greatly simplified all the variants.
+
+	The idea is to base the non-template variants on the templated ones, and
+	also for a specific operation (e.g. insert) implement all functionality
+	in one method, and the rest of the methods are inline.
+
+	All packet tests still pass.
+
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-09-15  Levente Mészáros
+
+	Implemented IPrintableObject interface with Message.
+
+2020-09-11  Levente Mészáros
+
+	Fixed printing a Packet with nullptr content.
+	Added PacketAPI and ChunkAPI headers.
+
+2020-09-02  Levente Mészáros
+
+	Added a getFullName() method that takes into account update information.
+
+2020-08-31  Levente Mészáros
+
+	Implemented IPrintableObject interface in Packet and Chunk classes to support formatted output.
+
+2020-08-25  Levente Mészáros
+
+	Changed Packet str() methods to use EV_FIELD where possible.
+	Changed str() to remove C++ namespace and use escape sequences.
+
+2020-06-10  Levente Mészáros
+
+	Added parsimPack/parsimUnpack to the Packet class, all Chunk classes and tag sets.
+
+2020-05-28  Levente Mészáros
+
+	Adapted Message to shared pointer support in TagSet.
+	Adapted Packet to shared pointer support in TagSet, and added a RegionTagSet field and API.
+
+2020-05-26  Levente Mészáros
+
+	Added new content insertion and replacing functions to Packet.
+	Added a RegionTagSet field to Packet to store frequently changing region tags.
+
+2020-05-19  Levente Mészáros
+
+	Added several update methods to Packet which allows to easily update its content.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-12  Levente Mészáros

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-01-24  Zoltan Bojthe
+
+	Fixed create-module in ScenarioManager for vector mode (fixed issue #508).
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-08  Andras Varga

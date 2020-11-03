@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2020-09-04  Levente Mészáros
+
+	Refactored a few more EV statements to use the new macros.
+
+2020-08-25  Levente Mészáros
+
+	Adapted to new EV_FIELD macro.
+
+2020-04-16  Levente Mészáros
+
+	Moved code to processPacket that has side effects in packet filters.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

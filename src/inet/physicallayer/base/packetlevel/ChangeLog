@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2020-08-31  Levente Mészáros
+
+	Added evFlags parameter to all printToStream methods and recursive calls.
+
+2020-08-25  Levente Mészáros
+
+	Changed EV output to use the new EV_FIELD macro where appropriate.
+
+2020-06-04  Levente Mészáros
+
+	Added & to const Coord where appropriate.
+	Added & to const Quaternion where appropriate.
+	Added more guards against NaN values.
+
+2020-05-29  Levente Mészáros
+
+	Added warning when power attenuation is zero.
+	Added several guards for incorrect SNIR and reception power values.
+
+2020-01-13  Levente Mészáros
+
+	Renamed Signal to WirelessSignal in preparation for introducing a Signal
+	base class for the wired case.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-09  Levente Mészáros

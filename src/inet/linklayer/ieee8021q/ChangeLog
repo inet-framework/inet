@@ -1,5 +1,39 @@
 ====== inet-4.x ======
 
+2020-10-30  Levente Mészáros
+
+	Reused SocketBase and default socket commands in socket and related processing.
+
+2020-10-29  Levente Mészáros
+
+	Replaced base module of Ieee8021qSocketPacketProcessor according to C++ base class.
+	Added Ieee8021qSocketTable and Ieee8021qSocket*Processor submodules.
+	Added Ieee8021qSocket and related socket table and processors.
+
+2020-10-13  Levente Mészáros
+
+	Added IEEE 802.1Q protocol registration to Ieee8021qTagEpdHeaderChecker.
+	Added Ieee8021qTagEpdProtocolDissector.
+	Added IIeee8021qLayer module interface and its default implementation Ieee8021qLayer.
+	Added defaultVlanId, defaultUserPriority and nextProtocol parameters to Ieee8021qTag*HeaderInserter.
+
+2020-09-24  Levente Mészáros
+
+	Deleted obsolete Ieee8021qEncap, Ieee8021qTagger and interfaces.
+	Renamed files Ieee8021q* to Ieee8021qTagHeader* or Ieee8021qTagTpidHeader*
+	depending on the file's content.
+	Refactored and documented the 802.1Q tag header chunks according to the standard.
+	Added Ieee8021qTagEpdHeaderSerializer.
+	Added new Ieee8021qTagEpd* files with the Ethernet Protocol Discrimination variants.
+	Renamed NED modules Ieee8021q* to Ieee8021qTagTpidHeader*.
+	Renamed Ieee8021qHeaderSerializer to Ieee8021qTagTpidHeaderSerializer.
+	Renamed C++ class from Ieee8021q* to Ieee8021qTagTpidHeader*.
+	Change Ieee8021qTagTpidHeaderInserter and Ieee8021qTagTpidHeaderChecker to work with the TPID field.
+
+2020-05-04  Levente Mészáros
+
+	Added Ieee8021qHeaderSerializer.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-19  Levente Mészáros

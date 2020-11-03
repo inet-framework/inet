@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2020-10-19  Levente Mészáros
+
+	Removed weird deletion of management frames from FrameSequenceStep (e.g RTS/CTS).
+
+2020-10-21  Levente Mészáros
+
+	Moved deletion dropped frames in FrameSequenceContext from destructor to
+	finishFrameSequence and abortFrameSequence.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-02-13  Levente Mészáros

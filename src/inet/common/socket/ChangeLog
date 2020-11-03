@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2020-10-30  Levente Mészáros
+
+	Extracted a generic and useful SocketBase class and the necessary commands.
+	Moved SocketTag under common/socket folder.
+
+2020-10-29  Levente Mészáros
+
+	Added send packet method to ISocket.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-01-28  ------ inet-4.1.0 released ------

@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2020-10-21  Levente Mészáros
+
+	Moved visualization removal in destructors to visualizer base classes.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-05-18  Levente Mészáros
+
+	Refactored path visualizer base classes to support upcoming packet flow visualization.
+	Disabled fading of path visualizations if fadeOutTime is 0 or negative.
+	Added statistics such as numPackets and totalLength to path visualization.
+	Added explicit parameter to control the subscribed signals in path visualizers.
+	Extended path visualization support with labels allowing multiple paths along the same path.
+	Renamed mapChunkIds to mapChunks and added chunk parameter.
+
+2020-05-14  Levente Mészáros
+
+	Fixed statistic visualization when multiple statistics are display from the same signal.
+
+2020-03-18  Levente Mészáros
+
+	Added powerDensityMapPixelMode and spectrogramPixelMode parameters.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-18  Levente Mészáros

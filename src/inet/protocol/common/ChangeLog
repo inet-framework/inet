@@ -1,0 +1,5 @@
+2020-10-19  Levente Mészáros
+
+	Added new common package with modules: InterPacketGap, PacketDeserializer,
+	PacketDestreamer, PacketEmitter, PacketSerializer, PacketStreamer,
+	PaddingInserter, PreemptableStreamer, and ProtocolChecker.

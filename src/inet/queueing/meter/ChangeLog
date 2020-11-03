@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-04-08  Levente Mészáros
+
+	Reduced redundancy around various PacketFlowBase derived modules.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

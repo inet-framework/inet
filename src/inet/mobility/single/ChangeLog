@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2020-06-12  Levente Mészáros
+
+	Added the possibility to use one of the elements as the result of the
+	superpoisition of the element positions or orientations in SuperpositioningMobility.
+
+2020-06-09  Levente Mészáros
+
+	Fixed CircleMobility initial orientation.
+
+2020-06-08  Rudolf Hornig
+
+	Allow changing the targetMobility and displayStringTextFormat parameter during runtime.
+
+2020-06-08  Levente Mészáros
+
+	Refactored mobility models to support returning const references.
+
+2020-05-29  Levente Mészáros
+
+	Fixed orientation calculation in FacingMobility.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-13  Zoltan Bojthe

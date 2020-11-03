@@ -1,0 +1,3 @@
+2020-04-09  Levente Mészáros
+
+	Added new policy package with modules: LengthBasedFragmenterPolicy.

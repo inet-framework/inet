@@ -1,5 +1,187 @@
 ====== inet-4.x ======
 
+2020-11-02  Levente Mészáros
+
+	Removed C++17 specific code causing compilation error on MacOS.
+
+2020-10-28  Levente Mészáros
+
+	Int128: Renamed files to follow the INET naming convention.
+
+2020-10-20  Levente Mészáros
+
+	Extracted separate ModuleRefByPar and ModuleRefByGate from ModuleRef.
+
+2020-10-19  Levente Mészáros
+
+	Enhanced automatic layouting of compound modules in SubmoduleLayout.
+	Extended MessageDispatcher with any protocol registration support.
+
+2020-10-15  Zoltan Bojthe
+
+	Added registration mechanisms to IProtocolRegistrationListener for protocol
+	groups and a special case for any protocols.
+
+2020-10-14  Levente Mészáros
+
+	Added methods to ProtocolGroup to enumerate members.
+
+2020-10-13  Levente Mészáros
+
+	Added condition to MessageDispatcher to avoid loops in registration
+	recursion when the caller and the calle would be the same module.
+	Changed IEEE 802.1Q protocol names according to global variable names.
+
+2020-10-01  Zoltan Bojthe
+
+	Added filter 'U' to FingerprintCalculator for filtering out the packet update events.
+
+2020-09-25  Levente Mészáros
+
+	Added 802.1ae protocol.
+	Added 802.1ae protocol to the group of Ethernet protocols.
+	Reordered protocols in alphanumeric order.
+	Reordered protocol groups and member protocols in alphanumeric order.
+	Renamed Ieee80211EtherType protocol to ieee802epd according to the standard.
+	Renamed ieee8021QCtag to ieee8021qCTag (and S-TAG) to be similar to other protocol variable names.
+	Renamed Ieee8022 protocol to Ieee8022llc as suggested by the TODO item.
+
+2020-09-22  Levente Mészáros
+
+	Added IdentityTag that allows keeping track of the identity of every data bit in all packets.
+
+2020-09-16  Levente Mészáros
+
+	Removed obsolete compatiblity typedefs.
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-09-14  Levente Mészáros
+
+	Moved get/findContainingNicModule to NetworkInterface to remove
+	IInterfaceTable depenceny from ModuleAccess.h.
+	Added ModuleRef for safe cross module referencing.
+	Added printing 0 as '0 s' for the seconds unit.
+
+2020-08-31  Levente Mészáros
+
+	Added templates to IPrintableObject to support printing all kinds of object
+	pointers/references either formatted or unformatted.
+	Added EV macros to INETDefs.h for formatting output.
+
+2020-08-27  Levente Mészáros
+
+	Added PrintFlag to IPrintableObject enumeration to control formatting and multiline output.
+
+2020-08-26  Levente Mészáros
+
+	Moved IPrintableObject to common folder.
+	Added operator<< for cEvent to override default omnet behavior.
+
+2020-08-25  Levente Mészáros
+
+	Added us, ns, ps time units.
+	Added EV_LOC to INETDefs.h to output the filename, line number and function
+	name trio unconditionally.
+	Added EV_FIELD to INETDefs.h macro to support outputting "field = value"
+	fragments with nice formatting.
+
+2020-07-31  Levente Mészáros
+
+	Added a separate INITSTAGE for clocks.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-07-15  Zoltan Bojthe
+
+	Changed omnetpp 6.0 getModuleByPath, findModuleByPath compatibility macros.
+
+2020-07-02  Zoltan Bojthe
+
+	Added new INITSTAGE_NETWORK_LAYER_PROTOCOLS for icmp, igmp, etc.
+
+2020-07-01  Levente Mészáros
+
+	Moved transmissionStartedSignal, transmissionEndedSignal, receptionStartedSignal
+	 and receptionEndedSignal from IRadio to Simsignals.
+
+2020-06-30  Levente Mészáros
+
+	Added checks to MessageDispatcher to allow registering the same gate multiple times.
+
+2020-06-19  Levente Mészáros
+
+	Implemented dispatching packet streaming in MessageDispatcher.
+	Added separate 802.2 SNAP protocol.
+
+2020-06-17  Levente Mészáros
+
+	Changed unit arithmetic operator templates to return the same runtime
+	value type that C++ would return for the same operator.
+
+2020-05-29  Zoltan Bojthe
+
+	Added set(protocol, [frontOffset[, backOffset]]) to PacketProtocolTag.
+
+2020-05-29  Levente Mészáros
+
+	Fixed automatic submodule layout for optional submodules.
+	Added compile time conditional to minnan and maxnan to avoid being used for integral types.
+
+2020-05-28  Levente Mészáros
+
+	Added SharedBase and SharedVector to shared pointer support.
+
+2020-05-22  Zoltan Bojthe
+
+	Added C-Tag, S-Tag protocols
+	Added ethernetFlowControl protocol (e.g. ethernet pause).
+
+2020-05-19  Levente Mészáros
+
+	Added various time tags for timing measurements.
+	Added PacketEventTag and insertPacketEvent function.
+	Added FlowTag and startPacketFlow, endPacketFlow functions.
+	Added packetFlowStarted and packetFlowEnded signals.
+
+2020-04-28  Levente Mészáros
+
+	Refactored OmittedModule to work properly and also to user automatic submodule layout.
+	Added SubmoduleLayout to automatically layout submodules when optional submodules are omitted.
+
+2020-04-22  Levente Mészáros
+
+	Fixed packet/message dispatching according to protocol/service primitive registration.
+	Fixed confusion about in/out gate in protocol/service primitive registration.
+
+2020-04-21  Levente Mészáros
+
+	Changed findConnectedGate to allow for stopping at compund module boundaries.
+
+2020-04-20  Levente Mészáros
+
+	Added support to PacketProtocolTag for partially constructed/deconstructed protocol headers.
+	Added OmittedModule to support reconnecting gates of optional modules.
+
+2020-04-14  Levente Mészáros
+
+	Added pushPacket support to MessageDispatcher.
+
+2020-04-08  Levente Mészáros
+
+	Added DirectionTag that describes whether a packet is inbound or outbound.
+
+2020-03-30  Zoltan Bojthe
+
+	Added string <--> hex converter functions to INETUtils.h.
+
+2020-02-18  Levente Mészáros
+
+	Refactored fingerprint calculator to support event filtering on/off and be
+	completely compatible with the default calculator.
+	Renamed to FingerprintCalculator.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-17  Zoltan Bojthe

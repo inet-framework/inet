@@ -1,5 +1,28 @@
 ====== inet-4.x ======
 
+2020-08-26  Levente Mészáros
+
+	Moved IPrintableObject to common folder.
+
+2020-07-01  Levente Mészáros
+
+	Moved transmissionStartedSignal, transmissionEndedSignal, receptionStartedSignal,
+	and receptionEndedSignal from IRadio to Simsignals.
+
+2020-06-04  Levente Mészáros
+
+	Added & to const Coord where appropriate.
+	Added & to const Quaternion where appropriate.
+
+2020-02-19  Zoltan Bojthe
+
+	Renamed ISignal to IWirelessSignal.
+
+2020-01-13  Levente Mészáros
+
+	Renamed Signal to WirelessSignal in preparation for introducing a Signal
+	base class for the wired case.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-05  Zoltan Bojthe

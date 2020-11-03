@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-04-17  Levente Mészáros
+
+	Fixed missing take() calls in pushPacket.
+
+2020-04-14  Levente Mészáros
+
+	Fixed the gate argument when calling handleCanPushPacket or handleCanPullPacket.
+
+2020-04-09  Levente Mészáros
+
+	Removed default argument value for gate parameters in push and pull methods.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

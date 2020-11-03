@@ -1,5 +1,46 @@
 ====== inet-4.x ======
 
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-05-14  Levente Mészáros
+
+	Added IPacketCollection to IPacketBuffer as base class.
+
+2020-04-23  Levente Mészáros
+
+	Added PacketGateBase and IPacketGate.
+
+2020-04-22  Levente Mészáros
+
+	Copied ITrafficConfitioner interface from Diffserv.
+
+2020-04-16  Levente Mészáros
+
+	Added const qualifiers to matchesPacket in IPacketFilter.
+
+2020-04-15  Levente Mészáros
+
+	Moved some pure virtual functions from base classes to interfaces.
+	Changed pullPacketProgress to allow the active module to control the packet streaming.
+
+2020-04-14  Levente Mészáros
+
+	Renamed IPacketQueueingElement to IPacketProcessor.
+
+2020-04-09  Levente Mészáros
+
+	Added separate enqueuePacket/dequeuePacket functions without gate arguments to IPacketQueue.
+	Removed default argument value for gate parameters in push and pull methods.
+	Added packet streaming API to interfaces in contract folder.
+
+2020-04-08  Levente Mészáros
+
+	Added new interfaces IPacketPuller, IPacketPusher, IPacketFlow.
+	Changed IPacketFilter, IPacketMarker and IPacketMeter interfaces to be based on IPacketFlow.
+	Added the virtual qualifier to interface base classes to allow arbitrary multiple inheritance.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

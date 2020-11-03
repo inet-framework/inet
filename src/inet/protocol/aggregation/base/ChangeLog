@@ -1,0 +1,3 @@
+2020-09-11  Levente Mészáros
+
+	Added new base package with modules: AggregatorBase and DeaggregatorBase.

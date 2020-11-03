@@ -1,5 +1,40 @@
 ====== inet-4.x ======
 
+2020-09-03  Levente Mészáros
+
+	Added condition to schedule for the currently streamed packet if there's any.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-07-03  Levente Mészáros
+
+	Added reverseOrder parameter to PacketSchedulerBase.
+	Replaced inversePriorities parameter with the generic reverseOrder parameter
+	from the base module.
+
+2020-06-26  Adriaan Nieß
+
+	Allowed inverse priorities for PriorityScheduler.
+
+2020-04-23  Levente Mészáros
+
+	Changed PriorityScheduler to allow sources to not implement the IPacketCollection interface.
+
+2020-04-14  Levente Mészáros
+
+	Implemented handle handlePushPacketProcessed and handlePullPacketProcessed.
+
+2020-04-08  Levente Mészáros
+
+	Moved taking packet ownership from protected base class method to public methods.
+
+2020-04-08  Levente Mészáros
+
+	Added the virtual qualifier to interface base classes to allow arbitrary multiple inheritance.
+	Fixed initializing various function fields to nullptr.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

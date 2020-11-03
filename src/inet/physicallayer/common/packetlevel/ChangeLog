@@ -1,5 +1,69 @@
 ====== inet-4.x ======
 
+2020-10-21  Levente Mészáros
+
+	Moved deletion of transmission and signal to the communication cache module.
+
+2020-09-18  Zoltan Bojthe
+
+	Added a new generic WireJunction module that just forwards all transmissions
+	and transmission updates to all ports. This means that there can be MULTIPLE
+	CONCURRENT SIGNALS on all connected wires.
+
+2020-09-14  Levente Mészáros
+
+	Added printing encapsulated packet to Signal.
+
+2020-09-02  Levente Mészáros
+
+	Added a getFullName() method to Signal that takes into account update information.
+
+2020-08-31  Levente Mészáros
+
+	Added evFlags parameter to all printToStream methods and recursive calls.
+
+2020-08-25  Levente Mészáros
+
+	Changed str() to remove C++ namespace and use escape sequences.
+	Changed EV output to use the new EV_FIELD macro where appropriate.
+
+2020-08-07  Levente Mészáros
+
+	Added str() method to Signal.
+
+2020-08-04  Zoltan Bojthe
+
+	Replaced setDeliverOnReceptionStart() to setDeliverImmediately().
+
+2020-07-31  Zoltan Bojthe
+
+	Optimized sendRawBytes.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-07-01  Levente Mészáros
+
+	Added registration for the Signal class.
+
+2020-06-04  Levente Mészáros
+
+	Added & to const Coord where appropriate.
+	Added & to const Quaternion where appropriate.
+	Radio: Added more guards against NaN values.
+
+2020-02-18  Levente Mészáros
+
+	Added Enter_Method calls to RadioMedium.
+
+2020-01-13  Levente Mészáros
+
+	Renamed Signal to WirelessSignal in preparation for introducing a Signal base
+	class for the wired case.
+	Added Signal class for wired signals.
+	Added Signal MSG file.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-06  Levente Mészáros

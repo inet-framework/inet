@@ -1,5 +1,43 @@
 ====== inet-4.x ======
 
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-08-31  Levente Mészáros
+
+	Changed log statements to have the filename first.
+
+2020-08-25  Levente Mészáros
+
+	Added more details to log statements to PcapWriter/PcapngWriter.
+	Replaced PacketDump with PacketPrinter.
+	Dropped obsolete PacketDump entirely replaced by PacketPrinter.
+
+2020-04-20  Levente Mészáros
+
+	Changed recorder to allow subscribing on a specific module.
+
+2020-04-17  Levente Mészáros
+
+	Revived ethernetPhy PCAP link type.
+
+2020-04-14  Zoltan Bojthe
+
+	Changed PcapRecorder to delegate direction, InterfaceEntry and PcapLinkType for pcap writer classes
+
+2020-04-08  Levente Mészáros
+
+	Added fileFormat parameter to PcapRecorder module.
+	Allows chosing between PCAP and PCAPng file formats.
+	Changed PcapRecorder to use the IPcapWriter interface instead of the PcapWriter class.
+	Added a new PcapngWriter class that writes using the PCAPng file format.
+	Changed PcapWriter to implement the new IPcapWriter interface.
+
+2020-01-02  Levente Mészáros
+
+	Added IPcapWriter interface to allow different PCAP writer implementations.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-19  Levente Mészáros

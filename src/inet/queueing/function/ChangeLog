@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-05-04  Levente Mészáros
+
+	Adapted packet classifiers to new naming scheme that includes Req/Ind.
+
+2020-04-16  Levente Mészáros
+
+	Added const qualifiers to matchesPacket in IPacketFilter.
+
+2020-04-14  Levente Mészáros
+
+	Fixed scheduler functions to properly use canPullPacket().
+
+2020-04-08  Levente Mészáros
+
+	Added the virtual qualifier to interface base classes to allow arbitrary multiple inheritance.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

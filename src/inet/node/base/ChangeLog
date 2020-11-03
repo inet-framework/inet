@@ -1,5 +1,38 @@
 ====== inet-4.x ======
 
+2020-10-13  Levente Mészáros
+
+	Added ieee8021q protocol submodule to LinkLayerNodeBase.
+
+2020-10-12  Levente Mészáros
+
+	Renamed vlan submodule to virt in LinkLayerNodeBase.
+
+	The vlan name could be confused with the VLAN (virtual LAN) of 802.1Q but
+	this submodule vecture really is just for virtual network interfaces. A
+	virtual network interface may, for example, simply have a different MAC
+	address and without any associated VLAN.
+
+2020-09-11  Levente Mészáros
+
+	Changed the ethernet submodule of network nodes to be optional and omitted by default.
+
+2020-07-30  Zoltan Bojthe
+
+	Added optional IClock submodule to NodeBase.
+
+2020-06-30  Levente Mészáros
+
+	Added explicit Ethernet layer submodule to LinkLayerNodeBase.
+
+2020-04-28  Levente Mészáros
+
+	Added NodeBase module class to automatically layout submodules without gates.
+
+2020-04-20  Levente Mészáros
+
+	Added PCAP recorders to network interfaces and network base modules.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-06  Levente Mészáros

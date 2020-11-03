@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2020-10-19  Levente Mészáros
+
+	Renamed MessageDispatcher submodules to reflect the layers they are in between.
+
+2020-10-13  Levente Mészáros
+
+	Changed deep parameter assignment for interfaceTableModule and macTableModule to be recursive.
+	Added separate IEEE 802.1Q protocol layer submodule and VLAN policy submodule.
+
+2020-09-25  Levente Mészáros
+
+	Changed promiscuous deep parameter assignment to match all submodules.
+
+2020-09-11  Levente Mészáros
+
+	Changed the ethernet submodule of network nodes to be optional and omitted by default.
+
+2020-06-30  Levente Mészáros
+
+	Added explicit Ethernet layer and optional cutthrough support.
+
+2020-01-29  Zoltan Bojthe
+
+	Set csmacdSupport to OFF by default in EtherSwitch.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-06  Levente Mészáros
