@@ -254,7 +254,7 @@ void EigrpDeviceConfigurator::loadEigrpIPv4Networks(cXMLElement *processElem, IE
     // Find and store interfaces for networks
     for(int i = 0; i < ift->getNumInterfaces(); i++)
     {
-        iface = (NetworkInterface*)ift->getInterface(i);
+        iface = ift->getInterface(i);
         net = isEigrpInterface(networks, iface);
         if (net != NULL)
             eigrpModule->addInterface(iface->getInterfaceId(), net->getNetworkId(), true);
@@ -345,7 +345,7 @@ void EigrpDeviceConfigurator::loadEigrpProcessesConfig(cXMLElement *device, IEig
             {
                 // Get interface ID
                 const char *ifaceName = (*procElem)->getNodeValue();
-                NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
+                NetworkInterface* iface = ift->findInterfaceByName(ifaceName);
                 if (iface == NULL){
                     throw cRuntimeError("No interface called %s on this device", ifaceName);
                 }
@@ -412,7 +412,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfacesConfig(cXMLElement *device, IEi
     {
         // Get interface ID
         const char *ifaceName = ifaceElem->getAttribute("name");
-        NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
+        NetworkInterface* iface = ift->findInterfaceByName(ifaceName);
         if (iface == NULL){
             throw cRuntimeError("No interface called %s on this device", ifaceName);
         }
@@ -615,7 +615,7 @@ void EigrpDeviceConfigurator::loadEigrpProcesses6Config(cXMLElement *device, IEi
         {
             // Get interface ID
             const char *ifaceName = (*procElem)->getNodeValue();
-            NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
+            NetworkInterface* iface = ift->findInterfaceByName(ifaceName);
             if (iface == NULL){
                 throw cRuntimeError("No interface called %s on this device", ifaceName);
             }
@@ -657,7 +657,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
     {
         // Get interface ID
         const char *ifaceName = ifaceElem->getAttribute("name");
-        NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
+        NetworkInterface* iface = ift->findInterfaceByName(ifaceName);
         if (iface == NULL){
             throw cRuntimeError("No interface called %s on this device", ifaceName);
         }

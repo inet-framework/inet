@@ -1135,7 +1135,7 @@ int EigrpIpv4Pdm::checkNeighborshipRules(int ifaceId, int neighAsNum,
     else
     {
         // get IP address of interface and mask
-        NetworkInterface *iface = check_and_cast<NetworkInterface *>(ift->getInterfaceById(ifaceId));
+        NetworkInterface *iface = ift->getInterfaceById(ifaceId);
         ifaceAddr.set(iface->getIpv4Address().getInt());
         ifaceMask.set(iface->getIpv4Netmask().getInt());
 
@@ -1624,7 +1624,7 @@ void EigrpIpv4Pdm::enableInterface(EigrpInterface *eigrpIface, Ipv4Address& ifAd
 EigrpInterface *EigrpIpv4Pdm::addInterfaceToEigrp(int ifaceId, int networkId, bool enabled)
 {
     //std::cout << "addInterfaceToEigrp with ifaceid, networkid, enabled set: "<< ifaceId <<", "<< networkId << ", "<< enabled << endl;
-    NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
+    NetworkInterface *iface = ift->getInterfaceById(ifaceId);
     // create EIGRP interface
     EigrpInterface *eigrpIface = new EigrpInterface(iface, networkId, false);
     Ipv4Address ifAddress, ifMask;
@@ -1703,7 +1703,7 @@ void EigrpIpv4Pdm::setPassive(bool passive, int ifaceId)
         eigrpIface = addInterfaceToEigrp(ifaceId, EigrpNetworkTable<Ipv4Address>::UNSPEC_NETID, false);
     else if (eigrpIface->isEnabled())
     { // Disable sending and receiving of messages
-        NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
+        NetworkInterface *iface = ift->getInterfaceById(ifaceId);
         Ipv4InterfaceData *idata = iface->getProtocolDataForUpdate<Ipv4InterfaceData>();
         idata->leaveMulticastGroup(EIGRP_IPV4_MULT);
         //iface->ipv4Data()->leaveMulticastGroup(EIGRP_IPV4_MULT);

@@ -138,12 +138,12 @@ void EigrpIpv6Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     if (signalID == interfaceStateChangedSignal)
     {
         NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
-        processIfaceStateChange(check_and_cast<NetworkInterface*>(ifcecd->getNetworkInterface()));
+        processIfaceStateChange(ifcecd->getNetworkInterface());
     }
     else if (signalID == interfaceConfigChangedSignal)
     {
         NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
-        NetworkInterface *iface = check_and_cast<NetworkInterface*>(ifcecd->getNetworkInterface());
+        NetworkInterface *iface = ifcecd->getNetworkInterface();
         EigrpInterface *eigrpIface = getInterfaceById(iface->getInterfaceId());
         double ifParam;
 
@@ -1570,7 +1570,7 @@ void EigrpIpv6Pdm::disableInterface(NetworkInterface *iface, EigrpInterface *eig
 
 EigrpInterface *EigrpIpv6Pdm::addInterfaceToEigrp(int ifaceId, bool enabled)
 {
-    NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
+    NetworkInterface *iface = ift->getInterfaceById(ifaceId);
     // create EIGRP interface
     EigrpInterface *eigrpIface = NULL;
 
@@ -1719,7 +1719,7 @@ void EigrpIpv6Pdm::setPassive(bool passive, int ifaceId)
         eigrpIface = addInterfaceToEigrp(ifaceId, false);
     else if (eigrpIface->isEnabled())
     { // Disable sending and receiving of messages
-        NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
+        NetworkInterface *iface = ift->getInterfaceById(ifaceId);
 
         Ipv6InterfaceData *ipv6int = iface->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->leaveMulticastGroup(EIGRP_IPV6_MULT);
