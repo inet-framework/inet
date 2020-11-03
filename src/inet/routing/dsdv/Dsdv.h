@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008
+//
 // DSDV simple example for INET (add-on)
 // Version 2.0
 // Diogo Antio & Pedro Menezes
@@ -54,7 +55,7 @@ class INET_API Dsdv : public RoutingProtocolBase
     cMessage *event = nullptr;
     cPar *broadcastDelay = nullptr;
     std::list<ForwardEntry *> *forwardList  = nullptr;
-    InterfaceEntry *interface80211ptr = nullptr;
+    NetworkInterface *interface80211ptr = nullptr;
     int interfaceId = -1;
     unsigned int sequencenumber = 0;
     simtime_t routeLifetime;
@@ -104,5 +105,5 @@ class INET_API DsdvIpv4Route : public Ipv4Route
 
 } // namespace inet
 
-#endif // ifndef __INET_DSDV_H
+#endif
 

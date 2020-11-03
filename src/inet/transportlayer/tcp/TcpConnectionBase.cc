@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2009-2010 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <assert.h>
@@ -82,7 +83,6 @@ TcpStateVariables::TcpStateVariables()
     snd_fin_seq = 0;
     fin_rcvd = false;
     rcv_fin_seq = 0;
-    sentBytes = 0;
 
     nagle_enabled = false;    // will be set from configureStateVariables()
     delayed_acks_enabled = false;    // will be set from configureStateVariables()
@@ -150,7 +150,7 @@ TcpStateVariables::TcpStateVariables()
     ecnWillingness = false;
     sndAck = false;
     rexmit = false;
-    eceReactionTime = 0;          
+    eceReactionTime = 0;
 }
 
 std::string TcpStateVariables::str() const
@@ -209,7 +209,7 @@ std::string TcpStateVariables::detailedInfo() const
 
 void TcpConnection::initConnection(Tcp *_mod, int _socketId)
 {
-    Enter_Method_Silent();
+    Enter_Method("initConnection");
 
     tcpMain = _mod;
     socketId = _socketId;
@@ -291,26 +291,26 @@ bool TcpConnection::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool TcpConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
+bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address segSrcAddr, L3Address segDestAddr)
 {
-    Enter_Method_Silent();
+    Enter_Method("processTCPSegment");
 
     printConnBrief();
     if (!localAddr.isUnspecified()) {
         ASSERT(localAddr == segDestAddr);
-        ASSERT(localPort == tcpseg->getDestPort());
+        ASSERT(localPort == tcpHeader->getDestPort());
     }
 
     if (!remoteAddr.isUnspecified()) {
         ASSERT(remoteAddr == segSrcAddr);
-        ASSERT(remotePort == tcpseg->getSrcPort());
+        ASSERT(remotePort == tcpHeader->getSrcPort());
     }
 
-    if (tryFastRoute(tcpseg))
+    if (tryFastRoute(tcpHeader))
         return true;
 
     // first do actions
-    TcpEventCode event = process_RCV_SEGMENT(packet, tcpseg, segSrcAddr, segDestAddr);
+    TcpEventCode event = process_RCV_SEGMENT(tcpSegment, tcpHeader, segSrcAddr, segDestAddr);
 
     // then state transitions
     return performStateTransition(event);
@@ -318,7 +318,7 @@ bool TcpConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>
 
 bool TcpConnection::processAppCommand(cMessage *msg)
 {
-    Enter_Method_Silent();
+    Enter_Method("processAppCommand");
 
     printConnBrief();
 

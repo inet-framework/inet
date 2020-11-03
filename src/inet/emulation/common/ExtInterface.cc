@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -12,9 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-
 
 #include <omnetpp/platdep/sockets.h>
 
@@ -42,7 +41,7 @@ Define_Module(ExtInterface);
 
 void ExtInterface::initialize(int stage)
 {
-    InterfaceEntry::initialize(stage);
+    NetworkInterface::initialize(stage);
     if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         const char *copyConfiguration = par("copyConfiguration");
         if (strcmp("copyFromExt", copyConfiguration))
@@ -114,7 +113,7 @@ void ExtInterface::copyNetworkAddressFromExt()
     close(fd);
 
     if (ipv4Address.isUnspecified() && ipv4Netmask.isUnspecified()) {
-        auto interfaceData = findProtocolData<Ipv4InterfaceData>();
+        auto interfaceData = findProtocolDataForUpdate<Ipv4InterfaceData>();
         if (interfaceData != nullptr) {
             interfaceData->setIPAddress(Ipv4Address());
             interfaceData->setNetmask(Ipv4Address());
@@ -159,7 +158,7 @@ void ExtInterface::copyNetworkAddressToExt()
     ifr.ifr_addr.sa_family = AF_INET;
     strncpy(ifr.ifr_name , device.c_str() , IFNAMSIZ-1);
 
-    Ipv4InterfaceData *interfaceData = findProtocolData<Ipv4InterfaceData>();
+    const auto& interfaceData = findProtocolData<Ipv4InterfaceData>();
     if (interfaceData != nullptr) {
         //set the IPv4 address
         ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr = htonl(interfaceData->getIPAddress().getInt());

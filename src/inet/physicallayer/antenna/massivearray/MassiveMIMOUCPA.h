@@ -77,7 +77,7 @@ class INET_API MassiveMIMOUCPA : public MassiveArray
 
   public:
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     MassiveMIMOUCPA();
     ~MassiveMIMOUCPA() {
 

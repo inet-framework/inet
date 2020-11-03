@@ -1,11 +1,11 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 // Copyright (C) 2010 Alfonso Ariza
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ProtocolTag_m.h"
@@ -125,22 +125,22 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     return UP_BE;
 }
 
-void ExampleQosClassifier::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void ExampleQosClassifier::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    if (!strcmp("out", out->getName()))
-        registerService(protocol, gate("in"), servicePrimitive);
+    if (!strcmp("in", g->getName()))
+        registerService(protocol, gate("out"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", out->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
-void ExampleQosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void ExampleQosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("in", in->getName()))
+    if (!strcmp("in", g->getName()))
         registerProtocol(protocol, gate("out"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", in->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
 } // namespace inet

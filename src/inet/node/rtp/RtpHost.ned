@@ -1,3 +1,5 @@
+//
+// Copyright (C) 2020 OpenSim Ltd.
 // the original file was included in the ~Udp sockets example
 
 package inet.node.rtp;

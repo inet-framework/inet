@@ -1,6 +1,5 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
-// Author: Benjamin Seregi
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -13,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef INET_ROUTING_PIM_PIMPACKETSERIALIZER_H_
-#define INET_ROUTING_PIM_PIMPACKETSERIALIZER_H_
+#ifndef __INET_PIMPACKETSERIALIZER_H
+#define __INET_PIMPACKETSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
@@ -39,4 +38,5 @@ class INET_API PimPacketSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 
-#endif /* INET_ROUTING_PIM_PIMPACKETSERIALIZER_H_ */
+#endif
+

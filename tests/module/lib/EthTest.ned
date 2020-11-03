@@ -21,7 +21,7 @@ module EthTestHost
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         *.interfaceTableModule = "";
         eth.csmacdSupport = csmacdSupport;
-        eth.encap.typename = "EtherEncapDummy";
+        eth.encap.typename = "OmittedEtherEncap";
         eth.queueType = queueType;
         @networkNode();
     gates:

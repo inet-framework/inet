@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,10 +12,10 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/applications/udpapp/UdpSocketIo.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
@@ -81,7 +83,7 @@ void UdpSocketIo::setSocketOptions()
     const char *multicastInterface = par("multicastInterface");
     if (multicastInterface[0]) {
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *ie = ift->findInterfaceByName(multicastInterface);
+        NetworkInterface *ie = ift->findInterfaceByName(multicastInterface);
         if (!ie)
             throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterface);
         socket.setMulticastOutputInterface(ie->getInterfaceId());
@@ -104,7 +106,7 @@ void UdpSocketIo::socketDataArrived(UdpSocket *socket, Packet *packet)
     emit(packetReceivedSignal, packet);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(packet) << endl;
     numReceived++;
-    delete packet->removeTag<SocketInd>();
+    packet->removeTag<SocketInd>();
     send(packet, "trafficOut");
 }
 
@@ -127,7 +129,8 @@ void UdpSocketIo::handleStartOperation(LifecycleOperation *operation)
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), par("localPort"));
     const char *destAddrs = par("destAddress");
-    socket.connect(*destAddrs ? L3AddressResolver().resolve(destAddrs) : L3Address(), par("destPort"));
+    if (*destAddrs)
+        socket.connect(L3AddressResolver().resolve(destAddrs), par("destPort"));
 }
 
 void UdpSocketIo::handleStopOperation(LifecycleOperation *operation)

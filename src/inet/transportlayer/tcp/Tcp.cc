@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,10 +12,10 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -74,8 +74,8 @@ void Tcp::initialize(int stage)
         WATCH_PTRMAP(tcpAppConnMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
@@ -103,7 +103,7 @@ void Tcp::handleSelfMessage(cMessage *msg)
 
 void Tcp::handleUpperCommand(cMessage *msg)
 {
-    int socketId = getTags(msg).getTag<SocketReq>()->getSocketId();
+    int socketId = check_and_cast<ITaggedObject *>(msg)->getTags().getTag<SocketReq>()->getSocketId();
     TcpConnection *conn = findConnForApp(socketId);
 
     if (!conn) {
@@ -122,7 +122,7 @@ void Tcp::handleUpperCommand(cMessage *msg)
 
 void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
 {
-    Enter_Method_Silent();
+    Enter_Method("sendFromConn");
     take(msg);
     send(msg, gatename, gateindex);
 }
@@ -224,13 +224,13 @@ void Tcp::removeConnection(TcpConnection *conn)
     conn->deleteModule();
 }
 
-TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;
     key.remoteAddr = srcAddr;
-    key.localPort = tcpseg->getDestPort();
-    key.remotePort = tcpseg->getSrcPort();
+    key.localPort = tcpHeader->getDestPort();
+    key.remotePort = tcpHeader->getSrcPort();
     SockPair save = key;
 
     // try with fully qualified SockPair
@@ -265,15 +265,15 @@ TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Add
     return nullptr;
 }
 
-void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+void Tcp::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
 {
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     const char *submoduleName = "conn-temp";
     auto module = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, this));
     module->initConnection(this, -1);
-    module->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
+    module->segmentArrivalWhileClosed(tcpSegment, tcpHeader, srcAddr, destAddr);
     module->deleteModule();
-    delete packet;
+    delete tcpSegment;
 }
 
 ushort Tcp::getEphemeralPort()
@@ -399,18 +399,18 @@ void Tcp::reset()
 }
 
 // packet contains the tcpHeader
-bool Tcp::checkCrc(Packet *packet)
+bool Tcp::checkCrc(Packet *tcpSegment)
 {
-    auto tcpHeader = packet->peekAtFront<TcpHeader>();
+    auto tcpHeader = tcpSegment->peekAtFront<TcpHeader>();
 
     switch (tcpHeader->getCrcMode()) {
         case CRC_COMPUTED: {
             //check CRC:
-            auto networkProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
-            const std::vector<uint8_t> tcpBytes = packet->peekDataAsBytes()->getBytes();
+            auto networkProtocol = tcpSegment->getTag<NetworkProtocolInd>()->getProtocol();
+            const std::vector<uint8_t> tcpBytes = tcpSegment->peekDataAsBytes()->getBytes();
             auto pseudoHeader = makeShared<TransportPseudoHeader>();
-            L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
-            L3Address destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+            L3Address srcAddr = tcpSegment->getTag<L3AddressInd>()->getSrcAddress();
+            L3Address destAddr = tcpSegment->getTag<L3AddressInd>()->getDestAddress();
             pseudoHeader->setSrcAddress(srcAddr);
             pseudoHeader->setDestAddress(destAddr);
             ASSERT(networkProtocol);
@@ -426,7 +426,7 @@ bool Tcp::checkCrc(Packet *packet)
                 throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
             MemoryOutputStream stream;
             Chunk::serialize(stream, pseudoHeader);
-            Chunk::serialize(stream, packet->peekData());
+            Chunk::serialize(stream, tcpSegment->peekData());
             uint16_t crc = TcpIpChecksum::checksum(stream.getData());
             return (crc == 0);
         }

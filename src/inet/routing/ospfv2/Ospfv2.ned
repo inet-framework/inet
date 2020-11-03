@@ -1,13 +1,18 @@
 //
-// This library is free software, you can redistribute it
-// and/or modify
-// it under  the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation;
-// either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful,
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.routing.ospfv2;
@@ -173,9 +178,9 @@ simple Ospfv2 like IOspf
         int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
         int interfaceOutputCost = default(0);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
         int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
-        string externalInterfaceOutputType = default("Type2");  // Type1|Type2 
+        string externalInterfaceOutputType = default("Type2");  // Type1|Type2
         string forwardingAddress = default("0.0.0.0");
-        int linkCost = default(1);  // cost of link (1-1000) for HostInterface and LoopbackInterface only      
+        int linkCost = default(1);  // cost of link (1-1000) for HostInterface and LoopbackInterface only
 
         string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn

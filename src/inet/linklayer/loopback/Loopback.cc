@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// Author: Zoltan Bojthe
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <stdio.h>
@@ -49,15 +47,15 @@ void Loopback::initialize(int stage)
     }
 }
 
-void Loopback::configureInterfaceEntry()
+void Loopback::configureNetworkInterface()
 {
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setLoopback(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setLoopback(true);
 }
 
 void Loopback::handleUpperPacket(Packet *packet)
@@ -72,7 +70,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     packet->clearTags();
     packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     emit(packetSentToUpperSignal, packet);
     send(packet, upperLayerOutGateId);
 }
@@ -82,7 +80,7 @@ void Loopback::refreshDisplay() const
     MacProtocolBase::refreshDisplay();
 
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
-            Ipv4Address addr = interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+            Ipv4Address addr = networkInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
      */
     char buf[80];

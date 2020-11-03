@@ -1,0 +1,54 @@
+%description:
+Test Nagle's algorithm: small packets are only sent when there's no
+outstanding data (everything sent previously has been acked).
+Tested with data >MSS sent by user.
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.*_app.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+# script format: "time numbytes; time numbytes; ..."
+*.cli_app.sendScript="1.00 3000; 1.0005 2000; 2.00 3000; 2.0005 100"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[1.001 A003] A.1000 > B.2000: A 1:1025(1024) ack 501 win 16384
+[1.203 B002] A.1000 < B.2000: A ack 1025 win 16384
+[1.205 A004] A.1000 > B.2000: A 1025:2049(1024) ack 501 win 16384
+[1.205 A005] A.1000 > B.2000: A 2049:3073(1024) ack 501 win 16384
+[1.207 B003] A.1000 < B.2000: A ack 3073 win 16384
+[1.209 A006] A.1000 > B.2000: A 3073:4097(1024) ack 501 win 16384
+[1.411 B004] A.1000 < B.2000: A ack 4097 win 16384
+[1.413 A007] A.1000 > B.2000: A 4097:5001(904) ack 501 win 16384
+[1.615 B005] A.1000 < B.2000: A ack 5001 win 16384
+[2.001 A008] A.1000 > B.2000: A 5001:6025(1024) ack 501 win 16384
+[2.001 A009] A.1000 > B.2000: A 6025:7049(1024) ack 501 win 16384
+[2.002 A010] A.1000 > B.2000: A 7049:8073(1024) ack 501 win 16384
+[2.003 B006] A.1000 < B.2000: A ack 7049 win 16384
+[2.204 B007] A.1000 < B.2000: A ack 8073 win 16384
+[2.205 A011] A.1000 > B.2000: A 8073:8101(28) ack 501 win 16384
+[2.407 B008] A.1000 < B.2000: A ack 8101 win 16384
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Calling finish() at end of Run #0...
+TcpTestNet1.cli_app: received 0 bytes in 0 packets
+TcpTestNet1.srv_app: received 8100 bytes in 9 packets
+[2.409] tcpdump finished, A:11 B:8 segments
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

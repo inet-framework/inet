@@ -1,20 +1,20 @@
-/*
- * Copyright (C) 2009 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+//
+// Copyright (C) 2009 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
 #include <algorithm>
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -63,7 +63,7 @@ void HostAutoConfigurator::setupNetworkLayer()
     // get our host module
     cModule *host = getContainingNode(this);
 
-    Ipv4Address myAddress = Ipv4Address(addressBase.getInt() + uint32(host->getId()));
+    Ipv4Address myAddress = Ipv4Address(addressBase.getInt() + uint32_t(host->getId()));
 
     // address test
     if (!Ipv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))
@@ -78,7 +78,7 @@ void HostAutoConfigurator::setupNetworkLayer()
     cStringTokenizer interfaceTokenizer(interfaces.c_str());
     const char *ifname;
     while ((ifname = interfaceTokenizer.nextToken()) != nullptr) {
-        InterfaceEntry *ie = interfaceTable->findInterfaceByName(ifname);
+        NetworkInterface *ie = interfaceTable->findInterfaceByName(ifname);
         if (!ie)
             throw cRuntimeError("No such interface '%s'", ifname);
 
@@ -90,7 +90,7 @@ void HostAutoConfigurator::setupNetworkLayer()
 
         EV_INFO << "interface " << ifname << " gets " << myAddress.str() << "/" << netmask.str() << std::endl;
 
-        auto ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+        auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
         ipv4Data->setIPAddress(myAddress);
         ipv4Data->setNetmask(netmask);
         ie->setBroadcast(true);

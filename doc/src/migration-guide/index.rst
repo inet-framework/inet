@@ -63,7 +63,7 @@ Modules must register supported protocols with the :ned:`MessageDispatcher` to o
 properly. This is done by calling ``inet::registerProtocol(...)`` for each supported
 protocol on each gate in ``initialize()``. Interfaces (usually MAC protocols modules)
 must also register with calling ``inet::registerInterface(...)`` for the corresponding
-:cpp:`InterfaceEntry` and gate in ``initialize()``. On the other hand, sockets are learned
+:cpp:`NetworkInterface` and gate in ``initialize()``. On the other hand, sockets are learned
 by the :ned:`MessageDispatcher` automatically on the fly.
 
 .. _mg:sec:migrationguide:attachingtags:

@@ -13,18 +13,18 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 
 package inet.examples.voipstream.VoIPStreamLargeNet;
 
-import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
+import inet.physicallayer.common.packetlevel.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -154,11 +154,9 @@ module VoIPStreamLargeLAN
                 eth.duplexMode = false;
                 @display("is=s");
         }
-        bus: EtherBus {
+        tap[b+1]: WireJunction {
             parameters:
-                positions = "5 10 15"; // every 5 meters
-                propagationSpeed = 2e8 mps;  // 1us = 200m
-                @display("b=424,6;o=#408060");
+                @display("p=,,r,50");
         }
         bhost[b]: EtherHost {
             parameters:
@@ -180,10 +178,13 @@ module VoIPStreamLargeLAN
         }
 
         for i=0..b-1 {
-            bus.ethg++ <--> cable <--> bhost[i].ethg;
+            tap[i].port++ <--> cable <--> bhost[i].ethg;
         }
+        tap[b].port++ <--> cable <--> hub.ethg++;
 
-        bus.ethg++ <--> cable <--> hub.ethg++;
+        for i=0..b-1 {
+            tap[i].port++ <--> cable <--> tap[i+1].port++;
+        }
 }
 
 //

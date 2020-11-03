@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /***************************************************************************
                        Rtcp.cc  -  description
                              -------------------
@@ -6,17 +21,10 @@
 
 ***************************************************************************/
 
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************/
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -197,7 +205,7 @@ void Rtcp::connectRet()
     // schedule first rtcp packet
     double intervalLength = 2.5 * (dblrand() + 0.5);
     cMessage *reminderMessage = new cMessage("Interval");
-    scheduleAt(simTime() + intervalLength, reminderMessage);
+    scheduleAfter(intervalLength, reminderMessage);
 }
 
 void Rtcp::readRet(Packet *sifpIn)
@@ -230,12 +238,12 @@ void Rtcp::scheduleInterval()
     intervalLength /= (double)(2.71828 - 1.5);    // [RFC 3550] , by Ahmed ayadi
 
     cMessage *reminderMessage = new cMessage("Interval");
-    scheduleAt(simTime() + intervalLength, reminderMessage);
+    scheduleAfter(intervalLength, reminderMessage);
 }
 
 void Rtcp::chooseSSRC()
 {
-    uint32 ssrc = 0;
+    uint32_t ssrc = 0;
     bool ssrcConflict = false;
     do {
         ssrc = intrand(0x7fffffff);
@@ -329,7 +337,7 @@ void Rtcp::processIncomingRTPPacket(Packet *packet, Ipv4Address address, int por
 {
     bool good = false;
     const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
-    uint32 ssrc = rtpHeader->getSsrc();
+    uint32_t ssrc = rtpHeader->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == nullptr) {
         participantInfo = new RtpParticipantInfo(ssrc);
@@ -396,7 +404,7 @@ void Rtcp::processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int po
 
 void Rtcp::processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderReportPacket>& rtcpSenderReportPacket, Ipv4Address address, int port)
 {
-    uint32 ssrc = rtcpSenderReportPacket->getSsrc();
+    uint32_t ssrc = rtcpSenderReportPacket->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
     if (participantInfo == nullptr) {
@@ -430,7 +438,7 @@ void Rtcp::processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderRepor
 
 void Rtcp::processIncomingRTCPReceiverReportPacket(const Ptr<const RtcpReceiverReportPacket>& rtcpReceiverReportPacket, Ipv4Address address, int port)
 {
-    uint32 ssrc = rtcpReceiverReportPacket->getSsrc();
+    uint32_t ssrc = rtcpReceiverReportPacket->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == nullptr) {
         participantInfo = new RtpReceiverInfo(ssrc);
@@ -470,7 +478,7 @@ void Rtcp::processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSD
             const SdesChunk *sdesChunk = check_and_cast<const SdesChunk *>(sdesChunks.get(j));
             // this is needed to avoid seg faults
             //sdesChunk->setOwner(this);
-            uint32 ssrc = sdesChunk->getSsrc();
+            uint32_t ssrc = sdesChunk->getSsrc();
             RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
             if (participantInfo == nullptr) {
                 participantInfo = new RtpReceiverInfo(ssrc);
@@ -488,7 +496,7 @@ void Rtcp::processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSD
 
 void Rtcp::processIncomingRTCPByePacket(const Ptr<const RtcpByePacket>& rtcpByePacket, Ipv4Address address, int port)
 {
-    uint32 ssrc = rtcpByePacket->getSsrc();
+    uint32_t ssrc = rtcpByePacket->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
     if (participantInfo != nullptr && participantInfo != _senderInfo) {
@@ -501,7 +509,7 @@ void Rtcp::processIncomingRTCPByePacket(const Ptr<const RtcpByePacket>& rtcpByeP
     }
 }
 
-RtpParticipantInfo *Rtcp::findParticipantInfo(uint32 ssrc)
+RtpParticipantInfo *Rtcp::findParticipantInfo(uint32_t ssrc)
 {
     std::string ssrcString = RtpParticipantInfo::ssrcToName(ssrc);
     return check_and_cast_nullable<RtpParticipantInfo *>(_participantInfos.get(ssrcString.c_str()));

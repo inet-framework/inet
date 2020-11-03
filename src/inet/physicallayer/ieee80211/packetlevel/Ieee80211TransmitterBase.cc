@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
@@ -50,22 +50,22 @@ void Ieee80211TransmitterBase::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211TransmitterBase::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211TransmitterBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", modeSet = " << printObjectToString(modeSet, level + 1)
-               << ", band = " << printObjectToString(band, level + 1);
+        stream << EV_FIELD(modeSet, printFieldToString(modeSet, level + 1, evFlags))
+               << EV_FIELD(band, printFieldToString(band, level + 1, evFlags));
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", mode = " << printObjectToString(mode, level + 1)
-               << ", channel = " << printObjectToString(channel, level + 1);
+        stream << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
+               << EV_FIELD(channel, printFieldToString(channel, level + 1, evFlags));
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
 const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Packet *packet) const
 {
     const IIeee80211Mode *transmissionMode;
-    auto modeReq = const_cast<Packet *>(packet)->findTag<Ieee80211ModeReq>();
-    auto bitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
+    const auto& modeReq = const_cast<Packet *>(packet)->findTag<Ieee80211ModeReq>();
+    const auto& bitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     if (modeReq != nullptr) {
         if (modeSet != nullptr && !modeSet->containsMode(modeReq->getMode()))
             throw cRuntimeError("Unsupported mode requested");
@@ -83,7 +83,7 @@ const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Pa
 const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(const Packet *packet) const
 {
     const Ieee80211Channel *transmissionChannel;
-    auto channelReq = const_cast<Packet *>(packet)->findTag<Ieee80211ChannelReq>();
+    const auto& channelReq = const_cast<Packet *>(packet)->findTag<Ieee80211ChannelReq>();
     transmissionChannel = channelReq != nullptr ? channelReq->getChannel() : channel;
     if (transmissionChannel == nullptr)
         throw cRuntimeError("Transmission channel is undefined");

@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MATH_FUNCTIONBASE_H_
-#define __INET_MATH_FUNCTIONBASE_H_
+#ifndef __INET_FUNCTIONBASE_H
+#define __INET_FUNCTIONBASE_H
 
 #include "inet/common/math/IFunction.h"
 
@@ -136,6 +138,11 @@ class INET_API FunctionBase : public IFunction<R, D>
         return makeShared<DividedFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
 
+    virtual std::ostream& printOn(std::ostream& os) const override {
+        print(os);
+        return os;
+    }
+
     virtual void print(std::ostream& os, int level = 0) const override {
         print(os, getDomain(), level);
     }
@@ -181,5 +188,5 @@ class INET_API FunctionBase : public IFunction<R, D>
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_FUNCTIONBASE_H_
+#endif
 

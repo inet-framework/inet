@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /***************************************************************************
                           RtpParticipantInfo.cc  -  description
                              -------------------
@@ -6,14 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************/
 
 #include "inet/transportlayer/rtp/Reports_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
@@ -24,7 +31,7 @@ namespace rtp {
 
 Register_Class(RtpParticipantInfo);
 
-RtpParticipantInfo::RtpParticipantInfo(uint32 ssrc) :
+RtpParticipantInfo::RtpParticipantInfo(uint32_t ssrc) :
     RtpParticipantInfo_Base(),
     _sdesChunk("SdesChunk", ssrc)
 {
@@ -128,12 +135,12 @@ bool RtpParticipantInfo::toBeDeleted(simtime_t now)
     return false;
 }
 
-uint32 RtpParticipantInfo::getSsrc() const
+uint32_t RtpParticipantInfo::getSsrc() const
 {
     return _sdesChunk.getSsrc();
 }
 
-void RtpParticipantInfo::setSsrc(uint32 ssrc)
+void RtpParticipantInfo::setSsrc(uint32_t ssrc)
 {
     _sdesChunk.setSsrc(ssrc);
 }
@@ -143,7 +150,7 @@ void RtpParticipantInfo::addSDESItem(SdesItem::SdesItemType type, const char *co
     _sdesChunk.addSDESItem(new SdesItem(type, content));
 }
 
-std::string RtpParticipantInfo::ssrcToName(uint32 ssrc)
+std::string RtpParticipantInfo::ssrcToName(uint32_t ssrc)
 {
     char name[9];
     sprintf(name, "%08x", ssrc);

@@ -27,7 +27,7 @@ void BreakpointPathLoss::initialize(int stage)
     }
 }
 
-std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "BreakpointPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
@@ -35,7 +35,7 @@ std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level)
                << ", L02 = " << l02
                << ", alpha1 = " << alpha1
                << ", alpha2 = " << alpha2
-               << ", breakpointDistance = " << breakpointDistance;
+               << EV_FIELD(breakpointDistance);
     return stream;
 }
 

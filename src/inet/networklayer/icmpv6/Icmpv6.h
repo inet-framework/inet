@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 // Copyright (C) 2005 Wei Yang, Ng
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_ICMPV6_H
@@ -36,7 +37,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, public IProtocolRegistrationListener
+class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, public DefaultProtocolRegistrationListener
 {
   public:
     /**
@@ -97,8 +98,8 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
 
     virtual void errorOut(const Ptr<const Icmpv6Header>& header);
 
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     static void insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
@@ -113,5 +114,5 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
 
 } // namespace inet
 
-#endif // ifndef __INET_ICMPV6_H
+#endif
 

@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -31,29 +31,30 @@ void PacketDuplicatorBase::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(inputGate);
-        checkPushPacketSupport(outputGate);
+        checkPacketOperationSupport(inputGate);
+        checkPacketOperationSupport(outputGate);
     }
 }
 
 void PacketDuplicatorBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     int numDuplicates = getNumPacketDuplicates(packet);
     for (int i = 0; i < numDuplicates; i++) {
-        EV_INFO << "Forwarding duplicate packet " << packet->getName() << "." << endl;
+        EV_INFO << "Forwarding duplicate packet" << EV_FIELD(packet) << EV_ENDL;
         auto duplicate = packet->dup();
         pushOrSendPacket(duplicate, outputGate, consumer);
     }
-    EV_INFO << "Forwarding original packet " << packet->getName() << "." << endl;
+    EV_INFO << "Forwarding original packet" << EV_FIELD(packet) << EV_ENDL;
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-void PacketDuplicatorBase::handleCanPushPacket(cGate *gate)
+void PacketDuplicatorBase::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 } // namespace queueing

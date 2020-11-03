@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BYTESCHUNK_H_
-#define __INET_BYTESCHUNK_H_
+#ifndef __INET_BYTESCHUNK_H
+#define __INET_BYTESCHUNK_H
 
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -42,9 +44,11 @@ class INET_API BytesChunk : public Chunk
 
     virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
     virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
+    virtual void doInsertAt(const Ptr<const Chunk>& chunk, b offset) override;
 
     virtual void doRemoveAtFront(b length) override;
     virtual void doRemoveAtBack(b length) override;
+    virtual void doRemoveAt(b offset, b length) override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -56,6 +60,9 @@ class INET_API BytesChunk : public Chunk
 
     virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return makeShared<BytesChunk>(*this); }
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Field accessor functions */
@@ -79,17 +86,21 @@ class INET_API BytesChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_BYTES; }
     virtual b getChunkLength() const override { return B(bytes.size()); }
 
+    virtual bool containsSameData(const Chunk& other) const override;
+
     virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
+    virtual bool canInsertAt(const Ptr<const Chunk>& chunk, b offset) const override;
 
     virtual bool canRemoveAtFront(b length) const override { return b(length).get() % 8 == 0; }
     virtual bool canRemoveAtBack(b length) const override { return b(length).get() % 8 == 0; }
+    virtual bool canRemoveAt(b offset, b length) const override { return b(offset).get() % 8 == 0 && b(length).get() % 8 == 0; }
 
-    virtual std::string str() const override;
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 
 } // namespace
 
-#endif // #ifndef __INET_BYTESCHUNK_H_
+#endif
 

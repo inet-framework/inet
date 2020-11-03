@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
@@ -40,7 +40,7 @@ void StochasticErrorModel::initialize(int stage)
     }
 }
 
-std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << "StochasticErrorModel"
@@ -52,7 +52,7 @@ std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int leve
 
 double StochasticErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computePacketErrorRate");
     const IReception *reception = snir->getReception();
     if (!std::isnan(packetErrorRate)) {
         double factor = reception->getDuration(part) / reception->getDuration();
@@ -80,7 +80,7 @@ double StochasticErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSig
 
 double StochasticErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeBitErrorRate");
     if (!std::isnan(bitErrorRate)) {
         return bitErrorRate;
     }
@@ -96,7 +96,7 @@ double StochasticErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal
 
 double StochasticErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeSymbolErrorRate");
     return symbolErrorRate;
 }
 

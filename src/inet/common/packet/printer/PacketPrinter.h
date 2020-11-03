@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,18 +12,18 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PACKETPRINTER_H_
-#define __INET_PACKETPRINTER_H_
+#ifndef __INET_PACKETPRINTER_H
+#define __INET_PACKETPRINTER_H
 
 #include "inet/common/StringFormat.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/common/packetlevel/WirelessSignal.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 #endif // WITH_RADIO
 
 namespace inet {
@@ -42,7 +44,7 @@ class INET_API PacketPrinter : public cMessagePrinter
         std::stringstream infoColumn;
     };
 
-    class DirectiveResolver : public inet::StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const Context& context;
         const int numPacket;
@@ -62,7 +64,7 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual const ProtocolPrinter& getProtocolPrinter(const Protocol *protocol) const;
     virtual void printContext(std::ostream& stream, const Options *options, Context& context) const;
 #ifdef WITH_RADIO
-    virtual void printSignal(inet::physicallayer::WirelessSignal *signal, const Options *options, Context& context) const;
+    virtual void printSignal(physicallayer::Signal *signal, const Options *options, Context& context) const;
 #endif // WITH_RADIO
     virtual void printPacket(Packet *packet, const Options *options, Context& context) const;
     virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
@@ -83,8 +85,8 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
 
 #ifdef WITH_RADIO
-    virtual void printSignal(std::ostream& stream, inet::physicallayer::WirelessSignal *signal) const;
-    virtual void printSignal(std::ostream& stream, inet::physicallayer::WirelessSignal *signal, const Options *options) const;
+    virtual void printSignal(std::ostream& stream, physicallayer::Signal *signal) const;
+    virtual void printSignal(std::ostream& stream, physicallayer::Signal *signal, const Options *options) const;
 #endif // WITH_RADIO
 
     virtual void printPacket(std::ostream& stream, Packet *packet, const char *format = nullptr) const;
@@ -96,5 +98,5 @@ class INET_API PacketPrinter : public cMessagePrinter
 
 } // namespace
 
-#endif // #ifndef __INET_PACKETPRINTER_H_
+#endif
 

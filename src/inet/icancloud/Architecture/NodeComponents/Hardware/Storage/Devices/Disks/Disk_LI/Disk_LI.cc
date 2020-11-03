@@ -248,7 +248,7 @@ simtime_t Disk_LI::storageDeviceTime (off_blockList_t offsetBlock, size_blockLis
 }
 
 
-void Disk_LI::calculateIndex (int64 jump, int64 numBytes, int *blockSizeIndex_1, int *blockSizeIndex_2, int *offsetIndex_1, int *offsetIndex_2){
+void Disk_LI::calculateIndex (int64_t jump, int64_t numBytes, int *blockSizeIndex_1, int *blockSizeIndex_2, int *offsetIndex_1, int *offsetIndex_2){
 
 	int currentOffset, currentBlockSize;
 	bool found;
@@ -315,7 +315,7 @@ void Disk_LI::calculateIndex (int64 jump, int64 numBytes, int *blockSizeIndex_1,
 }
 
 
-simtime_t Disk_LI::linealInterpolation (int64 x, int64 x0, int64 x1, simtime_t y0, simtime_t y1){
+simtime_t Disk_LI::linealInterpolation (int64_t x, int64_t x0, int64_t x1, simtime_t y0, simtime_t y1){
 
 	simtime_t y;
 

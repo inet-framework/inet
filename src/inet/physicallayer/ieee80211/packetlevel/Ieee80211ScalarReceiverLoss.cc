@@ -67,7 +67,7 @@ void Ieee80211ScalarReceiverLoss::initialize(int stage)
         loss *= gr;
         loss = std::sqrt(loss);
 
-        distance = (loss * landa)/(4 * PI);
+        distance = (loss * landa)/(4 * M_PI);
 
 
 

@@ -14,7 +14,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_DHCPCLIENT_H
@@ -49,7 +50,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     simtime_t startTime;    // application start time
     MacAddress macAddress;    // client's MAC address
     cModule *host = nullptr;    // containing host module (@networkNode)
-    InterfaceEntry *ie = nullptr;    // interface to configure
+    NetworkInterface *ie = nullptr;    // interface to configure
     IIpv4RoutingTable *irt = nullptr;    // routing table to update
 
     // state
@@ -167,7 +168,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     /*
      * Selects the first non-loopback interface
      */
-    virtual InterfaceEntry *chooseInterface();
+    virtual NetworkInterface *chooseInterface();
 
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
@@ -186,5 +187,5 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
 
 } // namespace inet
 
-#endif // ifndef __INET_DHCPCLIENT_H
+#endif
 

@@ -1,11 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
-//               2010 Zoltan Bojthe
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,9 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-
 
 #include "inet/common/packet/serializer/BytesChunkSerializer.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -125,7 +123,7 @@ void TcpLwipReceiveQueue::setConnection(TcpLwipConnection *connP)
     connM = connP;
 }
 
-void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, uint32 seqno, const void *bufferP, size_t bufferLengthP)
+void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, uint32_t seqno, const void *bufferP, size_t bufferLengthP)
 {
     ASSERT(packet);
     ASSERT(bufferP);
@@ -157,12 +155,12 @@ Packet *TcpLwipReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TcpLwipReceiveQueue::getAmountOfBufferedBytes() const
+uint32_t TcpLwipReceiveQueue::getAmountOfBufferedBytes() const
 {
     return B(dataBuffer.getLength()).get();
 }
 
-uint32 TcpLwipReceiveQueue::getQueueLength() const
+uint32_t TcpLwipReceiveQueue::getQueueLength() const
 {
     return B(dataBuffer.getLength()).get();
 }

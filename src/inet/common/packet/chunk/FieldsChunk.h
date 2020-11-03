@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FIELDSCHUNK_H_
-#define __INET_FIELDSCHUNK_H_
+#ifndef __INET_FIELDSCHUNK_H
+#define __INET_FIELDSCHUNK_H
 
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -59,6 +61,9 @@ class INET_API FieldsChunk : public Chunk
     FieldsChunk();
     FieldsChunk(const FieldsChunk& other);
     virtual ~FieldsChunk();
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     virtual void handleChange() override;
@@ -67,13 +72,17 @@ class INET_API FieldsChunk : public Chunk
     //@{
     virtual ChunkType getChunkType() const override { return CT_FIELDS; }
 
+    virtual bool containsSameData(const Chunk& other) const override;
+
     virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(chunkLength >= b(0)); return chunkLength; }
     virtual void setChunkLength(b chunkLength) { handleChange(); this->chunkLength = chunkLength; }
     virtual void addChunkLength(b chunkLength) { handleChange(); this->chunkLength += chunkLength; }
+
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 
 } // namespace
 
-#endif // #ifndef __INET_FIELDCHUNK_H_
+#endif
 

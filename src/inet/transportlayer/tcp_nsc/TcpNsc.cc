@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/transportlayer/tcp_nsc/TcpNsc.h"
@@ -27,7 +27,7 @@
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -235,8 +235,8 @@ void TcpNsc::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
@@ -620,7 +620,7 @@ TcpNscReceiveQueue *TcpNsc::createReceiveQueue()
 
 void TcpNsc::handleAppMessage(cMessage *msgP)
 {
-    auto& tags = getTags(msgP);
+    auto& tags = check_and_cast<ITaggedObject *>(msgP)->getTags();
     int connId = tags.getTag<SocketReq>()->getSocketId();
 
     TcpNscConnection *conn = findAppConn(connId);
@@ -655,7 +655,7 @@ void TcpNsc::handleMessage(cMessage *msgP)
            NSC timer processing
            ...
            Timers are ordinary cMessage objects that are started by
-           scheduleAt(simTime()+timeout, msg), and can be cancelled
+           scheduleAfter(timeout, msg), and can be cancelled
            via cancelEvent(msg); when they expire (fire) they are delivered
            to the module via handleMessage(), i.e. they end up here.
          */
@@ -666,7 +666,7 @@ void TcpNsc::handleMessage(cMessage *msgP)
 
             pStackM->timer_interrupt();
 
-            scheduleAt(msgP->getArrivalTime() + 1.0 / (double)pStackM->get_hz(), msgP);
+            scheduleAfter(1.0 / (double)pStackM->get_hz(), msgP);
         }
     }
     else if (msgP->arrivedOn("ipIn")) {
@@ -762,7 +762,7 @@ void TcpNsc::loadStack(const char *stacknameP, int bufferSizeP)
 
     // set timer for 1.0 / pStackM->get_hz()
     pNsiTimerM = new cMessage("nsc_nsi_timer");
-    scheduleAt(1.0 / (double)pStackM->get_hz(), pNsiTimerM);
+    scheduleAfter(1.0 / (double)pStackM->get_hz(), pNsiTimerM);
 }
 
 /** Called from the stack when a packet needs to be output to the wire. */
@@ -817,10 +817,10 @@ void TcpNsc::gettime(unsigned int *secP, unsigned int *usecP)
     *usec = (unsigned int)((t - *sec) * 1000000 + 0.5);
 #else // ifdef USE_DOUBLE_SIMTIME
     simtime_t t = simTime();
-    int64 raw = t.raw();
-    int64 scale = t.getScale();
-    int64 secs = raw / scale;
-    int64 usecs = (raw - (secs * scale));
+    int64_t raw = t.raw();
+    int64_t scale = t.getScale();
+    int64_t secs = raw / scale;
+    int64_t usecs = (raw - (secs * scale));
 
     //usecs = usecs * 1000000 / scale;
     if (scale > 1000000) // scale always 10^n

@@ -2174,5 +2174,5 @@ Snapshot<TOP>::Snapshot(Machine<TOP>& machine)
 
 } // namespace inet
 
-#endif    // __MACHO_HPP__
+#endif
 

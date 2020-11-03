@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
+// Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_NEXTHOPROUTE_H
@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 class IRoutingTable;
 class NextHopRoutingTable;
 
@@ -38,7 +38,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     int prefixLength;
     L3Address destination;
     L3Address nextHop;
-    InterfaceEntry *interface;
+    NetworkInterface *interface;
     SourceType sourceType;
     cObject *source;
     cObject *protocolData;
@@ -53,7 +53,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     virtual ~NextHopRoute() { delete protocolData; }
 
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     bool equals(const IRoute& route) const;
 
@@ -61,7 +61,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     virtual void setDestination(const L3Address& dest) override { if (destination != dest) { this->destination = dest; changed(F_DESTINATION); } }
     virtual void setPrefixLength(int l) override { if (prefixLength != l) { this->prefixLength = l; changed(F_PREFIX_LENGTH); } }
     virtual void setNextHop(const L3Address& nextHop) override { if (this->nextHop != nextHop) { this->nextHop = nextHop; changed(F_NEXTHOP); } }
-    virtual void setInterface(InterfaceEntry *ie) override { if (interface != ie) { this->interface = ie; changed(F_IFACE); } }
+    virtual void setInterface(NetworkInterface *ie) override { if (interface != ie) { this->interface = ie; changed(F_IFACE); } }
     virtual void setSourceType(SourceType sourceType) override { if (this->sourceType != sourceType) { this->sourceType = sourceType; changed(F_TYPE); } }
     virtual void setSource(cObject *source) override { if (this->source != source) { this->source = source; changed(F_SOURCE); } }
     virtual void setMetric(int metric) override { if (this->metric != metric) { this->metric = metric; changed(F_METRIC); } }
@@ -81,7 +81,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     virtual L3Address getNextHopAsGeneric() const override { return nextHop; }
 
     /** Next hop interface */
-    virtual InterfaceEntry *getInterface() const override { return interface; }
+    virtual NetworkInterface *getInterface() const override { return interface; }
 
     /** Source type of the route */
     SourceType getSourceType() const override { return sourceType; }
@@ -106,7 +106,7 @@ class INET_API NextHopMulticastRoute : public cObject
 class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastRoute
 {
   private:
-    struct Child { InterfaceEntry *ie; bool isLeaf; };
+    struct Child { NetworkInterface *ie; bool isLeaf; };
 
   private:
     IRoutingTable *owner;
@@ -114,7 +114,7 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     int prefixLength;
     L3Address origin;
     L3Address multicastGroup;
-    InterfaceEntry *parent;
+    NetworkInterface *parent;
     std::vector<Child> children;
     cObject *source;
     //XXX cObject *protocolData;
@@ -131,9 +131,9 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     virtual void setOrigin(const L3Address& origin) { this->origin = origin; }
     virtual void setPrefixLength(int len) { this->prefixLength = len; }
     virtual void setMulticastGroup(const L3Address& group) { this->multicastGroup = group; }
-    virtual void setParent(InterfaceEntry *ie) { this->parent = ie; }
-    virtual bool addChild(InterfaceEntry *ie, bool isLeaf);
-    virtual bool removeChild(InterfaceEntry *ie);
+    virtual void setParent(NetworkInterface *ie) { this->parent = ie; }
+    virtual bool addChild(NetworkInterface *ie, bool isLeaf);
+    virtual bool removeChild(NetworkInterface *ie);
     virtual void setSource(cObject *source) { this->source = source; }
     virtual void setMetric(int metric) { this->metric = metric; }
 
@@ -156,13 +156,13 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     virtual L3Address getMulticastGroup() const { return multicastGroup; }
 
     /** Parent interface */
-    virtual InterfaceEntry *getParent() const { return parent; }
+    virtual NetworkInterface *getParent() const { return parent; }
 
     /** Child interfaces */
     virtual int getNumChildren() const { return children.size(); }
 
     /** Returns the ith child interface */
-    virtual InterfaceEntry *getChild(int i) const { return X; }    //TODO
+    virtual NetworkInterface *getChild(int i) const { return X; }    //TODO
 
     /** Returns true if the ith child interface is a leaf */
     virtual bool getChildIsLeaf(int i) const { return X; }    //TODO
@@ -177,5 +177,5 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPROUTE_H
+#endif
 

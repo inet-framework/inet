@@ -14,10 +14,10 @@ of this file.
 General
 -------
 1. Make sure your OMNeT++ installation works OK (e.g. try running the samples)
-   and it is in the path (to test, try the command "which nedtool"). On
-   Windows, open a console with the "mingwenv.cmd" command. The PATH and other
-   variables will be automatically adjusted for you. Use this console to compile
-   and run INET.
+   and it is in the path (to test, try the command "which omnetpp", it should print
+   the path of the executable). On Windows, open a console with the "mingwenv.cmd"
+   command. The PATH and other variables will be automatically adjusted for you.
+   Use this console to compile and run INET.
 
 2. Extract the downloaded tarball into a directory of your choice (usually into your
    workspace directory, if you are using the IDE). NOTE: The built-in Windows

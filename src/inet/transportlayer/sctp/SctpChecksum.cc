@@ -13,7 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/transportlayer/sctp/SctpChecksum.h"
@@ -96,12 +97,12 @@ static uint32_t crc_c[256] = {
 
 uint32_t SctpChecksum::checksum(const void *addr, unsigned int len)
 {
-    uint32 h;
+    uint32_t h;
     const uint8_t *buf = static_cast<const uint8_t *>(addr);
     unsigned char byte0, byte1, byte2, byte3;
-    uint32 crc32c;
-    uint32 i;
-    uint32 res = (~0L);
+    uint32_t crc32c;
+    uint32_t i;
+    uint32_t res = (~0L);
     for (i = 0; i < len; i++) {
         CRC32C(res, buf[i]);
     }

@@ -14,7 +14,7 @@ module IgmpTesterNic
         string routingTableModule;
         *.interfaceTableModule = absPath(interfaceTableModule);
         *.routingTableModule = absPath(routingTableModule);
-        @class(InterfaceEntry);
+        @class(NetworkInterface);
     gates:
         input upperLayerIn;
         output upperLayerOut;

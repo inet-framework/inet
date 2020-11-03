@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.networklayer.ipv4;
@@ -21,7 +21,7 @@ package inet.networklayer.ipv4;
 //
 // ICMP implementation.
 //
-// @author Jochen Reber, Andras Varga
+// @author Jochen Reber
 //
 simple Icmp
 {

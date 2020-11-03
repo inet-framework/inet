@@ -1,11 +1,10 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
-// Author: Tamas Borbely
+// Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,10 +12,12 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.networklayer.diffserv;
+
+import inet.queueing.base.PacketProcessorBase;
 
 //
 // This module sets the DSCP field (lower six bit of Tos/TrafficClass) of IP datagrams
@@ -26,13 +27,12 @@ package inet.networklayer.diffserv;
 // Packets arrived at gate in[i] are marked with the ith value. If there are fewer
 // dscp values given than input gates, then the last one is repeated.
 //
-simple DscpMarker
+simple DscpMarker extends PacketProcessorBase
 {
     parameters:
         string dscps; // space separated list if dscp values; both names (e.g. AF11, EF) and numbers (0x0A,0b101110) can be used
-
+        @class(DscpMarker);
         @display("i=block/star");
-
         @signal[packetMarked](type=cPacket);
         @statistic[packetMarked](title="packets marked"; source=packetMarked; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:

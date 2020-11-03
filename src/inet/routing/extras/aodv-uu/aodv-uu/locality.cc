@@ -104,7 +104,7 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
     assert(dstnet == nullptr);
     return HOST_UNKNOWN;
 #else
-    InterfaceEntry *   ie;
+    NetworkInterface *   ie;
     ie = getInterfaceEntry (ifindex);
     struct in_addr dstnet;
     struct in_addr subnet;

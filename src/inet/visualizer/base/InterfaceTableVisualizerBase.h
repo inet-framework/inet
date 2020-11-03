@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_INTERFACETABLEVISUALIZERBASE_H
@@ -20,7 +20,7 @@
 
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
@@ -46,10 +46,10 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
 
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
-        const InterfaceEntry *interfaceEntry = nullptr;
+        const NetworkInterface *networkInterface = nullptr;
 
       public:
-        DirectiveResolver(const InterfaceEntry *interfaceEntry) : interfaceEntry(interfaceEntry) { }
+        DirectiveResolver(const NetworkInterface *networkInterface) : networkInterface(networkInterface) { }
 
         virtual const char *resolveDirective(char directive) const override;
     };
@@ -81,19 +81,19 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     virtual void unsubscribe();
 
     virtual cModule *getNetworkNode(const InterfaceVisualization *interfaceVisualization);
-    virtual cGate *getOutputGate(cModule *networkNode, InterfaceEntry *interfaceEntry);
+    virtual cGate *getOutputGate(cModule *networkNode, NetworkInterface *networkInterface);
     virtual cGate *getOutputGate(const InterfaceVisualization *interfaceVisualization);
 
-    virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry) = 0;
-    virtual const InterfaceVisualization *getInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry);
+    virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, NetworkInterface *networkInterface) = 0;
+    virtual const InterfaceVisualization *getInterfaceVisualization(cModule *networkNode, NetworkInterface *networkInterface);
     virtual void addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization);
     virtual void addAllInterfaceVisualizations();
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization);
     virtual void removeAllInterfaceVisualizations();
     virtual void updateAllInterfaceVisualizations();
 
-    virtual std::string getVisualizationText(const InterfaceEntry *interfaceEntry);
-    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry) = 0;
+    virtual std::string getVisualizationText(const NetworkInterface *networkInterface);
+    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) = 0;
 
   public:
     virtual ~InterfaceTableVisualizerBase();
@@ -105,5 +105,5 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
 
 } // namespace inet
 
-#endif // ifndef __INET_INTERFACETABLEVISUALIZERBASE_H
+#endif
 

@@ -1,0 +1,42 @@
+%description:
+Tests clock granularity on a settable clock.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = inet.test.unittest.lib.ClockTestNetwork
+cmdenv-express-mode = false
+cmdenv-log-prefix = "C:%C: "
+
+*.host.clock.typename = "SettableClock"
+*.host.clock.initialClockTime = 1s
+*.host.clock.oscillator.nominalTickLength = 0.1s
+*.host.clock.oscillator.driftRate = -0.5e6 ppm
+*.scenarioManager.script = xml("<scenario><at t='2.5s'><set-clock module='host.clock' time='2.9s' reset-oscillator='true'/></at></scenario>")
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "^C:" test.out > clock.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains: clock.out
+C:(ClockTestApp)ClockTestNetwork.host.app: start
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_1.1 to clock: 1.1, scheduled simtime: 0.2, scheduled clock: 1.1
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.11 to clock: 2.11, scheduled simtime: 2.4, scheduled clock: 2.2
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.89 to clock: 2.89, scheduled simtime: 3.8, scheduled clock: 2.9
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.9999999 to clock: 2.9999999, scheduled simtime: 4, scheduled clock: 3
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_3.11 to clock: 3.11, scheduled simtime: 4.4, scheduled clock: 3.2
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_1.1: simtime: 0.2, clock: 1.1
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.11: simtime: 2.4, clock: 2.2
+C:(ScenarioManager)ClockTestNetwork.scenarioManager: processing <at> command...
+C:(ScenarioManager)ClockTestNetwork.scenarioManager: processing <set-clock> command...
+C:(ConstantDriftOscillator)ClockTestNetwork.host.clock.oscillator: Setting oscillator tick offset from 0.1 to 0 at simtime 2.5.
+C:(SettableClock)ClockTestNetwork.host.clock: Setting clock time from 2.2 to 2.9 at simtime 2.5.
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 2.5, clock: 2.9
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 2.7, clock: 3
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 3.1, clock: 3.2
+C:(ClockTestApp)ClockTestNetwork.host.app: finished: simtime: 3.1, clock: 3.2
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

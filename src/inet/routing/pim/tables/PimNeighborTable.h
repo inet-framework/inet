@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 3
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
@@ -21,7 +21,7 @@
 #define __INET_PIMNEIGHBORTABLE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -41,7 +41,7 @@ class INET_API PimNeighbor : public cObject
 
   protected:
     PimNeighborTable *nt;
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     Ipv4Address address;
     int version;
     unsigned int generationId;
@@ -49,12 +49,12 @@ class INET_API PimNeighbor : public cObject
     cMessage *livenessTimer;
 
   public:
-    PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version);
+    PimNeighbor(NetworkInterface *ie, Ipv4Address address, int version);
     virtual ~PimNeighbor();
     virtual std::string str() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
-    InterfaceEntry *getInterfacePtr() const { return ie; }
+    NetworkInterface *getInterfacePtr() const { return ie; }
     Ipv4Address getAddress() const { return address; }
     int getVersion() const { return version; }
     unsigned int getGenerationId() const { return generationId; }
@@ -137,5 +137,5 @@ class INET_API PimNeighborTable : public cSimpleModule
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIMNEIGHBORTABLE_H
+#endif
 

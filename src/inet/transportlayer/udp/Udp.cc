@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004-2011 Andras Varga
+// Copyright (C) 2004-2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,13 +13,14 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <algorithm>
 #include <string>
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
@@ -31,7 +32,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
@@ -120,8 +121,8 @@ void Udp::initialize(int stage)
                 ipv6->registerHook(0, &crcInsertion);
 #endif
         }
-        registerService(Protocol::udp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::udp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::udp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::udp, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -222,7 +223,7 @@ void Udp::handleUpperCommand(cMessage *msg)
                 }
                 case UDP_C_SETOPTION_BLOCK_MCAST_SRC: {
                     auto cmd = check_and_cast<UdpBlockMulticastSourcesCommand *>(ctrl);
-                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
                     std::vector<L3Address> sourceList;
                     for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
                         sourceList.push_back(cmd->getSourceList(i));
@@ -231,7 +232,7 @@ void Udp::handleUpperCommand(cMessage *msg)
                 }
                 case UDP_C_SETOPTION_UNBLOCK_MCAST_SRC: {
                     auto cmd = check_and_cast<UdpUnblockMulticastSourcesCommand *>(ctrl);
-                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
                     std::vector<L3Address> sourceList;
                     for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
                         sourceList.push_back(cmd->getSourceList(i));
@@ -240,7 +241,7 @@ void Udp::handleUpperCommand(cMessage *msg)
                 }
                 case UDP_C_SETOPTION_LEAVE_MCAST_SRC: {
                     auto cmd = check_and_cast<UdpLeaveMulticastSourcesCommand *>(ctrl);
-                   InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                   NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
                     std::vector<L3Address> sourceList;
                     for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
                         sourceList.push_back(cmd->getSourceList(i));
@@ -249,7 +250,7 @@ void Udp::handleUpperCommand(cMessage *msg)
                 }
                 case UDP_C_SETOPTION_JOIN_MCAST_SRC: {
                     auto cmd = check_and_cast<UdpJoinMulticastSourcesCommand *>(ctrl);
-                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
                     std::vector<L3Address> sourceList;
                     for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
                         sourceList.push_back(cmd->getSourceList(i));
@@ -258,7 +259,7 @@ void Udp::handleUpperCommand(cMessage *msg)
                 }
                 case UDP_C_SETOPTION_SET_MCAST_SRC_FILTER: {
                     auto cmd = check_and_cast<UdpSetMulticastSourceFilterCommand *>(ctrl);
-                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
                     std::vector<L3Address> sourceList;
                     for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
                         sourceList.push_back(cmd->getSourceList(i));
@@ -472,7 +473,7 @@ void Udp::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multic
 
         // add the multicast address to the selected interface or all interfaces
         if (interfaceId != -1) {
-            InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+            NetworkInterface *ie = ift->getInterfaceById(interfaceId);
             if (!ie)
                 throw cRuntimeError("Interface id=%d does not exist", interfaceId);
             ASSERT(ie->isMulticast());
@@ -480,7 +481,7 @@ void Udp::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multic
         }
         else {
             for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                InterfaceEntry *ie = ift->getInterface(i);
+                NetworkInterface *ie = ift->getInterface(i);
                 if (ie->isMulticast())
                     addMulticastAddressToInterface(ie, multicastAddr);
             }
@@ -488,19 +489,19 @@ void Udp::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multic
     }
 }
 
-void Udp::addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& multicastAddr)
+void Udp::addMulticastAddressToInterface(NetworkInterface *ie, const L3Address& multicastAddr)
 {
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddr.isMulticast());
 
     if (multicastAddr.getType() == L3Address::IPv4) {
 #ifdef WITH_IPv4
-        ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(multicastAddr.toIpv4());
+        ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(multicastAddr.toIpv4());
 #endif // ifdef WITH_IPv4
     }
     else if (multicastAddr.getType() == L3Address::IPv6) {
 #ifdef WITH_IPv6
-        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
 #endif // ifdef WITH_IPv6
     }
     else
@@ -523,13 +524,13 @@ void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
                 MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
 
             if (membership->interfaceId != -1) {
-                InterfaceEntry *ie = ift->getInterfaceById(membership->interfaceId);
+                NetworkInterface *ie = ift->getInterfaceById(membership->interfaceId);
                 ie->changeMulticastGroupMembership(membership->multicastAddress,
                         oldFilterMode, membership->sourceList, MCAST_INCLUDE_SOURCES, empty);
             }
             else {
                 for (int j = 0; j < ift->getNumInterfaces(); ++j) {
-                    InterfaceEntry *ie = ift->getInterface(j);
+                    NetworkInterface *ie = ift->getInterface(j);
                     if (ie->isMulticast())
                         ie->changeMulticastGroupMembership(membership->multicastAddress,
                                 oldFilterMode, membership->sourceList, MCAST_INCLUDE_SOURCES, empty);
@@ -541,7 +542,7 @@ void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
     }
 }
 
-void Udp::blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
+void Udp::blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddress.isMulticast());
@@ -572,7 +573,7 @@ void Udp::blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
     }
 }
 
-void Udp::unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
+void Udp::unblockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddress.isMulticast());
@@ -603,7 +604,7 @@ void Udp::unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mu
     }
 }
 
-void Udp::leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
+void Udp::leaveMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddress.isMulticast());
@@ -637,7 +638,7 @@ void Udp::leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
         sd->deleteMulticastMembership(membership);
 }
 
-void Udp::joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
+void Udp::joinMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddress.isMulticast());
@@ -672,7 +673,7 @@ void Udp::joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multi
     }
 }
 
-void Udp::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList)
+void Udp::setMulticastSourceFilter(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddress.isMulticast());
@@ -716,9 +717,8 @@ void Udp::handleUpperPacket(Packet *packet)
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
-    auto socketReq = packet->removeTag<SocketReq>();
+    auto& socketReq = packet->removeTag<SocketReq>();
     int socketId = socketReq->getSocketId();
-    delete socketReq;
 
     SockDesc *sd = getOrCreateSocket(socketId);
 
@@ -732,10 +732,9 @@ void Udp::handleUpperPacket(Packet *packet)
     if (destAddr.isUnspecified())
         addressReq->setDestAddress(destAddr = sd->remoteAddr);
 
-    if (auto portsReq = packet->removeTagIfPresent<L4PortReq>()) {
+    if (auto& portsReq = packet->removeTagIfPresent<L4PortReq>()) {
         srcPort = portsReq->getSrcPort();
         destPort = portsReq->getDestPort();
-        delete portsReq;
     }
 
     if (srcPort == -1)
@@ -744,7 +743,7 @@ void Udp::handleUpperPacket(Packet *packet)
     if (destPort == -1)
         destPort = sd->remotePort;
 
-    auto interfaceReq = packet->findTag<InterfaceReq>();
+    const auto& interfaceReq = packet->findTag<InterfaceReq>();
     ASSERT(interfaceReq == nullptr || interfaceReq->getInterfaceId() != -1);
 
     if (interfaceReq == nullptr && destAddr.isMulticast()) {
@@ -928,7 +927,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
-    delete udpPacket->removeTag<PacketProtocolTag>();
+    udpPacket->removeTag<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getFrontOffset();
     auto udpHeader = udpPacket->popAtFront<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
@@ -1144,8 +1143,8 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 
     // send payload with UdpControlInfo up to the application
     payload->setKind(UDP_I_DATA);
-    delete payload->removeTagIfPresent<PacketProtocolTag>();
-    delete payload->removeTagIfPresent<DispatchProtocolReq>();
+    payload->removeTagIfPresent<PacketProtocolTag>();
+    payload->removeTagIfPresent<DispatchProtocolReq>();
     payload->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
     payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     payload->addTagIfAbsent<TransportProtocolInd>()->setTransportProtocolHeader(header);
@@ -1355,8 +1354,8 @@ bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
     else if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
         return false;
     else {
-        auto l3AddressInd = packet->findTag<L3AddressInd>();
-        auto networkProtocolInd = packet->findTag<NetworkProtocolInd>();
+        const auto& l3AddressInd = packet->findTag<L3AddressInd>();
+        const auto& networkProtocolInd = packet->findTag<NetworkProtocolInd>();
         if (l3AddressInd != nullptr && networkProtocolInd != nullptr)
             return verifyCrc(networkProtocolInd->getProtocol(), udpHeader, packet);
         else

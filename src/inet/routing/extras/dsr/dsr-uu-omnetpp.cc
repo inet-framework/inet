@@ -366,7 +366,7 @@ void DSRUU::initialize(int stage)
         // ASSERT(stage >= STAGE:IP_LAYER_READY_FOR_HOOK_REGISTRATION);
 
         int  num_80211 = 0;
-        InterfaceEntry *   i_face;
+        NetworkInterface *   i_face;
 
         for (int i = 0; i < getInterfaceTable()->getNumInterfaces(); i++)
         {
@@ -423,14 +423,14 @@ void DSRUU::initialize(int stage)
             // clean the route table wlan interface entry
             for (int i = this->getInetRoutingTable()->getNumRoutes()-1; i>=0; i--) {
                 auto entry = getInetRoutingTable()->getRoute(i);
-                const InterfaceEntry *ie = entry->getInterface();
+                const NetworkInterface *ie = entry->getInterface();
                 if (strstr(ie->getInterfaceName(), "wlan")!=nullptr) {
                     getInetRoutingTable()->deleteRoute(entry);
                 }
             }
         }
         auto interface = interface80211ptr;
-        CHK(interface->getProtocolData<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
+        CHK(interface->getProtocolDataForUpdate<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
         struct in_addr myAddr = my_addr();
         pathCacheMap.setRoot(myAddr.s_addr);
         is_init = true;
@@ -1604,19 +1604,11 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
     auto hopLimitReq = pkt->removeTagIfPresent<HopLimitReq>();
 
     short ttl = dp->nh.iph->ttl;
-    if (hopLimitReq)
-        delete hopLimitReq;
 
-    if (auto dontFragmentReq = pkt->removeTagIfPresent<FragmentationReq>()) {
-        delete dontFragmentReq;
-    }
+    pkt->removeTagIfPresent<FragmentationReq>();
     // set other fields
-    if (DscpReq *dscpReq = pkt->removeTagIfPresent<DscpReq>()) {
-        delete dscpReq;
-    }
-    if (EcnReq *ecnReq = pkt->removeTagIfPresent<EcnReq>()) {
-        delete ecnReq;
-    }
+    pkt->removeTagIfPresent<DscpReq>();
+    pkt->removeTagIfPresent<EcnReq>();
     ipHeader->setTimeToLive(ttl);
     ipHeader->setCrcMode(CRC_DECLARED_CORRECT);
     ipHeader->setCrc(0);
@@ -1725,19 +1717,11 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, const Packet 
     auto hopLimitReq = pkt->removeTagIfPresent<HopLimitReq>();
 
     short ttl = dp->nh.iph->ttl;
-    if (hopLimitReq)
-        delete hopLimitReq;
-
-    if (auto dontFragmentReq = pkt->removeTagIfPresent<FragmentationReq>()) {
-        delete dontFragmentReq;
-    }
+    pkt->removeTagIfPresent<FragmentationReq>();
     // set other fields
-    if (DscpReq *dscpReq = pkt->removeTagIfPresent<DscpReq>()) {
-        delete dscpReq;
-    }
-    if (EcnReq *ecnReq = pkt->removeTagIfPresent<EcnReq>()) {
-        delete ecnReq;
-    }
+    pkt->removeTagIfPresent<DscpReq>();
+    pkt->removeTagIfPresent<EcnReq>();
+
     ipHeader->setTimeToLive(ttl);
     ipHeader->setCrcMode(CRC_DECLARED_CORRECT);
     ipHeader->setCrc(0);

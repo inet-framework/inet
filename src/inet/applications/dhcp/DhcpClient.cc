@@ -14,7 +14,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/applications/dhcp/DhcpClient.h"
@@ -79,11 +80,11 @@ void DhcpClient::initialize(int stage)
     }
 }
 
-InterfaceEntry *DhcpClient::chooseInterface()
+NetworkInterface *DhcpClient::chooseInterface()
 {
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
         ie = ift->findInterfaceByName(interfaceName);
@@ -93,7 +94,7 @@ InterfaceEntry *DhcpClient::chooseInterface()
     else {
         // there should be exactly one non-loopback interface that we want to configure
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            InterfaceEntry *current = ift->getInterface(i);
+            NetworkInterface *current = ift->getInterface(i);
             if (!current->isLoopback()) {
                 if (ie)
                     throw cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to configure via DHCP");
@@ -316,8 +317,9 @@ void DhcpClient::recordLease(const Ptr<const DhcpMessage>& dhcpACK)
 
 void DhcpClient::bindLease()
 {
-    ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(lease->ip);
-    ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(lease->subnetMask);
+    auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
+    ipv4Data->setIPAddress(lease->ip);
+    ipv4Data->setNetmask(lease->subnetMask);
 
     std::string banner = "Got IP " + lease->ip.str();
     host->bubble(banner.c_str());
@@ -353,8 +355,7 @@ void DhcpClient::bindLease()
     }
 
     // update the routing table
-    cancelEvent(leaseTimer);
-    scheduleAt(simTime() + lease->leaseTime, leaseTimer);
+    rescheduleAfter(lease->leaseTime, leaseTimer);
 }
 
 void DhcpClient::unbindLease()
@@ -367,8 +368,8 @@ void DhcpClient::unbindLease()
     cancelEvent(leaseTimer);
 
     irt->deleteRoute(route);
-    ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address());
-    ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
+    ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(Ipv4Address());
+    ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
 }
 
 void DhcpClient::initClient()
@@ -502,12 +503,12 @@ void DhcpClient::handleDhcpMessage(Packet *packet)
 
 void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     // host associated. link is up. change the state to init.
     if (signalID == l2AssociatedSignal) {
-        InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry *>(obj);
+        NetworkInterface *associatedIE = check_and_cast_nullable<NetworkInterface *>(obj);
         if (associatedIE && ie == associatedIE && clientState != IDLE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             unbindLease();
@@ -685,23 +686,20 @@ void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
 void DhcpClient::scheduleTimerTO(DhcpTimerType type)
 {
     // cancel the previous timeout
-    cancelEvent(timerTo);
     timerTo->setKind(type);
-    scheduleAt(simTime() + responseTimeout, timerTo);
+    rescheduleAfter(responseTimeout, timerTo);
 }
 
 void DhcpClient::scheduleTimerT1()
 {
     // cancel the previous T1
-    cancelEvent(timerT1);
-    scheduleAt(simTime() + (lease->renewalTime), timerT1);    // RFC 2131 4.4.5
+    rescheduleAfter(lease->renewalTime, timerT1);    // RFC 2131 4.4.5
 }
 
 void DhcpClient::scheduleTimerT2()
 {
     // cancel the previous T2
-    cancelEvent(timerT2);
-    scheduleAt(simTime() + (lease->rebindTime), timerT2);    // RFC 2131 4.4.5
+    rescheduleAfter(lease->rebindTime, timerT2);    // RFC 2131 4.4.5
 }
 
 void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)

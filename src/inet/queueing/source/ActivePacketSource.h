@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,24 +12,20 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_ACTIVEPACKETSOURCE_H
 #define __INET_ACTIVEPACKETSOURCE_H
 
-#include "inet/queueing/base/PacketSourceBase.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/base/ActivePacketSourceBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API ActivePacketSource : public PacketSourceBase, public IActivePacketSource
+class INET_API ActivePacketSource : public ActivePacketSourceBase
 {
   protected:
-    cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
-
     cPar *productionIntervalParameter = nullptr;
     cMessage *productionTimer = nullptr;
 
@@ -43,16 +39,12 @@ class INET_API ActivePacketSource : public PacketSourceBase, public IActivePacke
   public:
     virtual ~ActivePacketSource() { cancelAndDelete(productionTimer); }
 
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
-
-    virtual bool supportsPushPacket(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
-
-    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_ACTIVEPACKETSOURCE_H
+#endif
 

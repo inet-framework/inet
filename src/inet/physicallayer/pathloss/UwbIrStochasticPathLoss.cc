@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /* -*- mode:c++ -*- ********************************************************
  * author:      Jerome Rousselot
  *
@@ -5,13 +20,6 @@
  *              Real-Time Software and Networking
  *              Jaquet-Droz 1, CH-2002 Neuchatel, Switzerland.
  *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
  * description: this AnalogueModel models free-space pathloss
  ***************************************************************************/
 
@@ -59,16 +67,16 @@ void UwbIrStochasticPathLoss::initialize(int stage)
     }
 }
 
-std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UwbIrStochasticPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", PL0 = " << PL0
-               << ", muGamma = " << muGamma
-               << ", muSigma = " << muSigma
-               << ", sigmaGamma = " << sigmaGamma
-               << ", sigmaSigma = " << sigmaSigma
-               << ", shadowing = " << shadowing;
+               << EV_FIELD(muGamma)
+               << EV_FIELD(muSigma)
+               << EV_FIELD(sigmaGamma)
+               << EV_FIELD(sigmaSigma)
+               << EV_FIELD(shadowing);
     return stream;
 }
 

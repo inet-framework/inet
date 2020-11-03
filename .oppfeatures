@@ -7,10 +7,27 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.common.clock
+                       inet.clock.base
+                       inet.clock.common
+                       inet.clock.model
+                       inet.clock.oscillator
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_CLOCK_SUPPORT"
+        linkerFlags = ""
+        />
+    <feature
+        id="clocksupport_examples"
+        name="Clock support examples"
+        description = "Examples for clock support"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.clock
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
         linkerFlags = ""
         />
     <feature
@@ -722,6 +739,7 @@
                        inet.power.base
                        inet.power.consumer
                        inet.power.generator
+                       inet.power.management
                        inet.power.storage
                       "
         extraSourceFolders = ""
@@ -860,6 +878,7 @@
                        inet.visualizer.base
                        inet.visualizer.common
                        inet.visualizer.environment
+                       inet.visualizer.flow
                        inet.visualizer.integrated
                        inet.visualizer.linklayer
                        inet.visualizer.mobility
@@ -1062,6 +1081,20 @@
         linkerFlags = ""
         />
     <feature
+        id="Ieee8022"
+        name="IEEE 802.2"
+        description = ""
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.ieee8022
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_IEEE8022"
+        linkerFlags = ""
+        />
+    <feature
         id="TUN"
         name="TUN"
         description = "TUN/TAP virtual network interface"
@@ -1147,64 +1180,33 @@
         compileFlags = "-DWITH_CSMACA"
         linkerFlags = ""
         />
-    <feature
-        id="ExtraManetRouting"
-        name="ExtraManetRouting"
-        description = "InetManet routing protocols"
+<feature
+        id="queueing"
+        name="Queueing library"
+        description = "Queues, classifiers, schedulers, servers, etc."
         initiallyEnabled = "true"
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.routing.extras
+                       inet.queueing
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_EXTRAMANETROUTING"
+        compileFlags = "-DWITH_QUEUEING"
         linkerFlags = ""
         />
     <feature
-        id="LoraFlora"
-        name="Lora model"
-        description = "Lora/Flora implementation"
-        initiallyEnabled = "false"
-        requires = ""
-        labels = ""
-        nedPackages = "
-                      inet.lora
-                      inet.examples.lora
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_FLORACODE"
-        linkerFlags = ""
-        />        
-    <feature
-        id="ClodNetSim"
-        name="ClodNetSim"
-        description = "ClodNetSim++ model"
-        initiallyEnabled = "false"
-        requires = ""
-        labels = ""
-        nedPackages = "
-                       inet.greencloudsimulator
-                       inet.examples.cloudNetSim
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_CLOUDNETSIM"
-        linkerFlags = ""
-        />
-		<feature
-        id="iCanCloud"
-        name="iCanCloud"
-        description = "iCanCloud model"
+        id="protocolsupport"
+        name="Protocol support"
+        description = "Aggregation, fragmentation, etc."
         initiallyEnabled = "true"
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.icancloud
-                       inet.examples.icancloud
+                       inet.protocol
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_ICANCLOUD"
-        linkerFlags = "-lz"
+        compileFlags = "-DWITH_PROTOCOL"
+        linkerFlags = ""
         />
     <feature
         id="wirelesstutorial"
@@ -1226,6 +1228,30 @@
         requires = "Ieee80211 IPv4 AODV Ethernet visualization"
         labels = "tutorial configuration"
         nedPackages = "inet.tutorials.configurator"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="queueingtutorial"
+        name="Queueing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to queueing."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = "tutorial queueing"
+        nedPackages = "inet.tutorials.queueing"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="protocoltutorial"
+        name="Protocol tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to protocol."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = "tutorial protocol"
+        nedPackages = "inet.tutorials.protocol"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
@@ -1309,5 +1335,65 @@
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
+        /> 
+               
+    <feature
+        id="ExtraManetRouting"
+        name="ExtraManetRouting"
+        description = "InetManet routing protocols"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.routing.extras
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_EXTRAMANETROUTING"
+        linkerFlags = ""
+        />
+    <feature
+        id="LoraFlora"
+        name="Lora model"
+        description = "Lora/Flora implementation"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                      inet.lora
+                      inet.examples.lora
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_FLORACODE"
+        linkerFlags = ""
+        />        
+    <feature
+        id="ClodNetSim"
+        name="ClodNetSim"
+        description = "ClodNetSim++ model"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.greencloudsimulator
+                       inet.examples.cloudNetSim
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_CLOUDNETSIM"
+        linkerFlags = ""
+        />
+		<feature
+        id="iCanCloud"
+        name="iCanCloud"
+        description = "iCanCloud model"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.icancloud
+                       inet.examples.icancloud
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_ICANCLOUD"
+        linkerFlags = "-lz"
         />
 </features>

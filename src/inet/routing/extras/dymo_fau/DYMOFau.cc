@@ -438,7 +438,7 @@ L3Address DYMOFau::getNextHopAddress(Packet *pkt)
     }
 }
 
-InterfaceEntry* DYMOFau::getNextHopInterface(Packet* pktAux)
+NetworkInterface* DYMOFau::getNextHopInterface(Packet* pktAux)
 {
 
     const auto & pkt = pktAux->peekAtFront<DYMO_PacketBBMessage>();
@@ -452,11 +452,11 @@ InterfaceEntry* DYMOFau::getNextHopInterface(Packet* pktAux)
     int interfaceId = interfaceInd->getInterfaceId();
     if (interfaceId == -1) throw cRuntimeError("received packet's UDPControlInfo did not have information on interfaceId");
 
-    InterfaceEntry* srcIf = nullptr;
+    NetworkInterface* srcIf = nullptr;
 
     for (int i = 0; i < getNumWlanInterfaces(); i++)
     {
-        InterfaceEntry *ie = getWlanInterfaceEntry(i);
+        NetworkInterface *ie = getWlanInterfaceEntry(i);
         if (interfaceId == ie->getInterfaceId())
         {
             srcIf = ie;
@@ -553,11 +553,7 @@ void DYMOFau::handleLowerRMForRelay(Packet *pkt)
         return;
     }
     auto tag1 = pkt->removeTagIfPresent<NetworkProtocolInd>();
-    if (tag1)
-        delete tag1;
     auto tag2 = pkt->removeTagIfPresent<PacketProtocolTag>();
-    if (tag2)
-        delete tag2;
     pkt->trimFront();
     auto routingMsgAux = pkt->removeAtFront<DYMO_RM>();
     auto origNode = routingMsgAux->getOrigNode();
@@ -635,15 +631,13 @@ void DYMOFau::handleLowerRERR(Packet *pkt)
 {
 
     // get RERR's SourceInterface
-    InterfaceEntry* sourceInterface = getNextHopInterface(pkt);
+    NetworkInterface* sourceInterface = getNextHopInterface(pkt);
 
     /** message is a RERR. **/
     auto tag1 = pkt->removeTagIfPresent<NetworkProtocolInd>();
-    if (tag1)
-        delete tag1;
+
     auto tag2 = pkt->removeTagIfPresent<PacketProtocolTag>();
-    if (tag2)
-        delete tag2;
+
     pkt->trimFront();
     auto my_rerr = pkt->removeAtFront<DYMO_RERR>();
     statsDYMORcvd++;
@@ -823,18 +817,16 @@ void DYMOFau::handleSelfMsg(cMessage* apMsg)
     else throw cRuntimeError("unknown message type");
 }
 
-void DYMOFau::sendDown(Packet* apMsg, L3Address destAddr, InterfaceEntry *ientry)
+void DYMOFau::sendDown(Packet* apMsg, L3Address destAddr, NetworkInterface *ientry)
 {
     // all messages sent to a lower layer are delayed by 0..MAXJITTER seconds (draft-ietf-manet-jitter-01)
     simtime_t jitter = dblrand() * MAXJITTER;
 
     // set byte size of message
     auto tag1 = apMsg->removeTagIfPresent<NetworkProtocolInd>();
-    if (tag1)
-        delete tag1;
+
     auto tag2 = apMsg->removeTagIfPresent<PacketProtocolTag>();
-    if (tag2)
-        delete tag2;
+
     apMsg->trimFront();
 
     apMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::dymo);
@@ -1238,7 +1230,7 @@ void DYMOFau::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
     return;
 }
 
-bool DYMOFau::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ, L3Address nextHopAddress, InterfaceEntry* nextHopInterface)
+bool DYMOFau::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ, L3Address nextHopAddress, NetworkInterface* nextHopInterface)
 {
     DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(ab.getAddress());
     if (entry && !isRBlockBetter(entry, ab, isRREQ)) return false;
@@ -1289,7 +1281,7 @@ Packet* DYMOFau::updateRoutes(Packet * pkt)
 
     bool isRREQ = (dynamicPtrCast<const DYMO_RREQ>(re) != nullptr);
     L3Address nextHopAddress = getNextHopAddress(pkt);
-    InterfaceEntry* nextHopInterface = getNextHopInterface(pkt);
+    NetworkInterface* nextHopInterface = getNextHopInterface(pkt);
 
     if (re->getOrigNode().getAddress()==myAddr) return nullptr;
     bool origNodeEntryWasSuperior = updateRoutesFromAddressBlock(re->getOrigNode(), isRREQ, nextHopAddress, nextHopInterface);
@@ -1317,11 +1309,9 @@ Packet* DYMOFau::updateRoutes(Packet * pkt)
     }
 
     auto tag1 = pkt->removeTagIfPresent<NetworkProtocolInd>();
-    if (tag1)
-        delete tag1;
+
     auto tag2 = pkt->removeTagIfPresent<PacketProtocolTag>();
-    if (tag2)
-        delete tag2;
+
     pkt->trimFront();
 
     auto reAux = pkt->removeAtFront<DYMO_RM>();

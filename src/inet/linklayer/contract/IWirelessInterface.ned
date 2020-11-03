@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,18 +12,19 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.linklayer.contract;
 
 //
-// Module interface for wireless network interfaces.
+// This module interface is implemented by wireless network interfaces.
 //
 moduleinterface IWirelessInterface extends INetworkInterface
 {
     parameters:
         @display("i=block/ifcard");
     gates:
-        input radioIn @labels(IWirelessSignal); // to receive signals
+        input radioIn @labels(IWirelessSignal);
 }
+

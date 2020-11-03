@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2013 Maria Fernandez, Carlos Calafate, Juan-Carlos Cano and
-// Pietro Manzoni
+// Copyright (C) 2013 Maria Fernandez, Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_TCPWESTWOOD_H
@@ -39,7 +39,7 @@ class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
-    uint32 ssthresh;    ///< slow start threshold
+    uint32_t ssthresh;    ///< slow start threshold
 
     simtime_t w_RTTmin;    // min RTT
     double w_a;    // threshold reduction factor for ssthresh calculation
@@ -70,27 +70,27 @@ class INET_API TcpWestwood : public TcpBaseAlg
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
     /** Recalculate BWE */
-    virtual void recalculateBWE(uint32 cumul_ack);
+    virtual void recalculateBWE(uint32_t cumul_ack);
 
   public:
     /** Ctor */
     TcpWestwood();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32 firstSeqAcked) override;
+    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck() override;
 
     /** Called after we send data */
-    virtual void dataSent(uint32 fromseq) override;
+    virtual void dataSent(uint32_t fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
+    virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) override;
 };
 
 } // namespace tcp
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPWESTWOOD_H
+#endif
 

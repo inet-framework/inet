@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
@@ -39,15 +39,15 @@ LayeredTransmission::~LayeredTransmission()
     delete analogModel;
 }
 
-std::ostream& LayeredTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& LayeredTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LayeredTransmission";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", packetModel = " << printObjectToString(packetModel, level + 1)
-               << ", bitModel = " << printObjectToString(bitModel, level + 1)
-               << ", symbolModel = " << printObjectToString(symbolModel, level + 1)
-               << ", sampleModel = " << printObjectToString(sampleModel, level + 1)
-               << ", analogModel = " << printObjectToString(analogModel, level + 1);
+        stream << EV_FIELD(packetModel, printFieldToString(packetModel, level + 1, evFlags))
+               << EV_FIELD(bitModel, printFieldToString(bitModel, level + 1, evFlags))
+               << EV_FIELD(symbolModel, printFieldToString(symbolModel, level + 1, evFlags))
+               << EV_FIELD(sampleModel, printFieldToString(sampleModel, level + 1, evFlags))
+               << EV_FIELD(analogModel, printFieldToString(analogModel, level + 1, evFlags));
     return TransmissionBase::printToStream(stream, level);
 }
 

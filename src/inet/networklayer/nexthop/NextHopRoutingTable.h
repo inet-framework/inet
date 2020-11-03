@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
+// Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_NEXTHOPROUTINGTABLE_H
@@ -66,7 +66,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
 
     virtual void refreshDisplay() const override;
 
-    virtual void configureInterface(InterfaceEntry *ie);
+    virtual void configureInterface(NetworkInterface *ie);
 
     virtual void configureLoopback();
 
@@ -109,7 +109,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override;    //XXX should be find..., see next one
+    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override;    //XXX should be find..., see next one
 
     /**
      * To be called from route objects whenever a field changes. Used for
@@ -134,7 +134,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
      * Returns the output interface for the packets with dest as destination
      * address, or nullptr if the destination is not in routing table.
      */
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override;    //XXX redundant
+    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override;    //XXX redundant
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -240,5 +240,5 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPROUTINGTABLE_H
+#endif
 

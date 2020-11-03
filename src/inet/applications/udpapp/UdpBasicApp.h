@@ -1,11 +1,11 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004,2011 Andras Varga
+// Copyright (C) 2004,2011 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_UDPBASICAPP_H
@@ -24,6 +24,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/base/ClockUserModuleMixin.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -31,7 +32,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UdpBasicApp : public ApplicationBase, public UdpSocket::ICallback
+class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, public UdpSocket::ICallback
 {
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -40,14 +41,14 @@ class INET_API UdpBasicApp : public ApplicationBase, public UdpSocket::ICallback
     std::vector<L3Address> destAddresses;
     std::vector<std::string> destAddressStr;
     int localPort = -1, destPort = -1;
-    simtime_t startTime;
-    simtime_t stopTime;
+    clocktime_t startTime;
+    clocktime_t stopTime;
     bool dontFragment = false;
     const char *packetName = nullptr;
 
     // state
     UdpSocket socket;
-    cMessage *selfMsg = nullptr;
+    ClockEvent *selfMsg = nullptr;
 
     // statistics
     int numSent = 0;
@@ -85,5 +86,5 @@ class INET_API UdpBasicApp : public ApplicationBase, public UdpSocket::ICallback
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPBASICAPP_H
+#endif
 

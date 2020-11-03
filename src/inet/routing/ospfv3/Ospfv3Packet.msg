@@ -129,15 +129,15 @@ struct Ospfv3LsaPrefixMetric
 cplusplus(Ospfv3LsaPrefixMetric) {{
 bool operator ==(const Ospfv3LsaPrefixMetric& b) const
 {
-	return (dnBit == b.dnBit)
-		&& (pBit == b.pBit)
-		&& (xBit == b.xBit)
-		&& (laBit == b.laBit)
-		&& (nuBit == b.nuBit)
-		&& (prefixLen == b.prefixLen)
-		&& (metric == b.metric)
-		&& (addressPrefix == b.addressPrefix)
-		;
+    return (dnBit == b.dnBit)
+        && (pBit == b.pBit)
+        && (xBit == b.xBit)
+        && (laBit == b.laBit)
+        && (nuBit == b.nuBit)
+        && (prefixLen == b.prefixLen)
+        && (metric == b.metric)
+        && (addressPrefix == b.addressPrefix)
+        ;
 }
 
 bool operator !=(const Ospfv3LsaPrefixMetric& b) const { return ! (*this == b); }
@@ -164,14 +164,14 @@ struct Ospfv3LsaPrefix0
 cplusplus(Ospfv3LsaPrefix0) {{
 bool operator ==(const Ospfv3LsaPrefix0& b) const
 {
-	return (dnBit == b.dnBit)
-		&& (pBit == b.pBit)
-		&& (xBit == b.xBit)
-		&& (laBit == b.laBit)
-		&& (nuBit == b.nuBit)
-		&& (prefixLen == b.prefixLen)
-		&& (addressPrefix == b.addressPrefix)
-		;
+    return (dnBit == b.dnBit)
+        && (pBit == b.pBit)
+        && (xBit == b.xBit)
+        && (laBit == b.laBit)
+        && (nuBit == b.nuBit)
+        && (prefixLen == b.prefixLen)
+        && (addressPrefix == b.addressPrefix)
+        ;
 }
 
 bool operator !=(const Ospfv3LsaPrefix0& b) const { return ! (*this == b); }

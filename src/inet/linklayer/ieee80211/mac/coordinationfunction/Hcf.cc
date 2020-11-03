@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -117,7 +117,7 @@ void Hcf::updateDisplayString()
 
 void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    Enter_Method_Silent("processUpperFrame(%s)", packet->getName());
+    Enter_Method("processUpperFrame(%s)", packet->getName());
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     // TODO:
     // A QoS STA should send individually addressed Management frames that are addressed to a non-QoS STA
@@ -135,7 +135,7 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         throw cRuntimeError("Unknown message type");
     EV_INFO << "The upper frame has been classified as a " << printAccessCategory(ac) << " frame." << endl;
     auto pendingQueue = edca->getEdcaf(ac)->getPendingQueue();
-    pendingQueue->pushPacket(packet);
+    pendingQueue->enqueuePacket(packet);
     if (!pendingQueue->isEmpty()) {
         auto edcaf = edca->getChannelOwner();
         if (edcaf == nullptr || edcaf->getAccessCategory() != ac) {
@@ -147,21 +147,19 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
 {
-    Enter_Method_Silent();
-    scheduleAt(simTime() + timeout, startRxTimer);
+    Enter_Method("scheduleStartRxTimer");
+    scheduleAfter(timeout, startRxTimer);
 }
 
 void Hcf::scheduleInactivityTimer(simtime_t timeout)
 {
-    Enter_Method_Silent();
-    if (inactivityTimer->isScheduled())
-        cancelEvent(inactivityTimer);
-    scheduleAt(simTime() + timeout, inactivityTimer);
+    Enter_Method("scheduleInactivityTimer");
+    rescheduleAfter(timeout, inactivityTimer);
 }
 
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    Enter_Method_Silent("processLowerFrame(%s)", packet->getName());
+    Enter_Method("processLowerFrame(%s)", packet->getName());
     EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     auto edcaf = edca->getChannelOwner();
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
@@ -194,7 +192,7 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 
 void Hcf::channelGranted(IChannelAccess* channelAccess)
 {
-    Enter_Method_Silent("channelGranted");
+    Enter_Method("channelGranted");
     auto edcaf = check_and_cast<Edcaf*>(channelAccess);
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -276,7 +274,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
 
 void Hcf::frameSequenceFinished()
 {
-    Enter_Method_Silent("frameSequenceFinished");
+    Enter_Method("frameSequenceFinished");
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
@@ -368,7 +366,7 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
 
 void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    Enter_Method_Silent("transmissionComplete");
+    Enter_Method("transmissionComplete");
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         frameSequenceHandler->transmissionComplete();
@@ -383,7 +381,7 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
 
 void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
 {
-    Enter_Method_Silent("originatorProcessRtsProtectionFailed");
+    Enter_Method("originatorProcessRtsProtectionFailed");
     auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
@@ -421,7 +419,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
 
 void Hcf::originatorProcessTransmittedFrame(Packet *packet)
 {
-    Enter_Method_Silent("originatorProcessTransmittedFrame");
+    Enter_Method("originatorProcessTransmittedFrame");
     EV_INFO << "Processing transmitted frame " << packet->getName() << " as originator in frame sequence.\n";
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
@@ -489,7 +487,7 @@ void Hcf::originatorProcessTransmittedControlFrame(const Ptr<const Ieee80211MacH
 
 void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
 {
-    Enter_Method_Silent("originatorProcessFailedFrame");
+    Enter_Method("originatorProcessFailedFrame");
     auto failedHeader = failedPacket->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
@@ -548,7 +546,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
 
 void Hcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTransmittedPacket)
 {
-    Enter_Method_Silent("originatorProcessReceivedFrame");
+    Enter_Method("originatorProcessReceivedFrame");
     EV_INFO << "Processing received frame " << receivedPacket->getName() << " as originator in frame sequence.\n";
     emit(packetReceivedFromPeerSignal, receivedPacket);
     auto receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
@@ -660,7 +658,7 @@ void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
 
 void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
-    Enter_Method_Silent("transmitFrame");
+    Enter_Method("transmitFrame");
     auto channelOwner = edca->getChannelOwner();
     if (channelOwner) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
@@ -699,7 +697,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 
 void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader)
 {
-    Enter_Method_Silent("transmitControlResponseFrame");
+    Enter_Method("transmitControlResponseFrame");
     responsePacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(receivedHeader))
@@ -735,7 +733,7 @@ void Hcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
 
 void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
-    Enter_Method_Silent("processMgmtFrame");
+    Enter_Method("processMgmtFrame");
     mgmtPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     processUpperFrame(mgmtPacket, mgmtHeader);
 }
@@ -770,7 +768,7 @@ bool Hcf::isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const
 
 void Hcf::corruptedFrameReceived()
 {
-    Enter_Method_Silent("corruptedFrameReceived");
+    Enter_Method("corruptedFrameReceived");
     if (frameSequenceHandler->isSequenceRunning() && !startRxTimer->isScheduled()) {
         frameSequenceHandler->handleStartRxTimeout();
         updateDisplayString();

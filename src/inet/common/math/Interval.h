@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MATH_INTERVAL_H_
-#define __INET_MATH_INTERVAL_H_
+#ifndef __INET_INTERVAL_H
+#define __INET_INTERVAL_H
 
 #include <bitset>
 #include <functional>
@@ -41,7 +43,7 @@ class INET_API Interval
 
   protected:
     template<size_t ... IS>
-    void checkImpl(integer_sequence<size_t, IS...>) const {
+    void checkImpl(std::integer_sequence<size_t, IS...>) const {
         unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         bool check = true;
         std::initializer_list<bool> l1{ check &= std::get<IS>(lower) <= std::get<IS>(upper) ... }; (void)l1;
@@ -65,7 +67,7 @@ class INET_API Interval
     }
 
     template<size_t ... IS>
-    bool containsImpl(const Point<T ...>& p, integer_sequence<size_t, IS...>) const {
+    bool containsImpl(const Point<T ...>& p, std::integer_sequence<size_t, IS...>) const {
         bool result = true;
         unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         (void)std::initializer_list<bool>{ result &= ((lowerClosed & (b >> IS)) ? std::get<IS>(lower) <= std::get<IS>(p) : std::get<IS>(lower) < std::get<IS>(p)) ... };
@@ -74,7 +76,7 @@ class INET_API Interval
     }
 
     template<size_t ... IS>
-    Interval<T ...> intersectImpl(const Interval<T ...>& o, integer_sequence<size_t, IS...>) const {
+    Interval<T ...> intersectImpl(const Interval<T ...>& o, std::integer_sequence<size_t, IS...>) const {
         unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         Point<T ...> l( math::maxnan(std::get<IS>(lower), std::get<IS>(o.lower)) ... ); (void)l;
         Point<T ...> u( math::minnan(std::get<IS>(upper), std::get<IS>(o.upper)) ... ); (void)u;
@@ -92,7 +94,7 @@ class INET_API Interval
     }
 
     template<size_t ... IS>
-    double getVolumeImpl(integer_sequence<size_t, IS...>) const {
+    double getVolumeImpl(std::integer_sequence<size_t, IS...>) const {
         double result = 1;
         unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         (void)std::initializer_list<double>{ result *= ((fixed & (b >> IS)) ? 1 : toDouble(std::get<IS>(upper) - std::get<IS>(lower))) ... };
@@ -100,7 +102,7 @@ class INET_API Interval
     }
 
     template<size_t ... IS>
-    bool isEmptyImpl(integer_sequence<size_t, IS...>) const {
+    bool isEmptyImpl(std::integer_sequence<size_t, IS...>) const {
         unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         bool result = false;
         (void)std::initializer_list<bool>{ result |= ((fixed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... };
@@ -111,7 +113,7 @@ class INET_API Interval
     Interval(const Point<T ...>& lower, const Point<T ...>& upper, unsigned char lowerClosed, unsigned char upperClosed, unsigned char fixed) :
         lower(lower), upper(upper), lowerClosed(lowerClosed), upperClosed(upperClosed), fixed(fixed) {
 #ifndef NDEBUG
-        checkImpl(index_sequence_for<T ...>{});
+        checkImpl(std::index_sequence_for<T ...>{});
 #endif
     }
 
@@ -140,21 +142,21 @@ class INET_API Interval
     }
 
     bool contains(const Point<T ...>& p) const {
-        return containsImpl(p, index_sequence_for<T ...>{});
+        return containsImpl(p, std::index_sequence_for<T ...>{});
     }
 
     /// Returns the volume in the dimensions denoted by the 1 bits of dims
     double getVolume() const {
-        return getVolumeImpl(index_sequence_for<T ...>{});
+        return getVolumeImpl(std::index_sequence_for<T ...>{});
     }
 
     /// Returns true iff getVolume() == 0
     bool isEmpty() const {
-        return isEmptyImpl(index_sequence_for<T ...>{});
+        return isEmptyImpl(std::index_sequence_for<T ...>{});
     }
 
     Interval<T ...> getIntersected(const Interval<T ...>& o) const {
-        return intersectImpl(o, index_sequence_for<T ...>{});
+        return intersectImpl(o, std::index_sequence_for<T ...>{});
     }
 
     Interval<T ...> getShifted(const Point<T ...>& p) const {
@@ -202,7 +204,7 @@ inline void iterateCorners(const Interval<T0, TS ...>& i, const std::function<vo
 namespace internal {
 
 template<typename ... T, size_t ... IS>
-inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, integer_sequence<size_t, IS...>) {
+inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, std::integer_sequence<size_t, IS...>) {
     const auto& lower = i.getLower();
     const auto& upper = i.getUpper();
     auto lowerClosed = i.getLowerClosed(); (void)lowerClosed;
@@ -219,7 +221,7 @@ inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, integer_s
 
 template<typename ... T>
 inline std::ostream& operator<<(std::ostream& os, const Interval<T ...>& i) {
-    internal::print(os, i, index_sequence_for<T ...>{});
+    internal::print(os, i, std::index_sequence_for<T ...>{});
     return os;
 }
 
@@ -227,5 +229,5 @@ inline std::ostream& operator<<(std::ostream& os, const Interval<T ...>& i) {
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_INTERVAL_H_
+#endif
 

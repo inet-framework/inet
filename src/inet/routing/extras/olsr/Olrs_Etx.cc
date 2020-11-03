@@ -3448,7 +3448,7 @@ bool Olsr_Etx::getNextHop(const L3Address &dest, L3Address &add, int &iface, dou
             if (rt_entry_aux->next_addr() != add)
                 throw cRuntimeError("OLSR Data base error");
 
-            InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+            NetworkInterface * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
             iface = ie->getInterfaceId();
             if (parameter_.link_delay())
                cost = rt_entry->delay;
@@ -3467,7 +3467,7 @@ bool Olsr_Etx::getNextHop(const L3Address &dest, L3Address &add, int &iface, dou
     if (rt_entry_aux->next_addr() != add)
         throw cRuntimeError("OLSR Data base error");
 
-    InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+    NetworkInterface * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
     iface = ie->getInterfaceId();
     if (parameter_.link_delay())
        cost = rt_entry->delay;

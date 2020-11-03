@@ -53,7 +53,7 @@ class DYMO_RoutingEntry
     L3Address routeAddress; /**< The IPv4 destination address of the getNode(s) associated with the routing table entry. */
     unsigned int routeSeqNum = 0; /**< The DYMO SeqNum associated with this routing information. */
     L3Address routeNextHopAddress; /**< The IPv4 address of the next DYMO router on the path toward the Route.Address. */
-    InterfaceEntry* routeNextHopInterface = nullptr; /**< The interface used to send packets toward the Route.Address. */
+    NetworkInterface* routeNextHopInterface = nullptr; /**< The interface used to send packets toward the Route.Address. */
     bool routeBroken = false; /**< A flag indicating whether this Route is broken.  This flag is set if the next hop becomes unreachable or in response to processing a RERR (see Section 5.5.4). */
     /*@}*/
 

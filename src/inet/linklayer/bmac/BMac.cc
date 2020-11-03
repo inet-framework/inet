@@ -10,7 +10,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETUtils.h"
@@ -22,7 +22,7 @@
 #include "inet/linklayer/bmac/BMacHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -94,7 +94,7 @@ void BMac::initialize(int stage)
         resend_data = new cMessage("resend_data", BMAC_RESEND_DATA);
         resend_data->setSchedulingPriority(100);
 
-        scheduleAt(simTime(), start_bmac);
+        scheduleAfter(SIMTIME_ZERO, start_bmac);
     }
 }
 
@@ -128,21 +128,21 @@ void BMac::finish()
     //recordScalar("timeTX", timeTX);
 }
 
-void BMac::configureInterfaceEntry()
+void BMac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(false);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(false);
+    networkInterface->setBroadcast(true);
 }
 
 /**
@@ -153,13 +153,12 @@ void BMac::configureInterfaceEntry()
 void BMac::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
-    txQueue->pushPacket(packet);
+    txQueue->enqueuePacket(packet);
     EV_DETAIL << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue\n"
               << "  queue size: " << txQueue->getNumPackets() << " macState: " << macState << endl;
     // force wakeup now
     if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
-        cancelEvent(wakeup);
-        scheduleAt(simTime() + dblrand() * 0.1f, wakeup);
+        rescheduleAfter(dblrand() * 0.1f, wakeup);
     }
 }
 
@@ -169,7 +168,7 @@ void BMac::handleUpperPacket(Packet *packet)
 void BMac::sendPreamble()
 {
     auto preamble = makeShared<BMacControlFrame>();
-    preamble->setSrcAddr(interfaceEntry->getMacAddress());
+    preamble->setSrcAddr(networkInterface->getMacAddress());
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(ctrlFrameLength);
 
@@ -189,7 +188,7 @@ void BMac::sendPreamble()
 void BMac::sendMacAck()
 {
     auto ack = makeShared<BMacControlFrame>();
-    ack->setSrcAddr(interfaceEntry->getMacAddress());
+    ack->setSrcAddr(networkInterface->getMacAddress());
     ack->setDestAddr(lastDataPktSrcAddr);
     ack->setChunkLength(ctrlFrameLength);
 
@@ -224,7 +223,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State INIT, message BMAC_START, new state SLEEP" << endl;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 macState = SLEEP;
-                scheduleAt(simTime() + dblrand() * slotDuration, wakeup);
+                scheduleAfter(dblrand() * slotDuration, wakeup);
                 return;
             }
             break;
@@ -232,7 +231,7 @@ void BMac::handleSelfMessage(cMessage *msg)
         case SLEEP:
             if (msg->getKind() == BMAC_WAKE_UP) {
                 EV_DETAIL << "State SLEEP, message BMAC_WAKEUP, new state CCA" << endl;
-                scheduleAt(simTime() + checkInterval, cca_timeout);
+                scheduleAfter(checkInterval, cca_timeout);
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                 macState = CCA;
                 return;
@@ -248,14 +247,14 @@ void BMac::handleSelfMessage(cMessage *msg)
                                  " SEND_PREAMBLE" << endl;
                     macState = SEND_PREAMBLE;
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    scheduleAt(simTime() + slotDuration, stop_preambles);
+                    scheduleAfter(slotDuration, stop_preambles);
                     return;
                 }
                 // if not, go back to sleep and wake up after a full period
                 else {
                     EV_DETAIL << "State CCA, message CCA_TIMEOUT, new state SLEEP"
                               << endl;
-                    scheduleAt(simTime() + slotDuration, wakeup);
+                    scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     return;
@@ -269,7 +268,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                              " WAIT_DATA" << endl;
                 macState = WAIT_DATA;
                 cancelEvent(cca_timeout);
-                scheduleAt(simTime() + slotDuration + checkInterval, data_timeout);
+                scheduleAfter(slotDuration + checkInterval, data_timeout);
                 delete msg;
                 return;
             }
@@ -282,8 +281,8 @@ void BMac::handleSelfMessage(cMessage *msg)
                           << endl;
                 macState = WAIT_DATA;
                 cancelEvent(cca_timeout);
-                scheduleAt(simTime() + slotDuration + checkInterval, data_timeout);
-                scheduleAt(simTime(), msg);
+                scheduleAfter(slotDuration + checkInterval, data_timeout);
+                scheduleAfter(SIMTIME_ZERO, msg);
                 return;
             }
             //in case we get an ACK, we simply dicard it, because it means the end
@@ -300,7 +299,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State SEND_PREAMBLE, message BMAC_SEND_PREAMBLE, new"
                              " state SEND_PREAMBLE" << endl;
                 sendPreamble();
-                scheduleAt(simTime() + 0.5f * checkInterval, send_preamble);
+                scheduleAfter(0.5f * checkInterval, send_preamble);
                 macState = SEND_PREAMBLE;
                 return;
             }
@@ -338,7 +337,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                                  " new state WAIT_ACK" << endl;
                     macState = WAIT_ACK;
                     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-                    scheduleAt(simTime() + checkInterval, ack_timeout);
+                    scheduleAfter(checkInterval, ack_timeout);
                 }
                 else {
                     EV_DETAIL << "State WAIT_TX_DATA_OVER, message BMAC_DATA_TX_OVER,"
@@ -346,9 +345,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                     deleteCurrentTxFrame();
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 }
@@ -364,7 +363,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                                  " SEND_DATA" << endl;
                     txAttempts++;
                     macState = SEND_PREAMBLE;
-                    scheduleAt(simTime() + slotDuration, stop_preambles);
+                    scheduleAfter(slotDuration, stop_preambles);
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 }
                 else {
@@ -378,9 +377,9 @@ void BMac::handleSelfMessage(cMessage *msg)
 
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     nbMissedAcks++;
@@ -409,9 +408,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                     deleteCurrentTxFrame();
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
@@ -438,7 +437,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             if (msg->getKind() == BMAC_DATA) {
-                MacAddress address = interfaceEntry->getMacAddress();
+                MacAddress address = networkInterface->getMacAddress();
                 nbRxDataPackets++;
                 auto packet = check_and_cast<Packet *>(msg);
                 const auto bmacHeader = packet->peekAtFront<BMacDataFrameHeader>();
@@ -472,9 +471,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                               << endl;
                     // if something in the queue, wakeup soon.
                     if (!txQueue->isEmpty())
-                        scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                        scheduleAfter(dblrand() * checkInterval, wakeup);
                     else
-                        scheduleAt(simTime() + slotDuration, wakeup);
+                        scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 }
@@ -485,9 +484,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                              " SLEEP" << endl;
                 // if something in the queue, wakeup soon.
                 if (!txQueue->isEmpty())
-                    scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                    scheduleAfter(dblrand() * checkInterval, wakeup);
                 else
-                    scheduleAt(simTime() + slotDuration, wakeup);
+                    scheduleAfter(slotDuration, wakeup);
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 return;
@@ -512,9 +511,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                 // ack sent, go to sleep now.
                 // if something in the queue, wakeup soon.
                 if (!txQueue->isEmpty())
-                    scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
+                    scheduleAfter(dblrand() * checkInterval, wakeup);
                 else
-                    scheduleAt(simTime() + slotDuration, wakeup);
+                    scheduleAfter(slotDuration, wakeup);
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
@@ -561,20 +560,20 @@ void BMac::sendDataPacket()
 
 void BMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signalID == IRadio::radioModeChangedSignal) {
         IRadio::RadioMode radioMode = static_cast<IRadio::RadioMode>(value);
         if (radioMode == IRadio::RADIO_MODE_TRANSMITTER) {
             // we just switched to TX after CCA, so simply send the first
             // sendPremable self message
             if (macState == SEND_PREAMBLE)
-                scheduleAt(simTime(), send_preamble);
+                scheduleAfter(SIMTIME_ZERO, send_preamble);
             else if (macState == SEND_ACK)
-                scheduleAt(simTime(), send_ack);
+                scheduleAfter(SIMTIME_ZERO, send_ack);
             // we were waiting for acks, but none came. we switched to TX and now
             // need to resend data
             else if (macState == SEND_DATA)
-                scheduleAt(simTime(), resend_data);
+                scheduleAfter(SIMTIME_ZERO, resend_data);
         }
     }
     // Transmission of one packet is over
@@ -582,9 +581,9 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             if (macState == WAIT_TX_DATA_OVER)
-                scheduleAt(simTime(), data_tx_over);
+                scheduleAfter(SIMTIME_ZERO, data_tx_over);
             else if (macState == WAIT_ACK_TX)
-                scheduleAt(simTime(), ack_tx_over);
+                scheduleAfter(SIMTIME_ZERO, ack_tx_over);
         }
         transmissionState = newRadioTransmissionState;
     }
@@ -680,7 +679,7 @@ void BMac::decapsulate(Packet *packet)
 {
     const auto& bmacHeader = packet->popAtFront<BMacDataFrameHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
@@ -704,7 +703,7 @@ void BMac::encapsulate(Packet *packet)
     delete packet->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
-    pkt->setSrcAddr(interfaceEntry->getMacAddress());
+    pkt->setSrcAddr(networkInterface->getMacAddress());
 
     //encapsulate the network packet
     packet->insertAtFront(pkt);

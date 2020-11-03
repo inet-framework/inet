@@ -1,19 +1,18 @@
 //
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/transportlayer/tcp_lwip/TcpLwip.h"
@@ -31,7 +30,7 @@
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -108,8 +107,8 @@ void TcpLwip::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
+        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
@@ -136,14 +135,6 @@ TcpLwip::~TcpLwip()
 
     while (!tcpAppConnMapM.empty()) {
         auto i = tcpAppConnMapM.begin();
-        auto& pcb = i->second->pcbM;
-        if (pcb) {
-            pcb->callback_arg = nullptr;
-            getLwipTcpLayer()->tcp_pcb_purge(pcb);
-            memp_free(MEMP_TCP_PCB, pcb);
-            pcb = nullptr;
-        }
-        i->second->deleteModule();
         tcpAppConnMapM.erase(i);
     }
 
@@ -243,7 +234,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     delete packet;
 }
 
-void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo,
         const void *dataptr, int len)
 {
     TcpLwipConnection *conn = (pcb != nullptr) ? static_cast<TcpLwipConnection *>(pcb->callback_arg) : nullptr;
@@ -416,7 +407,7 @@ struct netif *TcpLwip::ip_route(L3Address const& ipAddr)
 
 void TcpLwip::handleAppMessage(cMessage *msgP)
 {
-    auto& tags = getTags(msgP);
+    auto& tags = check_and_cast<ITaggedObject *>(msgP)->getTags();
     int connId = tags.getTag<SocketReq>()->getSocketId();
 
     TcpLwipConnection *conn = findAppConn(connId);
@@ -488,7 +479,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
 
     if (!pLwipFastTimerM->isScheduled()) {    // lwip fast timer
         if (nullptr != pLwipTcpLayerM->tcp_active_pcbs || nullptr != pLwipTcpLayerM->tcp_tw_pcbs)
-            scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
+            scheduleAfter(roundTime(simTime() + 0.250, 4) - simTime(), pLwipFastTimerM);
     }
 }
 
@@ -739,7 +730,8 @@ void TcpLwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TcpOpenCommand *tcp
 {
     ASSERT(pLwipTcpLayerM);
 
-    ASSERT(tcpCommandP->getFork() == true);
+    if (tcpCommandP->getFork() == false)
+        throw cRuntimeError("Error processing command OPEN_PASSIVE: non-forking listening connections are not supported yet");
 
     if (tcpCommandP->getLocalPort() == -1)
         throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");

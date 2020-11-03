@@ -10,11 +10,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef INET_TRANSPORTLAYER_RTP_PROFILES_AVPROFILE_RTPMPEGPACKETSERIALIZER_H_
-#define INET_TRANSPORTLAYER_RTP_PROFILES_AVPROFILE_RTPMPEGPACKETSERIALIZER_H_
+#ifndef __INET_RTPMPEGPACKETSERIALIZER_H
+#define __INET_RTPMPEGPACKETSERIALIZER_H
 
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
@@ -38,5 +38,5 @@ class INET_API RtpMpegPacketSerializer : public FieldsChunkSerializer
 } // namespace rtp
 } // namespace inet
 
-#endif /* INET_TRANSPORTLAYER_RTP_PROFILES_AVPROFILE_RTPMPEGPACKETSERIALIZER_H_ */
+#endif
 

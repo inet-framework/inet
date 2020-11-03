@@ -33,5 +33,5 @@ cmdenv-event-banners = false
 
 %exitcode: 1
 
-%contains: stderr
-doesn't support pop on gate
+%contains-regex: stderr
+doesn't support packet pushing on gate

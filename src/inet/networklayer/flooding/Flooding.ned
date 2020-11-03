@@ -1,19 +1,26 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //***************************************************************************
 // * file:        Flooding.ned
 // *
 // * author:      Daniel Willkomm
-// *		  
+// *
 // *
 // * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 // *              Technische Universitaet Berlin, Germany.
 // *
-// *              This program is free software; you can redistribute it 
-// *              and/or modify it under the terms of the GNU General Public 
-// *              License as published by the Free Software Foundation; either
-// *              version 2 of the License, or (at your option) any later 
-// *              version.
-// *              For further information see file COPYING 
-// *              in the top level directory
 // *
 // ***************************************************************************
 // * part of:     framework implementation developed by tkn
@@ -37,7 +44,7 @@ import inet.networklayer.contract.INetworkProtocol;
 // .ini file (bcMaxEntries parameter) as well as the time after which an entry
 // is deleted (bcDelTime parameter).
 //
-// If you prefere a memory-less version you should set to false the 
+// If you prefere a memory-less version you should set to false the
 // plainFlooding bool parameter.
 //
 // @author Daniel Willkomm

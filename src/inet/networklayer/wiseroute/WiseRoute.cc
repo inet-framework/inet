@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /***************************************************************************
  * file:        WiseRoute.cc
  *
@@ -7,13 +22,6 @@
  *
  * description: Implementation of the routing protocol of WiseStack.
  *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
  *
  *
  * Funding: This work was partially financed by the European Commission under the
@@ -92,7 +100,7 @@ void WiseRoute::initialize(int stage)
 
         // only schedule a flood of the node is a sink!!
         if (routeFloodsInterval > 0 && myNetwAddr == sinkAddress)
-            scheduleAt(simTime() + uniform(0.5, 1.5), routeFloodTimer);
+            scheduleAfter(uniform(0.5, 1.5), routeFloodTimer);
     }
 }
 
@@ -124,7 +132,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         sendDown(packet);
         nbFloodsSent++;
         nbRouteFloodsSent++;
-        scheduleAt(simTime() + routeFloodsInterval + uniform(0, 1), routeFloodTimer);
+        scheduleAfter(routeFloodsInterval + uniform(0, 1), routeFloodTimer);
     }
     else {
         EV << "WiseRoute - handleSelfMessage: got unexpected message of kind " << msg->getKind() << endl;
@@ -248,7 +256,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
 
     pkt->setChunkLength(B(headerLength));
 
-    auto addrTag = packet->findTag<L3AddressReq>();
+    const auto& addrTag = packet->findTag<L3AddressReq>();
     if (addrTag == nullptr) {
         EV << "WiseRoute warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";

@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,27 +12,18 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/PacketEventTag.h"
+#include "inet/common/TimeTag.h"
 #include "inet/queueing/common/PacketDelayer.h"
 
 namespace inet {
 namespace queueing {
 
 Define_Module(PacketDelayer);
-
-void PacketDelayer::initialize(int stage)
-{
-    PassivePacketSinkBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        inputGate = gate("in");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
-        outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    }
-}
 
 void PacketDelayer::handleMessage(cMessage *message)
 {
@@ -41,26 +32,34 @@ void PacketDelayer::handleMessage(cMessage *message)
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else
-        throw cRuntimeError("Unknown message");
+        PacketPusherBase::handleMessage(message);
 }
 
 void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    EV_INFO << "Delaying packet " << packet->getName() << "." << endl;
     take(packet);
-    packet->setArrival(getId(), inputGate->getId(), simTime());
-    scheduleAt(simTime() + par("delay"), packet);
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
+    EV_INFO << "Delaying packet" << EV_FIELD(packet) << EV_ENDL;
+    simtime_t delay = par("delay");
+    scheduleAt(simTime() + delay, packet);
+    insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength());
+    increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength());
+    handlePacketProcessed(packet);
     updateDisplayString();
 }
 
-void PacketDelayer::handleCanPushPacket(cGate *gate)
+void PacketDelayer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
+    Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+}
+
+void PacketDelayer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    if (producer != nullptr)
+        producer->handlePushPacketProcessed(packet, gate, successful);
 }
 
 } // namespace queueing

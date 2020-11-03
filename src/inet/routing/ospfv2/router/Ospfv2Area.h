@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_OSPFV2AREA_H
@@ -129,8 +130,8 @@ class INET_API Ospfv2Area : public cObject
     void recheckSummaryLSAs(std::vector<Ospfv2RoutingTableEntry *>& newRoutingTable);
 
     std::string str() const override;
-    std::string info() const OMNETPP5_CODE(override);
-    std::string detailedInfo() const OMNETPP5_CODE(override);
+    std::string info() const;
+    std::string detailedInfo() const;
 
   private:
     SummaryLsa *originateSummaryLSA(const SummaryLsa *summaryLSA);
@@ -167,5 +168,5 @@ inline std::ostream& operator<<(std::ostream& ostr, Ospfv2Area& area)
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2AREA_H
+#endif
 

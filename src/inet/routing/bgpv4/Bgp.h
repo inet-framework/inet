@@ -12,11 +12,12 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_BGPROUTING_H
-#define __INET_BGPROUTING_H
+#ifndef __INET_BGP_H
+#define __INET_BGP_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
@@ -56,5 +57,5 @@ private:
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPROUTING_H
+#endif
 

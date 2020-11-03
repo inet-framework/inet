@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_IEEE802154NARROWBANDSCALARTRANSMITTER_H
@@ -30,7 +31,7 @@ class INET_API Ieee802154NarrowbandScalarTransmitter : public FlatTransmitterBas
   public:
     Ieee802154NarrowbandScalarTransmitter();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
 };
 
@@ -38,5 +39,5 @@ class INET_API Ieee802154NarrowbandScalarTransmitter : public FlatTransmitterBas
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154NARROWBANDSCALARTRANSMITTER_H
+#endif
 

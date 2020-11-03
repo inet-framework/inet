@@ -1,0 +1,35 @@
+%description:
+Tests SettableClock:
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = inet.test.unittest.lib.ClockTestNetwork
+cmdenv-express-mode = false
+cmdenv-log-prefix = "C:%C: "
+
+*.host.clock.typename = "SettableClock"
+*.host.clock.oscillator.driftRate = -0.5e6 ppm
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "^C:" test.out > clock.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains: clock.out
+C:(ClockTestApp)ClockTestNetwork.host.app: start
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_1.1 to clock: 1.1, scheduled simtime: 2.2, scheduled clock: 1.1
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.11 to clock: 2.11, scheduled simtime: 4.22, scheduled clock: 2.11
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.89 to clock: 2.89, scheduled simtime: 5.78, scheduled clock: 2.89
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.9999999 to clock: 2.9999999, scheduled simtime: 5.9999998, scheduled clock: 2.9999999
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_3.11 to clock: 3.11, scheduled simtime: 6.22, scheduled clock: 3.11
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_1.1: simtime: 2.2, clock: 1.1
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.11: simtime: 4.22, clock: 2.11
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 5.78, clock: 2.89
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 5.9999998, clock: 2.9999999
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 6.22, clock: 3.11
+C:(ClockTestApp)ClockTestNetwork.host.app: finished: simtime: 6.22, clock: 3.11
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

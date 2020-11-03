@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MATH_IINTERPOLATOR_H_
-#define __INET_MATH_IINTERPOLATOR_H_
+#ifndef __INET_IINTERPOLATOR_H
+#define __INET_IINTERPOLATOR_H
 
 #include "inet/common/INETDefs.h"
 
@@ -58,5 +60,5 @@ class INET_API IInterpolator : public cObject
 
 } // namespace inet
 
-#endif // #ifndef __INET_MATH_IINTERPOLATOR_H_
+#endif
 

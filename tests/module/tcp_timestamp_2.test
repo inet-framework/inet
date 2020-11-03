@@ -42,12 +42,6 @@ TCP TimeStamp test
 [General]
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 network = inet.test.moduletest.lib.TcpTestNet1
 
 cmdenv-event-banners=false
@@ -110,20 +104,33 @@ while($sor = <FILE>)
 %postrun-command:  perl ./postrun.pl
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
+cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 5000   Option(s): MaxSegSize NOP NOP TS(0,0)
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 5000   Option(s): MaxSegSize NOP NOP TS(2,0)
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(4,0)
 srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 [1.001 A003] A.1000 > B.2000: A 1:501(500) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)
+[1.001 A004] A.1000 > B.2000: A 501:513(12) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)# removing original
 [1.003 B002] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(1002,1000)
-[1.005 A004] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# removing original
-[1.005 A005] A.1000 > B.2000: A 1001:1501(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
-[1.007 B003] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(1006,1000)
-[1.008 A005] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# introducing copy
-[1.010 B004] A.1000 < B.2000: A ack 1501 win 5000   Option(s): NOP NOP TS(1009,1004)
-[1.012 A006] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000   Option(s): NOP NOP TS(1011,1009)# removing original
-[1.012 A007] A.1000 > B.2000: A 2001:2501(500) ack 501 win 5000   Option(s): NOP NOP TS(1011,1009)
-[1.014 B005] A.1000 < B.2000: A ack 1501 win 5000   Option(s): NOP NOP TS(1013,1004)
-[1.015 A007] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000   Option(s): NOP NOP TS(1011,1009)# introducing copy
-[1.017 B006] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP TS(1016,1011)
-[1.018] tcpdump finished, A:7 B:6 segments
+[1.004 A004] A.1000 > B.2000: A 501:513(12) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)# introducing copy
+[1.005 A005] A.1000 > B.2000: A 513:1013(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
+[1.005 A006] A.1000 > B.2000: A 1013:1513(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# removing original
+[1.005 A007] A.1000 > B.2000: A 1513:1525(12) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
+[1.006 B003] A.1000 < B.2000: A ack 513 win 5000   Option(s): NOP NOP TS(1005,1000)
+[1.007 B004] A.1000 < B.2000: A ack 1013 win 5000   Option(s): NOP NOP TS(1006,1004)
+[1.007 B005] A.1000 < B.2000: A ack 1013 win 5000   Option(s): NOP NOP TS(1006,1004)
+[1.008 A007] A.1000 > B.2000: A 1013:1513(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# introducing copy
+[1.008 A008] A.1000 > B.2000: A 1525:2025(500) ack 501 win 5000   Option(s): NOP NOP TS(1007,1005)
+[1.008 A009] A.1000 > B.2000: A 2025:2049(24) ack 501 win 5000   Option(s): NOP NOP TS(1007,1005)
+[1.009 A010] A.1000 > B.2000: A 2049:2501(452) ack 501 win 5000   Option(s): NOP NOP TS(1008,1006)
+[1.010 B006] A.1000 < B.2000: A ack 1525 win 5000   Option(s): NOP NOP TS(1009,1004)
+[1.010 B007] A.1000 < B.2000: A ack 2025 win 5000   Option(s): NOP NOP TS(1009,1007)
+[1.010 B008] A.1000 < B.2000: A ack 2049 win 5000   Option(s): NOP NOP TS(1009,1007)
+[1.011 B009] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP TS(1010,1008)
+[1.012] tcpdump finished, A:10 B:9 segments
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

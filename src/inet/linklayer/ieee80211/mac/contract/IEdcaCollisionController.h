@@ -12,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ICOLLISIONCONTROLLER_H
-#define __INET_ICOLLISIONCONTROLLER_H
+#ifndef __INET_IEDCACOLLISIONCONTROLLER_H
+#define __INET_IEDCACOLLISIONCONTROLLER_H
 
 #include "inet/common/INETDefs.h"
 
@@ -37,4 +37,5 @@ class INET_API IEdcaCollisionController
 } // namespace ieee80211
 } // namespace inet
 
-#endif // #ifndef __INET_ICOLLISIONCONTROLLER_H
+#endif
+

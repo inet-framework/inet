@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
@@ -29,7 +29,7 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computePacketErrorRate");
     auto transmission = snir->getReception()->getTransmission();
     auto flatTransmission = dynamic_cast<const FlatTransmissionBase *>(transmission);
     auto ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
@@ -55,13 +55,13 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadio
 
 double Ieee80211ErrorModelBase::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeBitErrorRate");
     return NaN;
 }
 
 double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
+    Enter_Method("computeSymbolErrorRate");
     return NaN;
 }
 

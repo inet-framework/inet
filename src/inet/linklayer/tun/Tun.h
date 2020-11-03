@@ -12,13 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 // This file is based on the Ppp.h of INET written by Andras Varga.
 
-#ifndef __INET_TUNINTERFACE_H
-#define __INET_TUNINTERFACE_H
+#ifndef __INET_TUN_H
+#define __INET_TUN_H
 
 #include "inet/linklayer/base/MacProtocolBase.h"
 
@@ -30,7 +31,7 @@ class INET_API Tun : public MacProtocolBase
         std::vector<int> socketIds;
 
     protected:
-        virtual void configureInterfaceEntry() override;
+        virtual void configureNetworkInterface() override;
 
     public:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -42,5 +43,5 @@ class INET_API Tun : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_TUNINTERFACE_H
+#endif
 

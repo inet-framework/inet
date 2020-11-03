@@ -80,7 +80,7 @@ const_simtime_t PURGE_TIMEOUT = 200; // 200000 msec /* purge originators after t
 class BatmanIf
 {
   public:
-    InterfaceEntry* dev;
+    NetworkInterface* dev;
     int32_t udp_send_sock;
     int32_t udp_recv_sock;
     int32_t udp_tunnel_sock;

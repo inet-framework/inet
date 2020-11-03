@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <memory.h>
@@ -139,7 +140,7 @@ void Ospfv2Interface::setIfIndex(IInterfaceTable *ift, int index)
 {
     ifIndex = index;
     if (interfaceType == Ospfv2Interface::UNKNOWN_TYPE) {
-        InterfaceEntry *routingInterface = ift->getInterfaceById(ifIndex);
+        NetworkInterface *routingInterface = ift->getInterfaceById(ifIndex);
         interfaceAddressRange.address = routingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
         interfaceAddressRange.mask = routingInterface->getProtocolData<Ipv4InterfaceData>()->getNetmask();
         mtu = routingInterface->getMtu();

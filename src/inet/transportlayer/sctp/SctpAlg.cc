@@ -9,11 +9,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/transportlayer/sctp/Sctp.h"
@@ -68,7 +69,7 @@ void SctpAlg::sendCommandInvoked(SctpPathVariables *path)
     }
 }
 
-void SctpAlg::receivedDataAck(uint32)
+void SctpAlg::receivedDataAck(uint32_t)
 {
 }
 
@@ -77,7 +78,7 @@ void SctpAlg::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << endl;
 }
 
-void SctpAlg::receivedAckForDataNotYetSent(uint32 seq)
+void SctpAlg::receivedAckForDataNotYetSent(uint32_t seq)
 {
     EV_INFO << "ACK acks something not yet sent, sending immediate ACK" << endl;
 }
@@ -86,7 +87,7 @@ void SctpAlg::sackSent()
 {
 }
 
-void SctpAlg::dataSent(uint32)
+void SctpAlg::dataSent(uint32_t)
 {
 }
 

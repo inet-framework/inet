@@ -1,11 +1,11 @@
 //
-// Copyright (C) 2004 Andras Varga
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2004 OpenSim Ltd.
+// Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/transportlayer/tcp_nsc/queues/TcpNscQueues.h"
@@ -102,7 +102,7 @@ Packet *TcpNscSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLen
     return packet;
 }
 
-void TcpNscSendQueue::discardUpTo(uint32 seqNumP)
+void TcpNscSendQueue::discardUpTo(uint32_t seqNumP)
 {
     // nothing to do here
 }
@@ -152,12 +152,12 @@ Packet *TcpNscReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TcpNscReceiveQueue::getAmountOfBufferedBytes() const
+uint32_t TcpNscReceiveQueue::getAmountOfBufferedBytes() const
 {
     return B(dataBuffer.getLength()).get();
 }
 
-uint32 TcpNscReceiveQueue::getQueueLength() const
+uint32_t TcpNscReceiveQueue::getQueueLength() const
 {
     return B(dataBuffer.getLength()).get();
 }

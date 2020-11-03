@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -22,7 +22,9 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/TosTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/queueing/base/PacketTaggerBase.h"
 
@@ -48,7 +50,7 @@ void PacketTaggerBase::initialize(int stage)
         if (strlen(interfaceName) != 0) {
             auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
             auto interface = CHK(interfaceTable->findInterfaceByName(interfaceName));
-            interfaceId = interface->getId();
+            interfaceId = interface->getInterfaceId();
         }
     }
 }
@@ -56,35 +58,35 @@ void PacketTaggerBase::initialize(int stage)
 void PacketTaggerBase::markPacket(Packet *packet)
 {
     if (dscp != -1) {
-        EV_DEBUG << "Attaching DscpReq to " << packet->getName() << " with dscp = " << dscp << std::endl;
+        EV_DEBUG << "Attaching DscpReq" << EV_FIELD(packet) << EV_FIELD(dscp) << EV_ENDL;
         packet->addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
     }
     if (ecn != -1) {
-        EV_DEBUG << "Attaching EcnReq to " << packet->getName() << " with ecn = " << ecn << std::endl;
+        EV_DEBUG << "Attaching EcnReq" << EV_FIELD(packet) << EV_FIELD(ecn) << EV_ENDL;
         packet->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification(ecn);
     }
     if (tos != -1) {
-        EV_DEBUG << "Attaching TosReq to " << packet->getName() << " with tos = " << tos << std::endl;
+        EV_DEBUG << "Attaching TosReq" << EV_FIELD(packet) << EV_FIELD(tos) << EV_ENDL;
         packet->addTagIfAbsent<TosReq>()->setTos(tos);
     }
     if (interfaceId != -1) {
-        EV_DEBUG << "Attaching InterfaceReq to " << packet->getName() << " with interfaceId = " << interfaceId << std::endl;
+        EV_DEBUG << "Attaching InterfaceReq" << EV_FIELD(packet) << EV_FIELD(interfaceId) << EV_ENDL;
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     }
     if (hopLimit != -1) {
-        EV_DEBUG << "Attaching HopLimitReq to " << packet->getName() << " with hopLimit = " << hopLimit << std::endl;
+        EV_DEBUG << "Attaching HopLimitReq" << EV_FIELD(hopLimit) << EV_FIELD(packet) << EV_ENDL;
         packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     }
     if (vlanId != -1) {
-        EV_DEBUG << "Attaching VlanReq to " << packet->getName() << " with vlanId = " << vlanId << std::endl;
+        EV_DEBUG << "Attaching VlanReq" << EV_FIELD(packet) << EV_FIELD(vlanId) << EV_ENDL;
         packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
     }
     if (userPriority != -1) {
-        EV_DEBUG << "Attaching UserPriorityReq to " << packet->getName() << " with userPriority = " << userPriority << std::endl;
+        EV_DEBUG << "Attaching UserPriorityReq" << EV_FIELD(packet) << EV_FIELD(userPriority) << EV_ENDL;
         packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(userPriority);
     }
     if (!std::isnan(transmissionPower.get())) {
-        EV_DEBUG << "Attaching SignalPowerReq to " << packet->getName() << " with power = " << transmissionPower << std::endl;
+        EV_DEBUG << "Attaching SignalPowerReq" << EV_FIELD(packet) << EV_FIELD(transmissionPower) << EV_ENDL;
         packet->addTagIfAbsent<SignalPowerReq>()->setPower(transmissionPower);
     }
 }

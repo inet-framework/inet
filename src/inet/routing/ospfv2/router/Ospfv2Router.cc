@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <algorithm>
@@ -1517,9 +1518,9 @@ bool Router::isDirectRoute(Ospfv2RoutingTableEntry &entry)
         return true;
 
     for(int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *intf = ift->getInterface(i);
+        NetworkInterface *intf = ift->getInterface(i);
         if(intf && !intf->isLoopback()) {
-            Ipv4InterfaceData *ipv4data = intf->findProtocolData<Ipv4InterfaceData>();
+            const auto& ipv4data = intf->findProtocolData<Ipv4InterfaceData>();
             if(ipv4data) {
                 if((entry.getDestination() & ipv4data->getNetmask()) == (ipv4data->getIPAddress() & ipv4data->getNetmask()))
                     return true;

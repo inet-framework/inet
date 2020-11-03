@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3NEIGHBOR_H_
-#define __INET_OSPFV3NEIGHBOR_H_
+#ifndef __INET_OSPFV3NEIGHBOR_H
+#define __INET_OSPFV3NEIGHBOR_H
 
 #include <omnetpp.h>
 
@@ -187,5 +187,5 @@ class Ospfv3Neighbor
 } // namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3NEIGHBOR_H_
+#endif
 

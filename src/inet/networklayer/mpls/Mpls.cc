@@ -1,16 +1,20 @@
 //
-// (C) 2005 Vojtech Janota
-// (C) 2003 Xuan Thang Nguyen
+// Copyright (C) 2005 Vojtech Janota
+// Copyright (C) 2003 Xuan Thang Nguyen
 //
-// This library is free software, you can redistribute it
-// and/or modify
-// it under  the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation;
-// either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful,
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <string.h>
@@ -44,8 +48,8 @@ void Mpls::initialize(int stage)
         pct = getModuleFromPar<IIngressClassifier>(par("classifierModule"), this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::mpls, gate("netwIn"), gate("ifIn"));
-        registerProtocol(Protocol::mpls, gate("ifOut"), gate("netwOut"));
+        registerService(Protocol::mpls, gate("netwIn"), gate("netwOut"));
+        registerProtocol(Protocol::mpls, gate("ifOut"), gate("ifIn"));
     }
 }
 
@@ -119,7 +123,7 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
     packet->addPar("color") = color;
 
     packet->trim();
-    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
     sendToL2(packet);
 
@@ -144,7 +148,7 @@ void Mpls::pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
     packet->trimFront();
     newMplsHeader->setS(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() != Protocol::mpls.getId());
     packet->insertAtFront(newMplsHeader);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
 }
 
 void Mpls::swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
@@ -161,7 +165,7 @@ void Mpls::popLabel(Packet *packet)
     ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
     auto oldMplsHeader = packet->popAtFront<MplsHeader>();
     if(oldMplsHeader->getS()) {
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     }
 }
 
@@ -220,7 +224,7 @@ void Mpls::processPacketFromL2(Packet *packet)
 void Mpls::processMplsPacketFromL2(Packet *packet)
 {
     int incomingInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
-    InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
+    NetworkInterface *ie = ift->getInterfaceById(incomingInterfaceId);
     std::string incomingInterfaceName = ie->getInterfaceName();
     const auto& mplsHeader = packet->peekAtFront<MplsHeader>();
 
@@ -231,7 +235,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         // Decapsulate the message and pass up to L3
         EV_INFO << ": decapsulating and sending up\n";
         packet->popAtFront<MplsHeader>();
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         sendToL3(packet);
         return;
     }
@@ -248,7 +252,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         return;
     }
 
-    InterfaceEntry *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
+    NetworkInterface *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
 
     doStackOps(packet, outLabel);
 
@@ -264,7 +268,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         }
 
         //ASSERT(labelIf[outgoingPort]);
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
+        packet->removeTagIfPresent<DispatchProtocolReq>();
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
         packet->trim();
         sendToL2(packet);
@@ -277,7 +281,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
         if (outgoingInterface) {
             packet->trim();
-            delete packet->removeTagIfPresent<DispatchProtocolReq>();
+            packet->removeTagIfPresent<DispatchProtocolReq>();
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
             sendToL2(packet);
         }
@@ -301,32 +305,34 @@ void Mpls::sendToL3(Packet *msg)
     send(msg, "netwOut");
 }
 
-void Mpls::handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in)
+void Mpls::handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in)
 {
     if (!strcmp("ifIn", in->getBaseName()))
         registerInterface(interface, gate("netwIn"), gate("netwOut"));
 }
 
-void Mpls::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    if (!strcmp("ifOut", out->getName()))
+    if (!strcmp("ifOut", g->getName()))
         registerService(protocol, gate("netwIn"), servicePrimitive);
-    else if (!strcmp("netwOut", out->getName()))
+    else if (!strcmp("netwOut", g->getName()))
         registerService(protocol, gate("ifIn"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", out->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
-void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("ifIn", in->getName()))
+    if (!strcmp("ifIn", g->getName()))
         registerProtocol(protocol, gate("netwOut"), servicePrimitive);
-    else if (!strcmp("netwIn", in->getName()))
-        registerProtocol(protocol, gate("ifOut"), servicePrimitive);
+    else if (!strcmp("netwOut", g->getName()))
+        registerProtocol(protocol, gate("ifIn"), servicePrimitive);
+    else if (!strcmp("netwIn", g->getName()))
+        ; // void
     else
-        throw cRuntimeError("Unknown gate: %s", in->getName());
+        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
 } // namespace inet

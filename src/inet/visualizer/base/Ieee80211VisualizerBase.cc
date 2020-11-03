@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -36,8 +36,10 @@ Ieee80211VisualizerBase::Ieee80211Visualization::Ieee80211Visualization(int netw
 
 Ieee80211VisualizerBase::~Ieee80211VisualizerBase()
 {
-    if (displayAssociations)
+    if (displayAssociations) {
         unsubscribe();
+        removeAllIeee80211Visualizations();
+    }
 }
 
 void Ieee80211VisualizerBase::initialize(int stage)
@@ -96,9 +98,9 @@ void Ieee80211VisualizerBase::unsubscribe()
     }
 }
 
-const Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211VisualizerBase::getIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry)
+const Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211VisualizerBase::getIeee80211Visualization(cModule *networkNode, NetworkInterface *networkInterface)
 {
-    auto key = std::pair<int, int>(networkNode->getId(), interfaceEntry->getInterfaceId());
+    auto key = std::pair<int, int>(networkNode->getId(), networkInterface->getInterfaceId());
     auto it = ieee80211Visualizations.find(key);
     return it == ieee80211Visualizations.end() ? nullptr : it->second;
 }
@@ -129,21 +131,21 @@ void Ieee80211VisualizerBase::removeAllIeee80211Visualizations()
 void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
 #ifdef WITH_IEEE80211
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == l2AssociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            auto interfaceEntry = check_and_cast<InterfaceEntry *>(object);
+            auto networkInterface = check_and_cast<NetworkInterface *>(object);
             auto apInfo = check_and_cast<inet::ieee80211::Ieee80211MgmtSta::ApInfo *>(details);
-            auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, apInfo->ssid, W(apInfo->rxPower));
+            auto ieee80211Visualization = createIeee80211Visualization(networkNode, networkInterface, apInfo->ssid, W(apInfo->rxPower));
             addIeee80211Visualization(ieee80211Visualization);
         }
     }
     else if (signal == l2DisassociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            auto interfaceEntry = check_and_cast<InterfaceEntry *>(object);
-            auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
+            auto networkInterface = check_and_cast<NetworkInterface *>(object);
+            auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);
             if (ieee80211Visualization != nullptr) {
                 removeIeee80211Visualization(ieee80211Visualization);
                 delete ieee80211Visualization;
@@ -155,10 +157,10 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
         if (nodeFilter.matches(networkNode)) {
             // TODO: KLUDGE: this is the wrong way to lookup the interface and the ssid
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
-            auto interfaceEntry = getContainingNicModule(mgmt);
-            auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
+            auto networkInterface = getContainingNicModule(mgmt);
+            auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);
             if (ieee80211Visualization == nullptr) {
-                auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, mgmt->par("ssid"), W(NaN));
+                auto ieee80211Visualization = createIeee80211Visualization(networkNode, networkInterface, mgmt->par("ssid"), W(NaN));
                 addIeee80211Visualization(ieee80211Visualization);
             }
         }
@@ -168,8 +170,8 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
         if (nodeFilter.matches(networkNode)) {
             // TODO: KLUDGE: this is the wrong way to lookup the interface
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
-            auto interfaceEntry = getContainingNicModule(mgmt);
-            auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
+            auto networkInterface = getContainingNicModule(mgmt);
+            auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);
             if (ieee80211Visualization != nullptr) {
                 removeIeee80211Visualization(ieee80211Visualization);
                 delete ieee80211Visualization;

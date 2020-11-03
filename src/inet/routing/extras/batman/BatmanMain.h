@@ -107,13 +107,13 @@ class Batman : public ManetRoutingBase
     void hna_global_del(OrigNode *orig_node);
     void hna_free(void);
 
-    BatmanIf * is_batman_if(InterfaceEntry * dev);
+    BatmanIf * is_batman_if(NetworkInterface * dev);
     void ring_buffer_set(std::vector<uint8_t> &tq_recv, uint8_t &tq_index, uint8_t value);
     uint8_t ring_buffer_avg(std::vector<uint8_t> &tq_recv);
 
     // Routing table modification
-    void add_del_route(const L3Address  &, uint8_t netmask, const L3Address  &, int32_t, InterfaceEntry *dev, uint8_t rt_table, int8_t route_type, int8_t route_action);
-    void add_del_rule(const L3Address& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *dev, int8_t rule_type, int8_t rule_action);
+    void add_del_route(const L3Address  &, uint8_t netmask, const L3Address  &, int32_t, NetworkInterface *dev, uint8_t rt_table, int8_t route_type, int8_t route_action);
+    void add_del_rule(const L3Address& network, uint8_t netmask, int8_t rt_table, uint32_t prio, NetworkInterface *dev, int8_t rule_type, int8_t rule_action);
     int add_del_interface_rules(int8_t rule_action);
 
     //

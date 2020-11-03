@@ -2,7 +2,7 @@
 // Copyright (C) 2005 Michael Tuexen
 // Copyright (C) 2008 Irene Ruengeler
 // Copyright (C) 2009 Thomas Dreibholz
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -11,19 +11,20 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_PCAPRECORDER_H
 #define __INET_PCAPRECORDER_H
 
 #include "inet/common/packet/PacketFilter.h"
+#include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/recorder/IPcapWriter.h"
-#include "inet/common/packet/recorder/PacketDump.h"
 
 namespace inet {
 
@@ -50,14 +51,15 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     typedef std::map<simsignal_t, Direction> SignalList;
     std::vector<const Protocol *> dumpProtocols;
     SignalList signalList;
-    PacketDump packetDumper;
     IPcapWriter *pcapWriter = nullptr;
     unsigned int snaplen = 0;
     bool dumpBadFrames = false;
     PacketFilter packetFilter;
     int numRecorded = 0;
+    bool verbose = false;
     bool recordPcap = false;
     std::vector<IHelper *> helpers;
+    PacketPrinter packetPrinter;
 
     static simsignal_t packetRecordedSignal;
 
@@ -80,5 +82,5 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPRECORDER_H
+#endif
 

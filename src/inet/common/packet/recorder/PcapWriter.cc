@@ -3,7 +3,7 @@
 // Copyright (C) 2008 Irene Ruengeler
 // Copyright (C) 2009 Thomas Dreibholz
 // Copyright (C) 2009 Thomas Reschka
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -12,11 +12,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <errno.h>
@@ -63,6 +64,7 @@ void PcapWriter::open(const char *filename, unsigned int snaplen_par)
 
     inet::utils::makePathForFile(filename);
     dumpfile = fopen(filename, "wb");
+    fileName = filename;
 
     if (!dumpfile)
         throw cRuntimeError("Cannot open pcap file [%s] for writing: %s", filename, strerror(errno));
@@ -88,7 +90,7 @@ void PcapWriter::writeHeader(PcapLinkType linkType)
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 
-void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkTypePar)
+void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkTypePar)
 {
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
@@ -108,7 +110,7 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction di
     (void)direction; // unused
     (void)ie; // unused
 
-    EV << "PcapWriter::writeFrame\n";
+    EV_INFO << "Writing packet" << EV_FIELD(packet) << EV_FIELD(fileName) << EV_ENDL;
     uint8_t buf[MAXBUFLENGTH];
     memset(buf, 0, sizeof(buf));
 

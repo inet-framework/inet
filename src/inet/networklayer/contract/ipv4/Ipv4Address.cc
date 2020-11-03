@@ -2,21 +2,22 @@
 // Copyright (C) 2001  Vincent Oberle (vincent@oberle.com)
 // Institute of Telematics, University of Karlsruhe, Germany.
 // University Comillas, Madrid, Spain.
-// Copyright (C) 2004, 2008 Andras Varga
+// Copyright (C) 2004, 2008 OpenSim Ltd.
 // Copyright (C) 2008  Ingmar Baumgart
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2.1
+// of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this program; if not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 //
@@ -145,7 +146,7 @@ Ipv4Address::AddressCategory Ipv4Address::getAddressCategory() const
         return MULTICAST; // 224.0.0.0/4
     if (addr == 0xFFFFFFFFu)
         return BROADCAST; // 255.255.255.255/32
-    uint32 addr24 = addr & 0xFFFFFF00u;
+    uint32_t addr24 = addr & 0xFFFFFF00u;
     if (addr24 == 0xC0000000u)
         return IETF; // 192.0.0.0/24
     if ((addr24 == 0xC0000200u) || (addr24 == 0xC6336400u) || (addr24 == 0xCB007100u))
@@ -222,15 +223,15 @@ bool Ipv4Address::prefixMatches(const Ipv4Address& other, int length) const
     if (length > 31)
         return addr == other.addr;
 
-    uint32 mask = _makeNetmask(length);
+    uint32_t mask = _makeNetmask(length);
     return (addr & mask) == (other.addr & mask);
 }
 
 int Ipv4Address::getNumMatchingPrefixBits(const Ipv4Address& to_cmp) const
 {
-    uint32 addr2 = to_cmp.getInt();
+    uint32_t addr2 = to_cmp.getInt();
 
-    uint32 res = addr ^ addr2;
+    uint32_t res = addr ^ addr2;
     // If the bits are equal, there is a 0, so counting
     // the zeros from the left
     for (int i = 31; i >= 0; i--) {

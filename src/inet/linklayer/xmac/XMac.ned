@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.linklayer.xmac;
@@ -45,11 +46,11 @@ module XMac extends MacProtocolBase like IMacProtocol
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
 
-        // should we animate the nodes with colors depending on their state or 
+        // should we animate the nodes with colors depending on their state or
         // not?
         bool animation = default(true);
 
-        // bit rate 
+        // bit rate
         double bitrate @unit(bps) = default(19200 bps);
 
         //tx power
@@ -72,7 +73,7 @@ module XMac extends MacProtocolBase like IMacProtocol
         // Maximum transmission attempts per data packet, when ACKs are used
         int maxTxAttempts = default(2);
 
-        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value 
+        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(XMac);
         @signal[packetDropped](type=inet::Packet);

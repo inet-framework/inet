@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.queueing.queue;
@@ -42,11 +42,11 @@ module PriorityQueue extends CompoundPacketQueue
         queue[numQueues]: <default("PacketQueue")> like IPacketQueue {
             parameters:
                 bufferModule = default(exists(buffer) ? "^.buffer" : "");
-                @display("p=325,100,column,125");
+                @display("p=300,100,column,125");
         }
         scheduler: <default("PriorityScheduler")> like IPacketScheduler {
             parameters:
-                @display("p=550,100");
+                @display("p=500,100");
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;

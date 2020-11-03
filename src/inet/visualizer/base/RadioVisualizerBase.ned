@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.visualizer.base;
@@ -43,8 +43,8 @@ simple RadioVisualizerBase extends VisualizerBase
         string placementHint = default("bottomRight"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning
 
-		bool antennaLobeNormalize = default(false); // true means maximum gain, false means 0dB is displayed at the given antennaLobeRadius
-		bool antennaLobeRelativeLabels = default(false); // determines whether gain labels are relative or absolute (if true, maximum gain label is 0dB)
+        bool antennaLobeNormalize = default(false); // true means maximum gain, false means 0dB is displayed at the given antennaLobeRadius
+        bool antennaLobeRelativeLabels = default(false); // determines whether gain labels are relative or absolute (if true, maximum gain label is 0dB)
         bool antennaLobePlaneGlobal = default(true); // compute antenna lobe relative to the global or antenna local coordinate systems, global by default
         string antennaLobePlane @enum("view", "xy", "xz", "yz") = default("view"); // compute antenna lobe in this plane, view by default
         string antennaLobeMode @enum("logarithmic", "linear") = default("logarithmic");

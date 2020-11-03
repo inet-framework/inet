@@ -120,7 +120,7 @@ class DYMOFau : public ManetRoutingBase
     virtual void handleSelfMsg(cMessage*);
 
     /** @brief return destination interface for reply messages */
-    InterfaceEntry* getNextHopInterface(Packet *pkt);
+    NetworkInterface* getNextHopInterface(Packet *pkt);
 
     /** @brief return destination address for reply messages */
     L3Address getNextHopAddress(Packet* routingMsg);
@@ -134,7 +134,7 @@ class DYMOFau : public ManetRoutingBase
     virtual void handleLowerUERR(Packet *);
 
     /** @brief Function sends messages to lower layer (transport layer) */
-    void sendDown(Packet*, L3Address, InterfaceEntry * = nullptr);
+    void sendDown(Packet*, L3Address, NetworkInterface * = nullptr);
 
     /** @brief Increments the ownSeqNum */
     void incSeqNum();
@@ -167,7 +167,7 @@ class DYMOFau : public ManetRoutingBase
     void handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ);
 
     /** @brief updates routing entries from AddressBlock, returns whether AddressBlock should be kept */
-    bool updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ, L3Address nextHopAddress, InterfaceEntry* nextHopInterface);
+    bool updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ, L3Address nextHopAddress, NetworkInterface* nextHopInterface);
 
     /** @brief Function updates the routing entries from received AdditionalNodes. @see draft 4.2.1 */
     Packet * updateRoutes(Packet * pkt);

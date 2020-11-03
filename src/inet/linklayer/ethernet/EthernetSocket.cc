@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -12,10 +12,10 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -24,92 +24,38 @@
 
 namespace inet {
 
-EthernetSocket::EthernetSocket()
+void EthernetSocket::sendOut(cMessage *msg)
 {
-    // don't allow user-specified socketIds because they may conflict with
-    // automatically assigned ones.
-    socketId = getEnvir()->getUniqueNumber();
-    gateToEthernet = nullptr;
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
+    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
+    tags.addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    SocketBase::sendOut(msg);
 }
 
-void EthernetSocket::sendToEthernet(cMessage *msg)
+void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)
 {
-    if (!gateToEthernet)
-        throw cRuntimeError("EthernetSocket: setOutputGate() must be invoked before socket can be used");
-
-    cObject *ctrl = msg->getControlInfo();
-    EV_TRACE << "EthernetSocket: Send (" << msg->getClassName() << ")" << msg->getFullName();
-    if (ctrl)
-        EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
-    EV_TRACE << endl;
-
-    auto& tags = getTags(msg);
-    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    check_and_cast<cSimpleModule *>(gateToEthernet->getOwnerModule())->send(msg, gateToEthernet);
-}
-
-void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, int vlanId)
-{
-    auto request = new Request("BIND", ETHERNET_C_BIND);
+    auto request = new Request("BIND", SOCKET_C_BIND);
     EthernetBindCommand *ctrl = new EthernetBindCommand();
     ctrl->setLocalAddress(localAddress);
     ctrl->setRemoteAddress(remoteAddress);
     ctrl->setProtocol(protocol);
-    ctrl->setVlanId(vlanId);
+    ctrl->setSteal(steal);
     request->setControlInfo(ctrl);
     isOpen_ = true;
-    sendToEthernet(request);
-}
-
-void EthernetSocket::send(Packet *packet)
-{
-    packet->setKind(ETHERNET_C_DATA);
-    isOpen_ = true;
-    sendToEthernet(packet);
-}
-
-void EthernetSocket::close()
-{
-    auto request = new Request("CLOSE", ETHERNET_C_CLOSE);
-    auto *ctrl = new EthernetCloseCommand();
-    request->setControlInfo(ctrl);
-    isOpen_ = true;
-    sendToEthernet(request);
-}
-
-void EthernetSocket::destroy()
-{
-    auto request = new Request("destroy", ETHERNET_C_DESTROY);
-    auto *ctrl = new EthernetDestroyCommand();
-    request->setControlInfo(ctrl);
-    sendToEthernet(request);
-    isOpen_ = false;
-}
-
-void EthernetSocket::setCallback(ICallback *callback)
-{
-    this->callback = callback;
-}
-
-bool EthernetSocket::belongsToSocket(cMessage *msg) const
-{
-    auto& tags = getTags(msg);
-    auto socketInd = tags.findTag<SocketInd>();
-    return socketInd != nullptr && socketInd->getSocketId() == socketId;
+    sendOut(request);
 }
 
 void EthernetSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
     switch (msg->getKind()) {
-        case ETHERNET_I_DATA:
+        case SOCKET_I_DATA:
             if (callback)
                 callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
             else
                 delete msg;
             break;
-        case ETHERNET_I_SOCKET_CLOSED:
+        case SOCKET_I_CLOSED:
             isOpen_ = false;
             if (callback)
                 callback->socketClosed(this);

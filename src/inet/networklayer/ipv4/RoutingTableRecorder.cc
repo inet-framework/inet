@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2012 Andras Varga
+// Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <cinttypes>
@@ -100,12 +100,12 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsig
     if (signalID == routeAddedSignal || signalID == routeDeletedSignal || signalID == routeChangedSignal)
         recordRouteChange(host, check_and_cast<const IRoute *>(obj), signalID);
     else if (signalID == interfaceCreatedSignal || signalID == interfaceDeletedSignal)
-        recordInterfaceChange(host, check_and_cast<const InterfaceEntry *>(obj), signalID);
+        recordInterfaceChange(host, check_and_cast<const NetworkInterface *>(obj), signalID);
     else if (signalID == interfaceConfigChangedSignal || signalID == interfaceIpv4ConfigChangedSignal)
-        recordInterfaceChange(host, check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry(), signalID);
+        recordInterfaceChange(host, check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface(), signalID);
 }
 
-void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID)
+void RoutingTableRecorder::recordInterfaceChange(cModule *host, const NetworkInterface *ie, simsignal_t signalID)
 {
     // Note: ie->getInterfaceTable() may be nullptr (entry already removed from its table)
 

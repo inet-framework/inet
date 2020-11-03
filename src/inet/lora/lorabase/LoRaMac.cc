@@ -140,20 +140,20 @@ void LoRaMac::finish()
     recordScalar("numReceivedBroadcast", numReceivedBroadcast);
 }
 
-void LoRaMac::configureInterfaceEntry()
+void LoRaMac::configureNetworkInterface()
 {
-    //InterfaceEntry *e = new InterfaceEntry(this);
+    //NetworkInterface *e = new NetworkInterface(this);
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
-    interfaceEntry->setMacAddress(address);
+    networkInterface->setDatarate(bitrate);
+    networkInterface->setMacAddress(address);
 
     // capabilities
     //interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMtu(NaN);
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
-    interfaceEntry->setPointToPoint(false);
+    networkInterface->setMtu(NaN);
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
+    networkInterface->setPointToPoint(false);
 }
 
 /****************************************************************
@@ -181,7 +181,7 @@ void LoRaMac::handleUpperMessage(cMessage *msg)
 
     EV << "frame " << pktEncap << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
-    txQueue->pushPacket(pktEncap);
+    txQueue->enqueuePacket(pktEncap);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else {
@@ -383,7 +383,7 @@ Packet *LoRaMac::decapsulate(Packet *frame)
     auto loraHeader = frame->popAtFront<LoRaMacFrame>();
     frame->addTagIfAbsent<MacAddressInd>()->setSrcAddress(loraHeader->getTransmitterAddress());
     frame->addTagIfAbsent<MacAddressInd>()->setDestAddress(loraHeader->getReceiverAddress());
-    frame->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    frame->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(loraHeader->getNetworkProtocol());
     frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);

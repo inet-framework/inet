@@ -1,11 +1,10 @@
 //
-// Copyright (C) 2006 Levente Meszaros
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2006 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,17 +12,20 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
 
 namespace inet {
 
@@ -62,7 +64,7 @@ void EtherMacFullDuplex::initializeFlags()
     EtherMacBase::initializeFlags();
 
     duplexMode = true;
-    physInGate->setDeliverOnReceptionStart(false);
+    physInGate->setDeliverImmediately(false);
 }
 
 void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
@@ -85,11 +87,11 @@ void EtherMacFullDuplex::handleSelfMessage(cMessage *msg)
 {
     EV_TRACE << "Self-message " << msg << " received\n";
 
-    if (msg == endTxMsg)
+    if (msg == endTxTimer)
         handleEndTxPeriod();
-    else if (msg == endIFGMsg)
+    else if (msg == endIfgTimer)
         handleEndIFGPeriod();
-    else if (msg == endPauseMsg)
+    else if (msg == endPauseTimer)
         handleEndPausePeriod();
     else
         throw cRuntimeError("Unknown self message received!");
@@ -109,24 +111,23 @@ void EtherMacFullDuplex::startFrameTransmission()
     encapsulate(frame);
 
     // send
-    auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
+    auto& oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
     EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr->txrate);
     if (sendRawBytes) {
-        signal->encapsulate(new Packet(frame->getName(), frame->peekAllAsBytes()));
-        delete frame;
+        auto bytes = frame->peekDataAsBytes();
+        frame->eraseAll();
+        frame->insertAtFront(bytes);
     }
-    else
-        signal->encapsulate(frame);
+    signal->encapsulate(frame);
     send(signal, physOutGate);
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
+    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxTimer);
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
@@ -172,7 +173,7 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
-    txQueue->pushPacket(packet);
+    txQueue->enqueuePacket(packet);
 
     if (transmitState == TX_IDLE_STATE) {
         ASSERT(currentTxFrame == nullptr);
@@ -210,9 +211,6 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
     if (signal->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
 
-    if (signal->getBitrate() != curEtherDescr->txrate)
-        throw cRuntimeError("Ethernet misconfiguration: bitrate in module and on the signal must be same.");
-
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
         throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");
 
@@ -239,7 +237,7 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
         return;
 
     if (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
-        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrame>(frame->getChunkLength(), b(-1));
+        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrameBase>(frame->getChunkLength(), b(-1));
         if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
             auto pauseFrame = check_and_cast<const EthernetPauseFrame *>(controlFrame.get());
             int pauseUnits = pauseFrame->getPauseTime();
@@ -288,7 +286,7 @@ void EtherMacFullDuplex::handleEndTxPeriod()
 
     const auto& header = currentTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
-        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
+        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrameBase>(header->getChunkLength(), b(-1));
         if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
             const auto& pauseFrame = CHK(dynamicPtrCast<const EthernetPauseFrame>(controlFrame));
             numPauseFramesSent++;
@@ -343,10 +341,13 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, packet);
 
+    const auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
+    macAddressInd->setSrcAddress(frame->getSrc());
+    macAddressInd->setDestAddress(frame->getDest());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-    if (interfaceEntry)
-        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    if (networkInterface)
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, packet);
@@ -365,7 +366,7 @@ void EtherMacFullDuplex::processPauseCommand(int pauseUnits)
     else if (transmitState == PAUSE_STATE) {
         EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested
                   << " more time units from now\n";
-        cancelEvent(endPauseMsg);
+        cancelEvent(endPauseTimer);
 
         // Terminate PAUSE if pauseUnits == 0; Extend PAUSE if pauseUnits > 0
         scheduleEndPausePeriod(pauseUnits);
@@ -383,7 +384,7 @@ void EtherMacFullDuplex::scheduleEndIFGPeriod()
     ASSERT(nullptr == currentTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
-    scheduleAt(endIFGTime, endIFGMsg);
+    scheduleAt(endIFGTime, endIfgTimer);
 }
 
 void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
@@ -391,7 +392,7 @@ void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
     ASSERT(nullptr == currentTxFrame);
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
-    scheduleAt(simTime() + pausePeriod, endPauseMsg);
+    scheduleAfter(pausePeriod, endPauseTimer);
     changeTransmissionState(PAUSE_STATE);
 }
 

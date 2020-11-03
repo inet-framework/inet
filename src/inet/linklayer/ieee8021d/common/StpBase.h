@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-//
-// Author: Zsolt Prontvai
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_STPBASE_H
@@ -46,7 +46,7 @@ class INET_API StpBase : public OperationalBase, public cListener
     cModule *switchModule = nullptr;
     IMacAddressTable *macTable = nullptr;
     IInterfaceTable *ifTable = nullptr;
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
 
   public:
     StpBase();
@@ -70,7 +70,7 @@ class INET_API StpBase : public OperationalBase, public cListener
      * @brief Adds effects to be represented by Tkenv. Colors the link black if forwarding parameter is true
      * and the port to which the link is connected to is also forwarding, otherwise colors the link gray.
      */
-    virtual void colorLink(InterfaceEntry *ie, bool forwarding) const;
+    virtual void colorLink(NetworkInterface *ie, bool forwarding) const;
 
     /**
      * @brief Adds effects to be represented by Tkenv. Inactive links are colored grey.
@@ -88,22 +88,22 @@ class INET_API StpBase : public OperationalBase, public cListener
      * @brief Gets Ieee8021dInterfaceData for interface ID.
      * @return The port's Ieee8021dInterfaceData, or throws error if it doesn't exist.
      */
-    Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId);
-    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId) const { return const_cast<StpBase *>(this)->getPortInterfaceData(interfaceId); }
+    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId) const;
+    Ieee8021dInterfaceData *getPortInterfaceDataForUpdate(unsigned int interfaceId);
 
     /**
-     * @brief Gets InterfaceEntry for interface ID.
-     * @return The port's InterfaceEntry, throws error if it doesn't exist.
+     * @brief Gets NetworkInterface for interface ID.
+     * @return The port's NetworkInterface, throws error if it doesn't exist.
      */
-    InterfaceEntry *getPortInterfaceEntry(unsigned int interfaceId);
+    NetworkInterface *getPortNetworkInterface(unsigned int interfaceId) const;
 
     /*
      * Returns the first non-loopback interface.
      */
-    virtual InterfaceEntry *chooseInterface();
+    virtual NetworkInterface *chooseInterface();
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_STPBASE_H
+#endif
 

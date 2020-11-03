@@ -2,10 +2,10 @@
 // Copyright (c) 2005, 2006 INRIA
 // Copyright (C) 2015 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 // Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
 //
@@ -72,12 +72,12 @@ class INET_API Ieee80211YansErrorModel : public Ieee80211ErrorModelBase
     virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const override;
 
   public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211YansErrorModel"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211YansErrorModel"; }
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_YANSERRORRATEMODEL_H
+#endif
 

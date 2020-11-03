@@ -1,5 +1,18 @@
 //
-// This program is property of its copyright holder. All rights reserved.
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 import inet.common.INETDefs;
@@ -59,9 +72,69 @@ class DispatchProtocolInd extends ProtocolTagBase
 //
 // This tag specifies the protocol of the packet.
 //
+// Packet processing at the sender
+// ===============================
+//
+// | ApplicationData |
+//     whole packet has no protocol
+//     data part has no protocol
+//
+// | UdpHeader ApplicationData |
+//     whole packet has UDP protocol
+//     data part has UDP protocol
+//
+// | Ipv4Header UdpHeader ApplicationData |
+//     whole packet has IPv4 protocol
+//     data part has IPv4 protocol
+//
+// EthernetMacHeader | Ipv4Header UdpHeader ApplicationData |
+//     whole packet has incomplete Ethernet protocol
+//     data part has IPv4 protocol
+//
+// EthernetMacHeader | Ipv4Header UdpHeader ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has IPv4 protocol
+//
+// | EthernetMacHeader Ipv4Header UdpHeader ApplicationData EthernetPadding EthernetFcs |
+//     whole packet has Ethernet protocol
+//     data part has Ethernet protocol
+//
+// Packet processing at the receiver
+// =================================
+//
+// | EthernetMacHeader Ipv4Header UdpHeader ApplicationData EthernetPadding EthernetFcs |
+//     whole packet has Ethernet protocol
+//     data part has Ethernet protocol
+//
+// EthernetMacHeader Ipv4Header UdpHeader ApplicationData EthernetPadding | EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has no protocol
+//
+// EthernetMacHeader | Ipv4Header UdpHeader ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has IPv4 protocol
+//
+// EthernetMacHeader Ipv4Header | UdpHeader ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has UDP protocol
+//
+// EthernetMacHeader Ipv4Header UdpHeader | ApplicationData | EthernetPadding EthernetFcs
+//     whole packet has Ethernet protocol
+//     data part has no protocol
+//
 class PacketProtocolTag extends ProtocolTagBase
 {
+    b frontOffset = b(0); // extra offset relative to the packet data part front offset
+    b backOffset = b(0); // extra offset relative to the packet data part back offset
 }
+
+cplusplus(PacketProtocolTag) {{
+    void set(const Protocol *protocol, b frontOffset = b(0), b backOffset = b(0)) {
+        this->protocol = protocol;
+        this->frontOffset = frontOffset;
+        this->backOffset = backOffset;
+    }
+}}
 
 //
 // This request determines the transport protocol that should be used to send the packet.

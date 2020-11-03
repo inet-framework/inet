@@ -1,20 +1,20 @@
-/*
- * Copyright (C) 2004 Andras Varga
- * Copyright (C) 2014 OpenSim Ltd.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, see <http://www.gnu.org/licenses/>.
- */
+//
+// Copyright (C) 2004 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
 
 #ifndef __INET_GLOBALARP_H
 #define __INET_GLOBALARP_H
@@ -23,7 +23,7 @@
 
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -44,7 +44,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     {
       public:
         GlobalArp *owner = nullptr;    // owner module of this cache entry
-        const InterfaceEntry *interfaceEntry = nullptr;    // NIC to send the packet to
+        const NetworkInterface *networkInterface = nullptr;    // NIC to send the packet to
     };
 
   protected:
@@ -55,7 +55,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     static int globalArpCacheRefCnt;
 
   protected:
-    void ensureCacheEntry(const L3Address& address, const InterfaceEntry *interfaceEntry);
+    void ensureCacheEntry(const L3Address& address, const NetworkInterface *networkInterface);
     MacAddress mapUnicastAddress(L3Address address);
     MacAddress mapMulticastAddress(L3Address address);
 
@@ -67,7 +67,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     /** @name IArp implementation */
     //@{
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
-    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *interfaceEntry) override;
+    virtual MacAddress resolveL3Address(const L3Address& address, const NetworkInterface *networkInterface) override;
     // @}
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
@@ -89,5 +89,5 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_GLOBALARP_H
+#endif
 

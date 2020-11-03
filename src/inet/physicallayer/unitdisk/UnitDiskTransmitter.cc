@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/mobility/contract/IMobility.h"
@@ -47,18 +47,18 @@ void UnitDiskTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskTransmitter";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", preambleDuration = " << preambleDuration
-               << ", headerLength = " << headerLength
-               << ", bitrate = " << bitrate;
+        stream << EV_FIELD(preambleDuration)
+               << EV_FIELD(headerLength)
+               << EV_FIELD(bitrate);
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", communicationRange = " << communicationRange;
+        stream << EV_FIELD(communicationRange);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", interferenceRange = " << interferenceRange
-               << ", detectionRange = " << detectionRange;
+        stream << EV_FIELD(interferenceRange)
+               << EV_FIELD(detectionRange);
     return stream;
 }
 
@@ -66,7 +66,7 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
 {
     auto phyHeader = packet->peekAtFront<UnitDiskPhyHeader>();
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
-    auto signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
+    const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     auto headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
     auto dataDuration = b(dataLength).get() / bps(transmissionBitrate).get();

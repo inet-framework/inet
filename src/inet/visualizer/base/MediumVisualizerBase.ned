@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.visualizer.base;
@@ -55,7 +55,7 @@ simple MediumVisualizerBase extends VisualizerBase
 
         bool displaySignalArrivals = default(false); // display an image where a signal arrival is currently in progress, disabled by default
         string signalArrivalImage = default("misc/signal_arrival.png"); // image for ongoing signal arrivals
-        string signalArrivalPlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        string signalArrivalPlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double signalArrivalPlacementPriority = default(-1); // determines the order of annotation positioning
 
         bool displayCommunicationRanges = default(false); // display communication ranges as circles around radios, enabled by default
@@ -115,7 +115,7 @@ simple MediumVisualizerBase extends VisualizerBase
         int spectrumFigureXTickCount = default(3); // number of ticks along the X axis
         int spectrumFigureYTickCount = default(5); // number of ticks along the Y axis
         double spectrumFigureInterpolationSize = default(5); // power spectrum density interpolation distance along the frequency axis
-        string spectrumPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        string spectrumPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double spectrumPlacementPriority = default(-1); // determines the order of annotation positioning
 
         // parameters for spectrogram figures
@@ -128,7 +128,7 @@ simple MediumVisualizerBase extends VisualizerBase
         double spectrogramPixmapHeight = default(spectrogramFigureHeight); // pixmap resolution height
         int spectrogramFigureXTickCount = default(3); // number of ticks along the X axis
         int spectrogramFigureYTickCount = default(5); // number of ticks along the Y axis
-        string spectrogramPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        string spectrogramPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double spectrogramPlacementPriority = default(-1); // determines the order of annotation positioning
 
         @class(MediumVisualizerBase);

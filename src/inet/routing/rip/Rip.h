@@ -1,11 +1,10 @@
 //
-// Copyright (C) 2013 Opensim Ltd.
-// Author: Tamas Borbely
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RIPROUTING_H
-#define __INET_RIPROUTING_H
+#ifndef __INET_RIP_H
+#define __INET_RIP_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
@@ -46,18 +45,18 @@ enum RipMode {
 
 /**
  * Holds the RIP configuration of the interfaces.
- * We could store this data in the InterfaceEntry* itself,
+ * We could store this data in the NetworkInterface* itself,
  * but it contains only 5 holes for protocol data, and they
  * are used by network layer protocols only. Therefore
  * Rip manages its own table of these entries.
  */
-struct RipInterfaceEntry
+struct RipNetworkInterface
 {
-    const InterfaceEntry *ie = nullptr;    // the associated interface entry
+    const NetworkInterface *ie = nullptr;    // the associated interface entry
     int metric = 0;    // metric of this interface
     RipMode mode = NO_RIP;    // RIP mode of this interface
 
-    RipInterfaceEntry(const InterfaceEntry *ie)
+    RipNetworkInterface(const NetworkInterface *ie)
     : ie(ie), metric(1), mode(NO_RIP)
     {
         ASSERT(!ie->isLoopback());
@@ -91,7 +90,7 @@ struct RipInterfaceEntry
 class INET_API Rip : public RoutingProtocolBase, protected cListener
 {
     enum Mode { RIPv2, RIPng };
-    typedef std::vector<RipInterfaceEntry> InterfaceVector;
+    typedef std::vector<RipNetworkInterface> InterfaceVector;
     typedef std::vector<RipRoute *> RouteVector;
     // environment
     cModule *host = nullptr;    // the host module that owns this module
@@ -141,17 +140,17 @@ protected:
     virtual void startRIPRouting();
     virtual void stopRIPRouting();
 
-    virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
-    virtual void sendRIPRequest(const RipInterfaceEntry& ripInterface);
+    virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16_t routeTag = 0);
+    virtual void sendRIPRequest(const RipNetworkInterface& ripInterface);
 
     virtual void processRequest(Packet *pk);
     virtual void processUpdate(bool triggered);
-    virtual void sendRoutes(const L3Address& address, int port, const RipInterfaceEntry& ripInterface, bool changedOnly);
+    virtual void sendRoutes(const L3Address& address, int port, const RipNetworkInterface& ripInterface, bool changedOnly);
 
     virtual void processResponse(Packet *pk);
     virtual bool isValidResponse(Packet *packet);
-    virtual void updateRoute(RipRoute *route, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
-    virtual void addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
+    virtual void updateRoute(RipRoute *route, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16_t routeTag, const L3Address& from);
+    virtual void addRoute(const L3Address& dest, int prefixLength, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16_t routeTag, const L3Address& from);
 
     virtual void checkExpiredRoutes();
     virtual void invalidateRoute(RipRoute *route);
@@ -159,28 +158,28 @@ protected:
 
     virtual void triggerUpdate();
 
-    virtual void sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface);
+    virtual void sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const NetworkInterface *destInterface);
 
 private:
-    RipInterfaceEntry *findRipInterfaceById(int interfaceId);
+    RipNetworkInterface *findRipInterfaceById(int interfaceId);
 
     RipRoute *findRipRoute(const L3Address& destAddress, int prefixLength);
     RipRoute *findRipRoute(const L3Address& destination, int prefixLength, RipRoute::RouteType type);
     RipRoute *findRipRoute(const IRoute *route);
-    RipRoute *findRipRoute(const InterfaceEntry *ie, RipRoute::RouteType type);
+    RipRoute *findRipRoute(const NetworkInterface *ie, RipRoute::RouteType type);
 
-    void addRipInterface(const InterfaceEntry *ie, cXMLElement *config);
-    void deleteRipInterface(const InterfaceEntry *ie);
-    int getInterfaceMetric(InterfaceEntry *ie);
+    void addRipInterface(const NetworkInterface *ie, cXMLElement *config);
+    void deleteRipInterface(const NetworkInterface *ie);
+    int getInterfaceMetric(NetworkInterface *ie);
 
-    IRoute *createRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric);
+    IRoute *createRoute(const L3Address& dest, int prefixLength, const NetworkInterface *ie, const L3Address& nextHop, int metric);
 
     bool isLoopbackInterfaceRoute(const IRoute *route) {
-        InterfaceEntry *ie = dynamic_cast<InterfaceEntry *>(route->getSource());
+        NetworkInterface *ie = dynamic_cast<NetworkInterface *>(route->getSource());
         return ie && ie->isLoopback();
     }
     bool isLocalInterfaceRoute(const IRoute *route) {
-        InterfaceEntry *ie = dynamic_cast<InterfaceEntry *>(route->getSource());
+        NetworkInterface *ie = dynamic_cast<NetworkInterface *>(route->getSource());
         return ie && !ie->isLoopback();
     }
     bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
@@ -188,5 +187,5 @@ private:
 
 } // namespace inet
 
-#endif // ifndef __INET_RIPROUTING_H
+#endif
 

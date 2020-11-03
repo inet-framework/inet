@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.node.ethernet;
@@ -23,11 +24,13 @@ import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.IExternalInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
+import inet.linklayer.contract.IPolicyLayer;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.ethernet.IEtherEncap;
+import inet.linklayer.ethernet.layered.IEthernetLayer;
+import inet.linklayer.ieee8021q.Ieee8021qLayer;
 import inet.networklayer.common.InterfaceTable;
 
 //
@@ -38,7 +41,6 @@ import inet.networklayer.common.InterfaceTable;
 // it must be set to false, otherwise it can be set to true.
 // By default used half duples CSMA/CD mac
 //
-//
 module EtherSwitch
 {
     parameters:
@@ -48,16 +50,19 @@ module EtherSwitch
         int numPcapRecorders = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
+        bool enableCutthrough = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        eth[*].encap.typename = "EtherEncapDummy";
+        eth[*].encap.typename = default("OmittedEtherEncap");
         *.fcsMode = fcsMode;
-        *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.macTableModule = default(absPath(".macTable"));
+        **.interfaceTableModule = default(absPath(".interfaceTable"));
+        **.macTableModule = default(absPath(".macTable"));
 
         relayUnit.hasStp = hasStp;
         encap.registerProtocol = true;
+        eth[*].mac.promiscuous = default(true);
+        ethernet.*.promiscuous = default(true);
 
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
@@ -81,43 +86,84 @@ module EtherSwitch
             @display("p=800,300;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
-            @display("p=474,92");
+            @display("p=500,100");
         }
-        up: MessageDispatcher {
+        nr: MessageDispatcher {
             parameters:
-                @display("p=800,160;b=1200,5");
+                @display("p=800,200;b=1200,5");
         }
-        down: MessageDispatcher {
+        li: MessageDispatcher {
             parameters:
-                @display("p=800,380;b=1200,5");
+                @display("p=800,500;b=1200,5");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
+        eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
             parameters:
-                mac.promiscuous = true;
-                @display("p=250,450,row,150;q=txQueue");
+                @display("p=250,700,row,150;q=txQueue");
         }
-        encap: <default("EtherEncap")> like IEtherEncap {
-            @display("p=800,220");
+        encap: <default("EtherEncap")> like IEtherEncap if typename != "" {
+            @display("p=800,250");
+        }
+        policy: <default("OmittedPolicyLayer")> like IPolicyLayer {
+            @display("p=800,350");
+        }
+        rl: MessageDispatcher {
+            parameters:
+                @display("p=800,400;b=1200,5");
+        }
+        ethernet: <default("")> like IEthernetLayer if typename != "" {
+            @display("p=500,450");
+        }
+        ieee8021q: Ieee8021qLayer {
+            @display("p=700,450");
+        }
+        cutthrough: MessageDispatcher if enableCutthrough {
+            @display("p=800,600;b=1200,5");
         }
     connections:
-        relayUnit.ifOut --> down.in++;
-        relayUnit.ifIn <-- down.out++;
+        ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
+        li.out++ --> ethernet.lowerLayerIn if exists(ethernet);
 
-        encap.lowerLayerIn <-- relayUnit.upperLayerOut;
-        encap.lowerLayerOut --> relayUnit.upperLayerIn;
-
-        encap.upperLayerIn <-- up.out++;
-        encap.upperLayerOut --> up.in++;
+        ieee8021q.lowerLayerOut --> li.in++ if exists(ieee8021q);
+        li.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
 
         for i=0..sizeof(ethg)-1 {
-            down.out++ --> eth[i].upperLayerIn;
-            down.in++ <-- eth[i].upperLayerOut;
+            eth[i].cutthroughOut --> cutthrough.in++ if enableCutthrough;
+            eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
+        }
+
+        relayUnit.ifOut --> policy.upperLayerIn if exists(policy);
+        policy.upperLayerOut --> relayUnit.ifIn if exists(policy);
+
+        policy.lowerLayerOut --> rl.in++;
+        rl.out++ --> policy.lowerLayerIn;
+
+        rl.out++ --> li.in++;
+        li.out++ --> rl.in++;
+
+        ieee8021q.upperLayerOut --> rl.in++ if exists(ieee8021q);
+        rl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+
+        rl.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> rl.in++ if exists(ethernet);
+
+        relayUnit.ifOut --> li.in++ if !exists(policy);
+        li.out++ --> relayUnit.ifIn if !exists(policy);
+
+        for i=0..sizeof(ethg)-1 {
+            li.out++ --> eth[i].upperLayerIn;
+            li.in++ <-- eth[i].upperLayerOut;
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
         }
 
         if hasStp {
-            stp.relayIn <-- up.out++; // relayUnit.stpOut;
-            stp.relayOut --> up.in++; // relayUnit.stpIn;
+            stp.relayIn <-- nr.out++; // relayUnit.stpOut;
+            stp.relayOut --> nr.in++; // relayUnit.stpIn;
         }
+        relayUnit.upperLayerOut --> nr.in++ if !exists(encap);
+        nr.out++ --> relayUnit.upperLayerIn if !exists(encap);
+        relayUnit.upperLayerOut --> encap.lowerLayerIn if exists(encap);
+        encap.lowerLayerOut --> relayUnit.upperLayerIn if exists(encap);
+        encap.upperLayerOut --> nr.in++ if exists(encap);
+        nr.out++ --> encap.upperLayerIn if exists(encap);
 }
 

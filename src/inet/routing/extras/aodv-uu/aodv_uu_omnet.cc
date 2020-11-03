@@ -890,7 +890,7 @@ void NS_CLASS scheduleNextEvent()
 */
 const char *NS_CLASS if_indextoname(int ifindex, char *ifname)
 {
-    InterfaceEntry *   ie;
+    NetworkInterface *   ie;
     assert(ifindex >= 0);
     ie = getInterfaceEntry(ifindex);
     return ie->getInterfaceName();
@@ -926,7 +926,7 @@ void NS_CLASS recvAODVUUPacket(Packet * pkt)
         dst.s_addr = L3Address(pkt->getTag<MacAddressInd>()->getDestAddress());
     }
 
-    InterfaceEntry *   ie;
+    NetworkInterface *   ie;
     if (!isInMacLayer())
     {
         for (int i = 0; i < getNumWlanInterfaces(); i++)
@@ -956,7 +956,7 @@ void NS_CLASS processMacPacket(Packet * p, const L3Address &dest, const L3Addres
     src_addr.s_addr = src;
     rt_table_t *fwd_rt, *rev_rt;
 
-    //InterfaceEntry *   ie = getInterfaceEntry(ifindex);
+    //NetworkInterface *   ie = getInterfaceEntry(ifindex);
     isLocal = isLocalAddress(src);
 
     rev_rt = rt_table_find(src_addr);
@@ -1089,7 +1089,7 @@ INetfilter::IHook::Result  NS_CLASS processPacket(Packet * p, unsigned int ifind
     }
     auto ipHeader = dynamicPtrCast<Ipv4Header>(constPtrCast<NetworkHeaderBase>(networkHeader));
 
-    InterfaceEntry * ie;
+    NetworkInterface * ie;
 
     if (!sourceAddr.isUnspecified())
         isLocal = isLocalAddress(sourceAddr);
@@ -1378,7 +1378,7 @@ bool  NS_CLASS getNextHop(const L3Address &dest,L3Address &add, int &iface,doubl
         if (fwd_rt->state != VALID)
             return false;
         add = fwd_rt->next_hop.s_addr;
-        InterfaceEntry * ie = getInterfaceEntry (fwd_rt->ifindex);
+        NetworkInterface * ie = getInterfaceEntry (fwd_rt->ifindex);
         iface = ie->getInterfaceId();
         cost = fwd_rt->hcnt;
         return true;
@@ -1392,7 +1392,7 @@ bool  NS_CLASS getNextHop(const L3Address &dest,L3Address &add, int &iface,doubl
         if (fwd_rt->state != VALID)
             return false;
         add = fwd_rt->next_hop.s_addr;
-        InterfaceEntry * ie = getInterfaceEntry (fwd_rt->ifindex);
+        NetworkInterface * ie = getInterfaceEntry (fwd_rt->ifindex);
         iface = ie->getInterfaceId();
         cost = fwd_rt->hcnt;
         return true;

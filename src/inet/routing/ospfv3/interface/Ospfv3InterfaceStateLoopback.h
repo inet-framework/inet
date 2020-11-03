@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3INTERFACESTATELOOPBACK_H_
-#define __INET_OSPFV3INTERFACESTATELOOPBACK_H_
+#ifndef __INET_OSPFV3INTERFACESTATELOOPBACK_H
+#define __INET_OSPFV3INTERFACESTATELOOPBACK_H
 
 #include <string>
 
@@ -27,5 +27,5 @@ class INET_API Ospfv3InterfaceStateLoopback : public Ospfv3InterfaceState
 } // namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3INTERFACESTATELOOPBACK_H_
+#endif
 

@@ -49,7 +49,7 @@ WirelessGetNeig::WirelessGetNeig() {
         listNodes[addr] = info;
 
         for (int i = 0; i < info.itable->getNumInterfaces(); i++) {
-            InterfaceEntry * entry = info.itable->getInterface(i);
+            NetworkInterface * entry = info.itable->getInterface(i);
             if (entry->isLoopback())
                 continue;
             listNodesMac[L3Address(entry->getMacAddress())] = info;

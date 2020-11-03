@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ProtocolTag_m.h"
@@ -256,24 +256,26 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
         packet->insertAtBack(phyTrailer);
     }
+    const Protocol *protocol = nullptr;
     if (dynamic_cast<Ieee80211FhssPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211FhssPhy);
+        protocol = &Protocol::ieee80211FhssPhy;
     else if (dynamic_cast<Ieee80211IrPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211IrPhy);
+        protocol = &Protocol::ieee80211IrPhy;
     else if (dynamic_cast<Ieee80211DsssPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211DsssPhy);
+        protocol = &Protocol::ieee80211DsssPhy;
     else if (dynamic_cast<Ieee80211HrDsssPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HrDsssPhy);
+        protocol = &Protocol::ieee80211HrDsssPhy;
     else if (dynamic_cast<Ieee80211OfdmPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+        protocol = &Protocol::ieee80211OfdmPhy;
     else if (dynamic_cast<Ieee80211ErpOfdmPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211ErpOfdmPhy);
+        protocol = &Protocol::ieee80211ErpOfdmPhy;
     else if (dynamic_cast<Ieee80211HtPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HtPhy);
+        protocol = &Protocol::ieee80211HtPhy;
     else if (dynamic_cast<Ieee80211VhtPhyHeader*>(phyHeader.get()))
-        packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211VhtPhy);
+        protocol = &Protocol::ieee80211VhtPhy;
     else
         throw cRuntimeError("Invalid IEEE 802.11 PHY header type.");
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(protocol);
 }
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
@@ -286,7 +288,7 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
         packet->popAtBack(tailLength + paddingLength, Chunk::PF_ALLOW_INCORRECT);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
 }
 
 const Ptr<const Ieee80211PhyHeader> Ieee80211Radio::popIeee80211PhyHeaderAtFront(Packet *packet, b length, int flags)

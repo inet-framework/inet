@@ -6,18 +6,11 @@ retransmission timer expires
 [General]
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 
 *.testing=true
 
-####cmdenv-log-prefix=""
 *.tcptester.cmdenv-log-level=DEBUG
 **.cmdenv-log-level=OFF
 

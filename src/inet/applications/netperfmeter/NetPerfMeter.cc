@@ -10,25 +10,25 @@
 // *
 // *   Copyright (C) 2009-2015 by Thomas Dreibholz
 // *
-// *   This program is free software: you can redistribute it and/or modify
-// *   it under the terms of the GNU General Public License as published by
-// *   the Free Software Foundation, either version 3 of the License, or
-// *   (at your option) any later version.
-// *
-// *   This program is distributed in the hope that it will be useful,
-// *   but WITHOUT ANY WARRANTY; without even the implied warranty of
-// *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// *   GNU General Public License for more details.
-// *
-// *   You should have received a copy of the GNU General Public License
-// *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // *
 // *   Contact: dreibh@iem.uni-due.de
 
 #include "NetPerfMeter.h"
 #include "NetPerfMeter_m.h"
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Message.h"
@@ -338,7 +338,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
         assert(StopTimer == nullptr);
         if (StopTime > 0.0) {
             StopTimer = new cMessage("StopTimer", TIMER_STOP);
-            scheduleAt(simTime() + StopTime, StopTimer);
+            scheduleAfter(StopTime, StopTimer);
         }
     }
 
@@ -405,15 +405,15 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             // ------ Data Arrival Indication ----------------------------------
         case SCTP_I_DATA_NOTIFICATION: {
             // Data has arrived -> request it from the SCTP module.
-            auto& tags = getTags(msg);
-            const SctpCommandReq* dataIndication = tags.getTag<SctpCommandReq>();
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
+            auto dataIndication = tags.getTag<SctpCommandReq>();
             // SctpInfoReq* command = new SctpInfoReq("SendCommand");
             SctpInfoReq* command = new SctpInfoReq();
             command->setSocketId(dataIndication->getSocketId());
             command->setSid(dataIndication->getSid());
             command->setNumMsgs(dataIndication->getNumMsgs());
             Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
-            SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
+            auto cmd = cmsg->addTag<SctpSendReq>();
             cmd->setSocketId(dataIndication->getSocketId());
             cmd->setSid(dataIndication->getSid());
             cmsg->addTag<SocketReq>()->setSocketId(dataIndication->getSocketId());
@@ -438,8 +438,8 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             // ------ Connection established -----------------------------------
         case SCTP_I_ESTABLISHED: {
             Message *message = check_and_cast<Message *>(msg);
-            auto& tags = getTags(message);
-            const SctpConnectReq *connectInfo = tags.getTag<SctpConnectReq>();
+            auto& tags = message->getTags();
+            auto connectInfo = tags.getTag<SctpConnectReq>();
             ActualOutboundStreams = connectInfo->getOutboundStreams();
             if (ActualOutboundStreams > RequestedOutboundStreams) {
                 ActualOutboundStreams = RequestedOutboundStreams;
@@ -456,8 +456,8 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             // ------ Queue indication -----------------------------------------
         case SCTP_I_SENDQUEUE_ABATED: {
             Message *message = check_and_cast<Message *>(msg);
-            auto& tags = getTags(message);
-            const SctpSendQueueAbatedReq* sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
+            auto& tags = message->getTags();
+            const auto& sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
             assert(sendQueueAbatedIndication != nullptr);
             // Queue is underfull again -> give it more data.
             SendingAllowed = true;
@@ -665,7 +665,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
     else {
         // ====== Restart transmission immediately ============================
         StartTimer = new cMessage("StartTimer");
-        scheduleAt(simTime(), StartTimer);
+        scheduleAfter(SIMTIME_ZERO, StartTimer);
     }
 }
 
@@ -686,7 +686,7 @@ void NetPerfMeter::startSending()
     const simtime_t onTime = par("onTime");
     if (onTime.dbl() > 0.0) {
         OffTimer = new cMessage("OffTimer", TIMER_OFF);
-        scheduleAt(simTime() + onTime, OffTimer);
+        scheduleAfter(onTime, OffTimer);
     }
 }
 
@@ -705,7 +705,7 @@ void NetPerfMeter::stopSending()
     if ((offDuration.dbl() > 0.0)
             && ((MaxOnOffCycles < 0) || (OnOffCycleCounter <= (unsigned int) MaxOnOffCycles))) {
         OnTimer = new cMessage("OnTimer", TIMER_ON);
-        scheduleAt(simTime() + offDuration, OnTimer);
+        scheduleAfter(offDuration, OnTimer);
     }
 }
 
@@ -918,7 +918,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
         auto dataMessage = makeShared<BytesChunk>();
         std::vector<uint8_t> vec;
         vec.resize(frameSize);
-        for (uint32 i = 0; i < frameSize; i++)
+        for (uint32_t i = 0; i < frameSize; i++)
             vec[i] = ((i & 1) ? 'D' : 'T');
         dataMessage->setBytes(vec);
         dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -954,7 +954,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
                 auto dataMessage = makeShared<BytesChunk>();
                 std::vector<uint8_t> vec;
                 vec.resize(msgSize);
-                for (uint32 i = 0; i < msgSize; i++)
+                for (uint32_t i = 0; i < msgSize; i++)
                     vec[i] = ((i & 1) ? 'D' : 'T');
                 dataMessage->setBytes(vec);
                 dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -986,7 +986,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
                 auto dataMessage = makeShared<BytesChunk>();
                 std::vector<uint8_t> vec;
                 vec.resize(msgSize);
-                for (uint32 i = 0; i < msgSize; i++)
+                for (uint32_t i = 0; i < msgSize; i++)
                     vec[i] = ((i & 1) ? 'D' : 'T');
                 dataMessage->setBytes(vec);
                 dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -1038,7 +1038,7 @@ unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
 
 // ###### Send data of saturated streams ####################################
 void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long   bytesAvailableInQueue,
-                                              const SctpSendQueueAbatedReq* sendQueueAbatedIndication)
+                                              const Ptr<const SctpSendQueueAbatedReq>& sendQueueAbatedIndication)
 {
     if (OnTimer != nullptr) {
         // We are in Off mode -> nothing to send!
@@ -1140,7 +1140,7 @@ void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesA
      EV << simTime() << ", " << getFullPath()
      << ": Next on stream #" << streamID << " in " << nextFrameTime << "s" << endl;
      */
-    scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[streamID]);
+    scheduleAfter(nextFrameTime, TransmitTimerVector[streamID]);
 }
 
 
@@ -1174,7 +1174,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
         // std::cout << simTime() << ", " << getFullPath()
         //           << ": Next in " << nextFrameTime << "s" << endl;
 
-        scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[0]);
+        scheduleAfter(nextFrameTime, TransmitTimerVector[0]);
     }
 }
 
@@ -1186,8 +1186,8 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
         const auto& smsg = dataMessage->peekData();
 
         if (TransportProtocol == SCTP) {
-            auto& tags = getTags(msg);
-            SctpRcvReq *receiveCommand = tags.findTag<SctpRcvReq>();
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
+            auto& receiveCommand = tags.findTag<SctpRcvReq>();
             streamID = receiveCommand->getSid();
         }
 
@@ -1210,7 +1210,7 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
     // SCTP_I_SENDQUEUE_ABATED!
 
     Request* cmsg = new Request("QueueRequest", SCTP_C_QUEUE_BYTES_LIMIT);
-    SctpInfoReq* queueInfo = cmsg->addTag<SctpInfoReq>();
+    auto queueInfo = cmsg->addTag<SctpInfoReq>();
     queueInfo->setText(queueSize);
     queueInfo->setSocketId(ConnectionID);
 

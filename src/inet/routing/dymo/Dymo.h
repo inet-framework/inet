@@ -1,20 +1,18 @@
 //
-// Copyright (C) 2013 Opensim Ltd.
-// Author: Levente Meszaros
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_DYMO_H
@@ -153,7 +151,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     void processUdpPacket(Packet *packet);
 
     // handling Dymo packets
-    void sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
+    void sendDymoPacket(const Ptr<DymoPacket>& packet, const NetworkInterface *networkInterface, const L3Address& nextHop, double delay);
     void processDymoPacket(Packet *packet, const Ptr<const DymoPacket>& dymoPacket);
 
     // handling RteMsg packets
@@ -179,7 +177,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     const Ptr<Rerr> createRerr(std::vector<L3Address>& addresses);
     void sendRerr(const Ptr<Rerr>& rerr);
     void sendRerrForUndeliverablePacket(const L3Address& destination);
-    void sendRerrForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
+    void sendRerrForBrokenLink(const NetworkInterface *networkInterface, const L3Address& nextHop);
     void processRerr(Packet *packet, const Ptr<const Rerr>& rerr);
     b computeRerrLength(const Ptr<Rerr>& rerr);
 
@@ -187,7 +185,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     IRoute *createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);
     void updateRoutes(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);
     void updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock, IRoute *route);
-    int getLinkCost(const InterfaceEntry *interfaceEntry, DymoMetricType metricType);
+    int getLinkCost(const NetworkInterface *networkInterface, DymoMetricType metricType);
     bool isLoopFree(const Ptr<const RteMsg>& rteMsg, IRoute *route);
 
     // handling expunge timer
@@ -234,5 +232,5 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
 
 } // namespace inet
 
-#endif // ifndef __INET_DYMO_H
+#endif
 

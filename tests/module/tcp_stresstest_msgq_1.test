@@ -9,21 +9,9 @@ Here: packet loss (5%), packet delays (20%, by mean=1s), packet duplication
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.TcpTestNet2
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 cmdenv-express-mode=false
-#cmdenv-event-banners=false
-#cmdenv-module-messages=false
 
 *.testing=true
-
-####cmdenv-log-prefix=""
-#*.tcptester.cmdenv-log-level=DEBUG
-#**.cmdenv-log-level=OFF
 
 # script format: "time numbytes; time numbytes; ..."
 *.cli_app.sendScript="1 1; 1 100; 1 4000; 1 16000; 1 10; 1 1; 1 1; 1 1; 1 64000; 1 10;\
@@ -36,9 +24,6 @@ cmdenv-express-mode=false
 *.tcptester.numCopies=int(exponential(3))
 *.tcptester.delayValue=exponential(1)
 
-# override tcp settings in defaults.ini
-#*.tcp*.sendQueueClass="TCPMsgBasedSendQueue"
-#*.tcp*.receiveQueueClass="TCPMsgBasedRcvQueue"
 *.tcp*.dataTransferMode="object"
 
 include ../../lib/defaults.ini
@@ -49,8 +34,8 @@ Calling finish() at end of Run #0...
 TcpTestNet2.cli_app: received 0 bytes in 0 packets
 TcpTestNet2.cli_tcp: finishing with 1 connections open.
 TcpTestNet2.srv_tcp: finishing with 1 connections open.
-TcpTestNet2.srv_app: received 252372 bytes in 129 packets
-[206.927] tcpdump finished, A:329 B:364 segments
+TcpTestNet2.srv_app: received 252372 bytes in 112 packets
+[174.661] tcpdump finished, A:327 B:365 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

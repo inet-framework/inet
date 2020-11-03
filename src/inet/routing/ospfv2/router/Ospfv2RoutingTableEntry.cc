@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/routing/ospfv2/router/Ospfv2RoutingTableEntry.h"
@@ -54,7 +55,7 @@ Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(const Ospfv2RoutingTableEntry& 
 void Ospfv2RoutingTableEntry::addNextHop(NextHop hop)
 {
     if (nextHops.size() == 0) {
-        InterfaceEntry *routingInterface = ift->getInterfaceById(hop.ifIndex);
+        NetworkInterface *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
         // TODO: this used to be commented out, but it seems we need it

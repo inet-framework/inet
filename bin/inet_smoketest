@@ -304,13 +304,14 @@ class SmokeTestCase(SimulationTestCase):
         # Otherwise, assume the first word as the name of the executable.
         (exeName, progArgs) = (executable, self.cmdLine) if (self.cmdLine.startswith("-")) else self.cmdLine.split(maxsplit=1)
 
+        os.environ["TOOL"] = memcheckPrefix
         command = memcheckPrefix + (exeName + "_dbg" if debug else exeName + "_release" if release else exeName) + " -u Cmdenv " + progArgs + \
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false" + \
             " --result-dir=" + resultdir + \
             " " + extraOppRunArgs
 
-        print("COMMAND: " + command + '\n')
+        # print("COMMAND: " + command + '\n')
         result = self.runSimulation(self.title, command, workingdir)
 
         # process the result

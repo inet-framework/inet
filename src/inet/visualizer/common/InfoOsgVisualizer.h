@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,12 +12,13 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_INFOOSGVISUALIZER_H
 #define __INET_INFOOSGVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/InfoVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
@@ -42,16 +43,13 @@ class INET_API InfoOsgVisualizer : public InfoVisualizerBase
 
   protected:
     // parameters
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeOsgVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;
 
     virtual InfoVisualization *createInfoVisualization(cModule *module) const override;
     virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override;
-
-  public:
-    virtual ~InfoOsgVisualizer();
 
 #else // ifdef WITH_OSG
 
@@ -68,5 +66,5 @@ class INET_API InfoOsgVisualizer : public InfoVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_INFOOSGGVISUALIZER_H
+#endif
 

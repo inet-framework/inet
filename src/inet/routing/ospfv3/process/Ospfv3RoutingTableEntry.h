@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3ROUTINGTABLEENTRY_H_
-#define __INET_OSPFV3ROUTINGTABLEENTRY_H_
+#ifndef __INET_OSPFV3ROUTINGTABLEENTRY_H
+#define __INET_OSPFV3ROUTINGTABLEENTRY_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -139,5 +139,5 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
 } // namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3ROUTINGTABLEENTRY_H_
+#endif
 

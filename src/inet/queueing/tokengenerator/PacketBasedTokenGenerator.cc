@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -39,13 +39,14 @@ void PacketBasedTokenGenerator::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate);
+            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
 }
 
 void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     auto numTokens = numTokensPerPacketParameter->doubleValue() + numTokensPerBitParameter->doubleValue() * packet->getTotalLength().get();
     numTokensGenerated += numTokens;
     emit(TokenGeneratorBase::tokensCreatedSignal, numTokens);
@@ -80,7 +81,7 @@ void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t si
 {
     if (signal == TokenBasedServer::tokensDepletedSignal) {
         Enter_Method("tokensDepleted");
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else
         throw cRuntimeError("Unknown signal");

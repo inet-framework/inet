@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005 M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_VOIPSTREAMSENDER_H
@@ -34,12 +35,10 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 #ifndef HAVE_FFMPEG_AVRESAMPLE
 #error Please install libavresample or disable 'VoIPStream' feature
 #endif // ifndef HAVE_FFMPEG_AVRESAMPLE
 #include <libavresample/avresample.h>
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 };
 
 #include "inet/applications/voipstream/AudioOutFile.h"
@@ -116,13 +115,7 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     AVFormatContext *pFormatCtx = nullptr;
     AVCodecContext *pCodecCtx = nullptr;
     AVCodec *pCodec = nullptr;    // input decoder codec
-
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     AVAudioResampleContext *pReSampleCtx = nullptr;
-#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    ReSampleContext *pReSampleCtx = nullptr;
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-
     AVCodecContext *pEncoderCtx = nullptr;
     AVCodec *pCodecEncoder = nullptr;    // output encoder codec
 
@@ -139,5 +132,5 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
 
 } // namespace inet
 
-#endif // ifndef __INET_VOIPSTREAMSENDER_H
+#endif
 

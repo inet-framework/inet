@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -12,18 +12,18 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_EXTINTERFACE_H
 #define __INET_EXTINTERFACE_H
 
 #include "inet/common/IInterfaceRegistrationListener.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
-class INET_API ExtInterface : public InterfaceEntry
+class INET_API ExtInterface : public NetworkInterface
 {
   protected:
     virtual void configureInterface();
@@ -39,5 +39,5 @@ class INET_API ExtInterface : public InterfaceEntry
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTINTERFACE_H
+#endif
 

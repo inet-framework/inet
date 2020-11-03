@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2012 - 2016 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -11,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 /**
@@ -22,8 +23,8 @@
   */
 
 
-#ifndef ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_
-#define ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_
+#ifndef __INET_CLNSADDRESSTYPE_H
+#define __INET_CLNSADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -49,9 +50,10 @@ class INET_API CLNSAddressType : public IL3AddressType
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::clns; }
 
-    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalAddress(const NetworkInterface *ie) const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
 };
 
 } /* namespace inet */
 
-#endif /* ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_ */
+#endif
+

@@ -1,0 +1,37 @@
+%description:
+Tests clock granularity.:
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = inet.test.unittest.lib.ClockTestNetwork
+cmdenv-express-mode = false
+cmdenv-log-prefix = "C:%C: "
+
+*.host.clock.typename = "OscillatorBasedClock"
+*.host.clock.initialClockTime = 0s
+*.host.clock.oscillator.nominalTickLength = 0.1s
+*.host.clock.oscillator.driftRate = 1e6 ppm
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "^C:" test.out > clock.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains: clock.out
+C:(ClockTestApp)ClockTestNetwork.host.app: start
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_1.1 to clock: 1.1, scheduled simtime: 0.55, scheduled clock: 1.1
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.11 to clock: 2.11, scheduled simtime: 1.1, scheduled clock: 2.2
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.89 to clock: 2.89, scheduled simtime: 1.45, scheduled clock: 2.9
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_2.9999999 to clock: 2.9999999, scheduled simtime: 1.5, scheduled clock: 3
+C:(ClockTestApp)ClockTestNetwork.host.app: schedule Timer_3.11 to clock: 3.11, scheduled simtime: 1.6, scheduled clock: 3.2
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_1.1: simtime: 0.55, clock: 1.1
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.11: simtime: 1.1, clock: 2.2
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 1.45, clock: 2.9
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 1.5, clock: 3
+C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 1.6, clock: 3.2
+C:(ClockTestApp)ClockTestNetwork.host.app: finished: simtime: 1.6, clock: 3.2
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

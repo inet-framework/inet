@@ -61,13 +61,13 @@ EV << ".\n";
 %contains: stdout
 Running simulation...
 ** Event #1  t=0   Test (Test, id=1)
-[1000..1000)EmptyChunk
+[1000..1000)(inet::EmptyChunk)
 rcv_nxt=1000
-SQ:enqueue("msg1", 100): --> [1000..1100)ByteCountChunk, length = 100 B, data = 63
-SQ:enqueue("msg2", 400): --> [1000..1500)ByteCountChunk, length = 500 B, data = 63
-SQ:enqueue("msg3", 600): --> [1000..2100)ByteCountChunk, length = 1100 B, data = 63
-SQ:enqueue("msg4", 50): --> [1000..2150)ByteCountChunk, length = 1150 B, data = 63
-SQ:enqueue("msg5", 150): --> [1000..2300)ByteCountChunk, length = 1300 B, data = 63
+SQ:enqueue("msg1", 100): --> [1000..1100)(inet::ByteCountChunk) length = 100 B, data = 63
+SQ:enqueue("msg2", 400): --> [1000..1500)(inet::ByteCountChunk) length = 500 B, data = 63
+SQ:enqueue("msg3", 600): --> [1000..2100)(inet::ByteCountChunk) length = 1100 B, data = 63
+SQ:enqueue("msg4", 50): --> [1000..2150)(inet::ByteCountChunk) length = 1150 B, data = 63
+SQ:enqueue("msg5", 150): --> [1000..2300)(inet::ByteCountChunk) length = 1300 B, data = 63
 SQ:createSegmentWithBytes(1000, 1099): inet::ByteCountChunk[1000..1099)
 RQ:insertSeg [1000..1099) --> rcv_nxt=1099 [1000..1099)
 SQ:createSegmentWithBytes(1000, 1100): inet::ByteCountChunk[1000..1100)
@@ -85,17 +85,17 @@ RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
 RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
 RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
 RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
-SQ:discardUpTo(2099): [2099..2300)ByteCountChunk, length = 201 B, data = 63
+SQ:discardUpTo(2099): [2099..2300)(inet::ByteCountChunk) length = 201 B, data = 63
 RQ:extractUpTo(2100): < < data: 1 bytes > > --> rcv_nxt=2100
 RQ:extractUpTo(2100): < > --> rcv_nxt=2100
-SQ:discardUpTo(2100): [2100..2300)ByteCountChunk, length = 200 B, data = 63
+SQ:discardUpTo(2100): [2100..2300)(inet::ByteCountChunk) length = 200 B, data = 63
 SQ:createSegmentWithBytes(2200, 2300): inet::ByteCountChunk[2200..2300)
 RQ:insertSeg [2200..2300) --> rcv_nxt=2100 [2200..2300)
 SQ:createSegmentWithBytes(2100, 2200): inet::ByteCountChunk[2100..2200)
 RQ:insertSeg [2100..2200) --> rcv_nxt=2300 [2100..2300)
 RQ:extractUpTo(2200): < < data: 100 bytes > > --> rcv_nxt=2300 [2200..2300)
 RQ:extractUpTo(2300): < < data: 100 bytes > > --> rcv_nxt=2300
-SQ:discardUpTo(2300): [2300..2300)EmptyChunk
+SQ:discardUpTo(2300): [2300..2300)(inet::EmptyChunk)
 .
 
 <!> No more events, simulation completed -- at t=0s, event #1

@@ -1,17 +1,18 @@
 //
-// (C) 2013 Opensim Ltd.
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This library is free software, you can redistribute it
-// and/or modify
-// it under  the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation;
-// either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful,
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
 //
-// Author: Andras Varga (andras@omnetpp.org)
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/IInterfaceRegistrationListener.h"
@@ -62,9 +63,9 @@ void MacProtocolBase::initialize(int stage)
 
 void MacProtocolBase::registerInterface()
 {
-    ASSERT(interfaceEntry == nullptr);
-    interfaceEntry = getContainingNicModule(this);
-    configureInterfaceEntry();
+    ASSERT(networkInterface == nullptr);
+    networkInterface = getContainingNicModule(this);
+    configureNetworkInterface();
 }
 
 void MacProtocolBase::sendUp(cMessage *message)
@@ -109,7 +110,8 @@ void MacProtocolBase::popTxQueue()
     if (currentTxFrame != nullptr)
         throw cRuntimeError("Model error: incomplete transmission exists");
     ASSERT(txQueue != nullptr);
-    currentTxFrame = txQueue->popPacket();
+    currentTxFrame = txQueue->dequeuePacket();
+    currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
     take(currentTxFrame);
 }
 
@@ -118,7 +120,7 @@ void MacProtocolBase::flushQueue(PacketDropDetails& details)
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (txQueue)
         while (!txQueue->isEmpty()) {
-            auto packet = txQueue->popPacket();
+            auto packet = txQueue->dequeuePacket();
             emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete packet;
         }
@@ -128,7 +130,7 @@ void MacProtocolBase::clearQueue()
 {
     if (txQueue)
         while (!txQueue->isEmpty())
-            delete txQueue->popPacket();
+            delete txQueue->dequeuePacket();
 }
 
 void MacProtocolBase::handleMessageWhenDown(cMessage *msg)
@@ -143,8 +145,8 @@ void MacProtocolBase::handleMessageWhenDown(cMessage *msg)
 
 void MacProtocolBase::handleStartOperation(LifecycleOperation *operation)
 {
-    interfaceEntry->setState(InterfaceEntry::State::UP);
-    interfaceEntry->setCarrier(true);
+    networkInterface->setState(NetworkInterface::State::UP);
+    networkInterface->setCarrier(true);
 }
 
 void MacProtocolBase::handleStopOperation(LifecycleOperation *operation)
@@ -154,23 +156,24 @@ void MacProtocolBase::handleStopOperation(LifecycleOperation *operation)
     if (currentTxFrame)
         dropCurrentTxFrame(details);
     flushQueue(details);
-    interfaceEntry->setCarrier(false);
-    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+    networkInterface->setCarrier(false);
+    networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
 {
     deleteCurrentTxFrame();
     clearQueue();
-    interfaceEntry->setCarrier(false);
-    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+    networkInterface->setCarrier(false);
+    networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 void MacProtocolBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("receiveSignal");
     if (signalID == interfaceDeletedSignal) {
-        if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
-            interfaceEntry = nullptr;
+        if (networkInterface == check_and_cast<const NetworkInterface *>(obj))
+            networkInterface = nullptr;
     }
 }
 

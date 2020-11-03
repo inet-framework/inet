@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <algorithm>
@@ -94,21 +94,21 @@ void MediumLimitCache::initialize(int stage)
     }
 }
 
-std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level) const
+std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level, int evFlags) const
 {
     stream << "RadioMediumLimits";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", minConstraintArea = " << minConstraintArea
-               << ", maxConstraintArea = " << maxConstraintArea
-               << ", maxSpeed = " << maxSpeed
-               << ", maxTransmissionPower = " << maxTransmissionPower
-               << ", minInterferencePower = " << minInterferencePower
-               << ", minReceptionPower = " << minReceptionPower
-               << ", maxAntennaGain = " << maxAntennaGain
-               << ", minInterferenceTime = " << minInterferenceTime
-               << ", maxTransmissionDuration = " << maxTransmissionDuration
-               << ", maxCommunicationRange = " << maxCommunicationRange
-               << ", maxInterferenceRange = " << maxInterferenceRange;
+        stream << EV_FIELD(minConstraintArea)
+               << EV_FIELD(maxConstraintArea)
+               << EV_FIELD(maxSpeed)
+               << EV_FIELD(maxTransmissionPower)
+               << EV_FIELD(minInterferencePower)
+               << EV_FIELD(minReceptionPower)
+               << EV_FIELD(maxAntennaGain)
+               << EV_FIELD(minInterferenceTime)
+               << EV_FIELD(maxTransmissionDuration)
+               << EV_FIELD(maxCommunicationRange)
+               << EV_FIELD(maxInterferenceRange);
     return stream;
 }
 

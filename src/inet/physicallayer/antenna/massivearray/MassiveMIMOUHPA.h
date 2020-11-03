@@ -84,7 +84,7 @@ class INET_API MassiveMIMOUHPA : public MassiveArray
 
     }
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual void setDirection(const double &angle) override;
    // Consumption methods
 //   virtual W getPowerConsumption() const override {return actualConsumption;}

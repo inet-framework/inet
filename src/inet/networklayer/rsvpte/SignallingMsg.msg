@@ -1,16 +1,20 @@
 //
-// (C) 2005 Vojtech Janota
-// (C) 2003 Xuan Thang Nguyen
+// Copyright (C) 2005 Vojtech Janota
+// Copyright (C) 2003 Xuan Thang Nguyen
 //
-// This library is free software, you can redistribute it
-// and/or modify
-// it under  the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation;
-// either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful,
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 import inet.common.INETDefs;
@@ -22,16 +26,16 @@ namespace inet;
 enum SignallingConstants {
     MSG_PSB_TIMER         = 1;
     MSG_PSB_TIMEOUT       = 2;
-    
+
     MSG_RSB_REFRESH_TIMER = 3;
     MSG_RSB_COMMIT_TIMER  = 4;
     MSG_RSB_TIMEOUT       = 5;
-    
+
     MSG_HELLO_TIMER       = 6;
     MSG_HELLO_TIMEOUT     = 7;
-    
+
     MSG_PATH_NOTIFY       = 8;
-    
+
     PATH_CREATED          = 1;
     PATH_UNFEASIBLE       = 2;
     PATH_FAILED           = 3;

@@ -13,18 +13,19 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 
 
 package inet.examples.ethernet.lans;
 
-import inet.common.misc.ThruputMeteringChannel;
-import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
+import inet.physicallayer.common.packetlevel.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -34,39 +35,54 @@ import ned.DatarateChannel;
 network MixedLAN
 {
     types:
-        channel C extends ThruputMeteringChannel
+        channel C extends Eth10M
         {
-            delay = 01us;
-            datarate = 100Mbps;
+            length = 1cm;
         }
     submodules:
-        bus: EtherBus {
+        tap1: WireJunction {
             parameters:
-                positions = "10 20 24 35 40 48";
-                propagationSpeed = 2e8 mps; // 1us = 200m
-                @display("p=450,300;b=800,5;o=#408060");
-            gates:
-                ethg[6];
+                @display("p=126,307");
+        }
+        tap2: WireJunction {
+            parameters:
+                @display("p=258,307");
+        }
+        tap3: WireJunction {
+            parameters:
+                @display("p=344,307");
+        }
+        tap4: WireJunction {
+            parameters:
+                @display("p=514,307");
+        }
+        tap5: WireJunction {
+            parameters:
+                @display("p=650,307");
+        }
+        tap6: WireJunction {
+            parameters:
+                @display("p=753,307");
         }
         busHostA: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=100,200");
+                @display("p=126,200");
         }
         busHostB: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=250,200");
+                @display("p=258,200");
         }
         busHostC: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=650,400");
+                @display("p=514,400");
         }
         busHostD: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=800,400");
+                @display("p=753,400");
         }
         switchHostA: EtherHost {
             parameters:
@@ -95,7 +111,7 @@ network MixedLAN
         switch: EtherSwitch {
             parameters:
                 eth[4].duplexMode = false;
-                @display("p=325,400");
+                @display("p=344,400");
             gates:
                 ethg[5];
         }
@@ -117,28 +133,32 @@ network MixedLAN
         hub: EtherHub {
             parameters:
                 @display("p=650,200");
-            gates:
-                ethg[4];
         }
     connections:
+        tap1.port++ <--> Eth10M {  length = 10m; } <--> tap2.port++;
+        tap2.port++ <--> Eth10M {  length = 10m; } <--> tap3.port++;
+        tap3.port++ <--> Eth10M {  length = 4m; } <--> tap4.port++;
+        tap4.port++ <--> Eth10M {  length = 11m; } <--> tap5.port++;
+        tap5.port++ <--> Eth10M {  length = 8m; } <--> tap6.port++;
+
         //half-duplex:
-        bus.ethg[0] <--> C <--> busHostA.ethg;
-        bus.ethg[1] <--> C <--> busHostB.ethg;
-        bus.ethg[2] <--> C <--> switch.ethg[4];
-        bus.ethg[3] <--> C <--> busHostC.ethg;
-        bus.ethg[4] <--> C <--> hub.ethg[3];
-        bus.ethg[5] <--> C <--> busHostD.ethg;
+        tap1.port++ <--> C <--> busHostA.ethg;
+        tap2.port++ <--> C <--> busHostB.ethg;
+        tap3.port++ <--> C <--> switch.ethg[4];
+        tap4.port++ <--> C <--> busHostC.ethg;
+        tap5.port++ <--> C <--> hub.ethg++;
+        tap6.port++ <--> C <--> busHostD.ethg;
 
         //full-duplex:
-        switch.ethg[0] <--> C <--> switchHostA.ethg;
-        switch.ethg[1] <--> C <--> switchHostB.ethg;
-        switch.ethg[2] <--> C <--> switchHostC.ethg;
-        switch.ethg[3] <--> C <--> switchHostD.ethg;
+        switch.ethg[0] <--> Eth100M {  length = 3m; } <--> switchHostA.ethg;
+        switch.ethg[1] <--> Eth100M {  length = 2m; } <--> switchHostB.ethg;
+        switch.ethg[2] <--> Eth10M {  length = 4m; } <--> switchHostC.ethg;
+        switch.ethg[3] <--> Eth100M {  length = 5m; } <--> switchHostD.ethg;
 
         //half-duplex:
-        hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
-        hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
-        hub.ethg[2] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
+        hub.ethg++ <--> Eth10M {  length = 3m; } <--> hubHostA.ethg;
+        hub.ethg++ <--> Eth10M {  length = 4m; } <--> hubHostB.ethg;
+        hub.ethg++ <--> Eth10M {  length = 5m; } <--> hubHostC.ethg;
 }
 
 
@@ -258,45 +278,55 @@ network HubLAN
 network BusLAN
 {
     types:
-        channel C extends DatarateChannel
+        channel C extends Eth10M
         {
-            delay = 0s;
-            datarate = 10Mbps;
+            length = 1cm;
         }
     submodules:
         hostA: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=100,200");
+                @display("p=100,111");
         }
         hostB: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=250,200");
+                @display("p=250,111");
         }
         hostC: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=400,200");
+                @display("p=400,111");
         }
         hostD: EtherHost {
             parameters:
                 eth.duplexMode = false;
-                @display("p=550,200");
+                @display("p=550,111");
         }
-        bus: EtherBus {
+        tap1: WireJunction {
             parameters:
-                positions = "0 10 20 30";
-                propagationSpeed = 2e8 mps;
-                @display("p=325,100;b=500,6;o=#408060");
-            gates:
-                ethg[4];
+                @display("p=100,180");
+        }
+        tap2: WireJunction {
+            parameters:
+                @display("p=250,180");
+        }
+        tap3: WireJunction {
+            parameters:
+                @display("p=400,180");
+        }
+        tap4: WireJunction {
+            parameters:
+                @display("p=550,180");
         }
     connections:
-        bus.ethg[0] <--> C <--> hostA.ethg;
-        bus.ethg[1] <--> C <--> hostB.ethg;
-        bus.ethg[2] <--> C <--> hostC.ethg;
-        bus.ethg[3] <--> C <--> hostD.ethg;
+        tap1.port++ <--> Eth10M <--> tap2.port++;
+        tap2.port++ <--> Eth10M <--> tap3.port++;
+        tap3.port++ <--> Eth10M <--> tap4.port++;
+        hostA.ethg <--> C <--> tap1.port++;
+        hostB.ethg <--> C <--> tap2.port++;
+        hostC.ethg <--> C <--> tap3.port++;
+        hostD.ethg <--> C <--> tap4.port++;
 }
 
 network SwitchedDuplexLAN

@@ -124,5 +124,5 @@ class AccessModuleWrap
 
 } // namespace inet
 
-#endif // ifndef __INET_FINDMODULE_H
+#endif
 

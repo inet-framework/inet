@@ -13,7 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 
@@ -50,7 +51,7 @@ enum SctpErrorCode
 
 class SctpSimpleMessage extends cPacket
 {
-    uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
+    uint32_t dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     uint8_t data[];
     simtime_t creationTime = 0;
     bool encaps = false;
@@ -88,13 +89,13 @@ class SctpOpenReq extends SctpCommandReq
     bool fork = false;               // used only for passive open
     string queueClass = "SctpQueue"; // may be left empty
     string sctpAlgorithmClass;       // may be left empty
-    uint32 inboundStreams;
-    uint32 outboundStreams;
+    uint32_t inboundStreams;
+    uint32_t outboundStreams;
     bool streamReset;
     bool appLimited;
     int prMethod;
-    uint32 numRequests;
-    uint32 messagesToPush;
+    uint32_t numRequests;
+    uint32_t messagesToPush;
 }
 
 class SctpAvailableReq extends SctpCommandReq
@@ -112,9 +113,9 @@ class SctpConnectReq extends SctpCommandReq
 
 class SctpRcvReq extends SctpCommandReq
 {
-    uint32 ppid;
-    uint32 tsn;
-    uint32 cumTsn;
+    uint32_t ppid;
+    uint32_t tsn;
+    uint32_t cumTsn;
 }
 
 class SctpStatusReq extends SctpCommandReq
@@ -128,9 +129,9 @@ class SctpStatusReq extends SctpCommandReq
 class SctpResetReq extends SctpCommandReq
 {
     unsigned short requestType = 0;
-    uint16 instreams = 0;
-    uint16 outstreams = 0;
-    uint16 streams[];
+    uint16_t instreams = 0;
+    uint16_t outstreams = 0;
+    uint16_t streams[];
 }
 
 class SctpInfoReq extends SctpCommandReq
@@ -152,10 +153,10 @@ class SctpRtoReq extends SctpCommandReq
 
 class SctpSendQueueAbatedReq extends SctpCommandReq
 {
-    uint64 bytesAvailable;
-    uint64 bytesQueued;
-    uint64 bytesLimit;
-    uint64 queuedForStream[];
+    uint64_t bytesAvailable;
+    uint64_t bytesQueued;
+    uint64_t bytesLimit;
+    uint64_t queuedForStream[];
 }
 
 class SctpPathInfo extends cNamedObject

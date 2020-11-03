@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 import inet.common.INETDefs;
@@ -56,7 +57,7 @@ class XMacHeaderBase extends FieldsChunk
 
 //
 // Control Frame for ~XMac. Frame size is configurable
-// in the MAC layer. 
+// in the MAC layer.
 //
 class XMacControlFrame extends XMacHeaderBase
 {
@@ -64,7 +65,7 @@ class XMacControlFrame extends XMacHeaderBase
 
 //
 // Dataframe header for ~XMac. Frame size is configurable
-// in the MAC layer. 
+// in the MAC layer.
 //
 class XMacDataFrameHeader extends XMacHeaderBase
 {

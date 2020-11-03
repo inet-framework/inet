@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2006 OpenSim Ltd.
 // Copyright (C) 2001 Eric Wu and Steve Woon, Monash University, Melbourne, Australia
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +13,9 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
@@ -218,17 +220,17 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MacAddress address4;    // optional field, exists when toDS and fromDS are true
     AckPolicy ackPolicy = NORMAL_ACK;
-    uint8 tid;              // optional field, exists when type == ST_DATA_WITH_QOS
+    uint8_t tid;              // optional field, exists when type == ST_DATA_WITH_QOS
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
 
-//TODO this can be introduced when the SNAP header 
+//TODO this can be introduced when the SNAP header
 //class Ieee80211QoSDataHeader extends Ieee80211DataHeader
 //{
 //    type = ST_DATA_WITH_QOS;
 //    chunkLength = DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_PART_LENGTH;
 //    AckPolicy ackPolicy = NORMAL_ACK; //FIXME in real life this is part of the optional qos field above...
-//    uint8 tid;
+//    uint8_t tid;
 //    // TODO: other QoS control field parts
 //}
 
@@ -328,7 +330,7 @@ class Ieee80211Delba extends Ieee80211ActionFrame
     // DELBA Parameter Set (2 bytes)
     uint16_t reserved = 0; // Reserved. (11 bits)
     bool initiator; // It is set to 1 to indicate the originator and is set to 0 to indicate the recipient.
-    				// The Initiator subfield indicates if the originator or the recipient of the data is sending this frame. (1 bit)
+                    // The Initiator subfield indicates if the originator or the recipient of the data is sending this frame. (1 bit)
     uint8_t tid; // The TID subfield indicates the TSID or the UP for which the Block Ack has been originally set up. (4 bits)
 
     // This Reason Code field is used to indicate the reason that an unsolicited notification management frame of

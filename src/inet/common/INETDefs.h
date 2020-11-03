@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_INETDEFS_H
@@ -41,27 +41,12 @@ namespace inet {
 using namespace omnetpp;
 }
 
-#if OMNETPP_VERSION < 0x0504 || OMNETPP_BUILDNUM < 1020
-#  error At least OMNeT++/OMNEST version 5.4.1 required
-#endif // if OMNETPP_VERSION < 0x0504
+#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1506
+#  error At least OMNeT++/OMNEST version 6.0pre9 required
+#endif // if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1506
 
 #define INET_VERSION  0x0402
 #define INET_PATCH_LEVEL 0x00
-
-#if OMNETPP_VERSION < 0x0600
-#define OMNETPP5_CODE(x) x
-typedef long intval_t;
-typedef unsigned long uintval_t;
-#else
-#define OMNETPP5_CODE(x)
-#endif // if OMNETPP_VERSION < 0x0600
-
-#if OMNETPP_VERSION >= 0x0600
-#define OMNETPP6_CODE(x) x
-#else
-#define OMNETPP6_CODE(x)
-#endif // if OMNETPP_VERSION >= 0x0600
-
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT
@@ -82,6 +67,9 @@ typedef unsigned long ulong;
 
 // used at several places as
 #define SPEED_OF_LIGHT    299792458.0
+
+template< class... >
+using void_t = void;
 
 //
 // Macro to protect expressions like gate("out")->getToGate()->getToGate()
@@ -117,6 +105,26 @@ inline void printElapsedTime(const char *name, long startTime)
 
 #define TIME(CODE)    { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }
 
+#define GET_3TH_ARG(arg1, arg2, arg3, ...) arg3
+
+extern int evFlags;
+#define EV_FORMAT_STYLE(format) (evFlags & IPrintableObject::PRINT_FLAG_FORMATTED ? format : "")
+#define EV_NORMAL    EV_FORMAT_STYLE("\x1b[0m")
+#define EV_BOLD      EV_FORMAT_STYLE("\x1b[1m")
+#define EV_FAINT     EV_FORMAT_STYLE("\x1b[2m")
+#define EV_ITALIC    EV_FORMAT_STYLE("\x1b[3m")
+#define EV_UNDERLINE EV_FORMAT_STYLE("\x1b[4m")
+#define EV_FORMAT_OBJECT(object) printToStringIfPossible(object, evFlags)
+
+#define EV_FIELD_1(field) EV_FIELD_2(field, field)
+#define EV_FIELD_2(field, value) ", " << EV_BOLD << #field << EV_NORMAL << " = " << EV_FORMAT_OBJECT(value)
+#define EV_FIELD_CHOOSER(...) GET_3TH_ARG(__VA_ARGS__, EV_FIELD_2, EV_FIELD_1, )
+#define EV_FIELD(...) EV_FIELD_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+
+#define EV_ENDL "." << endl
+#define EV_LOC EV_FAINT << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "()" << EV_NORMAL
+
 } // namespace inet
 
-#endif // ifndef __INET_INETDEFS_H
+#endif
+

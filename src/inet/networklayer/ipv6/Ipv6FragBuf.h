@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_IPV6FRAGBUF_H
@@ -43,7 +43,7 @@ class INET_API Ipv6FragBuf
     //
     struct Key
     {
-        uint32 id;
+        uint32_t id;
         Ipv6Address src;
         Ipv6Address dest;
 
@@ -110,5 +110,5 @@ class INET_API Ipv6FragBuf
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6FRAGBUF_H
+#endif
 

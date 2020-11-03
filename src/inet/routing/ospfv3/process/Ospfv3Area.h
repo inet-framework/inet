@@ -1,5 +1,5 @@
-#ifndef __INET_OSPFV3AREA_H_
-#define __INET_OSPFV3AREA_H_
+#ifndef __INET_OSPFV3AREA_H
+#define __INET_OSPFV3AREA_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -164,7 +164,7 @@ class INET_API Ospfv3Area : public cObject
     void recheckInterAreaPrefixLSAs(std::vector<Ospfv3Ipv4RoutingTableEntry* >& newTableIPv4);
     bool hasLink(Ospfv3Lsa *fromLSA, Ospfv3Lsa *toLSA) const;
 
-    std::string detailedInfo() const OMNETPP5_CODE(override);
+    std::string detailedInfo() const;
 
     void setSpfTreeRoot(RouterLSA* routerLSA) { spfTreeRoot = routerLSA; }
 
@@ -222,5 +222,5 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Area& area)
 } // namespace ospfv3
 }//namespace inet
 
-#endif // __INET_OSPFV3AREA_H_
+#endif
 

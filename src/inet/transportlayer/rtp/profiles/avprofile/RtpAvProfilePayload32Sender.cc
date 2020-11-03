@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /***************************************************************************
                        RtpAvProfilePayload32Sender.cpp  -  description
                              -------------------
@@ -6,14 +21,6 @@
     email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
 ***************************************************************************/
 
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************/
 
 #include <fstream>
 #include <string.h>
@@ -70,7 +77,7 @@ void RtpAvProfilePayload32Sender::initializeSenderModule(RtpInnerPacket *rinpIn)
 
     // wait initial delay
     // cPacket *reminderMessage = new cMessage("next frame");
-    // scheduleAt(simTime() + _initialDelay, reminderMessage);
+    // scheduleAfter(_initialDelay, reminderMessage);
     EV_TRACE << "initializeSenderModule Exit" << endl;
 }
 
@@ -168,7 +175,7 @@ bool RtpAvProfilePayload32Sender::sendPacket()
         _frameNumber++;
 
         _reminderMessage = new cMessage("nextFrame");
-        scheduleAt(simTime() + 1.0 / _framesPerSecond, _reminderMessage);
+        scheduleAfter(1.0 / _framesPerSecond, _reminderMessage);
         ret = true;
     }
     else {

@@ -35,46 +35,46 @@ cmdenv-event-banners = false
 *.producer.productionInterval = uniform(0s, 2s)
 *.bucket.server.processingTime = 1s
 
-%contains: stdout
-Producing packet producer-0.
-Pushing packet producer-0 into the queue.
-Popping packet producer-0 from the queue.
-Processing packet producer-0 started.
+%contains-regex: stdout
+Producing packet, .*?producer-0.*?
+Pushing packet, .*?producer-0.*?
+Pulling packet, .*?producer-0.*?
+Processing packet started, .*?producer-0.*?
 
 Running simulation...
-Processing packet producer-0 ended.
-Consuming packet producer-0.
-Producing packet producer-1.
-Pushing packet producer-1 into the queue.
-Popping packet producer-1 from the queue.
-Processing packet producer-1 started.
-Processing packet producer-1 ended.
-Consuming packet producer-1.
-Producing packet producer-2.
-Pushing packet producer-2 into the queue.
-Popping packet producer-2 from the queue.
-Processing packet producer-2 started.
-Processing packet producer-2 ended.
-Consuming packet producer-2.
-Producing packet producer-3.
-Pushing packet producer-3 into the queue.
-Popping packet producer-3 from the queue.
-Processing packet producer-3 started.
-Processing packet producer-3 ended.
-Consuming packet producer-3.
-Producing packet producer-4.
-Pushing packet producer-4 into the queue.
-Popping packet producer-4 from the queue.
-Processing packet producer-4 started.
-Processing packet producer-4 ended.
-Consuming packet producer-4.
-Producing packet producer-5.
-Pushing packet producer-5 into the queue.
-Popping packet producer-5 from the queue.
-Processing packet producer-5 started.
-Processing packet producer-5 ended.
-Consuming packet producer-5.
-Producing packet producer-6.
-Pushing packet producer-6 into the queue.
-Popping packet producer-6 from the queue.
-Processing packet producer-6 started.
+Processing packet ended, .*?producer-0.*?
+Consuming packet, .*?producer-0.*?
+Producing packet, .*?producer-1.*?
+Pushing packet, .*?producer-1.*?
+Pulling packet, .*?producer-1.*?
+Processing packet started, .*?producer-1.*?
+Processing packet ended, .*?producer-1.*?
+Consuming packet, .*?producer-1.*?
+Producing packet, .*?producer-2.*?
+Pushing packet, .*?producer-2.*?
+Pulling packet, .*?producer-2.*?
+Processing packet started, .*?producer-2.*?
+Processing packet ended, .*?producer-2.*?
+Consuming packet, .*?producer-2.*?
+Producing packet, .*?producer-3.*?
+Pushing packet, .*?producer-3.*?
+Pulling packet, .*?producer-3.*?
+Processing packet started, .*?producer-3.*?
+Processing packet ended, .*?producer-3.*?
+Consuming packet, .*?producer-3.*?
+Producing packet, .*?producer-4.*?
+Pushing packet, .*?producer-4.*?
+Pulling packet, .*?producer-4.*?
+Processing packet started, .*?producer-4.*?
+Processing packet ended, .*?producer-4.*?
+Consuming packet, .*?producer-4.*?
+Producing packet, .*?producer-5.*?
+Pushing packet, .*?producer-5.*?
+Pulling packet, .*?producer-5.*?
+Processing packet started, .*?producer-5.*?
+Processing packet ended, .*?producer-5.*?
+Consuming packet, .*?producer-5.*?
+Producing packet, .*?producer-6.*?
+Pushing packet, .*?producer-6.*?
+Pulling packet, .*?producer-6.*?
+Processing packet started, .*?producer-6.*?

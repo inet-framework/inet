@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.physicallayer.energyconsumer;
@@ -22,8 +22,8 @@ package inet.physicallayer.energyconsumer;
 // determined by the radio mode, the transmitter state and the receiver state
 // using constant parameters.
 //
-// This module extends StateBasedCcEnergyConsumer, and provides default values 
-// suitable for using in low power wireless sensor nodes. Roughly based on 
+// This module extends StateBasedCcEnergyConsumer, and provides default values
+// suitable for using in low power wireless sensor nodes. Roughly based on
 // the data sheet for the CC2500 RF transceiver.
 //
 

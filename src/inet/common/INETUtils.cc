@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETUtils.h"
@@ -33,6 +33,58 @@ std::string dtostr(double d)
     std::ostringstream os;
     os << d;
     return os.str();
+}
+
+std::string hex(uint16_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(int16_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(uint32_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(int32_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(uint64_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(int64_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+long hex(const char *s)
+{
+    return strtol(s, nullptr, 16);
+}
+
+unsigned long uhex(const char *s)
+{
+    return strtoul(s, nullptr, 16);
 }
 
 double atod(const char *s)

@@ -12,14 +12,15 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_BGPCOMMON_H
 #define __INET_BGPCOMMON_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/routing/bgpv4/BgpCommon_m.h"
 
@@ -75,7 +76,7 @@ struct SessionInfo
     int localPreference = 0;
     bool checkConnection = false;
     int ebgpMultihop = 0;
-    InterfaceEntry *linkIntf = nullptr;
+    NetworkInterface *linkIntf = nullptr;
     TcpSocket *socket = nullptr;
     TcpSocket *socketListen = nullptr;
     bool sessionEstablished = false;
@@ -85,5 +86,5 @@ struct SessionInfo
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPCOMMON_H
+#endif
 

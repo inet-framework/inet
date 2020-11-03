@@ -66,7 +66,7 @@ class INET_API LoRaNeighborCache : public cSimpleModule, public INeighborCache
     LoRaNeighborCache();
     ~LoRaNeighborCache();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual void sendToNeighbors(IRadio *transmitter, const IWirelessSignal *frame, double range) const override;

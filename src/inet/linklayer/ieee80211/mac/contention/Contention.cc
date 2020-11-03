@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2016 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/FSMA.h"
@@ -81,7 +81,7 @@ void Contention::startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_
 {
     startTime = simTime();
     ASSERT(ifs >= 0 && eifs >= 0 && slotTime >= 0 && cw >= 0);
-    Enter_Method_Silent("startContention");
+    Enter_Method("startContention");
     cancelEvent(channelGrantedEvent);
     ASSERT(fsm.getState() == IDLE);
     this->ifs = ifs;
@@ -154,7 +154,7 @@ void Contention::handleWithFSM(EventType event)
     }
     emit(stateChangedSignal, fsm.getState());
     if (finallyReportChannelAccessGranted)
-        scheduleAt(simTime(), channelGrantedEvent);
+        scheduleAfter(SIMTIME_ZERO, channelGrantedEvent);
     if (hasGUI()) {
         if (startTxEvent->isScheduled())
             updateDisplayString(startTxEvent->getArrivalTime());
@@ -165,7 +165,7 @@ void Contention::handleWithFSM(EventType event)
 
 void Contention::mediumStateChanged(bool mediumFree)
 {
-    Enter_Method_Silent(mediumFree ? "medium FREE" : "medium BUSY");
+    Enter_Method(mediumFree ? "medium FREE" : "medium BUSY");
     this->mediumFree = mediumFree;
     lastChannelBusyTime = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED);
@@ -189,7 +189,7 @@ void Contention::handleMessage(cMessage *msg)
 
 void Contention::corruptedFrameReceived()
 {
-    Enter_Method_Silent("corruptedFrameReceived");
+    Enter_Method("corruptedFrameReceived");
     handleWithFSM(CORRUPTED_FRAME_RECEIVED);
 }
 

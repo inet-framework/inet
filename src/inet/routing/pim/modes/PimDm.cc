@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 3
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
@@ -205,7 +205,7 @@ void PimDm::handleMessageWhenUp(cMessage *msg)
 
 void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
     const Ipv4Header *ipv4Header;
     PimInterface *pimInterface;
@@ -214,7 +214,7 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     // note: this signal is often emitted from Ipv4::forwardMulticastPacket method
     if (signalID == ipv4NewMulticastSignal) {
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
-        pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
+        pimInterface = getIncomingInterface(check_and_cast<NetworkInterface *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             unroutableMulticastPacketArrived(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), ipv4Header->getTimeToLive());
     }
@@ -235,14 +235,14 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     // data come to non-RPF interface
     else if (signalID == ipv4DataOnNonrpfSignal) {
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
-        pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
+        pimInterface = getIncomingInterface(check_and_cast<NetworkInterface *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastPacketArrivedOnNonRpfInterface(ipv4Header->getDestAddress(), ipv4Header->getSrcAddress(), pimInterface->getInterfaceId());
     }
     // data come to RPF interface
     else if (signalID == ipv4DataOnRpfSignal) {
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
-        pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
+        pimInterface = getIncomingInterface(check_and_cast<NetworkInterface *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastPacketArrivedOnRpfInterface(pimInterface->getInterfaceId(), ipv4Header->getDestAddress(), ipv4Header->getSrcAddress(), ipv4Header->getTimeToLive());
     }
@@ -255,8 +255,8 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             if (route->getSource() == this && Ipv4Address::maskedAddrAreEqual(route->getOrigin(), entry->getDestination()/*routeSource*/, entry->getNetmask()/*routeNetmask*/)) {
                 Ipv4Address source = route->getOrigin();
                 Ipv4Route *routeToSource = rt->findBestMatchingRoute(source);
-                InterfaceEntry *newRpfInterface = routeToSource->getInterface();
-                InterfaceEntry *oldRpfInterface = route->getInInterface()->getInterface();
+                NetworkInterface *newRpfInterface = routeToSource->getInterface();
+                NetworkInterface *oldRpfInterface = route->getInInterface()->getInterface();
 
                 // is there any change?
                 if (newRpfInterface != oldRpfInterface)
@@ -385,7 +385,7 @@ void PimDm::processGraftRetryTimer(cMessage *timer)
     // Graft_Retry_Period.  It is RECOMMENDED that the router retry a
     // configured number of times before ceasing retries.
     sendGraftPacket(upstream->rpfNeighbor(), route->source, route->group, upstream->getInterfaceId());
-    scheduleAt(simTime() + graftRetryInterval, timer);
+    scheduleAfter(graftRetryInterval, timer);
 }
 
 void PimDm::processOverrideTimer(cMessage *timer)
@@ -475,7 +475,7 @@ void PimDm::processStateRefreshTimer(cMessage *timer)
         sendStateRefreshPacket(originator, route, downstream, upstream->maxTtlSeen);
     }
 
-    scheduleAt(simTime() + stateRefreshInterval, timer);
+    scheduleAfter(stateRefreshInterval, timer);
 }
 
 // ---- process PIM Messages ----
@@ -488,7 +488,7 @@ void PimDm::processJoinPrunePacket(Packet *pk)
     emit(rcvdJoinPrunePkSignal, pk);
 
     auto ifTag = pk->getTag<InterfaceInd>();
-    InterfaceEntry *incomingInterface = ift->getInterfaceById(ifTag->getInterfaceId());
+    NetworkInterface *incomingInterface = ift->getInterfaceById(ifTag->getInterfaceId());
 
     if (!incomingInterface) {
         delete pk;
@@ -686,7 +686,7 @@ void PimDm::processGraftPacket(Packet *pk)
     emit(rcvdGraftPkSignal, pk);
 
     Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
-    InterfaceEntry *incomingInterface = ift->getInterfaceById(pk->getTag<InterfaceInd>()->getInterfaceId());
+    NetworkInterface *incomingInterface = ift->getInterfaceById(pk->getTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
     if (pkt->getUpstreamNeighborAddress().unicastAddress != incomingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
@@ -1148,7 +1148,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
  * interfaces. If the interface is not in the list it will be added. if the router was pruned
  * from multicast tree, join again.
  */
-void PimDm::multicastReceiverAdded(InterfaceEntry *ie, Ipv4Address group)
+void PimDm::multicastReceiverAdded(NetworkInterface *ie, Ipv4Address group)
 {
     EV_DETAIL << "Multicast receiver added for group " << group << ".\n";
 
@@ -1195,7 +1195,7 @@ void PimDm::multicastReceiverAdded(InterfaceEntry *ie, Ipv4Address group)
  * interfaces. If the interface is in the list it will be removed. If the router was not pruned
  * and there is no outgoing interface, the router will prune from the multicast tree.
  */
-void PimDm::multicastReceiverRemoved(InterfaceEntry *ie, Ipv4Address group)
+void PimDm::multicastReceiverRemoved(NetworkInterface *ie, Ipv4Address group)
 {
     EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getInterfaceName() << "'.\n";
 
@@ -1370,7 +1370,7 @@ void PimDm::multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address gr
 // XXX Assert state causes RPF'(S) to change
 void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *routeToSource)
 {
-    InterfaceEntry *newRpf = routeToSource->getInterface();
+    NetworkInterface *newRpf = routeToSource->getInterface();
     Ipv4Address source = ipv4Route->getOrigin();
     Ipv4Address group = ipv4Route->getMulticastGroup();
     int rpfId = newRpf->getInterfaceId();
@@ -1382,7 +1382,7 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
 
     // delete old upstream interface data
     UpstreamInterface *oldUpstreamInterface = route->upstreamInterface;
-    InterfaceEntry *oldRpfInterface = oldUpstreamInterface ? oldUpstreamInterface->ie : nullptr;
+    NetworkInterface *oldRpfInterface = oldUpstreamInterface ? oldUpstreamInterface->ie : nullptr;
     delete oldUpstreamInterface;
     delete ipv4Route->getInInterface();
     ipv4Route->setInInterface(nullptr);
@@ -1590,7 +1590,7 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
     sendToIP(packet, Ipv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, downstream->ie->getInterfaceId());
 }
 
-void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric metric, InterfaceEntry *ie)
+void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric metric, NetworkInterface *ie)
 {
     EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getInterfaceName() << "'\n";
 
@@ -1692,8 +1692,7 @@ void PimDm::processOlistNonEmptyEvent(Route *route)
 
 void PimDm::restartTimer(cMessage *timer, double interval)
 {
-    cancelEvent(timer);
-    scheduleAt(simTime() + interval, timer);
+    rescheduleAfter(interval, timer);
 }
 
 void PimDm::cancelAndDeleteTimer(cMessage *& timer)
@@ -1702,7 +1701,7 @@ void PimDm::cancelAndDeleteTimer(cMessage *& timer)
     timer = nullptr;
 }
 
-PimInterface *PimDm::getIncomingInterface(InterfaceEntry *fromIE)
+PimInterface *PimDm::getIncomingInterface(NetworkInterface *fromIE)
 {
     if (fromIE)
         return pimIft->getInterfaceById(fromIE->getInterfaceId());
@@ -1774,7 +1773,7 @@ PimDm::DownstreamInterface *PimDm::Route::findDownstreamInterfaceByInterfaceId(i
     return nullptr;
 }
 
-PimDm::DownstreamInterface *PimDm::Route::createDownstreamInterface(InterfaceEntry *ie)
+PimDm::DownstreamInterface *PimDm::Route::createDownstreamInterface(NetworkInterface *ie)
 {
     DownstreamInterface *downstream = new DownstreamInterface(this, ie);
     downstreamInterfaces.push_back(downstream);
@@ -1820,14 +1819,14 @@ void PimDm::UpstreamInterface::startGraftRetryTimer()
 {
     graftRetryTimer = new cMessage("PIMGraftRetryTimer", GraftRetryTimer);
     graftRetryTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->graftRetryInterval, graftRetryTimer);
+    pimdm()->scheduleAfter(pimdm()->graftRetryInterval, graftRetryTimer);
 }
 
 void PimDm::UpstreamInterface::startOverrideTimer()
 {
     overrideTimer = new cMessage("PIMOverrideTimer", UpstreamOverrideTimer);
     overrideTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->overrideInterval, overrideTimer);
+    pimdm()->scheduleAfter(pimdm()->overrideInterval, overrideTimer);
 }
 
 /**
@@ -1839,7 +1838,7 @@ void PimDm::UpstreamInterface::startSourceActiveTimer()
 {
     sourceActiveTimer = new cMessage("PIMSourceActiveTimer", SourceActiveTimer);
     sourceActiveTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->sourceActiveInterval, sourceActiveTimer);
+    pimdm()->scheduleAfter(pimdm()->sourceActiveInterval, sourceActiveTimer);
 }
 
 /**
@@ -1851,7 +1850,7 @@ void PimDm::UpstreamInterface::startStateRefreshTimer()
 {
     stateRefreshTimer = new cMessage("PIMStateRefreshTimer", StateRefreshTimer);
     sourceActiveTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->stateRefreshInterval, stateRefreshTimer);
+    pimdm()->scheduleAfter(pimdm()->stateRefreshInterval, stateRefreshTimer);
 }
 
 PimDm::DownstreamInterface::~DownstreamInterface()
@@ -1869,7 +1868,7 @@ void PimDm::DownstreamInterface::startPruneTimer(double holdTime)
 {
     cMessage *timer = new cMessage("PimPruneTimer", PruneTimer);
     timer->setContextPointer(this);
-    owner->owner->scheduleAt(simTime() + holdTime, timer);
+    owner->owner->scheduleAfter(holdTime, timer);
     pruneTimer = timer;
 }
 
@@ -1888,7 +1887,7 @@ void PimDm::DownstreamInterface::startPrunePendingTimer(double overrideInterval)
     ASSERT(!prunePendingTimer);
     cMessage *timer = new cMessage("PimPrunePendingTimer", PrunePendingTimer);
     timer->setContextPointer(this);
-    owner->owner->scheduleAt(simTime() + overrideInterval, timer);
+    owner->owner->scheduleAfter(overrideInterval, timer);
     prunePendingTimer = timer;
 }
 

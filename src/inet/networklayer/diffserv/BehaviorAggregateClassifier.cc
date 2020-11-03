@@ -1,11 +1,10 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
-// Author: Tamas Borbely
+// Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,10 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -51,7 +51,7 @@ bool BehaviorAggregateClassifier::PacketDissectorCallback::matches(const Packet 
 {
     dissect = true;
     matches_ = false;
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
     auto copy = packet->dup();
@@ -113,8 +113,11 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, cGate *inputGate)
     emit(pkClassSignal, index);
     if (index >= 0)
         pushOrSendPacket(packet, outputGates[index], consumers[index]);
-    else
-        pushOrSendPacket(packet, gate("defaultOut"));
+    else {
+        auto defaultOutputGate = gate("defaultOut");
+        auto defaultConsumer = findConnectedModule<IPassivePacketSink>(defaultOutputGate);
+        pushOrSendPacket(packet, defaultOutputGate, defaultConsumer);
+    }
 }
 
 void BehaviorAggregateClassifier::refreshDisplay() const

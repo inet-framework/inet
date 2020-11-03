@@ -12,7 +12,7 @@ using namespace inet;
 static void parseAddr(const char *s)
 {
     Ipv6Address a(s);
-    uint32 *d = a.words();
+    uint32_t *d = a.words();
     char buff[100];
     sprintf(buff, "%x-%x-%x-%x", d[0],d[1],d[2],d[3]);
     EV << s << " --> " << a.str() << " (" << buff << ")\n";

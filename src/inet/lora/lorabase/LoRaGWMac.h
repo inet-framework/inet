@@ -33,7 +33,7 @@ public:
     cMessage *dutyCycleTimer = nullptr;
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
     long GW_forwardedDown;
     long GW_droppedDC;
 

@@ -6,17 +6,10 @@ outstanding data (everything sent previously has been acked).
 [General]
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 
 *.testing=true
-####cmdenv-log-prefix="%c %C@"
 
 *.tcptester.cmdenv-log-level=DEBUG
 *.*_app.cmdenv-log-level=DEBUG

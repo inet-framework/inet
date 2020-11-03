@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/EmptyChunk.h"
@@ -38,11 +40,58 @@ FieldsChunk::~FieldsChunk()
     delete serializedBytes;
 }
 
+void FieldsChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(chunkLength.get());
+}
+
+void FieldsChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    int64_t l;
+    buffer->unpack(l);
+    chunkLength = b(l);
+    delete serializedBytes;
+    serializedBytes = nullptr;
+}
+
 void FieldsChunk::handleChange()
 {
     Chunk::handleChange();
     delete serializedBytes;
     serializedBytes = nullptr;
+}
+
+bool FieldsChunk::containsSameData(const Chunk& other) const
+{
+    if (&other == this)
+        return true;
+    else if (!Chunk::containsSameData(other))
+        return false;
+    else {
+        // KLUDGE: TODO: should we generate this method from the MSG compiler?
+        // this implementation returns false if it cannot determine the result correctly
+        auto thisDescriptor = getDescriptor();
+        auto otherDescriptor = other.getDescriptor();
+        if (thisDescriptor != otherDescriptor)
+            return false;
+        auto thisVoidPtr = static_cast<void *>(const_cast<FieldsChunk *>(this));
+        auto otherVoidPtr = static_cast<void *>(const_cast<FieldsChunk *>(static_cast<const FieldsChunk *>(&other)));
+        for (int field = 0; field < thisDescriptor->getFieldCount(); field++) {
+            auto declaredOn = thisDescriptor->getFieldDeclaredOn(field);
+            if (!strcmp(declaredOn, "omnetpp::cObject") || !strcmp(declaredOn, "inet::Chunk") || !strcmp(declaredOn, "inet::FieldsChunk"))
+                continue;
+            auto flags = thisDescriptor->getFieldTypeFlags(field);
+            if ((flags & cClassDescriptor::FD_ISARRAY) || (flags & cClassDescriptor::FD_ISCOMPOUND) || (flags & cClassDescriptor::FD_ISPOINTER))
+                return false;
+            auto thisValue = thisDescriptor->getFieldValueAsString(thisVoidPtr, field, 0);
+            auto otherValue = otherDescriptor->getFieldValueAsString(otherVoidPtr, field, 0);
+            if (thisValue != otherValue)
+                return false;
+        }
+        return true;
+    }
 }
 
 const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
@@ -64,7 +113,7 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
     if (predicate != nullptr && predicate(const_cast<FieldsChunk *>(this)->shared_from_this()) && iterator.getPosition() == b(0)) {
         auto copy = staticPtrCast<FieldsChunk>(dupShared());
         copy->setChunkLength(length);
-        copy->tags.copyTags(tags, iterator.getPosition(), b(0), length);
+        copy->regionTags.copyTags(regionTags, iterator.getPosition(), b(0), length);
         copy->markIncomplete();
         return copy;
     }
@@ -73,6 +122,18 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
         return peekConverted<SliceChunk>(iterator, length, flags);
     // 5. peeking with conversion
     return converter(const_cast<FieldsChunk *>(this)->shared_from_this(), iterator, length, flags);
+}
+
+std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+{
+    auto className = getClassName();
+    auto descriptor = getDescriptor();
+    // TODO: make this more sophisticated, e.g. add properties to fields to control what is printed
+    if (level <= PRINT_LEVEL_DETAIL)
+        for (int i = 0; i < descriptor->getFieldCount(); i++)
+            if (!descriptor->getFieldIsArray(i) && !strcmp(className, descriptor->getFieldDeclaredOn(i)))
+                stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = " << descriptor->getFieldValueAsString((void *)this, i, 0);
+    return stream;
 }
 
 } // namespace

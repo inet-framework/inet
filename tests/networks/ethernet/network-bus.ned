@@ -1,8 +1,10 @@
 package inet.tests.ethernet;
 
-import inet.linklayer.ethernet.EtherBus;
-import inet.node.ethernet.EtherHost2;
 import inet.common.scenario.ScenarioManager;
+import inet.linklayer.ethernet.EtherBus;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EtherHost2;
+import inet.physicallayer.common.packetlevel.WireJunction;
 import ned.DatarateChannel;
 
 //
@@ -11,7 +13,6 @@ import ned.DatarateChannel;
 
 network HostsWithBus
 {
-    types:
     submodules:
         hostA: EtherHost2 {
             parameters:
@@ -25,13 +26,17 @@ network HostsWithBus
             parameters:
                 @display("p=334,80");
         }
-        bus: EtherBus {
+        tap1: WireJunction {
             parameters:
-                positions = "0 5 10";
-                propagationSpeed = 2e8 mps; // 1us = 200m
-                @display("p=250,180;b=400,6;o=#408060");
-            gates:
-                ethg[3];
+                @display("p=250,180");
+        }
+        tap2: WireJunction {
+            parameters:
+                @display("p=250,280");
+        }
+        tap3: WireJunction {
+            parameters:
+                @display("p=250,380");
         }
         scenarioManager: ScenarioManager {
             parameters:
@@ -39,8 +44,10 @@ network HostsWithBus
                 @display("p=184,180");
         }
     connections:
-        bus.ethg++ <--> DatarateChannel <--> hostA.ethg;
-        bus.ethg++ <--> DatarateChannel <--> hostB.ethg;
-        bus.ethg++ <--> DatarateChannel <--> hostC.ethg;
+        tap1.port++ <--> DatarateChannel <--> hostA.ethg;
+        tap2.port++ <--> DatarateChannel <--> hostB.ethg;
+        tap3.port++ <--> DatarateChannel <--> hostC.ethg;
+        tap1.port++ <--> DatarateChannel <--> tap2.port++;
+        tap2.port++ <--> DatarateChannel <--> tap3.port++;
 }
 

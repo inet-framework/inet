@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.routing.bgpv4;
@@ -21,7 +22,7 @@ import inet.routing.contract.IBgp;
 
 //
 // Implements BGP Version 4 routing protocol.
-// 
+//
 // The bgpConfig parameter can specify an XML file describing the
 // configuration of all BGP routers and their interfaces in the network.
 //

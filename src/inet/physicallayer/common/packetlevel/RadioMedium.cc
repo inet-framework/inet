@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,15 +12,16 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
@@ -74,10 +75,6 @@ RadioMedium::RadioMedium() :
 RadioMedium::~RadioMedium()
 {
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
-    communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
-        delete communicationCache->getCachedSignal(transmission);
-        delete transmission;
-    });
     if (recordCommunicationLog)
         communicationLog.close();
 }
@@ -153,18 +150,18 @@ void RadioMedium::finish()
     recordScalar("reception result cache hit", resultCacheHitPercentage, "%");
 }
 
-std::ostream& RadioMedium::printToStream(std::ostream &stream, int level) const
+std::ostream& RadioMedium::printToStream(std::ostream &stream, int level, int evFlags) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE) {
-        stream << ", propagation = " << printObjectToString(propagation, level + 1)
-               << ", pathLoss = " << printObjectToString(pathLoss, level + 1)
-               << ", analogModel = " << printObjectToString(analogModel, level + 1)
-               << ", obstacleLoss = " << printObjectToString(obstacleLoss, level + 1)
-               << ", backgroundNoise = " << printObjectToString(backgroundNoise, level + 1)
-               << ", mediumLimitCache = " << printObjectToString(mediumLimitCache, level + 1)
-               << ", neighborCache = " << printObjectToString(neighborCache, level + 1)
-               << ", communicationCache = " << printObjectToString(communicationCache, level + 1) ;
+        stream << EV_FIELD(propagation, printFieldToString(propagation, level + 1, evFlags))
+               << EV_FIELD(pathLoss, printFieldToString(pathLoss, level + 1, evFlags))
+               << EV_FIELD(analogModel, printFieldToString(analogModel, level + 1, evFlags))
+               << EV_FIELD(obstacleLoss, printFieldToString(obstacleLoss, level + 1, evFlags))
+               << EV_FIELD(backgroundNoise, printFieldToString(backgroundNoise, level + 1, evFlags))
+               << EV_FIELD(mediumLimitCache, printFieldToString(mediumLimitCache, level + 1, evFlags))
+               << EV_FIELD(neighborCache, printFieldToString(neighborCache, level + 1, evFlags))
+               << EV_FIELD(communicationCache, printFieldToString(communicationCache, level + 1, evFlags));
     }
     return stream;
 }
@@ -179,7 +176,7 @@ void RadioMedium::handleMessage(cMessage *message)
 
 bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *packet) const
 {
-    auto macAddressReq = const_cast<Packet *>(packet)->findTag<MacAddressInd>();
+    const auto& macAddressReq = const_cast<Packet *>(packet)->findTag<MacAddressInd>();
     if (macAddressReq == nullptr)
         return true;
     const MacAddress address = macAddressReq->getDestAddress();
@@ -188,7 +185,7 @@ bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *pac
     cModule *host = getContainingNode(check_and_cast<const cModule *>(radio));
     IInterfaceTable *interfaceTable = check_and_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-        const InterfaceEntry *interface = interfaceTable->getInterface(i);
+        const NetworkInterface *interface = interfaceTable->getInterface(i);
         if (interface && interface->getMacAddress() == address)
             return true;
     }
@@ -236,10 +233,7 @@ bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, c
 void RadioMedium::removeNonInterferingTransmissions()
 {
     communicationCache->removeNonInterferingTransmissions([&] (const ITransmission *transmission) {
-        const IWirelessSignal *signal = communicationCache->getCachedSignal(transmission);
         emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
-        delete signal;
-        delete transmission;
     });
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
         auto interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
@@ -498,11 +492,8 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 void RadioMedium::removeTransmission(const ITransmission *transmission)
 {
     Enter_Method("removeTranmsission");
-    const IWirelessSignal *signal = communicationCache->getCachedSignal(transmission);
-    communicationCache->removeTransmission(transmission);
     emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
-    delete signal;
-    delete transmission;
+    communicationCache->removeTransmission(transmission);
 }
 
 IWirelessSignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packet)
@@ -742,9 +733,9 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, cObject 
 {
     if (signal == interfaceConfigChangedSignal) {
         Enter_Method("interfaceConfigChanged");
-        auto interfaceChange = check_and_cast<InterfaceEntryChangeDetails *>(value);
-        if (interfaceChange->getFieldId() == InterfaceEntry::F_MACADDRESS) {
-            auto radio = check_and_cast<Radio *>(interfaceChange->getInterfaceEntry()->getSubmodule("radio"));
+        auto interfaceChange = check_and_cast<NetworkInterfaceChangeDetails *>(value);
+        if (interfaceChange->getFieldId() == NetworkInterface::F_MACADDRESS) {
+            auto radio = check_and_cast<Radio *>(interfaceChange->getNetworkInterface()->getSubmodule("radio"));
             pickUpSignals(radio);
         }
     }

@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETUtils.h"
@@ -40,9 +40,9 @@ void OrdinalBasedDuplicator::initialize(int stage)
         parseVector(vector);
 
         if (duplicatesVector.size() == 0)
-            EV_WARN << "Empty duplicatesVector" << endl;
+            EV_WARN << "Empty duplicatesVector" << EV_ENDL;
         else {
-            EV_DEBUG << "duplicatesVector=" << vector << endl;
+            EV_DEBUG << EV_FIELD(duplicatesVector, vector) << EV_ENDL;
             generateFurtherDuplicates = true;
         }
     }
@@ -52,11 +52,11 @@ int OrdinalBasedDuplicator::getNumPacketDuplicates(Packet *packet)
 {
     if (generateFurtherDuplicates) {
         if (numPackets == duplicatesVector[0]) {
-            EV_DEBUG << "Duplicating packet number " << numPackets << " " << packet << endl;
+            EV_DEBUG << "Duplicating packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet) << EV_ENDL;
             numDuplicated++;
             duplicatesVector.erase(duplicatesVector.begin());
             if (duplicatesVector.size() == 0) {
-                EV_DEBUG << "End of duplicatesVector reached." << endl;
+                EV_DEBUG << "End of duplicatesVector reached" << EV_ENDL;
                 generateFurtherDuplicates = false;
             }
             numPackets++;

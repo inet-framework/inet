@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_ICMP_H
@@ -35,7 +36,7 @@ class Ipv4Header;
 /**
  * Icmp module.
  */
-class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
     std::set<int> transportProtocols;    // where to send up packets
@@ -47,8 +48,8 @@ class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
     virtual void sendToIP(Packet *, const Ipv4Address& dest);
     virtual void sendToIP(Packet *msg);
     virtual bool possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId);
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     /**
@@ -70,5 +71,5 @@ class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
 
 } // namespace inet
 
-#endif // ifndef __INET_ICMP_H
+#endif
 

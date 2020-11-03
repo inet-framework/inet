@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,12 +12,13 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/FingerprintCalculator.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -24,7 +27,8 @@ Register_Class(FingerprintCalculator);
 void FingerprintCalculator::parseIngredients(const char *s)
 {
     cSingleFingerprintCalculator::parseIngredients(s);
-    filterEvents = strchr(s, NETWORK_COMMUNICATION_FILTER) != nullptr;
+    networkCommunicationFilter = strchr(s, NETWORK_COMMUNICATION_FILTER) != nullptr;
+    packetUpdateFilter = strchr(s, PACKET_UPDATE_FILTER) != nullptr;
 }
 
 cSingleFingerprintCalculator::FingerprintIngredient FingerprintCalculator::validateIngredient(char ch)
@@ -41,6 +45,7 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
         return cSingleFingerprintCalculator::addEventIngredient(event, ingredient);
     else {
         switch ((FingerprintIngredient)ingredient) {
+            case PACKET_UPDATE_FILTER:
             case NETWORK_COMMUNICATION_FILTER:
                 break;
             case NETWORK_NODE_PATH:
@@ -88,22 +93,33 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
 
 void FingerprintCalculator::addEvent(cEvent *event)
 {
-    if (!filterEvents)
-        cSingleFingerprintCalculator::addEvent(event);
-    else {
-        if (event->isMessage() && static_cast<cMessage *>(event)->isPacket()) {
-            auto cpacket = static_cast<cPacket *>(event);
+    if (networkCommunicationFilter || packetUpdateFilter) {
+        cPacket *cpacket =
+                (event->isMessage() && static_cast<cMessage *>(event)->isPacket()) ?
+                static_cast<cPacket *>(event) : nullptr;
+
+        if (packetUpdateFilter) {
+            if (cpacket != nullptr && cpacket->isUpdate())
+                return;
+        }
+
+        if (networkCommunicationFilter) {
+            if (cpacket == nullptr)
+                return;
+
             auto packet = dynamic_cast<Packet *>(cpacket);
             if (packet == nullptr)
                 packet = dynamic_cast<Packet *>(cpacket->getEncapsulatedPacket());
-            if (packet != nullptr) {
-                auto senderNode = findContainingNode(cpacket->getSenderModule());
-                auto arrivalNode = findContainingNode(cpacket->getArrivalModule());
-                if (senderNode != arrivalNode)
-                    cSingleFingerprintCalculator::addEvent(event);
-            }
+            if (packet == nullptr)
+                return;
+
+            auto senderNode = findContainingNode(cpacket->getSenderModule());
+            auto arrivalNode = findContainingNode(cpacket->getArrivalModule());
+            if (senderNode == arrivalNode)
+                return;
         }
     }
+    cSingleFingerprintCalculator::addEvent(event);
 }
 
 } // namespace

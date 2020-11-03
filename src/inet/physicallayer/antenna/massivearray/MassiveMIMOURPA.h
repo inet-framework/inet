@@ -75,7 +75,7 @@ class INET_API MassiveMIMOURPA : public MassiveArray
     virtual void setDirection(const double &angle) override;
     MassiveMIMOURPA();
     virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 

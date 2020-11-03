@@ -7,7 +7,7 @@ packet sink (PassivePacketSink).
 
 %file: test.ned
 
-import inet.queueing.common.PacketGate;
+import inet.queueing.gate.PacketGate;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
@@ -39,18 +39,18 @@ cmdenv-event-banners = false
 *.gate.openTime = 3s
 *.gate.closeTime = 7s
 
-%contains: stdout
+%contains-regex: stdout
 Opening gate.
-Producing packet producer-0.
-Passing packet producer-0.
-Consuming packet producer-0.
-Producing packet producer-1.
-Passing packet producer-1.
-Consuming packet producer-1.
-Producing packet producer-2.
-Passing packet producer-2.
-Consuming packet producer-2.
-Producing packet producer-3.
-Passing packet producer-3.
-Consuming packet producer-3.
+Producing packet, .*?producer-0.*?
+Passing through packet, .*?producer-0.*?
+Consuming packet, .*?producer-0.*?
+Producing packet, .*?producer-1.*?
+Passing through packet, .*?producer-1.*?
+Consuming packet, .*?producer-1.*?
+Producing packet, .*?producer-2.*?
+Passing through packet, .*?producer-2.*?
+Consuming packet, .*?producer-2.*?
+Producing packet, .*?producer-3.*?
+Passing through packet, .*?producer-3.*?
+Consuming packet, .*?producer-3.*?
 Closing gate.

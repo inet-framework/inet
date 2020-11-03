@@ -12,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
 
-#ifndef __INET__IDUPLICATEREMOVAL_H
-#define __INET__IDUPLICATEREMOVAL_H
+#ifndef __INET_IDUPLICATEREMOVAL_H
+#define __INET_IDUPLICATEREMOVAL_H
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -35,4 +35,5 @@ class INET_API IDuplicateRemoval
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET__IDUPLICATEREMOVAL_H
+#endif
+

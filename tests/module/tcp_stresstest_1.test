@@ -7,19 +7,9 @@ Here: packet loss only.
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.TcpTestNet2
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 cmdenv-express-mode=false
-#cmdenv-event-banners=false
-#cmdenv-module-messages=false
 
 *.testing=true
-
-####cmdenv-log-prefix=""
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=655360B  # 640K
@@ -34,8 +24,8 @@ Calling finish() at end of Run #0...
 TcpTestNet2.cli_app: received 0 bytes in 0 packets
 TcpTestNet2.cli_tcp: finishing with 1 connections open.
 TcpTestNet2.srv_tcp: finishing with 1 connections open.
-TcpTestNet2.srv_app: received 655360 bytes in 542 packets
-[31.064] tcpdump finished, A:689 B:383 segments
+TcpTestNet2.srv_app: received 655360 bytes in 534 packets
+[23.242] tcpdump finished, A:683 B:385 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

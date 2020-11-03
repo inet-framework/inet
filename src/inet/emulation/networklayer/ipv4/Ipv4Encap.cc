@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -12,10 +12,10 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Message.h"
@@ -43,8 +43,7 @@ void Ipv4Encap::initialize(int stage)
         crcMode = CRC_COMPUTED;
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::ipv4, gate("upperLayerIn"), nullptr);
-        registerProtocol(Protocol::ipv4, nullptr, gate("upperLayerOut"));
+        registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }
 
@@ -93,7 +92,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         else {
             EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
             packet->setFrontOffset(ipv4HeaderPosition);
-//            const InterfaceEntry* fromIE = getSourceInterface(packet);
+//            const NetworkInterface* fromIE = getSourceInterface(packet);
 //            sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
         send(packet, "upperLayerOut");
@@ -138,18 +137,14 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
     auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
     Ipv4Address src = l3AddressReq->getSrcAddress().toIpv4();
     Ipv4Address dest = l3AddressReq->getDestAddress().toIpv4();
-    delete l3AddressReq;
 
     ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
-    delete hopLimitReq;
     bool dontFragment = false;
-    if (auto dontFragmentReq = transportPacket->removeTagIfPresent<FragmentationReq>()) {
+    if (auto dontFragmentReq = transportPacket->removeTagIfPresent<FragmentationReq>())
         dontFragment = dontFragmentReq->getDontFragment();
-        delete dontFragmentReq;
-    }
 
     // set source and destination address
     ipv4Header->setDestAddress(dest);
@@ -160,22 +155,17 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
         ipv4Header->setSrcAddress(src);
 
     // set other fields
-    if (TosReq *tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
+    if (auto& tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
         ipv4Header->setTypeOfService(tosReq->getTos());
-        delete tosReq;
         if (transportPacket->findTag<DscpReq>())
             throw cRuntimeError("TosReq and DscpReq found together");
         if (transportPacket->findTag<EcnReq>())
             throw cRuntimeError("TosReq and EcnReq found together");
     }
-    if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
+    if (auto& dscpReq = transportPacket->removeTagIfPresent<DscpReq>())
         ipv4Header->setDscp(dscpReq->getDifferentiatedServicesCodePoint());
-        delete dscpReq;
-    }
-    if (EcnReq *ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
+    if (auto& ecnReq = transportPacket->removeTagIfPresent<EcnReq>())
         ipv4Header->setEcn(ecnReq->getExplicitCongestionNotification());
-        delete ecnReq;
-    }
 
     ipv4Header->setMoreFragments(false);
     ipv4Header->setDontFragment(dontFragment);

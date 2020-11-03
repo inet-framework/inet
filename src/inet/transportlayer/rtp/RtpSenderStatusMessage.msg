@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2008 Andras Varga
+// Copyright (C) 2008 OpenSim Ltd.
 // Copyright (C) 2001 Matthias Oppitz, Arndt Buschmann
 //           <matthias.oppitz@gmx.de>, <a.buschmann@gmx.de>
 //
@@ -14,7 +14,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 import inet.common.INETDefs;
@@ -40,5 +41,5 @@ enum RtpSenderStatus
 packet RtpSenderStatusMessage
 {
     RtpSenderStatus status;
-    uint32 timeStamp;
+    uint32_t timeStamp;
 };

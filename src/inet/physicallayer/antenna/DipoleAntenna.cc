@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/antenna/DipoleAntenna.h"
@@ -35,11 +35,11 @@ void DipoleAntenna::initialize(int stage)
         gain = makeShared<AntennaGain>(par("wireAxis"), m(par("length")));
 }
 
-std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) const
+std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DipoleAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", length = " << gain->getLength();
+        stream << EV_FIELD(length, gain->getLength());
     return AntennaBase::printToStream(stream, level);
 }
 
@@ -51,7 +51,8 @@ DipoleAntenna::AntennaGain::AntennaGain(const char *wireAxis, m length) :
 
 double DipoleAntenna::AntennaGain::computeGain(const Quaternion& direction) const
 {
-    double angle = std::acos(direction.rotate(Coord::X_AXIS) * wireAxisDirection);
+    double product = math::minnan(1.0, math::maxnan(-1.0, direction.rotate(Coord::X_AXIS) * wireAxisDirection));
+    double angle = std::acos(product);
     double q = sin(angle);
     return 1.5 * q * q;
 }

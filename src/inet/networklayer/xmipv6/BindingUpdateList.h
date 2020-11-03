@@ -1,24 +1,24 @@
-/**
- * Copyright (C) 2007
- * Faqir Zarrar Yousaf
- * Communication Networks Institute, University of Dortmund, Germany.
- * Christian Bauer
- * Institute of Communications and Navigation, German Aerospace Center (DLR)
-
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
+//
+// Copyright (C) 2007
+// Faqir Zarrar Yousaf
+// Communication Networks Institute, University of Dortmund, Germany.
+// Christian Bauer
+// Institute of Communications and Navigation, German Aerospace Center (DLR)
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
 #ifndef __INET_BINDINGUPDATELIST_H
 #define __INET_BINDINGUPDATELIST_H
@@ -29,7 +29,7 @@
 namespace inet {
 
 // Foreign declarations:
-class InterfaceEntry;
+class NetworkInterface;
 
 // used for the RR tokens
 #define UNDEFINED_TOKEN             0
@@ -205,12 +205,12 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Returns true if a home keygen token is available.
      */
-    virtual bool isHomeTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie);
+    virtual bool isHomeTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie);
 
     /**
      * Returns true if a care-of keygen token is available.
      */
-    virtual bool isCareOfTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie);
+    virtual bool isCareOfTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie);
 
     //
     // Additional methods
@@ -271,8 +271,8 @@ class INET_API BindingUpdateList : public cSimpleModule
      * These two methods indicate whether a CoTI or HoTI message
      * has been recently sent to the CN identified by parameter dest.
      */
-    virtual bool recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry *ie);
-    virtual bool recentlySentHOTI(const Ipv6Address& dest, InterfaceEntry *ie);
+    virtual bool recentlySentCOTI(const Ipv6Address& dest, NetworkInterface *ie);
+    virtual bool recentlySentHOTI(const Ipv6Address& dest, NetworkInterface *ie);
 
   protected:
     /**
@@ -283,5 +283,5 @@ class INET_API BindingUpdateList : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_BINDINGUPDATELIST_H
+#endif
 

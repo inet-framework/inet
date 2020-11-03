@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004-2005 Andras Varga
+// Copyright (C) 2004-2005 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/applications/generic/IpvxTrafGen.h"
@@ -78,8 +79,7 @@ void IpvxTrafGen::initialize(int stage)
         WATCH(numReceived);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        registerService(*protocol, nullptr, gate("ipIn"));
-        registerProtocol(*protocol, gate("ipOut"), nullptr);
+        registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -188,7 +188,7 @@ void IpvxTrafGen::printPacket(Packet *msg)
     if (ctrl != nullptr) {
         protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
     }
-    L3AddressTagBase *addresses = msg->findTag<L3AddressReq>();
+    Ptr<const L3AddressTagBase> addresses = msg->findTag<L3AddressReq>();
     if (addresses == nullptr)
         addresses = msg->findTag<L3AddressInd>();
     if (addresses != nullptr) {

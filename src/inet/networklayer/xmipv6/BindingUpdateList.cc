@@ -1,24 +1,24 @@
-/**
- * Copyright (C) 2007
- * Faqir Zarrar Yousaf
- * Communication Networks Institute, Technical University Dortmund (TU Dortmund), Germany.
- * Christian Bauer
- * Institute of Communications and Navigation, German Aerospace Center (DLR)
-
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
+//
+// Copyright (C) 2007
+// Faqir Zarrar Yousaf
+// Communication Networks Institute, Technical University Dortmund (TU Dortmund), Germany.
+// Christian Bauer
+// Institute of Communications and Navigation, German Aerospace Center (DLR)
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
@@ -276,7 +276,7 @@ void BindingUpdateList::resetCareOfToken(const Ipv6Address& dest, const Ipv6Addr
     //entry->sentCoTI = 0;
 }
 
-bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
     ASSERT(entry != nullptr);
@@ -285,7 +285,7 @@ bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, InterfaceE
            (entry->sentHoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime()) > simTime();
 }
 
-bool BindingUpdateList::isCareOfTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::isCareOfTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
     ASSERT(entry != nullptr);
@@ -384,7 +384,7 @@ void BindingUpdateList::suspendBinding(const Ipv6Address& dest)
     entry->BAck = false;
 }
 
-bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
@@ -393,7 +393,7 @@ bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry
     return entry->sentCoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > simTime();
 }
 
-bool BindingUpdateList::recentlySentHOTI(const Ipv6Address& dest, InterfaceEntry *ie)
+bool BindingUpdateList::recentlySentHOTI(const Ipv6Address& dest, NetworkInterface *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 

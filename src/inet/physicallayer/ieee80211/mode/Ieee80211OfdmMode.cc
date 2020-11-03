@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
@@ -146,32 +146,32 @@ const simtime_t Ieee80211OfdmMode::getRxTxTurnaroundTime() const
     return -1;
 }
 
-std::ostream& Ieee80211OfdmPreambleMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmPreambleMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee80211OfdmPreambleMode";
 }
 
-std::ostream& Ieee80211OfdmSignalMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmSignalMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee80211OfdmSignalMode";
 }
 
-std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmDataMode";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", netBitrate = " << netBitrate;
+        stream << EV_FIELD(netBitrate);
     return stream;
 }
 
-std::ostream& Ieee80211OfdmMode::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmMode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211OfdmMode";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", preambleMode = " << printObjectToString(preambleMode, level + 1)
-               << ", signalMode = " << printObjectToString(signalMode, level + 1);
+        stream << EV_FIELD(preambleMode, printFieldToString(preambleMode, level + 1, evFlags))
+               << EV_FIELD(signalMode, printFieldToString(signalMode, level + 1, evFlags));
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", dataMode = " << printObjectToString(dataMode, level + 1);
+        stream << EV_FIELD(dataMode, printFieldToString(dataMode, level + 1, evFlags));
     return stream;
 }
 

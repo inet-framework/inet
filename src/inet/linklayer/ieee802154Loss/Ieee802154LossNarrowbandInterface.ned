@@ -19,10 +19,10 @@
 package inet.linklayer.ieee802154Loss;
 
 import inet.linklayer.contract.IWirelessInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module Ieee802154LossNarrowbandInterface extends InterfaceEntry like IWirelessInterface
+module Ieee802154LossNarrowbandInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);

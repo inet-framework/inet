@@ -1,11 +1,10 @@
 //
-// Copyright (C) 2006 Levente Meszaros
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,11 +12,10 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <stdlib.h>
-
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -25,11 +23,14 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 
 namespace inet {
@@ -166,9 +167,9 @@ EtherMacBase::EtherMacBase()
 
 EtherMacBase::~EtherMacBase()
 {
-    cancelAndDelete(endTxMsg);
-    cancelAndDelete(endIFGMsg);
-    cancelAndDelete(endPauseMsg);
+    cancelAndDelete(endTxTimer);
+    cancelAndDelete(endIfgTimer);
+    cancelAndDelete(endPauseTimer);
 }
 
 void EtherMacBase::initialize(int stage)
@@ -189,9 +190,9 @@ void EtherMacBase::initialize(int stage)
         lastTxFinishTime = -1.0;    // not equals with current simtime.
 
         // initialize self messages
-        endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
-        endIFGMsg = new cMessage("EndIFG", ENDIFG);
-        endPauseMsg = new cMessage("EndPause", ENDPAUSE);
+        endTxTimer = new cMessage("EndTransmission", ENDTRANSMISSION);
+        endIfgTimer = new cMessage("EndIFG", ENDIFG);
+        endPauseTimer = new cMessage("EndPause", ENDPAUSE);
 
         // initialize states
         transmitState = TX_IDLE_STATE;
@@ -255,21 +256,21 @@ void EtherMacBase::initializeStatistics()
     WATCH(numPauseFramesSent);
 }
 
-void EtherMacBase::configureInterfaceEntry()
+void EtherMacBase::configureNetworkInterface()
 {
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    interfaceEntry->setMtu(par("mtu"));
+    networkInterface->setMtu(par("mtu"));
 
     // capabilities
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
 }
 
 void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 {
-    interfaceEntry->setState(InterfaceEntry::State::UP);
+    networkInterface->setState(NetworkInterface::State::UP);
     initializeFlags();
     initializeQueue();
     readChannelParameters(true);
@@ -278,12 +279,12 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
     if (currentTxFrame != nullptr || !txQueue->isEmpty()) {
-        interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
+        networkInterface->setState(NetworkInterface::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
     else {
-        interfaceEntry->setCarrier(false);
-        interfaceEntry->setState(InterfaceEntry::State::DOWN);
+        networkInterface->setCarrier(false);
+        networkInterface->setState(NetworkInterface::State::DOWN);
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }
@@ -292,9 +293,9 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 {
 //    clearQueue();
     connected = false;
-    interfaceEntry->setCarrier(false);
+    networkInterface->setCarrier(false);
     processConnectDisconnect();
-    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+    networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 // TODO: this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
@@ -304,9 +305,9 @@ void EtherMacBase::processAtHandleMessageFinished()
         if (currentTxFrame == nullptr && txQueue->isEmpty()) {
             EV << "Ethernet Queue is empty, MAC stopped\n";
             connected = false;
-            interfaceEntry->setCarrier(false);
+            networkInterface->setCarrier(false);
             processConnectDisconnect();
-            interfaceEntry->setState(InterfaceEntry::State::DOWN);
+            networkInterface->setState(NetworkInterface::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
     }
@@ -314,34 +315,30 @@ void EtherMacBase::processAtHandleMessageFinished()
 
 void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
-
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
-
-    if (signalID != POST_MODEL_CHANGE)
-        return;
-
-    if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
-        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection();
-    }
-    else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
-        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection();
-    }
-    else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
-        cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
-        if (transmissionChannel == gcobj->par->getOwner())
-            refreshConnection();
+    if (signalID == POST_MODEL_CHANGE) {
+        if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
+            if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
+                refreshConnection();
+        }
+        else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
+            if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
+                refreshConnection();
+        }
+        else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
+            cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
+            if (transmissionChannel == gcobj->par->getOwner())
+                refreshConnection();
+        }
     }
 }
 
 void EtherMacBase::processConnectDisconnect()
 {
     if (!connected) {
-        cancelEvent(endTxMsg);
-        cancelEvent(endIFGMsg);
-        cancelEvent(endPauseMsg);
+        cancelEvent(endTxTimer);
+        cancelEvent(endIfgTimer);
+        cancelEvent(endPauseTimer);
 
         if (currentTxFrame) {
             EV_DETAIL << "Interface is not connected, dropping packet " << currentTxFrame << endl;
@@ -354,7 +351,7 @@ void EtherMacBase::processConnectDisconnect()
 
         // Clear queue
         while (!txQueue->isEmpty()) {
-            Packet *msg = txQueue->popPacket();
+            Packet *msg = txQueue->dequeuePacket();
             EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedPkFromHLIfaceDown++;
             PacketDropDetails details;
@@ -426,7 +423,7 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
 
 void EtherMacBase::refreshConnection()
 {
-    Enter_Method_Silent();
+    Enter_Method("refreshConnection");
 
     bool oldConn = connected;
     readChannelParameters(false);
@@ -508,9 +505,9 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = nullptr;
-        if (interfaceEntry) {
-            interfaceEntry->setCarrier(false);
-            interfaceEntry->setDatarate(0);
+        if (networkInterface) {
+            networkInterface->setCarrier(false);
+            networkInterface->setDatarate(0);
         }
     }
     else {
@@ -530,9 +527,9 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
         for (auto & etherDescr : etherDescrs) {
             if (txRate == etherDescr.txrate) {
                 curEtherDescr = &(etherDescr);
-                if (interfaceEntry) {
-                    interfaceEntry->setCarrier(true);
-                    interfaceEntry->setDatarate(txRate);
+                if (networkInterface) {
+                    networkInterface->setCarrier(true);
+                    networkInterface->setDatarate(txRate);
                 }
                 return;
             }
@@ -611,7 +608,7 @@ void EtherMacBase::refreshDisplay() const
                 result = std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
                 break;
             case 'q':
-                result = std::to_string(txQueue->getNumPackets());
+                result = txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
                 break;
             case 'b':
                 if (transmissionChannel == nullptr)
@@ -687,6 +684,28 @@ void EtherMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
 
     packet->insertAtBack(ethFcs);
 }
+
+void EtherMacBase::cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration)
+{
+    ASSERT(duration <= signal->getDuration());
+    if (duration == signal->getDuration())
+        return;
+    signal->setDuration(duration);
+    int64_t newBitLength = duration.dbl() * signal->getBitrate();
+    if (auto packet = check_and_cast_nullable<Packet*>(signal->decapsulate())) {
+        //TODO: removed length calculation based on the PHY layer (parallel bits, bit order, etc.)
+        if (newBitLength < packet->getBitLength()) {
+            packet->trimFront();
+            packet->setBackOffset(b(newBitLength));
+            packet->trimBack();
+            packet->setBitError(true);
+        }
+        signal->encapsulate(packet);
+    }
+    signal->setBitError(true);
+    signal->setBitLength(newBitLength);
+}
+
 
 } // namespace inet
 

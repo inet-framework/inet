@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,11 +12,13 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 #include "inet/queueing/function/PacketDropperFunction.h"
 #include "inet/queueing/queue/PacketQueue.h"
@@ -31,9 +33,7 @@ void PacketQueue::initialize(int stage)
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         queue.setName("storage");
-        inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
-        outputGate = gate("out");
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
@@ -44,10 +44,10 @@ void PacketQueue::initialize(int stage)
         packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(inputGate);
-        checkPopPacketSupport(outputGate);
+        checkPacketOperationSupport(inputGate);
+        checkPacketOperationSupport(outputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate);
+            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
@@ -67,12 +67,6 @@ IPacketComparatorFunction *PacketQueue::createComparatorFunction(const char *com
         return nullptr;
     else
         return check_and_cast<IPacketComparatorFunction *>(createOne(comparatorClass));
-}
-
-void PacketQueue::handleMessage(cMessage *message)
-{
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
 }
 
 bool PacketQueue::isOverloaded() const
@@ -96,7 +90,8 @@ Packet *PacketQueue::getPacket(int index) const
 void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
+    take(packet);
+    EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     queue.insert(packet);
     emit(packetPushedSignal, packet);
     if (buffer != nullptr)
@@ -105,7 +100,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         if (packetDropperFunction != nullptr) {
             while (!isEmpty() && isOverloaded()) {
                 auto packet = packetDropperFunction->selectPacket(this);
-                EV_INFO << "Dropping packet " << packet->getName() << " from the queue.\n";
+                EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
                 queue.remove(packet);
                 dropPacket(packet, QUEUE_OVERFLOW);
             }
@@ -115,30 +110,36 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     }
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
-Packet *PacketQueue::popPacket(cGate *gate)
+Packet *PacketQueue::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
+    Enter_Method("pullPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
-    EV_INFO << "Popping packet " << packet->getName() << " from the queue." << endl;
+    EV_INFO << "Pulling packet" << EV_FIELD(packet) << EV_ENDL;
     if (buffer != nullptr) {
         queue.remove(packet);
         buffer->removePacket(packet);
     }
     else
         queue.pop();
-    emit(packetPoppedSignal, packet);
+    auto queueingTime = simTime() - packet->getArrivalTime();
+    auto packetEvent = new PacketQueuedEvent();
+    packetEvent->setQueuePacketLength(getNumPackets());
+    packetEvent->setQueueDataLength(getTotalLength());
+    insertPacketEvent(this, packet, PEK_QUEUED, queueingTime, packetEvent);
+    increaseTimeTag<QueueingTimeTag>(packet, queueingTime);
+    emit(packetPulledSignal, packet);
+    animateSendPacket(packet, outputGate);
     updateDisplayString();
-    animateSend(packet, outputGate);
     return packet;
 }
 
 void PacketQueue::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
-    EV_INFO << "Removing packet " << packet->getName() << " from the queue." << endl;
+    EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
     if (buffer != nullptr) {
         queue.remove(packet);
         buffer->removePacket(packet);
@@ -175,7 +176,7 @@ void PacketQueue::handlePacketRemoved(Packet *packet)
 {
     Enter_Method("handlePacketRemoved");
     if (queue.contains(packet)) {
-        EV_INFO << "Removing packet " << packet->getName() << " from the queue." << endl;
+        EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
         queue.remove(packet);
         emit(packetRemovedSignal, packet);
         updateDisplayString();

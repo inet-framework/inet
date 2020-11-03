@@ -1,3 +1,85 @@
+INET 4.3 release TODO items:
+
+1. Review
+
+ - Review new examples preemption, cutthrough, gating, and vlan.
+ - Review socket table, socket command processor and socket packet processor components.
+ - Review packet streaming API and implementation in all affected components.
+ - Review all added components in protocol support model.
+ - Review folder names and module names.
+
+2. User's Guide
+
+ - Add packet flow documentation.
+ - Add packet events documentation.
+ - Add timing measurement documentation.
+
+3. Developer's Guide 
+
+ - Update packet API tags and region tags documentation with respect to shared pointers.
+ - Extend packet API documentation with new packet data insertion, replace and update API.
+
+4. Release
+
+ - Fix important bugs from github.
+ - Merge important pull requests from github.
+ - Complete WHATSNEW and ChangeLog.
+
+5. Testing
+
+ - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.
+
+===============================================================================
+
+ - Add Ethernet socket support to layered model.
+ - Implement fingerprints for figures and values for all example simulations.
+ - update all EV statements to use EV_FIELD
+ - replace cross module pointers with ModuleRef<T>
+ - cleanup bitrate vs datarate
+ - cleanup operator<<, printOn, str, etc. in all classes
+
+handlePullPacketChanged can come from the queue when
+ - a high priority frame is already being streamed and it gets interrupted
+ - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
+in both cases a progress report is sent which is unnecessary and confusing
+
+- review all streamig operation with respect to origPacketId handling
+
+- ethernet preemption example: 2nd out of 3 sends per packet must be avoided
+  - add a check for whether the two packets are definitely equal or may be different?!
+  - change the preamble insertion module to immediately start with a progress of 8 bytes and
+  - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
+
+- reformat source code
+- create release script (remove trailing spaces, replace leading tabs, fix header guards, format source code)
+
+- check Ethernet FCS progress report at the correct moment of time
+
+Parallel simulation support
+ - compute earliest input/output time (function?!) for each gate in the network
+   - earliest output time (EOT) per gate starts from the earliest event in the module (using virtual method in modules with default implementation)
+   - also take into account C++ methods calls when propagating EIT/EOT
+   - earliest input time (EIT) per gate is computed from neighbors' earliest output time per gate + channel delay
+   - refine times by propagating EOT to EIT until there's no change
+   - neighbor partitions' EIT can be easily found
+
+- Add parameters to ScenarioManager disconnect operation to allow cutting connection at either end (source or destination)
+  and also support disconnecting bidirectional connections in all four combinations.
+
+Ethernet features:
+ - priority queueing
+ - gating
+ - transmission selection
+ - preemption
+ - cutthrough
+ - VLAN
+ - MAC security
+ - relaying with proper L2 protocol support
+ - LLC
+
+ - generic TCP/UDP socket tagging, with automatic copying of tags to outgoing packets
+
+ - Complete and review Packet API: insert/replace/update
 
  - temporal and spectral and spatial energy density
    - sampling

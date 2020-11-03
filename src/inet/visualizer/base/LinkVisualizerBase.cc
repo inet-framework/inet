@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/LayeredProtocolBase.h"
@@ -48,8 +48,10 @@ const char *LinkVisualizerBase::DirectiveResolver::resolveDirective(char directi
 
 LinkVisualizerBase::~LinkVisualizerBase()
 {
-    if (displayLinks)
+    if (displayLinks) {
         unsubscribe();
+        removeAllLinkVisualizations();
+    }
 }
 
 void LinkVisualizerBase::initialize(int stage)
@@ -241,7 +243,7 @@ void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *desti
 
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetReceivedFromUpperSignal) ||
         (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetSentToPeerSignal) ||
         (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetSentToLowerSignal))
@@ -249,11 +251,11 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         if (isLinkStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);
-            mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) { if (getLastModule(id) != nullptr) removeLastModule(id); });
+            mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) { if (getLastModule(id) != nullptr) removeLastModule(id); });
             auto networkNode = getContainingNode(module);
-            auto interfaceEntry = getContainingNicModule(module);
-            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
-                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) { setLastModule(id, module); });
+            auto networkInterface = getContainingNicModule(module);
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(networkInterface) && packetFilter.matches(packet)) {
+                mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) { setLastModule(id, module); });
             }
         }
     }
@@ -265,9 +267,9 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);
             auto networkNode = getContainingNode(module);
-            auto interfaceEntry = getContainingNicModule(module);
-            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
-                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) {
+            auto networkInterface = getContainingNicModule(module);
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(networkInterface) && packetFilter.matches(packet)) {
+                mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) {
                     auto lastModule = getLastModule(id);
                     if (lastModule != nullptr)
                         updateLinkVisualization(getContainingNode(lastModule), networkNode, packet);

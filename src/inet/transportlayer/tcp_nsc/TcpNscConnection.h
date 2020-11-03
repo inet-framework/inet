@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2006 Sam Jansen, Andras Varga, 2009 Zoltan Bojthe
+// Copyright (C) 2006 Sam Jansen
+// Copyright (C) 2006 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -13,11 +14,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_TCP_NSC_CONNECTION_H
-#define __INET_TCP_NSC_CONNECTION_H
+#ifndef __INET_TCPNSCCONNECTION_H
+#define __INET_TCPNSCCONNECTION_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
@@ -117,5 +118,5 @@ class INET_API TcpNscConnection
 
 } // namespace inet
 
-#endif // ifndef __INET_TCP_NSC_CONNECTION_H
+#endif
 

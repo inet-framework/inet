@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/BitsChunk.h"
@@ -53,15 +53,15 @@ void ApskDecoder::initialize(int stage)
     }
 }
 
-std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskDecoder";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", code = " << code;
+        stream << EV_FIELD(code);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", descrambler = " << printObjectToString(descrambler, level + 1)
-               << ", fecDecoder = " << printObjectToString(fecDecoder, level + 1)
-               << ", deinterleaver = " << printObjectToString(deinterleaver, level + 1);
+        stream << EV_FIELD(descrambler, printFieldToString(descrambler, level + 1, evFlags))
+               << EV_FIELD(fecDecoder, printFieldToString(fecDecoder, level + 1, evFlags))
+               << EV_FIELD(deinterleaver, printFieldToString(deinterleaver, level + 1, evFlags));
     return stream;
 }
 
@@ -85,7 +85,7 @@ const IReceptionPacketModel *ApskDecoder::decode(const IReceptionBitModel *bitMo
     }
     else {
         std::vector<bool> bits;
-        for (uint32 i = 0; i < decodedBits->getSize(); i++)
+        for (uint32_t i = 0; i < decodedBits->getSize(); i++)
             bits.push_back(decodedBits->getBit(i));
         const auto& bitsChunk = makeShared<BitsChunk>(bits);
         packet = new Packet(nullptr, bitsChunk);

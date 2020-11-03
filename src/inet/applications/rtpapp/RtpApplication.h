@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
 // Copyright (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -12,6 +12,10 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_RTPAPPLICATION_H
@@ -40,7 +44,7 @@ class INET_API RtpApplication : public cSimpleModule, public LifecycleUnsupporte
 
     // state
     Ipv4Address destinationAddress;    // the address of the unicast peer or of the multicast group
-    uint32 ssrc = 0;
+    uint32_t ssrc = 0;
     bool isActiveSession = false;
 
   protected:
@@ -54,5 +58,5 @@ class INET_API RtpApplication : public cSimpleModule, public LifecycleUnsupporte
 
 } // namespace inet
 
-#endif // ifndef __INET_RTPAPPLICATION_H
+#endif
 

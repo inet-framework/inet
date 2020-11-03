@@ -12,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-//
-// Author: Benjamin Martin Seregi
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
@@ -42,7 +40,7 @@ Ieee8021dInterfaceData::PortInfo::PortInfo()
 }
 
 Ieee8021dInterfaceData::Ieee8021dInterfaceData()
-    : InterfaceProtocolData(InterfaceEntry::F_IEEE8021D_DATA)
+    : InterfaceProtocolData(NetworkInterface::F_IEEE8021D_DATA)
 {
 }
 

@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2006 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETUtils.h"
@@ -25,7 +25,7 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
@@ -150,7 +150,7 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         delete msg;
         sendProbeRequest();
         cMessage *timerMsg = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
-        scheduleAt(simTime() + scanning.minChannelTime, timerMsg);    //XXX actually, we should start waiting after ProbeReq actually got transmitted
+        scheduleAfter(scanning.minChannelTime, timerMsg);    //XXX actually, we should start waiting after ProbeReq actually got transmitted
     }
     else if (msg->getKind() == MK_SCAN_MINCHANNELTIME) {
         // Active Scan: after minChannelTime, possibly listen for the remaining time until maxChannelTime
@@ -158,7 +158,7 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         if (scanning.busyChannelDetected) {
             EV << "Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
             cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-            scheduleAt(simTime() + scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
+            scheduleAfter(scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
         }
         else {
             EV << "Channel was empty during minChannelTime, going to next channel\n";
@@ -210,7 +210,7 @@ void Ieee80211MgmtSta::clearAPList()
 {
     for (auto & elem : apList)
         if (elem.authTimeoutMsg)
-            delete cancelEvent(elem.authTimeoutMsg);
+            cancelAndDelete(elem.authTimeoutMsg);
 
     apList.clear();
 }
@@ -264,7 +264,7 @@ void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
     ASSERT(ap->authTimeoutMsg == nullptr);
     ap->authTimeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
     ap->authTimeoutMsg->setContextPointer(ap);
-    scheduleAt(simTime() + timeout, ap->authTimeoutMsg);
+    scheduleAfter(timeout, ap->authTimeoutMsg);
 }
 
 void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
@@ -291,12 +291,12 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     ASSERT(assocTimeoutMsg == nullptr);
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
     assocTimeoutMsg->setContextPointer(ap);
-    scheduleAt(simTime() + timeout, assocTimeoutMsg);
+    scheduleAfter(timeout, assocTimeoutMsg);
 }
 
 void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     // Note that we are only subscribed during scanning!
     if (signalID == IRadio::receptionStateChangedSignal) {
         IRadio::ReceptionState newReceptionState = static_cast<IRadio::ReceptionState>(value);
@@ -318,7 +318,7 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     }
     else if (assocTimeoutMsg) {
         EV << "Cancelling ongoing association process\n";
-        delete cancelEvent(assocTimeoutMsg);
+        cancelAndDelete(assocTimeoutMsg);
         assocTimeoutMsg = nullptr;
     }
 
@@ -371,12 +371,12 @@ bool Ieee80211MgmtSta::scanNextChannel()
     if (scanning.activeScan) {
         // Active Scan: first wait probeDelay, then send a probe. Listening
         // for minChannelTime or maxChannelTime takes place after that. (11.1.3.2)
-        scheduleAt(simTime() + scanning.probeDelay, new cMessage("sendProbe", MK_SCAN_SENDPROBE));
+        scheduleAfter(scanning.probeDelay, new cMessage("sendProbe", MK_SCAN_SENDPROBE));
     }
     else {
         // Passive Scan: spend maxChannelTime on the channel (11.1.3.1)
         cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-        scheduleAt(simTime() + scanning.maxChannelTime, timerMsg);
+        scheduleAfter(scanning.maxChannelTime, timerMsg);
     }
 
     return false;
@@ -438,7 +438,7 @@ void Ieee80211MgmtSta::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
 
     // cancel possible pending authentication timer
     if (ap->authTimeoutMsg) {
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
     }
 
@@ -473,7 +473,7 @@ void Ieee80211MgmtSta::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     }
     else if (assocTimeoutMsg) {
         // pending association
-        delete cancelEvent(assocTimeoutMsg);
+        cancelAndDelete(assocTimeoutMsg);
         assocTimeoutMsg = nullptr;
     }
 
@@ -488,7 +488,7 @@ void Ieee80211MgmtSta::disassociate()
     EV << "Disassociating from AP address=" << assocAP.address << "\n";
     ASSERT(mib->bssStationData.isAssociated);
     mib->bssStationData.isAssociated = false;
-    delete cancelEvent(assocAP.beaconTimeoutMsg);
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo();    // clear it
 }
@@ -556,7 +556,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
         delete packet;
 
         // cancel timeout, send error to agent
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
         sendAuthenticationConfirm(ap, PRC_REFUSED);    //XXX or what resultCode?
         return;
@@ -584,7 +584,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
 
         // authentication completed
         ap->isAuthenticated = (statusCode == SC_SUCCESSFUL);
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
         sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
     }
@@ -603,7 +603,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
         return;
     }
     if (ap->authTimeoutMsg) {
-        delete cancelEvent(ap->authTimeoutMsg);
+        cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
         EV << "Cancelling pending authentication\n";
         delete packet;
@@ -646,12 +646,12 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
     if (mib->bssStationData.isAssociated) {
         EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
         mib->bssStationData.isAssociated = false;
-        delete cancelEvent(assocAP.beaconTimeoutMsg);
+        cancelAndDelete(assocAP.beaconTimeoutMsg);
         assocAP.beaconTimeoutMsg = nullptr;
         assocAP = AssociatedApInfo();
     }
 
-    delete cancelEvent(assocTimeoutMsg);
+    cancelAndDelete(assocTimeoutMsg);
     assocTimeoutMsg = nullptr;
 
     if (statusCode != SC_SUCCESSFUL) {
@@ -669,7 +669,7 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
         emit(l2AssociatedSignal, myIface, ap);
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
-        scheduleAt(simTime() + MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        scheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
     }
 
     // report back to agent
@@ -694,7 +694,7 @@ void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const
 
     if (assocTimeoutMsg) {
         // pending association
-        delete cancelEvent(assocTimeoutMsg);
+        cancelAndDelete(assocTimeoutMsg);
         assocTimeoutMsg = nullptr;
     }
     if (!mib->bssStationData.isAssociated || address != assocAP.address) {
@@ -705,7 +705,7 @@ void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const
 
     EV << "Setting isAssociated flag to false\n";
     mib->bssStationData.isAssociated = false;
-    delete cancelEvent(assocAP.beaconTimeoutMsg);
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
 }
 
@@ -719,8 +719,7 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
     if (mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
         EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
         ASSERT(assocAP.beaconTimeoutMsg != nullptr);
-        cancelEvent(assocAP.beaconTimeoutMsg);
-        scheduleAt(simTime() + MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        rescheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
 
         //ApInfo *ap = lookupAP(frame->getTransmitterAddress());
         //ASSERT(ap!=nullptr);

@@ -50,7 +50,7 @@ void LoRaNeighborCache::initialize(int stage)
     }
 }
 
-std::ostream& LoRaNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaNeighborCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LoRaNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)

@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,12 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -142,18 +145,30 @@ void PacketDissector::doDissectPacket(Packet *packet, const Protocol *protocol) 
     protocolDissector->dissect(packet, protocol, callback);
 }
 
-void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol) const
+void PacketDissector::dissectPacket(Packet *packet) const
 {
-    auto headerPopOffset = packet->getFrontOffset();
-    auto trailerPopOffset = packet->getBackOffset();
+    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    if (packetProtocolTag != nullptr)
+        dissectPacket(packet, protocol, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset());
+    else
+        dissectPacket(packet, protocol);
+}
+
+void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol, b extraFrontOffset, b extraBackOffset) const
+{
+    auto frontOffset = packet->getFrontOffset();
+    auto backOffset = packet->getBackOffset();
+    packet->setFrontOffset(frontOffset + extraFrontOffset);
+    packet->setBackOffset(backOffset + extraBackOffset);
     // dissect packet data part according to protocol
     doDissectPacket(packet, protocol);
     // dissect remaining junk in packet without protocol (e.g. ethernet padding at IP level)
     if (packet->getDataLength() != b(0))
         doDissectPacket(packet, nullptr);
     ASSERT(packet->getDataLength() == b(0));
-    packet->setFrontOffset(headerPopOffset);
-    packet->setBackOffset(trailerPopOffset);
+    packet->setFrontOffset(frontOffset);
+    packet->setBackOffset(backOffset);
 }
 
 } // namespace

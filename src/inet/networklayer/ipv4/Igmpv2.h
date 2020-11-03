@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2011 CoCo Communications
-// Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2012 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_IGMPV2_H
@@ -24,7 +25,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage_m.h"
 
@@ -33,7 +34,7 @@ namespace inet {
 class IInterfaceTable;
 class IIpv4RoutingTable;
 
-class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListener, public cListener
+class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistrationListener, public cListener
 {
   protected:
     enum RouterState {
@@ -139,16 +140,16 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
 
     struct IgmpHostTimerContext
     {
-        InterfaceEntry *ie;
+        NetworkInterface *ie;
         HostGroupData *hostGroup;
-        IgmpHostTimerContext(InterfaceEntry *ie, HostGroupData *hostGroup) : ie(ie), hostGroup(hostGroup) {}
+        IgmpHostTimerContext(NetworkInterface *ie, HostGroupData *hostGroup) : ie(ie), hostGroup(hostGroup) {}
     };
 
     struct IgmpRouterTimerContext
     {
-        InterfaceEntry *ie;
+        NetworkInterface *ie;
         RouterGroupData *routerGroup;
-        IgmpRouterTimerContext(InterfaceEntry *ie, RouterGroupData *routerGroup) : ie(ie), routerGroup(routerGroup) {}
+        IgmpRouterTimerContext(NetworkInterface *ie, RouterGroupData *routerGroup) : ie(ie), routerGroup(routerGroup) {}
     };
 
   protected:
@@ -205,17 +206,17 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual ~Igmpv2();
 
   protected:
     void addWatches();
 
-    virtual void multicastGroupJoined(InterfaceEntry *ie, const Ipv4Address& groupAddr);
-    virtual void multicastGroupLeft(InterfaceEntry *ie, const Ipv4Address& groupAddr);
-    virtual void configureInterface(InterfaceEntry *ie);
+    virtual void multicastGroupJoined(NetworkInterface *ie, const Ipv4Address& groupAddr);
+    virtual void multicastGroupLeft(NetworkInterface *ie, const Ipv4Address& groupAddr);
+    virtual void configureInterface(NetworkInterface *ie);
 
     virtual void deleteHostInterfaceData(int interfaceId);
     virtual void deleteRouterInterfaceData(int interfaceId);
@@ -226,30 +227,30 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual void processRexmtTimer(cMessage *msg);
 
     virtual void startTimer(cMessage *timer, double interval);
-    virtual void startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime);
+    virtual void startHostTimer(NetworkInterface *ie, HostGroupData *group, double maxRespTime);
 
     virtual void processIgmpMessage(Packet *packet);
-    virtual void processQuery(InterfaceEntry *ie, Packet *packet);
-    virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime);
-    //virtual void processV1Report(InterfaceEntry *ie, IgmpMessage *msg);
-    virtual void processV2Report(InterfaceEntry *ie, Packet *packet);
-    virtual void processLeave(InterfaceEntry *ie, Packet *packet);
+    virtual void processQuery(NetworkInterface *ie, Packet *packet);
+    virtual void processGroupQuery(NetworkInterface *ie, HostGroupData *group, simtime_t maxRespTime);
+    //virtual void processV1Report(NetworkInterface *ie, IgmpMessage *msg);
+    virtual void processV2Report(NetworkInterface *ie, Packet *packet);
+    virtual void processLeave(NetworkInterface *ie, Packet *packet);
 
-    virtual void sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double maxRespTime);
-    virtual void sendReport(InterfaceEntry *ie, HostGroupData *group);
-    virtual void sendLeave(InterfaceEntry *ie, HostGroupData *group);
-    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest);
+    virtual void sendQuery(NetworkInterface *ie, const Ipv4Address& groupAddr, double maxRespTime);
+    virtual void sendReport(NetworkInterface *ie, HostGroupData *group);
+    virtual void sendLeave(NetworkInterface *ie, HostGroupData *group);
+    virtual void sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& dest);
 
-    virtual RouterGroupData *createRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual HostGroupData *createHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual RouterGroupData *getRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual HostGroupData *getHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual void deleteRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual void deleteHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual RouterGroupData *createRouterGroupData(NetworkInterface *ie, const Ipv4Address& group);
+    virtual HostGroupData *createHostGroupData(NetworkInterface *ie, const Ipv4Address& group);
+    virtual RouterGroupData *getRouterGroupData(NetworkInterface *ie, const Ipv4Address& group);
+    virtual HostGroupData *getHostGroupData(NetworkInterface *ie, const Ipv4Address& group);
+    virtual void deleteRouterGroupData(NetworkInterface *ie, const Ipv4Address& group);
+    virtual void deleteHostGroupData(NetworkInterface *ie, const Ipv4Address& group);
 
-    virtual RouterInterfaceData *getRouterInterfaceData(InterfaceEntry *ie);
+    virtual RouterInterfaceData *getRouterInterfaceData(NetworkInterface *ie);
     virtual RouterInterfaceData *createRouterInterfaceData();
-    virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
+    virtual HostInterfaceData *getHostInterfaceData(NetworkInterface *ie);
     virtual HostInterfaceData *createHostInterfaceData();
 
   public:
@@ -260,5 +261,5 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
 
 }    // namespace inet
 
-#endif    // ifndef __INET_IGMPV2_H
+#endif
 

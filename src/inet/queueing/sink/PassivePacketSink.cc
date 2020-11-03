@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -34,9 +34,9 @@ void PassivePacketSink::initialize(int stage)
         consumptionTimer = new cMessage("ConsumptionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(inputGate);
+        checkPacketOperationSupport(inputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate);
+            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
 }
 
@@ -44,7 +44,7 @@ void PassivePacketSink::handleMessage(cMessage *message)
 {
     if (message == consumptionTimer) {
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate);
+            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else
         PassivePacketSinkBase::handleMessage(message);
@@ -54,12 +54,13 @@ void PassivePacketSink::scheduleConsumptionTimer()
 {
     simtime_t interval = consumptionIntervalParameter->doubleValue();
     if (interval != 0 || consumptionTimer->getArrivalModule() == nullptr)
-        scheduleAt(simTime() + interval, consumptionTimer);
+        scheduleAfter(interval, consumptionTimer);
 }
 
 void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     if (consumptionTimer->isScheduled() && consumptionTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being consumed");
     else {
@@ -71,7 +72,7 @@ void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)
 
 void PassivePacketSink::consumePacket(Packet *packet)
 {
-    EV_INFO << "Consuming packet " << packet->getName() << "." << endl;
+    EV_INFO << "Consuming packet" << EV_FIELD(packet) << EV_ENDL;
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();

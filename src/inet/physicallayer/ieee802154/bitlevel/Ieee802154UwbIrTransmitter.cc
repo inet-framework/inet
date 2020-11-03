@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /* -*- mode:c++ -*- ********************************************************
  * author:      Jerome Rousselot <jerome.rousselot@csem.ch>
  *
@@ -6,13 +21,6 @@
  *              Real-Time Software and Networking
  *              Jaquet-Droz 1, CH-2002 Neuchatel, Switzerland.
  *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
  * description: this class holds constants specified in IEEE 802.15.4A UWB-IR Phy
  * acknowledgment: this work was supported (in part) by the National Competence
  * 			    Center in Research on Mobile Information and Communication Systems
@@ -41,7 +49,7 @@ void Ieee802154UwbIrTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& Ieee802154UwbIrTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154UwbIrTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee802154UwbIrTransmitter";
 }
@@ -53,7 +61,7 @@ simtime_t Ieee802154UwbIrTransmitter::getFrameDuration(int psduLength) const
 
 simtime_t Ieee802154UwbIrTransmitter::getMaxFrameDuration() const
 {
-	return cfg.preambleLength + Ieee802154UwbIrMode::MaxPSDULength * cfg.data_symbol_duration;
+    return cfg.preambleLength + Ieee802154UwbIrMode::MaxPSDULength * cfg.data_symbol_duration;
 }
 
 simtime_t Ieee802154UwbIrTransmitter::getPhyMaxFrameDuration() const
@@ -68,7 +76,7 @@ simtime_t Ieee802154UwbIrTransmitter::getPhyMaxFrameDuration() const
 
 simtime_t Ieee802154UwbIrTransmitter::getThdr() const
 {
-	switch (cfg.channel) {
+    switch (cfg.channel) {
         default:
             switch (cfg.prf) {
                 case Ieee802154UwbIrMode::NOMINAL_4_M:
@@ -83,8 +91,8 @@ simtime_t Ieee802154UwbIrTransmitter::getThdr() const
                     return 0;
             }
             break;
-	}
-	return 0;
+    }
+    return 0;
 }
 
 void Ieee802154UwbIrTransmitter::generateSyncPreamble(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const

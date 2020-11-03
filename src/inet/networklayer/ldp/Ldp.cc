@@ -1,23 +1,27 @@
 //
-// (C) 2005 Vojtech Janota
-// (C) 2004 Andras Varga
+// Copyright (C) 2005 Vojtech Janota
+// Copyright (C) 2004 Andras Varga
 //
-// This library is free software, you can redistribute it
-// and/or modify
-// it under  the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation;
-// either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful,
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -101,7 +105,7 @@ void Ldp::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     //FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
-    //FIXME register to InterfaceEntry changes, for detecting the interface add/delete, and detecting multicast config changes:
+    //FIXME register to NetworkInterface changes, for detecting the interface add/delete, and detecting multicast config changes:
     //      should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
 
     if (stage == INITSTAGE_LOCAL) {
@@ -127,7 +131,7 @@ void Ldp::initialize(int stage)
         udpSocket.setOutputGate(gate("socketOut"));
         udpSocket.bind(LDP_PORT);
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-            InterfaceEntry *ie = ift->getInterface(i);
+            NetworkInterface *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 udpSockets.push_back(UdpSocket());
                 udpSockets.back().setOutputGate(gate("socketOut"));
@@ -163,7 +167,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         sendHelloTo(Ipv4Address::ALL_ROUTERS_MCAST);
 
         // schedule next hello
-        scheduleAt(simTime() + helloInterval, sendHelloMsg);
+        scheduleAfter(helloInterval, sendHelloMsg);
     }
     else if (msg->isSelfMessage()) {
         EV_INFO << "Timer " << msg->getName() << " expired\n";
@@ -188,7 +192,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
             udpSocket.processMessage(msg);
         }
         else {
-            auto& tags = getTags(msg);
+            auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
             int socketId = tags.getTag<SocketInd>()->getSocketId();
             for (auto& s: udpSockets) {
                 if (s.getSocketId() == socketId) {
@@ -235,7 +239,7 @@ void Ldp::socketClosed(UdpSocket *socket)
 
 void Ldp::handleStartOperation(LifecycleOperation *operation)
 {
-    scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
+    scheduleAfter(exponential(0.1), sendHelloMsg);
 }
 
 void Ldp::handleStopOperation(LifecycleOperation *operation)
@@ -398,7 +402,7 @@ void Ldp::rebuildFecList()
     // our own addresses (XXX is it needed?)
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
 
 //TODO should replace to ie->isUp() or drop this code:
 //        if (ie->getNetworkLayerGateIndex() < 0)
@@ -592,8 +596,7 @@ void Ldp::processLDPHello(Packet *msg)
     if (i != -1) {
         EV_DETAIL << "already in my peer table, rescheduling timeout" << endl;
         ASSERT(myPeers[i].timeout);
-        cancelEvent(myPeers[i].timeout);
-        scheduleAt(simTime() + holdTime, myPeers[i].timeout);
+        rescheduleAfter(holdTime, myPeers[i].timeout);
         return;
     }
 
@@ -604,7 +607,7 @@ void Ldp::processLDPHello(Packet *msg)
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = nullptr;
     info.timeout = new cMessage("HelloTimeout");
-    scheduleAt(simTime() + holdTime, info.timeout);
+    scheduleAfter(holdTime, info.timeout);
     myPeers.push_back(info);
     int peerIndex = myPeers.size() - 1;
 
@@ -786,7 +789,7 @@ Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
     //if (i == rt->getNumRoutes())
     //    return Ipv4Address();  // Signal an NOTIFICATION of NO ROUTE
     //
-    InterfaceEntry *ie = rt->getInterfaceForDestAddr(dest);
+    NetworkInterface *ie = rt->getInterfaceForDestAddr(dest);
     if (!ie)
         return Ipv4Address(); // no route
 
@@ -800,7 +803,7 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
 {
     int i = 0;
     int k = 0;
-    InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
+    NetworkInterface *ie = ift->findInterfaceByName(interfaceName.c_str());
     if (ie == nullptr)
         return Ipv4Address();
 
@@ -849,7 +852,7 @@ std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     if (rt->isLocalAddress(peerIP))
         return "lo0";
 
-    InterfaceEntry *ie = rt->getInterfaceForDestAddr(peerIP);
+    NetworkInterface *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
         throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
     return ie->getInterfaceName();
@@ -951,7 +954,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
                     if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
                         auto pk = new Packet(0, ldpPacket);
-                        scheduleAt(simTime() + 1.0    /* XXX FIXME */, pk);
+                        scheduleAfter(1.0    /* XXX FIXME */, pk);
                         return;
                     }
                     else {
@@ -1275,7 +1278,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
 
 void Ldp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     ASSERT(signalID == routeAddedSignal || signalID == routeDeletedSignal);

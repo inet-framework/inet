@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,13 +12,15 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 
 namespace inet {
+
+Register_Class(SliceChunk);
 
 SliceChunk::SliceChunk() :
     Chunk(),
@@ -46,13 +50,45 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->offset && this->offset <= chunkLength);
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->length && this->offset + this->length <= chunkLength);
 #endif
-    tags.copyTags(chunk->tags, offset, b(0), length);
+    regionTags.copyTags(chunk->regionTags, offset, b(0), length);
+}
+
+void SliceChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->packObject(chunk.get());
+    buffer->pack(b(offset).get());
+    buffer->pack(b(length).get());
+}
+
+void SliceChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    chunk = check_and_cast<Chunk *>(buffer->unpackObject())->shared_from_this();
+    uint64_t o;
+    buffer->unpack(o);
+    offset = b(o);
+    uint64_t l;
+    buffer->unpack(l);
+    length = b(l);
 }
 
 void SliceChunk::forEachChild(cVisitor *v)
 {
     Chunk::forEachChild(v);
     v->visit(const_cast<Chunk *>(chunk.get()));
+}
+
+bool SliceChunk::containsSameData(const Chunk& other) const
+{
+    if (&other == this)
+        return true;
+    else if (!Chunk::containsSameData(other))
+        return false;
+    else {
+        auto otherSlice = static_cast<const SliceChunk *>(&other);
+        return offset == otherSlice->offset && chunk->containsSameData(*otherSlice->chunk.get());
+    }
 }
 
 const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
@@ -150,11 +186,13 @@ void SliceChunk::doRemoveAtBack(b length)
     this->length -= length;
 }
 
-std::string SliceChunk::str() const
+std::ostream& SliceChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "SliceChunk, offset = " << offset << ", length = " << length << ", chunk = {" << chunk << "}";
-    return os.str();
+    if (level <= PRINT_LEVEL_DETAIL) {
+        stream << EV_FIELD(offset);
+        stream << EV_FIELD(chunk, printFieldToString(chunk.get(), level + 1, evFlags));
+    }
+    return stream;
 }
 
 } // namespace

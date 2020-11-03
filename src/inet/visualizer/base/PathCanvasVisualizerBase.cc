@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -59,8 +59,8 @@ bool isPointOnSegment(const LineSegment& segment, const Coord& point)
             std::min(p1.y, p2.y) <= point.y && point.y <= std::max(p1.y, p2.y));
 }
 
-PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const std::vector<int>& path, LabeledPolylineFigure *figure) :
-    PathVisualization(path),
+PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const char *label, const std::vector<int>& path, LabeledPolylineFigure *figure) :
+    PathVisualization(label, path),
     figure(figure)
 {
 }
@@ -68,12 +68,6 @@ PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const
 PathCanvasVisualizerBase::PathCanvasVisualization::~PathCanvasVisualization()
 {
     delete figure;
-}
-
-PathCanvasVisualizerBase::~PathCanvasVisualizerBase()
-{
-    if (displayRoutes)
-        removeAllPathVisualizations();
 }
 
 void PathCanvasVisualizerBase::initialize(int stage)
@@ -146,7 +140,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
     visualizationTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
+const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const
 {
     auto figure = new LabeledPolylineFigure("path");
     auto polylineFigure = figure->getPolylineFigure();
@@ -159,9 +153,7 @@ const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPat
     auto labelFigure = figure->getLabelFigure();
     labelFigure->setFont(labelFont);
     labelFigure->setColor(isEmpty(labelColorAsString) ? lineColor : labelColor);
-    auto text = getPathVisualizationText(packet);
-    labelFigure->setText(text.c_str());
-    return new PathCanvasVisualization(path, figure);
+    return new PathCanvasVisualization(label, path, figure);
 }
 
 void PathCanvasVisualizerBase::addPathVisualization(const PathVisualization *pathVisualization)
@@ -190,7 +182,7 @@ void PathCanvasVisualizerBase::refreshPathVisualization(const PathVisualization 
 {
     PathVisualizerBase::refreshPathVisualization(pathVisualization, packet);
     auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(pathVisualization);
-    auto text = getPathVisualizationText(packet);
+    auto text = getPathVisualizationText(pathVisualization, packet);
     pathCanvasVisualization->figure->getLabelFigure()->setText(text.c_str());
 }
 

@@ -55,7 +55,7 @@ void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcast
         cMessage *removeEvent = new cMessage("removeEvent", NEIGHBOR_TIMER);
 
         // schedule the event to remove the entry after initT seconds
-        scheduleAt(simTime() + timeInNeighboursTable, removeEvent);
+        scheduleAfter(timeInNeighboursTable, removeEvent);
 
         NeighborMap::value_type pairToInsert = make_pair(nodeAddress, removeEvent);
         pair<NeighborMap::iterator, bool> ret = neighMap.insert(pairToInsert);
@@ -67,14 +67,12 @@ void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcast
     //if the node is NOT a "new" neighbor update its timer
     else {
         EV << "updateNeighMap(): The message came from an already known neighbor! " << endl;
-        //cancel the event that was scheduled to remove the entry for this neighbor
-        cancelEvent(it->second);
+        // Cancel the event that was scheduled to remove the entry for this neighbor.
         // Define a new event in order to remove the entry after initT seconds
         // Set the context pointer to point to the integer that resembles to the address of
         // the node to be removed when the corresponding event occurs
         it->second->setContextPointer((void *)(&it->first));
-
-        scheduleAt(simTime() + timeInNeighboursTable, it->second);
+        rescheduleAfter(timeInNeighboursTable, it->second);
     }
     updateBeta();
 }

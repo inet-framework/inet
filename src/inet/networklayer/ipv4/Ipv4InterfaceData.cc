@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -13,10 +13,9 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-
-//  Author: Andras Varga, 2004
 
 #include <algorithm>
 #include <sstream>
@@ -154,7 +153,7 @@ std::string Ipv4InterfaceData::RouterMulticastData::detailedInfo()
 }
 
 Ipv4InterfaceData::Ipv4InterfaceData()
-    : InterfaceProtocolData(InterfaceEntry::F_IPV4_DATA)
+    : InterfaceProtocolData(NetworkInterface::F_IPV4_DATA)
 {
     netmask = Ipv4Address::ALLONES_ADDRESS;
     metric = 0;
@@ -368,8 +367,8 @@ void Ipv4InterfaceData::addMulticastListener(const Ipv4Address& multicastAddress
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
 
-        Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4MulticastGroupRegisteredSignal, &info);
+        Ipv4MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv4MulticastGroupRegisteredSignal, &info);
     }
 
     if (!groupData->sourceList.containsAll()) {
@@ -388,8 +387,8 @@ void Ipv4InterfaceData::addMulticastListener(Ipv4Address multicastAddress, Ipv4A
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
 
-        Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4MulticastGroupRegisteredSignal, &info);
+        Ipv4MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv4MulticastGroupRegisteredSignal, &info);
     }
 
     if (!groupData->sourceList.contains(sourceAddress)) {
@@ -413,8 +412,8 @@ void Ipv4InterfaceData::removeMulticastListener(const Ipv4Address& multicastAddr
         multicastGroups.erase(multicastGroups.begin() + i);
         changed1(F_MULTICAST_LISTENERS);
 
-        Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4MulticastGroupUnregisteredSignal, &info);
+        Ipv4MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+        check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv4MulticastGroupUnregisteredSignal, &info);
     }
 }
 
@@ -434,8 +433,8 @@ void Ipv4InterfaceData::removeMulticastListener(Ipv4Address multicastAddress, Ip
             delete multicastGroups[i];
             multicastGroups.erase(multicastGroups.begin() + i);
 
-            Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-            check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4MulticastGroupUnregisteredSignal, &info);
+            Ipv4MulticastGroupInfo info(getNetworkInterface(), multicastAddress);
+            check_and_cast<cModule *>(getNetworkInterface()->getInterfaceTable())->emit(ipv4MulticastGroupUnregisteredSignal, &info);
         }
         changed1(F_MULTICAST_LISTENERS);
     }

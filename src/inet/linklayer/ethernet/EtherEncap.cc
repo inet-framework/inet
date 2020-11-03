@@ -1,26 +1,28 @@
-/*
- * Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, see <http://www.gnu.org/licenses/>.
- */
+//
+// Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/EthernetCRC.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -28,9 +30,9 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetCommand_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -56,8 +58,6 @@ bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHead
         return false;
     if (protocol != nullptr && packet->getTag<PacketProtocolTag>()->getProtocol() != protocol)
         return false;
-    if (vlanId != -1 && packet->getTag<VlanInd>()->getVlanId() != vlanId)
-        return false;
     return true;
 }
 
@@ -70,6 +70,8 @@ void EtherEncap::initialize(int stage)
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         useSNAP = par("useSNAP");
+        networkInterface = findContainingNicModule(this);     //TODO or getContainingNicModule() ? or use a macaddresstable?
+
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
@@ -78,8 +80,7 @@ void EtherEncap::initialize(int stage)
     {
         if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
             //register service and protocol
-            registerService(Protocol::ethernetMac, gate("upperLayerIn"), nullptr);
-            registerProtocol(Protocol::ethernetMac, nullptr, gate("upperLayerOut"));
+            registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
         }
     }
 }
@@ -95,23 +96,23 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         socket->localAddress = bindCommand->getLocalAddress();
         socket->remoteAddress = bindCommand->getRemoteAddress();
         socket->protocol = bindCommand->getProtocol();
-        socket->vlanId = bindCommand->getVlanId();
+        socket->steal = bindCommand->getSteal();
         socketIdToSocketMap[socketId] = socket;
         delete msg;
     }
-    else if (dynamic_cast<EthernetCloseCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketMap.find(socketId);
         delete it->second;
         socketIdToSocketMap.erase(it);
         delete msg;
-        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
-        auto ctrl = new EthernetSocketClosedIndication();
+        auto indication = new Indication("closed", SOCKET_I_CLOSED);
+        auto ctrl = new SocketClosedIndication();
         indication->setControlInfo(ctrl);
         indication->addTag<SocketInd>()->setSocketId(socketId);
         send(indication, "transportOut");
     }
-    else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<SocketDestroyCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketMap.find(socketId);
         delete it->second;
@@ -132,7 +133,7 @@ void EtherEncap::refreshDisplay() const
 
 void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 {
-    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
         throw cRuntimeError("packet length from higher layer (%s) exceeds maximum Ethernet payload length (%s)", packet->getDataLength().str().c_str(), MAX_ETHERNET_DATA_BYTES.str().c_str());
 
@@ -147,7 +148,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 
     int typeOrLength = -1;
     if (!useSNAP) {
-        auto protocolTag = packet->findTag<PacketProtocolTag>();
+        const auto& protocolTag = packet->findTag<PacketProtocolTag>();
         if (protocolTag) {
             const Protocol *protocol = protocolTag->getProtocol();
             if (protocol) {
@@ -163,13 +164,16 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     }
     auto macAddressReq = packet->getTag<MacAddressReq>();
     const auto& ethHeader = makeShared<EthernetMacHeader>();
-    ethHeader->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
+    auto srcAddr = macAddressReq->getSrcAddress();
+    if (srcAddr.isUnspecified() && networkInterface != nullptr)
+        srcAddr = networkInterface->getMacAddress();
+    ethHeader->setSrc(srcAddr);
     ethHeader->setDest(macAddressReq->getDestAddress());
     ethHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethHeader);
-
-    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
-
+    const auto& ethernetFcs = makeShared<EthernetFcs>();
+    ethernetFcs->setFcsMode(fcsMode);
+    packet->insertAtBack(ethernetFcs);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
@@ -191,7 +195,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
         packet->setBackOffset(packet->getFrontOffset() + payloadLength);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
     }
     else if (isEth2Header(*ethHeader)) {
         if (auto protocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength()))
@@ -222,19 +226,18 @@ void EtherEncap::processPacketFromMac(Packet *packet)
             packet->removeTagIfPresent<PacketProtocolTag>();
             packet->removeTagIfPresent<DispatchProtocolReq>();
         }
-        bool stealPacket = false;
+        bool steal = false;
         for (auto it : socketIdToSocketMap) {
             auto socket = it.second;
             if (socket->matches(packet, ethHeader)) {
                 auto packetCopy = packet->dup();
-                packetCopy->setKind(ETHERNET_I_DATA);
+                packetCopy->setKind(SOCKET_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
                 send(packetCopy, "upperLayerOut");
-                stealPacket |= socket->vlanId != -1;
+                steal |= socket->steal;
             }
         }
-        // TODO: should the socket configure if it steals packets or not?
-        if (stealPacket)
+        if (steal)
             delete packet;
         else if (payloadProtocol != nullptr && upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
             EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
@@ -283,7 +286,9 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertAtFront(hdr);
-    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
+    const auto& ethernetFcs = makeShared<EthernetFcs>();
+    ethernetFcs->setFcsMode(fcsMode);
+    packet->insertAtBack(ethernetFcs);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";

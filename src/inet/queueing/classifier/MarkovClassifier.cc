@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -58,10 +58,10 @@ void MarkovClassifier::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < (int)outputGates.size(); i++)
-            checkPushOrPopPacketSupport(outputGates[i]);
-        checkPushOrPopPacketSupport(inputGate);
+            checkPacketOperationSupport(outputGates[i]);
+        checkPacketOperationSupport(inputGate);
         if (collectors[state] != nullptr)
-            collectors[state]->handleCanPopPacket(outputGates[state]);
+            collectors[state]->handleCanPullPacketChanged(outputGates[state]->getPathEndGate());
         scheduleWaitTimer();
     }
 }
@@ -80,7 +80,7 @@ void MarkovClassifier::handleMessage(cMessage *message)
             }
         }
         if (collectors[state] != nullptr)
-            collectors[state]->handleCanPopPacket(outputGates[state]);
+            collectors[state]->handleCanPullPacketChanged(outputGates[state]->getPathEndGate());
         scheduleWaitTimer();
     }
     else
@@ -94,29 +94,30 @@ int MarkovClassifier::classifyPacket(Packet *packet)
 
 void MarkovClassifier::scheduleWaitTimer()
 {
-    scheduleAt(simTime() + waitIntervals[state].doubleValue(this), waitTimer);
+    scheduleAfter(waitIntervals[state].doubleValue(this), waitTimer);
 }
 
-bool MarkovClassifier::canPopSomePacket(cGate *gate) const
+bool MarkovClassifier::canPullSomePacket(cGate *gate) const
 {
     return gate->getIndex() == state;
 }
 
-Packet *MarkovClassifier::canPopPacket(cGate *gate) const
+Packet *MarkovClassifier::canPullPacket(cGate *gate) const
 {
-    return canPopSomePacket(gate) ? provider->canPopPacket(inputGate->getPathStartGate()) : nullptr;
+    return canPullSomePacket(gate) ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
 }
 
-Packet *MarkovClassifier::popPacket(cGate *gate)
+Packet *MarkovClassifier::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
+    Enter_Method("pullPacket");
     if (gate->getIndex() != state)
-        throw cRuntimeError("Cannot pop from gate");
-    auto packet = provider->popPacket(inputGate->getPathEndGate());
+        throw cRuntimeError("Cannot pull from gate");
+    auto packet = provider->pullPacket(inputGate->getPathEndGate());
+    take(packet);
+    animateSendPacket(packet, gate);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();
-    animateSend(packet, gate);
     return packet;
 }
 
@@ -133,11 +134,18 @@ const char *MarkovClassifier::resolveDirective(char directive) const
     return result.c_str();
 }
 
-void MarkovClassifier::handleCanPopPacket(cGate *gate)
+void MarkovClassifier::handleCanPullPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacketChanged");
     if (collectors[state] != nullptr)
-        collectors[state]->handleCanPopPacket(outputGates[state]);
+        collectors[state]->handleCanPullPacketChanged(outputGates[state]->getPathEndGate());
+}
+
+void MarkovClassifier::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    if (collectors[state] != nullptr)
+        collectors[state]->handlePullPacketProcessed(packet, outputGates[state]->getPathEndGate(), successful);
 }
 
 } // namespace queueing

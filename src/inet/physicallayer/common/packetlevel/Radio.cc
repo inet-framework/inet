@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,12 +12,13 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
@@ -55,7 +56,7 @@ void Radio::initialize(int stage)
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
-        radioIn->setDeliverOnReceptionStart(true);
+        radioIn->setDeliverImmediately(true);
         sendRawBytes = par("sendRawBytes");
         separateTransmissionParts = par("separateTransmissionParts");
         separateReceptionParts = par("separateReceptionParts");
@@ -91,19 +92,19 @@ void Radio::initializeRadioMode() {
         throw cRuntimeError("Unknown initialRadioMode");
 }
 
-std::ostream& Radio::printToStream(std::ostream& stream, int level) const
+std::ostream& Radio::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", antenna = " << printObjectToString(antenna, level + 1)
-               << ", transmitter = " << printObjectToString(transmitter, level + 1)
-               << ", receiver = " << printObjectToString(receiver, level + 1);
+        stream << EV_FIELD(antenna, printFieldToString(antenna, level + 1, evFlags))
+               << EV_FIELD(transmitter, printFieldToString(transmitter, level + 1, evFlags))
+               << EV_FIELD(receiver, printFieldToString(receiver, level + 1, evFlags));
     return stream;
 }
 
 void Radio::setRadioMode(RadioMode newRadioMode)
 {
-    Enter_Method_Silent();
+    Enter_Method("setRadioMode");
     if (newRadioMode < RADIO_MODE_OFF || newRadioMode > RADIO_MODE_SWITCHING)
         throw cRuntimeError("Unknown radio mode: %d", newRadioMode);
     else if (newRadioMode == RADIO_MODE_SWITCHING)
@@ -157,7 +158,7 @@ void Radio::startRadioModeSwitch(RadioMode newRadioMode, simtime_t switchingTime
     radioMode = RADIO_MODE_SWITCHING;
     nextRadioMode = newRadioMode;
     emit(radioModeChangedSignal, radioMode);
-    scheduleAt(simTime() + switchingTime, switchTimer);
+    scheduleAfter(switchingTime, switchTimer);
 }
 
 void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
@@ -400,10 +401,9 @@ WirelessSignal *Radio::createSignal(Packet *packet) const
     encapsulate(packet);
     if (sendRawBytes) {
         // TODO: this doesn't always work, because the packet length may not be divisible by 8
-        auto rawPacket = new Packet(packet->getName(), packet->peekAllAsBytes());
-        rawPacket->copyTags(*packet);
-        delete packet;
-        packet = rawPacket;
+        auto bytes = packet->peekDataAsBytes();
+        packet->eraseAll();
+        packet->insertAtFront(bytes);
     }
     WirelessSignal *signal = check_and_cast<WirelessSignal *>(medium->transmitPacket(this, packet));
     ASSERT(signal->getDuration() != 0);

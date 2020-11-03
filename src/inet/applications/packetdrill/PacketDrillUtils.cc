@@ -2,18 +2,18 @@
 // Copyright (C) 2014 Irene Ruengeler
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2.1
+// of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <fcntl.h>
@@ -192,10 +192,10 @@ int PacketDrillExpression::unescapeCstringExpression(const char *input_string, c
 }
 
 /* Sets the value from the expression argument, checking that it is a
- * valid int32 or uint32, and matches the expected type. Returns STATUS_OK on
+ * valid int32_t or uint32_t, and matches the expected type. Returns STATUS_OK on
  * success; on failure returns STATUS_ERR and sets error message.
  */
-int PacketDrillExpression::getS32(int32 *val, char **error)
+int PacketDrillExpression::getS32(int32_t *val, char **error)
 {
     if (type != EXPR_INTEGER)
         return STATUS_ERR;
@@ -207,7 +207,7 @@ int PacketDrillExpression::getS32(int32 *val, char **error)
     return STATUS_OK;
 }
 
-int PacketDrillExpression::getU32(uint32 *val, char **error)
+int PacketDrillExpression::getU32(uint32_t *val, char **error)
 {
     if (type != EXPR_INTEGER)
         return STATUS_ERR;
@@ -219,7 +219,7 @@ int PacketDrillExpression::getU32(uint32 *val, char **error)
     return STATUS_OK;
 }
 
-int PacketDrillExpression::getU16(uint16 *val, char **error)
+int PacketDrillExpression::getU16(uint16_t *val, char **error)
 {
     if (type != EXPR_INTEGER)
         return STATUS_ERR;
@@ -233,7 +233,7 @@ int PacketDrillExpression::getU16(uint16 *val, char **error)
 
 
 /* Do a symbol->int lookup, and return true if we found the symbol. */
-bool PacketDrillExpression::lookupIntSymbol(const char *input_symbol, int64 *output_integer, struct int_symbol *symbols)
+bool PacketDrillExpression::lookupIntSymbol(const char *input_symbol, int64_t *output_integer, struct int_symbol *symbols)
 {
     int i;
     for (i = 0; symbols[i].name != NULL ; ++i) {
@@ -245,7 +245,7 @@ bool PacketDrillExpression::lookupIntSymbol(const char *input_symbol, int64 *out
     return false;
 }
 
-int PacketDrillExpression::symbolToInt(const char *input_symbol, int64 *output_integer, char **error)
+int PacketDrillExpression::symbolToInt(const char *input_symbol, int64_t *output_integer, char **error)
 {
     if (lookupIntSymbol(input_symbol, output_integer, platform_symbols()))
         return STATUS_OK;
@@ -359,7 +359,7 @@ PacketDrillStruct::PacketDrillStruct()
     streamNumbers = nullptr;
 }
 
-PacketDrillStruct::PacketDrillStruct(int64 v1, int64 v2)
+PacketDrillStruct::PacketDrillStruct(int64_t v1, int64_t v2)
 {
     value1 = v1;
     value2 = v2;
@@ -368,7 +368,7 @@ PacketDrillStruct::PacketDrillStruct(int64 v1, int64 v2)
     streamNumbers = nullptr;
 }
 
-PacketDrillStruct::PacketDrillStruct(int64 v1, int64 v2, int32 v3, int32 v4, cQueue *streams)
+PacketDrillStruct::PacketDrillStruct(int64_t v1, int64_t v2, int32_t v3, int32_t v4, cQueue *streams)
 {
     value1 = v1;
     value2 = v2;
@@ -385,7 +385,7 @@ PacketDrillOption::PacketDrillOption(char *v1, char *v2)
     value = strdup(v2);
 }
 
-PacketDrillTcpOption::PacketDrillTcpOption(uint16 kind_, uint16 length_)
+PacketDrillTcpOption::PacketDrillTcpOption(uint16_t kind_, uint16_t length_)
 {
     kind = kind_;
     length = length_;
@@ -397,7 +397,7 @@ PacketDrillTcpOption::PacketDrillTcpOption(uint16 kind_, uint16 length_)
     blockCount = 0;
 }
 
-PacketDrillSctpChunk::PacketDrillSctpChunk(uint8 type_, SctpChunk *sctpChunk)
+PacketDrillSctpChunk::PacketDrillSctpChunk(uint8_t type_, SctpChunk *sctpChunk)
 {
     type = type_;
     chunk = sctpChunk->dup();
@@ -426,10 +426,10 @@ PacketDrillSctpParameter::~PacketDrillSctpParameter()
 {
 }
 
-PacketDrillSctpParameter::PacketDrillSctpParameter(uint16 type_, int16 len, void* content_)
+PacketDrillSctpParameter::PacketDrillSctpParameter(uint16_t type_, int16_t len, void* content_)
 {
     parameterValue = 0;
-    uint32 flgs = 0;
+    uint32_t flgs = 0;
     type = type_;
     if (len == -1)
         flgs |= FLAG_CHUNK_LENGTH_NOCHECK;

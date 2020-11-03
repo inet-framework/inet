@@ -1,21 +1,19 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-
 
 #include "TCPTester.h"
 
@@ -183,7 +181,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
 //    pk->addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
     pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
     pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
-    delete pk->removeTag<L3AddressReq>();
+    pk->removeTag<L3AddressReq>();
 
     // find entry in script
     Command *cmd = NULL;
@@ -221,7 +219,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
             else
             {
                 segcopy->setContextPointer(cmd);
-                scheduleAt(simTime()+d, segcopy);
+                scheduleAfter(d, segcopy);
             }
         }
         delete pk;
@@ -289,7 +287,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
 //    pk->addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
     pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
     pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
-    delete pk->removeTag<L3AddressReq>();
+    pk->removeTag<L3AddressReq>();
 
     // decide what to do
     double x = dblrand();
@@ -305,7 +303,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
         dump(seg, pk->getByteLength(), fromA, "delay: removing original");
         double d = *delay;
         pk->setContextPointer((void*)fromA);
-        scheduleAt(simTime()+d, pk);
+        scheduleAfter(d, pk);
     }
     else if (x-=pdelay, x<=pcopy)
     {
@@ -317,7 +315,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
             double d = *delay;
             Packet *segcopy = pk->dup();
             segcopy->setContextPointer((void *)fromA);
-            scheduleAt(simTime()+d, segcopy);
+            scheduleAfter(d, segcopy);
         }
         delete pk;
     }

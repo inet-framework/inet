@@ -68,7 +68,7 @@ void WirelessNumHops::reStart()
         vectorList.push_back(info);
         for (int j = 0 ; j < vectorList[i].itable->getNumInterfaces(); j++)
         {
-            InterfaceEntry *e = vectorList[i].itable->getInterface(j);
+            NetworkInterface *e = vectorList[i].itable->getInterface(j);
             if (e->getMacAddress().isUnspecified())
                 continue;
             if (e->isLoopback())
@@ -877,11 +877,11 @@ void WirelessNumHops::setIpRoutingTable(const Ipv4Address &desAddress, const Ipv
     IInterfaceTable* itable = L3AddressResolver().interfaceTableOf(node);
 
 
-    InterfaceEntry *iface = nullptr;
+    NetworkInterface *iface = nullptr;
     bool found = false;
     for (int j = 0; j < itable->getNumInterfaces(); j++)
     {
-        InterfaceEntry *e = itable->getInterface(j);
+        NetworkInterface *e = itable->getInterface(j);
         if (e->getMacAddress().isUnspecified())
             continue;
         if (e->isLoopback())
@@ -951,11 +951,11 @@ void WirelessNumHops::setIpRoutingTable(const Ipv4Address &root, const Ipv4Addre
 
 
     IIpv4RoutingTable *inet_rt = L3AddressResolver().getIpv4RoutingTableOf(getContainingNode((cModule*)vectorList[id].mob));
-    InterfaceEntry *iface = nullptr;
+    NetworkInterface *iface = nullptr;
     bool found = false;
     for (int j = 0; j < vectorList[id].itable->getNumInterfaces(); j++)
     {
-        InterfaceEntry *e = vectorList[id].itable->getInterface(j);
+        NetworkInterface *e = vectorList[id].itable->getInterface(j);
         if (e->getMacAddress().isUnspecified())
             continue;
         if (e->isLoopback())

@@ -1,28 +1,30 @@
-/*
- * Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, see <http://www.gnu.org/licenses/>.
- */
+//
+// Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -43,6 +45,7 @@ class INET_API EtherEncap : public Ieee8022Llc
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
     bool useSNAP;    // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
+    NetworkInterface *networkInterface = nullptr;
 
     struct Socket
     {
@@ -50,7 +53,7 @@ class INET_API EtherEncap : public Ieee8022Llc
         MacAddress localAddress;
         MacAddress remoteAddress;
         const Protocol *protocol = nullptr;
-        int vlanId = -1;
+        bool steal = false;
 
         Socket(int socketId) : socketId(socketId) {}
         bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
@@ -79,5 +82,5 @@ class INET_API EtherEncap : public Ieee8022Llc
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERENCAP_H
+#endif
 

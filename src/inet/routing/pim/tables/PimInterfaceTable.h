@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 3
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
@@ -21,7 +21,7 @@
 #define __INET_PIMINTERFACETABLE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -38,7 +38,7 @@ class INET_API PimInterface : public cObject
     };
 
   protected:
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
 
     // parameters
     PimMode mode;
@@ -48,12 +48,12 @@ class INET_API PimInterface : public cObject
     Ipv4Address drAddress;
 
   public:
-    PimInterface(InterfaceEntry *ie, PimMode mode, bool stateRefreshFlag)
+    PimInterface(NetworkInterface *ie, PimMode mode, bool stateRefreshFlag)
         : ie(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
     virtual std::string str() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
-    InterfaceEntry *getInterfacePtr() const { return ie; }
+    NetworkInterface *getInterfacePtr() const { return ie; }
     PimMode getMode() const { return mode; }
     bool getSR() const { return stateRefreshFlag; }
 
@@ -87,13 +87,13 @@ class INET_API PimInterfaceTable : public cSimpleModule, protected cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual void configureInterfaces(cXMLElement *config);
-    virtual PimInterface *createInterface(InterfaceEntry *ie, cXMLElement *config);
-    virtual PimInterfaceVector::iterator findInterface(InterfaceEntry *ie);
-    virtual void addInterface(InterfaceEntry *ie);
-    virtual void removeInterface(InterfaceEntry *ie);
+    virtual PimInterface *createInterface(NetworkInterface *ie, cXMLElement *config);
+    virtual PimInterfaceVector::iterator findInterface(NetworkInterface *ie);
+    virtual void addInterface(NetworkInterface *ie);
+    virtual void removeInterface(NetworkInterface *ie);
 };
 
 }    // namespace inet
 
-#endif // ifndef __INET_PIMINTERFACETABLE_H
+#endif
 

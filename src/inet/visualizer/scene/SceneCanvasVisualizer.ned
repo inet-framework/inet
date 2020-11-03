@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.visualizer.scene;
@@ -35,10 +35,10 @@ simple SceneCanvasVisualizer extends SceneVisualizerBase like ISceneVisualizer
         string viewAngle = default("x right y down z out"); // view angle is either ()
                                                             //   - a valid combination of the words: x, y, z, left/right, up/down, in/out or
                                                             //   - one of isometric, isometricN (where 0 <= N < 48)
-                                                            //   - 3 rotation angles and leftHanded/rightHanded 
+                                                            //   - 3 rotation angles and leftHanded/rightHanded
         string viewScale = default("1 1"); // the 2D scale is applied after the view projection
         string viewTranslation = default("0 0"); // the 2D translation is applied after the view projection
-        string descriptionFigure = default(""); // if not empty, it should be the name of a text figure; it will display the active configuration's description 
+        string descriptionFigure = default(""); // if not empty, it should be the name of a text figure; it will display the active configuration's description
         @class(SceneCanvasVisualizer);
 }
 

@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CHUNKQUEUE_H_
-#define __INET_CHUNKQUEUE_H_
+#ifndef __INET_CHUNKQUEUE_H
+#define __INET_CHUNKQUEUE_H
 
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -205,7 +207,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override { return iterator.getPosition() == b(0) ? content->str() : content->peek(iterator)->str(); }
+    virtual std::string str() const override;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *queue) { return os << queue->str(); }
@@ -214,5 +216,5 @@ inline std::ostream& operator<<(std::ostream& os, const ChunkQueue& queue) { ret
 
 } // namespace
 
-#endif // #ifndef __INET_CHUNKQUEUE_H_
+#endif
 

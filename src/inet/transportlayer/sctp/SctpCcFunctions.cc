@@ -10,11 +10,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/transportlayer/sctp/SctpAssociation.h"
@@ -185,15 +186,15 @@ void SctpAssociation::cwndUpdateBeforeSack()
     }
 }
 
-static uint32 updateMPTCP(const uint32 w,
-        const uint32 totalW,
+static uint32_t updateMPTCP(const uint32_t w,
+        const uint32_t totalW,
         double a,
-        const uint32 mtu,
-        const uint32 ackedBytes)
+        const uint32_t mtu,
+        const uint32_t ackedBytes)
 {
-    const uint32 increase = max(1,
-                min((uint32)ceil((double)w * a * (double)min(ackedBytes, mtu) / (double)totalW),
-                        (uint32)min(ackedBytes, mtu)));
+    const uint32_t increase = max(1,
+                min((uint32_t)ceil((double)w * a * (double)min(ackedBytes, mtu) / (double)totalW),
+                        (uint32_t)min(ackedBytes, mtu)));
     return w + increase;
 }
 
@@ -202,9 +203,9 @@ void SctpAssociation::recalculateOLIABasis() {
     double assoc_best_paths_l_rXl_r__rtt_r = 0.0;
     //max_w_paths: The set of paths in all_paths with largest congestion windows.
     //https://tools.ietf.org/html/draft-khalili-mptcp-congestion-control-05
-    uint32 max_w_paths = 0;
-    uint32 max_w_paths_cnt = 0; (void)max_w_paths_cnt; // FIXME this variable is unused
-    uint32 best_paths_cnt = 0;
+    uint32_t max_w_paths = 0;
+    uint32_t max_w_paths_cnt = 0; (void)max_w_paths_cnt; // FIXME this variable is unused
+    uint32_t best_paths_cnt = 0;
 
     // Create the sets
     int cnt = 0;
@@ -254,10 +255,10 @@ void SctpAssociation::recalculateOLIABasis() {
     }
 }
 
-uint32 SctpAssociation::updateOLIA(uint32 w, const uint32 s,
-        const uint32 totalW, double a, const uint32 mtu,
-        const uint32 ackedBytes, SctpPathVariables* path) {
-    int32 increase = 0;
+uint32_t SctpAssociation::updateOLIA(uint32_t w, const uint32_t s,
+        const uint32_t totalW, double a, const uint32_t mtu,
+        const uint32_t ackedBytes, SctpPathVariables* path) {
+    int32_t increase = 0;
     bool isInCollectedPath = false;
     bool isMaxWndPaths = false;
 
@@ -313,7 +314,7 @@ uint32 SctpAssociation::updateOLIA(uint32 w, const uint32 s,
             if (denominator2 > 0.0) {
                 term2 = numerator2 / denominator2;
             }
-            increase = (uint32) ceil(
+            increase = (uint32_t) ceil(
                     (term1 * path->cwnd * path->pmtu) + (term2 * path->pmtu));
         } else if ((isMaxWndPaths) && (!assocCollectedPaths.empty())) {
             /*
@@ -332,7 +333,7 @@ uint32 SctpAssociation::updateOLIA(uint32 w, const uint32 s,
             if (denominator2 > 0.0) {
                 term2 = numerator2 / denominator2;
             }
-            increase = (int32) ceil(
+            increase = (int32_t) ceil(
                     (term1 * path->cwnd * path->pmtu) - (term2 * path->pmtu)); // TODO
         } else {
             /*
@@ -344,10 +345,10 @@ uint32 SctpAssociation::updateOLIA(uint32 w, const uint32 s,
 
              multiplied by MSS_r * bytes_acked.
              */
-            increase = (int32) ceil(term1 * path->cwnd * path->pmtu); // TODO std::min(acked,
+            increase = (int32_t) ceil(term1 * path->cwnd * path->pmtu); // TODO std::min(acked,
         }
     } else {
-        increase = (int32) min(path->pmtu, ackedBytes);  // slow start
+        increase = (int32_t) min(path->pmtu, ackedBytes);  // slow start
     }
     return w + increase;
 }
@@ -355,8 +356,8 @@ uint32 SctpAssociation::updateOLIA(uint32 w, const uint32 s,
 void SctpAssociation::recordCwndUpdate(SctpPathVariables* path)
 {
     if (path == nullptr) {
-        uint32 totalSsthresh = 0.0;
-        uint32 totalCwnd = 0.0;
+        uint32_t totalSsthresh = 0.0;
+        uint32_t totalCwnd = 0.0;
         double totalBandwidth = 0.0;
         for (auto & elem : sctpPathMap)
         {
@@ -376,17 +377,17 @@ void SctpAssociation::recordCwndUpdate(SctpPathVariables* path)
     }
 }
 
-uint32 SctpAssociation::getInitialCwnd(const SctpPathVariables *path) const
+uint32_t SctpAssociation::getInitialCwnd(const SctpPathVariables *path) const
 {
-    uint32 newCwnd;
+    uint32_t newCwnd;
 
-    const uint32 upperLimit = (state->initialWindow > 0) ? (state->initialWindow * path->pmtu) : max(2 * path->pmtu, 4380);
+    const uint32_t upperLimit = (state->initialWindow > 0) ? (state->initialWindow * path->pmtu) : max(2 * path->pmtu, 4380);
     if ((state->allowCMT == false) || (state->cmtCCVariant == SctpStateVariables::CCCV_CMT)) {
-        newCwnd = (int32)min((state->initialWindow > 0) ? (state->initialWindow * path->pmtu) : (4 * path->pmtu),
+        newCwnd = (int32_t)min((state->initialWindow > 0) ? (state->initialWindow * path->pmtu) : (4 * path->pmtu),
                     upperLimit);
     }
     else {
-        newCwnd = (int32)min((int32)ceil(((state->initialWindow > 0) ?
+        newCwnd = (int32_t)min((int32_t)ceil(((state->initialWindow > 0) ?
                                           (state->initialWindow * path->pmtu) :
                                           (4 * path->pmtu)) / (double)sctpPathMap.size()),
                     upperLimit);
@@ -409,13 +410,13 @@ void SctpAssociation::initCcParameters(SctpPathVariables *path)
     assocMaxWndPaths.clear();
 }
 
-int32 SctpAssociation::rpPathBlockingControl(SctpPathVariables *path, const double reduction)
+int32_t SctpAssociation::rpPathBlockingControl(SctpPathVariables *path, const double reduction)
 {
     // ====== Compute new cwnd ===============================================
-    const int32 newCwnd = (int32)ceil(path->cwnd - reduction);
+    const int32_t newCwnd = (int32_t)ceil(path->cwnd - reduction);
     // NOTE: newCwnd may be negative!
     // ====== Block path if newCwnd < 1 MTU ==================================
-    if ((state->rpPathBlocking == true) && (newCwnd < (int32)path->pmtu)) {
+    if ((state->rpPathBlocking == true) && (newCwnd < (int32_t)path->pmtu)) {
         if ((path->blockingTimeout < 0.0) || (path->blockingTimeout < simTime())) {
             // printf("a=%1.9f b=%1.9f   a=%d b=%d\n", path->blockingTimeout.dbl(), simTime().dbl(), (path->blockingTimeout < 0.0), (path->blockingTimeout < simTime()) );
 
@@ -459,8 +460,8 @@ void SctpAssociation::cwndUpdateAfterSack()
                     EV_INFO << simTime() << ":\tCC [cwndUpdateAfterSack]\t" << path->remoteAddress
                             << "\tsst=" << path->ssthresh << " cwnd=" << path->cwnd;
 
-                    path->ssthresh = max((int32)path->cwnd - (int32)rint(decreaseFactor * (double)path->cwnd),
-                                4 * (int32)path->pmtu);
+                    path->ssthresh = max((int32_t)path->cwnd - (int32_t)rint(decreaseFactor * (double)path->cwnd),
+                                4 * (int32_t)path->pmtu);
                     path->cwnd = path->ssthresh;
                 }
                 // ====== Resource Pooling ======================================
@@ -468,10 +469,10 @@ void SctpAssociation::cwndUpdateAfterSack()
                     // ====== CMT/RP-SCTPv1 Fast Retransmit ======================
                     if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRPv1) {
                         const double sstRatio = (double)path->ssthresh / (double)path->cmtGroupTotalSsthresh;
-                        const int32 reducedCwnd = rpPathBlockingControl(path, rint(path->cmtGroupTotalCwnd * decreaseFactor));
+                        const int32_t reducedCwnd = rpPathBlockingControl(path, rint(path->cmtGroupTotalCwnd * decreaseFactor));
                         path->ssthresh = max(reducedCwnd,
-                                    max((int32)path->pmtu,
-                                            (int32)ceil((double)state->rpMinCwnd * (double)path->pmtu * sstRatio)));
+                                    max((int32_t)path->pmtu,
+                                            (int32_t)ceil((double)state->rpMinCwnd * (double)path->pmtu * sstRatio)));
                         path->cwnd = path->ssthresh;
                     }
                     // ====== CMT/RPv2-SCTP Fast Retransmit ======================
@@ -480,21 +481,21 @@ void SctpAssociation::cwndUpdateAfterSack()
                         const double pathBandwidth = path->cwnd / GET_SRTT(path->srtt.dbl());
                         const double bandwidthToGive = path->cmtGroupTotalCwndBandwidth / 2.0;
                         const double reductionFactor = max(0.5, bandwidthToGive / pathBandwidth);
-                        const int32 reducedCwnd = rpPathBlockingControl(path, reductionFactor * path->cwnd);
-                        path->ssthresh = (int32)max(reducedCwnd, (int32)state->rpMinCwnd * (int32)path->pmtu);
+                        const int32_t reducedCwnd = rpPathBlockingControl(path, reductionFactor * path->cwnd);
+                        path->ssthresh = (int32_t)max(reducedCwnd, (int32_t)state->rpMinCwnd * (int32_t)path->pmtu);
                         path->cwnd = path->ssthresh;
                     }
                     // ====== Like MPTCP Fast Retransmit =========================
                     else if(state->cmtCCVariant == SctpStateVariables::CCCV_CMT_LIA) {
                         // Just like plain CMT-SCTP ...
-                        const int32 reducedCwnd = rpPathBlockingControl(path, rint(decreaseFactor * (double)path->cwnd));
-                        path->ssthresh = max(reducedCwnd, (int32)state->rpMinCwnd * (int32)path->pmtu);
+                        const int32_t reducedCwnd = rpPathBlockingControl(path, rint(decreaseFactor * (double)path->cwnd));
+                        path->ssthresh = max(reducedCwnd, (int32_t)state->rpMinCwnd * (int32_t)path->pmtu);
                         path->cwnd = path->ssthresh;
                     }
                     else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMT_OLIA) {
                         // like draft
-                        path->ssthresh = max((int32) path->cwnd-(int32) rint(decreaseFactor * (double) path->cwnd),
-                                4 * (int32) path->pmtu);
+                        path->ssthresh = max((int32_t) path->cwnd-(int32_t) rint(decreaseFactor * (double) path->cwnd),
+                                4 * (int32_t) path->pmtu);
                         path->cwnd = path->ssthresh;
                     }
                     // ====== TEST Fast Retransmit ===============================
@@ -503,15 +504,15 @@ void SctpAssociation::cwndUpdateAfterSack()
                         const double pathBandwidth = path->cwnd / GET_SRTT(path->srtt.dbl());
                         const double bandwidthToGive = path->cmtGroupTotalCwndBandwidth / 2.0;
                         const double reductionFactor = max(0.5, bandwidthToGive / pathBandwidth);
-                        const int32 reducedCwnd = rpPathBlockingControl(path, reductionFactor * path->cwnd);
-                        path->ssthresh = (int32)max(reducedCwnd, (int32)state->rpMinCwnd * (int32)path->pmtu);
+                        const int32_t reducedCwnd = rpPathBlockingControl(path, reductionFactor * path->cwnd);
+                        path->ssthresh = (int32_t)max(reducedCwnd, (int32_t)state->rpMinCwnd * (int32_t)path->pmtu);
                         path->cwnd = path->ssthresh;
                     }
                     // ====== TEST Fast Retransmit ===============================
                     else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRP_Test2) {
                         // Just like CMT-SCTP ...
-                        const int32 reducedCwnd = rpPathBlockingControl(path, rint(decreaseFactor * (double)path->cwnd));
-                        path->ssthresh = max(reducedCwnd, (int32)state->rpMinCwnd * (int32)path->pmtu);
+                        const int32_t reducedCwnd = rpPathBlockingControl(path, rint(decreaseFactor * (double)path->cwnd));
+                        path->ssthresh = max(reducedCwnd, (int32_t)state->rpMinCwnd * (int32_t)path->pmtu);
                         path->cwnd = path->ssthresh;
                     }
                     // ====== Other -> error =====================================
@@ -530,8 +531,8 @@ void SctpAssociation::cwndUpdateAfterSack()
 
                 // ====== Fast Recovery ========================================
                 if (state->fastRecoverySupported) {
-                    uint32 highestAckOnPath = state->lastTsnAck;
-                    uint32 highestOutstanding = state->lastTsnAck;
+                    uint32_t highestAckOnPath = state->lastTsnAck;
+                    uint32_t highestOutstanding = state->lastTsnAck;
                     for (SctpQueue::PayloadQueue::const_iterator chunkIterator = retransmissionQ->payloadQueue.begin();
                          chunkIterator != retransmissionQ->payloadQueue.end(); chunkIterator++)
                     {
@@ -577,7 +578,7 @@ void SctpAssociation::cwndUpdateAfterSack()
     }
 }
 
-void SctpAssociation::updateFastRecoveryStatus(const uint32 lastTsnAck)
+void SctpAssociation::updateFastRecoveryStatus(const uint32_t lastTsnAck)
 {
     for (auto & elem : sctpPathMap) {
         SctpPathVariables *path = elem.second;
@@ -605,7 +606,7 @@ void SctpAssociation::updateFastRecoveryStatus(const uint32 lastTsnAck)
 }
 
 void SctpAssociation::cwndUpdateBytesAcked(SctpPathVariables *path,
-        const uint32 ackedBytes,
+        const uint32_t ackedBytes,
         const bool ctsnaAdvanced)
 {
     EV_INFO << simTime() << "====> cwndUpdateBytesAcked:"
@@ -644,21 +645,21 @@ void SctpAssociation::cwndUpdateBytesAcked(SctpPathVariables *path,
 
                 // ====== SCTP or CMT-SCTP (independent congestion control) =====
                 if ((state->allowCMT == false) || (state->cmtCCVariant == SctpStateVariables::CCCV_CMT)) {
-                    path->cwnd += (int32)min(path->pmtu, ackedBytes);
+                    path->cwnd += (int32_t)min(path->pmtu, ackedBytes);
                 }
                 // ====== Resource Pooling Slow Start ===========================
                 else {
                     // ====== CMT/RPv1-SCTP Slow Start ===========================
                     if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRPv1) {
                         const double sstRatio = (double)path->ssthresh / (double)path->cmtGroupTotalSsthresh;
-                        path->cwnd += (int32)ceil(min(path->pmtu, ackedBytes) * sstRatio);
+                        path->cwnd += (int32_t)ceil(min(path->pmtu, ackedBytes) * sstRatio);
                     }
                     // ====== CMT/RPv2-SCTP Slow Start ===========================
                     else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRPv2) {
                         // Increase ratio based on cwnd bandwidth share!
                         const double increaseRatio = ((double)path->cwnd / GET_SRTT(path->srtt.dbl()))
                             / (double)path->cmtGroupTotalCwndBandwidth;
-                        path->cwnd += (int32)ceil(min(path->pmtu, ackedBytes) * increaseRatio);
+                        path->cwnd += (int32_t)ceil(min(path->pmtu, ackedBytes) * increaseRatio);
                     }
                     // ====== Like MPTCP Slow Start ==============================
                     else if(state->cmtCCVariant == SctpStateVariables::CCCV_CMT_LIA) {
@@ -677,7 +678,7 @@ void SctpAssociation::cwndUpdateBytesAcked(SctpPathVariables *path,
                         // Increase ratio based on cwnd bandwidth share!
                         const double increaseRatio = ((double)path->utilizedCwnd / GET_SRTT(path->srtt.dbl()))
                             / (double)path->cmtGroupTotalUtilizedCwndBandwidth;
-                        path->cwnd += (int32)ceil(min(path->pmtu, ackedBytes) * increaseRatio);
+                        path->cwnd += (int32_t)ceil(min(path->pmtu, ackedBytes) * increaseRatio);
                     }
                     // ====== Like MPTCP Slow Start ==============================
                     else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRP_Test2) {
@@ -745,21 +746,21 @@ void SctpAssociation::cwndUpdateBytesAcked(SctpPathVariables *path,
 
                 // ====== SCTP or CMT-SCTP (independent congestion control) =====
                 if ((state->allowCMT == false) || (state->cmtCCVariant == SctpStateVariables::CCCV_CMT)) {
-                    path->cwnd += (int32)rint(increaseFactor * path->pmtu);
+                    path->cwnd += (int32_t)rint(increaseFactor * path->pmtu);
                 }
                 // ====== Resource Pooling Congestion Avoidance =================
                 else {
                     // ====== CMT/RP-SCTP Congestion Avoidance ===================
                     if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRPv1) {
                         const double sstRatio = (double)path->ssthresh / (double)path->cmtGroupTotalSsthresh;
-                        path->cwnd += (int32)ceil(increaseFactor * path->pmtu * sstRatio);
+                        path->cwnd += (int32_t)ceil(increaseFactor * path->pmtu * sstRatio);
                     }
                     // ====== CMT/RPv2-SCTP Congestion Avoidance =================
                     else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRPv2) {
                         // Increase ratio based on cwnd bandwidth share!
                         const double increaseRatio = ((double)path->cwnd / GET_SRTT(path->srtt.dbl()))
                             / (double)path->cmtGroupTotalCwndBandwidth;
-                        path->cwnd += (int32)ceil(increaseFactor * path->pmtu * increaseRatio);
+                        path->cwnd += (int32_t)ceil(increaseFactor * path->pmtu * increaseRatio);
                     }
                     // ====== Like MPTCP Congestion Avoidance ====================
                     else if(state->cmtCCVariant == SctpStateVariables::CCCV_CMT_LIA) {
@@ -778,7 +779,7 @@ void SctpAssociation::cwndUpdateBytesAcked(SctpPathVariables *path,
                         // Increase ratio based on cwnd bandwidth share!
                         const double increaseRatio = ((double)path->utilizedCwnd / GET_SRTT(path->srtt.dbl()))
                             / (double)path->cmtGroupTotalUtilizedCwndBandwidth;
-                        path->cwnd += (int32)ceil(increaseFactor * path->pmtu * increaseRatio);
+                        path->cwnd += (int32_t)ceil(increaseFactor * path->pmtu * increaseRatio);
                     }
                     // ====== TEST Congestion Avoidance ==========================
                     else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRP_Test2) {
@@ -847,8 +848,8 @@ void SctpAssociation::cwndUpdateAfterRtxTimeout(SctpPathVariables *path)
 
     // ====== SCTP or CMT-SCTP (independent congestion control) ==============
     if ((state->allowCMT == false) || (state->cmtCCVariant == SctpStateVariables::CCCV_CMT)) {
-        path->ssthresh = max((int32)path->cwnd - (int32)rint(decreaseFactor * (double)path->cwnd),
-                    4 * (int32)path->pmtu);
+        path->ssthresh = max((int32_t)path->cwnd - (int32_t)rint(decreaseFactor * (double)path->cwnd),
+                    4 * (int32_t)path->pmtu);
         path->cwnd = path->pmtu;
     }
     // ====== Resource Pooling RTX Timeout ===================================
@@ -856,12 +857,12 @@ void SctpAssociation::cwndUpdateAfterRtxTimeout(SctpPathVariables *path)
         // ====== CMT/RPv1-SCTP RTX Timeout ===================================
         if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRPv1) {
             const double sstRatio = (double)path->ssthresh / (double)path->cmtGroupTotalSsthresh;
-            const int32 decreasedWindow = (int32)path->cwnd - (int32)rint(path->cmtGroupTotalCwnd * decreaseFactor);
+            const int32_t decreasedWindow = (int32_t)path->cwnd - (int32_t)rint(path->cmtGroupTotalCwnd * decreaseFactor);
             path->ssthresh = max(decreasedWindow,
-                        max((int32)path->pmtu,
-                                (int32)ceil((double)state->rpMinCwnd * (double)path->pmtu * sstRatio)));
-            path->cwnd = max((int32)path->pmtu,
-                        (int32)ceil((double)path->pmtu * sstRatio));
+                        max((int32_t)path->pmtu,
+                                (int32_t)ceil((double)state->rpMinCwnd * (double)path->pmtu * sstRatio)));
+            path->cwnd = max((int32_t)path->pmtu,
+                        (int32_t)ceil((double)path->pmtu * sstRatio));
         }
         // ====== CMT/RPv2-SCTP RTX Timeout ===================================
         else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRPv2) {
@@ -869,20 +870,20 @@ void SctpAssociation::cwndUpdateAfterRtxTimeout(SctpPathVariables *path)
             const double bandwidthToGive = path->cmtGroupTotalCwndBandwidth / 2.0;
             const double reductionFactor = max(0.5, bandwidthToGive / pathBandwidth);
 
-            path->ssthresh = (int32)max((int32)state->rpMinCwnd * (int32)path->pmtu,
-                        (int32)ceil(path->cwnd - reductionFactor * path->cwnd));
+            path->ssthresh = (int32_t)max((int32_t)state->rpMinCwnd * (int32_t)path->pmtu,
+                        (int32_t)ceil(path->cwnd - reductionFactor * path->cwnd));
             path->cwnd = path->pmtu;
         }
         // ====== Like MPTCP RTX Timeout ======================================
         else if(state->cmtCCVariant == SctpStateVariables::CCCV_CMT_LIA) {
-            path->ssthresh = max((int32)path->cwnd - (int32)rint(decreaseFactor * (double)path->cwnd),
-                        (int32)state->rpMinCwnd * (int32)path->pmtu);
+            path->ssthresh = max((int32_t)path->cwnd - (int32_t)rint(decreaseFactor * (double)path->cwnd),
+                        (int32_t)state->rpMinCwnd * (int32_t)path->pmtu);
             path->cwnd = path->pmtu;
         }
         else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMT_OLIA) {
             // like draft
-            path->ssthresh = max((int32) path->cwnd - (int32) rint(decreaseFactor * (double) path->cwnd),
-                    4 * (int32) path->pmtu);
+            path->ssthresh = max((int32_t) path->cwnd - (int32_t) rint(decreaseFactor * (double) path->cwnd),
+                    4 * (int32_t) path->pmtu);
             path->cwnd = path->pmtu;
         }
         // ====== TEST RTX Timeout ============================================
@@ -891,14 +892,14 @@ void SctpAssociation::cwndUpdateAfterRtxTimeout(SctpPathVariables *path)
             const double bandwidthToGive = path->cmtGroupTotalCwndBandwidth / 2.0;
             const double reductionFactor = max(0.5, bandwidthToGive / pathBandwidth);
 
-            path->ssthresh = (int32)max((int32)state->rpMinCwnd * (int32)path->pmtu,
-                        (int32)ceil(path->cwnd - reductionFactor * path->cwnd));
+            path->ssthresh = (int32_t)max((int32_t)state->rpMinCwnd * (int32_t)path->pmtu,
+                        (int32_t)ceil(path->cwnd - reductionFactor * path->cwnd));
             path->cwnd = path->pmtu;
         }
         // ====== Like MPTCP RTX Timeout ======================================
         else if (state->cmtCCVariant == SctpStateVariables::CCCV_CMTRP_Test2) {
-            path->ssthresh = max((int32)path->cwnd - (int32)rint(decreaseFactor * (double)path->cwnd),
-                        (int32)state->rpMinCwnd * (int32)path->pmtu);
+            path->ssthresh = max((int32_t)path->cwnd - (int32_t)rint(decreaseFactor * (double)path->cwnd),
+                        (int32_t)state->rpMinCwnd * (int32_t)path->pmtu);
             path->cwnd = path->pmtu;
         }
         // ====== Other -> error ==============================================

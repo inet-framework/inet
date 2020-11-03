@@ -1428,8 +1428,8 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
     for (auto it=this->interfaceList.begin(); it!=this->interfaceList.end(); it++) {
         // if interface is not transit (not in state DR, BDR or DRother) or has no neighbour in FULL STATE than continue
         if ((*it)->getTransitNetInt() == false || !(*it)->hasAnyNeighborInState(Ospfv3Neighbor::FULL_STATE)) {
-            InterfaceEntry *ie = CHK(this->getInstance()->getProcess()->ift->findInterfaceByName((*it)->getIntName().c_str()));
-            Ipv6InterfaceData* ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+            NetworkInterface *ie = CHK(this->getInstance()->getProcess()->ift->findInterfaceByName((*it)->getIntName().c_str()));
+            const auto& ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
 
             int numPrefixes;
             if (!v6) // is this LSA for IPv4 or Ipv6 AF ?
@@ -1440,7 +1440,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
 
             for (int i=0; i<numPrefixes; i++) {
                 if (this->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-                    Ipv4InterfaceData* ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+                    const auto& ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
                     Ipv4Address ipAdd = ipv4Data->getIPAddress();
                     Ospfv3LsaPrefixMetric prefix;
                     prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
@@ -1518,8 +1518,8 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
     B packetLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
 
     // get IPv6 data
-    InterfaceEntry *ie = CHK(this->getInstance()->getProcess()->ift->findInterfaceByName(interface->getIntName().c_str()));
-    Ipv6InterfaceData* ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+    NetworkInterface *ie = CHK(this->getInstance()->getProcess()->ift->findInterfaceByName(interface->getIntName().c_str()));
+    const auto& ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     Ospfv3LsaHeader &header = networkLSA->getHeaderForUpdate();
 
     IntraAreaPrefixLSA* newLsa = new IntraAreaPrefixLSA();
@@ -1544,7 +1544,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
     int prefixCount = 0;
     for (int i=0; i < numPrefixes; i++) {
         if (this->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-            Ipv4InterfaceData* ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+            const auto& ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
             Ipv4Address ipAdd = ipv4Data->getIPAddress();
             Ospfv3LsaPrefixMetric prefix;
             prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();

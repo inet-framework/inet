@@ -1,11 +1,11 @@
 //
-// Copyright (C) 2004 Andras Varga
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2004 OpenSim Ltd.
+// Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_TCPLWIPQUEUES_H
@@ -175,7 +175,7 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * object should *not* be deleted.
      * //FIXME revise this comment
      */
-    virtual void notifyAboutIncomingSegmentProcessing(Packet *packet, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(Packet *packet, uint32_t seqNo,
             const void *bufferP, size_t bufferLengthP);
 
     /**
@@ -200,12 +200,12 @@ class INET_API TcpLwipReceiveQueue : public cObject
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() const;
+    virtual uint32_t getAmountOfBufferedBytes() const;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() const;
+    virtual uint32_t getQueueLength() const;
 
     /**
      * Shows current queue status.
@@ -230,5 +230,5 @@ class INET_API TcpLwipReceiveQueue : public cObject
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPLWIPQUEUES_H
+#endif
 

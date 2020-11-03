@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2015 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_IEEE80211OFDMMODE_H
@@ -73,7 +73,7 @@ class INET_API Ieee80211OfdmPreambleMode : public IIeee80211PreambleMode, public
     Ieee80211OfdmPreambleMode(Hz channelSpacing);
     virtual ~Ieee80211OfdmPreambleMode() {}
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     const simtime_t getTrainingSymbolGIDuration() const { return getFFTTransformPeriod() / 2; }
     const simtime_t getShortTrainingSequenceDuration() const { return 10 * getFFTTransformPeriod() / 4; }
@@ -92,7 +92,7 @@ class INET_API Ieee80211OfdmSignalMode : public IIeee80211HeaderMode, public Iee
     Ieee80211OfdmSignalMode(const Ieee80211OfdmCode *code, const Ieee80211OfdmModulation *modulation, Hz channelSpacing, Hz bandwidth, unsigned int rate);
     virtual ~Ieee80211OfdmSignalMode() {}
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     unsigned int getRate() const { return rate; }
     b getRateFieldLength() const { return b(4); }
@@ -120,7 +120,7 @@ class INET_API Ieee80211OfdmDataMode : public IIeee80211DataMode, public Ieee802
     Ieee80211OfdmDataMode(const Ieee80211OfdmCode *code, const Ieee80211OfdmModulation *modulation, Hz channelSpacing, Hz bandwidth);
     virtual ~Ieee80211OfdmDataMode() {}
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     b getServiceFieldLength() const { return b(16); }
     b getTailFieldLength() const { return b(6); }
@@ -151,7 +151,7 @@ class INET_API Ieee80211OfdmMode : public Ieee80211ModeBase, public Ieee80211Ofd
   public:
     Ieee80211OfdmMode(const char *name, const Ieee80211OfdmPreambleMode *preambleMode, const Ieee80211OfdmSignalMode *signalMode, const Ieee80211OfdmDataMode *dataMode, Hz channelSpacing, Hz bandwidth);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const Ieee80211OfdmPreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const Ieee80211OfdmSignalMode *getHeaderMode() const override { return signalMode; }
@@ -267,5 +267,5 @@ class INET_API Ieee80211OfdmCompliantModes
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211OFDMMODE_H
+#endif
 

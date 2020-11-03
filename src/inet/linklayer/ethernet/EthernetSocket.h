@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -12,21 +12,20 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_ETHERNETSOCKET_H
 #define __INET_ETHERNETSOCKET_H
 
-#include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/socket/ISocket.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/socket/SocketBase.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
-class INET_API EthernetSocket : public ISocket
+class INET_API EthernetSocket : public SocketBase
 {
   public:
     class INET_API ICallback
@@ -50,28 +49,13 @@ class INET_API EthernetSocket : public ISocket
         virtual void socketClosed(EthernetSocket *socket) = 0;
     };
   protected:
-    int socketId;
     ICallback *callback = nullptr;
-    void *userData = nullptr;
-    InterfaceEntry *interfaceEntry = nullptr;
-    cGate *gateToEthernet = nullptr;
-    bool isOpen_ = false;
+    NetworkInterface *networkInterface = nullptr;
 
   protected:
-    void sendToEthernet(cMessage *msg);
+    virtual void sendOut(cMessage *msg) override;
 
   public:
-    EthernetSocket();
-    virtual ~EthernetSocket() {}
-
-    void *getUserData() const { return userData; }
-    void setUserData(void *userData) { this->userData = userData; }
-
-    /**
-     * Returns the internal socket Id.
-     */
-    int getSocketId() const override { return socketId; }
-
     /** @name Opening and closing connections, sending data */
     //@{
     /**
@@ -88,52 +72,23 @@ class INET_API EthernetSocket : public ISocket
      * EthernetSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      */
-    void setCallback(ICallback *cb);
+    void setCallback(ICallback *callback) { this->callback = callback; }
 
-    /**
-     * Sets the gate on which to send to Ethernet. Must be invoked before socket
-     * can be used. Example: <tt>socket.setOutputGate(gate("out"));</tt>
-     */
-    void setOutputGate(cGate *gate) { gateToEthernet = gate; }
-
-    void setInterfaceEntry(InterfaceEntry *interfaceEntry) { this->interfaceEntry = interfaceEntry; }
+    void setNetworkInterface(NetworkInterface *networkInterface) { this->networkInterface = networkInterface; }
 
     /**
      * Binds the socket to the MAC address.
      */
-    void bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, int vlanId);
-
-    /**
-     * Sends a data packet to the address and port specified previously
-     * in a connect() call.
-     */
-    void send(Packet *packet);
-
-    virtual bool isOpen() const override { return isOpen_; }
-    /**
-     * Unbinds the socket. Once closed, a closed socket may be bound to another
-     * (or the same) port, and reused.
-     */
-    virtual void close() override;
+    void bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal);
     //@}
-
-    /**
-     * Notify the protocol that the owner of ISocket has destroyed the socket.
-     * Typically used when the owner of ISocket has crashed.
-     */
-    virtual void destroy() override;
 
     /** @name Handling of messages arriving from Ethernet */
     //@{
-    /**
-     * Returns true if the message belongs to this socket instance.
-     */
-    virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
     //@}
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERNETSOCKET_H
+#endif
 

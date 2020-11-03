@@ -1,19 +1,20 @@
-/*
- * Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, see <http://www.gnu.org/licenses/>.
- */
+//
+// Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 
 #ifndef __INET_ETHERMAC_H
 #define __INET_ETHERMAC_H
@@ -23,9 +24,6 @@
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 
 namespace inet {
-
-class EthernetJamSignal;
-class EtherPauseFrame;
 
 /**
  * Ethernet MAC module which supports both half-duplex (CSMA/CD) and full-duplex
@@ -49,16 +47,23 @@ class INET_API EtherMac : public EtherMacBase
     virtual void finish() override;
 
   protected:
-    // states
-    int numConcurrentTransmissions = 0;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
-    int backoffs = 0;    // value of backoff for exponential back-off algorithm
-    long currentSendPkTreeID = -1;
+    class RxSignal {
+      public:
+        long transmissionId = -1;
+        EthernetSignalBase *signal = nullptr;
+        simtime_t endRxTime;
+        RxSignal(long transmissionId, EthernetSignalBase *signal, simtime_t_cref endRxTime) : transmissionId(transmissionId), signal(signal), endRxTime(endRxTime) {}
+    };
+    std::vector<RxSignal> rxSignals;
 
-    // other variables
-    EthernetSignalBase *frameBeingReceived = nullptr;
-    cMessage *endRxMsg = nullptr;
-    cMessage *endBackoffMsg = nullptr;
-    cMessage *endJammingMsg = nullptr;
+  protected:
+    // states
+    int backoffs = 0;    // value of backoff for exponential back-off algorithm
+
+    cMessage *endRxTimer = nullptr;
+    cMessage *endBackoffTimer = nullptr;
+    cMessage *endJammingTimer = nullptr;
+    EthernetSignalBase *curTxSignal = nullptr;
 
     // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
     // stores the end time of the reconnect state
@@ -68,8 +73,6 @@ class INET_API EtherMac : public EtherMacBase
         simtime_t endTime;    // end of reception
         PkIdRxTime(long id, simtime_t time) { packetTreeId = id; endTime = time; }
     };
-    typedef std::list<PkIdRxTime> EndRxTimeList;
-    EndRxTimeList endRxTimeList;    // list of incoming packets, ordered by endTime
 
     // statistics
     simtime_t totalCollisionTime;    // total duration of collisions on channel
@@ -97,24 +100,23 @@ class INET_API EtherMac : public EtherMacBase
     // helpers
     virtual void readChannelParameters(bool errorWhenAsymmetric) override;
     virtual void handleUpperPacket(Packet *msg) override;
-    virtual void processJamSignalFromNetwork(EthernetJamSignal *msg);
     virtual void processMsgFromNetwork(EthernetSignalBase *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void fillIFGIfInBurst();
-    virtual void scheduleEndTxPeriod(B sentFrameByteLength);
-    virtual void scheduleEndRxPeriod(EthernetSignalBase *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
     virtual void sendJamSignal();
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete();
     virtual void processReceivedDataFrame(Packet *frame);
-    virtual void processReceivedJam(EthernetJamSignal *jam);
     virtual void processReceivedControlFrame(Packet *packet);
     virtual void processConnectDisconnect() override;
-    virtual void addReception(simtime_t endRxTime);
-    virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);
     virtual void processDetectedCollision();
+    virtual void sendSignal(EthernetSignalBase *signal, simtime_t_cref duration);
+    virtual void handleSignalFromNetwork(EthernetSignalBase *signal);
+    virtual void txFinished();
+    virtual void updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime);
+    virtual void dropCurrentTxFrame(PacketDropDetails& details) override;
 
     B calculateMinFrameLength();
     B calculatePaddedFrameLength(Packet *frame);
@@ -124,5 +126,5 @@ class INET_API EtherMac : public EtherMacBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERMAC_H
+#endif
 

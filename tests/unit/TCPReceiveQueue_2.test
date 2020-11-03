@@ -60,13 +60,13 @@ EV << ".\n";
 %contains: stdout
 Running simulation...
 ** Event #1  t=0   Test (Test, id=1)
-[4294967000..4294967000)EmptyChunk
+[4294967000..4294967000)(inet::EmptyChunk)
 rcv_nxt=4294967000
-SQ:enqueue("msg1", 100): --> [4294967000..4294967100)ByteCountChunk, length = 100 B, data = 63
-SQ:enqueue("msg2", 100): --> [4294967000..4294967200)ByteCountChunk, length = 200 B, data = 63
-SQ:enqueue("msg3", 296): --> [4294967000..200)ByteCountChunk, length = 496 B, data = 63
-SQ:enqueue("msg4", 600): --> [4294967000..800)ByteCountChunk, length = 1096 B, data = 63
-SQ:enqueue("msg5", 200): --> [4294967000..1000)ByteCountChunk, length = 1296 B, data = 63
+SQ:enqueue("msg1", 100): --> [4294967000..4294967100)(inet::ByteCountChunk) length = 100 B, data = 63
+SQ:enqueue("msg2", 100): --> [4294967000..4294967200)(inet::ByteCountChunk) length = 200 B, data = 63
+SQ:enqueue("msg3", 296): --> [4294967000..200)(inet::ByteCountChunk) length = 496 B, data = 63
+SQ:enqueue("msg4", 600): --> [4294967000..800)(inet::ByteCountChunk) length = 1096 B, data = 63
+SQ:enqueue("msg5", 200): --> [4294967000..1000)(inet::ByteCountChunk) length = 1296 B, data = 63
 SQ:createSegmentWithBytes(4294967000, 4294967099): inet::ByteCountChunk[4294967000..4294967099)
 RQ:insertSeg [4294967000..4294967099) --> rcv_nxt=4294967099 [4294967000..4294967099)
 SQ:createSegmentWithBytes(4294967090, 4294967100): inet::ByteCountChunk[4294967090..4294967100)
@@ -80,22 +80,22 @@ RQ:insertSeg [700..799) --> rcv_nxt=800 [4294967000..800)
 SQ:createSegmentWithBytes(700, 800): inet::ByteCountChunk[700..800)
 RQ:insertSeg [700..800) --> rcv_nxt=800 [4294967000..800)
 RQ:extractUpTo(4294967099): < < data: 99 bytes > > --> rcv_nxt=800 [4294967099..800)
-SQ:discardUpTo(4294967099): [4294967099..1000)ByteCountChunk, length = 1197 B, data = 63
+SQ:discardUpTo(4294967099): [4294967099..1000)(inet::ByteCountChunk) length = 1197 B, data = 63
 RQ:extractUpTo(799): < < data: 996 bytes > > --> rcv_nxt=800 [799..800)
 RQ:extractUpTo(799): < > --> rcv_nxt=800 [799..800)
-SQ:discardUpTo(799): [799..1000)ByteCountChunk, length = 201 B, data = 63
-SQ:discardUpTo(799): [799..1000)ByteCountChunk, length = 201 B, data = 63
+SQ:discardUpTo(799): [799..1000)(inet::ByteCountChunk) length = 201 B, data = 63
+SQ:discardUpTo(799): [799..1000)(inet::ByteCountChunk) length = 201 B, data = 63
 RQ:extractUpTo(800): < < data: 1 bytes > > --> rcv_nxt=800
 RQ:extractUpTo(800): < > --> rcv_nxt=800
-SQ:discardUpTo(800): [800..1000)ByteCountChunk, length = 200 B, data = 63
-SQ:discardUpTo(800): [800..1000)ByteCountChunk, length = 200 B, data = 63
+SQ:discardUpTo(800): [800..1000)(inet::ByteCountChunk) length = 200 B, data = 63
+SQ:discardUpTo(800): [800..1000)(inet::ByteCountChunk) length = 200 B, data = 63
 SQ:createSegmentWithBytes(800, 900): inet::ByteCountChunk[800..900)
 RQ:insertSeg [800..900) --> rcv_nxt=900 [800..900)
 RQ:extractUpTo(900): < < data: 100 bytes > > --> rcv_nxt=900
 SQ:createSegmentWithBytes(900, 1000): inet::ByteCountChunk[900..1000)
 RQ:insertSeg [900..1000) --> rcv_nxt=1000 [900..1000)
 RQ:extractUpTo(1000): < < data: 100 bytes > > --> rcv_nxt=1000
-SQ:discardUpTo(1000): [1000..1000)EmptyChunk
+SQ:discardUpTo(1000): [1000..1000)(inet::EmptyChunk)
 .
 
 <!> No more events, simulation completed -- at t=0s, event #1

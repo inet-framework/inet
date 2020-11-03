@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <errno.h>
@@ -71,7 +71,7 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
     auto err = fread(&packetHeader, sizeof(packetHeader), 1, file);
     if (err != 1)
         throw cRuntimeError("Cannot read packetheader, errno is %ld.", err);
-    uint8 buffer[1 << 16];
+    uint8_t buffer[1 << 16];
     memset(buffer, 0, sizeof(buffer));
     err = fread(buffer, packetHeader.incl_len, 1, file);
     if (err != 1)

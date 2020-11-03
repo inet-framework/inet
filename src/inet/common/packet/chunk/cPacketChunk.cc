@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/cPacketChunk.h"
@@ -18,6 +20,8 @@
 #include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
+
+Register_Class(cPacketChunk);
 
 cPacketChunk::cPacketChunk(cPacket *packet) :
     Chunk(),
@@ -36,6 +40,19 @@ cPacketChunk::cPacketChunk(const cPacketChunk& other) :
 cPacketChunk::~cPacketChunk()
 {
     dropAndDelete(packet);
+}
+
+void cPacketChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->packObject(packet);
+}
+
+void cPacketChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    packet = check_and_cast<cPacket *>(buffer->unpackObject());
+    take(packet);
 }
 
 const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
@@ -60,14 +77,16 @@ const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConver
     return converter(const_cast<cPacketChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::string cPacketChunk::str() const {
-    if (packet != nullptr) {
-        std::ostringstream os;
-        os << "cPacketChunk, packet = {(" << packet->getClassName() << ")" << packet->str() << ", length = " << getChunkLength() << "}";
-        return os.str();
-    }
-    else
-        return std::string("cPacketChunk, packet = {<null>}");
+bool cPacketChunk::containsSameData(const Chunk& other) const
+{
+    return &other == this || (Chunk::containsSameData(other) && packet == static_cast<const cPacketChunk *>(&other)->packet);
+}
+
+std::ostream& cPacketChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+{
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FIELD(packet);
+    return stream;
 }
 
 } // namespace

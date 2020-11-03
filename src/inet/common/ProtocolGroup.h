@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_PROTOCOLGROUP_H
@@ -26,6 +26,7 @@ class INET_API ProtocolGroup
 {
   protected:
     const char *name;
+    std::vector<const Protocol *> protocols;
     std::map<int, const Protocol *> protocolNumberToProtocol;
     std::map<const Protocol *, int> protocolToProtocolNumber;
 
@@ -33,6 +34,8 @@ class INET_API ProtocolGroup
     ProtocolGroup(const char *name, std::map<int, const Protocol *> protocolNumberToProtocol);
 
     const char *getName() const { return name; }
+    int getNumElements() const { return protocols.size(); }
+    const Protocol *getElement(int index) const { return protocols.at(index); }
 
     const Protocol *findProtocol(int protocolNumber) const;
     const Protocol *getProtocol(int protocolNumber) const;
@@ -43,15 +46,15 @@ class INET_API ProtocolGroup
   public:
     // in alphanumeric order
     static ProtocolGroup ethertype;
-    static ProtocolGroup pppprotocol;
-    static ProtocolGroup ipprotocol;
     static ProtocolGroup ieee8022protocol;
+    static ProtocolGroup ipprotocol;
+    static ProtocolGroup pppprotocol;
     static ProtocolGroup snapOui;
-    static ProtocolGroup udpprotocol;
     static ProtocolGroup tcpprotocol;
+    static ProtocolGroup udpprotocol;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_PROTOCOLGROUP_H
+#endif
 

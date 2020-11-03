@@ -22,7 +22,7 @@ LoRaTransmission::LoRaTransmission(const IRadio *transmitter, const Packet *macF
 
 }
 
-std::ostream& LoRaTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     /*if (level <= PRINT_LEVEL_DETAIL)
         stream << ", centerFrequency = " << centerFrequency;

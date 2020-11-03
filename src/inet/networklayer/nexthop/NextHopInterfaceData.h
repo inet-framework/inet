@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
+// Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_NEXTHOPINTERFACEDATA_H
@@ -21,15 +21,15 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
 /**
- * Next hop forwarding protocol specific data for an InterfaceEntry, stores generic network address.
+ * Next hop forwarding protocol specific data for an NetworkInterface, stores generic network address.
  *
- * @see InterfaceEntry
+ * @see NetworkInterface
  */
 class INET_API NextHopInterfaceData : public InterfaceProtocolData
 {
@@ -50,9 +50,9 @@ class INET_API NextHopInterfaceData : public InterfaceProtocolData
     NextHopInterfaceData& operator=(const NextHopInterfaceData& obj);
 
   public:
-    NextHopInterfaceData() : InterfaceProtocolData(InterfaceEntry::F_NEXTHOP_DATA) { metric = 0; }
+    NextHopInterfaceData() : InterfaceProtocolData(NetworkInterface::F_NEXTHOP_DATA) { metric = 0; }
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     /** @name Getters */
     //@{
@@ -71,5 +71,5 @@ class INET_API NextHopInterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_NEXTHOPINTERFACEDATA_H
+#endif
 

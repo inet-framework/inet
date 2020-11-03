@@ -1,18 +1,18 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this program; if not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <algorithm>
@@ -45,7 +45,7 @@ Define_Module(InterfaceTable);
 
 #define INTERFACEIDS_START    100
 
-std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
+std::ostream& operator<<(std::ostream& os, const NetworkInterface& e)
 {
     os << e.str();
     return os;
@@ -84,7 +84,7 @@ void InterfaceTable::refreshDisplay() const
 
     if (par("displayAddresses")) {
         for (auto & elem : idToInterface) {
-            InterfaceEntry *ie = elem;
+            NetworkInterface *ie = elem;
             if (ie)
                 updateLinkDisplayString(ie);
         }
@@ -100,7 +100,7 @@ void InterfaceTable::handleMessageWhenUp(cMessage *msg)
 void InterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     // nothing needed here at the moment
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 }
 
@@ -117,12 +117,12 @@ bool InterfaceTable::isLocalAddress(const L3Address& address) const
     return findInterfaceByAddress(address) != nullptr;
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address) const
+NetworkInterface *InterfaceTable::findInterfaceByAddress(const L3Address& address) const
 {
     if (!address.isUnspecified()) {
         L3Address::AddressType addrType = address.getType();
         for (auto & elem : idToInterface) {
-            InterfaceEntry *ie = elem;
+            NetworkInterface *ie = elem;
             if (ie) {
 #ifdef WITH_NEXTHOP
                 if (auto nextHopData = ie->findProtocolData<NextHopInterfaceData>())
@@ -180,7 +180,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 #ifdef WITH_IPv4
         case L3Address::IPv4:
             for (auto & elem : idToInterface) {
-                InterfaceEntry *ie = elem;
+                NetworkInterface *ie = elem;
                 if (ie) {
                     if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>()) {
                         Ipv4Address ipv4Addr = ipv4Data->getIPAddress();
@@ -196,7 +196,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 #ifdef WITH_IPv6
         case L3Address::IPv6:
             for (auto & elem : idToInterface) {
-                InterfaceEntry *ie = elem;
+                NetworkInterface *ie = elem;
                 if (ie) {
                     if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
                         for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
@@ -238,7 +238,7 @@ int InterfaceTable::getNumInterfaces() const
     return tmpNumInterfaces;
 }
 
-InterfaceEntry *InterfaceTable::getInterface(int pos) const
+NetworkInterface *InterfaceTable::getInterface(int pos) const
 {
     int n = getNumInterfaces();    // also fills tmpInterfaceList
     if (pos < 0 || pos >= n)
@@ -246,7 +246,7 @@ InterfaceEntry *InterfaceTable::getInterface(int pos) const
 
     if (!tmpInterfaceList) {
         // collect non-nullptr elements into tmpInterfaceList[]
-        tmpInterfaceList = new InterfaceEntry *[n];
+        tmpInterfaceList = new NetworkInterface *[n];
         int k = 0;
         int maxId = idToInterface.size();
         for (int i = 0; i < maxId; i++)
@@ -258,15 +258,15 @@ InterfaceEntry *InterfaceTable::getInterface(int pos) const
     return tmpInterfaceList[pos];
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceById(int id) const
+NetworkInterface *InterfaceTable::getInterfaceById(int id) const
 {
-    InterfaceEntry *ie = findInterfaceById(id);
+    NetworkInterface *ie = findInterfaceById(id);
     if (ie == nullptr)
         throw cRuntimeError("getInterfaceById(): no interface with ID=%d", id);
     return ie;
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceById(int id) const
+NetworkInterface *InterfaceTable::findInterfaceById(int id) const
 {
     id -= INTERFACEIDS_START;
     return (id < 0 || id >= (int)idToInterface.size()) ? nullptr : idToInterface[id];
@@ -277,7 +277,7 @@ int InterfaceTable::getBiggestInterfaceId() const
     return INTERFACEIDS_START + idToInterface.size() - 1;
 }
 
-void InterfaceTable::addInterface(InterfaceEntry *entry)
+void InterfaceTable::addInterface(NetworkInterface *entry)
 {
     if (!host)
         throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
@@ -287,7 +287,6 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
 
     // insert
     entry->setInterfaceId(INTERFACEIDS_START + idToInterface.size());
-    entry->setInterfaceTable(this);
     idToInterface.push_back(entry);
     invalidateTmpInterfaceList();
 
@@ -297,7 +296,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
     emit(interfaceCreatedSignal, entry);
 }
 
-void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
+void InterfaceTable::discoverConnectingGates(NetworkInterface *entry)
 {
     cModule *ifmod = entry;
     if (!ifmod)
@@ -316,7 +315,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     //    ifIn[] and ifOut[], and NIC must be connected to identical gate indices in both vectors.
     // 3. If the NIC module is not connected to another modules ifIn[] and ifOut[] gates, we assume
     //    that it is NOT connected to a network layer, and leave networkLayerGateIndex
-    //    in InterfaceEntry unfilled.
+    //    in NetworkInterface unfilled.
     // 4. The NIC may or may not connect to gates of the containing host compound module.
     //
 
@@ -358,7 +357,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     }
 }
 
-void InterfaceTable::deleteInterface(InterfaceEntry *entry)
+void InterfaceTable::deleteInterface(NetworkInterface *entry)
 {
     int id = entry->getInterfaceId();
     if (entry != getInterfaceById(id))
@@ -378,13 +377,13 @@ void InterfaceTable::invalidateTmpInterfaceList()
     tmpInterfaceList = nullptr;
 }
 
-void InterfaceTable::interfaceChanged(simsignal_t signalID, const InterfaceEntryChangeDetails *details)
+void InterfaceTable::interfaceChanged(simsignal_t signalID, const NetworkInterfaceChangeDetails *details)
 {
-    Enter_Method_Silent();
-    emit(signalID, const_cast<InterfaceEntryChangeDetails *>(details));
+    Enter_Method("interfaceChanged");
+    emit(signalID, const_cast<NetworkInterfaceChangeDetails *>(details));
 }
 
-void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry) const
+void InterfaceTable::updateLinkDisplayString(NetworkInterface *entry) const
 {
     int outputGateId = entry->getNodeOutputGateId();
     if (outputGateId != -1) {
@@ -417,10 +416,10 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry) const
     }
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceByNodeOutputGateId(int id) const
+NetworkInterface *InterfaceTable::findInterfaceByNodeOutputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
-    Enter_Method_Silent();
+    Enter_Method("findInterfaceByNodeOutputGateId");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->getNodeOutputGateId() == id)
@@ -429,10 +428,10 @@ InterfaceEntry *InterfaceTable::findInterfaceByNodeOutputGateId(int id) const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceByNodeInputGateId(int id) const
+NetworkInterface *InterfaceTable::findInterfaceByNodeInputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
-    Enter_Method_Silent();
+    Enter_Method("findInterfaceByNodeInputGateId");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->getNodeInputGateId() == id)
@@ -441,7 +440,7 @@ InterfaceEntry *InterfaceTable::findInterfaceByNodeInputGateId(int id) const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceByInterfaceModule(cModule *ifmod) const
+NetworkInterface *InterfaceTable::findInterfaceByInterfaceModule(cModule *ifmod) const
 {
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
     ASSERT(host != nullptr);
@@ -464,7 +463,7 @@ InterfaceEntry *InterfaceTable::findInterfaceByInterfaceModule(cModule *ifmod) c
             nodeInputGateId = g->getPreviousGate()->getId();
     }
 
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
     if (nodeInputGateId >= 0)
         ie = findInterfaceByNodeInputGateId(nodeInputGateId);
     if (!ie && nodeOutputGateId >= 0)
@@ -474,9 +473,9 @@ InterfaceEntry *InterfaceTable::findInterfaceByInterfaceModule(cModule *ifmod) c
     return ie;
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceByName(const char *name) const
+NetworkInterface *InterfaceTable::findInterfaceByName(const char *name) const
 {
-    Enter_Method_Silent();
+    Enter_Method("findInterfaceByName");
     if (!name)
         return nullptr;
     int n = idToInterface.size();
@@ -487,9 +486,9 @@ InterfaceEntry *InterfaceTable::findInterfaceByName(const char *name) const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::findFirstLoopbackInterface() const
+NetworkInterface *InterfaceTable::findFirstLoopbackInterface() const
 {
-    Enter_Method_Silent();
+    Enter_Method("findFirstLoopbackInterface");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->isLoopback())
@@ -498,9 +497,9 @@ InterfaceEntry *InterfaceTable::findFirstLoopbackInterface() const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::findFirstNonLoopbackInterface() const
+NetworkInterface *InterfaceTable::findFirstNonLoopbackInterface() const
 {
-    Enter_Method_Silent();
+    Enter_Method("findFirstNonLoopbackInterface");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && !idToInterface[i]->isLoopback())
@@ -509,9 +508,9 @@ InterfaceEntry *InterfaceTable::findFirstNonLoopbackInterface() const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::findFirstMulticastInterface() const
+NetworkInterface *InterfaceTable::findFirstMulticastInterface() const
 {
-    Enter_Method_Silent();
+    Enter_Method("findFirstMulticastInterface");
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && idToInterface[i]->isMulticast() && !idToInterface[i]->isLoopback())
@@ -547,7 +546,7 @@ MulticastGroupList InterfaceTable::collectMulticastGroups() const
     MulticastGroupList mglist;
     for (int i = 0; i < getNumInterfaces(); ++i) {
 #ifdef WITH_IPv4
-        InterfaceEntry *ie = getInterface(i);
+        NetworkInterface *ie = getInterface(i);
         int interfaceId = ie->getInterfaceId();
         auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
         if (ipv4Data) {

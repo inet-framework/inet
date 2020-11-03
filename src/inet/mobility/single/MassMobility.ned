@@ -1,6 +1,4 @@
 //
-// Author: Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)
-// Generalization: Andras Varga
 // Copyright (C) 2005 Emin Ilker Cetinbas, Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -14,7 +12,11 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+// Author: Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)
+// Generalization: Andras Varga
 //
 
 package inet.mobility.single;
@@ -49,7 +51,7 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // 3D (spatial movement) is also supported using rotationAxisAngle parameter.
 //
-// @author Emin Ilker Cetinbas, Andras Varga
+// @author Emin Ilker Cetinbas
 //
 simple MassMobility extends MovingMobilityBase
 {

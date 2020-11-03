@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -26,16 +26,11 @@ Define_Module(PcapFilePacketProducer);
 
 void PcapFilePacketProducer::initialize(int stage)
 {
-    PacketQueueingElementBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    ActivePacketSourceBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
         pcapReader.openPcap(par("filename"), par("packetNameFormat"));
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(outputGate);
+    else if (stage == INITSTAGE_QUEUEING)
         schedulePacket();
-    }
 }
 
 void PcapFilePacketProducer::finish()
@@ -63,17 +58,17 @@ void PcapFilePacketProducer::schedulePacket()
     auto packet = pair.second;
     emit(packetCreatedSignal, packet);
     if (packet != nullptr) {
-        EV << "Scheduling packet " << packet->getFullName() << " from PCAP file.\n";
+        EV << "Scheduling packet from PCAP file" << EV_FIELD(packet) << EV_ENDL;
         scheduleAt(pair.first, packet);
     }
     else
-        EV << "End of PCAP file reached.\n";
+        EV << "End of PCAP file reached" << EV_ENDL;
 }
 
-void PcapFilePacketProducer::handleCanPushPacket(cGate *gate)
+void PcapFilePacketProducer::handleCanPushPacketChanged(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
-    if (gate->getPathStartGate() == outputGate)
+    Enter_Method("handleCanPushPacketChanged");
+    if (gate == outputGate)
         schedulePacket();
 }
 

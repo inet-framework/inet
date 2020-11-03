@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -49,7 +49,7 @@ void QuadTreeNeighborCache::initialize(int stage)
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, nullptr);
         maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         rebuildQuadTree();
-        scheduleAt(simTime() + refillPeriod, rebuildQuadTreeTimer);
+        scheduleAfter(refillPeriod, rebuildQuadTreeTimer);
     }
 }
 
@@ -58,16 +58,16 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
     if (!msg->isSelfMessage())
         throw cRuntimeError("This module only handles self messages");
     rebuildQuadTree();
-    scheduleAt(simTime() + refillPeriod, msg);
+    scheduleAfter(refillPeriod, msg);
 }
 
-std::ostream& QuadTreeNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& QuadTreeNeighborCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "QuadTreeNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", maxNumOfPointsPerQuadrant = " << maxNumOfPointsPerQuadrant
-               << ", refillPeriod = " << refillPeriod
-               << ", maxSpeed = " << maxSpeed;
+        stream << EV_FIELD(maxNumOfPointsPerQuadrant)
+               << EV_FIELD(refillPeriod)
+               << EV_FIELD(maxSpeed);
     return stream;
 }
 
@@ -77,7 +77,7 @@ void QuadTreeNeighborCache::addRadio(const IRadio *radio)
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
     maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
     if (maxSpeed != 0 && !rebuildQuadTreeTimer->isScheduled() && initialized())
-        scheduleAt(simTime() + refillPeriod, rebuildQuadTreeTimer);
+        scheduleAfter(refillPeriod, rebuildQuadTreeTimer);
     Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
     Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
     // If the constraintArea changed we must rebuild the QuadTree

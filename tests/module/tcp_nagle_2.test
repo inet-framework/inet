@@ -9,18 +9,11 @@ which contradicts with the slow start algorithm...
 [General]
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 
 *.testing=true
-####cmdenv-log-prefix="%c %C@"
-####cmdenv-log-prefix=""
+
 *.tcptester.cmdenv-log-level=DEBUG
 *.*_app.cmdenv-log-level=DEBUG
 **.cmdenv-log-level=OFF
@@ -31,18 +24,6 @@ cmdenv-express-mode=false
 include ../../lib/defaults.ini
 
 %#--------------------------------------------------------------------------------------------------------------
-%file: postrun.pl
-open FILE, '<test.out';
-while($sor = <FILE>)
-{
-    if ($sor =~ /^\[\d/)
-    {
-        print $sor;
-    }
-}
-%#--------------------------------------------------------------------------------------------------------------
-%postrun-command:  perl ./postrun.pl
-%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 [1.001 A003] A.1000 > B.2000: A 1:2(1) ack 501 win 16384
 [1.003 B002] A.1000 < B.2000: A ack 2 win 16384
@@ -50,16 +31,15 @@ while($sor = <FILE>)
 [1.021 A005] A.1000 > B.2000: A 4:1028(1024) ack 501 win 16384
 [1.207 B003] A.1000 < B.2000: A ack 1028 win 16384
 [1.209 A006] A.1000 > B.2000: A 1028:2052(1024) ack 501 win 16384
-[1.209 A007] A.1000 > B.2000: A 2052:3075(1023) ack 501 win 16384
-[1.411 B004] A.1000 < B.2000: A ack 3075 win 16384
+[1.411 B004] A.1000 < B.2000: A ack 2052 win 16384
+[1.413 A007] A.1000 > B.2000: A 2052:3075(1023) ack 501 win 16384
+[1.615 B005] A.1000 < B.2000: A ack 3075 win 16384
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
 TcpTestNet1.cli_app: received 0 bytes in 0 packets
 TcpTestNet1.srv_app: received 3074 bytes in 5 packets
-[1.412] tcpdump finished, A:7 B:4 segments
-
-End.
+[1.616] tcpdump finished, A:7 B:5 segments
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

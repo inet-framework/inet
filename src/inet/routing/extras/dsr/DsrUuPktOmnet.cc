@@ -326,8 +326,7 @@ void insertDsrProtocolHeaderAtBack(Packet *packet, const Ptr<DSRPkt>& header)
 
 const Ptr<DSRPkt> removeDsrProtocolHeader(Packet *packet)
 {
-
-    delete packet->removeTagIfPresent<DsrProtocolInd>();
+    packet->removeTagIfPresent<DsrProtocolInd>();
     return removeProtocolHeader<DSRPkt>(packet);
 }
 

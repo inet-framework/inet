@@ -37,7 +37,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee802154Loss/Ieee802154MacLoss.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/common/WirelessGetNeig.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
@@ -67,7 +67,7 @@ void Ieee802154MacLoss::initialize(int stage)
         auto dist = pathLoss->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), centerFrequency, loss);
 
         std::vector<L3Address> list;
-        neig->getNeighbours(L3Address(interfaceEntry->getMacAddress()), list, dist.get());
+        neig->getNeighbours(L3Address(networkInterface->getMacAddress()), list, dist.get());
         double probabilityCompleteFailureLink = par("probabilityCompleteFailureLink"); // (between 0..1) percentage of links that will fail in every node
         double probabilityLink = par("probabilityLink"); // (between 0..1) percentage of links that will lost packet in every node
         double probabilityFailurePacket = par("probabilityFailurePacket"); // (between 0..1) probability of loss in link with loss.

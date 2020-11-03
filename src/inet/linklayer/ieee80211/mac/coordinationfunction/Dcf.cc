@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -88,7 +88,7 @@ void Dcf::updateDisplayString()
 
 void Dcf::channelGranted(IChannelAccess *channelAccess)
 {
-    Enter_Method_Silent("channelGranted");
+    Enter_Method("channelGranted");
     ASSERT(this->channelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
@@ -99,10 +99,10 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
 
 void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    Enter_Method_Silent("processUpperFrame(%s)", packet->getName());
+    Enter_Method("processUpperFrame(%s)", packet->getName());
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     auto pendingQueue = channelAccess->getPendingQueue();
-    pendingQueue->pushPacket(packet);
+    pendingQueue->enqueuePacket(packet);
     if (!pendingQueue->isEmpty()) {
         EV_DETAIL << "Requesting channel" << endl;
         channelAccess->requestChannel(this);
@@ -111,7 +111,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 
 void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader)
 {
-    Enter_Method_Silent("transmitControlResponseFrame");
+    Enter_Method("transmitControlResponseFrame");
     responsePacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(receivedHeader))
@@ -145,13 +145,13 @@ void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
 
 void Dcf::scheduleStartRxTimer(simtime_t timeout)
 {
-    Enter_Method_Silent();
-    scheduleAt(simTime() + timeout, startRxTimer);
+    Enter_Method("scheduleStartRxTimer");
+    scheduleAfter(timeout, startRxTimer);
 }
 
 void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    Enter_Method_Silent("processLowerFrame(%s)", packet->getName());
+    Enter_Method("processLowerFrame(%s)", packet->getName());
     EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     if (frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponses
@@ -181,7 +181,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 
 void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
-    Enter_Method_Silent("transmitFrame");
+    Enter_Method("transmitFrame");
     const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
     auto mode = rateSelection->computeMode(packet, header);
     RateSelection::setFrameMode(packet, header, mode);
@@ -204,7 +204,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 
 void Dcf::frameSequenceFinished()
 {
-    Enter_Method_Silent("frameSequenceFinished");
+    Enter_Method("frameSequenceFinished");
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     channelAccess->releaseChannel(this);
     if (hasFrameToTransmit())
@@ -256,7 +256,7 @@ FrameSequenceContext* Dcf::buildContext()
 
 void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    Enter_Method_Silent("transmissionComplete");
+    Enter_Method("transmissionComplete");
     if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
         updateDisplayString();
@@ -273,7 +273,7 @@ bool Dcf::hasFrameToTransmit()
 
 void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
 {
-    Enter_Method_Silent("originatorProcessRtsProtectionFailed");
+    Enter_Method("originatorProcessRtsProtectionFailed");
     EV_INFO << "RTS frame transmission failed\n";
     auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     recoveryProcedure->rtsFrameTransmissionFailed(protectedHeader, stationRetryCounters);
@@ -293,7 +293,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
 
 void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 {
-    Enter_Method_Silent("originatorProcessTransmittedFrame");
+    Enter_Method("originatorProcessTransmittedFrame");
     EV_INFO << "Processing transmitted frame " << packet->getName() << " as originator in frame sequence.\n";
     emit(packetSentToPeerSignal, packet);
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
@@ -317,7 +317,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 
 void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTransmittedPacket)
 {
-    Enter_Method_Silent("originatorProcessReceivedFrame");
+    Enter_Method("originatorProcessReceivedFrame");
     EV_INFO << "Processing received frame " << receivedPacket->getName() << " as originator in frame sequence.\n";
     emit(packetReceivedFromPeerSignal, receivedPacket);
     auto receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
@@ -343,7 +343,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
 
 void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
 {
-    Enter_Method_Silent("originatorProcessFailedFrame");
+    Enter_Method("originatorProcessFailedFrame");
     EV_INFO << "Data/Mgmt frame transmission failed\n";
     const auto& failedHeader = failedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
     ASSERT(failedHeader->getType() != ST_DATA_WITH_QOS);
@@ -392,7 +392,7 @@ bool Dcf::isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const
 
 void Dcf::corruptedFrameReceived()
 {
-    Enter_Method_Silent("corruptedFrameReceived");
+    Enter_Method("corruptedFrameReceived");
     if (frameSequenceHandler->isSequenceRunning() && !startRxTimer->isScheduled()) {
         frameSequenceHandler->handleStartRxTimeout();
         updateDisplayString();

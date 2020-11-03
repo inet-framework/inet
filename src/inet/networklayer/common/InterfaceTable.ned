@@ -1,18 +1,19 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this program; if not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
 
 package inet.networklayer.common;
 
@@ -30,20 +31,18 @@ package inet.networklayer.common;
 // functions of the C++ module class. For detailed info, please see the C++
 // documentation of the class (Doxygen).
 //
-// @author: Andras Varga
-//
 simple InterfaceTable
 {
     parameters:
         bool displayAddresses = default(false);  // whether to display IP addresses on links
         @display("i=block/table");
-        @signal[interfaceCreated](type=inet::InterfaceEntry);
-        @signal[interfaceDeleted](type=inet::InterfaceEntry);
-        @signal[interfaceStateChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceConfigChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceIpv4ConfigChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceIpv6ConfigChanged](type=inet::InterfaceEntryChangeDetails);
-        @signal[interfaceGnpConfigChanged](type=inet::InterfaceEntryChangeDetails);
+        @signal[interfaceCreated](type=inet::NetworkInterface);
+        @signal[interfaceDeleted](type=inet::NetworkInterface);
+        @signal[interfaceStateChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceConfigChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceIpv4ConfigChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceIpv6ConfigChanged](type=inet::NetworkInterfaceChangeDetails);
+        @signal[interfaceGnpConfigChanged](type=inet::NetworkInterfaceChangeDetails);
         @signal[ipv4MulticastGroupJoined](type=inet::Ipv4MulticastGroupInfo);
         @signal[ipv4MulticastGroupLeft](type=inet::Ipv4MulticastGroupInfo);
         @signal[ipv4McastChange](type=inet::Ipv4MulticastGroupSourceInfo);

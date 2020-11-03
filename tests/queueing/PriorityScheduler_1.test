@@ -53,86 +53,86 @@ cmdenv-event-banners = false
 *.producer*.productionInterval = uniform(0s, 2s)
 *.collector.collectionInterval = uniform(0s, 1s)
 
-%contains: stdout
-Popping packet producer2-0 from the queue.
-Scheduling packet producer2-0.
-Collecting packet producer2-0.
-Producing packet producer1-1.
-Pushing packet producer1-1 into the queue.
-Producing packet producer2-1.
-Pushing packet producer2-1 into the queue.
-Popping packet producer1-1 from the queue.
-Scheduling packet producer1-1.
-Collecting packet producer1-1.
-Popping packet producer2-1 from the queue.
-Scheduling packet producer2-1.
-Collecting packet producer2-1.
-Producing packet producer1-2.
-Pushing packet producer1-2 into the queue.
-Popping packet producer1-2 from the queue.
-Scheduling packet producer1-2.
-Collecting packet producer1-2.
-Producing packet producer2-2.
-Pushing packet producer2-2 into the queue.
-Producing packet producer1-3.
-Pushing packet producer1-3 into the queue.
-Popping packet producer1-3 from the queue.
-Scheduling packet producer1-3.
-Collecting packet producer1-3.
-Popping packet producer2-2 from the queue.
-Scheduling packet producer2-2.
-Collecting packet producer2-2.
-Producing packet producer1-4.
-Pushing packet producer1-4 into the queue.
-Popping packet producer1-4 from the queue.
-Scheduling packet producer1-4.
-Collecting packet producer1-4.
-Producing packet producer2-3.
-Pushing packet producer2-3 into the queue.
-Popping packet producer2-3 from the queue.
-Scheduling packet producer2-3.
-Collecting packet producer2-3.
-Producing packet producer1-5.
-Pushing packet producer1-5 into the queue.
-Popping packet producer1-5 from the queue.
-Scheduling packet producer1-5.
-Collecting packet producer1-5.
-Producing packet producer2-4.
-Pushing packet producer2-4 into the queue.
-Popping packet producer2-4 from the queue.
-Scheduling packet producer2-4.
-Collecting packet producer2-4.
-Producing packet producer1-6.
-Pushing packet producer1-6 into the queue.
-Popping packet producer1-6 from the queue.
-Scheduling packet producer1-6.
-Collecting packet producer1-6.
-Producing packet producer1-7.
-Pushing packet producer1-7 into the queue.
-Popping packet producer1-7 from the queue.
-Scheduling packet producer1-7.
-Collecting packet producer1-7.
-Producing packet producer2-5.
-Pushing packet producer2-5 into the queue.
-Popping packet producer2-5 from the queue.
-Scheduling packet producer2-5.
-Collecting packet producer2-5.
-Producing packet producer1-8.
-Pushing packet producer1-8 into the queue.
-Producing packet producer1-9.
-Pushing packet producer1-9 into the queue.
-Popping packet producer1-8 from the queue.
-Scheduling packet producer1-8.
-Collecting packet producer1-8.
-Popping packet producer1-9 from the queue.
-Scheduling packet producer1-9.
-Collecting packet producer1-9.
-Producing packet producer1-10.
-Pushing packet producer1-10 into the queue.
-Producing packet producer1-11.
-Pushing packet producer1-11 into the queue.
-Popping packet producer1-10 from the queue.
-Scheduling packet producer1-10.
-Collecting packet producer1-10.
-Producing packet producer2-6.
-Pushing packet producer2-6 into the queue.
+%contains-regex: stdout
+Pulling packet, .*?producer2-0.*?
+Scheduling packet, .*?producer2-0.*?
+Collecting packet, .*?producer2-0.*?
+Producing packet, .*?producer1-1.*?
+Pushing packet, .*?producer1-1.*?
+Producing packet, .*?producer2-1.*?
+Pushing packet, .*?producer2-1.*?
+Pulling packet, .*?producer1-1.*?
+Scheduling packet, .*?producer1-1.*?
+Collecting packet, .*?producer1-1.*?
+Pulling packet, .*?producer2-1.*?
+Scheduling packet, .*?producer2-1.*?
+Collecting packet, .*?producer2-1.*?
+Producing packet, .*?producer1-2.*?
+Pushing packet, .*?producer1-2.*?
+Pulling packet, .*?producer1-2.*?
+Scheduling packet, .*?producer1-2.*?
+Collecting packet, .*?producer1-2.*?
+Producing packet, .*?producer2-2.*?
+Pushing packet, .*?producer2-2.*?
+Producing packet, .*?producer1-3.*?
+Pushing packet, .*?producer1-3.*?
+Pulling packet, .*?producer1-3.*?
+Scheduling packet, .*?producer1-3.*?
+Collecting packet, .*?producer1-3.*?
+Pulling packet, .*?producer2-2.*?
+Scheduling packet, .*?producer2-2.*?
+Collecting packet, .*?producer2-2.*?
+Producing packet, .*?producer1-4.*?
+Pushing packet, .*?producer1-4.*?
+Pulling packet, .*?producer1-4.*?
+Scheduling packet, .*?producer1-4.*?
+Collecting packet, .*?producer1-4.*?
+Producing packet, .*?producer2-3.*?
+Pushing packet, .*?producer2-3.*?
+Pulling packet, .*?producer2-3.*?
+Scheduling packet, .*?producer2-3.*?
+Collecting packet, .*?producer2-3.*?
+Producing packet, .*?producer1-5.*?
+Pushing packet, .*?producer1-5.*?
+Pulling packet, .*?producer1-5.*?
+Scheduling packet, .*?producer1-5.*?
+Collecting packet, .*?producer1-5.*?
+Producing packet, .*?producer2-4.*?
+Pushing packet, .*?producer2-4.*?
+Pulling packet, .*?producer2-4.*?
+Scheduling packet, .*?producer2-4.*?
+Collecting packet, .*?producer2-4.*?
+Producing packet, .*?producer1-6.*?
+Pushing packet, .*?producer1-6.*?
+Pulling packet, .*?producer1-6.*?
+Scheduling packet, .*?producer1-6.*?
+Collecting packet, .*?producer1-6.*?
+Producing packet, .*?producer1-7.*?
+Pushing packet, .*?producer1-7.*?
+Pulling packet, .*?producer1-7.*?
+Scheduling packet, .*?producer1-7.*?
+Collecting packet, .*?producer1-7.*?
+Producing packet, .*?producer2-5.*?
+Pushing packet, .*?producer2-5.*?
+Pulling packet, .*?producer2-5.*?
+Scheduling packet, .*?producer2-5.*?
+Collecting packet, .*?producer2-5.*?
+Producing packet, .*?producer1-8.*?
+Pushing packet, .*?producer1-8.*?
+Producing packet, .*?producer1-9.*?
+Pushing packet, .*?producer1-9.*?
+Pulling packet, .*?producer1-8.*?
+Scheduling packet, .*?producer1-8.*?
+Collecting packet, .*?producer1-8.*?
+Pulling packet, .*?producer1-9.*?
+Scheduling packet, .*?producer1-9.*?
+Collecting packet, .*?producer1-9.*?
+Producing packet, .*?producer1-10.*?
+Pushing packet, .*?producer1-10.*?
+Producing packet, .*?producer1-11.*?
+Pushing packet, .*?producer1-11.*?
+Pulling packet, .*?producer1-10.*?
+Scheduling packet, .*?producer1-10.*?
+Collecting packet, .*?producer1-10.*?
+Producing packet, .*?producer2-6.*?
+Pushing packet, .*?producer2-6.*?

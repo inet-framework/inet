@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.mobility.single;
@@ -29,7 +29,7 @@ import inet.mobility.contract.IMobility;
 // component in the mobility of each group member. It also allows to seprate the
 // mobility model of initial positioning from positioning during the simulation.
 // It also makes possible to separate the mobility model of positioning from the
-// mobility model of orientation. 
+// mobility model of orientation.
 //
 module SuperpositioningMobility extends MobilityBase
 {
@@ -37,7 +37,7 @@ module SuperpositioningMobility extends MobilityBase
         int numElements; // number of combined mobility modules
         string positionComposition @enum("zero", "sum", "average") = default("sum");
         string orientationComposition @enum("zero", "sum", "average", "faceForward") = default("sum");
-        element[*].subjectModule = default(""); // disable visual subject module of superposition elements by default 
+        element[*].subjectModule = default(""); // disable visual subject module of superposition elements by default
         @class(SuperpositioningMobility);
     submodules:
         element[numElements]: <> like IMobility {

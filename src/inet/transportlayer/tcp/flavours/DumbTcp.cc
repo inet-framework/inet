@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -53,7 +53,7 @@ void DumbTcp::established(bool active)
         // finish connection setup with ACK (possibly piggybacked on data)
         EV_INFO << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
 
-        if (!conn->sendData(false, 65535))
+        if (!conn->sendData(65535))
             conn->sendAck();
     }
 }
@@ -69,13 +69,13 @@ void DumbTcp::processTimer(cMessage *timer, TcpEventCode& event)
         throw cRuntimeError(timer, "unrecognized timer");
 
     conn->retransmitData();
-    conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
+    conn->scheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
 }
 
 void DumbTcp::sendCommandInvoked()
 {
     // start sending
-    conn->sendData(false, 65535);
+    conn->sendData(65535);
 }
 
 void DumbTcp::receivedOutOfOrderSegment()
@@ -92,11 +92,10 @@ void DumbTcp::receiveSeqChanged()
     conn->sendAck();
 }
 
-void DumbTcp::receivedDataAck(uint32)
+void DumbTcp::receivedDataAck(uint32_t)
 {
     // ack may have freed up some room in the window, try sending.
-    // small segments also OK (Nagle off)
-    conn->sendData(false, 65535);
+    conn->sendData(65535);
 }
 
 void DumbTcp::receivedDuplicateAck()
@@ -104,7 +103,7 @@ void DumbTcp::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 }
 
-void DumbTcp::receivedAckForDataNotYetSent(uint32 seq)
+void DumbTcp::receivedAckForDataNotYetSent(uint32_t seq)
 {
     EV_INFO << "ACK acks something not yet sent, sending immediate ACK\n";
     conn->sendAck();
@@ -114,15 +113,12 @@ void DumbTcp::ackSent()
 {
 }
 
-void DumbTcp::dataSent(uint32 fromseq)
+void DumbTcp::dataSent(uint32_t fromseq)
 {
-    if (rexmitTimer->isScheduled())
-        conn->cancelEvent(rexmitTimer);
-
-    conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
+    conn->rescheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
 }
 
-void DumbTcp::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+void DumbTcp::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
 }
 
@@ -130,7 +126,7 @@ void DumbTcp::restartRexmitTimer()
 {
 }
 
-void DumbTcp::rttMeasurementCompleteUsingTS(uint32 echoedTS)
+void DumbTcp::rttMeasurementCompleteUsingTS(uint32_t echoedTS)
 {
 }
 

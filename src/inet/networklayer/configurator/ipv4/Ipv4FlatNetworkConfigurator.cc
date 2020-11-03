@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,12 +12,12 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <algorithm>
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4FlatNetworkConfigurator.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -80,8 +80,8 @@ void Ipv4FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVecto
 void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // assign Ipv4 addresses
-    uint32 networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
-    uint32 netmask = Ipv4Address(par("netmask").stringValue()).getInt();
+    uint32_t networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
+    uint32_t netmask = Ipv4Address(par("netmask").stringValue()).getInt();
     int maxNodes = (~netmask) - 1;    // 0 and ffff have special meaning and cannot be used
     if (topo.getNumNodes() > maxNodes)
         throw cRuntimeError("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
@@ -92,16 +92,17 @@ void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVecto
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        uint32 addr = networkAddress | uint32(++numIPNodes);
+        uint32_t addr = networkAddress | uint32_t(++numIPNodes);
         nodeInfo[i].address.set(addr);
 
         // find interface table and assign address to all (non-loopback) interfaces
         IInterfaceTable *ift = nodeInfo[i].ift;
         for (int k = 0; k < ift->getNumInterfaces(); k++) {
-            InterfaceEntry *ie = ift->getInterface(k);
+            NetworkInterface *ie = ift->getInterface(k);
             if (!ie->isLoopback()) {
-                ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address(addr));
-                ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
+                auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
+                ipv4Data->setIPAddress(Ipv4Address(addr));
+                ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
             }
         }
     }
@@ -122,7 +123,7 @@ void Ipv4FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVect
 
         // count non-loopback interfaces
         int numIntf = 0;
-        InterfaceEntry *ie = nullptr;
+        NetworkInterface *ie = nullptr;
         for (int k = 0; k < ift->getNumInterfaces(); k++)
             if (!ift->getInterface(k)->isLoopback()) {
                 ie = ift->getInterface(k);
@@ -182,7 +183,7 @@ void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVec
             IInterfaceTable *ift = nodeInfo[j].ift;
 
             int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
-            InterfaceEntry *ie = ift->findInterfaceByNodeOutputGateId(outputGateId);
+            NetworkInterface *ie = ift->findInterfaceByNodeOutputGateId(outputGateId);
             if (!ie)
                 throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 

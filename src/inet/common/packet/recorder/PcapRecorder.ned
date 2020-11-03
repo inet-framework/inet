@@ -2,7 +2,7 @@
 // Copyright (C) 2005 Michael Tuexen
 // Copyright (C) 2008 Irene Ruengeler
 // Copyright (C) 2009 Thomas Dreibholz
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -11,11 +11,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.common.packet.recorder;
@@ -40,17 +41,10 @@ package inet.common.packet.recorder;
 // sendingSignalNames and receivingSignalNames parameters. The packets
 // themselves are expected as cPacket* signal values.
 //
-// <b>Supported packets:</b> The module handles IPv4/IPv6 packets (~Ipv4Header/
-// ~Ipv6Header classes), possibly encapsulated into other (L2, PHY, etc)
-// frames at any depth. Packets not containing IP packets are discarded.
-// The following higher layer protocol messages (inside IP packets) are
-// recognized and dumped/recorded: ~Ipv4Header, ~SctpHeader, ~TcpHeader,
-// ~IcmpHeader.
-//
 simple PcapRecorder
 {
     parameters:
-        bool verbose = default(false);  // whether to log packets on the module output
+        bool verbose = default(true);  // whether to log packets on the module output
         string pcapFile = default(""); // the PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // maximum number of bytes to record per packet

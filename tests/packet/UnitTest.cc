@@ -3,16 +3,16 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
 
+#include "inet/common/IdentityTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/ChunkBuffer.h"
@@ -564,6 +564,53 @@ static void testBackPopOffset()
     ASSERT_ERROR(packet1.peekAtBack(B(1)), "length is invalid");
 }
 
+static void testUpdate()
+{
+    // 1. update destructively
+    Packet packet1;
+    packet1.insertAtFront(makeImmutableApplicationHeader(42));
+    packet1.insertAtBack(makeImmutableTcpHeader());
+    // 2. update at front
+    ASSERT(packet1.peekAtFront<ApplicationHeader>()->getSomeData() == 42);
+    packet1.updateAtFront<ApplicationHeader>([] (const Ptr<ApplicationHeader>& applicationHeader) {
+        applicationHeader->setSomeData(0);
+    });
+    ASSERT(packet1.peekAtFront<ApplicationHeader>()->getSomeData() == 0);
+    // 3. update at back
+    ASSERT(packet1.peekAtBack<TcpHeader>(B(20))->getCrc() == 0);
+    packet1.updateAtBack<TcpHeader>([] (const Ptr<TcpHeader>& tcpHeader) {
+        tcpHeader->setCrc(42);
+    }, B(20));
+    ASSERT(packet1.peekAtBack<TcpHeader>(B(20))->getCrc() == 42);
+    // 4. udpate copy of the original
+    auto& packet2 = *packet1.dup();
+    // 5. update at front
+    ASSERT(packet2.peekAtFront<ApplicationHeader>()->getSomeData() == 0);
+    packet2.updateAtFront<ApplicationHeader>([] (const Ptr<ApplicationHeader>& applicationHeader) {
+        applicationHeader->setSomeData(42);
+    });
+    ASSERT(packet1.peekAtFront<ApplicationHeader>()->getSomeData() == 0);
+    ASSERT(packet2.peekAtFront<ApplicationHeader>()->getSomeData() == 42);
+    // 6. update at back
+    ASSERT(packet2.peekAtBack<TcpHeader>(B(20))->getCrc() == 42);
+    packet2.updateAtBack<TcpHeader>([] (const Ptr<TcpHeader>& tcpHeader) {
+        tcpHeader->setCrc(0);
+    }, B(20));
+    ASSERT(packet1.peekAtBack<TcpHeader>(B(20))->getCrc() == 42);
+    ASSERT(packet2.peekAtBack<TcpHeader>(B(20))->getCrc() == 0);
+
+    // 7. update in the middle
+    Packet packet3;
+    packet3.insertAtFront(makeImmutableApplicationHeader(42));
+    packet3.insertAtFront(makeImmutableTcpHeader());
+    packet3.insertAtFront(makeImmutableIpHeader());
+    ASSERT(packet3.peekAt<TcpHeader>(B(20))->getCrc() == 0);
+    packet3.updateAt<TcpHeader>([] (const Ptr<TcpHeader>& tcpHeader) {
+        tcpHeader->setCrc(42);
+    }, B(20));
+    ASSERT(packet3.peekAt<TcpHeader>(B(20))->getCrc() == 42);
+}
+
 static void testEncapsulation()
 {
     // 1. packet contains all chunks of encapsulated packet as is
@@ -754,38 +801,38 @@ static void testStreaming()
     ASSERT(data[1] == 0xF0);
 
     // 4. uint8_t
-    uint64_t uint8 = 0x42;
+    uint64_t uint8_t = 0x42;
     MemoryOutputStream outputStream1;
-    outputStream1.writeUint8(uint8);
+    outputStream1.writeUint8(uint8_t);
     MemoryInputStream inputStream1(outputStream1.getData());
-    ASSERT(inputStream1.readUint8() == uint8);
+    ASSERT(inputStream1.readUint8() == uint8_t);
     ASSERT(!inputStream1.isReadBeyondEnd());
     ASSERT(inputStream1.getRemainingLength() == b(0));
 
     // 5. uint16_t
-    uint64_t uint16 = 0x4242;
+    uint64_t uint16_t = 0x4242;
     MemoryOutputStream outputStream2;
-    outputStream2.writeUint16Be(uint16);
+    outputStream2.writeUint16Be(uint16_t);
     MemoryInputStream inputStream2(outputStream2.getData());
-    ASSERT(inputStream2.readUint16Be() == uint16);
+    ASSERT(inputStream2.readUint16Be() == uint16_t);
     ASSERT(!inputStream2.isReadBeyondEnd());
     ASSERT(inputStream2.getRemainingLength() == b(0));
 
     // 6. uint32_t
-    uint64_t uint32 = 0x42424242;
+    uint64_t uint32_t = 0x42424242;
     MemoryOutputStream outputStream3;
-    outputStream3.writeUint32Be(uint32);
+    outputStream3.writeUint32Be(uint32_t);
     MemoryInputStream inputStream3(outputStream3.getData());
-    ASSERT(inputStream3.readUint32Be() == uint32);
+    ASSERT(inputStream3.readUint32Be() == uint32_t);
     ASSERT(!inputStream3.isReadBeyondEnd());
     ASSERT(inputStream3.getRemainingLength() == b(0));
 
     // 7. uint64_t
-    uint64_t uint64 = 0x4242424242424242L;
+    uint64_t uint64_t = 0x4242424242424242L;
     MemoryOutputStream outputStream4;
-    outputStream4.writeUint64Be(uint64);
+    outputStream4.writeUint64Be(uint64_t);
     MemoryInputStream inputStream4(outputStream4.getData());
-    ASSERT(inputStream4.readUint64Be() == uint64);
+    ASSERT(inputStream4.readUint64Be() == uint64_t);
     ASSERT(!inputStream4.isReadBeyondEnd());
     ASSERT(inputStream4.getRemainingLength() == b(0));
 
@@ -864,12 +911,12 @@ static void testConversion()
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
     packet1.insertAtBack(applicationHeader1->Chunk::peek<BytesChunk>(B(0), B(5)));
     packet1.insertAtBack(applicationHeader1->Chunk::peek(B(5), B(5)));
-    ASSERT_ERROR(packet1.peekAtFront<ApplicationHeader>(B(10)), "serialization is disabled");
+    ASSERT_ERROR(packet1.peekAtFront<ApplicationHeader>(B(10)), "is disabled");
 
     // 2. implicit conversion via serialization is an error by default (would result in hard to debug errors)
     Packet packet2;
     packet2.insertAtBack(makeImmutableIpHeader());
-    ASSERT_ERROR(packet2.peekAtFront<ApplicationHeader>(), "serialization is disabled");
+    ASSERT_ERROR(packet2.peekAtFront<ApplicationHeader>(), "is disabled");
 }
 
 static void testIteration()
@@ -1516,7 +1563,7 @@ static void testReorderBuffer()
 static void testTagSet()
 {
     // 1. getNumTags
-    TagSet tagSet1;
+    SharingTagSet tagSet1;
     ASSERT(tagSet1.getNumTags() == 0);
     tagSet1.addTag<CreationTimeTag>();
     ASSERT(tagSet1.getNumTags() == 1);
@@ -1524,14 +1571,14 @@ static void testTagSet()
     ASSERT(tagSet1.getNumTags() == 0);
 
     // 2. getTag
-    TagSet tagSet2;
+    SharingTagSet tagSet2;
     const auto& tag1 = tagSet2.addTag<CreationTimeTag>();
     const auto& tag2 = tagSet2.getTag(0);
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
 
     // 3. clearTags
-    TagSet tagSet3;
+    SharingTagSet tagSet3;
     tagSet3.clearTags();
     ASSERT(tagSet3.getNumTags() == 0);
     tagSet3.addTag<CreationTimeTag>();
@@ -1539,7 +1586,7 @@ static void testTagSet()
     ASSERT(tagSet3.getNumTags() == 0);
 
     // 4. findTag
-    TagSet tagSet4;
+    SharingTagSet tagSet4;
     ASSERT(tagSet4.findTag<CreationTimeTag>() == nullptr);
     const auto& tag3 = tagSet4.addTag<CreationTimeTag>();
     const auto& tag4 = tagSet4.findTag<CreationTimeTag>();
@@ -1549,7 +1596,7 @@ static void testTagSet()
     ASSERT(tagSet4.findTag<CreationTimeTag>() == nullptr);
 
     // 5. getTag
-    TagSet tagSet5;
+    SharingTagSet tagSet5;
     ASSERT_ERROR(tagSet5.getTag<CreationTimeTag>(), "is absent");
     const auto& tag5 = tagSet5.addTag<CreationTimeTag>();
     const auto& tag6 = tagSet5.getTag<CreationTimeTag>();
@@ -1559,42 +1606,42 @@ static void testTagSet()
     ASSERT_ERROR(tagSet5.getTag<CreationTimeTag>(), "is absent");
 
     // 6. addTag
-    TagSet tagSet6;
+    SharingTagSet tagSet6;
     const auto& tag7 = tagSet6.addTag<CreationTimeTag>();
     ASSERT(tag7 != nullptr);
     ASSERT(tagSet6.getNumTags() == 1);
     ASSERT_ERROR(tagSet6.addTag<CreationTimeTag>(), "is present");
 
     // 7. addTagIfAbsent
-    TagSet tagSet7;
-    const auto& tag8 = tagSet7.addTagIfAbsent<CreationTimeTag>();
-    const auto& tag9 = tagSet7.addTagIfAbsent<CreationTimeTag>();
+    SharingTagSet tagSet7;
+    const auto& tag8 = tagSet7.addTagIfAbsent<CreationTimeTag>().get();
+    const auto& tag9 = tagSet7.addTagIfAbsent<CreationTimeTag>().get();
     ASSERT(tag9 != nullptr);
     ASSERT(tag9 == tag8);
     ASSERT(tagSet7.getNumTags() == 1);
 
     // 8. removeTag
-    TagSet tagSet8;
+    SharingTagSet tagSet8;
     ASSERT_ERROR(tagSet8.removeTag<CreationTimeTag>(), "is absent");
-    const auto& tag10 = tagSet8.addTag<CreationTimeTag>();
-    const auto& tag11 = tagSet8.removeTag<CreationTimeTag>();
+    const auto& tag10 = tagSet8.addTag<CreationTimeTag>().get();
+    const auto& tag11 = tagSet8.removeTag<CreationTimeTag>().get();
     ASSERT(tag11 != nullptr);
     ASSERT(tag11 == tag10);
     ASSERT(tagSet8.getNumTags() == 0);
 
     // 9. removeTagIfPresent
-    TagSet tagSet9;
+    SharingTagSet tagSet9;
     tagSet9.removeTagIfPresent<CreationTimeTag>();
-    const auto& tag12 = tagSet9.addTag<CreationTimeTag>();
-    const auto& tag13 = tagSet9.removeTagIfPresent<CreationTimeTag>();
+    const auto& tag12 = tagSet9.addTag<CreationTimeTag>().get();
+    const auto& tag13 = tagSet9.removeTagIfPresent<CreationTimeTag>().get();
     ASSERT(tag13 != nullptr);
     ASSERT(tag13 == tag12);
     ASSERT(tagSet9.getNumTags() == 0);
     ASSERT(tagSet9.removeTagIfPresent<CreationTimeTag>() == nullptr);
 
     // 10. copyTags
-    TagSet tagSet10;
-    TagSet tagSet11;
+    SharingTagSet tagSet10;
+    SharingTagSet tagSet11;
     tagSet11.copyTags(tagSet10);
     ASSERT(tagSet11.getNumTags() == 0);
     tagSet10.addTag<CreationTimeTag>();
@@ -1605,7 +1652,7 @@ static void testTagSet()
 static void testRegionTagSet()
 {
     { // 1. getNumTags
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.getNumTags() == 0);
     regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     ASSERT(regionTagSet.getNumTags() == 1);
@@ -1614,15 +1661,15 @@ static void testRegionTagSet()
     }
 
     { // 2. getTag
-    RegionTagSet regionTagSet;
-    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
-    const auto& tag2 = regionTagSet.getTag(0);
+    SharingRegionTagSet regionTagSet;
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)).get();
+    const auto& tag2 = regionTagSet.getTag(0).get();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     }
 
     { // 3. clearTags
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     regionTagSet.clearTags(b(0), b(1000));
     ASSERT(regionTagSet.getNumTags() == 0);
     regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
@@ -1631,7 +1678,7 @@ static void testRegionTagSet()
     }
 
     { // 4. findTag
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.findTag<CreationTimeTag>(b(0), b(1000)) == nullptr);
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     const auto& tag2 = regionTagSet.findTag<CreationTimeTag>(b(0), b(1000));
@@ -1642,7 +1689,7 @@ static void testRegionTagSet()
     }
 
     { // 5. getTag
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.getTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     const auto& tag2 = regionTagSet.getTag<CreationTimeTag>(b(0), b(1000));
@@ -1653,7 +1700,7 @@ static void testRegionTagSet()
     }
 
     { // 6. getAllTags
-    RegionTagSet regionTagSet;
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.getAllTags<CreationTimeTag>(b(0), b(1000)).size() == 0);
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     tag1->setCreationTime(42);
@@ -1669,7 +1716,7 @@ static void testRegionTagSet()
     tag3->setCreationTime(42);
     const auto& tag4 = regionTagSet.addTag<CreationTimeTag>(b(1000), b(1000));
     tag4->setCreationTime(81);
-    const auto& tags2 = regionTagSet.getAllTags<CreationTimeTag>(b(500), b(1000));
+    const auto& tags2 = regionTagSet.getAllTagsForUpdate<CreationTimeTag>(b(500), b(1000));
     ASSERT(tags2.size() == 2);
     ASSERT(tags2[0].getOffset() == b(500) && tags2[0].getLength() == b(500));
     ASSERT(tags2[1].getOffset() == b(1000) && tags2[1].getLength() == b(500));
@@ -1679,84 +1726,86 @@ static void testRegionTagSet()
     ASSERT(tag5->getCreationTime() == 42);
     ASSERT(tag6 != nullptr);
     ASSERT(tag6->getCreationTime() == 81);
-    ASSERT(regionTagSet.getNumTags() == 2);
-    ASSERT(regionTagSet.getRegionTag(0).getOffset() == b(0) && regionTagSet.getRegionTag(0).getLength() == b(1000));
-    ASSERT(regionTagSet.getRegionTag(1).getOffset() == b(1000) && regionTagSet.getRegionTag(1).getLength() == b(1000));
+    ASSERT(regionTagSet.getNumTags() == 4);
+    ASSERT(regionTagSet.getRegionTag(0).getOffset() == b(0) && regionTagSet.getRegionTag(0).getLength() == b(500));
+    ASSERT(regionTagSet.getRegionTag(1).getOffset() == b(500) && regionTagSet.getRegionTag(1).getLength() == b(500));
+    ASSERT(regionTagSet.getRegionTag(2).getOffset() == b(1000) && regionTagSet.getRegionTag(1).getLength() == b(500));
+    ASSERT(regionTagSet.getRegionTag(3).getOffset() == b(1500) && regionTagSet.getRegionTag(1).getLength() == b(500));
     }
 
     { // 7. addTag
-    RegionTagSet regionTagSet;
-    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    SharingRegionTagSet regionTagSet;
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(2000), b(1000));
     ASSERT(tag1 != nullptr);
     ASSERT(regionTagSet.getNumTags() == 1);
-    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)), "is present");
-    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(100), b(800)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(-100), b(200)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(900), b(200)), "Overlapping");
-    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(-100), b(100)) != nullptr);
-    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(1000), b(100)) != nullptr);
-    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(2000), b(1000)) != nullptr);
-    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(-2000), b(1000)) != nullptr);
+    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(2000), b(1000)), "is present");
+    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(2100), b(800)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(1900), b(200)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(2900), b(200)), "Overlapping");
+    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(1900), b(100)) != nullptr);
+    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(3000), b(100)) != nullptr);
+    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(4000), b(1000)) != nullptr);
+    ASSERT(regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)) != nullptr);
     }
 
     { // 8. addTagIfAbsent
-    RegionTagSet regionTagSet;
-    const auto& tag1 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
-    const auto& tag2 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
+    SharingRegionTagSet regionTagSet;
+    const auto& tag1 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(2000), b(1000)).get();
+    const auto& tag2 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(2000), b(1000)).get();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     ASSERT(regionTagSet.getNumTags() == 1);
-    ASSERT_ERROR(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(100), b(800)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(-100), b(200)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(900), b(200)), "Overlapping");
-    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(-100), b(100)) != nullptr);
-    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(1000), b(100)) != nullptr);
-    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(2000), b(1000)) != nullptr);
-    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(-2000), b(1000)) != nullptr);
+    ASSERT_ERROR(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(2100), b(800)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(1900), b(200)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(2900), b(200)), "Overlapping");
+    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(1900), b(100)) != nullptr);
+    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(3000), b(100)) != nullptr);
+    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(4000), b(1000)) != nullptr);
+    ASSERT(regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000)) != nullptr);
     }
 
     { // 9. removeTag
-    RegionTagSet regionTagSet;
-    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
-    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(100), b(800)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(-100), b(200)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(900), b(200)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(-100), b(100)), "is absent");
-    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(1000), b(100)), "is absent");
+    SharingRegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(2000), b(1000)), "is absent");
-    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(-2000), b(1000)), "is absent");
-    const auto& tag2 = regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(2000), b(1000)).get();
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(2100), b(800)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(1900), b(200)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(2900), b(200)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(1900), b(100)), "is absent");
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(3000), b(100)), "is absent");
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(4000), b(1000)), "is absent");
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
+    const auto& tag2 = regionTagSet.removeTag<CreationTimeTag>(b(2000), b(1000)).get();
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(2000), b(1000)), "is absent");
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     ASSERT(regionTagSet.getNumTags() == 0);
     }
 
     { // 10. removeTagIfPresent
-    RegionTagSet regionTagSet;
-    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
-    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(100), b(800)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(-100), b(200)), "Overlapping");
-    ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(900), b(200)), "Overlapping");
-    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(-100), b(100)) == nullptr);
-    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(1000), b(100)) == nullptr);
+    SharingRegionTagSet regionTagSet;
     ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(2000), b(1000)) == nullptr);
-    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(-2000), b(1000)) == nullptr);
-    const auto& tag2 = regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000));
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(2000), b(1000)).get();
+    ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(2100), b(800)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(1900), b(200)), "Overlapping");
+    ASSERT_ERROR(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(2900), b(200)), "Overlapping");
+    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(1900), b(100)) == nullptr);
+    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(3000), b(100)) == nullptr);
+    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(4000), b(1000)) == nullptr);
+    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
+    const auto& tag2 = regionTagSet.removeTagIfPresent<CreationTimeTag>(b(2000), b(1000)).get();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     ASSERT(regionTagSet.getNumTags() == 0);
-    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
+    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(2000), b(1000)) == nullptr);
     }
 
-    { // 11. removeAllTags
-    RegionTagSet regionTagSet;
+    { // 11. removeTagsWherePresent
+    SharingRegionTagSet regionTagSet;
     ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
     tag1->setCreationTime(42);
-    const auto& tags1 = regionTagSet.removeAllTags<CreationTimeTag>(b(0), b(1000));
+    const auto& tags1 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(0), b(1000));
     ASSERT(tags1.size() == 1);
     ASSERT(tags1[0].getOffset() == b(0) && tags1[0].getLength() == b(1000));
     const auto& tag2 = tags1[0].getTag();
@@ -1767,7 +1816,7 @@ static void testRegionTagSet()
     tag3->setCreationTime(42);
     const auto& tag4 = regionTagSet.addTag<CreationTimeTag>(b(1000), b(1000));
     tag4->setCreationTime(81);
-    const auto& tags2 = regionTagSet.removeAllTags<CreationTimeTag>(b(500), b(1000));
+    const auto& tags2 = regionTagSet.removeTagsWherePresent<CreationTimeTag>(b(500), b(1000));
     ASSERT(tags2.size() == 2);
     ASSERT(tags2[0].getOffset() == b(500) && tags2[0].getLength() == b(500));
     ASSERT(tags2[1].getOffset() == b(1000) && tags2[1].getLength() == b(500));
@@ -1783,8 +1832,8 @@ static void testRegionTagSet()
     }
 
     { // 12. copyTags
-    RegionTagSet regionTagSet1;
-    RegionTagSet regionTagSet2;
+    SharingRegionTagSet regionTagSet1;
+    SharingRegionTagSet regionTagSet2;
     regionTagSet2.copyTags(regionTagSet1, b(0), b(0), b(1000));
     ASSERT(regionTagSet2.getNumTags() == 0);
     regionTagSet1.addTag<CreationTimeTag>(b(0), b(1000));
@@ -1793,7 +1842,7 @@ static void testRegionTagSet()
     }
 }
 
-static void testChunkTags()
+static void testChunkRegionTags()
 {
     // FieldsChunk
     auto chunk1 = makeShared<IpHeader>();
@@ -1836,6 +1885,36 @@ static void testPacketTags()
     packet1.popAtFront<TcpHeader>();
     const auto& tag3 = packet1.getTag<CreationTimeTag>();
     ASSERT(tag3 == tag2);
+
+    // 4. copy on write for duplicated packet
+    Packet packet2;
+    packet2.insertAtBack(makeImmutableByteCountChunk(B(1000)));
+    const auto& tag4 = packet2.addTag<CreationTimeTag>();
+    tag4->setCreationTime(42);
+    auto packet3 = packet2.dup();
+    auto tag5 = packet3->getTagForUpdate<CreationTimeTag>();
+    tag5->setCreationTime(0);
+    auto tag6 = packet2.getTag<CreationTimeTag>();
+    ASSERT(tag6->getCreationTime() == 42);
+    auto tag7 = packet3->getTag<CreationTimeTag>();
+    ASSERT(tag7->getCreationTime() == 0);
+}
+
+static void testPacketRegionTags()
+{
+    {
+    // 1. copy on write for duplicated packet
+    Packet packet1;
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(1000)));
+    auto timeTag = packet1.addRegionTag<CreationTimeTag>(B(0), B(1000));
+    timeTag->setCreationTime(42);
+    auto packet2 = packet1.dup();
+    packet2->mapAllRegionTagsForUpdate<CreationTimeTag>(B(0), B(1000), [&] (b o, b l, const Ptr<CreationTimeTag>& timeTag) {
+        timeTag->setCreationTime(0);
+    });
+    ASSERT(packet1.getRegionTag<CreationTimeTag>(B(0), B(1000))->getCreationTime() == 42);
+    ASSERT(packet2->getRegionTag<CreationTimeTag>(B(0), B(1000))->getCreationTime() == 0);
+    }
 }
 
 static void testRegionTags()
@@ -1901,6 +1980,64 @@ static void testRegionTags()
     }
 }
 
+static void testIdentityTag()
+{
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    chunk->clearTags(B(0), B(500));
+    auto regions = chunk->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 1);
+    ASSERT(regions[0].getOffset() == B(500));
+    ASSERT(regions[0].getLength() == B(500));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart + 4000);
+    }
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    chunk->clearTags(B(500), B(500));
+    auto regions = chunk->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 1);
+    ASSERT(regions[0].getOffset() == B(0));
+    ASSERT(regions[0].getLength() == B(500));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart);
+    }
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    chunk->clearTags(B(100), B(800));
+    auto regions = chunk->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 2);
+    ASSERT(regions[0].getOffset() == B(0));
+    ASSERT(regions[0].getLength() == B(100));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart);
+    ASSERT(regions[1].getOffset() == B(900));
+    ASSERT(regions[1].getLength() == B(100));
+    ASSERT(regions[1].getTag()->getIdentityStart() == identityStart + 7200);
+    }
+    {
+    auto chunk = makeShared<ByteCountChunk>(B(1000));
+    auto tag = chunk->addTag<IdentityTag>(B(0), B(1000));
+    auto identityStart = IdentityTag::getNextIdentityStart(chunk->getChunkLength());
+    tag->setIdentityStart(identityStart);
+    Packet packet;
+    packet.insertAtFront(makeShared<ByteCountChunk>(B(500)));
+    packet.insertAtFront(chunk);
+    packet.insertAtFront(makeShared<ByteCountChunk>(B(500)));
+    auto regions = packet.peekAll()->getAllTags<IdentityTag>();
+    ASSERT(regions.size() == 1);
+    ASSERT(regions[0].getOffset() == B(500));
+    ASSERT(regions[0].getLength() == B(1000));
+    ASSERT(regions[0].getTag()->getIdentityStart() == identityStart + 4000);
+    }
+}
+
 void UnitTest::initialize()
 {
     testMutable();
@@ -1916,6 +2053,7 @@ void UnitTest::initialize()
     testTrailer();
     testFrontPopOffset();
     testBackPopOffset();
+    testUpdate();
     testEncapsulation();
     testAggregation();
     testFragmentation();
@@ -1939,9 +2077,11 @@ void UnitTest::initialize()
     testReorderBuffer();
     testTagSet();
     testRegionTagSet();
-    testChunkTags();
+    testChunkRegionTags();
     testPacketTags();
+    testPacketRegionTags();
     testRegionTags();
+    testIdentityTag();
 }
 
 } // namespace

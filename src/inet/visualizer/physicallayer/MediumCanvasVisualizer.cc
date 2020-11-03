@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <algorithm>
@@ -75,7 +75,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         }
         animationSpeedInterpolator.setCurrentAnimationSpeed(0);
         animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, 0, 0);
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
     else if (stage == INITSTAGE_LAST) {
         canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
@@ -936,7 +936,7 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
 
 void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleRadioAdded");
     auto module = check_and_cast<const cModule *>(radio);
     auto networkNode = getContainingNode(module);
     if (networkNodeFilter.matches(networkNode)) {
@@ -1003,7 +1003,7 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
 
 void MediumCanvasVisualizer::handleRadioRemoved(const IRadio *radio)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleRadioRemoved");
     auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
     auto networkNode = getContainingNode(module);
     if (networkNodeFilter.matches(networkNode)) {
@@ -1025,7 +1025,7 @@ void MediumCanvasVisualizer::handleRadioRemoved(const IRadio *radio)
 
 void MediumCanvasVisualizer::handleSignalAdded(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalAdded");
     MediumVisualizerBase::handleSignalAdded(transmission);
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
@@ -1042,7 +1042,7 @@ void MediumCanvasVisualizer::handleSignalAdded(const ITransmission *transmission
 
 void MediumCanvasVisualizer::handleSignalRemoved(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalRemoved");
     MediumVisualizerBase::handleSignalRemoved(transmission);
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
@@ -1060,7 +1060,7 @@ void MediumCanvasVisualizer::handleSignalRemoved(const ITransmission *transmissi
 
 void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalDepartureStarted");
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
@@ -1086,7 +1086,7 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
 
 void MediumCanvasVisualizer::handleSignalDepartureEnded(const ITransmission *transmission)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalDepartureEnded");
     if (matchesTransmission(transmission)) {
         invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
@@ -1104,7 +1104,7 @@ void MediumCanvasVisualizer::handleSignalDepartureEnded(const ITransmission *tra
 
 void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *reception)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalArrivalStarted");
     MediumVisualizerBase::handleSignalArrivalStarted(reception);
     if (matchesTransmission(reception->getTransmission())) {
         invalidDisplay = true;
@@ -1144,7 +1144,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
 
 void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *reception)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleSignalArrivalEnded");
     if (matchesTransmission(reception->getTransmission())) {
         invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
@@ -1163,8 +1163,10 @@ void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *receptio
 
 void MediumCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signal == IMobility::mobilityStateChangedSignal)
+    if (signal == IMobility::mobilityStateChangedSignal) {
+        Enter_Method("receiveSignal");
         invalidDisplay = true;
+    }
     else
         MediumVisualizerBase::receiveSignal(source, signal, object, details);
 }

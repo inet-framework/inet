@@ -57,6 +57,9 @@ Note that the division of the simulated and real parts of the network is
 arbitrary; INET has support for dividing the network at other levels of the
 protocol stack; for example, at the link layer.
 
+For an more information on emulation
+in INET, read the :doc:`Emulation section </users-guide/ch-emulation>` in the User's Guide.
+
 The Simulation Setup
 --------------------
 

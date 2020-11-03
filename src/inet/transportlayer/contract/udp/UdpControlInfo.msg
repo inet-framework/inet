@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004,2011 Andras Varga
+// Copyright (C) 2004,2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 import inet.common.INETDefs;
@@ -212,7 +213,7 @@ class UdpSetDscpCommand extends UdpSetOptionCommand
 }
 
 //
-// Control info for setting the TOS (Type Of Service) / Traffic Class 
+// Control info for setting the TOS (Type Of Service) / Traffic Class
 // header field on outgoing Ipv4/Ipv6 packets sent from an Udp socket.
 // This is a 8-bit field.
 // To set the option, send a message to  the ~Udp module with kind=UDP_C_SETOPTION

@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /* -*- mode:c++ -*- ********************************************************
  * file:        Flooding.cc
  *
@@ -6,13 +21,6 @@
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
  *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
  *
  ***************************************************************************
  * part of:     framework implementation developed by tkn
@@ -289,9 +297,8 @@ void Flooding::encapsulate(Packet *appPkt)
     auto pkt = makeShared<FloodingHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(b(headerLength));
 
-    auto hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();
+    auto& hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();
     int ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
-    delete hopLimitReq;
     if (ttl == -1)
         ttl = defaultTtl;
 
@@ -299,7 +306,7 @@ void Flooding::encapsulate(Packet *appPkt)
     seqNum++;
     pkt->setTtl(ttl);
 
-    auto addressReq = appPkt->findTag<L3AddressReq>();
+    const auto& addressReq = appPkt->findTag<L3AddressReq>();
     if (addressReq == nullptr) {
         EV << "warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";

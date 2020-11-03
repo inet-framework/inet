@@ -55,10 +55,10 @@ void LoRaTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& LoRaTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LoRaTransmitter";
-    return FlatTransmitterBase::printToStream(stream, level);
+    return FlatTransmitterBase::printToStream(stream, level, evFlags);
 }
 
 

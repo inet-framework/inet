@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2008 Andras Varga
+// Copyright (C) 2008 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_IPV4ROUTE_H
@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 class IIpv4RoutingTable;
 
 /**
@@ -39,7 +39,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     Ipv4Address dest;    ///< Destination
     Ipv4Address netmask;    ///< Route mask
     Ipv4Address gateway;    ///< Next hop
-    InterfaceEntry *interfacePtr;    ///< interface
+    NetworkInterface *interfacePtr;    ///< interface
     SourceType sourceType;    ///< manual, routing prot, etc.
     unsigned int adminDist;    ///< Cisco like administrative distance
     int metric;    ///< Metric ("cost" to reach the destination)
@@ -59,7 +59,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
         metric(0), source(nullptr), protocolData(nullptr) {}
     virtual ~Ipv4Route();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     bool operator==(const Ipv4Route& route) const { return equals(route); }
     bool operator!=(const Ipv4Route& route) const { return !equals(route); }
@@ -75,7 +75,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setDestination(Ipv4Address _dest) { if (dest != _dest) { dest = _dest; changed(F_DESTINATION); } }
     virtual void setNetmask(Ipv4Address _netmask) { if (netmask != _netmask) { netmask = _netmask; changed(F_PREFIX_LENGTH); } }
     virtual void setGateway(Ipv4Address _gateway) { if (gateway != _gateway) { gateway = _gateway; changed(F_NEXTHOP); } }
-    virtual void setInterface(InterfaceEntry *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
+    virtual void setInterface(NetworkInterface *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
     virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
     const char* getSourceTypeAbbreviation() const;
     virtual void setAdminDist(unsigned int _adminDist) override { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
@@ -91,7 +91,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     Ipv4Address getGateway() const { return gateway; }
 
     /** Next hop interface */
-    InterfaceEntry *getInterface() const override { return interfacePtr; }
+    NetworkInterface *getInterface() const override { return interfacePtr; }
 
     /** Convenience method */
     const char *getInterfaceName() const;
@@ -172,7 +172,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     Ipv4MulticastRoute() : rt(nullptr), inInterface(nullptr), sourceType(MANUAL), source(nullptr), metric(0) {}
     virtual ~Ipv4MulticastRoute();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(IIpv4RoutingTable *rt) { this->rt = rt; }
@@ -193,7 +193,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void setInInterface(InInterface *_inInterface) override;
     virtual void clearOutInterfaces() override;
     virtual void addOutInterface(OutInterface *outInterface) override;
-    virtual bool removeOutInterface(const InterfaceEntry *ie) override;
+    virtual bool removeOutInterface(const NetworkInterface *ie) override;
     virtual void removeOutInterface(unsigned int i) override;
     virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
     virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
@@ -240,5 +240,5 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
 
 } // namespace inet
 
-#endif    // __INET_IPv4ROUTE_H
+#endif
 

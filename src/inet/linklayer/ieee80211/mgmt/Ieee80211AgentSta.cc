@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2006 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETUtils.h"
@@ -60,7 +60,7 @@ void Ieee80211AgentSta::initialize(int stage)
         simtime_t startingTime = par("startingTime");
         if (startingTime < SIMTIME_ZERO)
             startingTime = uniform(SIMTIME_ZERO, maxChannelTime);
-        scheduleAt(simTime() + startingTime, new cMessage("startUp", MK_STARTUP));
+        scheduleAfter(startingTime, new cMessage("startUp", MK_STARTUP));
 
         myIface = nullptr;
     }
@@ -116,7 +116,7 @@ void Ieee80211AgentSta::handleResponse(cMessage *msg)
 
 void Ieee80211AgentSta::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 
     if (signalID == l2BeaconLostSignal) {
@@ -305,7 +305,7 @@ void Ieee80211AgentSta::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
         // we are happy!
         getContainingNode(this)->bubble("Associated with AP");
         if (prevAP.isUnspecified() || prevAP != resp->getAddress()) {
-            emit(l2AssociatedNewApSignal, myIface);    //XXX detail: InterfaceEntry?
+            emit(l2AssociatedNewApSignal, myIface);    //XXX detail: NetworkInterface?
             prevAP = resp->getAddress();
         }
         else
@@ -324,7 +324,7 @@ void Ieee80211AgentSta::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
     }
     else {
         EV << "Reassociation successful\n";
-        emit(l2AssociatedOldApSignal, myIface);    //XXX detail: InterfaceEntry?
+        emit(l2AssociatedOldApSignal, myIface);    //XXX detail: NetworkInterface?
         emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
         // we are happy!
     }

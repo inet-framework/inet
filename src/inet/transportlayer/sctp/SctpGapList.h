@@ -8,12 +8,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_SCTPGAPLIST_H
@@ -36,41 +36,41 @@ class INET_API SctpSimpleGapList
     SctpSimpleGapList();
     ~SctpSimpleGapList();
 
-    void check(const uint32 cTsnAck) const;
+    void check(const uint32_t cTsnAck) const;
     void print(std::ostream& os) const;
 
-    uint32 getNumGaps() const
+    uint32_t getNumGaps() const
     {
         return NumGaps;
     }
 
-    uint32 getGapStart(const uint32 index) const
+    uint32_t getGapStart(const uint32_t index) const
     {
         assert(index < NumGaps);
         return GapStartList[index];
     }
 
-    uint32 getGapStop(const uint32 index) const
+    uint32_t getGapStop(const uint32_t index) const
     {
         assert(index < NumGaps);
         return GapStopList[index];
     }
 
-    bool tsnInGapList(const uint32 tsn) const;
-    void forwardCumAckTsn(const uint32 cTsnAck);
-    bool tryToAdvanceCumAckTsn(uint32& cTsnAck);
-    void removeFromGapList(const uint32 removedTsn);
-    bool updateGapList(const uint32 receivedTsn,
-            uint32& cTsnAck,
+    bool tsnInGapList(const uint32_t tsn) const;
+    void forwardCumAckTsn(const uint32_t cTsnAck);
+    bool tryToAdvanceCumAckTsn(uint32_t& cTsnAck);
+    void removeFromGapList(const uint32_t removedTsn);
+    bool updateGapList(const uint32_t receivedTsn,
+            uint32_t& cTsnAck,
             bool& newChunkReceived);
     void resetGaps();
 
     // ====== Private data ===================================================
 
   private:
-    uint32 NumGaps;
-    uint32 GapStartList[MAX_GAP_COUNT];
-    uint32 GapStopList[MAX_GAP_COUNT];
+    uint32_t NumGaps;
+    uint32_t GapStartList[MAX_GAP_COUNT];
+    uint32_t GapStopList[MAX_GAP_COUNT];
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, const SctpSimpleGapList& gapList) { gapList.print(ostr); return ostr; }
@@ -81,18 +81,18 @@ class INET_API SctpGapList
     SctpGapList();
     ~SctpGapList();
 
-    void setInitialCumAckTsn(const uint32 cumAckTsn)
+    void setInitialCumAckTsn(const uint32_t cumAckTsn)
     {
         assert(CombinedGapList.getNumGaps() == 0);
         CumAckTsn = cumAckTsn;
     }
 
-    uint32 getCumAckTsn() const
+    uint32_t getCumAckTsn() const
     {
         return CumAckTsn;
     }
 
-    uint32 getHighestTsnReceived() const
+    uint32_t getHighestTsnReceived() const
     {
         if (CombinedGapList.getNumGaps() > 0) {
             return CombinedGapList.getGapStop(CombinedGapList.getNumGaps() - 1);
@@ -108,7 +108,7 @@ class INET_API SctpGapList
         GT_NonRevokable = 2
     };
 
-    uint32 getNumGaps(const GapType type) const
+    uint32_t getNumGaps(const GapType type) const
     {
         if (type == GT_Revokable) {
             return RevokableGapList.getNumGaps();
@@ -121,22 +121,22 @@ class INET_API SctpGapList
         }
     }
 
-    bool tsnInGapList(const uint32 tsn) const
+    bool tsnInGapList(const uint32_t tsn) const
     {
         return CombinedGapList.tsnInGapList(tsn);
     }
 
-    bool tsnIsRevokable(const uint32 tsn) const
+    bool tsnIsRevokable(const uint32_t tsn) const
     {
         return RevokableGapList.tsnInGapList(tsn);
     }
 
-    bool tsnIsNonRevokable(const uint32 tsn) const
+    bool tsnIsNonRevokable(const uint32_t tsn) const
     {
         return NonRevokableGapList.tsnInGapList(tsn);
     }
 
-    uint32 getGapStart(const GapType type, const uint32 index) const
+    uint32_t getGapStart(const GapType type, const uint32_t index) const
     {
         if (type == GT_Revokable) {
             return RevokableGapList.getGapStart(index);
@@ -149,7 +149,7 @@ class INET_API SctpGapList
         }
     }
 
-    uint32 getGapStop(const GapType type, const uint32 index) const
+    uint32_t getGapStop(const GapType type, const uint32_t index) const
     {
         if (type == GT_Revokable) {
             return RevokableGapList.getGapStop(index);
@@ -165,18 +165,18 @@ class INET_API SctpGapList
     void check() const;
     void print(std::ostream& os) const;
 
-    void forwardCumAckTsn(const uint32 cumAckTsn);
+    void forwardCumAckTsn(const uint32_t cumAckTsn);
     bool tryToAdvanceCumAckTsn();
-    void removeFromGapList(const uint32 removedTsn);
-    bool updateGapList(const uint32 receivedTsn,
+    void removeFromGapList(const uint32_t removedTsn);
+    bool updateGapList(const uint32_t receivedTsn,
             bool& newChunkReceived,
             bool tsnIsRevokable = true);
-    void resetGaps(const uint32 newCumAck);
+    void resetGaps(const uint32_t newCumAck);
 
     // ====== Private data ===================================================
 
   private:
-    uint32 CumAckTsn;
+    uint32_t CumAckTsn;
     SctpSimpleGapList RevokableGapList;
     SctpSimpleGapList NonRevokableGapList;
     SctpSimpleGapList CombinedGapList;
@@ -187,5 +187,5 @@ inline std::ostream& operator<<(std::ostream& ostr, const SctpGapList& gapList) 
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPGAPLIST_H
+#endif
 

@@ -8,18 +8,18 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/applications/packetdrill/PacketDrillApp.h"
 #include "inet/applications/packetdrill/PacketDrillInfo_m.h"
 #include "inet/applications/packetdrill/PacketDrillUtils.h"
@@ -86,14 +86,14 @@ void PacketDrillApp::initialize(int stage)
         const char *interface = par("interface");
         //const char *interfaceTableModule = par("interfaceTableModule");
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByName(interface);
-        if (interfaceEntry == nullptr)
+        NetworkInterface *networkInterface = interfaceTable->findInterfaceByName(interface);
+        if (networkInterface == nullptr)
             throw cRuntimeError("TUN interface not found: %s", interface);
-        auto *idat = interfaceEntry->getProtocolData<Ipv4InterfaceData>();
+        auto idat = networkInterface->getProtocolDataForUpdate<Ipv4InterfaceData>();
         idat->setIPAddress(localAddress.toIpv4());
         tunSocket.setOutputGate(gate("socketOut"));
-        tunSocket.open(interfaceEntry->getInterfaceId());
-        tunInterfaceId = interfaceEntry->getInterfaceId();
+        tunSocket.open(networkInterface->getInterfaceId());
+        tunInterfaceId = networkInterface->getInterfaceId();
         tunSocketId = tunSocket.getSocketId();
 
         cMessage* timeMsg = new cMessage("PacketDrillAppTimer", MSGKIND_START);
@@ -210,7 +210,7 @@ void PacketDrillApp::socketDataNotificationArrived(SctpSocket *socket, Message *
 {
     if (recvFromSet) {
         Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
-        SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
+        auto cmd = cmsg->addTag<SctpSendReq>();
         cmd->setSocketId(sctpAssocId);
         cmsg->addTag<SocketReq>()->setSocketId(sctpAssocId);
         cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
@@ -383,9 +383,8 @@ void PacketDrillApp::scheduleEvent()
     PacketDrillEvent *event = check_and_cast<PacketDrillEvent *>(script->getEventList()->get(eventCounter));
     event->setEventNumber(eventCounter);
     adjustTimes(event);
-    cancelEvent(eventTimer);
     eventTimer->setContextPointer(event);
-    scheduleAt(event->getEventTime(), eventTimer);
+    rescheduleAt(event->getEventTime(), eventTimer);
 }
 
 void PacketDrillApp::runEvent(PacketDrillEvent* event)
@@ -420,8 +419,8 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
             else if (protocol == IP_PROT_SCTP) {
                 auto sctpHeader = pk->removeAtFront<SctpHeader>();
                 sctpHeader->setVTag(peerVTag);
-                int32 noChunks = sctpHeader->getSctpChunksArraySize();
-                for (int32 cc = 0; cc < noChunks; cc++) {
+                int32_t noChunks = sctpHeader->getSctpChunksArraySize();
+                for (int32_t cc = 0; cc < noChunks; cc++) {
                     SctpChunk *chunk = const_cast<SctpChunk *>(sctpHeader->getSctpChunks(cc));
                     unsigned char chunkType = chunk->getSctpChunkType();
                     switch (chunkType) {
@@ -640,9 +639,9 @@ void PacketDrillApp::closeAllSockets()
     tunSocket.send(pk);
 }
 
-bool PacketDrillApp::findSeqNumMap(uint32 num)
+bool PacketDrillApp::findSeqNumMap(uint32_t num)
 {
-    std::map<uint32, uint32>::iterator it;
+    std::map<uint32_t, uint32_t>::iterator it;
 
     it = seqNumMap.find(num);
     if (it != seqNumMap.end())
@@ -884,10 +883,10 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
         case IP_PROT_SCTP: {
             Packet* cmsg = new Packet("AppData", SCTP_C_SEND_ORDERED);
             auto applicationData = makeShared<BytesChunk>();
-            uint32 sendBytes = syscall->result->getNum();
+            uint32_t sendBytes = syscall->result->getNum();
             std::vector<uint8_t> vec;
             vec.resize(sendBytes);
-            for (uint32 i = 0; i < sendBytes; i++)
+            for (uint32_t i = 0; i < sendBytes; i++)
                 vec[i] = (bytesSent + i) & 0xFF;
             applicationData->setBytes(vec);
             applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -1021,14 +1020,14 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_RESET_STREAMS: {
             struct sctp_reset_streams_expr *rs = exp->getResetStreams();
             Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_STREAM_RESET);
-            SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
+            auto rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(rs->srs_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
             if (rs->srs_number_streams->getNum() > 0 && rs->srs_stream_list != nullptr) {
                 rinfo->setStreamsArraySize(rs->srs_number_streams->getNum());
                 cQueue *qu = rs->srs_stream_list->getList();
-                uint16 i = 0;
+                uint16_t i = 0;
                 for (cQueue::Iterator iter(*qu); !iter.end(); iter++, i++) {
                     rinfo->setStreams(i, check_and_cast<PacketDrillExpression *>(*iter)->getNum());
                     qu->remove((*iter));
@@ -1053,7 +1052,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_ADD_STREAMS: {
             struct sctp_add_streams_expr *as = exp->getAddStreams();
             Message *cmsg = new Message("SCTP_C_ADD_STREAMS", SCTP_C_ADD_STREAMS);
-            SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
+            auto rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(as->sas_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1123,7 +1122,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                     break;
                 case SCTP_RESET_ASSOC: {
                     Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_RESET_ASSOC);
-                    SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
+                    auto rinfo = cmsg->addTag<SctpResetReq>();
                     rinfo->setSocketId(-1);
                     rinfo->setFd(value);
                     rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1231,8 +1230,8 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
 {
     int script_fd, count;
     PacketDrillExpression *exp;
-    uint32 flags, ppid, ttl, context;
-    uint16 stream_no;
+    uint32_t flags, ppid, ttl, context;
+    uint16_t stream_no;
 
     if (args->getLength() != 10)
         return STATUS_ERR;
@@ -1270,11 +1269,11 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
         return STATUS_ERR;
 
     Packet* cmsg = new Packet("AppData");
-    uint32 sendBytes = syscall->result->getNum();
+    uint32_t sendBytes = syscall->result->getNum();
     auto applicationData = makeShared<BytesChunk>();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (uint32 i = 0; i < sendBytes; i++)
+    for (uint32_t i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -1297,8 +1296,8 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
 {
     int script_fd, count;
     PacketDrillExpression *exp;
-    uint16 sid = 0, ssn = 0;
-    uint32 ppid = 0;
+    uint16_t sid = 0, ssn = 0;
+    uint32_t ppid = 0;
 
     if (syscall->result->getNum() == -1) {
         return STATUS_OK;
@@ -1323,10 +1322,10 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     }
     Packet* cmsg = new Packet("AppData");
     auto applicationData = makeShared<BytesChunk>();
-    uint32 sendBytes = syscall->result->getNum();
+    uint32_t sendBytes = syscall->result->getNum();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (uint32 i = 0; i < sendBytes; i++)
+    for (uint32_t i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -1378,7 +1377,7 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                 }
                 case IP_PROT_SCTP: {
                     Packet* pkt = new Packet("dataRequest", SCTP_C_RECEIVE);
-                    SctpSendReq *sctpcmd = pkt->addTag<SctpSendReq>();
+                    auto sctpcmd = pkt->addTag<SctpSendReq>();
                     sctpcmd->setSocketId(sctpAssocId);
                     sctpcmd->setSid(0);
                     pkt->addTag<SocketReq>()->setSocketId(sctpAssocId);
@@ -1763,14 +1762,14 @@ bool PacketDrillApp::compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, 
         return false;
     }
 
-    const uint32 numberOfChunks = storedSctp->getSctpChunksArraySize();
-    for (uint32 i = 0; i < numberOfChunks; i++) {
+    const uint32_t numberOfChunks = storedSctp->getSctpChunksArraySize();
+    for (uint32_t i = 0; i < numberOfChunks; i++) {
         const SctpChunk* storedHeader = storedSctp->getSctpChunks(i);
         const SctpChunk* liveHeader = liveSctp->getSctpChunks(i);
         if (!(storedHeader->getSctpChunkType() == liveHeader->getSctpChunkType())) {
             return false;
         }
-        const uint8 type = storedHeader->getSctpChunkType();
+        const uint8_t type = storedHeader->getSctpChunkType();
 
         if ((type != INIT && type != INIT_ACK) && type != ABORT && (liveSctp->getVTag() != localVTag)) {
             EV_DETAIL << " VTag " << liveSctp->getVTag() << " incorrect. Should be " << localVTag << " peerVTag="
@@ -1899,7 +1898,7 @@ bool PacketDrillApp::compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, 
 
 bool PacketDrillApp::compareDataPacket(const SctpDataChunk* storedDataChunk, const SctpDataChunk* liveDataChunk)
 {
-    uint32 flags = storedDataChunk->getFlags();
+    uint32_t flags = storedDataChunk->getFlags();
     if (!(flags & FLAG_CHUNK_LENGTH_NOCHECK))
         if (storedDataChunk->getByteLength() != liveDataChunk->getByteLength())
             return false;
@@ -1928,7 +1927,7 @@ bool PacketDrillApp::compareDataPacket(const SctpDataChunk* storedDataChunk, con
 
 bool PacketDrillApp::compareInitPacket(const SctpInitChunk* storedInitChunk, const SctpInitChunk* liveInitChunk)
 {
-    uint32 flags = storedInitChunk->getFlags();
+    uint32_t flags = storedInitChunk->getFlags();
     peerVTag = liveInitChunk->getInitTag();
     localDiffTsn = liveInitChunk->getInitTsn() - initLocalTsn;
     initPeerTsn = liveInitChunk->getInitTsn();
@@ -1955,7 +1954,7 @@ bool PacketDrillApp::compareInitPacket(const SctpInitChunk* storedInitChunk, con
 
 bool PacketDrillApp::compareInitAckPacket(const SctpInitAckChunk* storedInitAckChunk, const SctpInitAckChunk* liveInitAckChunk)
 {
-    uint32 flags = storedInitAckChunk->getFlags();
+    uint32_t flags = storedInitAckChunk->getFlags();
     peerVTag = liveInitAckChunk->getInitTag();
     localDiffTsn = liveInitAckChunk->getInitTsn() - initLocalTsn;
     initPeerTsn = liveInitAckChunk->getInitTsn();
@@ -1982,7 +1981,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
 {
     bool found = false;
 
-    uint32 flags = storedReconfigChunk->getFlags();
+    uint32_t flags = storedReconfigChunk->getFlags();
     if (!(storedReconfigChunk->getParametersArraySize() == liveReconfigChunk->getParametersArraySize())) {
         return false;
     }
@@ -2020,7 +2019,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
                 if (!(storedoutparam->getStreamNumbersArraySize() == liveoutparam->getStreamNumbersArraySize()))
                     return false;
                 if (storedoutparam->getStreamNumbersArraySize() > 0) {
-                    for (uint16 i = 0; i < storedoutparam->getStreamNumbersArraySize(); i++) {
+                    for (uint16_t i = 0; i < storedoutparam->getStreamNumbersArraySize(); i++) {
                         if (!(storedoutparam->getStreamNumbers(i) == liveoutparam->getStreamNumbers(i)))
                             return false;
                     }
@@ -2050,7 +2049,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
                 if (!(storedinparam->getStreamNumbersArraySize() == liveinparam->getStreamNumbersArraySize()))
                     return false;
                 if (storedinparam->getStreamNumbersArraySize() > 0) {
-                    for (uint16 i = 0; i < storedinparam->getStreamNumbersArraySize(); i++) {
+                    for (uint16_t i = 0; i < storedinparam->getStreamNumbersArraySize(); i++) {
                         if (!(storedinparam->getStreamNumbers(i) == liveinparam->getStreamNumbers(i)))
                             return false;
                     }
@@ -2160,7 +2159,7 @@ bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedRec
 
 bool PacketDrillApp::compareSackPacket(const SctpSackChunk *storedSackChunk, const SctpSackChunk *liveSackChunk)
 {
-    uint32 flags = storedSackChunk->getFlags();
+    uint32_t flags = storedSackChunk->getFlags();
     if (!(flags & FLAG_SACK_CHUNK_CUM_TSN_NOCHECK))
         if (!(storedSackChunk->getCumTsnAck() == liveSackChunk->getCumTsnAck()))
             return false;

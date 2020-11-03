@@ -10,7 +10,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 import inet.common.INETDefs;
@@ -37,7 +37,7 @@ enum RtcpPacketType
 class RtcpPacket extends FieldsChunk
 {
     chunkLength = B(4);
-    int8 version = 2;
+    int8_t version = 2;
     bool padding = 0;   // (1 bits) Used to indicate if there are extra padding bytes at the end of the RTP packet. A padding might be used to fill up a block of certain size, for example as required by an encryption algorithm. The last byte of the padding contains the number of padding bytes that were added (including itself).
     short count = 0;    // RC (Reception report count ): (5 bits) The number of reception report blocks contained in this packet. A value of zero is valid.
     RtcpPacketType packetType = RTCP_PT_UNDEF;      // (8 bits) Contains a constant to identify RTCP packet type.
@@ -54,7 +54,7 @@ class RtcpReceiverReportPacket extends RtcpPacket
 {
     packetType = RTCP_PT_RR;
     chunkLength = getChunkLength() + B(4);
-    uint32 ssrc = 0;
+    uint32_t ssrc = 0;
     cArray receptionReports;
 }
 
@@ -80,7 +80,7 @@ class RtcpByePacket extends RtcpPacket
     packetType = RTCP_PT_BYE;
     chunkLength = getChunkLength() + B(4);
     count = 1;
-    uint32 ssrc = 0;
+    uint32_t ssrc = 0;
 }
 
 class RtcpSenderReportPacket extends RtcpReceiverReportPacket

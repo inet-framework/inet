@@ -143,7 +143,7 @@ void NS_CLASS write_to_log_file(char *msg, int len)
 #endif
 }
 
-const char *packet_type(uint32 type)
+const char *packet_type(uint32_t type)
 {
     static char temp[50];
 

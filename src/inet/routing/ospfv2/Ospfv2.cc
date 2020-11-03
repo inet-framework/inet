@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <map>
@@ -55,8 +56,7 @@ void Ospfv2::initialize(int stage)
         startupTimer = new cMessage("OSPF-startup");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {  // interfaces and static routes are already initialized
-        registerService(Protocol::ospf, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -105,25 +105,25 @@ void Ospfv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
 {
     Enter_Method("Ospf::receiveSignal");
 
-    const InterfaceEntry *ie;
-    const InterfaceEntryChangeDetails *change;
+    const NetworkInterface *ie;
+    const NetworkInterfaceChangeDetails *change;
 
     if (signalID == interfaceCreatedSignal) {
         // configure interface for RIP
-        ie = check_and_cast<const InterfaceEntry *>(obj);
+        ie = check_and_cast<const NetworkInterface *>(obj);
         if (ie->isMulticast() && !ie->isLoopback()) {
             // TODO
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        ie = check_and_cast<const InterfaceEntry *>(obj);
+        ie = check_and_cast<const NetworkInterface *>(obj);
         // TODO
     }
     else if (signalID == interfaceStateChangedSignal) {
-        change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        change = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = change->getFieldId();
-        if (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER) {
-            ie = change->getInterfaceEntry();
+        if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
+            ie = change->getNetworkInterface();
             if (!ie->isUp())
                 handleInterfaceDown(ie);
             else {
@@ -145,7 +145,7 @@ void Ospfv2::handleStartOperation(LifecycleOperation *operation)
         subscribe();
     }
     else
-        scheduleAt(simTime() + startupTime, startupTimer);
+        scheduleAfter(startupTime, startupTimer);
 }
 
 void Ospfv2::handleStopOperation(LifecycleOperation *operation)
@@ -168,7 +168,7 @@ void Ospfv2::handleCrashOperation(LifecycleOperation *operation)
 
 void Ospfv2::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 {
-    Enter_Method_Silent();
+    Enter_Method("insertExternalRoute");
     Ospfv2AsExternalLsaContents newExternalContents;
     newExternalContents.setExternalTOSInfoArraySize(1);
     const Ipv4Address netmask = netAddr.mask;
@@ -185,7 +185,7 @@ void Ospfv2::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 
 int Ospfv2::checkExternalRoute(const Ipv4Address& route)
 {
-    Enter_Method_Silent();
+    Enter_Method("checkExternalRoute");
     for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
@@ -199,7 +199,7 @@ int Ospfv2::checkExternalRoute(const Ipv4Address& route)
     return 0;
 }
 
-void Ospfv2::handleInterfaceDown(const InterfaceEntry *ie)
+void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
 {
     EV_DEBUG << "interface " << ie->getInterfaceId() << " went down. \n";
 

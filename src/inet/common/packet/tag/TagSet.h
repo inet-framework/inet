@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TAGSET_H_
-#define __INET_TAGSET_H_
+#ifndef __INET_TAGSET_H
+#define __INET_TAGSET_H
 
 #include "inet/common/INETDefs.h"
 
@@ -72,12 +74,22 @@ class INET_API TagSet : public cObject
     /**
      * Returns the tag for the provided type, or returns nullptr if no such tag is present.
      */
-    template <typename T> T *findTag() const;
+    template <typename T> const T *findTag() const;
+
+    /**
+     * Returns the tag of the provided type for update, or returns nullptr if no such tag is present.
+     */
+    template <typename T> T *findTagForUpdate();
 
     /**
      * Returns the tag for the provided type, or throws an exception if no such tag is present.
      */
-    template <typename T> T *getTag() const;
+    template <typename T> const T *getTag() const;
+
+    /**
+     * Returns the tag of the provided type for update, or throws an exception if no such tag is present.
+     */
+    template <typename T> T *getTagForUpdate();
 
     /**
      * Returns a newly added tag for the provided type, or throws an exception if such a tag is already present.
@@ -117,19 +129,31 @@ inline int TagSet::getTagIndex() const
 }
 
 template <typename T>
-inline T *TagSet::findTag() const
+inline const T *TagSet::findTag() const
 {
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : static_cast<T *>((*tags)[index]);
 }
 
 template <typename T>
-inline T *TagSet::getTag() const
+inline T *TagSet::findTagForUpdate()
+{
+    return const_cast<T *>(findTag<T>());
+}
+
+template <typename T>
+inline const T *TagSet::getTag() const
 {
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
     return static_cast<T *>((*tags)[index]);
+}
+
+template <typename T>
+inline T *TagSet::getTagForUpdate()
+{
+    return const_cast<T *>(getTag<T>());
 }
 
 template <typename T>
@@ -146,7 +170,7 @@ inline T *TagSet::addTag()
 template <typename T>
 inline T *TagSet::addTagIfAbsent()
 {
-    T *tag = findTag<T>();
+    T *tag = findTagForUpdate<T>();
     if (tag == nullptr)
         addTag(tag = new T());
     return tag;
@@ -170,5 +194,5 @@ inline T *TagSet::removeTagIfPresent()
 
 } // namespace
 
-#endif // #ifndef __INET_TAGSET_H_
+#endif
 

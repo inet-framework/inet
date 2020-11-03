@@ -67,9 +67,9 @@ LoRaGWMac::~LoRaGWMac() {
         cancelAndDelete(dutyCycleTimer);
 }
 
-void LoRaGWMac::configureInterfaceEntry()
+void LoRaGWMac::configureNetworkInterface()
 {
-    //InterfaceEntry *e = new InterfaceEntry(this);
+    //NetworkInterface *e = new NetworkInterface(this);
 
     // data rate
     //e->setDatarate(bitrate);
@@ -86,15 +86,15 @@ void LoRaGWMac::configureInterfaceEntry()
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
+    networkInterface->setMacAddress(address);
     // data rate
     //interfaceEntry->setDatarate(bitrate);
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
-    interfaceEntry->setPointToPoint(false);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
+    networkInterface->setPointToPoint(false);
 }
 
 void LoRaGWMac::handleSelfMessage(cMessage *msg)

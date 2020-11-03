@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.emulation.linklayer.ethernet;
@@ -30,21 +30,24 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        @display("i=block/ifcard");
+        double bitrate @unit(bps) = default(nan bps);
     gates:
+        input cutthroughIn @loose;
+        output cutthroughOut @loose;
         inout phys @labels(EtherFrame);
     submodules:
         tap: ExtEthernetTapDevice {
             parameters:
-                @display("p=100,100");
+                @display("p=300,100");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queue.packetCapacity = 10000;
-                @display("p=200,400");
+                @display("p=300,200");
         }
     connections allowunconnected:
         tap.lowerLayerOut --> { @display("m=s"); } --> mac.upperLayerIn;
         tap.lowerLayerIn <-- { @display("m=s"); } <-- mac.upperLayerOut;
         mac.phys <--> { @display("m=s"); } <--> phys;
 }
+

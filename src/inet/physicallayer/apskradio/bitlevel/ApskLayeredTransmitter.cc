@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/mobility/contract/IMobility.h"
@@ -77,20 +77,20 @@ void ApskLayeredTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskLayeredTransmitter";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", levelOfDetail = " << levelOfDetail
-               << ", centerFrequency = " << centerFrequency;
+        stream << EV_FIELD(levelOfDetail)
+               << EV_FIELD(centerFrequency);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", encoder = " << printObjectToString(encoder, level + 1) 
-               << ", modulator = " << printObjectToString(modulator, level + 1) 
-               << ", pulseShaper = " << printObjectToString(pulseShaper, level + 1) 
-               << ", digitalAnalogConverter = " << printObjectToString(digitalAnalogConverter, level + 1) 
-               << ", power = " << power
-               << ", bitrate = " << bitrate
-               << ", bandwidth = " << bandwidth;
+        stream << EV_FIELD(encoder, printFieldToString(encoder, level + 1, evFlags))
+               << EV_FIELD(modulator, printFieldToString(modulator, level + 1, evFlags))
+               << EV_FIELD(pulseShaper, printFieldToString(pulseShaper, level + 1, evFlags))
+               << EV_FIELD(digitalAnalogConverter, printFieldToString(digitalAnalogConverter, level + 1, evFlags))
+               << EV_FIELD(power)
+               << EV_FIELD(bitrate)
+               << EV_FIELD(bandwidth);
     return stream;
 }
 

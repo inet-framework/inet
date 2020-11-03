@@ -113,8 +113,8 @@ Batman::~Batman()
 void Batman::processChangeInterface(simsignal_t signalID,const cObject *obj)
 {
     // reconfigure interfaces
-    const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
-    InterfaceEntry *interfaceEntry = iecd->getInterfaceEntry();
+    const NetworkInterfaceChangeDetails *iecd = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+    NetworkInterface *interfaceEntry = iecd->getNetworkInterface();
 
     for (auto &elem : if_list)
     {
@@ -217,7 +217,7 @@ void Batman::initialize(int stage)
 
         for (int i = 0; i<getNumWlanInterfaces(); i++)
         {
-            InterfaceEntry *iEntry = getWlanInterfaceEntry(i);
+            NetworkInterface *iEntry = getWlanInterfaceEntry(i);
 
             BatmanIf *batman_if;
             batman_if = new BatmanIf();

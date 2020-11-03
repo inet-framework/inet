@@ -109,6 +109,11 @@ class value
         return m_rep;
     }
 
+    void set(const value_type& v)
+    {
+        m_rep = v;
+    }
+
     template<typename OtherValue, typename OtherUnits>
     value& operator=(const value<OtherValue, OtherUnits>& other)
     {
@@ -272,6 +277,20 @@ template<int Num, int Den, typename Value, typename Unit>
 value<Value, pow<Unit, Num, Den> > raise(const value<Value, Unit>& a)
 {
     return value<Value, pow<Unit, Num, Den> >(internal::fixed_power<Num, Den>::pow(a.get()));
+}
+
+template<typename Value, typename Units>
+inline void doParsimPacking(cCommBuffer *buffer, const value<Value, Units>& a)
+{
+    buffer->pack(a.get());
+}
+
+template<typename Value, typename Units>
+inline void doParsimUnpacking(cCommBuffer *buffer, value<Value, Units>& a)
+{
+    Value v;
+    buffer->unpack(v);
+    a.set(v);
 }
 
 } // namespace units
@@ -1050,6 +1069,9 @@ typedef milli<m>::type mm;
 typedef kilo<m>::type km;
 typedef milli<kg>::type g;
 typedef milli<g>::type mg;
+typedef pico<s>::type ps;
+typedef nano<s>::type ns;
+typedef micro<s>::type us;
 typedef milli<s>::type ms;
 typedef pico<W>::type pW;
 typedef nano<W>::type nW;
@@ -1067,6 +1089,9 @@ UNIT_DISPLAY_NAME(units::mm, "mm");
 UNIT_DISPLAY_NAME(units::km, "km");
 UNIT_DISPLAY_NAME(units::g, "g");
 UNIT_DISPLAY_NAME(units::mg, "mg");
+UNIT_DISPLAY_NAME(units::ps, "ps");
+UNIT_DISPLAY_NAME(units::ns, "ns");
+UNIT_DISPLAY_NAME(units::us, "us");
 UNIT_DISPLAY_NAME(units::ms, "ms");
 UNIT_DISPLAY_NAME(units::pW, "pW");
 UNIT_DISPLAY_NAME(units::nW, "nW");
@@ -1258,6 +1283,10 @@ typedef value<double, units::mAh> mAh;
 typedef value<double, units::kHz> kHz;
 typedef value<double, units::MHz> MHz;
 typedef value<double, units::GHz> GHz;
+typedef value<simtime_t, units::ps> psimsec;
+typedef value<simtime_t, units::ns> nsimsec;
+typedef value<simtime_t, units::us> usimsec;
+typedef value<simtime_t, units::ms> msimsec;
 
 // Non-SI
 typedef value<double, units::lb> lb;
@@ -1401,10 +1430,20 @@ inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::
     // TODO: KLUDGE: there's no direct infinity support in simtime_t
     static auto positiveInfinity = SimTime::getMaxTime() / 2;
     static auto negativeInfinity = -SimTime::getMaxTime() / 2;
-    if (value.get() == positiveInfinity)
+    if (value == values::s(0))
+        os << "0 s";
+    else if (value.get() == positiveInfinity)
         os << "inf s";
     else if (value.get() == negativeInfinity)
         os << "-inf s";
+    else if (values::simsec(value) < values::psimsec(1000.0))
+        os << values::psimsec(value);
+    else if (values::simsec(value) < values::nsimsec(1000.0))
+        os << values::nsimsec(value);
+    else if (values::simsec(value) < values::usimsec(1000.0))
+        os << values::usimsec(value);
+    else if (values::simsec(value) < values::msimsec(1000.0))
+        os << values::msimsec(value);
     else {
         os << value.get() << ' ';
         output_unit<units::s>::fn(os);
@@ -1469,5 +1508,5 @@ Value tan(const value<Value, Unit>& angle)
 
 } // namespace inet
 
-#endif // ifndef __INET_UNITS_H
+#endif
 

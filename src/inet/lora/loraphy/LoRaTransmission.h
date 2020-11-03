@@ -38,7 +38,7 @@ public:
     Hz getLoRaBW() const { return LoRaBW; }
     int getLoRaCR() const { return LoRaCR; }
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 } /* namespace physicallayer */

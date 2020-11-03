@@ -213,7 +213,7 @@ ManetRoutingBase::ManetRoutingBase()
 }
 
 
-bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
+bool ManetRoutingBase::isThisInterfaceRegistered(NetworkInterface * ie)
 {
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
@@ -226,7 +226,7 @@ bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
 
 void ManetRoutingBase::registerRoutingModule()
 {
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     const char *name;
     /* Set host parameters */
     isRegistered = true;
@@ -355,7 +355,7 @@ void ManetRoutingBase::registerRoutingModule()
         // clean the route table wlan interface entry
         for (int i=inet_rt->getNumRoutes()-1; i>=0; i--) {
             entry = inet_rt->getRoute(i);
-            const InterfaceEntry *ie = entry->getInterface();
+            const NetworkInterface *ie = entry->getInterface();
             if (strstr(ie->getInterfaceName(), "wlan")!=nullptr) {
                 inet_rt->deleteRoute(entry);
             }
@@ -365,19 +365,19 @@ void ManetRoutingBase::registerRoutingModule()
         Ipv4Address AUTOASSIGN_ADDRESS_BASE(par("autoassignAddressBase").stringValue());
         if (AUTOASSIGN_ADDRESS_BASE.getInt() == 0)
             throw cRuntimeError("Auto assignment need autoassignAddressBase to be set");
-        Ipv4Address myAddr(AUTOASSIGN_ADDRESS_BASE.getInt() + uint32(getParentModule()->getId()));
+        Ipv4Address myAddr(AUTOASSIGN_ADDRESS_BASE.getInt() + uint32_t(getParentModule()->getId()));
         for (int k=0; k<inet_ift->getNumInterfaces(); k++) {
-            InterfaceEntry *ie = inet_ift->getInterface(k);
+            NetworkInterface *ie = inet_ift->getInterface(k);
             if (strstr(ie->getInterfaceName(), "wlan")!=nullptr) {
-                ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(myAddr);
-                ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS); // full address must match for local delivery
+                ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(myAddr);
+                ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
     }
     // register LL-MANET-Routers
     if (!mac_layer_) {
         for (auto & elem : *interfaceVector) {
-            elem.interfacePtr->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
+            elem.interfacePtr->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
         }
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
 
@@ -447,7 +447,7 @@ bool ManetRoutingBase::isLocalAddress(const L3Address& dest) const
         throw cRuntimeError("Manet routing protocol is not register");
     if (dest.getType() == L3Address::IPv4)
         return inet_rt->isLocalAddress(dest.toIpv4());
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     for (int i = 0; i < inet_ift->getNumInterfaces(); i++) {
         ie = inet_ift->getInterface(i);
         L3Address add(ie->getMacAddress());
@@ -497,7 +497,7 @@ void ManetRoutingBase::processChangeInterface(simsignal_t signalID,const cObject
     // clean the route table wlan interface entry
     for (int i=inet_rt->getNumRoutes()-1; i>=0; i--) {
         entry = inet_rt->getRoute(i);
-        const InterfaceEntry *ie = entry->getInterface();
+        const NetworkInterface *ie = entry->getInterface();
         if (strstr(ie->getInterfaceName(), "wlan")!=nullptr) {
             inet_rt->deleteRoute(entry);
         }
@@ -506,7 +506,7 @@ void ManetRoutingBase::processChangeInterface(simsignal_t signalID,const cObject
 
 
 
-void ManetRoutingBase::sendToIpOnIface(Packet *msg, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, InterfaceEntry  *ie)
+void ManetRoutingBase::sendToIpOnIface(Packet *msg, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, NetworkInterface  *ie)
 {
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
@@ -540,7 +540,7 @@ void ManetRoutingBase::sendToIp(Packet *msg, int srcPort, const L3Address& destA
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
 
-    InterfaceEntry  *ie = nullptr;
+    NetworkInterface  *ie = nullptr;
     if (!iface.isUnspecified())
         ie = getInterfaceWlanByAddress(iface); // The user want to use a pre-defined interface
     else {
@@ -557,14 +557,14 @@ void ManetRoutingBase::sendToIp(Packet *msg, int srcPort, const L3Address& destA
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
 
-    InterfaceEntry  *ie = nullptr;
+    NetworkInterface  *ie = nullptr;
     if (index!=-1)
         ie = getInterfaceEntry(index); // The user want to use a pre-defined interface
 
     sendToIpOnIface(msg, srcPort, destAddr, destPort, ttl, delay, ie);
 }
 
-void ManetRoutingBase::injectDirectToIp(Packet *msg, double delay, InterfaceEntry *ie)
+void ManetRoutingBase::injectDirectToIp(Packet *msg, double delay, NetworkInterface *ie)
 {
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
@@ -682,7 +682,7 @@ void ManetRoutingBase::omnet_chg_rte(const L3Address &dst,
         else if (netm.getType() == L3Address::IPv6) {
             unsigned int i = 0;
             auto add = netm.toIpv6();
-            uint32 *w = add.words();
+            uint32_t *w = add.words();
             for (i = 0; i < 128; i++) {
                 uint32_t val = w[(unsigned int) (i / 32)];
                 if (val & (1 << i % 32))
@@ -692,7 +692,7 @@ void ManetRoutingBase::omnet_chg_rte(const L3Address &dst,
         }
     }
 
-    InterfaceEntry *ie = getInterfaceWlanByAddress(iface);
+    NetworkInterface *ie = getInterfaceWlanByAddress(iface);
     IRoute::SourceType sourceType =
             useManetLabelRouting ? IRoute::MANET : IRoute::MANET2;
 
@@ -782,7 +782,7 @@ void ManetRoutingBase::omnet_chg_rte(const L3Address &dst,
         else if (netm.getType() == L3Address::IPv6) {
             unsigned int i = 0;
             auto add = netm.toIpv6();
-            uint32 *w = add.words();
+            uint32_t *w = add.words();
             for (i = 0; i < 128; i++) {
                 uint32_t val = w[(unsigned int) (i / 32)];
                 if (val & (1 << i % 32))
@@ -792,7 +792,7 @@ void ManetRoutingBase::omnet_chg_rte(const L3Address &dst,
         }
     }
 
-    InterfaceEntry *ie = getInterfaceEntry(index);
+    NetworkInterface *ie = getInterfaceEntry(index);
     IRoute::SourceType sourceType = useManetLabelRouting ? IRoute::MANET : IRoute::MANET2;
 
     if (found) {
@@ -979,7 +979,7 @@ int ManetRoutingBase::getWlanInterfaceIndexByAddress(L3Address add)
 //
 // Get the interface with the same address that add
 //
-InterfaceEntry *ManetRoutingBase::getInterfaceWlanByAddress(L3Address add) const
+NetworkInterface *ManetRoutingBase::getInterfaceWlanByAddress(L3Address add) const
 {
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
@@ -1020,7 +1020,7 @@ int ManetRoutingBase::getWlanInterfaceIndex(int i) const
 //
 // Get the i-esime wlan interface
 //
-InterfaceEntry *ManetRoutingBase::getWlanInterfaceEntry(int i) const
+NetworkInterface *ManetRoutingBase::getWlanInterfaceEntry(int i) const
 {
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
@@ -1218,7 +1218,7 @@ bool ManetRoutingBase::setRoute(const L3Address & destination, const L3Address &
         else if (mask.getType() == L3Address::IPv6) {
             unsigned int i = 0;
             auto add = mask.toIpv6();
-            uint32 *w = add.words();
+            uint32_t *w = add.words();
             for (i = 0; i < 128; i++) {
                 uint32_t val = w[(unsigned int) (i / 32)];
                 if (val & (1 << i % 32))
@@ -1228,7 +1228,7 @@ bool ManetRoutingBase::setRoute(const L3Address & destination, const L3Address &
         }
     }
 
-    InterfaceEntry *ie = getInterfaceEntry(ifaceIndex);
+    NetworkInterface *ie = getInterfaceEntry(ifaceIndex);
 
     if (found)
     {

@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_OSPFV2_H
@@ -75,12 +76,12 @@ class Ospfv2 : public RoutingProtocolBase, protected cListener
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
-    void handleInterfaceDown(const InterfaceEntry *ie);
+    void handleInterfaceDown(const NetworkInterface *ie);
 };
 
 } // namespace ospfv2
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFV2_H
+#endif
 

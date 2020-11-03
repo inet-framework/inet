@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PACKETDISSECTOR_H_
-#define __INET_PACKETDISSECTOR_H_
+#ifndef __INET_PACKETDISSECTOR_H
+#define __INET_PACKETDISSECTOR_H
 
 #include <stack>
 #include <functional>
@@ -156,14 +158,19 @@ class INET_API PacketDissector
     PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ICallback& callback);
 
     /**
+     * Dissects the given packet according to the attached PacketProtocolTag.
+     */
+    void dissectPacket(Packet *packet) const;
+
+    /**
      * Dissects the given packet of the provided protocol. The packet dissection
      * algorithm calls the visitChunk() method of the provided callback for each
      * protocol specific chunk found in the packet.
      */
-    void dissectPacket(Packet *packet, const Protocol *protocol) const;
+    void dissectPacket(Packet *packet, const Protocol *protocol, b extraFrontOffset = b(0), b extraBackOffset = b(0)) const;
 };
 
 } // namespace
 
-#endif // #ifndef __INET_PACKETDISSECTOR_H_
+#endif
 

@@ -31,26 +31,26 @@ cmdenv-event-banners = false
 *.producer.packetLength = 1B
 *.producer.productionInterval = 1s
 
-%contains: stdout
-Producing packet producer-0.
-Consuming packet producer-0.
+%contains-regex: stdout
+Producing packet, .*?producer-0.*?
+Consuming packet, .*?producer-0.*?
 
 Running simulation...
-Producing packet producer-1.
-Consuming packet producer-1.
-Producing packet producer-2.
-Consuming packet producer-2.
-Producing packet producer-3.
-Consuming packet producer-3.
-Producing packet producer-4.
-Consuming packet producer-4.
-Producing packet producer-5.
-Consuming packet producer-5.
-Producing packet producer-6.
-Consuming packet producer-6.
-Producing packet producer-7.
-Consuming packet producer-7.
-Producing packet producer-8.
-Consuming packet producer-8.
-Producing packet producer-9.
-Consuming packet producer-9.
+Producing packet, .*?producer-1.*?
+Consuming packet, .*?producer-1.*?
+Producing packet, .*?producer-2.*?
+Consuming packet, .*?producer-2.*?
+Producing packet, .*?producer-3.*?
+Consuming packet, .*?producer-3.*?
+Producing packet, .*?producer-4.*?
+Consuming packet, .*?producer-4.*?
+Producing packet, .*?producer-5.*?
+Consuming packet, .*?producer-5.*?
+Producing packet, .*?producer-6.*?
+Consuming packet, .*?producer-6.*?
+Producing packet, .*?producer-7.*?
+Consuming packet, .*?producer-7.*?
+Producing packet, .*?producer-8.*?
+Consuming packet, .*?producer-8.*?
+Producing packet, .*?producer-9.*?
+Consuming packet, .*?producer-9.*?

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,11 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-
-//
-//  Author: Andras Varga
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_IPV4INTERFACEDATA_H
@@ -26,7 +23,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
@@ -59,9 +56,9 @@ struct INET_API Ipv4MulticastSourceList
  */
 struct INET_API Ipv4MulticastGroupInfo : public cObject
 {
-    Ipv4MulticastGroupInfo(InterfaceEntry *const ie, const Ipv4Address& groupAddress)
+    Ipv4MulticastGroupInfo(NetworkInterface *const ie, const Ipv4Address& groupAddress)
         : ie(ie), groupAddress(groupAddress) {}
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     Ipv4Address groupAddress;
 };
 
@@ -72,17 +69,17 @@ struct INET_API Ipv4MulticastGroupSourceInfo : public Ipv4MulticastGroupInfo
 {
     typedef std::vector<Ipv4Address> Ipv4AddressVector;
 
-    Ipv4MulticastGroupSourceInfo(InterfaceEntry *const ie, const Ipv4Address& groupAddress, const Ipv4MulticastSourceList& sourceList)
+    Ipv4MulticastGroupSourceInfo(NetworkInterface *const ie, const Ipv4Address& groupAddress, const Ipv4MulticastSourceList& sourceList)
         : Ipv4MulticastGroupInfo(ie, groupAddress), sourceList(sourceList) {}
 
     Ipv4MulticastSourceList sourceList;
 };
 
 /**
- * Ipv4-specific data in an InterfaceEntry. Stores interface Ipv4 address,
+ * Ipv4-specific data in an NetworkInterface. Stores interface Ipv4 address,
  * netmask, metric, etc.
  *
- * @see InterfaceEntry
+ * @see NetworkInterface
  */
 // XXX pass Ipv4Address parameters as values
 class INET_API Ipv4InterfaceData : public InterfaceProtocolData
@@ -169,7 +166,7 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
     Ipv4InterfaceData();
     virtual ~Ipv4InterfaceData();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     /** @name Getters */
     //@{
@@ -209,5 +206,5 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4INTERFACEDATA_H
+#endif
 

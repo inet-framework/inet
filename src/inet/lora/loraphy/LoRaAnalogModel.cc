@@ -29,7 +29,7 @@ namespace lora {
 
 Define_Module(LoRaAnalogModel);
 
-std::ostream& LoRaAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "LoRaAnalogModel";
 }

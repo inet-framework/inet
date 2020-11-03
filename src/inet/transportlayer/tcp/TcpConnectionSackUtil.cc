@@ -1,7 +1,7 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2009-2011 Thomas Reschka
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,7 +14,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <algorithm>    // min,max
@@ -36,7 +37,7 @@ namespace tcp {
 // helper functions for SACK
 //
 
-bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSack& option)
+bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSack& option)
 {
     if (option.getLength() % 8 != 2) {
         EV_ERROR << "ERROR: option length incorrect\n";
@@ -68,7 +69,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
             EV_INFO << (i + 1) << ". SACK: " << tmp.str() << endl;
 
             // check for D-SACK
-            if (i == 0 && seqLE(tmp.getEnd(), tcpseg->getAckNo())) {
+            if (i == 0 && seqLE(tmp.getEnd(), tcpHeader->getAckNo())) {
                 // RFC 2883, page 8:
                 // "In order for the sender to check that the first (D)SACK block of an
                 // acknowledgement in fact acknowledges duplicate data, the sender
@@ -80,7 +81,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
                 // sequence space in the SACK block to the TCP state variable snd.una
                 // (which carries the total cumulative ACK), as this may result in the
                 // wrong conclusion if ACK packets are reordered."
-                EV_DETAIL << "Received D-SACK below cumulative ACK=" << tcpseg->getAckNo()
+                EV_DETAIL << "Received D-SACK below cumulative ACK=" << tcpHeader->getAckNo()
                           << " D-SACK: " << tmp.str() << endl;
                 // Note: RFC 2883 does not specify what should be done in this case.
                 // RFC 2883, page 9:
@@ -89,7 +90,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
                 // take in these cases. The extension to the SACK option simply enables
                 // the sender to detect each of these cases.(...)"
             }
-            else if (i == 0 && n > 1 && seqGreater(tmp.getEnd(), tcpseg->getAckNo())) {
+            else if (i == 0 && n > 1 && seqGreater(tmp.getEnd(), tcpHeader->getAckNo())) {
                 // RFC 2883, page 8:
                 // "If the sequence space in the first SACK block is greater than the
                 // cumulative ACK, then the sender next compares the sequence space in
@@ -100,7 +101,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
                 Sack tmp2(option.getSackItem(1).getStart(), option.getSackItem(1).getEnd());
 
                 if (tmp2.contains(tmp)) {
-                    EV_DETAIL << "Received D-SACK above cumulative ACK=" << tcpseg->getAckNo()
+                    EV_DETAIL << "Received D-SACK above cumulative ACK=" << tcpHeader->getAckNo()
                               << " D-SACK: " << tmp.str()
                               << ", SACK: " << tmp2.str() << endl;
                     // Note: RFC 2883 does not specify what should be done in this case.
@@ -112,7 +113,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
                 }
             }
 
-            if (seqGreater(tmp.getEnd(), tcpseg->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una))
+            if (seqGreater(tmp.getEnd(), tcpHeader->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una))
                 rexmitQueue->setSackedBit(tmp.getStart(), tmp.getEnd());
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
@@ -130,7 +131,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
     return true;
 }
 
-bool TcpConnection::isLost(uint32 seqNum)
+bool TcpConnection::isLost(uint32_t seqNum)
 {
     ASSERT(state->sack_enabled);
 
@@ -173,7 +174,7 @@ void TcpConnection::setPipe()
 
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     state->pipe = 0;
-    uint32 length = 0;    // required for rexmitQueue->checkSackBlock()
+    uint32_t length = 0;    // required for rexmitQueue->checkSackBlock()
     bool sacked;    // required for rexmitQueue->checkSackBlock()
     bool rexmitted;    // required for rexmitQueue->checkSackBlock()
 
@@ -183,7 +184,7 @@ void TcpConnection::setPipe()
     // the TCP receiver.  After initializing pipe to zero the following
     // steps are taken for each octet 'S1' in the sequence space between
     // HighACK and HighData that has not been SACKed:"
-    for (uint32 s1 = state->snd_una; seqLess(s1, state->snd_max); s1 += length) {
+    for (uint32_t s1 = state->snd_una; seqLess(s1, state->snd_max); s1 += length) {
         rexmitQueue->checkSackBlock(s1, length, sacked, rexmitted);
 
         if (!sacked) {
@@ -215,7 +216,7 @@ void TcpConnection::setPipe()
     emit(pipeSignal, state->pipe);
 }
 
-bool TcpConnection::nextSeg(uint32& seqNum)
+bool TcpConnection::nextSeg(uint32_t& seqNum)
 {
     ASSERT(state->sack_enabled);
 
@@ -227,8 +228,8 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // transmitted, per the following rules:"
 
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
-    uint32 highestSackedSeqNum = rexmitQueue->getHighestSackedSeqNum();
-    uint32 shift = state->snd_mss;
+    uint32_t highestSackedSeqNum = rexmitQueue->getHighestSackedSeqNum();
+    uint32_t shift = state->snd_mss;
     bool sacked = false;    // required for rexmitQueue->checkSackBlock()
     bool rexmitted = false;    // required for rexmitQueue->checkSackBlock()
 
@@ -250,7 +251,7 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // (1.c) IsLost (S2) returns true."
 
     // Note: state->highRxt == RFC.HighRxt + 1
-    for (uint32 s2 = state->highRxt;
+    for (uint32_t s2 = state->highRxt;
          seqLess(s2, state->snd_max) && seqLess(s2, highestSackedSeqNum);
          s2 += shift
          )
@@ -275,10 +276,10 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // HighData+1 MUST be returned."
     {
         // check how many unsent bytes we have
-        ulong buffered = sendQueue->getBytesAvailable(state->snd_max);
-        ulong maxWindow = state->snd_wnd;
+        uint32_t buffered = sendQueue->getBytesAvailable(state->snd_max);
+        uint32_t maxWindow = state->snd_wnd;
         // effectiveWindow: number of bytes we're allowed to send now
-        ulong effectiveWin = maxWindow - state->pipe;
+        uint32_t effectiveWin = maxWindow - state->pipe;
 
         if (buffered > 0 && effectiveWin >= state->snd_mss) {
             seqNum = state->snd_max;    // HighData = snd_max
@@ -314,7 +315,7 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     // the decision of whether or not to use rule (3) to
     // implementors."
     {
-        for (uint32 s3 = state->highRxt;
+        for (uint32_t s3 = state->highRxt;
              seqLess(s3, state->snd_max) && seqLess(s3, highestSackedSeqNum);
              s3 += shift
              )
@@ -338,7 +339,7 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     return false;
 }
 
-void TcpConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
+void TcpConnection::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
@@ -356,33 +357,33 @@ void TcpConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
         // data to send) return without sending anything (i.e., terminate
         // steps C.1 -- C.5)."
 
-        uint32 seqNum;
+        uint32_t seqNum;
 
         if (!nextSeg(seqNum)) // if nextSeg() returns false (=failure): terminate steps C.1 -- C.5
             break;
 
-        sendSegmentDuringLossRecoveryPhase(seqNum);
+        uint32_t sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
         // RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
         // network must be updated by incrementing pipe by the number of
         // octets transmitted in (C.1)."
-        state->pipe += state->sentBytes;
+        state->pipe += sentBytes;
     }
 }
 
-void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
+uint32_t TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
     // start sending from seqNum
     state->snd_nxt = seqNum;
 
-    uint32 old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+    uint32_t old_highRxt = rexmitQueue->getHighestRexmittedSeqNum();
 
     // no need to check cwnd and rwnd - has already be done before
     // no need to check nagle - sending mss bytes
-    sendSegment(state->snd_mss);
+    uint32_t sentBytes = sendSegment(state->snd_mss);
 
-    uint32 sentSeqNum = seqNum + state->sentBytes;
+    uint32_t sentSeqNum = seqNum + sentBytes;
 
     if(state->send_fin && sentSeqNum == state->snd_fin_seq)
         sentSeqNum = sentSeqNum + 1;
@@ -435,16 +436,18 @@ void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
     }
     else // don't measure RTT for retransmitted packets
         tcpAlgorithm->dataSent(seqNum); // seqNum = old_snd_nxt
+
+    return sentBytes;
 }
 
-TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
+TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
 {
     B options_len = B(0);
-    B used_options_len = tcpseg->getHeaderOptionArrayLength();
+    B used_options_len = tcpHeader->getHeaderOptionArrayLength();
     bool dsack_inserted = false;    // set if dsack is subsets of a bigger sack block recently reported
 
-    uint32 start = state->start_seqno;
-    uint32 end = state->end_seqno;
+    uint32_t start = state->start_seqno;
+    uint32_t end = state->end_seqno;
 
     // delete old sacks (below rcv_nxt), delete duplicates and print previous status of sacks_array:
     auto it = state->sacks_array.begin();
@@ -472,7 +475,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
         state->snd_dsack = false;
         state->start_seqno = 0;
         state->end_seqno = 0;
-        return *tcpseg;
+        return *tcpHeader;
     }
 
     if (start != end) {
@@ -491,8 +494,8 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
             EV_DETAIL << "inserted DSACK entry: " << nSack.str() << "\n";
         }
         else {
-            uint32 contStart = receiveQueue->getLE(start);
-            uint32 contEnd = receiveQueue->getRE(end);
+            uint32_t contStart = receiveQueue->getLE(start);
+            uint32_t contEnd = receiveQueue->getRE(end);
 
             Sack newSack(contStart, contEnd);
             state->sacks_array.push_front(newSack);
@@ -572,10 +575,10 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
         state->start_seqno = 0;
         state->end_seqno = 0;
 
-        return *tcpseg;
+        return *tcpHeader;
     }
 
-    uint optArrSize = tcpseg->getHeaderOptionArraySize();
+    uint optArrSize = tcpHeader->getHeaderOptionArraySize();
 
     uint optArrSizeAligned = optArrSize;
 
@@ -585,7 +588,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
     }
 
     while (optArrSize < optArrSizeAligned) {
-        tcpseg->insertHeaderOption(new TcpOptionNop());
+        tcpHeader->insertHeaderOption(new TcpOptionNop());
         optArrSize++;
     }
 
@@ -608,9 +611,9 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
 
     ASSERT(options_len <= TCP_OPTIONS_MAX_SIZE);    // Options length allowed? - maximum: 40 Bytes
 
-    tcpseg->insertHeaderOption(option);
-    tcpseg->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpseg->getHeaderOptionArrayLength());
-    tcpseg->setChunkLength(tcpseg->getHeaderLength());
+    tcpHeader->insertHeaderOption(option);
+    tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpHeader->getHeaderOptionArrayLength());
+    tcpHeader->setChunkLength(tcpHeader->getHeaderLength());
     // update number of sent sacks
     state->snd_sacks += n;
 
@@ -652,7 +655,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
     state->start_seqno = 0;
     state->end_seqno = 0;
 
-    return *tcpseg;
+    return *tcpHeader;
 }
 
 } // namespace tcp

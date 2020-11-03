@@ -30,8 +30,7 @@ void Ospfv3Splitter::initialize(int stage)
         routingModule=this->getParentModule();
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        registerService(Protocol::ospf, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
 
         this->parseConfig(par("ospfv3RoutingConfig"), par("ospfv3IntConfig"));
 
@@ -63,7 +62,7 @@ void Ospfv3Splitter::handleMessage(cMessage* msg)
                 delete msg;
                 return;
             }
-            InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+            NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
             if (ie != nullptr) {
                 char* ieName = (char*)ie->getInterfaceName();
                 std::map<std::string, std::pair<int,int>>::iterator it = this->interfaceToProcess.find(ieName);
@@ -144,8 +143,8 @@ void Ospfv3Splitter::parseConfig(cXMLElement* routingConfig, cXMLElement* intCon
         }
         //register all interfaces to MCAST
         for (auto it=processToInterface.begin(); it!=processToInterface.end(); it++) {
-            InterfaceEntry* ie = CHK(ift->findInterfaceByName(intName));
-            Ipv6InterfaceData *ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
+            NetworkInterface* ie = CHK(ift->findInterfaceByName(intName));
+            auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
 
             //ALL_OSPF_ROUTERS_MCAST renamed into ALL_ROUTERS_5
             ipv6int->joinMulticastGroup(Ipv6Address::ALL_OSPF_ROUTERS_MCAST);//TODO - join only once

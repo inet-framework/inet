@@ -9,11 +9,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_SCTPRECEIVESTREAM_H
@@ -29,21 +30,21 @@ class INET_API SctpReceiveStream : public cObject
 {
   protected:
     SctpAssociation *assoc;
-    uint16 streamId;
-    int32 expectedStreamSeqNum;
+    uint16_t streamId;
+    int32_t expectedStreamSeqNum;
     SctpQueue *deliveryQ;
     SctpQueue *orderedQ;
     SctpQueue *unorderedQ;
-    uint32 reassemble(SctpQueue *queue, uint32 tsn);
+    uint32_t reassemble(SctpQueue *queue, uint32_t tsn);
 
   public:
-    uint32 enqueueNewDataChunk(SctpDataVariables *dchunk);
+    uint32_t enqueueNewDataChunk(SctpDataVariables *dchunk);
     /**
      * Ctor.
      */
     SctpReceiveStream(SctpAssociation *assoc);
-    int32 getExpectedStreamSeqNum();
-    void setExpectedStreamSeqNum(int32 num);
+    int32_t getExpectedStreamSeqNum();
+    void setExpectedStreamSeqNum(int32_t num);
 
     /**
      * Virtual dtor.
@@ -53,12 +54,12 @@ class INET_API SctpReceiveStream : public cObject
     SctpQueue *getOrderedQ() const { return orderedQ; };
     SctpQueue *getUnorderedQ() const { return unorderedQ; };
 
-    int32 getStreamId() const { return streamId; };
-    void setStreamId(const uint16 id) { streamId = id; };
+    int32_t getStreamId() const { return streamId; };
+    void setStreamId(const uint16_t id) { streamId = id; };
 };
 
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPRECEIVESTREAM_H
+#endif
 

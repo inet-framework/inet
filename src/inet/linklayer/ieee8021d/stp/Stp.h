@@ -13,9 +13,9 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-// Authors: ANSA Team, Benjamin Martin Seregi
+// Authors: ANSA Team
 //
 
 #ifndef __INET_STP_H
@@ -104,7 +104,7 @@ class INET_API Stp : public StpBase
      * Comparison of all IDs in Ieee8021dInterfaceData::PortInfo structure
      * Invokes: superiorID(), superiorPort()
      */
-    int comparePorts(Ieee8021dInterfaceData *portA, Ieee8021dInterfaceData *portB);
+    int comparePorts(const Ieee8021dInterfaceData *portA, const Ieee8021dInterfaceData *portB);
     int compareBridgeIDs(unsigned int aPriority, MacAddress aAddress, unsigned int bPriority, MacAddress bAddress);
     int comparePortIDs(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum);
 
@@ -259,5 +259,5 @@ inline std::ostream& operator<<(std::ostream& os, Stp i)
 
 } // namespace inet
 
-#endif // ifndef __INET_STP_H
+#endif
 

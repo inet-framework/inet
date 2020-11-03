@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// author: Zoltan Bojthe
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_ACKINGMAC_H
@@ -29,7 +27,7 @@
 namespace inet {
 
 class AckingMacHeader;
-class InterfaceEntry;
+class NetworkInterface;
 
 /**
  * Implements a simplified ideal MAC.
@@ -55,7 +53,7 @@ class INET_API AckingMac : public MacProtocolBase
   protected:
     /** implements MacBase functions */
     //@{
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
     //@}
 
     virtual void startTransmitting();
@@ -85,5 +83,5 @@ class INET_API AckingMac : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ACKINGMAC_H
+#endif
 

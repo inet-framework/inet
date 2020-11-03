@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_EXAMPLEQOSCLASSIFIER_H
@@ -26,12 +27,12 @@ namespace inet {
 /**
  * An example packet classifier based on the UDP/TCP port number.
  */
-class INET_API ExampleQosClassifier : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API ExampleQosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
     virtual int getUserPriority(cMessage *msg);
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     ExampleQosClassifier() {}

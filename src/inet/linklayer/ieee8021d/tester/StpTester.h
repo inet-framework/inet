@@ -12,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-//
-// Author: Benjamin Martin Seregi
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_STPTESTER_H
@@ -79,5 +77,5 @@ class INET_API StpTester : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_STPTESTER_H
+#endif
 

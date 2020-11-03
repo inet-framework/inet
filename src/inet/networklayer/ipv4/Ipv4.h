@@ -1,11 +1,11 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_IPV4_H
@@ -45,7 +45,7 @@ class IIpv4RoutingTable;
 /**
  * Implements the Ipv4 protocol.
  */
-class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
+class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, public cListener
 {
   public:
     /**
@@ -117,12 +117,12 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual const InterfaceEntry *getSourceInterface(Packet *packet);
-    virtual const InterfaceEntry *getDestInterface(Packet *packet);
+    virtual const NetworkInterface *getSourceInterface(Packet *packet);
+    virtual const NetworkInterface *getDestInterface(Packet *packet);
     virtual Ipv4Address getNextHop(Packet *packet);
 
     // utility: look up route to the source of the datagram and return its interface
-    virtual const InterfaceEntry *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
+    virtual const NetworkInterface *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -191,7 +191,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     /**
      * Determines the output interface for the given multicast datagram.
      */
-    virtual const InterfaceEntry *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption);
+    virtual const NetworkInterface *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const NetworkInterface *multicastIFOption);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
@@ -228,7 +228,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
      */
     virtual void sendDatagramToOutput(Packet *packet);
 
-    virtual MacAddress resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const InterfaceEntry *destIE);
+    virtual MacAddress resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const NetworkInterface *destIE);
 
     virtual void sendPacketToNIC(Packet *packet);
 
@@ -240,8 +240,8 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     Ipv4();
     virtual ~Ipv4();
 
-    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -322,5 +322,5 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV4_H
+#endif
 

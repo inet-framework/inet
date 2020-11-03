@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_TRANSPORTCONNECTIONCANVASVISUALIZER_H
@@ -20,6 +20,7 @@
 
 #include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/TransportConnectionVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 
@@ -42,7 +43,7 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+    ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;
@@ -52,14 +53,11 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void setConnectionLabelsVisible(bool visible);
-
-  public:
-    virtual ~TransportConnectionCanvasVisualizer();
 };
 
 } // namespace visualizer
 
 } // namespace inet
 
-#endif // ifndef __INET_TRANSPORTCONNECTIONCANVASVISUALIZER_H
+#endif
 

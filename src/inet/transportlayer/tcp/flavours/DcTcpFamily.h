@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_DCTCPFAMILY_H
@@ -36,9 +37,9 @@ class INET_API DcTcpFamilyStateVariables : public TcpTahoeRenoFamilyStateVariabl
 
     //DCTCP
     bool dctcp_ce;
-    uint32 dctcp_windEnd;
-    uint32 dctcp_bytesAcked;
-    uint32 dctcp_bytesMarked; //amount of bytes marked
+    uint32_t dctcp_windEnd;
+    uint32_t dctcp_bytesAcked;
+    uint32_t dctcp_bytesMarked; //amount of bytes marked
     double dctcp_alpha;
     double dctcp_gamma;
 };
@@ -59,5 +60,5 @@ class INET_API DcTcpFamily : public TcpTahoeRenoFamily
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_DCTCPFAMILY_H
+#endif
 

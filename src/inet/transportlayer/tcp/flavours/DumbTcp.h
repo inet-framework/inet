@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_DUMBTCP_H
@@ -74,21 +74,21 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedDataAck(uint32 firstSeqAcked) override;
+    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
     virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32 seq) override;
+    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
 
     virtual void ackSent() override;
 
-    virtual void dataSent(uint32 fromseq) override;
+    virtual void dataSent(uint32_t fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
+    virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) override;
 
     virtual void restartRexmitTimer() override;
 
-    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) override;
+    virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) override;
 
     virtual bool shouldMarkAck() override;
 
@@ -98,5 +98,5 @@ class INET_API DumbTcp : public TcpAlgorithm
 } // namespace tcp
 } // namespace inet
 
-#endif // ifndef __INET_DUMBTCP_H
+#endif
 

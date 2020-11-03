@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -86,26 +86,26 @@ const IReceptionAnalogModel *Ieee80211LayeredOfdmReceiver::createAnalogModel(con
     return nullptr;
 }
 
-std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211LayeredOfdmReceiver";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", levelOfDetail = " << levelOfDetail
-               << ", mode = " << printObjectToString(mode, level + 1)
-               << ", errorModel = " << printObjectToString(errorModel, level + 1)
-               << ", dataDecoder = " << printObjectToString(dataDecoder, level + 1)
-               << ", signalDecoder = " << printObjectToString(signalDecoder, level + 1)
-               << ", dataDemodulator = " << printObjectToString(dataDemodulator, level + 1)
-               << ", signalDemodulator = " << printObjectToString(signalDemodulator, level + 1)
-               << ", pulseFilter = " << printObjectToString(pulseFilter, level + 1)
-               << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level + 1)
-               << ", energyDetection = " << energyDetection
-               << ", sensitivity = " << energyDetection
-               << ", centerFrequency = " << centerFrequency
-               << ", bandwidth = " << bandwidth
-               << ", channelSpacing = " << channelSpacing
-               << ", snirThreshold = " << snirThreshold
-               << ", isCompliant = " << isCompliant;
+        stream << EV_FIELD(levelOfDetail)
+               << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
+               << EV_FIELD(errorModel, printFieldToString(errorModel, level + 1, evFlags))
+               << EV_FIELD(dataDecoder, printFieldToString(dataDecoder, level + 1, evFlags))
+               << EV_FIELD(signalDecoder, printFieldToString(signalDecoder, level + 1, evFlags))
+               << EV_FIELD(dataDemodulator, printFieldToString(dataDemodulator, level + 1, evFlags))
+               << EV_FIELD(signalDemodulator, printFieldToString(signalDemodulator, level + 1, evFlags))
+               << EV_FIELD(pulseFilter, printFieldToString(pulseFilter, level + 1, evFlags))
+               << EV_FIELD(analogDigitalConverter, printFieldToString(analogDigitalConverter, level + 1, evFlags))
+               << EV_FIELD(energyDetection)
+               << EV_FIELD(sensitivity)
+               << EV_FIELD(centerFrequency)
+               << EV_FIELD(bandwidth)
+               << EV_FIELD(channelSpacing)
+               << EV_FIELD(snirThreshold)
+               << EV_FIELD(isCompliant);
     return stream;
 }
 
@@ -445,7 +445,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(reception->getAnalogModel());
         W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
         bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing reception possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+        EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
     }
 }

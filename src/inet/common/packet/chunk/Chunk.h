@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,20 +12,21 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CHUNK_H_
-#define __INET_CHUNK_H_
+#ifndef __INET_CHUNK_H
+#define __INET_CHUNK_H
 
 #include <memory>
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
+#include "inet/common/packet/tag/IRegionTaggedObject.h"
 #include "inet/common/Ptr.h"
-#include "inet/common/Units.h"
-#include "inet/common/packet/tag/RegionTagSet.h"
 #include "inet/common/TemporarySharedPtr.h"
+#include "inet/common/Units.h"
 
 // checking chunk implementation is disabled by default
 #ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED
@@ -243,16 +246,10 @@ using namespace units::values;
  * e) Inserting a connecting SliceChunk into a SliceChunk merges them
  */
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
-class INET_API Chunk : public cObject,
-#if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
-    public std::enable_shared_from_this<Chunk>
-#elif INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
-    public IntrusivePtrCounter<Chunk>
-#else
-#error "Unknown Ptr implementation"
-#endif
+class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject, public IRegionTaggedObject
 {
   friend class SliceChunk;
+  friend class EncryptedChunk;
   friend class SequenceChunk;
   friend class ChunkDescriptor;
 
@@ -278,6 +275,7 @@ class INET_API Chunk : public cObject,
         CT_BYTECOUNT,
         CT_BYTES,
         CT_SLICE,
+        CT_ENCRYPTED,
         CT_CPACKET,
         CT_SEQUENCE,
         CT_FIELDS
@@ -368,25 +366,34 @@ class INET_API Chunk : public cObject,
     /**
      * The set of region tags attached to the data represented by this chunk.
      */
-    RegionTagSet tags;
+    SharingRegionTagSet regionTags;
 
   protected:
+    /** @name Class descriptor functions */
+    //@{
+    int getBinDumpNumLines() const;
+    int getHexDumpNumLines() const;
+    const char *getBinDumpLine(int index);
+    const char *getHexDumpLine(int index);
+    const SharingRegionTagSet::RegionTag<TagBase>& _getTag(int index) const { return regionTags.getRegionTag(index); }
+    //@}
+
+    /** @name Self checking functions */
+    //@{
     void checkMutable() const { CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable"); }
+    //@}
 
+    /** @name Customizable functions */
+    //@{
     virtual void handleChange();
-
-    virtual int getBinDumpNumLines(); // only for class descriptor
-    virtual int getHexDumpNumLines(); // only for class descriptor
-    virtual const char *getBinDumpLine(int index); // only for class descriptor
-    virtual const char *getHexDumpLine(int index); // only for class descriptor
-
-    virtual int getTagsArraySize(); // only for class descriptor
-    virtual const RegionTagSet::RegionTag<cObject>& getTags(int index); // only for class descriptor
 
     virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void doInsertAt(const Ptr<const Chunk>& chunk, b offset) { throw cRuntimeError("Invalid operation"); }
     virtual void doRemoveAtFront(b length) { throw cRuntimeError("Invalid operation"); }
     virtual void doRemoveAtBack(b length) { throw cRuntimeError("Invalid operation"); }
+    virtual void doRemoveAt(b offset, b length) { throw cRuntimeError("Invalid operation"); }
+    //@}
 
     /**
      * Creates a new chunk of the given type that represents the designated part
@@ -443,6 +450,9 @@ class INET_API Chunk : public cObject,
     virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
 
     virtual void forEachChild(cVisitor *v) override;
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Mutability related functions */
@@ -501,14 +511,19 @@ class INET_API Chunk : public cObject,
     virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const { return false; }
 
     /**
+     * Returns true if this chunk is capable of representing the result.
+     */
+    virtual bool canInsertAt(const Ptr<const Chunk>& chunk, b offset) const { return false; }
+
+    /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
     void insertAtFront(const Ptr<const Chunk>& chunk) {
         CHUNK_CHECK_IMPLEMENTATION(canInsertAtFront(chunk));
         handleChange();
         auto length = chunk->getChunkLength();
-        tags.moveTags(length);
-        tags.copyTags(chunk->tags, b(0), b(0), length);
+        regionTags.moveTags(length);
+        regionTags.copyTags(chunk->regionTags, b(0), b(0), length);
         doInsertAtFront(chunk);
     }
 
@@ -518,8 +533,21 @@ class INET_API Chunk : public cObject,
     void insertAtBack(const Ptr<const Chunk>& chunk) {
         CHUNK_CHECK_IMPLEMENTATION(canInsertAtBack(chunk));
         handleChange();
-        tags.copyTags(chunk->tags, b(0), getChunkLength(), chunk->getChunkLength());
+        regionTags.copyTags(chunk->regionTags, b(0), getChunkLength(), chunk->getChunkLength());
         doInsertAtBack(chunk);
+    }
+
+    /**
+     * Inserts the provided chunk into this chunk.
+     */
+    void insertAt(const Ptr<const Chunk>& chunk, b offset) {
+        auto chunkLength = getChunkLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= chunkLength, "offset is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canInsertAtBack(chunk));
+        handleChange();
+        regionTags.moveTags(offset, chunkLength - offset, chunk->getChunkLength());
+        regionTags.copyTags(chunk->regionTags, b(0), offset, chunk->getChunkLength());
+        doInsertAt(chunk, offset);
     }
     //@}
 
@@ -536,24 +564,45 @@ class INET_API Chunk : public cObject,
     virtual bool canRemoveAtBack(b length) const { return false; }
 
     /**
+     * Returns true if this chunk is capable of representing the result.
+     */
+    virtual bool canRemoveAt(b offset, b length) const { return false; }
+
+    /**
      * Removes the requested part from the beginning of this chunk.
      */
     void removeAtFront(b length) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canRemoveAtFront(length));
         handleChange();
         doRemoveAtFront(length);
-        tags.clearTags(b(0), length);
-        tags.moveTags(-length);
+        regionTags.clearTags(b(0), length);
+        regionTags.moveTags(-length);
     }
 
     /**
      * Removes the requested part from the end of this chunk.
      */
     void removeAtBack(b length) {
+        auto chunkLength = getChunkLength();
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canRemoveAtBack(length));
         handleChange();
         doRemoveAtBack(length);
-        tags.clearTags(getChunkLength(), length);
+        regionTags.clearTags(chunkLength - length, length);
+    }
+
+    /**
+     * Removes the requested part from this chunk.
+     */
+    void removeAt(b offset, b length) {
+        auto chunkLength = getChunkLength();
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= chunkLength, "length is invalid");
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset + length <= chunkLength, "offset is invalid");
+        CHUNK_CHECK_IMPLEMENTATION(canRemoveAt(offset, length));
+        handleChange();
+        doRemoveAt(offset, length);
+        regionTags.moveTags(offset + length, chunkLength - offset - length, -length);
     }
     //@}
 
@@ -574,6 +623,16 @@ class INET_API Chunk : public cObject,
      * Returns the length of data represented by this chunk.
      */
     virtual b getChunkLength() const = 0;
+
+    /**
+     * Returns true if the two chunks represent the same binary data. The two
+     * chunks are compared without serialization, and the method is allowed to
+     * return false if the result cannot be determined correctly. Tags and other
+     * metadata are ignored in the comparison.
+     */
+    virtual bool containsSameData(const Chunk& other) const {
+        return getChunkType() == other.getChunkType() && getChunkLength() == other.getChunkLength();
+    }
 
     /**
      * Returns true if this chunk contains no data.
@@ -622,28 +681,41 @@ class INET_API Chunk : public cObject,
      */
     template <typename T>
     const Ptr<T> peek(const Iterator& iterator, b length = unspecifiedLength, int flags = 0) const {
-        CHUNK_CHECK_USAGE((flags & PF_ALLOW_EMPTY) == 0, "peeking with a specific chunk type with PF_ALLOW_EMPTY is an invalid operation");
-        const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || dynamicPtrCast<T>(chunk); };
-        const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, b length, int flags) -> const Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
-        const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
-        return checkPeekResult<T>(staticPtrCast<T>(chunk), flags);
+        if (std::is_same<T, Chunk>::value)
+            // NOTE: this code used to be a simple peek template specialization for the Chunk type but
+            // explicit specialization in non-namespace scope does not compile in GCC:
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282
+            // specialization for the case where any returned type is acceptable.
+            return staticPtrCast<T>(peek(iterator, length, flags));
+        else {
+            CHUNK_CHECK_USAGE((flags & PF_ALLOW_EMPTY) == 0, "peeking with a specific chunk type with PF_ALLOW_EMPTY is an invalid operation");
+            const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || dynamicPtrCast<T>(chunk); };
+            const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, b length, int flags) -> const Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
+            const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
+            return checkPeekResult<T>(staticPtrCast<T>(chunk), flags);
+        }
     }
     //@}
 
-    /** @name Tag related functions */
+    /** @name Region tagging functions */
     //@{
+    /**
+     * Returns all region tags.
+     */
+    virtual SharingRegionTagSet& getRegionTags() override { return regionTags; }
+
     /**
      * Returns the number of chunk tags.
      */
     int getNumTags() const {
-        return tags.getNumTags();
+        return regionTags.getNumTags();
     }
 
     /**
      * Returns the chunk tag at the given index.
      */
-    const cObject *getTag(int index) const {
-        return tags.getTag(index);
+    const Ptr<const TagBase> getTag(int index) const {
+        return regionTags.getTag(index);
     }
 
     /**
@@ -651,7 +723,7 @@ class INET_API Chunk : public cObject,
      */
     void clearTags(b offset = b(0), b length = b(-1)) {
         checkMutable();
-        tags.clearTags(offset, length == b(-1) ? getChunkLength() - offset : length);
+        regionTags.clearTags(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
@@ -659,76 +731,122 @@ class INET_API Chunk : public cObject,
      */
     void copyTags(const Chunk& source, b sourceOffset = b(0), b offset = b(0), b length = b(-1)) {
         checkMutable();
-        tags.copyTags(source.tags, sourceOffset, offset, length == b(-1) ? getChunkLength() - offset : length);
+        regionTags.copyTags(source.regionTags, sourceOffset, offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns the chunk tag for the provided type and range, or returns nullptr if no such chunk tag is found.
      */
-    template<typename T> const T *findTag(b offset = b(0), b length = b(-1)) const {
-        return tags.findTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    template<typename T> const Ptr<const T> findTag(b offset = b(0), b length = b(-1)) const {
+        return regionTags.findTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
      */
-    template<typename T> const T *getTag(b offset = b(0), b length = b(-1)) const {
-        return tags.getTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    template<typename T> const Ptr<const T> getTag(b offset = b(0), b length = b(-1)) const {
+        return regionTags.getTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Maps all tags in the provided range to to the function.
+     */
+    template<typename T> void mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const {
+        return regionTags.mapAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
+    }
+
+    /**
+     * Maps all tags in the provided range to to the function.
+     */
+    template<typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f) {
+        checkMutable();
+        return regionTags.mapAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
     }
 
     /**
      * Returns all chunk tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<const T>> getAllTags(b offset = b(0), b length = b(-1)) const {
-        return tags.getAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<const T>> getAllTags(b offset = b(0), b length = b(-1)) const {
+        return regionTags.getAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Returns all chunk tags for the provided type and range in a detached vector of region tags.
+     */
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllTagsForUpdate(b offset = b(0), b length = b(-1)) {
+        checkMutable();
+        return regionTags.getAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns a newly added chunk tag for the provided type and range, or throws an exception if such a chunk tag is already present.
      */
-    template<typename T> T *addTag(b offset = b(0), b length = b(-1)) {
+    template<typename T> const Ptr<T> addTag(b offset = b(0), b length = b(-1)) {
         checkMutable();
-        return tags.addTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+        return regionTags.addTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns a newly added chunk tag for the provided type and range if absent, or returns the chunk tag that is already present.
      */
-    template<typename T> T *addTagIfAbsent(b offset = b(0), b length = b(-1)) {
+    template<typename T> const Ptr<T> addTagIfAbsent(b offset = b(0), b length = b(-1)) {
         checkMutable();
-        return tags.addTagIfAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+        return regionTags.addTagIfAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Returns the newly added chunk tags for the provided type and range where the tag is absent.
+     */
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> addTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
+        checkMutable();
+        return regionTags.addTagsWhereAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Removes the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
      */
-    template <typename T> T *removeTag(b offset, b length) {
+    template <typename T> const Ptr<T> removeTag(b offset, b length) {
         checkMutable();
-        return tags.removeTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+        return regionTags.removeTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Removes the chunk tag for the provided type and range if present, or returns nullptr if no such chunk tag is found.
      */
-    template <typename T> T *removeTagIfPresent(b offset, b length) {
+    template <typename T> const Ptr<T> removeTagIfPresent(b offset, b length) {
         checkMutable();
-        return tags.removeTagIfPresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+        return regionTags.removeTagIfPresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Removes and returns all chunk tags for the provided type and range.
      */
-    template <typename T> std::vector<RegionTagSet::RegionTag<T>> removeAllTags(b offset, b length) {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> removeTagsWherePresent(b offset, b length) {
         checkMutable();
-        return tags.removeAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+        return regionTags.removeTagsWherePresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
     //@}
+
+    /** @name Utility functions */
+    //@{
+    /**
+     * Prints an optinally formatted human readable string representation of
+     * the data present in this chunk to the given stream.
+     */
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+
+    /**
+     * Prints an optinally formatted human readable string representation of
+     * the feilds of this chunk to the given stream.
+     */
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const;
 
     /**
      * Returns a human readable string representation of the data present in
      * this chunk.
      */
     virtual std::string str() const override;
+    //@}
 
   public:
     /** @name Chunk serialization related functions */
@@ -763,13 +881,9 @@ const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
         return staticPtrCast<T>(chunk->dupShared());
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { if (chunk != nullptr) return os << chunk->str(); else return os << "<nullptr>"; }
-
-inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) { return os << chunk.str(); }
-
 typedef TemporarySharedPtr<Chunk> ChunkTemporarySharedPtr;
 
 } // namespace
 
-#endif // #ifndef __INET_CHUNK_H_
+#endif
 

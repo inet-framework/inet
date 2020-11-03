@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 3
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
@@ -75,7 +75,7 @@ void PimBase::handleStartOperation(LifecycleOperation *operation)
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
         PimInterface *pimInterface = pimIft->getInterface(i);
         if (pimInterface->getMode() == mode) {
-            pimInterface->getInterfacePtr()->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
+            pimInterface->getInterfacePtr()->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
             isEnabled = true;
         }
     }
@@ -83,7 +83,7 @@ void PimBase::handleStartOperation(LifecycleOperation *operation)
     if (isEnabled) {
         EV_INFO << "PIM is enabled on device " << hostname << endl;
         helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
-        scheduleAt(simTime() + par("triggeredHelloDelay"), helloTimer);
+        scheduleAfter(par("triggeredHelloDelay"), helloTimer);
     }
 }
 
@@ -106,7 +106,7 @@ void PimBase::processHelloTimer(cMessage *timer)
     ASSERT(timer == helloTimer);
     EV_DETAIL << "Hello Timer expired.\n";
     sendHelloPackets();
-    scheduleAt(simTime() + helloPeriod, helloTimer);
+    scheduleAfter(helloPeriod, helloTimer);
 }
 
 void PimBase::sendHelloPackets()
@@ -190,7 +190,7 @@ void PimBase::processHelloPacket(Packet *packet)
         }
     }
 
-    InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+    NetworkInterface *ie = ift->getInterfaceById(interfaceId);
 
     EV_INFO << "Received PIM Hello from neighbor: interface=" << ie->getInterfaceName() << " address=" << address << "\n";
 

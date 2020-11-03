@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 //
@@ -82,7 +83,7 @@ class INET_API RoutingTableParser
             char *destStr);
 
     // Convert string separated by ':' into dynamic string array.
-    virtual void parseMulticastGroups(char *groupStr, InterfaceEntry *);
+    virtual void parseMulticastGroups(char *groupStr, NetworkInterface *);
 
     // Return 1 if beginning of str1 and str2 is equal up to str2-len,
     // otherwise 0.
@@ -98,5 +99,5 @@ class INET_API RoutingTableParser
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTINGTABLEPARSER_H
+#endif
 

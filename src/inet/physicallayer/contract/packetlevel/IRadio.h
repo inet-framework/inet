@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_IRADIO_H
@@ -35,7 +35,6 @@ class IRadioMedium;
  * supported. The radio has an operation mode and it provides the state of the
  * radio medium at its position.
  *
- * @author Levente Meszaros
  */
 // TODO: add burst support, sending of signals back to back (using a resource limited queue)
 // TODO: rename *Changed signals to *Change signals and emit them just before overwriting
@@ -81,30 +80,6 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
      * The source is the radio and the emitted value is the new transmitted part.
      */
     static simsignal_t transmittedSignalPartChangedSignal;
-
-    /**
-     * This signal is emitted when a transmission is started by the radio.
-     * The source is the radio and the emitted value is the transmission.
-     */
-    static simsignal_t transmissionStartedSignal;
-
-    /**
-     * This signal is emitted when a transmission is ended by the radio.
-     * The source is the radio and the emitted value is the transmission.
-     */
-    static simsignal_t transmissionEndedSignal;
-
-    /**
-     * This signal is emitted when an attempted reception is started by the radio.
-     * The source is the radio and the emitted value is the reception.
-     */
-    static simsignal_t receptionStartedSignal;
-
-    /**
-     * This signal is emitted when an attempted reception is ended by the radio.
-     * The source is the radio and the emitted value is the reception.
-     */
-    static simsignal_t receptionEndedSignal;
 
     /**
      * This enumeration specifies the requested operational mode of the radio.
@@ -326,5 +301,5 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_IRADIO_H
+#endif
 

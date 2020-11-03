@@ -13,12 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.examples.inet.tcpclientserver;
 
-import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -47,9 +46,6 @@ network ClientServer
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
-        }
-        netAnimTrace: NetAnimTrace {
-            @display("p=100,200;is=s");
         }
     connections:
         client1.pppg++ <--> C <--> server.pppg++;

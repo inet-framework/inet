@@ -48,7 +48,7 @@ int8_t Batman::send_udp_packet(Packet *packet_buff, int32_t packet_buff_len, con
 // modification routing tables methods
 //
 //
-void Batman::add_del_route(const L3Address &dest, uint8_t netmask, const L3Address &router, int32_t ifi, InterfaceEntry* dev, uint8_t rt_table, int8_t route_type, int8_t route_action)
+void Batman::add_del_route(const L3Address &dest, uint8_t netmask, const L3Address &router, int32_t ifi, NetworkInterface* dev, uint8_t rt_table, int8_t route_type, int8_t route_action)
 {
     if (route_type != ROUTE_TYPE_UNICAST)
         return;
@@ -82,7 +82,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
     int if_count = 1;
     for (int i=0; i<getNumInterfaces(); i++)
     {
-        InterfaceEntry *ifr = getInterfaceEntry(i);
+        NetworkInterface *ifr = getInterfaceEntry(i);
 
         if (ifr->getProtocolData<Ipv4InterfaceData>()==nullptr) // no ipv4
             continue;
@@ -114,7 +114,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
     return 1;
 }
 
-void Batman::add_del_rule(const L3Address& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *iif, int8_t rule_type, int8_t rule_action)
+void Batman::add_del_rule(const L3Address& network, uint8_t netmask, int8_t rt_table, uint32_t prio, NetworkInterface *iif, int8_t rule_type, int8_t rule_action)
 {
     return;
 }

@@ -1,18 +1,18 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.node.base;
@@ -25,7 +25,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
     parameters:
         bool hasIpv4 = default(true);
         bool hasIpv6 = default(false);
-        bool hasGn = default(false); 
+        bool hasGn = default(false);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;
@@ -61,34 +61,13 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         generic.ifIn <-- nl.out++ if exists(generic);
         generic.ifOut --> nl.in++ if exists(generic);
 
-        for i=0..numLoInterfaces-1 {
-            nl.out++ --> lo[i].upperLayerIn;
-            lo[i].upperLayerOut --> nl.in++;
-        }
+        ethernet.upperLayerOut --> nl.in++ if exists(ethernet);
+        nl.out++ --> ethernet.upperLayerIn if exists(ethernet);
 
-        for i=0..sizeof(radioIn)-1 {
-            wlan[i].upperLayerOut --> nl.in++;
-            wlan[i].upperLayerIn <-- nl.out++;
-        }
+        ieee8021q.upperLayerOut --> nl.in++ if exists(ieee8021q);
+        nl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
 
-        for i=0..sizeof(ethg)-1 {
-            eth[i].upperLayerOut --> nl.in++;
-            eth[i].upperLayerIn <-- nl.out++;
-        }
-
-        for i=0..sizeof(pppg)-1 {
-            ppp[i].upperLayerOut --> nl.in++;
-            ppp[i].upperLayerIn <-- nl.out++;
-        }
-
-        for i=0..numTunInterfaces-1 {
-            tun[i].upperLayerOut --> nl.in++;
-            tun[i].upperLayerIn <-- nl.out++;
-        }
-
-        for i=0..numVlanInterfaces-1 {
-            vlan[i].upperLayerOut --> nl.in++;
-            vlan[i].upperLayerIn <-- nl.out++;
-        }
+        nl.out++ --> li.in++;
+        nl.in++ <-- li.out++;
 }
 

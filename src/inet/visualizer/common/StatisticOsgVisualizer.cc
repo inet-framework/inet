@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -34,18 +34,12 @@ StatisticOsgVisualizer::StatisticOsgVisualization::StatisticOsgVisualization(Net
 {
 }
 
-StatisticOsgVisualizer::~StatisticOsgVisualizer()
-{
-    if (displayStatistics)
-        removeAllStatisticVisualizations();
-}
-
 void StatisticOsgVisualizer::initialize(int stage)
 {
     StatisticVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
 
@@ -80,7 +74,8 @@ void StatisticOsgVisualizer::removeStatisticVisualization(const StatisticVisuali
 {
     StatisticVisualizerBase::removeStatisticVisualization(statisticVisualization);
     auto statisticOsgVisualization = static_cast<const StatisticOsgVisualization *>(statisticVisualization);
-    statisticOsgVisualization->networkNodeVisualization->removeAnnotation(statisticOsgVisualization->node);
+    if (networkNodeVisualizer != nullptr)
+        statisticOsgVisualization->networkNodeVisualization->removeAnnotation(statisticOsgVisualization->node);
 }
 
 void StatisticOsgVisualizer::refreshStatisticVisualization(const StatisticVisualization *statisticVisualization)

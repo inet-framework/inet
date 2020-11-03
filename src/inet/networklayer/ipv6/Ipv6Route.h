@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_IPV6ROUTE_H
@@ -27,7 +27,7 @@
 
 namespace inet {
 
-class InterfaceEntry;
+class NetworkInterface;
 class Ipv6RoutingTable;
 
 /**
@@ -63,7 +63,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     Ipv6Address _destPrefix;
     short _prefixLength;
     SourceType _sourceType;
-    InterfaceEntry *_interfacePtr;
+    NetworkInterface *_interfacePtr;
     Ipv6Address _nextHop;    // unspecified means "direct"
     simtime_t _expiryTime;    // if route is an advertised prefix: prefix lifetime
     int _metric;
@@ -96,7 +96,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     virtual ~Ipv6Route() { delete _protocolData; }
 
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(Ipv6RoutingTable *rt) { _rt = rt; }
@@ -124,8 +124,8 @@ class INET_API Ipv6Route : public cObject, public IRoute
     const char* getSourceTypeAbbreviation() const;
     virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); }    //TODO rename Ipv6 method
     virtual L3Address getNextHopAsGeneric() const override { return getNextHop(); }
-    virtual InterfaceEntry *getInterface() const override { return _interfacePtr; }
-    virtual void setInterface(InterfaceEntry *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
+    virtual NetworkInterface *getInterface() const override { return _interfacePtr; }
+    virtual void setInterface(NetworkInterface *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
     virtual cObject *getSource() const override { return _source; }
     virtual cObject *getProtocolData() const override { return _protocolData; }
     virtual void setProtocolData(cObject *protocolData) override { _protocolData = protocolData; }
@@ -133,5 +133,5 @@ class INET_API Ipv6Route : public cObject, public IRoute
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6ROUTE_H
+#endif
 

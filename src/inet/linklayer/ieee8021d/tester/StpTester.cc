@@ -12,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-//
-// Author: Benjamin Martin Seregi
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -38,7 +36,7 @@ void StpTester::initialize()
 {
     checkTimer = new cMessage("checktime");
     checkTime = par("checkTime");
-    scheduleAt(simTime() + checkTime, checkTimer);
+    scheduleAfter(checkTime, checkTimer);
 }
 
 void StpTester::handleMessage(cMessage *msg)
@@ -55,7 +53,7 @@ void StpTester::handleMessage(cMessage *msg)
             EV_DEBUG << "Not all nodes are connected with each other" << endl;
         if (isTreeGraph())
             EV_DEBUG << "The network topology is a tree topology" << endl;
-        scheduleAt(simTime() + checkTime, msg);
+        scheduleAfter(checkTime, msg);
     }
     else {
         throw cRuntimeError("This module only handle selfmessages");
@@ -158,8 +156,8 @@ bool StpTester::isForwarding(Topology::Node *node, unsigned int portNum)
         return true;
 
     cGate *gate = node->getModule()->gate("ethg$o", portNum);
-    InterfaceEntry *gateIfEntry = CHK(ifTable->findInterfaceByNodeOutputGateId(gate->getId()));
-    Ieee8021dInterfaceData *portData = gateIfEntry->findProtocolData<Ieee8021dInterfaceData>();
+    NetworkInterface *gateIfEntry = CHK(ifTable->findInterfaceByNodeOutputGateId(gate->getId()));
+    auto portData = gateIfEntry->findProtocolData<Ieee8021dInterfaceData>();
 
     // If portData does not exist, then it implies that
     // the node is not a switch

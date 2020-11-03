@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -39,30 +39,34 @@ void OrdinalBasedDropper::initialize(int stage)
         parseVector(vector);
 
         if (dropsVector.size() == 0)
-            EV_WARN << "Empty dropsVector" << endl;
-        else
-            EV_DEBUG << "dropsVector=" << vector << endl;
+            EV_WARN << "Empty dropsVector" << EV_ENDL;
+        else {
+            EV_DEBUG << EV_FIELD(dropsVector, vector) << EV_ENDL;
             generateFurtherDrops = true;
+        }
     }
 }
 
-bool OrdinalBasedDropper::matchesPacket(Packet *packet)
+bool OrdinalBasedDropper::matchesPacket(const Packet *packet) const
 {
-    if (generateFurtherDrops) {
-        if (numPackets == dropsVector[0]) {
-            EV_DEBUG << "Dropping packet number " << numPackets << " " << packet << endl;
-            numDropped++;
-            dropsVector.erase(dropsVector.begin());
-            if (dropsVector.size() == 0) {
-                EV_DEBUG << "End of dropsVector reached." << endl;
-                generateFurtherDrops = false;
-            }
-            numPackets++;
-            return false;
-        }
-    }
+    return !generateFurtherDrops || numPackets != dropsVector[0];
+}
+
+void OrdinalBasedDropper::processPacket(Packet *packet)
+{
     numPackets++;
-    return true;
+}
+
+void OrdinalBasedDropper::dropPacket(Packet *packet)
+{
+    EV_DEBUG << "Dropping packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet) << EV_ENDL;
+    numPackets++;
+    numDropped++;
+    dropsVector.erase(dropsVector.begin());
+    if (dropsVector.size() == 0) {
+        EV_DEBUG << "End of dropsVector reached" << EV_ENDL;
+        generateFurtherDrops = false;
+    }
 }
 
 void OrdinalBasedDropper::parseVector(const char *vector)

@@ -533,8 +533,8 @@
     <filename>inet.linklayer.ethernet.EtherEncap.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.EtherEncapDummy</name>
-    <filename>inet.linklayer.ethernet.EtherEncapDummy.html</filename>
+    <name>inet.linklayer.ethernet.OmittedEtherEncap</name>
+    <filename>inet.linklayer.ethernet.OmittedEtherEncap.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.EtherFrameClassifier</name>
@@ -1481,8 +1481,8 @@
     <filename>inet.visualizer.integrated.IntegratedVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.networklayer.common.InterfaceEntry</name>
-    <filename>inet.networklayer.common.InterfaceEntry.html</filename>
+    <name>inet.networklayer.common.NetworkInterface</name>
+    <filename>inet.networklayer.common.NetworkInterface.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.common.InterfaceTable</name>

@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /***************************************************************************
                           sdes.cc  -  description
                              -------------------
@@ -6,14 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************/
 
 #include <string.h>
 
@@ -120,7 +127,7 @@ int SdesItem::getSdesTotalLength() const
 
 Register_Class(SdesChunk);
 
-SdesChunk::SdesChunk(const char *name, uint32 ssrc) : cArray(name)
+SdesChunk::SdesChunk(const char *name, uint32_t ssrc) : cArray(name)
 {
     _ssrc = ssrc;
     _length = 4;
@@ -191,12 +198,12 @@ void SdesChunk::addSDESItem(SdesItem *sdesItem)
     _length += sdesItem->getSdesTotalLength();
 }
 
-uint32 SdesChunk::getSsrc() const
+uint32_t SdesChunk::getSsrc() const
 {
     return _ssrc;
 }
 
-void SdesChunk::setSsrc(uint32 ssrc)
+void SdesChunk::setSsrc(uint32_t ssrc)
 {
     _ssrc = ssrc;
 }

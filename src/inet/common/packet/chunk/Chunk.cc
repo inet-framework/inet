@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/SliceChunk.h"
@@ -32,14 +34,28 @@ Chunk::Chunk() :
 Chunk::Chunk(const Chunk& other) :
     id(nextId++),
     flags(other.flags & ~CF_IMMUTABLE),
-    tags(other.tags)
+    regionTags(other.regionTags)
 {
 }
 
 void Chunk::forEachChild(cVisitor *v)
 {
-    for (int i = 0; i < tags.getNumTags(); i++)
-        v->visit(tags.getTag(i));
+    for (int i = 0; i < regionTags.getNumTags(); i++)
+        v->visit(const_cast<TagBase *>(regionTags.getTag(i).get()));
+}
+
+void Chunk::parsimPack(cCommBuffer *buffer) const
+{
+    buffer->pack(id);
+    buffer->pack(flags);
+    regionTags.parsimPack(buffer);
+}
+
+void Chunk::parsimUnpack(cCommBuffer *buffer)
+{
+    buffer->unpack(id);
+    buffer->unpack(flags);
+    regionTags.parsimUnpack(buffer);
 }
 
 void Chunk::handleChange()
@@ -47,12 +63,12 @@ void Chunk::handleChange()
     checkMutable();
 }
 
-int Chunk::getBinDumpNumLines()
+int Chunk::getBinDumpNumLines() const
 {
     return (b(getChunkLength()).get() + 31) / 32;
 }
 
-int Chunk::getHexDumpNumLines()
+int Chunk::getHexDumpNumLines() const
 {
     return ((b(getChunkLength()).get() + 7) / 8 + 15) / 16;
 }
@@ -106,26 +122,18 @@ const char *Chunk::getHexDumpLine(int index)
     return asStringValue.c_str();
 }
 
-int Chunk::getTagsArraySize()
-{
-    return tags.getNumTags();
-}
-
-const RegionTagSet::RegionTag<cObject>& Chunk::getTags(int index)
-{
-    return tags.getRegionTag(index);
-}
-
 const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto chunkType = chunk->getChunkType();
-    if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES)
-        throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag to peek)");
+    if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES) {
+        auto chunkObject = chunk.get();
+        throw cRuntimeError("Implicit data reinterpretation via chunk serialization/deserialization (%s -> %s) is disabled to prevent unexpected behavior due to reinterpretation and unpredictable performance degradation due to overhead (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag)", opp_typename(typeid(*chunkObject)), opp_typename(typeInfo));
+    }
     MemoryOutputStream outputStream;
     serialize(outputStream, chunk, offset, length < b(0) ? std::min(-length, chunk->getChunkLength() - offset) : length);
     MemoryInputStream inputStream(outputStream.getData());
     const auto& result = deserialize(inputStream, typeInfo);
-    result->tags.copyTags(chunk->tags, offset, b(0), result->getChunkLength());
+    result->regionTags.copyTags(chunk->regionTags, offset, b(0), result->getChunkLength());
     return result;
 }
 
@@ -148,11 +156,28 @@ const Ptr<Chunk> Chunk::peek(const Iterator& iterator, b length, int flags) cons
     return checkPeekResult<Chunk>(chunk, flags);
 }
 
+std::ostream& Chunk::printToStream(std::ostream& stream, int level, int evFlags) const
+{
+    std::string className = getClassName();
+    auto index = className.rfind("::");
+    if (index != std::string::npos)
+        className = className.substr(index + 2);
+    stream << EV_FAINT << className << EV_NORMAL;
+    return printFieldsToStream(stream, level, evFlags);
+}
+
+std::ostream& Chunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+{
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FIELD(length, getChunkLength());
+    return stream;
+}
+
 std::string Chunk::str() const
 {
-    std::ostringstream os;
-    os << getClassName() << ", length = " << getChunkLength();
-    return os.str();
+    std::stringstream stream;
+    printFieldsToStream(stream, PRINT_LEVEL_COMPLETE, 0);
+    return stream.tellp() == 0 ? "" : stream.str().substr(2);
 }
 
 void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length)

@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
@@ -29,11 +29,11 @@ DimensionalSnir::DimensionalSnir(const DimensionalReception *reception, const Di
 {
 }
 
-std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level) const
+std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DimensionalSnir";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", minSNIR = " << minSNIR;
+        stream << EV_FIELD(minSNIR);
     return SnirBase::printToStream(stream, level);
 }
 
@@ -58,7 +58,7 @@ double DimensionalSnir::computeMin() const
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
     double minSNIR = snir->getMin(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
-    EV_DEBUG << "Computing minimum SNIR: start = " << startPoint << ", end = " << endPoint << " -> minimum SNIR = " << minSNIR << endl;
+    EV_DEBUG << "Computing minimum SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(minSNIR) << endl;
     return minSNIR;
 }
 
@@ -83,7 +83,7 @@ double DimensionalSnir::computeMax() const
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
     double maxSNIR = snir->getMax(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
-    EV_DEBUG << "Computing maximum SNIR: start = " << startPoint << ", end = " << endPoint << " -> maximum SNIR = " << maxSNIR << endl;
+    EV_DEBUG << "Computing maximum SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(maxSNIR) << endl;
     return maxSNIR;
 }
 
@@ -108,7 +108,7 @@ double DimensionalSnir::computeMean() const
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
     double meanSNIR = snir->getMean(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
-    EV_DEBUG << "Computing mean SNIR: start = " << startPoint << ", end = " << endPoint << " -> mean SNIR = " << meanSNIR << endl;
+    EV_DEBUG << "Computing mean SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(meanSNIR) << endl;
     return meanSNIR;
 }
 

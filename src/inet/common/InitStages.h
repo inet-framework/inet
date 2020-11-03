@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,13 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// author: Zoltan Bojthe
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INITSTAGES
-#define __INET_INITSTAGES
+#ifndef __INET_INITSTAGES_H
+#define __INET_INITSTAGES_H
 
 #include "inet/common/INETDefs.h"
 
@@ -41,6 +39,11 @@ enum InitStages {
      *  - subscribing to module signals
      */
     INITSTAGE_LOCAL = 0,
+
+    /**
+     * Initialization of clocks.
+     */
+    INITSTAGE_CLOCK = 1,
 
     /**
      * Initialization of the physical environment.
@@ -99,7 +102,7 @@ enum InitStages {
     /**
      * Initialization of network configuration (e.g. Ipv4NetworkConfigurator) includes:
      *  - determining IP addresses and static routes
-     *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to InterfaceEntry
+     *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to NetworkInterface
      */
     INITSTAGE_NETWORK_CONFIGURATION = 4,
 
@@ -156,5 +159,5 @@ enum InitStages {
 
 } // namespace inet
 
-#endif    // __INET_INITSTAGES
+#endif
 

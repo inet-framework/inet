@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2013 Opensim Ltd.
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// author: Levente Meszaros (levy@omnetpp.org)
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "TestMobility.h"
@@ -26,10 +24,10 @@ Define_Module(TestMobility);
 
 bool TestMobility::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleOperationStage");
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {
         if (stage == 0) {
-            scheduleAt(simTime() + 9, &startMoving);
+            scheduleAfter(9, &startMoving);
             EV << getFullPath() << " starting to move" << endl;
             return true;
         }
@@ -44,7 +42,7 @@ bool TestMobility::handleOperationStage(LifecycleOperation *operation, int stage
     }
     else if (dynamic_cast<TestNodeShutdownOperation *>(operation)) {
         if (stage == 0) {
-            scheduleAt(simTime() + 9, &stopMoving);
+            scheduleAfter(9, &stopMoving);
             EV << getFullPath() << " stopping to move" << endl;
             return true;
         }

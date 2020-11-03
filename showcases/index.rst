@@ -17,6 +17,7 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released showcases:
 
+- :doc:`emulation/videostreaming/doc/index`
 - :doc:`wireless/analogmodel/doc/index`
 - :doc:`wireless/crosstalk/doc/index`
 - :doc:`wireless/coexistence/doc/index`

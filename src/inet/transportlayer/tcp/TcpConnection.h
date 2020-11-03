@@ -1,7 +1,7 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2009-2010 Thomas Reschka
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,7 +14,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_TCPCONNECTION_H
@@ -147,32 +148,32 @@ class INET_API TcpStateVariables : public cObject
   public:
     TcpStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const;
 
   public:
     bool active;    // set if the connection was initiated by an active open
     bool fork;    // if passive and in LISTEN: whether to fork on an incoming connection
 
-    uint32 snd_mss;    // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
+    uint32_t snd_mss;    // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
                        // This will be set to the minimum of the local smss parameter and the value specified in the
                        // MSS option received during connection setup.
 
     // send sequence number variables (see RFC 793, "3.2. Terminology")
-    uint32 snd_una;    // send unacknowledged
-    uint32 snd_nxt;    // send next (drops back on retransmission)
-    uint32 snd_max;    // max seq number sent (needed because snd_nxt is re-set on retransmission)
-    uint32 snd_wnd;    // send window
-    uint32 snd_up;    // send urgent pointer
-    uint32 snd_wl1;    // segment sequence number used for last window update
-    uint32 snd_wl2;    // segment ack. number used for last window update
-    uint32 iss;    // initial sequence number (ISS)
+    uint32_t snd_una;    // send unacknowledged
+    uint32_t snd_nxt;    // send next (drops back on retransmission)
+    uint32_t snd_max;    // max seq number sent (needed because snd_nxt is re-set on retransmission)
+    uint32_t snd_wnd;    // send window
+    uint32_t snd_up;    // send urgent pointer
+    uint32_t snd_wl1;    // segment sequence number used for last window update
+    uint32_t snd_wl2;    // segment ack. number used for last window update
+    uint32_t iss;    // initial sequence number (ISS)
 
     // receive sequence number variables
-    uint32 rcv_nxt;    // receive next
-    uint32 rcv_wnd;    // receive window
-    uint32 rcv_up;    // receive urgent pointer;
-    uint32 irs;    // initial receive sequence number
-    uint32 rcv_adv;    // advertised window
+    uint32_t rcv_nxt;    // receive next
+    uint32_t rcv_wnd;    // receive window
+    uint32_t rcv_up;    // receive urgent pointer;
+    uint32_t irs;    // initial receive sequence number
+    uint32_t rcv_adv;    // advertised window
 
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TcpAlgorithm)
@@ -185,19 +186,17 @@ class INET_API TcpStateVariables : public cObject
     bool fin_ack_rcvd;
 
     bool send_fin;    // true if a user CLOSE command has been "queued"
-    uint32 snd_fin_seq;    // if send_fin == true: FIN should be sent just before this sequence number
+    uint32_t snd_fin_seq;    // if send_fin == true: FIN should be sent just before this sequence number
 
     bool fin_rcvd;    // whether FIN received or not
-    uint32 rcv_fin_seq;    // if fin_rcvd: sequence number of received FIN
-
-    uint32 sentBytes;    // amount of user data (in bytes) sent in last segment
+    uint32_t rcv_fin_seq;    // if fin_rcvd: sequence number of received FIN
 
     bool nagle_enabled;    // set if Nagle's algorithm (RFC 896) is enabled
     bool delayed_acks_enabled;    // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled;    // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool increased_IW_enabled;    // set if Increased Initial Window (RFC 3390) is enabled
 
-    uint32 full_sized_segment_counter;    // this counter is needed for delayed ACK
+    uint32_t full_sized_segment_counter;    // this counter is needed for delayed ACK
     bool ack_now;    // send ACK immediately, needed if delayed_acks_enabled is set
                      // Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
                      // ack_now should be set when:
@@ -223,8 +222,8 @@ class INET_API TcpStateVariables : public cObject
     bool ts_enabled;    // set if the connection uses Window Scale (header option)
     bool snd_initial_ts;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts;    // set if initial TIMESTAMP has been received
-    uint32 ts_recent;    // RFC 1323, page 31: "Latest received Timestamp"
-    uint32 last_ack_sent;    // RFC 1323, page 31: "Last ACK field sent"
+    uint32_t ts_recent;    // RFC 1323, page 31: "Latest received Timestamp"
+    uint32_t last_ack_sent;    // RFC 1323, page 31: "Last ACK field sent"
     simtime_t time_last_data_sent;    // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables
@@ -232,34 +231,34 @@ class INET_API TcpStateVariables : public cObject
     bool sack_enabled;    // set if the connection uses selective acknowledgment (header option)
     bool snd_sack_perm;    // set if SACK_PERMITTED has been sent
     bool rcv_sack_perm;    // set if SACK_PERMITTED has been received
-    uint32 start_seqno;    // start sequence number of last received out-of-order segment
-    uint32 end_seqno;    // end sequence number of last received out-of-order segment
+    uint32_t start_seqno;    // start sequence number of last received out-of-order segment
+    uint32_t end_seqno;    // end sequence number of last received out-of-order segment
     bool snd_sack;    // set if received vaild out-of-order segment or rcv_nxt changed, but receivedQueue is not empty
     bool snd_dsack;    // set if received duplicated segment (sequenceNo+PLength < rcv_nxt) or (segment is not acceptable)
     SackList sacks_array;    // MAX_SACK_BLOCKS is set to 60
-    uint32 highRxt;    // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
-    uint32 pipe;    // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
-    uint32 recoveryPoint;    // RFC 3517
-    uint32 sackedBytes;    // number of sackedBytes
-    uint32 sackedBytes_old;    // old number of sackedBytes - needed for RFC 3042 to check if last dupAck contained new sack information
+    uint32_t highRxt;    // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
+    uint32_t pipe;    // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
+    uint32_t recoveryPoint;    // RFC 3517
+    uint32_t sackedBytes;    // number of sackedBytes
+    uint32_t sackedBytes_old;    // old number of sackedBytes - needed for RFC 3042 to check if last dupAck contained new sack information
     bool lossRecovery;    // indicates if algorithm is in loss recovery phase
 
     // queue management
-    uint32 sendQueueLimit;
+    uint32_t sendQueueLimit;
     bool queueUpdate;
 
     // those counters would logically belong to TcpAlgorithm, but it's a lot easier to manage them here
-    uint32 dupacks;    // current number of received consecutive duplicate ACKs
-    uint32 snd_sacks;    // number of sent sacks
-    uint32 rcv_sacks;    // number of received sacks
-    uint32 rcv_oooseg;    // number of received out-of-order segments
-    uint32 rcv_naseg;    // number of received not acceptable segments
+    uint32_t dupacks;    // current number of received consecutive duplicate ACKs
+    uint32_t snd_sacks;    // number of sent sacks
+    uint32_t rcv_sacks;    // number of received sacks
+    uint32_t rcv_oooseg;    // number of received out-of-order segments
+    uint32_t rcv_naseg;    // number of received not acceptable segments
 
     // receiver buffer / receiver queue related variables
-    uint32 maxRcvBuffer;    // maximal amount of bytes in tcp receive queue
-    uint32 usedRcvBuffer;    // current amount of used bytes in tcp receive queue
-    uint32 freeRcvBuffer;    // current amount of free bytes in tcp receive queue
-    uint32 tcpRcvQueueDrops;    // number of drops in tcp receive queue
+    uint32_t maxRcvBuffer;    // maximal amount of bytes in tcp receive queue
+    uint32_t usedRcvBuffer;    // current amount of used bytes in tcp receive queue
+    uint32_t freeRcvBuffer;    // current amount of free bytes in tcp receive queue
+    uint32_t tcpRcvQueueDrops;    // number of drops in tcp receive queue
 
     //ECN
     bool ecnEchoState;         // indicates if connection is in echo mode (got CE indication from IP and didn't get CWR from sender yet)
@@ -274,7 +273,7 @@ class INET_API TcpStateVariables : public cObject
     bool rexmit;               // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 
-    uint32 dupthresh; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
+    uint32_t dupthresh; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 };
 
 /**
@@ -432,27 +431,27 @@ class INET_API TcpConnection : public cSimpleModule
      * Shortcut to process most common case as fast as possible. Returns false
      * if segment requires normal (slow) route.
      */
-    virtual bool tryFastRoute(const Ptr<const TcpHeader>& tcpseg);
+    virtual bool tryFastRoute(const Ptr<const TcpHeader>& tcpHeader);
     /**
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    virtual TcpEventCode process_RCV_SEGMENT(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TcpEventCode processSegmentInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TcpEventCode processSynInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
-    virtual TcpEventCode processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TcpEventCode processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
-    virtual TcpEventCode processRstInSynReceived(const Ptr<const TcpHeader>& tcpseg);
-    virtual bool processAckInEstabEtc(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
+    virtual TcpEventCode process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
+    virtual TcpEventCode processSegmentInListen(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
+    virtual TcpEventCode processSynInListen(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
+    virtual TcpEventCode processSegmentInSynSent(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
+    virtual TcpEventCode processSegment1stThru8th(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
+    virtual TcpEventCode processRstInSynReceived(const Ptr<const TcpHeader>& tcpHeader);
+    virtual bool processAckInEstabEtc(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
     //@}
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
-    virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionMaxSegmentSize& option);
-    virtual bool processWSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionWindowScale& option);
-    virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSackPermitted& option);
-    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSack& option);
-    virtual bool processTSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionTimestamp& option);
+    virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionMaxSegmentSize& option);
+    virtual bool processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option);
+    virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option);
+    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSack& option);
+    virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
@@ -478,7 +477,7 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    virtual bool isSegmentAcceptable(Packet *packet, const Ptr<const TcpHeader>& tcpseg) const;
+    virtual bool isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader) const;
 
     /** Utility: send SYN */
     virtual void sendSyn();
@@ -487,19 +486,19 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void sendSynAck();
 
     /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual void readHeaderOptions(const Ptr<const TcpHeader>& tcpseg);
+    virtual void readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader);
 
     /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual TcpHeader writeHeaderOptions(const Ptr<TcpHeader>& tcpseg);
+    virtual TcpHeader writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader);
 
     /** Utility: adds SACKs to segments header options field */
-    virtual TcpHeader addSacks(const Ptr<TcpHeader>& tcpseg);
+    virtual TcpHeader addSacks(const Ptr<TcpHeader>& tcpHeader);
 
     /** Utility: get TSval from segments TS header option */
-    virtual uint32 getTSval(const Ptr<const TcpHeader>& tcpseg) const;
+    virtual uint32_t getTSval(const Ptr<const TcpHeader>& tcpHeader) const;
 
     /** Utility: get TSecr from segments TS header option */
-    virtual uint32 getTSecr(const Ptr<const TcpHeader>& tcpseg) const;
+    virtual uint32_t getTSecr(const Ptr<const TcpHeader>& tcpHeader) const;
 
     /** Utility: returns true if the connection is not yet accepted by the application */
     virtual bool isToBeAccepted() const { return listeningSocketId != -1; }
@@ -510,10 +509,8 @@ class INET_API TcpConnection : public cSimpleModule
 
     /**
      * Utility: Send data from sendQueue, at most congestionWindow.
-     * If fullSegmentsOnly is set, don't send segments smaller than SMSS (needed for Nagle).
-     * Returns true if some data was actually sent.
      */
-    virtual bool sendData(bool fullSegmentsOnly, uint32 congestionWindow);
+    virtual bool sendData(uint32_t congestionWindow);
 
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
     virtual bool sendProbe();
@@ -525,11 +522,11 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void retransmitData();
 
     /** Utility: sends RST */
-    virtual void sendRst(uint32 seqNo);
+    virtual void sendRst(uint32_t seqNo);
     /** Utility: sends RST; does not use connection state */
-    virtual void sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort);
+    virtual void sendRst(uint32_t seq, L3Address src, L3Address dest, int srcPort, int destPort);
     /** Utility: sends RST+ACK; does not use connection state */
-    virtual void sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort);
+    virtual void sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Address dest, int srcPort, int destPort);
 
     /** Utility: sends FIN */
     virtual void sendFin();
@@ -537,11 +534,12 @@ class INET_API TcpConnection : public cSimpleModule
     /**
      * Utility: sends one segment of 'bytes' bytes from snd_nxt, and advances snd_nxt.
      * sendData(), sendProbe() and retransmitData() internally all rely on this one.
+     * Returns the number of bytes sent.
      */
-    virtual void sendSegment(uint32 bytes);
+    virtual uint32_t sendSegment(uint32_t bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
-    virtual void sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg);
+    virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();
@@ -549,15 +547,9 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: signal to user that connection timed out */
     virtual void signalConnectionTimeout();
 
-    /** Utility: start a timer */
-    void scheduleTimeout(cMessage *msg, simtime_t timeout) { scheduleAt(simTime() + timeout, msg); }
-
   protected:
-    /** Utility: cancel a timer */
-    // cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
-
     /** Utility: send IP packet */
-    virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpHeader, L3Address src, L3Address dest);
 
     /** Utility: sends packet to application */
     virtual void sendToApp(cMessage *msg);
@@ -578,7 +570,7 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: prints local/remote addr/port and app gate index/socketId */
     virtual void printConnBrief() const;
     /** Utility: prints important header fields */
-    static void printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
+    static void printSegmentBrief(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
     /** Utility: returns name of TCP_S_xxx constants */
     static const char *stateName(int state);
     /** Utility: returns name of TCP_E_xxx constants */
@@ -590,8 +582,8 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
 
-    /** Utility: returns true when receive queue has enough space for store the tcpseg */
-    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
+    /** Utility: returns true when receive queue has enough space for store the tcpHeader */
+    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
 
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
@@ -599,7 +591,7 @@ class INET_API TcpConnection : public cSimpleModule
     virtual unsigned short updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlways = false);
+    virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
 
   public:
     TcpConnection() {}
@@ -628,7 +620,7 @@ class INET_API TcpConnection : public cSimpleModule
      * connection object so that it can call this method, then immediately
      * deletes it.
      */
-    virtual void segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
 
     /** @name Various getters **/
     //@{
@@ -654,7 +646,7 @@ class INET_API TcpConnection : public cSimpleModule
      * of false means that the connection structure must be deleted by the
      * caller (TCP).
      */
-    virtual bool processTCPSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
+    virtual bool processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
 
     /**
      * Process commands from the application.
@@ -673,7 +665,7 @@ class INET_API TcpConnection : public cSimpleModule
      * than 'SeqNum' have been SACKed.  Otherwise, the routine returns
      * false."
      */
-    virtual bool isLost(uint32 seqNum);
+    virtual bool isLost(uint32_t seqNum);
 
     /**
      * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
@@ -693,32 +685,33 @@ class INET_API TcpConnection : public cSimpleModule
      * Returns true if a valid sequence number (for the next segment) is found and
      * returns false if no segment should be send.
      */
-    virtual bool nextSeg(uint32& seqNum);
+    virtual bool nextSeg(uint32_t& seqNum);
 
     /**
      * Utility: send data during Loss Recovery phase (if SACK is enabled).
      */
-    virtual void sendDataDuringLossRecoveryPhase(uint32 congestionWindow);
+    virtual void sendDataDuringLossRecoveryPhase(uint32_t congestionWindow);
 
     /**
      * Utility: send segment during Loss Recovery phase (if SACK is enabled).
+     * Returns the number of bytes sent.
      */
-    virtual void sendSegmentDuringLossRecoveryPhase(uint32 seqNum);
+    virtual uint32_t sendSegmentDuringLossRecoveryPhase(uint32_t seqNum);
 
     /**
      * Utility: send one new segment from snd_max if allowed (RFC 3042).
      */
-    virtual void sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow);
+    virtual void sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestionWindow);
 
     /**
      * Utility: converts a given simtime to a timestamp (TS).
      */
-    static uint32 convertSimtimeToTS(simtime_t simtime);
+    static uint32_t convertSimtimeToTS(simtime_t simtime);
 
     /**
      * Utility: converts a given timestamp (TS) to a simtime.
      */
-    static simtime_t convertTSToSimtime(uint32 timestamp);
+    static simtime_t convertTSToSimtime(uint32_t timestamp);
 
     /**
      * Utility: checks if send queue is empty (no data to send).
@@ -730,5 +723,5 @@ class INET_API TcpConnection : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_TCPCONNECTION_H
+#endif
 

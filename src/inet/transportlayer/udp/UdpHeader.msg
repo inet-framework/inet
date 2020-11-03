@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 
@@ -21,8 +22,11 @@ import inet.common.INETDefs;
 import inet.transportlayer.common.CrcMode;
 import inet.transportlayer.contract.TransportHeaderBase;
 
-namespace inet;
+cplusplus {{
+#include "inet/common/INETUtils.h"
+}}
 
+namespace inet;
 
 cplusplus {{
 const B UDP_HEADER_LENGTH = B(8);
@@ -37,14 +41,12 @@ class UdpHeader extends TransportHeaderBase
     unsigned short destPort;
     chunkLength = UDP_HEADER_LENGTH;
     B totalLengthField = B(-1);   // UDP header + payload in bytes
-    uint16_t crc = 0;
+    uint16_t crc = 0 @toString(utils::hex($)) @fromString(utils::uhex($));
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
 
 cplusplus(UdpHeader) {{
   public:
-    virtual std::string str() const override;
-
     virtual unsigned int getSourcePort() const override { return getSrcPort(); }
     virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
     virtual unsigned int getDestinationPort() const override { return getDestPort(); }

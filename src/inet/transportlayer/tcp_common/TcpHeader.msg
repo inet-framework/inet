@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2009-2011 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 
@@ -197,16 +198,15 @@ class TcpHeader extends TransportHeaderBase
     // in the respective segment (except if SYN is set; then the the
     // seq. number is the initial seq. number (ISS) and the first data
     // octet is ISS + 1)
-    unsigned int sequenceNo;
+    uint32_t sequenceNo;
 
     // Acknowledgement Number: if ACK flag is set, this field contains
     // the next sequence number the sender of this segment is expecting
     // to receive
-    unsigned int ackNo;
+    uint32_t ackNo;
 
-    // TCP Header Length - default: 20 bytes
-    // if header options are used the headerLength is greater than 20 bytes (default)
-    B headerLength = TCP_MIN_HEADER_LENGTH; // TCP_MIN_HEADER_LENGTH = 20 bytes
+    // TCP Header Length including options 
+    B headerLength = TCP_MIN_HEADER_LENGTH;
 
     bool cwrBit; // CWR: congestion window reduced bit (RFC 3168)
     bool eceBit; // ECE: ECN-echo bit (RFC 3168)
@@ -220,14 +220,14 @@ class TcpHeader extends TransportHeaderBase
     // Window Size: the number of data octets beginning with the one indicated
     // in the acknowledgement field which the sender of this segment is
     // willing to accept
-    unsigned short window;
+    uint16_t window;
 
     // Urgent Pointer: communicates the current value of the urgent pointer
     // as a positive offset from the sequence number in this segment. The
     // urgent pointer points to the sequence number of the octet following
     // the urgent data. This field is only be interpreted in segments with
     // the URG control bit set.
-    unsigned short urgentPointer;
+    uint16_t urgentPointer;
 
     uint16_t crc = 0;
     CrcMode crcMode = CRC_MODE_UNDEFINED;

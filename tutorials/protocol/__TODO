@@ -1,0 +1,30 @@
+Not necessarily in this order
+
+- application talks directly to another
+- add channel delay and transmitter/receiver
+- add lossy channel and FCS inserter/checker
+- add inter packet gap
+- add queue and server
+- add acknowledgement mechanism
+- add resending and duplicate removal
+- add send to and receive at MAC address
+- add sequence numbering and reordering
+- add QoS with multiple queues to form a priority queue
+- add a shared buffer to the queues
+- add preemption support
+- create network interface module
+- add dynamic dispatch for multiple L2 peers
+- add multiple network interfaces and dispatcher
+- add interface table
+- add send to and receive at port
+- add send to and receive at network address
+- add hop limit
+- add forwarding and routing table
+- add address resolution
+- add fragmentation and defragmentation
+- add aggregation and deaggregation
+- create data service
+- add multiple applications with dispatcher
+- add routing protocol
+- add connection oriented transport
+- etc.

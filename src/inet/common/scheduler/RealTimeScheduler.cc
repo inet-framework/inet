@@ -15,7 +15,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 // This file is based on the cSocketRTScheduler.cc of OMNeT++ written by
@@ -69,11 +70,6 @@ void RealTimeScheduler::removeCallback(int fd, ICallback *callback)
 void RealTimeScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_nsecs();
-    // TODO: delete eventually
-#if OMNETPP_VERSION <= 0x0505 && OMNETPP_BUILDNUM <= 1022
-    // this event prevents Qtenv fast forwarding to the first event
-    sim->getFES()->insert(new BeginSimulationEvent("BeginSimulation"));
-#endif
 }
 
 void RealTimeScheduler::endRun()
@@ -104,11 +100,11 @@ bool RealTimeScheduler::receiveWithTimeout(long usec)
     timeout.tv_sec = 0;
     timeout.tv_usec = usec;
 
-    int32 fdVec[FD_SETSIZE], maxfd;
+    int32_t fdVec[FD_SETSIZE], maxfd;
     fd_set rdfds;
     FD_ZERO(&rdfds);
     maxfd = -1;
-    for (uint16 i = 0; i < callbackEntries.size(); i++) {
+    for (uint16_t i = 0; i < callbackEntries.size(); i++) {
         fdVec[i] = callbackEntries.at(i).fd;
         if (fdVec[i] > maxfd)
             maxfd = fdVec[i];
@@ -117,7 +113,7 @@ bool RealTimeScheduler::receiveWithTimeout(long usec)
     if (select(maxfd + 1, &rdfds, nullptr, nullptr, &timeout) < 0)
         return found;
     advanceSimTime();
-    for (uint16 i = 0; i < callbackEntries.size(); i++) {
+    for (uint16_t i = 0; i < callbackEntries.size(); i++) {
         if (!(FD_ISSET(fdVec[i], &rdfds)))
             continue;
         if (callbackEntries.at(i).callback->notify(fdVec[i]))
@@ -130,7 +126,7 @@ bool RealTimeScheduler::receiveWithTimeout(long usec)
     timeout.tv_sec = 0;
     timeout.tv_usec = usec;
     advanceSimTime();
-    for (uint16 i = 0; i < callbackEntries.size(); i++) {
+    for (uint16_t i = 0; i < callbackEntries.size(); i++) {
         if (callbackEntries.at(i).callback->notify(callbackEntries.at(i).fd))
             found = true;
     }

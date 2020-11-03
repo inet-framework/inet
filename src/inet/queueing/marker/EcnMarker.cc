@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,16 +12,17 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/queueing/marker/EcnMarker.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #endif // #ifdef WITH_ETHERNET
 
@@ -36,9 +37,9 @@ Define_Module(EcnMarker);
 
 void EcnMarker::markPacket(Packet *packet)
 {
-    auto ecnReq = packet->findTag<EcnReq>();
+    const auto& ecnReq = packet->findTag<EcnReq>();
     if (ecnReq != nullptr) {
-        EV_DETAIL << "Marking packet with ECN.\n";
+        EV_DETAIL << "Marking packet with ECN" << EV_ENDL;
         setEcn(packet, static_cast<IpEcnCode>(ecnReq->getExplicitCongestionNotification()));
     }
 }
@@ -79,7 +80,7 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
     }
 }
 
-IpEcnCode EcnMarker::getEcn(Packet *packet)
+IpEcnCode EcnMarker::getEcn(const Packet *packet)
 {
 #if defined(WITH_ETHERNET) && defined(WITH_IPv4)
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();

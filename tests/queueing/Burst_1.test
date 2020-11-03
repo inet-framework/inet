@@ -45,38 +45,38 @@ cmdenv-event-banners = false
 *.scheduler.transitionProbabilities = "0 1 1 0"
 *.scheduler.waitIntervals = "40 4"
 
-%contains: stdout
-Producing packet producer1-0.
-Consuming packet producer1-0.
+%contains-regex: stdout
+Producing packet, .*?producer1-0.*?
+Consuming packet, .*?producer1-0.*?
 
 Running simulation...
-Producing packet producer1-1.
-Consuming packet producer1-1.
-Producing packet producer1-2.
-Consuming packet producer1-2.
-Producing packet producer1-3.
-Consuming packet producer1-3.
-Producing packet producer2-0.
-Consuming packet producer2-0.
-Producing packet producer2-1.
-Consuming packet producer2-1.
-Producing packet producer2-2.
-Consuming packet producer2-2.
-Producing packet producer1-4.
-Consuming packet producer1-4.
-Producing packet producer1-5.
-Consuming packet producer1-5.
-Producing packet producer1-6.
-Consuming packet producer1-6.
-Producing packet producer2-3.
-Consuming packet producer2-3.
-Producing packet producer2-4.
-Consuming packet producer2-4.
-Producing packet producer2-5.
-Consuming packet producer2-5.
-Producing packet producer2-6.
-Consuming packet producer2-6.
-Producing packet producer1-7.
-Consuming packet producer1-7.
-Producing packet producer1-8.
-Consuming packet producer1-8.
+Producing packet, .*?producer1-1.*?
+Consuming packet, .*?producer1-1.*?
+Producing packet, .*?producer1-2.*?
+Consuming packet, .*?producer1-2.*?
+Producing packet, .*?producer1-3.*?
+Consuming packet, .*?producer1-3.*?
+Producing packet, .*?producer2-0.*?
+Consuming packet, .*?producer2-0.*?
+Producing packet, .*?producer2-1.*?
+Consuming packet, .*?producer2-1.*?
+Producing packet, .*?producer2-2.*?
+Consuming packet, .*?producer2-2.*?
+Producing packet, .*?producer1-4.*?
+Consuming packet, .*?producer1-4.*?
+Producing packet, .*?producer1-5.*?
+Consuming packet, .*?producer1-5.*?
+Producing packet, .*?producer1-6.*?
+Consuming packet, .*?producer1-6.*?
+Producing packet, .*?producer2-3.*?
+Consuming packet, .*?producer2-3.*?
+Producing packet, .*?producer2-4.*?
+Consuming packet, .*?producer2-4.*?
+Producing packet, .*?producer2-5.*?
+Consuming packet, .*?producer2-5.*?
+Producing packet, .*?producer2-6.*?
+Consuming packet, .*?producer2-6.*?
+Producing packet, .*?producer1-7.*?
+Consuming packet, .*?producer1-7.*?
+Producing packet, .*?producer1-8.*?
+Consuming packet, .*?producer1-8.*?

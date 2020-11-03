@@ -188,7 +188,7 @@ namespace inet {
 
 namespace inetmanet {
 
-BatmanIf *Batman::is_batman_if(InterfaceEntry *dev)
+BatmanIf *Batman::is_batman_if(NetworkInterface *dev)
 {
     BatmanIf *batman_if;
 

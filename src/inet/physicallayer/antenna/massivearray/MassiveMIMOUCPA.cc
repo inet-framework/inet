@@ -243,7 +243,7 @@ double MassiveMIMOUCPA::AntennaGain::getAngolo(Coord p1, Coord p2) const {
 
 }
 
-std::ostream& MassiveMIMOUCPA::printToStream(std::ostream& stream,  int level) const {
+std::ostream& MassiveMIMOUCPA::printToStream(std::ostream& stream,  int level, int evFlags) const {
     stream << "MassiveMIMOUCPA";
     if (level >= PRINT_LEVEL_DETAIL) {
 
@@ -256,7 +256,7 @@ std::ostream& MassiveMIMOUCPA::printToStream(std::ostream& stream,  int level) c
         //  cout<<getAngolo(Coord(2,0,0),Coord(1,2,0))<<endl;
         //  cout<<getAngolo(positions[0],positions[1])<<endl;
     }
-    return AntennaBase::printToStream(stream, level);
+    return AntennaBase::printToStream(stream, level, evFlags);
 }
 
 void MassiveMIMOUCPA::receiveSignal(cComponent *source, simsignal_t signalID,

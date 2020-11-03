@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
@@ -31,7 +31,7 @@ TcpSendQueue::~TcpSendQueue()
 {
 }
 
-void TcpSendQueue::init(uint32 startSeq)
+void TcpSendQueue::init(uint32_t startSeq)
 {
     begin = startSeq;
     end = startSeq;
@@ -47,7 +47,6 @@ std::string TcpSendQueue::str() const
 
 void TcpSendQueue::enqueueAppData(Packet *msg)
 {
-    //tcpEV << "sendQ: " << str() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     dataBuffer.push(msg->peekDataAt(B(0), msg->getDataLength()));
     end += msg->getByteLength();
     if (seqLess(end, begin))
@@ -55,36 +54,36 @@ void TcpSendQueue::enqueueAppData(Packet *msg)
     delete msg;
 }
 
-uint32 TcpSendQueue::getBufferStartSeq()
+uint32_t TcpSendQueue::getBufferStartSeq() const
 {
     return begin;
 }
 
-uint32 TcpSendQueue::getBufferEndSeq()
+uint32_t TcpSendQueue::getBufferEndSeq() const
 {
     return end;
 }
 
-Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+uint32_t TcpSendQueue::getBytesAvailable(uint32_t fromSeq) const
 {
-    //tcpEV << "sendQ: " << str() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
+    return seqLess(fromSeq, end) ? end - fromSeq : 0;
+}
 
+Packet *TcpSendQueue::createSegmentWithBytes(uint32_t fromSeq, uint32_t numBytes)
+{
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
     char msgname[32];
-    sprintf(msgname, "tcpseg(l=%lu)", numBytes);
+    sprintf(msgname, "tcpseg(l=%u)", (unsigned int)numBytes);
 
-    Packet *packet = new Packet(msgname);
+    Packet *tcpSegment = new Packet(msgname);
     const auto& payload = dataBuffer.peekAt(B(fromSeq - begin), B(numBytes));   //get data from buffer
-    //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
-    packet->insertAtBack(payload);
-    return packet;
+    tcpSegment->insertAtBack(payload);
+    return tcpSegment;
 }
 
-void TcpSendQueue::discardUpTo(uint32 seqNum)
+void TcpSendQueue::discardUpTo(uint32_t seqNum)
 {
-    //tcpEV << "sendQ: " << str() << " discardUpTo(seq=" << seqNum << ")\n";
-
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
     if (seqNum != begin) {

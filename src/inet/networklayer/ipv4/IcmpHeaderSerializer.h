@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //               2005 Christian Dankbar, Irene Ruengeler, Michael Tuexen
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_ICMPHEADERSERIALIZER_H
@@ -39,5 +40,5 @@ class INET_API IcmpHeaderSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 
-#endif // ifndef __INET_ICMPHEADERSERIALIZER_H
+#endif
 

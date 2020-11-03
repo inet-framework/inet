@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2011 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,9 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// @author Zoltan Bojthe
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
@@ -133,7 +131,7 @@ Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto *msg = dynamic_cast<Packet *>(object)) {
-        L3AddressTagBase *addresses = msg->findTag<L3AddressReq>();
+        Ptr<const L3AddressTagBase> addresses = msg->findTag<L3AddressReq>();
         if (!addresses)
             addresses = msg->findTag<L3AddressInd>();
         if (addresses != nullptr) {
@@ -313,7 +311,7 @@ void MinimumSnirFromSnirIndFilter::receiveSignal(cResultFilter *prev, simtime_t_
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<SnirInd>();
+        const auto& tag = pk->findTag<SnirInd>();
         if (tag)
             fire(this, t, tag->getMinimumSnir(), details);
     }
@@ -327,7 +325,7 @@ void PacketErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<ErrorRateInd>();
+        const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
             fire(this, t, tag->getPacketErrorRate(), details);  //TODO isNaN?
     }
@@ -341,7 +339,7 @@ void BitErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, simt
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<ErrorRateInd>();
+        const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
             fire(this, t, tag->getBitErrorRate(), details);  //TODO isNaN?
     }
@@ -355,7 +353,7 @@ void SymbolErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 {
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
-        auto tag = pk->findTag<ErrorRateInd>();
+        const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
             fire(this, t, tag->getSymbolErrorRate(), details);  //TODO isNaN?
     }

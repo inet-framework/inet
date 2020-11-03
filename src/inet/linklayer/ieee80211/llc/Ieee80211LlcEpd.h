@@ -12,15 +12,16 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_IEEE80211LLCEPD_H
 #define __INET_IEEE80211LLCEPD_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -42,5 +43,5 @@ class INET_API Ieee80211LlcEpd : public cSimpleModule, public IIeee80211Llc
 } // namespace ieee80211
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211EPDLLC_H
+#endif
 

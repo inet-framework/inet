@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -31,8 +31,10 @@ RadioVisualizerBase::RadioVisualization::RadioVisualization(const int radioModul
 
 RadioVisualizerBase::~RadioVisualizerBase()
 {
-    if (displayRadios)
+    if (displayRadios) {
         unsubscribe();
+        removeAllRadioVisualizations();
+    }
 }
 
 void RadioVisualizerBase::initialize(int stage)
@@ -132,9 +134,17 @@ void RadioVisualizerBase::removeRadioVisualization(const RadioVisualization *rad
     radioVisualizations.erase(radioVisualizations.find(radioVisualization->radioModuleId));
 }
 
+void RadioVisualizerBase::removeAllRadioVisualizations()
+{
+    for (auto radioVisualization : std::map<int, const RadioVisualization *>(radioVisualizations)) {
+        removeRadioVisualization(radioVisualization.second);
+        delete radioVisualization.second;
+    }
+}
+
 void RadioVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == IRadio::radioModeChangedSignal || signal == IRadio::receptionStateChangedSignal || signal == IRadio::transmissionStateChangedSignal) {
         auto module = check_and_cast<cModule *>(source);
         auto radio = check_and_cast<IRadio *>(module);

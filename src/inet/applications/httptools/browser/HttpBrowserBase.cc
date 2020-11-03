@@ -1,9 +1,10 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License version 3
-// as published by the Free Software Foundation.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -11,8 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/applications/httptools/browser/HttpBrowserBase.h"
@@ -159,7 +159,7 @@ void HttpBrowserBase::initialize(int stage)
                 activationTime += std::max(0.0, 86400.0 - rdActivityLength->draw()) / 2.0; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
-            scheduleAt(simTime() + activationTime, eventTimer);
+            scheduleAfter(activationTime, eventTimer);
         }
     }
 }
@@ -219,7 +219,7 @@ void HttpBrowserBase::handleSelfActivityStart()
     double activityPeriodLength = (rdActivityLength != nullptr) ? rdActivityLength->draw() : 0.0;    // Get the length of the activity period
     acitivityPeriodEnd = simTime() + activityPeriodLength;    // The end of the activity period
     EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << (activityPeriodLength / 3600.0) << " hours." << endl;
-    scheduleAt(simTime() + simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
+    scheduleAfter(simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
 }
 
 void HttpBrowserBase::handleSelfStartSession()
@@ -368,7 +368,7 @@ void HttpBrowserBase::handleDataMessage(Ptr<const HttpReplyMessage> appmsg)
                 }
                 else {
                     reqmsg->setKind(HTTPT_DELAYED_REQUEST_MESSAGE);
-                    scheduleAt(simTime() + delay, reqmsg);    // Schedule the message as a self message
+                    scheduleAfter(delay, reqmsg);    // Schedule the message as a self message
                 }
             }
             // Iterate through the list of queues (one for each recipient encountered) and submit each queue.
@@ -468,9 +468,7 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
 
 void HttpBrowserBase::scheduleNextBrowseEvent()
 {
-    if (eventTimer->isScheduled())
-        cancelEvent(eventTimer);
-    simtime_t nextEventTime;    // MIGRATE40: kvj
+    simtime_t nextEventTime;
     if (++reqInCurSession >= reqNoInCurSession) {
         // The requests in the current round are done. Lets check what to do next.
         if (rdActivityLength == nullptr || simTime() < acitivityPeriodEnd) {
@@ -479,7 +477,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             EV_INFO << "Scheduling a new session start @ T=" << nextEventTime << endl;
             messagesInCurrentSession = 0;
             eventTimer->setKind(MSGKIND_START_SESSION);
-            scheduleAt(nextEventTime, eventTimer);
+            rescheduleAt(nextEventTime, eventTimer);
         }
         else {
             // Schedule the next activity period start. This corresponds to to a working day or home time, ie. time
@@ -488,7 +486,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             simtime_t activationTime = simTime() + std::max(0.0, 86400.0 - rdActivityLength->draw());    // Sleep for a while
             EV_INFO << "Terminating current activity @ T=" << simTime() << ". Next activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
-            scheduleAt(activationTime, eventTimer);
+            rescheduleAt(activationTime, eventTimer);
         }
     }
     else {
@@ -497,7 +495,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
         EV_INFO << "Scheduling a browse event @ T=" << nextEventTime
                 << ". Request " << reqInCurSession << " of " << reqNoInCurSession << endl;
         eventTimer->setKind(MSGKIND_NEXT_MESSAGE);
-        scheduleAt(nextEventTime, eventTimer);
+        rescheduleAt(nextEventTime, eventTimer);
     }
 }
 

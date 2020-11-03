@@ -52,13 +52,13 @@ void LoRaRadio::initialize(int stage)
 LoRaRadio::~LoRaRadio() {
 }
 
-std::ostream& LoRaRadio::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaRadio::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", antenna = " << printObjectToString(antenna, level + 1)
-               << ", transmitter = " << printObjectToString(transmitter, level + 1)
-               << ", receiver = " << printObjectToString(receiver, level + 1);
+        stream << ", antenna = " << printFieldToString(antenna, level + 1, evFlags)
+               << ", transmitter = " << printFieldToString(transmitter, level + 1, evFlags)
+               << ", receiver = " << printFieldToString(receiver, level + 1, evFlags);
     return stream;
 }
 
@@ -197,8 +197,6 @@ void LoRaRadio::handleUpperPacket(Packet *packet)
 
         auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
         signalPowerReq->setPower(tag->getPower());
-
-        delete tag;
 
         preamble->setChunkLength(b(16));
         packet->insertAtFront(preamble);

@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_POWERFUNCTIONS_H_
-#define __INET_POWERFUNCTIONS_H_
+#ifndef __INET_POWERFUNCTIONS_H
+#define __INET_POWERFUNCTIONS_H
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/math/Functions.h"
@@ -69,7 +71,7 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
     virtual bool isFinite(const Interval<simsec, Hz>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(FrequencyDependentAttenuation, distance = " << distance << ", transmitterAntennaGain = " << transmitterAntennaGain << ", receiverAntennaGain = " << receiverAntennaGain;
+        os << "(FrequencyDependentAttenuation" << EV_FIELD(distance) << EV_FIELD(transmitterAntennaGain) << EV_FIELD(receiverAntennaGain);
         os << "\n" << std::string(level + 2, ' ');
         os << "(" << *radioMedium->getPathLoss() << ")";
         os << "\n" << std::string(level + 2, ' ');
@@ -466,12 +468,12 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
     virtual void print(std::ostream& os, const Interval<Quaternion>& i, int level = 0) const override { os << "TODO"; }
     virtual void printPartitioning(std::ostream& os, const Interval<Quaternion>& i, int level = 0) const override { os << "TODO"; }
     virtual void printPartition(std::ostream& os, const Interval<Quaternion>& i, int level = 0) const override { os << "TODO"; }
-    virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(AntennaGain, minGain = " << antennaGain->getMinGain() << ", maxGain = " << antennaGain->getMaxGain() << ")"; }
+    virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(AntennaGain" << EV_FIELD(minGain, antennaGain->getMinGain()) << EV_FIELD(maxGain, antennaGain->getMaxGain()) << ")"; }
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // #ifndef __INET_POWERFUNCTIONS_H_
+#endif
 

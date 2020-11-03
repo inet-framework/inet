@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2018 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,15 +12,13 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// @author: Zoltan Bojthe
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211MacProtocolDissector.h"
@@ -33,18 +31,18 @@ Register_Protocol_Dissector(&Protocol::ieee80211Mac, Ieee80211MacProtocolDissect
 
 const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet) const
 {
-    if (const auto llcTag = packet->findTag<ieee80211::LlcProtocolTag>())
+    if (const auto& llcTag = packet->findTag<ieee80211::LlcProtocolTag>())
         return llcTag->getProtocol();
-    else if (const auto channelTag = packet->findTag<physicallayer::Ieee80211ChannelInd>()) {
+    else if (const auto& channelTag = packet->findTag<physicallayer::Ieee80211ChannelInd>()) {
         // EtherType protocol discrimination is mandatory for deployments in the 5.9 GHz band
         if (channelTag->getChannel()->getBand() == &physicallayer::Ieee80211CompliantBands::band5_9GHz)
-            return &Protocol::ieee80211EtherType;
+            return &Protocol::ieee802epd;
     }
     const auto& header = packet->peekAtFront();
     if (dynamicPtrCast<const Ieee8022LlcHeader>(header) != nullptr)
-        return &Protocol::ieee8022;
-    else if (dynamicPtrCast<const Ieee80211EtherTypeHeader>(header) != nullptr)
-        return &Protocol::ieee80211EtherType;
+        return &Protocol::ieee8022llc;
+    else if (dynamicPtrCast<const Ieee802EpdHeader>(header) != nullptr)
+        return &Protocol::ieee802epd;
     else
         return nullptr;
 }

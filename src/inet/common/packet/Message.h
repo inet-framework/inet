@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,22 +12,30 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MESSAGE_H_
-#define __INET_MESSAGE_H_
+#ifndef __INET_MESSAGE_H
+#define __INET_MESSAGE_H
 
-#include "inet/common/packet/tag/TagSet.h"
+#include "inet/common/IPrintableObject.h"
+#include "inet/common/packet/tag/ITaggedObject.h"
+#include "inet/common/TagBase.h"
 
 namespace inet {
 
-class INET_API Message : public cMessage
+class INET_API Message : public cMessage, public IPrintableObject, public ITaggedObject
 {
   friend class MessageDescriptor;
 
   protected:
-    TagSet tags;
+    SharingTagSet tags;
+
+  protected:
+    /** @name Class descriptor functions */
+    //@{
+    const TagBase *_getTag(int index) { return tags.getTag(index).get(); }
+    //@}
 
   public:
     explicit Message(const char *name = nullptr, short kind = 0);
@@ -38,7 +48,7 @@ class INET_API Message : public cMessage
     /**
      * Returns all tags.
      */
-    TagSet& getTags() { return tags; }
+    virtual SharingTagSet& getTags() override { return tags; }
 
     /**
      * Returns the number of message tags.
@@ -50,7 +60,7 @@ class INET_API Message : public cMessage
     /**
      * Returns the message tag at the given index.
      */
-    cObject *getTag(int index) const {
+    const Ptr<const TagBase> getTag(int index) const {
         return tags.getTag(index);
     }
 
@@ -71,44 +81,63 @@ class INET_API Message : public cMessage
     /**
      * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
      */
-    template<typename T> T *findTag() const {
+    template<typename T> const Ptr<const T> findTag() const {
         return tags.findTag<T>();
+    }
+
+    /**
+     * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
+     */
+    template<typename T> const Ptr<T> findTagForUpdate() {
+        return tags.findTagForUpdate<T>();
     }
 
     /**
      * Returns the message tag for the provided type or throws an exception if no such message tag is found.
      */
-    template<typename T> T *getTag() const {
+    template<typename T> const Ptr<const T> getTag() const {
         return tags.getTag<T>();
+    }
+
+    /**
+     * Returns the message tag for the provided type or throws an exception if no such message tag is found.
+     */
+    template<typename T> const Ptr<T> getTagForUpdate() {
+        return tags.getTagForUpdate<T>();
     }
 
     /**
      * Returns a newly added message tag for the provided type, or throws an exception if such a message tag is already present.
      */
-    template<typename T> T *addTag() {
+    template<typename T> const Ptr<T> addTag() {
         return tags.addTag<T>();
     }
 
     /**
      * Returns a newly added message tag for the provided type if absent, or returns the message tag that is already present.
      */
-    template<typename T> T *addTagIfAbsent() {
+    template<typename T> const Ptr<T> addTagIfAbsent() {
         return tags.addTagIfAbsent<T>();
     }
 
     /**
      * Removes the message tag for the provided type, or throws an exception if no such message tag is found.
      */
-    template<typename T> T *removeTag() {
+    template<typename T> const Ptr<T> removeTag() {
         return tags.removeTag<T>();
     }
 
     /**
      * Removes the message tag for the provided type if present, or returns nullptr if no such message tag is found.
      */
-    template<typename T> T *removeTagIfPresent() {
+    template<typename T> const Ptr<T> removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
+    //@}
+
+    /** @name Utility functions */
+    //@{
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 
@@ -130,11 +159,7 @@ class INET_API Indication : public Message
     virtual Indication *dup() const override { return new Indication(*this); }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Message *message) { return os << message->str(); }
-
-inline std::ostream& operator<<(std::ostream& os, const Message& message) { return os << message.str(); }
-
 } // namespace
 
-#endif // #ifndef __INET_MESSAGE_H_
+#endif
 

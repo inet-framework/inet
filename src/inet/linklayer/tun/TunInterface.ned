@@ -13,31 +13,35 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.linklayer.tun;
 
 import inet.linklayer.contract.ITunnelInterface;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 
-module TunInterface extends InterfaceEntry like ITunnelInterface
+//
+// This module implements a TUN network interface.
+//
+module TunInterface extends NetworkInterface like ITunnelInterface
 {
     parameters:
-        @class(InterfaceEntry);
-        string interfaceTableModule;    // The path to the InterfaceTable module
+        string interfaceTableModule;
         int mtu @unit(B) = default(1500B);
-        @display("i=block/tunnel");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
+        @display("i=block/tunnel");
     gates:
-        input upperLayerIn;    // from upper layers
-        output upperLayerOut;  // to upper layers
+        input upperLayerIn;
+        output upperLayerOut;
     submodules:
         tun: Tun {
-            @display("p=100,100");
+            parameters:
+	            @display("p=300,100");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> tun.upperLayerIn;
-        upperLayerOut <-- { @display("m=n"); } <-- tun.upperLayerOut;
+        tun.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
 

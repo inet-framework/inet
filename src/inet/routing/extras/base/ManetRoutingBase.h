@@ -166,7 +166,7 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
 
     typedef struct InterfaceIdentification
     {
-        InterfaceEntry *interfacePtr;
+        NetworkInterface *interfacePtr = nullptr;
         int index;
         inline InterfaceIdentification& operator=(const InterfaceIdentification& b)
         {
@@ -249,11 +249,11 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
 //   encapsulate messages and send to the next layer
 //
 /////////////////////////////////////
-    virtual void sendToIpOnIface(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, InterfaceEntry *iface);
+    virtual void sendToIpOnIface(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, NetworkInterface *iface);
     virtual void sendToIp(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, const L3Address& ifaceAddr);
     virtual void sendToIp(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, int ifaceIndex = -1);
 
-    virtual void injectDirectToIp(Packet *pk, double delay, InterfaceEntry *iface);
+    virtual void injectDirectToIp(Packet *pk, double delay, NetworkInterface *iface);
 
 /////////////////////////////////
 //
@@ -331,8 +331,8 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void processChangeInterface(simsignal_t signalID, const cObject *details);
 
     /// get the i-esime interface
-    virtual InterfaceEntry *getInterfaceEntry(int index) const {return inet_ift->getInterface(index);}
-    virtual InterfaceEntry *getInterfaceEntryById(int id) const {return inet_ift->getInterfaceById(id);}
+    virtual NetworkInterface *getInterfaceEntry(int index) const {return inet_ift->getInterface(index);}
+    virtual NetworkInterface *getInterfaceEntryById(int id) const {return inet_ift->getInterfaceById(id);}
 
     /// Total number of interfaces
     virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
@@ -351,7 +351,7 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual int getWlanInterfaceIndexByAddress(L3Address = L3Address());
 
     /// Get the interface with the same address that add
-    virtual InterfaceEntry *getInterfaceWlanByAddress(L3Address = L3Address()) const;
+    virtual NetworkInterface *getInterfaceWlanByAddress(L3Address = L3Address()) const;
 
     /// get number of wlan interfaces
     virtual int getNumWlanInterfaces() const {return interfaceVector->size();}
@@ -360,10 +360,10 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual int getWlanInterfaceIndex(int i) const;
 
     /// Get the i-esime wlan interface
-    virtual InterfaceEntry *getWlanInterfaceEntry(int i) const;
+    virtual NetworkInterface *getWlanInterfaceEntry(int i) const;
 
     /// Returns true if ie found in the general interface table
-    virtual bool isThisInterfaceRegistered(InterfaceEntry *ie);
+    virtual bool isThisInterfaceRegistered(NetworkInterface *ie);
     //@}
 
     /// @name Access to the node position

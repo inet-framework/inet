@@ -12,7 +12,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_BGPROUTER_H
@@ -126,7 +127,7 @@ private:
     friend class BgpSession;
     // functions used by the BgpSession class
     void getScheduleAt(simtime_t t, cMessage *msg) { bgpModule->scheduleAt(t, msg); }
-    void getCancelAndDelete(cMessage *msg) { return bgpModule->cancelAndDelete(msg); }
+    void getCancelAndDelete(cMessage *msg) { bgpModule->cancelAndDelete(msg); }
     cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
     IIpv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
@@ -189,5 +190,5 @@ private:
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPROUTER_H
+#endif
 

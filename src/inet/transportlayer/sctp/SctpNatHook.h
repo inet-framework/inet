@@ -18,7 +18,7 @@ class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
     SctpNatTable *natTable;
     IRoutingTable *rt;
     IInterfaceTable *ift;
-    uint64 nattedPackets;
+    uint64_t nattedPackets;
     void initialize() override;
     void finish() override;
 
@@ -40,5 +40,5 @@ class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCTPNATHOOK_H
+#endif
 

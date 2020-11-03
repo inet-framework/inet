@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -80,23 +80,23 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211LayeredOfdmTransmitter";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", levelOfDetail = " << levelOfDetail
-               << ", mode = " << printObjectToString(mode, level + 1)
-               << ", signalEncoder = " << printObjectToString(signalEncoder, level + 1)
-               << ", dataEncoder = " << printObjectToString(dataEncoder, level + 1)
-               << ", signalModulator = " << printObjectToString(signalModulator, level + 1)
-               << ", dataModulator = " << printObjectToString(dataModulator, level + 1)
-               << ", pulseShaper = " << printObjectToString(pulseShaper, level + 1)
-               << ", digitalAnalogConverter = " << printObjectToString(digitalAnalogConverter, level + 1)
-               << ", isCompliant = " << isCompliant
-               << ", bandwidth = " << bandwidth
-               << ", channelSpacing = " << channelSpacing
-               << ", centerFrequency = " << centerFrequency
-               << ", power = " << power;
+        stream << EV_FIELD(levelOfDetail)
+               << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
+               << EV_FIELD(signalEncoder, printFieldToString(signalEncoder, level + 1, evFlags))
+               << EV_FIELD(dataEncoder, printFieldToString(dataEncoder, level + 1, evFlags))
+               << EV_FIELD(signalModulator, printFieldToString(signalModulator, level + 1, evFlags))
+               << EV_FIELD(dataModulator, printFieldToString(dataModulator, level + 1, evFlags))
+               << EV_FIELD(pulseShaper, printFieldToString(pulseShaper, level + 1, evFlags))
+               << EV_FIELD(digitalAnalogConverter, printFieldToString(digitalAnalogConverter, level + 1, evFlags))
+               << EV_FIELD(isCompliant)
+               << EV_FIELD(bandwidth)
+               << EV_FIELD(channelSpacing)
+               << EV_FIELD(centerFrequency)
+               << EV_FIELD(power);
     return stream;
 }
 
@@ -301,7 +301,7 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::computeMode(Hz bandwid
 
 const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::getMode(const Packet* packet) const
 {
-    auto modeReq = const_cast<Packet*>(packet)->findTag<Ieee80211ModeReq>();
+    const auto& modeReq = const_cast<Packet*>(packet)->findTag<Ieee80211ModeReq>();
     if (isCompliant)
         return modeReq != nullptr ? check_and_cast<const Ieee80211OfdmMode*>(modeReq->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
     else

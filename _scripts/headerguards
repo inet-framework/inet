@@ -22,7 +22,7 @@ for root, dirs, files in os.walk(rootPath):
         symbol = "__INET_" + re.sub("[^A-Z0-9]", "_", getUpperCaseFilename(filename)) + "_H"
         fullpath = os.path.join(root, filename)
         if symbol in symbolmap:
-            print "ERR: duplicated filename: ", filename, ": ", fullpath, " vs ", symbolmap[symbol]
+            print "ERROR: duplicate filename detected: ", filename, ": ", fullpath, " vs ", symbolmap[symbol]
         else:
             symbolmap[symbol] = fullpath
             f = open(fullpath, 'r')
@@ -30,10 +30,14 @@ for root, dirs, files in os.walk(rootPath):
             pattern = "#ifndef .*_H.*\n#define.*"
             m = re.search(pattern, headerFile)
             if not m:
-                print "ERR: ", filename, " doesn't have any headerguard"
+                print "ERROR: ", filename, " doesn't have any headerguard"
             else:
                 replacement = "#ifndef " + symbol + "\n#define " + symbol
-                newHeader = re.sub(pattern, replacement, headerFile)
+                newHeader = headerFile
+                newHeader = re.sub(pattern, replacement, newHeader)
+                pattern = "#endif.*?\n\s*\Z"
+                replacement = "#endif\n\n"
+                newHeader = re.sub(pattern, replacement, newHeader)
                 if headerFile != newHeader:
                     f2 = open(fullpath, 'w')
                     f2.write(newHeader)

@@ -55,10 +55,10 @@ class Disk_LI: public IStorageDevice{
 		cGate* outGate = nullptr;
 
 		/** Block Sizes array (in bytes) */
-		static int64 blockSizes [NUM_BLOCK_SIZES];
+		static int64_t blockSizes [NUM_BLOCK_SIZES];
 
 		/** Jump Sizes array (in bytes) */
-		static int64 jumpsSizes [NUM_JUMP_SIZES];
+		static int64_t jumpsSizes [NUM_JUMP_SIZES];
 
 		/** Read times to Lineal Interpolation */
 		static const const_simtime_t readTimes [NUM_BLOCK_SIZES] [NUM_JUMP_SIZES];
@@ -156,14 +156,14 @@ class Disk_LI: public IStorageDevice{
 		 * @param y2 Y index of second coordinate.
 		 *
 		 */
-		void calculateIndex (int64 jump, int64 numBytes, int *blockSizeIndex_1, int *blockSizeIndex_2, int *offsetIndex_1, int *offsetIndex_2);
+		void calculateIndex (int64_t jump, int64_t numBytes, int *blockSizeIndex_1, int *blockSizeIndex_2, int *offsetIndex_1, int *offsetIndex_2);
 
 
 		/**
 		 * Function to calculate Lineal interpolation
 		 *
 		 */
-		simtime_t linealInterpolation (int64 x, int64 x0, int64 x1, simtime_t y0, simtime_t y1);
+		simtime_t linealInterpolation (int64_t x, int64_t x0, int64_t x1, simtime_t y0, simtime_t y1);
 
 
 		/*
@@ -179,8 +179,8 @@ class Disk_LI: public IStorageDevice{
 };
 
 
-int64 Disk_LI::blockSizes [19] = {512, 1024 , 2048 , 4096 , 8192 , 16384 , 32768 , 65536 , 131072 , 262144 , 524288 , 1048576 , 2097152 , 4194304 , 8388608 , 16777216 , 33554432 , 67108864 , 134217728 };
-int64 Disk_LI::jumpsSizes [9] = {0, 512 , 1024 , 4096 , 32768 , 131072 , 1048576 , 10485760 , 104857600 };
+int64_t Disk_LI::blockSizes [19] = {512, 1024 , 2048 , 4096 , 8192 , 16384 , 32768 , 65536 , 131072 , 262144 , 524288 , 1048576 , 2097152 , 4194304 , 8388608 , 16777216 , 33554432 , 67108864 , 134217728 };
+int64_t Disk_LI::jumpsSizes [9] = {0, 512 , 1024 , 4096 , 32768 , 131072 , 1048576 , 10485760 , 104857600 };
 
 
 const const_simtime_t Disk_LI::readTimes [19] [9] = {

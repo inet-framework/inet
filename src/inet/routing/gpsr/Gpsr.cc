@@ -1,20 +1,18 @@
 //
-// Copyright (C) 2013 Opensim Ltd
-// Author: Levente Meszaros
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <algorithm>
@@ -108,8 +106,7 @@ void Gpsr::initialize(int stage)
         globalPositionTable.clear();
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::manet, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);
         WATCH(neighborPositionTable);
@@ -153,7 +150,7 @@ void Gpsr::processMessage(cMessage *message)
 void Gpsr::scheduleBeaconTimer()
 {
     EV_DEBUG << "Scheduling beacon timer" << endl;
-    scheduleAt(simTime() + beaconInterval + uniform(-1, 1) * maxJitter, beaconTimer);
+    scheduleAfter(beaconInterval + uniform(-1, 1) * maxJitter, beaconTimer);
 }
 
 void Gpsr::processBeaconTimer()
@@ -185,8 +182,7 @@ void Gpsr::schedulePurgeNeighborsTimer()
             scheduleAt(nextExpiration, purgeNeighborsTimer);
         else {
             if (purgeNeighborsTimer->getArrivalTime() != nextExpiration) {
-                cancelEvent(purgeNeighborsTimer);
-                scheduleAt(nextExpiration, purgeNeighborsTimer);
+                rescheduleAt(nextExpiration, purgeNeighborsTimer);
             }
         }
     }
@@ -290,9 +286,9 @@ void Gpsr::configureInterfaces()
     // join multicast groups
     cPatternMatcher interfaceMatcher(interfaces, false, true, false);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getInterfaceName()))
-            interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
+        NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+        if (networkInterface->isMulticast() && interfaceMatcher.matches(networkInterface->getInterfaceName()))
+            networkInterface->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
     }
 }
 
@@ -388,7 +384,7 @@ L3Address Gpsr::getSelfAddress() const
 #ifdef WITH_IPv6
     if (ret.getType() == L3Address::IPv6) {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-            InterfaceEntry *ie = interfaceTable->getInterface(i);
+            NetworkInterface *ie = interfaceTable->getInterface(i);
             if ((!ie->isLoopback())) {
                 if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
                     ret = ipv6Data->getPreferredAddress();
@@ -608,8 +604,8 @@ INetfilter::IHook::Result Gpsr::routeDatagram(Packet *datagram, GpsrOption *gpsr
     else {
         EV_INFO << "Next hop found: source = " << source << ", destination = " << destination << ", nextHop: " << nextHop << endl;
         gpsrOption->setSenderAddress(getSelfAddress());
-        auto interfaceEntry = CHK(interfaceTable->findInterfaceByName(outputInterface));
-        datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        auto networkInterface = CHK(interfaceTable->findInterfaceByName(outputInterface));
+        datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
         return ACCEPT;
     }
 }

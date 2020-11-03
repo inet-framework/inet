@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2011 Juan Luis Garrote Molinero
 // Copyright (C) 2013 Zsolt Prontvai
 //
@@ -14,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_RSTP_H
@@ -24,7 +24,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/switch/MacAddressTable.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
 #include "inet/linklayer/ieee8021d/common/StpBase.h"
@@ -182,5 +182,5 @@ class INET_API Rstp : public StpBase
 
 } // namespace inet
 
-#endif // ifndef __INET_RSTP_H
+#endif
 

@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
@@ -46,13 +46,13 @@ void FlatReceiverBase::initialize(int stage)
     }
 }
 
-std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level) const
+std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", errorModel = " << printObjectToString(errorModel, level + 1);
+        stream << EV_FIELD(errorModel, printFieldToString(errorModel, level + 1, evFlags));
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", energyDetection = " << energyDetection
-               << ", sensitivity = " << sensitivity;
+        stream << EV_FIELD(energyDetection)
+               << EV_FIELD(sensitivity);
     return NarrowbandReceiverBase::printToStream(stream, level);
 }
 
@@ -80,7 +80,7 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
         W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(part), reception->getEndTime(part));
         ASSERT(W(0.0) <= minReceptionPower);
         bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing whether reception is possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+        EV_DEBUG << "Computing whether reception is possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
     }
 }

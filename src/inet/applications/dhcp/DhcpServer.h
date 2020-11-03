@@ -14,7 +14,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_DHCPSERVER_H
@@ -57,7 +58,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     Ipv4Address gateway;
     Ipv4Address ipAddressStart;
 
-    InterfaceEntry *ie = nullptr;    // interface to serve DHCP requests on
+    NetworkInterface *ie = nullptr;    // interface to serve DHCP requests on
     UdpSocket socket;
     simtime_t startTime;    // application start time
     cMessage *startTimer = nullptr;    // self message to start DHCP server
@@ -105,7 +106,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     virtual void sendNak(const Ptr<const DhcpMessage>& dhcpMsg);
 
     virtual void handleSelfMessages(cMessage *msg);
-    virtual InterfaceEntry *chooseInterface();
+    virtual NetworkInterface *chooseInterface();
     virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     //UdpSocket::ICallback methods
@@ -130,5 +131,5 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
 
 } // namespace inet
 
-#endif // ifndef __INET_DHCPSERVER_H
+#endif
 

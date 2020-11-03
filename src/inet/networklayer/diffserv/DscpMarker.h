@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2012 Andras Varga
+// Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,26 +12,29 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_DSCPMARKER_H
 #define __INET_DSCPMARKER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/queueing/base/PacketQueueingElementBase.h"
-#include "inet/queueing/contract/IPassivePacketSink.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
 /**
  * DSCP Marker.
  */
-class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public queueing::IPassivePacketSink, public queueing::IActivePacketSource
+class INET_API DscpMarker : public queueing::PacketProcessorBase, public queueing::IPassivePacketSink, public queueing::IActivePacketSource
 {
   protected:
+    cGate *outputGate = nullptr;
+    IPassivePacketSink *consumer = nullptr;
+
     std::vector<int> dscps;
 
     int numRcvd = 0;
@@ -42,25 +45,34 @@ class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public q
   public:
     DscpMarker() {}
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual queueing::IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
-    virtual void handleCanPushPacket(cGate *gate) override { }
+
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+
+    virtual void handleCanPushPacketChanged(cGate *gate) override { }
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
 
-    virtual bool canPushSomePacket(cGate *gate = nullptr) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate = nullptr) const override { return true; }
-    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
-
     virtual bool markPacket(Packet *msg, int dscp);
+
+  public:
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
+
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { }
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_DSCPMARKER_H
+#endif
 

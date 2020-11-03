@@ -2,7 +2,7 @@
 // Copyright (C) 2005 Michael Tuexen
 // Copyright (C) 2008 Irene Ruengeler
 // Copyright (C) 2009 Thomas Dreibholz
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2011 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -11,11 +11,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_PCAPWRITER_H
@@ -36,6 +37,7 @@ namespace inet {
 class INET_API PcapWriter : public IPcapWriter
 {
   protected:
+    std::string fileName;
     FILE *dumpfile = nullptr;    // pcap file
     unsigned int snaplen = 0;    // max. length of packets in pcap file
     PcapLinkType network = LINKTYPE_INVALID;    // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html
@@ -72,7 +74,7 @@ class INET_API PcapWriter : public IPcapWriter
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writePacket(simtime_t time, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkType) override;
+    void writePacket(simtime_t time, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.
@@ -87,5 +89,5 @@ class INET_API PcapWriter : public IPcapWriter
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPWRITER_H
+#endif
 

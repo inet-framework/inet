@@ -14,11 +14,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_TCP_LWIP_H
-#define __INET_TCP_LWIP_H
+#ifndef __INET_TCPLWIP_H
+#define __INET_TCPLWIP_H
 
 #include <map>
 
@@ -78,7 +78,7 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
 
     virtual netif *ip_route(L3Address const& ipAddr) override;
 
-    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo,
             const void *dataptr, int len) override;
 
     // internal event functions:
@@ -165,5 +165,5 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
 
 } // namespace inet
 
-#endif // ifndef __INET_TCP_LWIP_H
+#endif
 

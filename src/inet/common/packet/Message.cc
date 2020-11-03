@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/Message.h"
@@ -28,6 +30,18 @@ Message::Message(const Message& other) :
     cMessage(other),
     tags(other.tags)
 {
+}
+
+std::ostream& Message::printToStream(std::ostream& stream, int level, int evFlags) const
+{
+    std::string className = getClassName();
+    auto index = className.rfind("::");
+    if (index != std::string::npos)
+        className = className.substr(index + 2);
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << EV_FAINT << "(" << className << ")" << EV_NORMAL;
+    stream << EV_ITALIC << getName() << EV_NORMAL;
+    return stream;
 }
 
 Request::Request(const char *name, short kind) :

@@ -9,11 +9,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_SCTPHEADER_H
@@ -70,7 +71,7 @@ class INET_API SctpHeader : public SctpHeader_Base
     virtual void insertSctpChunks(SctpChunk * sctpChunks) override;
     virtual void insertSctpChunks(size_t k, SctpChunk * sctpChunks) override;
     virtual void eraseSctpChunks(size_t k) override {};
-    virtual void replaceSctpChunk(SctpChunk *msg, uint32 k);
+    virtual void replaceSctpChunk(SctpChunk *msg, uint32_t k);
 
 
    // virtual void addChunk(SctpChunk * chunk);
@@ -99,7 +100,7 @@ class INET_API SctpErrorChunk : public SctpErrorChunk_Base
     void clean();
 
   public:
-    SctpErrorChunk(const char *name = nullptr, int32 kind = 0) : SctpErrorChunk_Base() {};
+    SctpErrorChunk(const char *name = nullptr, int32_t kind = 0) : SctpErrorChunk_Base() {};
     SctpErrorChunk(const SctpErrorChunk& other) : SctpErrorChunk_Base(other) { copy(other); };
     SctpErrorChunk& operator=(const SctpErrorChunk& other);
     ~SctpErrorChunk();
@@ -117,7 +118,7 @@ class INET_API SctpErrorChunk : public SctpErrorChunk_Base
      * Returns the kth parameter in this SCTP Error Chunk
      */
      virtual SctpParameter * getParameters(size_t k) const override;
-  //  virtual cPacketPtr& getParameters(uint32 k) override;
+  //  virtual cPacketPtr& getParameters(uint32_t k) override;
 
     /**
      * Adds a message object to the SCTP packet. The packet length will be adjusted
@@ -140,7 +141,7 @@ class INET_API SctpStreamResetChunk : public SctpStreamResetChunk_Base
     void clean();
 
   public:
-    SctpStreamResetChunk(const char *name = nullptr, int32 kind = 0) : SctpStreamResetChunk_Base() {};
+    SctpStreamResetChunk(const char *name = nullptr, int32_t kind = 0) : SctpStreamResetChunk_Base() {};
     SctpStreamResetChunk(const SctpStreamResetChunk& other) : SctpStreamResetChunk_Base(other) { operator=(other); };
     SctpStreamResetChunk& operator=(const SctpStreamResetChunk& other);
     ~SctpStreamResetChunk();
@@ -178,7 +179,7 @@ class INET_API SctpAsconfChunk : public SctpAsconfChunk_Base
     std::vector<SctpParameter *> parameterList;
 
   public:
-    SctpAsconfChunk(const char *name = nullptr, int32 kind = 0) : SctpAsconfChunk_Base() {};
+    SctpAsconfChunk(const char *name = nullptr, int32_t kind = 0) : SctpAsconfChunk_Base() {};
     SctpAsconfChunk(const SctpAsconfChunk& other) : SctpAsconfChunk_Base(other) { operator=(other); };
     SctpAsconfChunk& operator=(const SctpAsconfChunk& other);
 
@@ -228,7 +229,7 @@ class INET_API SctpAsconfAckChunk : public SctpAsconfAckChunk_Base
     std::vector<SctpParameter *> parameterList;
 
   public:
-    SctpAsconfAckChunk(const char *name = nullptr, int32 kind = 0) : SctpAsconfAckChunk_Base() {};
+    SctpAsconfAckChunk(const char *name = nullptr, int32_t kind = 0) : SctpAsconfAckChunk_Base() {};
     SctpAsconfAckChunk(const SctpAsconfAckChunk& other) : SctpAsconfAckChunk_Base(other) { operator=(other); };
     SctpAsconfAckChunk& operator=(const SctpAsconfAckChunk& other);
 
@@ -262,5 +263,5 @@ class INET_API SctpAsconfAckChunk : public SctpAsconfAckChunk_Base
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPHEADER_H
+#endif
 

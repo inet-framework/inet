@@ -94,5 +94,5 @@ struct igmp
 
 } // namespace inet
 
-#endif /* _NETINET_IGMP_H_ */
+#endif
 

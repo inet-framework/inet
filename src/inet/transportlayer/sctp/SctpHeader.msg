@@ -9,11 +9,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 import inet.common.INETDefs;
@@ -28,11 +29,11 @@ class SctpHeader extends TransportHeaderBase
 {
     @customize;
     // Source Port
-    uint16 srcPort;
+    uint16_t srcPort;
     // Destination Port
-    uint16 destPort;
+    uint16_t destPort;
     // Verification Tag
-    uint32 vTag;
+    uint32_t vTag;
     bool checksumOk;
     uint32_t crc = 0;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
@@ -44,8 +45,8 @@ class SctpHeader extends TransportHeaderBase
 class SctpChunk extends cPacket
 {
     // Chunk Type
-    uint8 sctpChunkType;
-    uint32 flags;
+    uint8_t sctpChunkType;
+    uint32_t flags;
     unsigned short length = 0;
     char chunkName[];
 }
@@ -53,51 +54,51 @@ class SctpChunk extends cPacket
 class SctpInitChunk extends SctpChunk
 {
     // Initiate Tag
-    uint32 initTag;
+    uint32_t initTag;
     // Advertised Receiver Window
-    uint32 a_rwnd;
+    uint32_t a_rwnd;
     // Number of Outbound Streams
-    uint16 noOutStreams;
+    uint16_t noOutStreams;
     // Number of Inbound Streams
-    uint16 noInStreams;
+    uint16_t noInStreams;
     // Initial TSN
-    uint32 initTsn;
+    uint32_t initTsn;
     bool forwardTsn;
     bool ipv4Supported;
     bool ipv6Supported;
     L3Address addresses[];
-    uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
-    uint32 msg_rwnd;
-    uint16 sctpChunkTypes[]; //Chunk list parameter, i.e. for SCTP AUTH
-    uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
-    uint16 hmacTypes[]; //HMAC Identifier for HMAC algorithm parameter
-    uint8 random[]; //Random Parameter for SCTP AUTH
+    uint8_t unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
+    uint32_t msg_rwnd;
+    uint16_t sctpChunkTypes[]; //Chunk list parameter, i.e. for SCTP AUTH
+    uint16_t sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
+    uint16_t hmacTypes[]; //HMAC Identifier for HMAC algorithm parameter
+    uint8_t random[]; //Random Parameter for SCTP AUTH
 }
 
 class SctpInitAckChunk extends SctpChunk
 {
     // Initiate Tag
-    uint32 initTag;
+    uint32_t initTag;
     // Advertised Receiver Window
-    uint32 a_rwnd;
+    uint32_t a_rwnd;
     // Number of Outbound Streams
-    uint16 noOutStreams;
+    uint16_t noOutStreams;
     // Number of Inbound Streams
-    uint16 noInStreams;
+    uint16_t noInStreams;
     // Initial TSN
-    uint32 initTsn;
+    uint32_t initTsn;
     bool forwardTsn;
     bool ipv4Supported;
     bool ipv6Supported;
     L3Address addresses[];
     char cookie[];
-    uint8 unrecognizedParameters[];
+    uint8_t unrecognizedParameters[];
     SctpCookie *stateCookie = nullptr;
-    uint32 msg_rwnd;
-    uint8 random[]; //Random Number
-    uint16 sctpChunkTypes[];
-    uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
-    uint16 hmacTypes[];
+    uint32_t msg_rwnd;
+    uint8_t random[]; //Random Number
+    uint16_t sctpChunkTypes[];
+    uint16_t sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
+    uint16_t hmacTypes[];
 }
 
 
@@ -106,17 +107,17 @@ class SctpCookieEchoChunk extends SctpChunk
 {
     char cookie[];
     SctpCookie *stateCookie = nullptr;
-    uint8 unrecognizedParameters[]; //for the serializer to send an Error chunk bundled with a Cookie-Echo
+    uint8_t unrecognizedParameters[]; //for the serializer to send an Error chunk bundled with a Cookie-Echo
 }
 
 class SctpCookie extends cNamedObject
 {
     simtime_t creationTime;
-    uint32 localTag;
-    uint32 peerTag;
-    uint8 localTieTag[];
-    uint8 peerTieTag[];
-    uint32 length;
+    uint32_t localTag;
+    uint32_t peerTag;
+    uint8_t localTieTag[];
+    uint8_t peerTieTag[];
+    uint32_t length;
 }
 
 class SctpCookieAckChunk extends SctpChunk
@@ -130,16 +131,16 @@ class SctpDataMsg extends cPacket
     bool bBit = 0;
     simtime_t enqueuingTime;
     simtime_t expiryTime;
-    uint32 ppid;
+    uint32_t ppid;
     L3Address initialDestination;
-    uint32 msgNum;
-    uint16 sid;
+    uint32_t msgNum;
+    uint16_t sid;
     bool ordered;
-    uint32 booksize;
-    uint32 rtx;
+    uint32_t booksize;
+    uint32_t rtx;
     bool fragment;
-    uint32 prMethod;
-    uint32 priority;
+    uint32_t prMethod;
+    uint32_t priority;
     bool strReset;
     bool sackNow;
 }
@@ -152,46 +153,46 @@ class SctpDataChunk extends SctpChunk
     bool uBit = 0;
     bool iBit = 0;
     // Transmission Sequence Number
-    uint32 tsn;
+    uint32_t tsn;
     // Stream identifier
-    uint16 sid;
+    uint16_t sid;
     // Stream Sequence Number
-    uint16 ssn;
+    uint16_t ssn;
     // Payload Protocol Identifier
-    uint32 ppid;
+    uint32_t ppid;
     simtime_t enqueuingTime;
     simtime_t firstSendTime;
 }
 
 class SctpForwardTsnChunk extends SctpChunk
 {
-    uint32 newCumTsn;
-    uint16 sid[];
+    uint32_t newCumTsn;
+    uint16_t sid[];
     short ssn[]; // set -1 in case of unordered delivery
 }
 
 class SctpSackChunk extends SctpChunk
 {
     // Cumulative TSN Ack
-    uint32 cumTsnAck;
+    uint32_t cumTsnAck;
     // Advertised Receiver Window Credit
-    uint32 a_rwnd;
+    uint32_t a_rwnd;
     // Number of Gap Ack Blocks
-    uint16 numGaps;
+    uint16_t numGaps;
     // Number of Non-Revokable Gap Ack Blocks
-    uint16 numNrGaps;
+    uint16_t numNrGaps;
     // Number of Duplicate TSNs
-    uint16 numDupTsns;
+    uint16_t numDupTsns;
     // Start and End of Gap Ack Blocks
     bool   isNrSack;
-    uint32 gapStart[];
-    uint32 gapStop[];
-    uint32 dupTsns[];
-    uint32 sackSeqNum = 0;
-    uint32 nrGapStart[];
-    uint32 nrGapStop[];
-    uint32 msg_rwnd;
-    uint8  dacPacketsRcvd = 0;
+    uint32_t gapStart[];
+    uint32_t gapStop[];
+    uint32_t dupTsns[];
+    uint32_t sackSeqNum = 0;
+    uint32_t nrGapStart[];
+    uint32_t nrGapStop[];
+    uint32_t msg_rwnd;
+    uint8_t  dacPacketsRcvd = 0;
     bool   nrSubtractRGaps = false;
 }
 
@@ -217,7 +218,7 @@ class SctpHeartbeatAckChunk extends SctpChunk
 
 class SctpShutdownChunk extends SctpChunk
 {
-    uint32 cumTsnAck;
+    uint32_t cumTsnAck;
 }
 
 class SctpShutdownAckChunk extends SctpChunk
@@ -239,7 +240,7 @@ class SctpErrorChunk extends SctpChunk
 
 class SctpParameter extends cPacket
 {
-    uint16 parameterType;
+    uint16_t parameterType;
     char name[];
 }
 
@@ -249,9 +250,9 @@ class SctpPacketDropChunk extends SctpChunk
     bool tFlag;
     bool bFlag;
     bool mFlag;
-    uint32 maxRwnd;
-    uint32 queuedData;
-    uint16 truncLength;
+    uint32_t maxRwnd;
+    uint32_t queuedData;
+    uint16_t truncLength;
 }
 
 class SctpStreamResetChunk extends SctpChunk
@@ -262,117 +263,117 @@ class SctpStreamResetChunk extends SctpChunk
 
 class SctpOutgoingSsnResetRequestParameter extends SctpParameter
 {
-    uint32 srReqSn; //Stream Reset Request Sequence Number: initialized with the initial TSN, then incremented
-    uint32 srResSn; //Stream Reset Response Sequence Number
-    uint32 lastTsn; //Senders last assigned TSN
-    uint16 streamNumbers[];
+    uint32_t srReqSn; //Stream Reset Request Sequence Number: initialized with the initial TSN, then incremented
+    uint32_t srResSn; //Stream Reset Response Sequence Number
+    uint32_t lastTsn; //Senders last assigned TSN
+    uint16_t streamNumbers[];
 }
 
 class SctpIncomingSsnResetRequestParameter extends SctpParameter
 {
     @customize;
-    uint32 srReqSn; //Stream Reset Request Sequence Number
-    uint16 streamNumbers[];
+    uint32_t srReqSn; //Stream Reset Request Sequence Number
+    uint16_t streamNumbers[];
 }
 
 class SctpSsnTsnResetRequestParameter extends SctpParameter
 {
-    uint32 srReqSn; //Stream Reset Request Sequence Number
+    uint32_t srReqSn; //Stream Reset Request Sequence Number
 }
 
 class SctpStreamResetResponseParameter extends SctpParameter
 {
-    uint32 srResSn; //Stream Reset Response Sequence Number
-    uint32 result;
-    uint32 sendersNextTsn = 0;
-    uint32 receiversNextTsn = 0;
+    uint32_t srResSn; //Stream Reset Response Sequence Number
+    uint32_t result;
+    uint32_t sendersNextTsn = 0;
+    uint32_t receiversNextTsn = 0;
 }
 
 class SctpAddStreamsRequestParameter extends SctpParameter
 {
-    uint32 srReqSn; //Stream Reset Request Sequence Number
-    uint16 numberOfStreams;
-    uint16 reserved = 0;
+    uint32_t srReqSn; //Stream Reset Request Sequence Number
+    uint16_t numberOfStreams;
+    uint16_t reserved = 0;
 }
 
 class SctpResetTimer extends cPacket
 {
-    uint32 inSN; //Stream Reset Response Sequence Number for Incoming Reset Request
+    uint32_t inSN; //Stream Reset Response Sequence Number for Incoming Reset Request
     bool inAcked;   // false, when timer is running for the Reset Response Sequence Number, true otherwise
-    uint32 outSN; //Stream Reset Response Sequence Number for Outgoing Reset Request
+    uint32_t outSN; //Stream Reset Response Sequence Number for Outgoing Reset Request
     bool outAcked;
 }
 
 class SctpAuthenticationChunk extends SctpChunk
 {
-    uint16 sharedKey;
-    uint16 hMacIdentifier;
+    uint16_t sharedKey;
+    uint16_t hMacIdentifier;
     bool hMacOk;
-    uint32 HMAC[];
+    uint32_t HMAC[];
 }
 
 class SctpAsconfChunk extends SctpChunk
 {
     @customize;
-    uint32 serialNumber;
+    uint32_t serialNumber;
     L3Address addressParam;
-    uint32 peerVTag; //for NAT
+    uint32_t peerVTag; //for NAT
     abstract SctpParameter *asconfParams[];
 }
 
 class SctpAsconfAckChunk extends SctpChunk
 {
     @customize;
-    uint32 serialNumber;
+    uint32_t serialNumber;
     abstract SctpParameter *asconfResponse[];
 }
 
 class SctpAddIPParameter extends SctpParameter
 {
-    uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
+    uint32_t requestCorrelationId; //assigned by the sender to identify each request parameter
     L3Address addressParam;
 }
 
 class SctpDeleteIPParameter extends SctpParameter
 {
-    uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
+    uint32_t requestCorrelationId; //assigned by the sender to identify each request parameter
     L3Address addressParam;
 }
 
 class SctpSetPrimaryIPParameter extends SctpParameter
 {
-    uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
+    uint32_t requestCorrelationId; //assigned by the sender to identify each request parameter
     L3Address addressParam;
 }
 
 class SctpSupportedExtensionsParameter extends SctpParameter
 {
-    uint16 sctpChunkTypes[];
+    uint16_t sctpChunkTypes[];
 }
 
 class SctpErrorCauseParameter extends SctpParameter
 {
-    uint32 responseCorrelationId;
-    uint32 errorCauseType;
+    uint32_t responseCorrelationId;
+    uint32_t errorCauseType;
 }
 
 class SctpSimpleErrorCauseParameter extends SctpParameter
 {
-    uint16 value;
+    uint16_t value;
 }
 
 class SctpSuccessIndication extends SctpParameter
 {
-    uint32 responseCorrelationId;
+    uint32_t responseCorrelationId;
 }
 
 class NatMessage extends cMessage
 {
     bool        multi;
-    uint16      peer1;
+    uint16_t      peer1;
     L3Address     peer1Addresses[];
-    uint32      portPeer1;
-    uint16      peer2;
+    uint32_t      portPeer1;
+    uint16_t      peer2;
     L3Address     peer2Addresses[];
-    uint32      portPeer2;
+    uint32_t      portPeer2;
 }

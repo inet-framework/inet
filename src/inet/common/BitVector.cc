@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <algorithm>
@@ -24,7 +24,7 @@ namespace inet {
 BitVector::BitVector()
 {
     size = 0;
-    bytes.push_back(uint8(0));
+    bytes.push_back(uint8_t(0));
 }
 
 BitVector::BitVector(const char* bits)
@@ -62,10 +62,10 @@ BitVector::BitVector(unsigned int bits, unsigned int size)
 void BitVector::setBit(int pos, bool value)
 {
     while (containerSize() <= pos)
-        bytes.push_back(uint8(0));
+        bytes.push_back(uint8_t(0));
     if (pos + 1 > size)
         size = pos + 1;
-    uint8& field = bytes[pos / UINT8_LENGTH];
+    uint8_t& field = bytes[pos / UINT8_LENGTH];
     if (value)
         field |= 1 << (pos % UINT8_LENGTH);
     else
@@ -76,7 +76,7 @@ void BitVector::toggleBit(int pos)
 {
     if (pos >= size)
         throw cRuntimeError("Out of range with bit position %d", pos);
-    uint8& field = bytes[pos / UINT8_LENGTH];
+    uint8_t& field = bytes[pos / UINT8_LENGTH];
     field ^= 1 << (pos % UINT8_LENGTH);
 }
 
@@ -84,7 +84,7 @@ bool BitVector::getBit(int pos) const
 {
     if (pos >= size)
         throw cRuntimeError("Out of range with bit position %d", pos);
-    uint8 field = bytes[pos / UINT8_LENGTH];
+    uint8_t field = bytes[pos / UINT8_LENGTH];
     return field & (1 << (pos % UINT8_LENGTH));
 }
 

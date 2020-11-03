@@ -37,7 +37,7 @@ void LoRaLogNormalShadowing::initialize(int stage)
     }
 }
 
-std::ostream& LoRaLogNormalShadowing::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaLogNormalShadowing::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LoRaLogNormalShadowing";
     if (level <= PRINT_LEVEL_TRACE)

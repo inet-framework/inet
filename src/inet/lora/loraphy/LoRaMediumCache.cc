@@ -98,7 +98,7 @@ void LoRaMediumCache::initialize(int stage)
     }
 }
 
-std::ostream& LoRaMediumCache::printToStream(std::ostream &stream, int level) const
+std::ostream& LoRaMediumCache::printToStream(std::ostream &stream, int level, int evFlags) const
 {
     stream << "LoRaMediumCache ";
     if (level <= PRINT_LEVEL_TRACE)

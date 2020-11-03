@@ -10,10 +10,10 @@ network TcpTestNet1
         cli_app: TcpTestClient {
             @display("p=95,95");
         }
-        cli_tcp: <default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"))> like ITcp {
+        cli_tcp: <default("Tcp")> like ITcp {
             @display("p=95,178");
         }
-        srv_tcp: <default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"))> like ITcp {
+        srv_tcp: <default("Tcp")> like ITcp {
             @display("p=302,178");
         }
         srv_app: TcpTestClient {

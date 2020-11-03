@@ -98,7 +98,7 @@ class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, pu
 
     virtual int getId() const override { return id; }
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IAntenna *getAntenna() const override { return antenna; }
     virtual const ITransmitter *getTransmitter() const override { return transmitter; }

@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.emulation.linklayer.ieee80211;
@@ -47,41 +47,40 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
-        @display("i=block/ifcard");
     gates:
         input radioIn @labels(IWirelessSignal); // to receive signals
     submodules:
         mib: Ieee80211Mib {
             parameters:
-                @display("p=100,100;is=s");
+                @display("p=100,300;is=s");
         }
         tap: ExtEthernetTapDevice {
             parameters:
-                @display("p=250,100");
+                @display("p=300,100");
         }
         llc: <default("Ieee80211Portal")> like IIeee80211Llc {
             parameters:
-                @display("p=250,200");
+                @display("p=300,200");
         }
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             parameters:
-                @display("p=400,150");
+                @display("p=500,150");
         }
         agent: <default("Ieee80211AgentSta")> like IIeee80211Agent if typename != "" {
             parameters:
-                @display("p=550,350");
+                @display("p=700,300");
         }
         mgmt: <default("Ieee80211MgmtSta")> like IIeee80211Mgmt {
             parameters:
-                @display("p=400,350");
+                @display("p=500,300");
         }
         mac: <default("Ieee80211Mac")> like IIeee80211Mac {
             parameters:
-                @display("p=250,350");
+                @display("p=300,300");
         }
         radio: <default("Ieee80211ScalarRadio")> like IRadio {
             parameters:
-                @display("p=250,500");
+                @display("p=300,400");
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> radio.radioIn;
@@ -103,3 +102,4 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
 
         classifier.in <-- { @display("m=n"); } <-- tap.lowerLayerOut if exists(classifier);
 }
+

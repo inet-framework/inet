@@ -74,7 +74,7 @@ std::ostream& operator<<(std::ostream& os, const Olsr_rt_entry& e)
 };
 
 
-uint32 OlsrAddressSize::ADDR_SIZE = ADDR_SIZE_DEFAULT;
+uint32_t OlsrAddressSize::ADDR_SIZE = ADDR_SIZE_DEFAULT;
 Olsr::GlobalRtable Olsr::globalRtable;
 Olsr::DistributionPath Olsr::distributionPath;
 
@@ -601,7 +601,7 @@ Olsr::check_packet(Packet* msg, nsaddr_t &src_addr, int &index)
 
     auto interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     index = -1;
-    InterfaceEntry * ie;
+    NetworkInterface * ie;
 
     for (int i=0; i<getNumWlanInterfaces(); i++) {
         ie = getWlanInterfaceEntry(i);
@@ -2904,7 +2904,7 @@ bool Olsr::getNextHop(const L3Address &dest, L3Address &add, int &iface, double 
             if (rt_entry_aux->next_addr() != add)
                 throw cRuntimeError("OLSR Data base error");
 
-            InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+            NetworkInterface * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
             iface = ie->getInterfaceId();
             cost = rt_entry->dist();
             return true;
@@ -2920,7 +2920,7 @@ bool Olsr::getNextHop(const L3Address &dest, L3Address &add, int &iface, double 
     if (rt_entry_aux->next_addr() != add)
         throw cRuntimeError("OLSR Data base error");
 
-    InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+    NetworkInterface * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
     iface = ie->getInterfaceId();
     cost = rt_entry->dist();
     return true;
@@ -2996,7 +2996,7 @@ bool Olsr::getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L
         Olsr_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
         if (rt_entry_aux->next_addr() != add)
             throw cRuntimeError("OLSR Data base error");
-        InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+        NetworkInterface * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
         iface = ie->getInterfaceId();
         gw = dest;
     }
@@ -3054,7 +3054,7 @@ bool Olsr::getNextHopGroup(const L3Address& dest, L3Address &next, int &iface, L
 
 L3Address Olsr::getIfaceAddressFromIndex(int index)
 {
-    InterfaceEntry * entry = getInterfaceEntry(index);
+    NetworkInterface * entry = getInterfaceEntry(index);
     if (this->isInMacLayer())
         return L3Address(entry->getMacAddress());
     else

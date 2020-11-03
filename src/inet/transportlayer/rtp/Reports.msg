@@ -1,10 +1,19 @@
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// at your option) any later version.
+// Copyright (C) 2001 by Matthias Oppitz <Matthias.Oppitz@gmx.de>
 //
-// (C) 2001 by Matthias Oppitz <Matthias.Oppitz@gmx.de>
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 import inet.common.INETDefs;
@@ -18,16 +27,16 @@ namespace inet::rtp;
 class SenderReport extends cObject
 {
     // The ntp time stamp.
-    uint64 NTPTimeStamp;
+    uint64_t NTPTimeStamp;
 
     // The rtp time stamp.
-    uint32 RTPTimeStamp;
+    uint32_t RTPTimeStamp;
 
     // The number of packets sent.
-    uint32 packetCount;
+    uint32_t packetCount;
 
     // The number of (payload) bytes sent.
-    uint32 byteCount;
+    uint32_t byteCount;
 };
 
 cplusplus(SenderReport) {{
@@ -51,16 +60,16 @@ cplusplus(SenderReport) {{
 class ReceptionReport extends cObject
 {
     // The ssrc identifier of the sender this ~ReceptionReport is for.
-    uint32 ssrc;
+    uint32_t ssrc;
 
     // The fraction lost.
-    uint8 fractionLost;
+    uint8_t fractionLost;
 
     // The number of packets expected minus the number of packets received.
     int packetsLostCumulative;
 
     // The extended highest sequence number received.
-    uint32 sequenceNumber;
+    uint32_t sequenceNumber;
 
     // The interarrival jitter.
     int jitter;

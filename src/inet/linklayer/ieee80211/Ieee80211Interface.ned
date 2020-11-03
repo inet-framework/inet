@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2006 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.linklayer.ieee80211;
@@ -23,11 +23,12 @@ import inet.linklayer.ieee80211.llc.IIeee80211Llc;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
-import inet.networklayer.common.InterfaceEntry;
+import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
-// This NIC implements an 802.11 network interface card.
+// This module implements an IEEE 802.11 network interface.
+//
 // It can be configured via the mgmt.typename parameter to act
 // as an AP or a STA, or for ad-hoc mode.
 //
@@ -36,10 +37,9 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 //
 // A classifier is needed if you want to use QoS.
 //
-module Ieee80211Interface extends InterfaceEntry like IWirelessInterface
+module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 {
     parameters:
-        @class(::inet::InterfaceEntry);
         string interfaceTableModule;
         string energySourceModule = default("");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
@@ -55,39 +55,38 @@ module Ieee80211Interface extends InterfaceEntry like IWirelessInterface
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
-        @display("i=block/ifcard");
     gates:
-        input upperLayerIn; // to upper layers
-        output upperLayerOut; // from upper layers
-        input radioIn @labels(IWirelessSignal); // to receive signals
+        input upperLayerIn;
+        output upperLayerOut;
+        input radioIn @labels(IWirelessSignal);
     submodules:
         mib: Ieee80211Mib {
             parameters:
-                @display("p=100,100;is=s");
+                @display("p=100,300;is=s");
         }
         llc: <default(opMode == "p" ? "Ieee80211LlcEpd" : "Ieee80211LlcLpd")> like IIeee80211Llc {
             parameters:
-                @display("p=250,200");
+                @display("p=300,200");
         }
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             parameters:
-                @display("p=400,100");
+                @display("p=500,100");
         }
         agent: <default("Ieee80211AgentSta")> like IIeee80211Agent if typename != "" {
             parameters:
-                @display("p=550,350");
+                @display("p=700,300");
         }
         mgmt: <default("Ieee80211MgmtSta")> like IIeee80211Mgmt {
             parameters:
-                @display("p=400,350");
+                @display("p=500,300");
         }
         mac: <default("Ieee80211Mac")> like IIeee80211Mac {
             parameters:
-                @display("p=250,350");
+                @display("p=300,300");
         }
         radio: <default("Ieee80211ScalarRadio")> like IRadio {
             parameters:
-                @display("p=250,500");
+                @display("p=300,400");
         }
     connections:
         radioIn --> { @display("m=s"); } --> radio.radioIn;

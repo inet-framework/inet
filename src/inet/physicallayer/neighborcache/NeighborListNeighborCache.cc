@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -43,17 +43,17 @@ void NeighborListNeighborCache::initialize(int stage)
     else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
         maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         updateNeighborLists();
-        scheduleAt(simTime() + refillPeriod, updateNeighborListsTimer);
+        scheduleAfter(refillPeriod, updateNeighborListsTimer);
     }
 }
 
-std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "NeighborListNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", refillPeriod = " << refillPeriod
-               << ", range = " << range
-               << ", maxSpeed = " << maxSpeed;
+        stream << EV_FIELD(refillPeriod)
+               << EV_FIELD(range)
+               << EV_FIELD(maxSpeed);
     return stream;
 }
 
@@ -80,7 +80,7 @@ void NeighborListNeighborCache::handleMessage(cMessage *msg)
 
     updateNeighborLists();
 
-    scheduleAt(simTime() + refillPeriod, msg);
+    scheduleAfter(refillPeriod, msg);
 }
 
 void NeighborListNeighborCache::updateNeighborList(RadioEntry *radioEntry)
@@ -108,7 +108,7 @@ void NeighborListNeighborCache::addRadio(const IRadio *radio)
     updateNeighborLists();
     maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
     if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled() && initialized())
-        scheduleAt(simTime() + refillPeriod, updateNeighborListsTimer);
+        scheduleAfter(refillPeriod, updateNeighborListsTimer);
 }
 
 void NeighborListNeighborCache::removeRadio(const IRadio *radio)

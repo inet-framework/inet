@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,13 +12,15 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
 
 namespace inet {
+
+Register_Class(BitsChunk);
 
 BitsChunk::BitsChunk() :
     Chunk()
@@ -33,6 +37,27 @@ BitsChunk::BitsChunk(const std::vector<bool>& bits) :
     Chunk(),
     bits(bits)
 {
+}
+
+void BitsChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(bits.size());
+    for (auto bit : bits)
+        buffer->pack(bit);
+}
+
+void BitsChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    size_t size;
+    buffer->unpack(size);
+    bits.clear();
+    for (size_t i = 0; i < size; i++) {
+        bool bit;
+        buffer->unpack(bit);
+        bits.push_back(bit);
+    }
 }
 
 const Ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
@@ -55,7 +80,7 @@ const Ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter
         b startOffset = iterator.getPosition();
         b endOffset = iterator.getPosition() + (length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
         auto result = makeShared<BitsChunk>(std::vector<bool>(bits.begin() + b(startOffset).get(), bits.begin() + b(endOffset).get()));
-        result->tags.copyTags(tags, iterator.getPosition(), b(0), result->getChunkLength());
+        result->regionTags.copyTags(regionTags, iterator.getPosition(), b(0), result->getChunkLength());
         result->markImmutable();
         return result;
     }
@@ -90,12 +115,22 @@ void BitsChunk::setBit(int index, bool bit)
     bits.at(index) = bit;
 }
 
+bool BitsChunk::containsSameData(const Chunk& other) const
+{
+    return &other == this || (Chunk::containsSameData(other) && bits == static_cast<const BitsChunk *>(&other)->bits);
+}
+
 bool BitsChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITS;
 }
 
 bool BitsChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
+{
+    return chunk->getChunkType() == CT_BITS;
+}
+
+bool BitsChunk::canInsertAt(const Ptr<const Chunk>& chunk, b offset) const
 {
     return chunk->getChunkType() == CT_BITS;
 }
@@ -112,6 +147,12 @@ void BitsChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
+void BitsChunk::doInsertAt(const Ptr<const Chunk>& chunk, b offset)
+{
+    const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
+    bits.insert(bits.begin() + b(offset).get(), bitsChunk->bits.begin(), bitsChunk->bits.end());
+}
+
 void BitsChunk::doRemoveAtFront(b length)
 {
     bits.erase(bits.begin(), bits.begin() + b(length).get());
@@ -122,14 +163,20 @@ void BitsChunk::doRemoveAtBack(b length)
     bits.erase(bits.end() - b(length).get(), bits.end());
 }
 
-std::string BitsChunk::str() const
+void BitsChunk::doRemoveAt(b offset, b length)
 {
-    std::ostringstream os;
-    os << "BitsChunk, length = " << bits.size() << ", bits = {";
-    for (auto bit : bits)
-        os << (bit ? "1" : "0");
-    os << "}";
-    return os.str();
+    bits.erase(bits.begin() + b(offset).get(), bits.begin() + b(offset).get() + b(length).get());
+}
+
+std::ostream& BitsChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+{
+    if (level <= PRINT_LEVEL_TRACE) {
+        stream << ", " << EV_BOLD << "bits" << EV_NORMAL << " = {";
+        for (auto bit : bits)
+            stream << (bit ? "1" : "0");
+        stream << "}";
+    }
+    return stream;
 }
 
 } // namespace

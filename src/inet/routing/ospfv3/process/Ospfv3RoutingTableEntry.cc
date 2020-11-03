@@ -71,7 +71,7 @@ void Ospfv3RoutingTableEntry::setType2Cost(Metric pathCost)
 void Ospfv3RoutingTableEntry::addNextHop(NextHop hop)
 {
     if (nextHops.size() == 0) {
-        InterfaceEntry *routingInterface = ift->getInterfaceById(hop.ifIndex);
+        NetworkInterface *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
         // TODO: this used to be commented out, but it seems we need it
@@ -267,7 +267,7 @@ void Ospfv3Ipv4RoutingTableEntry::setType2Cost(Metric pathCost)
 void Ospfv3Ipv4RoutingTableEntry::addNextHop(NextHop hop)
 {
     if (nextHops.size() == 0) {
-        InterfaceEntry *routingInterface = ift->getInterfaceById(hop.ifIndex);
+        NetworkInterface *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
         // TODO: this used to be commented out, but it seems we need it

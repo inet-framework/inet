@@ -11,7 +11,7 @@
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
@@ -196,19 +196,19 @@ union YYSTYPE
 {
 #line 222 "parser.y" /* yacc.c:1909  */
 
-    int64 integer;
+    int64_t integer;
     double floating;
     char *string;
     char *reserved;
-    int64 time_usecs;
+    int64_t time_usecs;
     enum direction_t direction;
-    uint16 port;
-    int32 window;
-    uint32 sequence_number;
+    uint16_t port;
+    int32_t window;
+    uint32_t sequence_number;
     struct {
         int protocol;    /* IPPROTO_TCP or IPPROTO_UDP */
-        uint32 start_sequence;
-        uint16 payload_bytes;
+        uint32_t start_sequence;
+        uint16_t payload_bytes;
     } tcp_sequence_info;
     PacketDrillEvent *event;
     PacketDrillPacket *packet;
@@ -230,7 +230,7 @@ union YYSTYPE
     cQueue *stream_list;
     cQueue *cause_list;
     PacketDrillBytes *byte_list;
-    uint8 byte;
+    uint8_t byte;
     PacketDrillSctpChunk *sctp_chunk;
 
 #line 237 "parser.h" /* yacc.c:1909  */

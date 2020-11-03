@@ -20,7 +20,7 @@ import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.contract.IVlanInterface;
+import inet.linklayer.contract.IVirtualInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.transportlayer.contract.ITcp;
 import inet.common.MessageDispatcher;

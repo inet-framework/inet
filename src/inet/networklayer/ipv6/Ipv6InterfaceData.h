@@ -1,19 +1,20 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 // Copyright (C) 2005 Wei Yang, Ng
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2.1
+// of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this program; if not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_IPV6INTERFACEDATA_H
@@ -27,7 +28,7 @@
 #error "IPv6 feature disabled"
 #endif
 
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
@@ -96,14 +97,14 @@ class Ipv6RoutingTable;
  */
 struct INET_API Ipv6MulticastGroupInfo : public cObject
 {
-    Ipv6MulticastGroupInfo(InterfaceEntry *const ie, const Ipv6Address& groupAddress)
+    Ipv6MulticastGroupInfo(NetworkInterface *const ie, const Ipv6Address& groupAddress)
         : ie(ie), groupAddress(groupAddress) {}
-    InterfaceEntry *ie;
+    NetworkInterface *ie;
     Ipv6Address groupAddress;
 };
 
 /**
- * Ipv6-specific data for InterfaceEntry. Most of this comes from
+ * Ipv6-specific data for NetworkInterface. Most of this comes from
  * section 6.2.1 of RFC 2461 (Ipv6 Neighbor Discovery, Router Configuration
  * Variables).
  */
@@ -459,7 +460,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     Ipv6InterfaceData();
     virtual ~Ipv6InterfaceData();
     std::string str() const override;
-    std::string detailedInfo() const OMNETPP5_CODE(override);
+    std::string detailedInfo() const;
 
     /** @name Addresses */
     //@{
@@ -476,7 +477,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * WITH_xMIPv6:
      * Also takes into account the status of the H-Flag in the recieved RA.
      * Called from  Ipv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
-     *                      Ipv6NdPrefixInformation& prefixInfo, InterfaceEntry* ie, bool hFlag).
+     *                      Ipv6NdPrefixInformation& prefixInfo, NetworkInterface* ie, bool hFlag).
      * Relevant only when MIPv6 is supported. (Zarrar Yousaf 20.07.07)
      */
     virtual void assignAddress(const Ipv6Address& addr, bool tentative,
@@ -806,5 +807,5 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_IPV6INTERFACEDATA_H
+#endif
 

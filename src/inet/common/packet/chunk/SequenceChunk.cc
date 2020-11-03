@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,13 +12,15 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 
 namespace inet {
+
+Register_Class(SequenceChunk);
 
 SequenceChunk::SequenceChunk() :
     Chunk()
@@ -35,11 +39,50 @@ SequenceChunk::SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks) :
 {
 }
 
+void SequenceChunk::parsimPack(cCommBuffer *buffer) const
+{
+    Chunk::parsimPack(buffer);
+    buffer->pack(chunks.size());
+    for (const auto& chunk : chunks)
+        buffer->packObject(const_cast<Chunk *>(chunk.get()));
+}
+
+void SequenceChunk::parsimUnpack(cCommBuffer *buffer)
+{
+    Chunk::parsimUnpack(buffer);
+    size_t size;
+    buffer->unpack(size);
+    chunks.clear();
+    for (size_t i = 0; i < size; i++) {
+        const auto& chunk = check_and_cast<Chunk *>(buffer->unpackObject())->shared_from_this();
+        chunks.push_back(chunk);
+    }
+}
+
 void SequenceChunk::forEachChild(cVisitor *v)
 {
     Chunk::forEachChild(v);
     for (const auto& chunk : chunks)
         v->visit(const_cast<Chunk *>(chunk.get()));
+}
+
+bool SequenceChunk::containsSameData(const Chunk& other) const
+{
+    if (&other == this)
+        return true;
+    else if (!Chunk::containsSameData(other))
+        return false;
+    else {
+        auto otherSequence = static_cast<const SequenceChunk *>(&other);
+        if (chunks.size() != otherSequence->chunks.size())
+            return false;
+        else {
+            for (auto i = 0; i < (int)chunks.size(); i++)
+                if (!chunks[i]->containsSameData(*otherSequence->chunks[i].get()))
+                    return false;
+            return true;
+        }
+    }
 }
 
 const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
@@ -354,20 +397,18 @@ void SequenceChunk::doRemoveAtBack(b length)
     chunks.erase(it.base(), chunks.end());
 }
 
-std::string SequenceChunk::str() const
+std::ostream& SequenceChunk::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    std::ostringstream os;
-    os << "[";
+    stream << "[";
     bool first = true;
     for (const auto& chunk : chunks) {
         if (!first)
-            os << " | ";
+            stream << " | ";
         else
             first = false;
-        os << chunk->str();
+        chunk->printToStream(stream, level + 1, evFlags);
     }
-    os << "]";
-    return os.str();
+    return stream << "]";
 }
 
 } // namespace

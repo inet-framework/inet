@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /***************************************************************************
                           RtpInnerPacket.cc  -  description
                              -------------------
@@ -6,14 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************/
 
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
@@ -72,13 +79,13 @@ void RtpInnerPacket::setInitializeRTCPPkt(const char *commonName_par, int mtu_pa
     port = port_par;
 }
 
-void RtpInnerPacket::setRtcpInitializedPkt(uint32 ssrc_par)
+void RtpInnerPacket::setRtcpInitializedPkt(uint32_t ssrc_par)
 {
     type = RTP_INP_RTCP_INITIALIZED;
     ssrc = ssrc_par;
 }
 
-void RtpInnerPacket::setCreateSenderModulePkt(uint32 ssrc_par, int payloadType_par, const char *fileName_par)
+void RtpInnerPacket::setCreateSenderModulePkt(uint32_t ssrc_par, int payloadType_par, const char *fileName_par)
 {
     type = RTP_INP_CREATE_SENDER_MODULE;
     ssrc = ssrc_par;
@@ -86,25 +93,25 @@ void RtpInnerPacket::setCreateSenderModulePkt(uint32 ssrc_par, int payloadType_p
     fileName = fileName_par;
 }
 
-void RtpInnerPacket::setSenderModuleCreatedPkt(uint32 ssrc_par)
+void RtpInnerPacket::setSenderModuleCreatedPkt(uint32_t ssrc_par)
 {
     type = RTP_INP_SENDER_MODULE_CREATED;
     ssrc = ssrc_par;
 }
 
-void RtpInnerPacket::setDeleteSenderModulePkt(uint32 ssrc_par)
+void RtpInnerPacket::setDeleteSenderModulePkt(uint32_t ssrc_par)
 {
     type = RTP_INP_DELETE_SENDER_MODULE;
     ssrc = ssrc_par;
 }
 
-void RtpInnerPacket::setSenderModuleDeletedPkt(uint32 ssrc_par)
+void RtpInnerPacket::setSenderModuleDeletedPkt(uint32_t ssrc_par)
 {
     type = RTP_INP_SENDER_MODULE_DELETED;
     ssrc = ssrc_par;
 }
 
-void RtpInnerPacket::setInitializeSenderModulePkt(uint32 ssrc_par, const char *fileName_par, int mtu_par)
+void RtpInnerPacket::setInitializeSenderModulePkt(uint32_t ssrc_par, const char *fileName_par, int mtu_par)
 {
     type = RTP_INP_INITIALIZE_SENDER_MODULE;
     ssrc = ssrc_par;
@@ -112,7 +119,7 @@ void RtpInnerPacket::setInitializeSenderModulePkt(uint32 ssrc_par, const char *f
     mtu = mtu_par;
 }
 
-void RtpInnerPacket::setSenderModuleInitializedPkt(uint32 ssrc_par, int payloadType_par, int clockRate_par, int timeStampBase_par, int sequenceNumberBase_par)
+void RtpInnerPacket::setSenderModuleInitializedPkt(uint32_t ssrc_par, int payloadType_par, int clockRate_par, int timeStampBase_par, int sequenceNumberBase_par)
 {
     type = RTP_INP_SENDER_MODULE_INITIALIZED;
     ssrc = ssrc_par;
@@ -122,14 +129,14 @@ void RtpInnerPacket::setSenderModuleInitializedPkt(uint32 ssrc_par, int payloadT
     sequenceNumberBase = sequenceNumberBase_par;
 }
 
-void RtpInnerPacket::setSenderModuleControlPkt(uint32 ssrc_par, RtpSenderControlMessage *msg)
+void RtpInnerPacket::setSenderModuleControlPkt(uint32_t ssrc_par, RtpSenderControlMessage *msg)
 {
     type = RTP_INP_SENDER_MODULE_CONTROL;
     ssrc = ssrc_par;
     encapsulate(msg);
 }
 
-void RtpInnerPacket::setSenderModuleStatusPkt(uint32 ssrc_par, RtpSenderStatusMessage *msg)
+void RtpInnerPacket::setSenderModuleStatusPkt(uint32_t ssrc_par, RtpSenderStatusMessage *msg)
 {
     type = RTP_INP_SENDER_MODULE_STATUS;
     ssrc = ssrc_par;

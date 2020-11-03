@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_PCAPNGWRITER_H
@@ -18,7 +20,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/recorder/IPcapWriter.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -29,6 +31,7 @@ namespace inet {
 class INET_API PcapngWriter : public IPcapWriter
 {
   protected:
+    std::string fileName;
     FILE *dumpfile = nullptr;    // pcap file
     bool flush = false;
     int nextPcapngInterfaceId = 0;
@@ -59,13 +62,13 @@ class INET_API PcapngWriter : public IPcapWriter
     /**
      * Records the interface into the output file.
      */
-    void writeInterface(InterfaceEntry *interfaceEntry, PcapLinkType linkType);
+    void writeInterface(NetworkInterface *networkInterface, PcapLinkType linkType);
 
     /**
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writePacket(simtime_t time, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkType) override;
+    void writePacket(simtime_t time, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.
@@ -80,5 +83,5 @@ class INET_API PcapngWriter : public IPcapWriter
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPNGWRITER_H
+#endif
 

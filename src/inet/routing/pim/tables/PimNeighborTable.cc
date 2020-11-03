@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2013 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 3
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
@@ -26,7 +26,7 @@ namespace inet {
 Register_Abstract_Class(PimNeighbor);
 Define_Module(PimNeighborTable);
 
-PimNeighbor::PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version)
+PimNeighbor::PimNeighbor(NetworkInterface *ie, Ipv4Address address, int version)
     : nt(nullptr), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
 {
     ASSERT(ie);
@@ -109,7 +109,7 @@ void PimNeighborTable::processLivenessTimer(cMessage *livenessTimer)
 
 bool PimNeighborTable::addNeighbor(PimNeighbor *entry, double holdTime)
 {
-    Enter_Method_Silent();
+    Enter_Method("addNeighbor");
 
     PimNeighborVector& neighborsOnInterface = neighbors[entry->getInterfaceId()];
 
@@ -131,7 +131,7 @@ bool PimNeighborTable::addNeighbor(PimNeighbor *entry, double holdTime)
 
 bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
 {
-    Enter_Method_Silent();
+    Enter_Method("deleteNeighbor");
 
     auto it = neighbors.find(neighbor->getInterfaceId());
     if (it != neighbors.end()) {
@@ -154,9 +154,8 @@ bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
 
 void PimNeighborTable::restartLivenessTimer(PimNeighbor *neighbor, double holdTime)
 {
-    Enter_Method_Silent();
-    cancelEvent(neighbor->getLivenessTimer());
-    scheduleAt(simTime() + holdTime, neighbor->getLivenessTimer());
+    Enter_Method("restartLivenessTimer");
+    rescheduleAfter(holdTime, neighbor->getLivenessTimer());
 }
 
 PimNeighbor *PimNeighborTable::findNeighbor(int interfaceId, Ipv4Address addr)

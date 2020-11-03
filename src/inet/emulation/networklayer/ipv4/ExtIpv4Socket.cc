@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <omnetpp/platdep/sockets.h>
@@ -33,7 +33,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/emulation/networklayer/ipv4/ExtIpv4Socket.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -71,7 +71,7 @@ void ExtIpv4Socket::handleMessage(cMessage *msg)
     ip_addr.sin_port = htons(0);
 
     auto bytesChunk = packet->peekAllAsBytes();
-    uint8 buffer[1 << 16];
+    uint8_t buffer[1 << 16];
     size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
     ASSERT(packetLength == (size_t)packet->getByteLength());
 
@@ -123,7 +123,7 @@ void ExtIpv4Socket::closeSocket()
 
 bool ExtIpv4Socket::notify(int fd)
 {
-    Enter_Method_Silent();
+    Enter_Method("notify");
     ASSERT(this->fd == fd);
     uint8_t buffer[1 << 16];
     memset(&buffer, 0, sizeof(buffer));

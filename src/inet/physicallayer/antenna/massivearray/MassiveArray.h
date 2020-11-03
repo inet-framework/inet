@@ -55,7 +55,7 @@ class INET_API MassiveArray : public AntennaBase, protected cListener
     virtual void setDirection(const double &angle) = 0;
     MassiveArray();
     virtual Ptr<const IAntennaGain> getGain() const override = 0;
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override = 0;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override = 0;
 };
 
 

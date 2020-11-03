@@ -36,27 +36,27 @@ sim-time-limit = 10s
 cmdenv-event-banners = false
 *.producer.packetLength = intuniform(1B, 2B)
 *.producer.productionInterval = 1s
-*.filter.packetFilter = "totalLength(\"1 B\")"
+*.filter.packetFilter = "totalLength=~\"1 B\""
 
-%contains: stdout
-Producing packet producer-1.
-Filtering out packet producer-1.
-Producing packet producer-2.
-Filtering out packet producer-2.
-Producing packet producer-3.
-Passing through packet producer-3.
-Consuming packet producer-3.
-Producing packet producer-4.
-Filtering out packet producer-4.
-Producing packet producer-5.
-Filtering out packet producer-5.
-Producing packet producer-6.
-Filtering out packet producer-6.
-Producing packet producer-7.
-Filtering out packet producer-7.
-Producing packet producer-8.
-Filtering out packet producer-8.
-Producing packet producer-9.
-Filtering out packet producer-9.
-Producing packet producer-10.
-Filtering out packet producer-10.
+%contains-regex: stdout
+Producing packet, .*?producer-1.*?
+Filtering out packet, .*?producer-1.*?
+Producing packet, .*?producer-2.*?
+Filtering out packet, .*?producer-2.*?
+Producing packet, .*?producer-3.*?
+Passing through packet, .*?producer-3.*?
+Consuming packet, .*?producer-3.*?
+Producing packet, .*?producer-4.*?
+Filtering out packet, .*?producer-4.*?
+Producing packet, .*?producer-5.*?
+Filtering out packet, .*?producer-5.*?
+Producing packet, .*?producer-6.*?
+Filtering out packet, .*?producer-6.*?
+Producing packet, .*?producer-7.*?
+Filtering out packet, .*?producer-7.*?
+Producing packet, .*?producer-8.*?
+Filtering out packet, .*?producer-8.*?
+Producing packet, .*?producer-9.*?
+Filtering out packet, .*?producer-9.*?
+Producing packet, .*?producer-10.*?
+Filtering out packet, .*?producer-10.*?

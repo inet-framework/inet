@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -57,7 +57,7 @@ void GridNeighborCache::initialize(int stage)
         if (std::isnan(cellSize.z))
             cellSize.z = constraintAreaSize.z / par("cellCountZ").doubleValue();
         fillCubeVector();
-        scheduleAt(simTime() + refillPeriod, refillCellsTimer);
+        scheduleAfter(refillPeriod, refillCellsTimer);
     }
 }
 
@@ -67,16 +67,16 @@ void GridNeighborCache::handleMessage(cMessage *msg)
         throw cRuntimeError("This module only handles self messages");
     EV_DETAIL << "Updating the grid cells" << endl;
     fillCubeVector();
-    scheduleAt(simTime() + refillPeriod, msg);
+    scheduleAfter(refillPeriod, msg);
 }
 
-std::ostream& GridNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& GridNeighborCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "GridNeighborCache";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", cellSize = " << cellSize
-               << ", refillPeriod = " << refillPeriod
-               << ", maxSpeed = " << maxSpeed;
+        stream << EV_FIELD(cellSize)
+               << EV_FIELD(refillPeriod)
+               << EV_FIELD(maxSpeed);
     return stream;
 }
 
@@ -97,7 +97,7 @@ void GridNeighborCache::addRadio(const IRadio *radio)
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
     maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
     if (maxSpeed != 0 && !refillCellsTimer->isScheduled() && initialized())
-        scheduleAt(simTime() + refillPeriod, refillCellsTimer);
+        scheduleAfter(refillPeriod, refillCellsTimer);
     Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
     Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
     // If the constraintArea changed we must rebuild the grid

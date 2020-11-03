@@ -1,10 +1,10 @@
 //
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
@@ -92,22 +92,22 @@ const IReceptionAnalogModel *ApskLayeredReceiver::createAnalogModel(const Layere
     return nullptr;
 }
 
-std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskLayeredReceiver";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", levelOfDetail = " << levelOfDetail
-               << ", centerFrequency = " << centerFrequency;
+        stream << EV_FIELD(levelOfDetail)
+               << EV_FIELD(centerFrequency);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", errorModel = " << printObjectToString(errorModel, level + 1)
-               << ", decoder = " << printObjectToString(decoder, level + 1)
-               << ", demodulator = " << printObjectToString(demodulator, level + 1)
-               << ", pulseFilter = " << printObjectToString(pulseFilter, level + 1)
-               << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level + 1)
-               << ", energyDetection = " << energyDetection
-               << ", sensitivity = " << sensitivity
-               << ", bandwidth = " << bandwidth
-               << ", snirThreshold = " << snirThreshold;
+        stream << EV_FIELD(errorModel, printFieldToString(errorModel, level + 1, evFlags))
+               << EV_FIELD(decoder, printFieldToString(decoder, level + 1, evFlags))
+               << EV_FIELD(demodulator, printFieldToString(demodulator, level + 1, evFlags))
+               << EV_FIELD(pulseFilter, printFieldToString(pulseFilter, level + 1, evFlags))
+               << EV_FIELD(analogDigitalConverter, printFieldToString(analogDigitalConverter, level + 1, evFlags))
+               << EV_FIELD(energyDetection)
+               << EV_FIELD(sensitivity)
+               << EV_FIELD(bandwidth)
+               << EV_FIELD(snirThreshold);
     return stream;
 }
 
@@ -210,7 +210,7 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(scalarReception->getAnalogModel());
         W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
         bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing reception possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+        EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
     }
 }

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2006 Sam Jansen, Andras Varga
-// Copyright (C) 2009 Zoltan Bojthe
+// Copyright (C) 2009 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -14,13 +14,13 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 
 #include <sim_interface.h>    // NSC header
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"

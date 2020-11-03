@@ -58,7 +58,7 @@ void UdpBasicBurstNotification::processStart()
         socket.setBroadcast(true);
 
     if (strcmp(par("outputInterface").stringValue(),"") != 0) {
-        InterfaceEntry *ie = ift->findInterfaceByName(par("outputInterface").stringValue());
+        NetworkInterface *ie = ift->findInterfaceByName(par("outputInterface").stringValue());
         if (ie == nullptr)
             throw cRuntimeError(this, "Invalid output interface name : %s",par("outputInterface").stringValue());
         outputInterface = ie->getInterfaceId();
@@ -72,7 +72,7 @@ void UdpBasicBurstNotification::processStart()
         while ((token = tokenizer.nextToken()) != nullptr) {
             if (strstr(token, "ALL") != nullptr) {
                 for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                    InterfaceEntry *ie = ift->getInterface(i);
+                    NetworkInterface *ie = ift->getInterface(i);
                     if (ie->isLoopback())
                         continue;
                     if (ie == nullptr)
@@ -81,7 +81,7 @@ void UdpBasicBurstNotification::processStart()
                 }
             }
             else {
-                InterfaceEntry *ie = ift->findInterfaceByName(token);
+                NetworkInterface *ie = ift->findInterfaceByName(token);
                 if (ie == nullptr)
                     throw cRuntimeError(this, "Invalid output interface name : %s", token);
                 outputInterfaceMulticastBroadcast.push_back(ie->getInterfaceId());

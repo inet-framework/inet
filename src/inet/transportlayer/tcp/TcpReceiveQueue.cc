@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2009 Thomas Reschka
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
@@ -33,7 +34,7 @@ TcpReceiveQueue::~TcpReceiveQueue()
 {
 }
 
-void TcpReceiveQueue::init(uint32 startSeq)
+void TcpReceiveQueue::init(uint32_t startSeq)
 {
     rcv_nxt = startSeq;
 
@@ -52,11 +53,11 @@ std::string TcpReceiveQueue::str() const
     return buf.str();
 }
 
-uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
+uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader)
 {
-    B tcpHeaderLength = tcpseg->getHeaderLength();
-    B tcpPayloadLength = packet->getDataLength() - tcpHeaderLength;
-    uint32_t seq = tcpseg->getSequenceNo();
+    B tcpHeaderLength = tcpHeader->getHeaderLength();
+    B tcpPayloadLength = tcpSegment->getDataLength() - tcpHeaderLength;
+    uint32_t seq = tcpHeader->getSequenceNo();
     uint32_t offs = 0;
     uint32_t buffSeq = offsetToSeq(reorderBuffer.getExpectedOffset());
 
@@ -79,7 +80,7 @@ uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const
         seq = buffSeq;
         tcpPayloadLength -= B(offs);
     }
-    const auto& payload = packet->peekDataAt(tcpHeaderLength + B(offs), tcpPayloadLength);
+    const auto& payload = tcpSegment->peekDataAt(tcpHeaderLength + B(offs), tcpPayloadLength);
     reorderBuffer.replace(seqToOffset(seq), payload);
 
     if (seqGE(rcv_nxt, offsetToSeq(reorderBuffer.getRegionStartOffset(0))))
@@ -111,9 +112,9 @@ Packet *TcpReceiveQueue::extractBytesUpTo(uint32_t seq)
     return nullptr;
 }
 
-uint32 TcpReceiveQueue::getAmountOfBufferedBytes()
+uint32_t TcpReceiveQueue::getAmountOfBufferedBytes()
 {
-    uint32 bytes = 0;
+    uint32_t bytes = 0;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++)
         bytes += B(reorderBuffer.getRegionLength(i)).get();
@@ -121,14 +122,14 @@ uint32 TcpReceiveQueue::getAmountOfBufferedBytes()
     return bytes;
 }
 
-uint32 TcpReceiveQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
+uint32_t TcpReceiveQueue::getAmountOfFreeBytes(uint32_t maxRcvBuffer)
 {
-    uint32 usedRcvBuffer = getAmountOfBufferedBytes();
-    uint32 freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
+    uint32_t usedRcvBuffer = getAmountOfBufferedBytes();
+    uint32_t freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
     return (maxRcvBuffer > usedRcvBuffer) ? freeRcvBuffer : 0;
 }
 
-uint32 TcpReceiveQueue::getQueueLength()
+uint32_t TcpReceiveQueue::getQueueLength()
 {
     return reorderBuffer.getNumRegions();
 }
@@ -138,7 +139,7 @@ void TcpReceiveQueue::getQueueStatus()
     EV_DEBUG << "receiveQLength=" << reorderBuffer.getNumRegions() << " " << str() << "\n";
 }
 
-uint32 TcpReceiveQueue::getLE(uint32 fromSeqNum)
+uint32_t TcpReceiveQueue::getLE(uint32_t fromSeqNum)
 {
     B fs = seqToOffset(fromSeqNum);
 
@@ -150,7 +151,7 @@ uint32 TcpReceiveQueue::getLE(uint32 fromSeqNum)
     return fromSeqNum;
 }
 
-uint32 TcpReceiveQueue::getRE(uint32 toSeqNum)
+uint32_t TcpReceiveQueue::getRE(uint32_t toSeqNum)
 {
     B fs = seqToOffset(toSeqNum);
 
@@ -162,7 +163,7 @@ uint32 TcpReceiveQueue::getRE(uint32 toSeqNum)
     return toSeqNum;
 }
 
-uint32 TcpReceiveQueue::getFirstSeqNo()
+uint32_t TcpReceiveQueue::getFirstSeqNo()
 {
     if (reorderBuffer.getNumRegions() == 0)
         return rcv_nxt;

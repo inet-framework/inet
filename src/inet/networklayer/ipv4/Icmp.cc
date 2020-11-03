@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 //  Cleanup and rewrite: Andras Varga, 2004
@@ -46,8 +47,8 @@ void Icmp::initialize(int stage)
         crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
-        registerService(Protocol::icmpv4, gate("transportIn"), gate("ipIn"));
-        registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("transportOut"));
+        registerService(Protocol::icmpv4, gate("transportIn"), gate("transportOut"));
+        registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -156,7 +157,7 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
     // if the input interface is unconfigured, we won't recognize network-directed broadcasts because we don't what network we are on
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceId != -1) {
-        InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+        NetworkInterface *ie = ift->getInterfaceById(interfaceId);
         auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
         bool interfaceUnconfigured = (ipv4Data == nullptr) || ipv4Data->getIPAddress().isUnspecified();
         return interfaceUnconfigured;
@@ -286,15 +287,15 @@ void Icmp::sendToIP(Packet *msg)
     send(msg, "ipOut");
 }
 
-void Icmp::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void Icmp::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", in->getBaseName())) {
+    if (!strcmp("transportOut", gate->getBaseName())) {
         int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
         if (protocolNumber != -1)
             transportProtocols.insert(protocolNumber);

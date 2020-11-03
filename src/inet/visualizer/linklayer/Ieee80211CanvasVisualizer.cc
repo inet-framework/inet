@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/ModuleAccess.h"
@@ -42,19 +42,13 @@ Ieee80211CanvasVisualizer::Ieee80211CanvasVisualization::Ieee80211CanvasVisualiz
 {
 }
 
-Ieee80211CanvasVisualizer::~Ieee80211CanvasVisualizer()
-{
-    if (displayAssociations)
-        removeAllIeee80211Visualizations();
-}
-
 void Ieee80211CanvasVisualizer::initialize(int stage)
 {
     Ieee80211VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
+        networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
 
@@ -83,12 +77,12 @@ void Ieee80211CanvasVisualizer::refreshDisplay() const
 #endif
 }
 
-Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
+Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, NetworkInterface *networkInterface, std::string ssid, W power)
 {
     std::string icon = getIcon(power);
     auto labeledIconFigure = new LabeledIconFigure("ieee80211Association");
     labeledIconFigure->setTags((std::string("ieee80211_association ") + tags).c_str());
-    labeledIconFigure->setAssociatedObject(interfaceEntry);
+    labeledIconFigure->setAssociatedObject(networkInterface);
     labeledIconFigure->setZIndex(zIndex);
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents an IEEE 802.11 association");
@@ -104,8 +98,8 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
-        throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", interfaceEntry->getInterfaceName(), networkNode->getFullPath().c_str());
-    return new Ieee80211CanvasVisualization(networkNodeVisualization, labeledIconFigure, networkNode->getId(), interfaceEntry->getInterfaceId());
+        throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", networkInterface->getInterfaceName(), networkNode->getFullPath().c_str());
+    return new Ieee80211CanvasVisualization(networkNodeVisualization, labeledIconFigure, networkNode->getId(), networkInterface->getInterfaceId());
 }
 
 void Ieee80211CanvasVisualizer::addIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization)
@@ -119,7 +113,8 @@ void Ieee80211CanvasVisualizer::removeIeee80211Visualization(const Ieee80211Visu
 {
     Ieee80211VisualizerBase::removeIeee80211Visualization(ieee80211Visualization);
     auto ieee80211CanvasVisualization = static_cast<const Ieee80211CanvasVisualization *>(ieee80211Visualization);
-    ieee80211CanvasVisualization->networkNodeVisualization->removeAnnotation(ieee80211CanvasVisualization->figure);
+    if (networkNodeVisualizer != nullptr)
+        ieee80211CanvasVisualization->networkNodeVisualization->removeAnnotation(ieee80211CanvasVisualization->figure);
 }
 
 } // namespace visualizer

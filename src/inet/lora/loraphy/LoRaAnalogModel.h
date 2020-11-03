@@ -31,7 +31,7 @@ class INET_API LoRaAnalogModel : public ScalarAnalogModelBase
 {
   public:
     const W getBackgroundNoisePower(const LoRaBandListening *listening) const;
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual W computeReceptionPower(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
     const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;

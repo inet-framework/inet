@@ -34,7 +34,7 @@ network TestFilter
 
 using namespace inet; 
 
-static bool testFilter(Packet *packet)
+static bool testFilter(const Packet *packet)
 {
     return packet->getId() % 2 == 0;
 }
@@ -51,59 +51,59 @@ cmdenv-event-banners = false
 *.collector.collectionInterval = 1s
 *.filter.filterClass = "TestFilter"
 
-%contains: stdout
-Providing packet provider-0.
-Passing through packet provider-0.
-Collecting packet provider-0.
+%contains-regex: stdout
+Providing packet, .*?provider-0.*?
+Passing through packet, .*?provider-0.*?
+Collecting packet, .*?provider-0.*?
 
 Running simulation...
-Providing packet provider-1.
-Filtering out packet provider-1.
-Providing packet provider-2.
-Passing through packet provider-2.
-Collecting packet provider-2.
-Providing packet provider-3.
-Filtering out packet provider-3.
-Providing packet provider-4.
-Passing through packet provider-4.
-Collecting packet provider-4.
-Providing packet provider-5.
-Filtering out packet provider-5.
-Providing packet provider-6.
-Passing through packet provider-6.
-Collecting packet provider-6.
-Providing packet provider-7.
-Filtering out packet provider-7.
-Providing packet provider-8.
-Passing through packet provider-8.
-Collecting packet provider-8.
-Providing packet provider-9.
-Filtering out packet provider-9.
-Providing packet provider-10.
-Passing through packet provider-10.
-Collecting packet provider-10.
-Providing packet provider-11.
-Filtering out packet provider-11.
-Providing packet provider-12.
-Passing through packet provider-12.
-Collecting packet provider-12.
-Providing packet provider-13.
-Filtering out packet provider-13.
-Providing packet provider-14.
-Passing through packet provider-14.
-Collecting packet provider-14.
-Providing packet provider-15.
-Filtering out packet provider-15.
-Providing packet provider-16.
-Passing through packet provider-16.
-Collecting packet provider-16.
-Providing packet provider-17.
-Filtering out packet provider-17.
-Providing packet provider-18.
-Passing through packet provider-18.
-Collecting packet provider-18.
-Providing packet provider-19.
-Filtering out packet provider-19.
-Providing packet provider-20.
-Passing through packet provider-20.
-Collecting packet provider-20.
+Providing packet, .*?provider-1.*?
+Filtering out packet, .*?provider-1.*?
+Providing packet, .*?provider-2.*?
+Passing through packet, .*?provider-2.*?
+Collecting packet, .*?provider-2.*?
+Providing packet, .*?provider-3.*?
+Filtering out packet, .*?provider-3.*?
+Providing packet, .*?provider-4.*?
+Passing through packet, .*?provider-4.*?
+Collecting packet, .*?provider-4.*?
+Providing packet, .*?provider-5.*?
+Filtering out packet, .*?provider-5.*?
+Providing packet, .*?provider-6.*?
+Passing through packet, .*?provider-6.*?
+Collecting packet, .*?provider-6.*?
+Providing packet, .*?provider-7.*?
+Filtering out packet, .*?provider-7.*?
+Providing packet, .*?provider-8.*?
+Passing through packet, .*?provider-8.*?
+Collecting packet, .*?provider-8.*?
+Providing packet, .*?provider-9.*?
+Filtering out packet, .*?provider-9.*?
+Providing packet, .*?provider-10.*?
+Passing through packet, .*?provider-10.*?
+Collecting packet, .*?provider-10.*?
+Providing packet, .*?provider-11.*?
+Filtering out packet, .*?provider-11.*?
+Providing packet, .*?provider-12.*?
+Passing through packet, .*?provider-12.*?
+Collecting packet, .*?provider-12.*?
+Providing packet, .*?provider-13.*?
+Filtering out packet, .*?provider-13.*?
+Providing packet, .*?provider-14.*?
+Passing through packet, .*?provider-14.*?
+Collecting packet, .*?provider-14.*?
+Providing packet, .*?provider-15.*?
+Filtering out packet, .*?provider-15.*?
+Providing packet, .*?provider-16.*?
+Passing through packet, .*?provider-16.*?
+Collecting packet, .*?provider-16.*?
+Providing packet, .*?provider-17.*?
+Filtering out packet, .*?provider-17.*?
+Providing packet, .*?provider-18.*?
+Passing through packet, .*?provider-18.*?
+Collecting packet, .*?provider-18.*?
+Providing packet, .*?provider-19.*?
+Filtering out packet, .*?provider-19.*?
+Providing packet, .*?provider-20.*?
+Passing through packet, .*?provider-20.*?
+Collecting packet, .*?provider-20.*?

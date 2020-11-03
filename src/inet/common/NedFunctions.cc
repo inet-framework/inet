@@ -1,11 +1,11 @@
 //
-// Copyright (C) 1992-2004 Andras Varga
+// Copyright (C) 1992-2004 OpenSim Ltd.
 // Copyright (C) 2014 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/common/INETDefs.h"
@@ -207,14 +207,14 @@ static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[]
 {
     switch (argv[0].getType()) {
         case cNedValue::BOOL:
-            return (OMNETPP5_CODE(intpar_t) OMNETPP6_CODE(intval_t))( argv[0].boolValue() ? 1 : 0 );
+            return (intval_t)( argv[0].boolValue() ? 1 : 0 );
         case cNedValue::INT:
             return argv[0];
         case cNedValue::DOUBLE:
-            return cNedValue(checked_int_cast<OMNETPP5_CODE(intpar_t) OMNETPP6_CODE(intval_t)>(floor(argv[0].doubleValue())), argv[0].getUnit());
+            return cNedValue(checked_int_cast<intval_t>(floor(argv[0].doubleValue())), argv[0].getUnit());
         case cNedValue::STRING:
             throw cRuntimeError("intWithUnit(): Cannot convert string to int");
-        case OMNETPP5_CODE(cNedValue::XML) OMNETPP6_CODE(cNedValue::OBJECT) :
+        case cNedValue::OBJECT:
             throw cRuntimeError("intWithUnit(): Cannot convert cObject to int");
         default:
             throw cRuntimeError("Internal error: Invalid cNedValue type");
@@ -228,7 +228,7 @@ Define_NED_Function2(nedf_intWithUnit,
 
 cNedValue nedf_xmlattr(cComponent *contextComponent, cNedValue argv[], int argc)
 {
-    if (argv[0].getType() != OMNETPP5_CODE(cNedValue::XML) OMNETPP6_CODE(cNedValue::OBJECT))
+    if (argv[0].getType() != cNedValue::OBJECT)
         throw cRuntimeError("xmlattr(): xmlNode argument must be an xml node");
     if (argv[1].getType() != cNEDValue::STRING)
         throw cRuntimeError("xmlattr(): attributeName argument must be a string");

@@ -1,12 +1,10 @@
 //
-// Copyright (C) 2004 Andras Varga
-// Copyright (C) 2006 Levente Meszaros
-// Copyright (C) 2011 Zoltan Bojthe
+// Copyright (C) 2004 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_ETHERMACBASE_H
@@ -25,14 +23,16 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
+
+using namespace inet::physicallayer;
 
 /**
  * Base class for Ethernet MAC implementations.
@@ -113,7 +113,9 @@ class INET_API EtherMacBase : public MacProtocolBase
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
 
     // self messages
-    cMessage *endTxMsg = nullptr, *endIFGMsg = nullptr, *endPauseMsg = nullptr;
+    cMessage *endTxTimer = nullptr;
+    cMessage *endIfgTimer = nullptr;
+    cMessage *endPauseTimer = nullptr;
 
     // statistics
     unsigned long numFramesSent = 0;
@@ -143,7 +145,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     EtherMacBase();
     virtual ~EtherMacBase();
 
-    virtual MacAddress getMacAddress() { return interfaceEntry ? interfaceEntry->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
+    virtual MacAddress getMacAddress() { return networkInterface ? networkInterface->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected; }
@@ -191,7 +193,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     bool verifyCrcAndLength(Packet *packet);
 
     // MacBase
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
 
     // display
     virtual void refreshDisplay() const override;
@@ -202,9 +204,11 @@ class INET_API EtherMacBase : public MacProtocolBase
 
     void changeTransmissionState(MacTransmitState newState);
     void changeReceptionState(MacReceiveState newState);
+
+    virtual void cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration);
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERMACBASE_H
+#endif
 

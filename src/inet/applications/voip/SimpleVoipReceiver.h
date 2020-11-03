@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2011 Adriano (University of Pisa)
-// Copyright (C) 2012 Opensim Ltd.
+// Copyright (C) 2012 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #ifndef __INET_SIMPLEVOIPRECEIVER_H
@@ -116,5 +117,5 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLEVOIPRECEIVER_H
+#endif
 

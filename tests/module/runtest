@@ -16,7 +16,7 @@ cp -pPR lib work/       # OSX does not support cp -a
 opp_test gen $OPT -v $TESTFILES || exit 1
 
 echo
-(cd work; opp_makemake -f --deep -lINET$DBG_SUFFIX -L../../../src -P . --no-deep-includes -I../../../src; $MAKE) || exit 1
+(cd work; opp_makemake -f --deep -lINET$DBG_SUFFIX -L../../../src -P . --no-deep-includes -I../../../src -i ../makefrag; $MAKE) || exit 1
 
 echo
 PATH=$PATH:../../src opp_test run $OPT -v -p work$DBG_SUFFIX $TESTFILES -a "--check-signals=false -lINET " || exit 1

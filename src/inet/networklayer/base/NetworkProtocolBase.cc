@@ -1,28 +1,30 @@
 //
-// (C) 2013 Opensim Ltd.
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This library is free software, you can redistribute it
-// and/or modify
-// it under  the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation;
-// either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful,
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
 //
-// Author: Andras Varga (andras@omnetpp.org)
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
 namespace inet {
@@ -38,20 +40,20 @@ void NetworkProtocolBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(getProtocol(), gate("transportIn"), gate("queueIn"));
-        registerProtocol(getProtocol(), gate("queueOut"), gate("transportOut"));
+        registerService(getProtocol(), gate("transportIn"), gate("transportOut"));
+        registerProtocol(getProtocol(), gate("queueOut"), gate("queueIn"));
     }
 }
 
-void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
 }
 
-void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (in->isName("transportIn"))
+    if (gate->isName("transportOut"))
         upperProtocols.insert(&protocol);
 }
 
@@ -59,7 +61,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (Packet *packet = dynamic_cast<Packet *>(message)) {
         const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        const auto *addr = packet->getTag<L3AddressInd>();
+        const auto& addr = packet->getTag<L3AddressInd>();
         auto remoteAddress(addr->getSrcAddress());
         auto localAddress(addr->getDestAddress());
         bool hasSocket = false;
@@ -99,19 +101,19 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        auto& tags = getTags(message);
-        delete tags.removeTagIfPresent<DispatchProtocolReq>();
+        auto& tags = check_and_cast<ITaggedObject *>(message)->getTags();
+        tags.removeTagIfPresent<DispatchProtocolReq>();
         tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
     else {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-            InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-            if (interfaceEntry && !interfaceEntry->isLoopback()) {
+            NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+            if (networkInterface && !networkInterface->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
-                auto& tags = getTags(duplicate);
-                delete tags.removeTagIfPresent<DispatchProtocolReq>();
-                tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                auto& tags = check_and_cast<ITaggedObject *>(duplicate)->getTags();
+                tags.removeTagIfPresent<DispatchProtocolReq>();
+                tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
                 send(duplicate, "queueOut");
             }
         }

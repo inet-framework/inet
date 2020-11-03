@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,11 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SLICECHUNK_H_
-#define __INET_SLICECHUNK_H_
+#ifndef __INET_SLICECHUNK_H
+#define __INET_SLICECHUNK_H
 
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -68,6 +70,9 @@ class INET_API SliceChunk : public Chunk
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return makeShared<SliceChunk>(*this); }
+
+    virtual void parsimPack(cCommBuffer *buffer) const override;
+    virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     virtual void forEachChild(cVisitor *v) override;
@@ -104,17 +109,19 @@ class INET_API SliceChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_SLICE; }
     virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
 
+    virtual bool containsSameData(const Chunk& other) const override;
+
     virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
 
     virtual bool canRemoveAtFront(b length) const override { return false; }
     virtual bool canRemoveAtBack(b length) const override { return false; }
 
-    virtual std::string str() const override;
+    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 
 } // namespace
 
-#endif // #ifndef __INET_SLICECHUNK_H_
+#endif
 

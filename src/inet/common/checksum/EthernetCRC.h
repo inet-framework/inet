@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_ETHERNETCRC_H
@@ -32,5 +34,5 @@ uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize, uint32_t cr
 #define ETHER_CRC_POLY_LE    0xedb88320
 #define ETHER_CRC_POLY_BE    0x04c11db6
 
-#endif /* ETHERNETCRC_H_ */
+#endif
 

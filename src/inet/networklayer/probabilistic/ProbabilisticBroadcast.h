@@ -243,5 +243,5 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
 
 } // namespace inet
 
-#endif // ifndef __INET_PROBABILISTICBROADCAST_H
+#endif
 

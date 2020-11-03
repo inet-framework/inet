@@ -18,6 +18,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
@@ -51,7 +52,7 @@ bool LoRaMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *pack
     cModule *host = getContainingNode(check_and_cast<const cModule *>(radio));
     IInterfaceTable *interfaceTable = check_and_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-        const InterfaceEntry *interface = interfaceTable->getInterface(i);
+        auto interface = interfaceTable->getInterface(i);
         if (interface && interface->getMacAddress() == address)
             return true;
     }

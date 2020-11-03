@@ -9,11 +9,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include "inet/transportlayer/sctp/SctpAssociation.h"
@@ -46,7 +47,7 @@ SctpQueue::~SctpQueue()
     }
 }
 
-bool SctpQueue::checkAndInsertChunk(const uint32 key, SctpDataVariables *chunk)
+bool SctpQueue::checkAndInsertChunk(const uint32_t key, SctpDataVariables *chunk)
 {
     auto found = payloadQueue.find(key);
     if (found != payloadQueue.end()) {
@@ -56,7 +57,7 @@ bool SctpQueue::checkAndInsertChunk(const uint32 key, SctpDataVariables *chunk)
     return true;
 }
 
-uint32 SctpQueue::getQueueSize() const
+uint32_t SctpQueue::getQueueSize() const
 {
     return payloadQueue.size();
 }
@@ -72,7 +73,7 @@ SctpDataVariables *SctpQueue::extractMessage()
     return nullptr;
 }
 
-SctpDataVariables *SctpQueue::getAndExtractChunk(const uint32 tsn)
+SctpDataVariables *SctpQueue::getAndExtractChunk(const uint32_t tsn)
 {
     if (!payloadQueue.empty()) {
         auto iterator = payloadQueue.find(tsn);
@@ -88,7 +89,7 @@ void SctpQueue::printQueue() const
     EV_DEBUG << "Queue contents:\n";
     for (const auto & elem : payloadQueue)
     {
-        const uint32 key = elem.first;
+        const uint32_t key = elem.first;
         const SctpDataVariables *chunk = elem.second;
         EV_DEBUG << key << ":\t"
                  << "lastDestination=" << chunk->getLastDestination()
@@ -108,7 +109,7 @@ SctpDataVariables *SctpQueue::getFirstChunk() const
     return chunk;
 }
 
-cMessage *SctpQueue::getMsg(const uint32 tsn) const
+cMessage *SctpQueue::getMsg(const uint32_t tsn) const
 {
     PayloadQueue::const_iterator iterator = payloadQueue.find(tsn);
     if (iterator != payloadQueue.end()) {
@@ -119,7 +120,7 @@ cMessage *SctpQueue::getMsg(const uint32 tsn) const
     return nullptr;
 }
 
-SctpDataVariables *SctpQueue::getChunk(const uint32 tsn) const
+SctpDataVariables *SctpQueue::getChunk(const uint32_t tsn) const
 {
     PayloadQueue::const_iterator iterator = payloadQueue.find(tsn);
     if (iterator != payloadQueue.end()) {
@@ -129,7 +130,7 @@ SctpDataVariables *SctpQueue::getChunk(const uint32 tsn) const
     return nullptr;
 }
 
-SctpDataVariables *SctpQueue::getChunkFast(const uint32 tsn, bool& firstTime)
+SctpDataVariables *SctpQueue::getChunkFast(const uint32_t tsn, bool& firstTime)
 {
     if (!firstTime) {
         if (GetChunkFastIterator != payloadQueue.end()) {
@@ -153,13 +154,13 @@ SctpDataVariables *SctpQueue::getChunkFast(const uint32 tsn, bool& firstTime)
     return nullptr;
 }
 
-void SctpQueue::removeMsg(const uint32 tsn)
+void SctpQueue::removeMsg(const uint32_t tsn)
 {
     auto iterator = payloadQueue.find(tsn);
     payloadQueue.erase(iterator);
 }
 
-bool SctpQueue::deleteMsg(const uint32 tsn)
+bool SctpQueue::deleteMsg(const uint32_t tsn)
 {
     auto iterator = payloadQueue.find(tsn);
     if (iterator != payloadQueue.end()) {
@@ -172,9 +173,9 @@ bool SctpQueue::deleteMsg(const uint32 tsn)
     return false;
 }
 
-int32 SctpQueue::getNumBytes() const
+int32_t SctpQueue::getNumBytes() const
 {
-    int32 qb = 0;
+    int32_t qb = 0;
     for (const auto & elem : payloadQueue)
     {
         qb += (elem.second->len / 8);
@@ -182,7 +183,7 @@ int32 SctpQueue::getNumBytes() const
     return qb;
 }
 
-SctpDataVariables *SctpQueue::dequeueChunkBySSN(const uint16 ssn)
+SctpDataVariables *SctpQueue::dequeueChunkBySSN(const uint16_t ssn)
 {
     for (auto iterator = payloadQueue.begin();
          iterator != payloadQueue.end(); iterator++)
@@ -199,14 +200,14 @@ SctpDataVariables *SctpQueue::dequeueChunkBySSN(const uint16 ssn)
     return nullptr;
 }
 
-uint16 SctpQueue::getFirstSsnInQueue(const uint16 sid)
+uint16_t SctpQueue::getFirstSsnInQueue(const uint16_t sid)
 {
     return payloadQueue.begin()->second->ssn;
 }
 
 void SctpQueue::findEarliestOutstandingTsnsForPath(const L3Address& remoteAddress,
-        uint32& earliestOutstandingTsn,
-        uint32& rtxEarliestOutstandingTsn) const
+        uint32_t& earliestOutstandingTsn,
+        uint32_t& rtxEarliestOutstandingTsn) const
 {
     bool findEarliestOutstandingTsn = true;
     bool findRTXEarliestOutstandingTsn = true;
@@ -234,7 +235,7 @@ void SctpQueue::findEarliestOutstandingTsnsForPath(const L3Address& remoteAddres
     }
 }
 
-uint32 SctpQueue::getSizeOfFirstChunk(const L3Address& remoteAddress)
+uint32_t SctpQueue::getSizeOfFirstChunk(const L3Address& remoteAddress)
 {
     for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
          iterator != payloadQueue.end(); ++iterator)

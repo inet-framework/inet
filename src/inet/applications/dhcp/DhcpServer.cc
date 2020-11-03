@@ -14,7 +14,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <algorithm>
@@ -78,11 +79,11 @@ void DhcpServer::openSocket()
 
 void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
 
     if (signalID == interfaceDeletedSignal) {
         if (isUp()) {
-            InterfaceEntry *nie = check_and_cast<InterfaceEntry *>(obj);
+            NetworkInterface *nie = check_and_cast<NetworkInterface *>(obj);
             if (ie == nie)
                 throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
         }
@@ -91,11 +92,11 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-InterfaceEntry *DhcpServer::chooseInterface()
+NetworkInterface *DhcpServer::chooseInterface()
 {
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
-    InterfaceEntry *ie = nullptr;
+    NetworkInterface *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
         ie = ift->findInterfaceByName(interfaceName);
@@ -105,7 +106,7 @@ InterfaceEntry *DhcpServer::chooseInterface()
     else {
         // there should be exactly one non-loopback interface that we want to serve DHCP requests on
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            InterfaceEntry *current = ift->getInterface(i);
+            NetworkInterface *current = ift->getInterface(i);
             if (!current->isLoopback()) {
                 if (ie)
                     throw cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to serve DHCP requests on");
@@ -557,9 +558,7 @@ void DhcpServer::handleStartOperation(LifecycleOperation *operation)
 
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
-    Ipv4InterfaceData *ipv4data = ie->findProtocolData<Ipv4InterfaceData>();
-    if (ipv4data == nullptr)
-        throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
+    auto ipv4data = ie->getProtocolData<Ipv4InterfaceData>();
     const char *gatewayStr = par("gateway");
     gateway = *gatewayStr ? L3AddressResolver().resolve(gatewayStr, L3AddressResolver::ADDR_IPv4).toIpv4() : ipv4data->getIPAddress();
     subnetMask = ipv4data->getNetmask();

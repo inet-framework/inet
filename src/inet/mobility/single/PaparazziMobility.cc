@@ -190,12 +190,12 @@ void PaparazziMobility::moveOval(const double &sp, const double &radious, const 
         if (targetPosition.y - constraintAreaMin.y < constraintAreaMax.y - targetPosition.y) {
             down = true;
             initCircle.y += radious;
-            acummulateAngle = rad(PI/2);
+            acummulateAngle = rad(M_PI/2);
         }
         else {
             down = false;
             initCircle.y -= radious;
-            acummulateAngle = rad(3*PI/2);
+            acummulateAngle = rad(3*M_PI/2);
         }
         // compute the center position of both circles.
         center1 = initCircle;
@@ -216,16 +216,16 @@ void PaparazziMobility::moveOval(const double &sp, const double &radious, const 
 
             initCircle = lastPosition;
             double omega = std::abs(sp/radious);
-            nextChange = simTime() + std::abs(PI / omega);
+            nextChange = simTime() + std::abs(M_PI / omega);
             if (nextChange > endPattern)
                 nextChange = endPattern;
 
             if (down) {
-                acummulateAngle = rad(PI/2);
+                acummulateAngle = rad(M_PI/2);
                 initCircle.y += radious;
             }
             else {
-                acummulateAngle = rad(3*PI/2);
+                acummulateAngle = rad(3*M_PI/2);
                 initCircle.y -= radious;
             }
 
@@ -328,12 +328,12 @@ void PaparazziMobility::moveEight(const double &sp, const double &radious, const
         }
         initCircle = lastPosition;
         if (down) {
-            acummulateAngle = rad(PI);
+            acummulateAngle = rad(M_PI);
             initCircle.y += radious;
         }
         else {
             initCircle.y -= radious;
-            acummulateAngle = rad(3*PI/2);
+            acummulateAngle = rad(3*M_PI/2);
         }
 
         center1 = initCircle;
@@ -355,11 +355,11 @@ void PaparazziMobility::moveEight(const double &sp, const double &radious, const
             double omega = sp / radious;
             rigth = !rigth;
             if (!down) {
-                acummulateAngle = rad(PI/2);
+                acummulateAngle = rad(M_PI/2);
                 initCircle.y += radious;
             }
             else {
-                acummulateAngle = rad(3*PI/2);
+                acummulateAngle = rad(3*M_PI/2);
                 initCircle.y -= radious;
             }
 
@@ -369,7 +369,7 @@ void PaparazziMobility::moveEight(const double &sp, const double &radious, const
             else
                 initCircle = center2;
 
-            nextChange = simTime() + std::abs(PI / omega);
+            nextChange = simTime() + std::abs(M_PI / omega);
             if (nextChange > endPattern)
                 nextChange = endPattern;
         }
@@ -401,7 +401,7 @@ void PaparazziMobility::moveEight(const double &sp, const double &radious, const
 
             // compute speed
             if (targetPosition.x - lastPosition.x == 0)
-                angle = PI/2;
+                angle = M_PI/2;
             else
                 angle = std::atan(std::abs(targetPosition.y - lastPosition.y)/std::abs(targetPosition.x - lastPosition.x));
 
@@ -470,11 +470,11 @@ void PaparazziMobility::moveScan(const double &sp, const double &radious, const 
             down = false;
 
         if (down) {
-            acummulateAngle = rad(PI/2);
+            acummulateAngle = rad(M_PI/2);
             initCircle.y += radious;
         }
         else {
-            acummulateAngle = rad(3*PI/2);
+            acummulateAngle = rad(3*M_PI/2);
             initCircle.y -= radious;
         }
         // angle projection;
@@ -488,14 +488,14 @@ void PaparazziMobility::moveScan(const double &sp, const double &radious, const 
 
             initCircle = lastPosition;
             double omega = std::abs(sp / radious);
-            nextChange = simTime() + (PI / omega);
+            nextChange = simTime() + (M_PI / omega);
             rigth = !rigth;
             if (down) {
-                acummulateAngle = rad(PI/2);
+                acummulateAngle = rad(M_PI/2);
                 initCircle.y += radious;
             }
             else {
-                acummulateAngle = rad(3*PI/2);
+                acummulateAngle = rad(3*M_PI/2);
                 initCircle.y -= radious;
             }
             if (nextChange > endPattern)
@@ -544,7 +544,7 @@ void PaparazziMobility::moveScan(const double &sp, const double &radious, const 
 
 simtime_t PaparazziMobility::computeStayAt(const double &sp, const double &radious, const int& endDregree){
     double omega = sp / radious;
-    double endAngle = 2*PI*endDregree/360;
+    double endAngle = 2*M_PI*endDregree/360;
     simtime_t end = endAngle/ omega;
     return end;
 }
@@ -552,14 +552,14 @@ simtime_t PaparazziMobility::computeStayAt(const double &sp, const double &radio
 
 simtime_t PaparazziMobility::computeOvalTime(const double &sp, const double &radious, const double &linDist) {
     double o = sp / radious;
-    simtime_t cirCleTime = (2 * PI)/o;
+    simtime_t cirCleTime = (2 * M_PI)/o;
     simtime_t lineTime = 2*linDist/sp;
     return cirCleTime + lineTime;
 }
 
 simtime_t PaparazziMobility::computeScanTime(const double &sp, const double &radious, const double &linDist, const int &hori) {
     double o = sp / radious;
-    simtime_t halfCirCleTime = PI/o;
+    simtime_t halfCirCleTime = M_PI/o;
     simtime_t lineTime = linDist/sp;
     if (hori > 1)
         return (hori-1 * halfCirCleTime) + (hori*lineTime);
@@ -572,7 +572,7 @@ void PaparazziMobility::startStayAt() {
     mode = STAYAT;
     speed = par("speed");
     r = par("r");
-    acummulateAngle = rad(PI/2);
+    acummulateAngle = rad(M_PI/2);
     endPattern = simTime() + computeStayAt(speed, r, 360);
     nextChange = endPattern;
     origin = lastPosition;
@@ -586,7 +586,7 @@ void PaparazziMobility::startStayAt() {
 void PaparazziMobility::startOval() {
     mode = OVAL;
     partialState = Init;
-    acummulateAngle = rad(PI/2);
+    acummulateAngle = rad(M_PI/2);
     linDist = par("linearDist"); // configuration parameter or random?
     speed = par("speed");
     r = par("r");
@@ -599,7 +599,7 @@ void PaparazziMobility::startOval() {
 void PaparazziMobility::startEigth() {
     mode=EIGHT;
     partialState = Init;
-    acummulateAngle = rad(PI/2);
+    acummulateAngle = rad(M_PI/2);
     linDist = par("linearDist"); // configuration parameter or random?
     speed = par("speed");
     r = par("r");
@@ -612,7 +612,7 @@ void PaparazziMobility::startEigth() {
 void PaparazziMobility::startScan() {
     mode=SCAN;
     partialState = Init;
-    acummulateAngle = rad(PI/2);
+    acummulateAngle = rad(M_PI/2);
     linDist = par("linearDist"); // configuration parameter or random?
     speed = par("speed");
     r = par("r");

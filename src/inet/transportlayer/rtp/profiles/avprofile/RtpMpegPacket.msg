@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2008 Andras Varga
+// Copyright (C) 2008 OpenSim Ltd.
 // Copyright (C) 2001 Matthias Oppitz
 //
 // This program is free software; you can redistribute it and/or
@@ -13,7 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 //
@@ -47,7 +48,7 @@ class RtpMpegHeader extends FieldsChunk
     bool newPictureHeader = false;	// Used for MPEG-2 payloads when the previous bit (AN) is set to 1. Otherwise, it must be set to zero.
     bool sequenceHeaderPresent = false;	// Normally 0 and set to 1 at the occurrence of each MPEG sequence header.
     bool beginningOfSlice = false;	// Set when the start of the packet payload is a slice start code, or when a slice start
-           							// code is preceded only by one or more of a Video_Sequence_Header, GOP_header and/or Picture_Header.
+                                       // code is preceded only by one or more of a Video_Sequence_Header, GOP_header and/or Picture_Header.
     bool endOfSlice = false;	// Set when the last byte of the payload is the end of an MPEG slice.
     uint8_t pictureType;   // picture type of the frame the data in this packet belongs to.
     bool fbv = false;	// full_pel_backward_vector

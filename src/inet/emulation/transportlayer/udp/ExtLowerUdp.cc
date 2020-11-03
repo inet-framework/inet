@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,12 +12,12 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <omnetpp/platdep/sockets.h>
 
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -48,8 +50,7 @@ void ExtLowerUdp::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::udp, gate("appIn"), nullptr);
-        registerProtocol(Protocol::udp, nullptr, gate("appOut"));
+        registerService(Protocol::udp, gate("appIn"), gate("appOut"));
     }
 }
 
@@ -115,35 +116,35 @@ void ExtLowerUdp::handleMessage(cMessage *message)
 //                leaveMulticastGroups(sd, addresses);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpBlockMulticastSourcesCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                blockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpUnblockMulticastSourcesCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpJoinMulticastSourcesCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                joinMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpLeaveMulticastSourcesCommand *>(ctrl)) {
-//               InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//               NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
 //                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
 //            }
 //            else if (auto cmd = dynamic_cast<UdpSetMulticastSourceFilterCommand *>(ctrl)) {
-//                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+//                NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
 //                std::vector<L3Address> sourceList;
 //                for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
 //                    sourceList.push_back(cmd->getSourceList(i));
@@ -291,7 +292,7 @@ void ExtLowerUdp::processPacketFromUpper(Packet *packet)
 
 void ExtLowerUdp::processPacketFromLower(int fd)
 {
-    Enter_Method_Silent();
+    Enter_Method("processPacketFromLower");
     auto it = fdToSocketMap.find(fd);
     if (it == fdToSocketMap.end())
         throw cRuntimeError("Unknown socket");

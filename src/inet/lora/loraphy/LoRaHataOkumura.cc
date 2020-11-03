@@ -34,7 +34,7 @@ void LoRaHataOkumura::initialize(int stage)
     }
 }
 
-std::ostream& LoRaHataOkumura::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaHataOkumura::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LoRaHataOkumura";
     return stream;

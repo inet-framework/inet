@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,30 +12,32 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FINGERPRINTCALCULATOR_H_
-#define __INET_FINGERPRINTCALCULATOR_H_
+#ifndef __INET_FINGERPRINTCALCULATOR_H
+#define __INET_FINGERPRINTCALCULATOR_H
 
 #include "inet/common/INETDefs.h"
 
 namespace inet {
 
-#define INET_FINGERPRINT_INGREDIENTS "~NID"
+#define INET_FINGERPRINT_INGREDIENTS "~UNID"
 
 class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
 {
   protected:
     enum FingerprintIngredient {
         NETWORK_COMMUNICATION_FILTER = '~',
+        PACKET_UPDATE_FILTER         = 'U',
         NETWORK_NODE_PATH            = 'N',
         NETWORK_INTERFACE_PATH       = 'I',
         PACKET_DATA                  = 'D',
     };
 
   protected:
-    bool filterEvents = false;
+    bool networkCommunicationFilter = false;
+    bool packetUpdateFilter = false;
 
   protected:
     virtual void parseIngredients(const char *s) override;
@@ -48,5 +52,5 @@ class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
 
 } // namespace
 
-#endif // #ifndef __INET_FINGERPRINTCALCULATOR_H_
+#endif
 

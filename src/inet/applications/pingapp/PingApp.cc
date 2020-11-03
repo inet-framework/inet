@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2001, 2003, 2004 Johnny Lai, Monash University, Melbourne, Australia
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -13,7 +13,8 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 #include <iostream>
@@ -30,7 +31,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/EchoPacket_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -465,7 +466,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     // get src, hopCount etc from packet, and print them
     L3Address src = packet->getTag<L3AddressInd>()->getSrcAddress();
     //L3Address dest = msg->getTag<L3AddressInd>()->getDestination();
-    auto msgHopCountTag = packet->findTag<HopLimitInd>();
+    auto& msgHopCountTag = packet->findTag<HopLimitInd>();
     int msgHopCount = msgHopCountTag ? msgHopCountTag->getHopLimit() : -1;
 
     // calculate the RTT time by looking up the the send time of the packet
@@ -547,7 +548,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(getSimulation()->getModule(i));
         if (ift) {
             for (int j = 0; j < ift->getNumInterfaces(); j++) {
-                InterfaceEntry *ie = ift->getInterface(j);
+                NetworkInterface *ie = ift->getInterface(j);
                 if (ie && !ie->isLoopback()) {
 #ifdef WITH_IPv4
                     auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();

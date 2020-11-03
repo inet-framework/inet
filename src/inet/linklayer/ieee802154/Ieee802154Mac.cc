@@ -1,3 +1,18 @@
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
 /* -*- mode:c++ -*- ********************************************************
  * file:        Ieee802154Mac.cc
  *
@@ -10,13 +25,6 @@
  *              Telecommunication Networks Group (TKN) at Technische
  *              Universitaet Berlin, Germany.
  *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
  *
  * Funding: This work was partially financed by the European Commission under the
  * Framework 6 IST Project "Wirelessly Accessible Sensor Populations"
@@ -36,7 +44,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee802154/Ieee802154Mac.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -155,21 +163,21 @@ Ieee802154Mac::~Ieee802154Mac()
         delete ackMessage;
 }
 
-void Ieee802154Mac::configureInterfaceEntry()
+void Ieee802154Mac::configureNetworkInterface()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    interfaceEntry->setDatarate(bitrate);
+    networkInterface->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMacAddress(address);
+    networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
 }
 
 /**
@@ -187,7 +195,7 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     macPkt->setDestAddr(dest);
     delete packet->removeControlInfo();
-    macPkt->setSrcAddr(interfaceEntry->getMacAddress());
+    macPkt->setSrcAddr(networkInterface->getMacAddress());
 
     if (useMACAcks) {
         if (SeqNrParent.find(dest) == SeqNrParent.end()) {
@@ -206,7 +214,7 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
     packet->insertAtFront(macPkt);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
+    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
     executeMac(EV_SEND_REQUEST, packet);
 }
@@ -215,7 +223,7 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_SEND_REQUEST:
-            txQueue->pushPacket(static_cast<Packet *>(msg));
+            txQueue->enqueuePacket(static_cast<Packet *>(msg));
             if (!txQueue->isEmpty()) {
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
@@ -596,7 +604,7 @@ void Ieee802154Mac::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
-    txQueue->pushPacket(static_cast<Packet *>(msg));
+    txQueue->enqueuePacket(static_cast<Packet *>(msg));
 }
 
 /**
@@ -689,24 +697,24 @@ void Ieee802154Mac::fsmError(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::startTimer(t_mac_timer timer)
 {
     if (timer == TIMER_BACKOFF) {
-        scheduleAt(scheduleBackoff(), backoffTimer);
+        scheduleAfter(scheduleBackoff(), backoffTimer);
     }
     else if (timer == TIMER_CCA) {
         simtime_t ccaTime = rxSetupTime + ccaDetectionTime;
         EV_DETAIL << "(startTimer) ccaTimer value=" << ccaTime
                   << "(rxSetupTime,ccaDetectionTime:" << rxSetupTime
                   << "," << ccaDetectionTime << ")." << endl;
-        scheduleAt(simTime() + rxSetupTime + ccaDetectionTime, ccaTimer);
+        scheduleAfter(rxSetupTime + ccaDetectionTime, ccaTimer);
     }
     else if (timer == TIMER_SIFS) {
         assert(useMACAcks);
         EV_DETAIL << "(startTimer) sifsTimer value=" << sifs << endl;
-        scheduleAt(simTime() + sifs, sifsTimer);
+        scheduleAfter(sifs, sifsTimer);
     }
     else if (timer == TIMER_RX_ACK) {
         assert(useMACAcks);
         EV_DETAIL << "(startTimer) rxAckTimer value=" << macAckWaitDuration << endl;
-        scheduleAt(simTime() + macAckWaitDuration, rxAckTimer);
+        scheduleAfter(macAckWaitDuration, rxAckTimer);
     }
     else {
         EV << "Unknown timer requested to start:" << timer << endl;
@@ -752,7 +760,7 @@ simtime_t Ieee802154Mac::scheduleBackoff()
     nbBackoffs = nbBackoffs + 1;
     backoffValues = backoffValues + SIMTIME_DBL(backoffTime);
 
-    return backoffTime + simTime();
+    return backoffTime;
 }
 
 /*
@@ -793,7 +801,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
     const MacAddress& src = csmaHeader->getSrcAddr();
     const MacAddress& dest = csmaHeader->getDestAddr();
     long ExpectedNr = 0;
-    MacAddress address = interfaceEntry->getMacAddress();
+    MacAddress address = networkInterface->getMacAddress();
 
     EV_DETAIL << "Received frame name= " << csmaHeader->getName()
               << ", myState=" << macState << " src=" << src
@@ -883,7 +891,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
 
 void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
@@ -898,7 +906,7 @@ void Ieee802154Mac::decapsulate(Packet *packet)
 {
     const auto& csmaHeader = packet->popAtFront<Ieee802154MacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);

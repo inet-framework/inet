@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2008 Andras Varga
+// Copyright (C) 2008 OpenSim Ltd.
 // Copyright (C) 2001 Matthias Oppitz
 //
 // This program is free software; you can redistribute it and/or
@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 import inet.common.INETDefs;
@@ -61,7 +61,7 @@ class RtpControlInfo extends cObject
 // base class
 class RtpSessionControlInfo extends RtpControlInfo
 {
-    uint32 ssrc;
+    uint32_t ssrc;
 };
 
 
@@ -98,7 +98,7 @@ class RtpCiSenderStatus extends RtpSessionControlInfo
     type = RTP_IFP_SENDER_STATUS;
     // from ~RtpSenderStatusMessage:
     RtpSenderStatus status;
-    uint32 timeStamp;
+    uint32_t timeStamp;
 };
 
 // App to ~Rtp

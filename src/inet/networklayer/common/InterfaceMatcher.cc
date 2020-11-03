@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2013 Opensim Ltd.
+// Copyright (C) 2013 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include <set>
@@ -22,7 +22,7 @@
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 
 namespace inet {
@@ -63,7 +63,7 @@ InterfaceMatcher::Selector::Selector(const char *hostPattern, const char *namePa
 }
 
 // Note: "hosts", "interfaces" and "towards" must ALL match on the interface
-bool InterfaceMatcher::Selector::matches(const InterfaceEntry *ie)
+bool InterfaceMatcher::Selector::matches(const NetworkInterface *ie)
 {
     cModule *hostModule = ie->getInterfaceTable()->getHostModule();
     std::string hostFullPath = hostModule->getFullPath();
@@ -108,7 +108,7 @@ InterfaceMatcher::~InterfaceMatcher()
 /**
  * Returns the index of the first selector that matches the interface.
  */
-int InterfaceMatcher::findMatchingSelector(const InterfaceEntry *ie)
+int InterfaceMatcher::findMatchingSelector(const NetworkInterface *ie)
 {
     for (int i = 0; i < (int)selectors.size(); i++)
         if (selectors[i]->matches(ie))
@@ -131,7 +131,7 @@ static cGate *findRemoteGate(cGate *startGate)
     return nullptr;
 }
 
-bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher& hostMatcher) const
+bool InterfaceMatcher::linkContainsMatchingHost(const NetworkInterface *ie, const Matcher& hostMatcher) const
 {
     int outGateId = ie->getNodeOutputGateId();
     cModule *node = ie->getInterfaceTable()->getHostModule();
@@ -142,7 +142,7 @@ bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const 
     collectNeighbors(outGate, hostNodes, deviceNodes, node);
 
     for (auto neighbour : hostNodes) {
-        
+
         std::string hostFullPath = neighbour->getFullPath();
         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
         if (hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))

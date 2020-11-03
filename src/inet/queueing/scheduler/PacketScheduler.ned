@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 package inet.queueing.scheduler;
@@ -22,8 +22,8 @@ import inet.queueing.contract.IPacketScheduler;
 
 //
 // This module connects one packet collector to multiple packet providers. It
-// can be popped for packets by the connected packet collector. When this
-// happens, the scheduler pops a packet from one of its packet providers based
+// can be pulled for packets by the connected packet collector. When this
+// happens, the scheduler pulls a packet from one of its packet providers based
 // on the configured scheduler function. The packet scheduler function takes a
 // list of packet providers and returns an integer which in turn is used for
 // determining the input gate.

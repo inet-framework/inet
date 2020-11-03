@@ -52,5 +52,5 @@ struct udphdr
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPHDR_H
+#endif
 

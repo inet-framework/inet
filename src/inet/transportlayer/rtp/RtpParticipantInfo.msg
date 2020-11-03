@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2001 Matthias Oppitz
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 
@@ -37,7 +37,7 @@ class RtpParticipantInfo extends cNamedObject
 {
     @customize;  //FIXME need revise, several custommized functions should be moved to a processing module
 
-    abstract uint32 ssrc;
+    abstract uint32_t ssrc;
 
     // Used for storing the ip address of this endsystem.
     Ipv4Address address = Ipv4Address::UNSPECIFIED_ADDRESS;

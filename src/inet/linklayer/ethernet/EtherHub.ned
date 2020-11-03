@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+// Copyright (C) 2020 Opensim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -12,36 +12,35 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
 package inet.linklayer.ethernet;
 
+
 //
-// A generic wiring hub model.
+// An Ethernet hub model.
 //
-// ethg[i] gates represent ports. Messages arriving on a port are broadcast
-// to every other port. For the model to work correctly, all connecting
-// links (both incoming and outgoing ones) must have the same datarate.
+// The model simply broadcasts frames (and transmission updates
+// representing aborted frames, etc.) received on one port on all
+// other ports, mimicking the propagation of electrical signals.
 //
-// Messages are not interpreted by the hub model in any way, thus the hub
-// model is not specific to Ethernet. Messages may represent anything, from
-// the beginning of a frame transmission to end (or abortion) of transmission.
-//
-// It is allowed to dynamically unconnect/reconnect ports of the hub, and also
-// to change the size of ethg[] to add/remove ports. However, the model only
-// checks the equivalence of input/output datarates on startup; you are
-// responsible that links added at runtime have have the correct datarate.
+// Note that no special attention is made to appropriately model
+// frame truncations that occur when the link breaks, or comes
+// back up while a transmission is underway. If you need
+// to precisely model what happens when the link state changes,
+// you cannot use this module.
 //
 simple EtherHub
 {
     parameters:
         @networkNode();
         @labels(node,ethernet-node);
-        @display("i=device/hub");
+        @display("i=device/hub;bgb=155,104");
         @signal[packetReceived](type=cMessage);
         @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a port
+        inout ethg[] @labels(EtherFrame-conn);
 }
 

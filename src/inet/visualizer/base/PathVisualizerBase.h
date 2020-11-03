@@ -1,10 +1,10 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_PATHVISUALIZERBASE_H
@@ -40,19 +40,24 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
   protected:
     class INET_API PathVisualization : public LineManager::ModulePath {
       public:
+        std::string label;
+        mutable int numPackets = 0;
+        mutable b totalLength = b(0);
         mutable AnimationPosition lastUsageAnimationPosition;
 
       public:
-        PathVisualization(const std::vector<int>& path);
+        PathVisualization(const char *label, const std::vector<int>& path);
         virtual ~PathVisualization() {}
     };
 
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
+        const PathVisualization *pathVisualization = nullptr;
         const cPacket *packet = nullptr;
 
       public:
-        DirectiveResolver(const cPacket *packet) : packet(packet) { }
+        DirectiveResolver(const PathVisualization *pathVisualization, const cPacket *packet) :
+            pathVisualization(pathVisualization), packet(packet) { }
 
         virtual const char *resolveDirective(char directive) const override;
     };
@@ -78,13 +83,16 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     const char *fadeOutMode = nullptr;
     double fadeOutTime = NaN;
     double fadeOutAnimationSpeed = NaN;
+    simsignal_t startPathSignal = -1;
+    simsignal_t extendPathSignal = -1;
+    simsignal_t endPathSignal = -1;
     //@}
 
     LineManager *lineManager = nullptr;
     /**
-     * Maps packet to module vector.
+     * Maps path label and chunk id to module id vector.
      */
-    std::map<int, std::vector<int>> incompletePaths;
+    std::map<std::pair<std::string, int>, std::vector<int>> incompletePaths;
     /**
      * Maps nodes to the number of paths that go through it.
      */
@@ -106,20 +114,23 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual bool isPathEnd(cModule *module) const = 0;
     virtual bool isPathElement(cModule *module) const = 0;
 
-    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path, cPacket *packet) const = 0;
+    virtual void processPathStart(cModule *networkNode, const char *label, Packet *packet);
+    virtual void processPathElement(cModule *networkNode, const char *label, Packet *packet);
+    virtual void processPathEnd(cModule *networkNode, const char *label, Packet *packet);
+
+    virtual const PathVisualization *createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const = 0;
     virtual const PathVisualization *getPathVisualization(const std::vector<int>& path);
     virtual void addPathVisualization(const PathVisualization *pathVisualization);
     virtual void removePathVisualization(const PathVisualization *pathVisualization);
     virtual void removeAllPathVisualizations();
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const = 0;
 
-    virtual const std::vector<int> *getIncompletePath(int chunkId);
-    virtual void addToIncompletePath(int chunkId, cModule *module);
-    virtual void removeIncompletePath(int chunkId);
+    virtual const std::vector<int> *getIncompletePath(const std::string& label, int chunkId);
+    virtual void addToIncompletePath(const std::string& label, int chunkId, cModule *module);
+    virtual void removeIncompletePath(const std::string& label, int chunkId);
 
-    virtual std::string getPathVisualizationText(cPacket *packet) const;
+    virtual std::string getPathVisualizationText(const PathVisualization *pathVisualization, cPacket *packet) const;
     virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet);
-    virtual void updatePathVisualization(const std::vector<int>& path, cPacket *packet);
 
   public:
     virtual ~PathVisualizerBase();
@@ -131,5 +142,5 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_PATHVISUALIZERBASE_H
+#endif
 

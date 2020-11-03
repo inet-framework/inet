@@ -150,8 +150,8 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
                 Ospfv3IntraAreaPrefixLsa* prefLSA = interface->getArea()->originateNetIntraAreaPrefixLSA(newLSA, interface, false);
                 if (prefLSA != nullptr) {
                     interface->getArea()->installIntraAreaPrefixLSA(prefLSA);
-                    InterfaceEntry* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
-                    Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+                    NetworkInterface* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
+                    auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
                     ipv6int->joinMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 
                     interface->getArea()->floodLSA(newLSA);
@@ -183,8 +183,8 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
     }
 
     if (nextState ==  Ospfv3Interface::INTERFACE_STATE_BACKUP) {
-        InterfaceEntry* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
-        Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+        NetworkInterface* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
+        auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->joinMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
     }
 
@@ -205,8 +205,8 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
     if ((oldState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED || oldState == Ospfv3Interface::INTERFACE_STATE_BACKUP) &&
         (nextState != Ospfv3Interface::INTERFACE_STATE_DESIGNATED && nextState != Ospfv3Interface::INTERFACE_STATE_BACKUP))
     {
-        InterfaceEntry* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
-        Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+        NetworkInterface* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
+        auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->leaveMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
     }
 }

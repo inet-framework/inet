@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008
+//
 // DSDV simple example for INET (add-on)
 // Version 2.0
 // Diogo Antio & Pedro Menezes
@@ -62,8 +63,7 @@ void Dsdv::initialize(int stage)
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        registerService(Protocol::manet, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -71,8 +71,8 @@ void Dsdv::start()
 {
     /* Search the 80211 interface */
     int  num_80211 = 0;
-    InterfaceEntry *ie;
-    InterfaceEntry *i_face;
+    NetworkInterface *ie;
+    NetworkInterface *i_face;
     const char *name;
     broadcastDelay = &par("broadcastDelay");
     for (int i = 0; i < ift->getNumInterfaces(); i++)
@@ -99,19 +99,19 @@ void Dsdv::start()
         for (int i = rt->getNumRoutes() - 1; i >= 0; i--)
         {
             entry = rt->getRoute(i);
-            const InterfaceEntry *ie = entry->getInterface();
+            const NetworkInterface *ie = entry->getInterface();
             if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
                 rt->deleteRoute(entry);
         }
     }
-    CHK(interface80211ptr->getProtocolData<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
+    CHK(interface80211ptr->getProtocolDataForUpdate<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
 
     // schedules a random periodic event: the hello message broadcast from DSDV module
 
     //reads from omnetpp.ini
     //HelloForward = new DsdvHello("HelloForward");
     // schedules a random periodic event: the hello message broadcast from DSDV module
-    scheduleAt(simTime() + uniform(0.0, par("maxVariance").doubleValue()), event);
+    scheduleAfter(uniform(0.0, par("maxVariance").doubleValue()), event);
 }
 
 void Dsdv::stop()
@@ -145,7 +145,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
 
         // count non-loopback interfaces
         // int numIntf = 0;
-        // InterfaceEntry *ie = nullptr;
+        // NetworkInterface *ie = nullptr;
         //for (int k=0; k<ift->getNumInterfaces(); k++)
         //  if (!ift->getInterface(k)->isLoopback())
         //  {ie = ift->getInterface(k); numIntf++;}
@@ -187,7 +187,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         hello = nullptr;
 
         //schedule new brodcast hello message event
-        scheduleAt(simTime()+helloInterval+broadcastDelay->doubleValue(), event);
+        scheduleAfter(helloInterval+broadcastDelay->doubleValue(), event);
         bubble("Sending new hello message");
     }
     else
@@ -325,10 +325,9 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
                     double waitTime = intuniform(1, 50);
                     waitTime = waitTime/100;
                     EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";
-                    waitTime = SIMTIME_DBL(simTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime <<" And host is " << source << "\n";
                     fhp->event = new cMessage("event2");
-                    scheduleAt(waitTime, fhp->event);
+                    scheduleAfter(waitTime, fhp->event);
                     forwardList->push_back(fhp);
                     fhp = nullptr;
                 }

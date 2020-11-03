@@ -12,11 +12,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_SCTPSERIALIZER_H
-#define __INET_SCTPSERIALIZER_H
+#ifndef __INET_SCTPHEADERSERIALIZER_H
+#define __INET_SCTPHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
@@ -44,15 +45,15 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
      * the frame over a raw socket.)
      * Returns the length of data written into buffer.
      */
-   // int32 serialize(const SctpHeader *msg, uint8 *buf, uint32 bufsize);
+   // int32_t serialize(const SctpHeader *msg, uint8_t *buf, uint32_t bufsize);
 
     /**
      * Puts a packet sniffed from the wire into an SCTPMessage.
      */
-  //  void parse(const uint8 *buf, uint32 bufsize, SctpHeader *dest);
+  //  void parse(const uint8_t *buf, uint32_t bufsize, SctpHeader *dest);
 
-    static uint32 checksum(const uint8 *buf, uint32 len);
-    static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
+    static uint32_t checksum(const uint8_t *buf, uint32_t len);
+    static void hmacSha1(const uint8_t *buf, uint32_t buflen, const uint8_t *key, uint32_t keylen, uint8_t *digest);
     void calculateSharedKey();
     bool compareRandom();
 
@@ -67,5 +68,5 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
 } // namespace sctp
 } // namespace inet
 
-#endif // ifndef __INET_SCTPSERIALIZER_H
+#endif
 

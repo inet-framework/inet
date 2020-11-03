@@ -2,11 +2,11 @@
 <scenario>
     <at t="1.4">
         <disconnect src-module="hostA" src-gate="ethg$o" />
-        <disconnect src-module="bus" src-gate="ethg$o[0]" />
+        <disconnect src-module="tap1" src-gate="port$o[0]" />
     </at>
     <at t="1.5">
         <connect src-module="hostA" src-gate="ethg"
-                 dest-module="bus" dest-gate="ethg[0]"
+                 dest-module="tap1" dest-gate="port[0]"
                  channel-type="ned.DatarateChannel" >
 <!--
             <param name="datarate" value="10Mbps" />
@@ -17,51 +17,51 @@
 
     <at t="1.6">
         <disconnect src-module="hostB" src-gate="ethg$o" />
-        <disconnect src-module="bus" src-gate="ethg$o[1]" />
+        <disconnect src-module="tap2" src-gate="port$o[0]" />
     </at>
     <at t="1.7">
         <connect src-module="hostB" src-gate="ethg"
-                 dest-module="bus" dest-gate="ethg[1]"
+                 dest-module="tap2" dest-gate="port[0]"
                  channel-type="ned.DatarateChannel" />
     </at>
 
     <at t="1.8">
         <disconnect src-module="hostC" src-gate="ethg$o" />
-        <disconnect src-module="bus" src-gate="ethg$o[2]" />
+        <disconnect src-module="tap3" src-gate="port$o[0]" />
     </at>
     <at t="1.9">
         <connect src-module="hostC" src-gate="ethg"
-                 dest-module="bus" dest-gate="ethg[2]"
+                 dest-module="tap3" dest-gate="port[0]"
                  channel-type="ned.DatarateChannel" />
     </at>
 
     <at t="3.4">
         <disconnect src-module="hostA" src-gate="ethg$o" />
-        <disconnect src-module="bus" src-gate="ethg$o[0]" />
+        <disconnect src-module="tap1" src-gate="port$o[0]" />
     </at>
     <at t="3.5">
         <connect src-module="hostA" src-gate="ethg"
-                 dest-module="bus" dest-gate="ethg[0]"
+                 dest-module="tap1" dest-gate="port[0]"
                  channel-type="ned.DatarateChannel" />
     </at>
 
     <at t="3.6">
         <disconnect src-module="hostB" src-gate="ethg$o" />
-        <disconnect src-module="bus" src-gate="ethg$o[1]" />
+        <disconnect src-module="tap2" src-gate="port$o[0]" />
     </at>
     <at t="3.7">
         <connect src-module="hostB" src-gate="ethg"
-                 dest-module="bus" dest-gate="ethg[1]"
+                 dest-module="tap2" dest-gate="port[0]"
                  channel-type="ned.DatarateChannel" />
     </at>
 
     <at t="3.8">
         <disconnect src-module="hostC" src-gate="ethg$o" />
-        <disconnect src-module="bus" src-gate="ethg$o[2]" />
+        <disconnect src-module="tap3" src-gate="port$o[0]" />
     </at>
     <at t="3.9">
         <connect src-module="hostC" src-gate="ethg"
-                 dest-module="bus" dest-gate="ethg[2]"
+                 dest-module="tap3" dest-gate="port[0]"
                  channel-type="ned.DatarateChannel" />
     </at>
 </scenario>

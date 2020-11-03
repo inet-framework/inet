@@ -144,5 +144,5 @@ struct icmp
 
 } // namespace inet
 
-#endif // ifndef __INET_IP_ICMP_H
+#endif
 

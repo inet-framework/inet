@@ -1,22 +1,19 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004 OpenSim Ltd.
 // Copyright (C) 2012 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// @author Andras Varga
-// @author Zoltan Bojthe
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -160,7 +157,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
         throw cRuntimeError("L3AddressResolver: syntax error parsing address spec `%s'", s);
 
     // find module
-    cModule *mod = getSimulation()->getModuleByPath(modname.c_str());
+    cModule *mod = getSimulation()->findModuleByPath(modname.c_str());
     if (!mod)
         throw cRuntimeError("L3AddressResolver: module `%s' not found", modname.c_str());
 
@@ -185,7 +182,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
     // find interface for dest node
     // get address from the given module/interface
     if (!destnodename.empty()) {
-        cModule *destnode = getSimulation()->getModuleByPath(destnodename.c_str());
+        cModule *destnode = getSimulation()->findModuleByPath(destnodename.c_str());
         if (!destnode)
             throw cRuntimeError("L3AddressResolver: destination module `%s' not found", destnodename.c_str());
         result = addressOf(mod, destnode, addrType);
@@ -218,7 +215,7 @@ L3Address L3AddressResolver::addressOf(cModule *host, int addrType)
 L3Address L3AddressResolver::addressOf(cModule *host, const char *ifname, int addrType)
 {
     IInterfaceTable *ift = interfaceTableOf(host);
-    InterfaceEntry *ie = ift->findInterfaceByName(ifname);
+    NetworkInterface *ie = ift->findInterfaceByName(ifname);
     if (ie)
         return getAddressFrom(ie, addrType);
 
@@ -229,7 +226,7 @@ L3Address L3AddressResolver::addressOf(cModule *host, cModule *destmod, int addr
 {
     IInterfaceTable *ift = interfaceTableOf(host);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
         if (ie) {
             int gateId = ie->getNodeOutputGateId();
             if (gateId != -1)
@@ -260,7 +257,7 @@ L3Address L3AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
     return ret;
 }
 
-L3Address L3AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
+L3Address L3AddressResolver::getAddressFrom(NetworkInterface *ie, int addrType)
 {
     L3Address ret;
     bool mask = addrType & ADDR_MASK;
@@ -290,7 +287,7 @@ bool L3AddressResolver::getIpv4AddressFrom(L3Address& retAddr, IInterfaceTable *
 #ifdef WITH_IPv4
     // choose first usable interface address (configured for Ipv4, non-loopback if, addr non-null)
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
         if (ie->isLoopback())
             continue;
         if (getInterfaceIpv4Address(retAddr, ie, netmask))
@@ -317,7 +314,7 @@ bool L3AddressResolver::getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *
     Ipv6Address::Scope retScope = Ipv6Address::UNSPECIFIED;
 
     for (int i = 0; i < ift->getNumInterfaces() && retScope != Ipv6Address::GLOBAL; i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
         auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
         if (!ipv6Data || ie->isLoopback())
             continue;
@@ -341,7 +338,7 @@ bool L3AddressResolver::getMacAddressFrom(L3Address& retAddr, IInterfaceTable *i
 
     // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
         if (ie->isLoopback())
             continue;
         if (getInterfaceMacAddress(retAddr, ie, netmask))
@@ -358,7 +355,7 @@ bool L3AddressResolver::getModulePathAddressFrom(L3Address& retAddr, IInterfaceT
 
     // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
         if (ie->isLoopback())
             continue;
         if (getInterfaceModulePathAddress(retAddr, ie, netmask))
@@ -375,7 +372,7 @@ bool L3AddressResolver::getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTab
 
     // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        NetworkInterface *ie = ift->getInterface(i);
         if (ie->isLoopback())
             continue;
         if (getInterfaceModuleIdAddress(retAddr, ie, netmask))
@@ -384,7 +381,7 @@ bool L3AddressResolver::getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTab
     return false;
 }
 
-bool L3AddressResolver::getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceIpv6Address(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
 #ifdef WITH_IPv6
     if (netmask)
@@ -400,7 +397,7 @@ bool L3AddressResolver::getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *
     return false;
 }
 
-bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
 #ifdef WITH_IPv4
     if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>()) {
@@ -421,7 +418,7 @@ bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *
     return false;
 }
 
-bool L3AddressResolver::getInterfaceMacAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceMacAddress(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
     if (!ie->getMacAddress().isUnspecified()) {
         ret = ie->getMacAddress();
@@ -430,13 +427,13 @@ bool L3AddressResolver::getInterfaceMacAddress(L3Address& ret, InterfaceEntry *i
     return false;
 }
 
-bool L3AddressResolver::getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceModulePathAddress(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
     ret = ie->getModulePathAddress();
     return true;
 }
 
-bool L3AddressResolver::getInterfaceModuleIdAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceModuleIdAddress(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
     ret = ie->getModuleIdAddress();
     return true;
@@ -532,7 +529,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
         IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
         if (itable != nullptr) {
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
-                InterfaceEntry *entry = itable->getInterface(i);
+                NetworkInterface *entry = itable->getInterface(i);
                 switch (add.getType()) {
 #ifdef WITH_IPv6
                     case L3Address::IPv6: {
@@ -567,7 +564,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
     return nullptr;
 }
 
-InterfaceEntry *L3AddressResolver::findInterfaceWithMacAddress(const MacAddress& addr)
+NetworkInterface *L3AddressResolver::findInterfaceWithMacAddress(const MacAddress& addr)
 {
     if (addr.isUnspecified() || addr.isBroadcast() || addr.isMulticast())
         return nullptr;
@@ -577,7 +574,7 @@ InterfaceEntry *L3AddressResolver::findInterfaceWithMacAddress(const MacAddress&
         IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
         if (itable != nullptr) {
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
-                InterfaceEntry *entry = itable->getInterface(i);
+                NetworkInterface *entry = itable->getInterface(i);
                 if (entry->getMacAddress() == addr)
                     return entry;
             }
@@ -588,7 +585,7 @@ InterfaceEntry *L3AddressResolver::findInterfaceWithMacAddress(const MacAddress&
 
 cModule *L3AddressResolver::findHostWithMacAddress(const MacAddress& addr)
 {
-    InterfaceEntry *entry = findInterfaceWithMacAddress(addr);
+    NetworkInterface *entry = findInterfaceWithMacAddress(addr);
     return entry ? entry->getInterfaceTable()->getHostModule() : nullptr;
 }
 
