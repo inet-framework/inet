@@ -135,7 +135,7 @@ void EigrpIpv4Pdm::initialize(int stage){
 
 void EigrpIpv4Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent("EigrpIpv4Pdm::receiveSignal"); //Switch Context to this module!
+    Enter_Method("EigrpIpv4Pdm::receiveSignal"); //Switch Context to this module!
 
 
     if (signalID == interfaceStateChangedSignal)
