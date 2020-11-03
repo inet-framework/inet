@@ -3,7 +3,11 @@
 | Build and fingerprint tests | [![Travis CI][travis-master]][1] |
 | Feature enablement tests    | [![CircleCI][circle-master]][3]  |
 
-INET Framework for OMNEST/OMNeT++
+
+Warning this version needs at least omnet++ 6-pre9.
+For older omnet++ versions you  can use V4.2.x branch or inetmanet 3
+
+Inetmanet/INET Framework for OMNEST/OMNeT++
 =================================
 
 The [INET framework](https://inet.omnetpp.org) is an open-source communication networks
