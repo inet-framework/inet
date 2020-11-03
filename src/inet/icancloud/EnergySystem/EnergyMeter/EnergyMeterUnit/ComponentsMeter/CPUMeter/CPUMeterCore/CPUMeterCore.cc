@@ -74,9 +74,8 @@ double CPUMeterCore::getInstantConsumption(const string & state, int partIndex){
                 actualState = state;
 
             // Get the consumption of the state
-                consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
-
-               accumConsumption =  consumptionValue;
+            consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
+            accumConsumption =  consumptionValue;
 
         }
 

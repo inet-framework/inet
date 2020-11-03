@@ -51,10 +51,14 @@ namespace icancloud {
       this->isOpened    = true;
       this->compression = compression;
       this->fname       = fname;
-
+#ifdef ZLIB_H
       if (this->compression == true)
+
           this->fz = gzopen(fname, "ab1h");
       else this->f.open(fname, ios::app);
+#else
+      this->f.open(fname, ios::app);
+#endif
   }
 
   void ICCLog::Append ( const char *format, ... )
@@ -66,9 +70,14 @@ namespace icancloud {
 
       if (true == this->isOpened)
       {
+#ifdef ZLIB_H
           if (this->compression == true)
               gzwrite(fz, fb, strlen(fb));
           else f << this->fb;
+#else
+          f << this->fb;
+#endif
+
       }
 
       va_end(args);
@@ -78,10 +87,13 @@ namespace icancloud {
   {
       if (true == this->isOpened)
       {
+#ifdef ZLIB_H
           if (true == this->compression)
               gzclose_w(this->fz);
           else f.close();
-
+#else
+          f.close();
+#endif
           this->isOpened = false;
       }
   }

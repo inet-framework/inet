@@ -60,6 +60,7 @@ namespace icancloud {
 
     void MemoSupport::dump_bin ( void )
     {
+#ifdef ZLIB_H
             gzFile file ;
             MemoNode *s ;
 
@@ -82,10 +83,12 @@ namespace icancloud {
             }
 
             gzclose(file);
+#endif
     }
 
     void MemoSupport::restore_bin ( void )
     {
+#ifdef ZLIB_H
             gzFile file;
             MemoNode *fcall, *s;
             int ret;
@@ -118,10 +121,12 @@ namespace icancloud {
             }
 
             gzclose(file);
+#endif
     }
 
     void MemoSupport::stats ( void )
     {
+#ifdef ZLIB_H
             gzFile file;
             MemoNode *fcall;
             int ret;
@@ -167,6 +172,7 @@ namespace icancloud {
             }
 
             gzclose(file);
+#endif
     }
 
 } // namespace icancloud

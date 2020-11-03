@@ -6,7 +6,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <sys/time.h>
+#if  __has_include(<zlib.h>)
 #include <zlib.h>
+#endif
 #include "uthash.h"
 #include <iostream>
 #include <cstdlib>

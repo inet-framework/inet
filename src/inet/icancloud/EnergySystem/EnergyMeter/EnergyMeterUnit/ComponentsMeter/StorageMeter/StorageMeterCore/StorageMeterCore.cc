@@ -57,11 +57,9 @@ double StorageMeterCore::getInstantConsumption(const string & state, int partInd
                 actualState = state;
 
             // Get the consumption of the state
-                consumptionValue = e_internal->e_getConsumptionValue(actualState);
-                instantConsumption +=  consumptionValue;
-
+            consumptionValue = e_internal->e_getConsumptionValue(actualState);
+            instantConsumption +=  consumptionValue;
         }
-
     }
 
     else {

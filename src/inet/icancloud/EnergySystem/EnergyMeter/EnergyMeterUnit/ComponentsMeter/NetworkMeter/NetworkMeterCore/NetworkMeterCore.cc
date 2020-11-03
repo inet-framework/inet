@@ -69,11 +69,9 @@ double NetworkMeterCore::getInstantConsumption(const string &state,int partIndex
                 actualState = e_internal -> e_getActualState(partIndex);
             else
                 actualState = state;
-
             // Get the consumption of the state
-                consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
-
-                instantConsumption =  consumptionValue;
+            consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
+            instantConsumption =  consumptionValue;
 
         }
 

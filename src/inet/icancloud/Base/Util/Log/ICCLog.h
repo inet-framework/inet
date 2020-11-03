@@ -21,7 +21,12 @@
 #include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
+#if  __has_include(<zlib.h>)
 #include <zlib.h>
+
+
+#endif
+
 
 namespace inet {
 
@@ -42,7 +47,9 @@ using namespace std;
   class ICCLog {
 
        private:
+#ifdef ZLIB_H
 		  gzFile fz;
+#endif
 		  ofstream f;
 		  bool compression;
 		  bool isOpened;
