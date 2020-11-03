@@ -32,7 +32,7 @@
 #include "inet/routing/eigrp/pdms/IEigrpModule.h"
 #include "inet/routing/eigrp/tables/EigrpNetworkTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 namespace inet {
 namespace eigrp {
 class INET_API EigrpDeviceConfigurator
@@ -50,7 +50,7 @@ class INET_API EigrpDeviceConfigurator
       // configuration for EIGRP //
       /////////////////////////////
       /**< Gets interfaces that correspond to the IP address and mask */
-      EigrpNetwork<Ipv4Address> *isEigrpInterface(std::vector<EigrpNetwork<Ipv4Address> *>& networks, InterfaceEntry* interface);
+      EigrpNetwork<Ipv4Address> *isEigrpInterface(std::vector<EigrpNetwork<Ipv4Address> *>& networks, NetworkInterface* interface);
       /**< Converts wildcard to netmask and check validity */
       bool wildcardToMask(const char *wildcard, Ipv4Address& result);
       /**< Loads configuration of EIGRP process */

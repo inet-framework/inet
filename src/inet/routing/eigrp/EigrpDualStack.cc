@@ -61,9 +61,9 @@ bool maskedAddrAreEqual(const Ipv4Address& addr1, const Ipv4Address& addr2, cons
 
 bool maskedAddrAreEqual(const Ipv6Address& addr1, const Ipv6Address& addr2, const Ipv6Address& netmask)
 {
-    const uint32 *a1 = addr1.words();
-    const uint32 *a2 = addr2.words();
-    const uint32 *mask = netmask.words();
+    const uint32_t *a1 = addr1.words();
+    const uint32_t *a2 = addr2.words();
+    const uint32_t *mask = netmask.words();
 
     return !(static_cast<bool> (
             ((a1[0] ^ a2[0]) & mask[0]) |
@@ -77,15 +77,15 @@ bool maskedAddrAreEqual(const Ipv6Address& addr1, const Ipv6Address& addr2, cons
 
 Ipv6Address getPrefix(const Ipv6Address& addr, const Ipv6Address& netmask)
 {
-    const uint32 *addrp = addr.words();
-    const uint32 *netmaskp = netmask.words();
+    const uint32_t *addrp = addr.words();
+    const uint32_t *netmaskp = netmask.words();
 
     return Ipv6Address(addrp[0] & netmaskp[0], addrp[1] & netmaskp[1], addrp[2] & netmaskp[2], addrp[3] & netmaskp[3]); //TODO - verify
 }
 
 Ipv6Address makeNetmask(int length) //TODO - verify
 {
-    uint32 netmask[4] = {0, 0, 0, 0};
+    uint32_t netmask[4] = {0, 0, 0, 0};
 
     for(int i = 0; i < 4; ++i)
     {//through 4 parts of address

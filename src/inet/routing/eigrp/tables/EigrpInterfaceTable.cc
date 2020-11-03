@@ -56,7 +56,7 @@ EigrpInterface::~EigrpInterface()
     hellot = nullptr;
 }
 
-EigrpInterface::EigrpInterface(InterfaceEntry *iface, int networkId, bool enabled) :
+EigrpInterface::EigrpInterface(NetworkInterface *iface, int networkId, bool enabled) :
                interfaceId(iface->getInterfaceId()), networkId(networkId), enabled(enabled)
 {
     hellot = NULL;
@@ -84,7 +84,7 @@ EigrpInterface::EigrpInterface(InterfaceEntry *iface, int networkId, bool enable
     }
 }
 
-bool EigrpInterface::isMulticastAllowedOnIface(InterfaceEntry *iface)
+bool EigrpInterface::isMulticastAllowedOnIface(NetworkInterface *iface)
 {
     if (iface->isMulticast())
         if (getNumOfNeighbors() > 1)

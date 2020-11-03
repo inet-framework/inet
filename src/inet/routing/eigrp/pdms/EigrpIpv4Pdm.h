@@ -209,7 +209,7 @@ protected:
     /**
      * Remove interface from EIGRP interface table. Removes all neighbors on the interface.
      */
-    void disableInterface(InterfaceEntry *iface, EigrpInterface *eigrpIface, Ipv4Address& ifAddress, Ipv4Address& ifMask);
+    void disableInterface(NetworkInterface *iface, EigrpInterface *eigrpIface, Ipv4Address& ifAddress, Ipv4Address& ifMask);
     /**
      * Add interface to the EIGRP interface table and notifies DUAL.
      */
@@ -225,7 +225,7 @@ protected:
 
 
     //-- PROCESSING EVENTS FROM NOTIFICATION BOARD
-    void processIfaceStateChange(InterfaceEntry *iface);
+    void processIfaceStateChange(NetworkInterface *iface);
     void processIfaceConfigChange(EigrpInterface *eigrpIface);
     void processRTRouteDel(const cObject *details);
 

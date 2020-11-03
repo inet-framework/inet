@@ -52,7 +52,7 @@ topology table.
 #include "inet/routing/eigrp/messages/EigrpMsgReq.h"
 
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 namespace eigrp {
@@ -218,8 +218,8 @@ protected:
     /**
      * Remove interface from EIGRP interface table. Removes all neighbors on the interface.
      */
-    //void disableInterface(InterfaceEntry *iface, EigrpInterface *eigrpIface, Ipv6Address& ifAddress, Ipv6Address& ifMask);
-    void disableInterface(InterfaceEntry*iface, EigrpInterface *eigrpIface);
+    //void disableInterface(NetworkInterface *iface, EigrpInterface *eigrpIface, Ipv6Address& ifAddress, Ipv6Address& ifMask);
+    void disableInterface(NetworkInterface*iface, EigrpInterface *eigrpIface);
     /**
      * Add interface to the EIGRP interface table and notifies DUAL.
      */
@@ -238,7 +238,7 @@ protected:
     EigrpInterface *addInterfaceToEigrp(int ifaceId, bool enabled);
 
     //-- PROCESSING EVENTS FROM NOTIFICATION BOARD
-    void processIfaceStateChange(InterfaceEntry* iface);
+    void processIfaceStateChange(NetworkInterface* iface);
     void processIfaceConfigChange(EigrpInterface *eigrpIface);
     void processRTRouteDel(const cObject *details);
 

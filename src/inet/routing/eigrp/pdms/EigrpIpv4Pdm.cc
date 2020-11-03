@@ -140,13 +140,13 @@ void EigrpIpv4Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
     if (signalID == interfaceStateChangedSignal)
     {
-        InterfaceEntryChangeDetails *ifcecd = check_and_cast<InterfaceEntryChangeDetails*>(obj);
-        processIfaceStateChange(check_and_cast<InterfaceEntry*>(ifcecd->getInterfaceEntry()));
+        NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
+        processIfaceStateChange(check_and_cast<NetworkInterface*>(ifcecd->getNetworkInterface()));
     }
     else if (signalID == interfaceConfigChangedSignal)
     {
-        InterfaceEntryChangeDetails *ifcecd = check_and_cast<InterfaceEntryChangeDetails*>(obj);
-        InterfaceEntry *iface = check_and_cast<InterfaceEntry*>(ifcecd->getInterfaceEntry());
+        NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
+        NetworkInterface *iface = check_and_cast<NetworkInterface*>(ifcecd->getNetworkInterface());
         EigrpInterface *eigrpIface = getInterfaceById(iface->getInterfaceId());
         double ifParam;
 
@@ -189,7 +189,7 @@ void EigrpIpv4Pdm::handleMessage(cMessage *msg){
     }
 }
 
-void EigrpIpv4Pdm::processIfaceStateChange(InterfaceEntry *iface)
+void EigrpIpv4Pdm::processIfaceStateChange(NetworkInterface *iface)
 {
     EigrpInterface *eigrpIface;
     int ifaceId = iface->getInterfaceId();
@@ -1135,7 +1135,7 @@ int EigrpIpv4Pdm::checkNeighborshipRules(int ifaceId, int neighAsNum,
     else
     {
         // get IP address of interface and mask
-        InterfaceEntry *iface = check_and_cast<InterfaceEntry *>(ift->getInterfaceById(ifaceId));
+        NetworkInterface *iface = check_and_cast<NetworkInterface *>(ift->getInterfaceById(ifaceId));
         ifaceAddr.set(iface->getIpv4Address().getInt());
         ifaceMask.set(iface->getIpv4Netmask().getInt());
 
@@ -1526,7 +1526,7 @@ EigrpInterface *EigrpIpv4Pdm::getInterfaceById(int ifaceId)
         return eigrpIftDisabled->findInterface(ifaceId);
 }
 
-void EigrpIpv4Pdm::disableInterface(InterfaceEntry *iface, EigrpInterface *eigrpIface, Ipv4Address& ifAddress, Ipv4Address& ifMask)
+void EigrpIpv4Pdm::disableInterface(NetworkInterface *iface, EigrpInterface *eigrpIface, Ipv4Address& ifAddress, Ipv4Address& ifMask)
 {
     EigrpTimer* hellot = nullptr;
     EigrpNeighbor<Ipv4Address> *neigh = nullptr;
@@ -1538,7 +1538,7 @@ void EigrpIpv4Pdm::disableInterface(InterfaceEntry *iface, EigrpInterface *eigrp
 
     if (!eigrpIface->isPassive()) {
         //iface->ipv4Data()->leaveMulticastGroup(EIGRP_IPV4_MULT);
-        Ipv4InterfaceData *idata = iface->getProtocolData<Ipv4InterfaceData>();
+        Ipv4InterfaceData *idata = iface->getProtocolDataForUpdate<Ipv4InterfaceData>();
         idata->leaveMulticastGroup(EIGRP_IPV4_MULT);
     }
 
@@ -1597,8 +1597,8 @@ void EigrpIpv4Pdm::enableInterface(EigrpInterface *eigrpIface, Ipv4Address& ifAd
     //Ipv4InterfaceData *ifaceIpv4 = ift->getInterfaceById(ifaceId)->ipv4Data();
     //ifaceIpv4->joinMulticastGroup(EIGRP_IPV4_MULT);
 
-    InterfaceEntry *ie = ift->getInterfaceById(ifaceId);
-    Ipv4InterfaceData *idata = ie->getProtocolData<Ipv4InterfaceData>();
+    NetworkInterface *ie = ift->getInterfaceById(ifaceId);
+    Ipv4InterfaceData *idata = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
     idata->joinMulticastGroup(EIGRP_IPV4_MULT);
 
     eigrpIface->setNetworkId(networkId);
@@ -1624,7 +1624,7 @@ void EigrpIpv4Pdm::enableInterface(EigrpInterface *eigrpIface, Ipv4Address& ifAd
 EigrpInterface *EigrpIpv4Pdm::addInterfaceToEigrp(int ifaceId, int networkId, bool enabled)
 {
     //std::cout << "addInterfaceToEigrp with ifaceid, networkid, enabled set: "<< ifaceId <<", "<< networkId << ", "<< enabled << endl;
-    InterfaceEntry *iface = check_and_cast<InterfaceEntry*>(ift->getInterfaceById(ifaceId));
+    NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
     // create EIGRP interface
     EigrpInterface *eigrpIface = new EigrpInterface(iface, networkId, false);
     Ipv4Address ifAddress, ifMask;
@@ -1703,8 +1703,8 @@ void EigrpIpv4Pdm::setPassive(bool passive, int ifaceId)
         eigrpIface = addInterfaceToEigrp(ifaceId, EigrpNetworkTable<Ipv4Address>::UNSPEC_NETID, false);
     else if (eigrpIface->isEnabled())
     { // Disable sending and receiving of messages
-        InterfaceEntry *iface = check_and_cast<InterfaceEntry*>(ift->getInterfaceById(ifaceId));
-        Ipv4InterfaceData *idata = iface->getProtocolData<Ipv4InterfaceData>();
+        NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
+        Ipv4InterfaceData *idata = iface->getProtocolDataForUpdate<Ipv4InterfaceData>();
         idata->leaveMulticastGroup(EIGRP_IPV4_MULT);
         //iface->ipv4Data()->leaveMulticastGroup(EIGRP_IPV4_MULT);
 

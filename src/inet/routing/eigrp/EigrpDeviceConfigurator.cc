@@ -152,7 +152,7 @@ bool EigrpDeviceConfigurator::Str2Bool(bool *ret, const char *str){
 bool EigrpDeviceConfigurator::wildcardToMask(const char *wildcard, Ipv4Address& result)
 {
     result.set(wildcard);
-    uint32 wcNum = result.getInt();
+    uint32_t wcNum = result.getInt();
 
     // convert wildcard to mask
     wcNum = ~wcNum;
@@ -164,7 +164,7 @@ bool EigrpDeviceConfigurator::wildcardToMask(const char *wildcard, Ipv4Address& 
     return true;
 }
 
-EigrpNetwork<Ipv4Address> *EigrpDeviceConfigurator::isEigrpInterface(std::vector<EigrpNetwork<Ipv4Address> *>& networks, InterfaceEntry *interface)
+EigrpNetwork<Ipv4Address> *EigrpDeviceConfigurator::isEigrpInterface(std::vector<EigrpNetwork<Ipv4Address> *>& networks, NetworkInterface *interface)
 {
     Ipv4Address prefix;
     Ipv4Address mask;
@@ -206,7 +206,7 @@ void EigrpDeviceConfigurator::loadEigrpIPv4Networks(cXMLElement *processElem, IE
     Ipv4Address address, mask;
     std::vector<EigrpNetwork<Ipv4Address> *> networks;
     EigrpNetwork<Ipv4Address> *net;
-    InterfaceEntry* iface;
+    NetworkInterface* iface;
 
     cXMLElement *netoworkParentElem = processElem->getFirstChildWithTag("Networks");
     if (netoworkParentElem == NULL)
@@ -254,7 +254,7 @@ void EigrpDeviceConfigurator::loadEigrpIPv4Networks(cXMLElement *processElem, IE
     // Find and store interfaces for networks
     for(int i = 0; i < ift->getNumInterfaces(); i++)
     {
-        iface = (InterfaceEntry*)ift->getInterface(i);
+        iface = (NetworkInterface*)ift->getInterface(i);
         net = isEigrpInterface(networks, iface);
         if (net != NULL)
             eigrpModule->addInterface(iface->getInterfaceId(), net->getNetworkId(), true);
@@ -345,7 +345,7 @@ void EigrpDeviceConfigurator::loadEigrpProcessesConfig(cXMLElement *device, IEig
             {
                 // Get interface ID
                 const char *ifaceName = (*procElem)->getNodeValue();
-                InterfaceEntry* iface = (InterfaceEntry*)ift->findInterfaceByName(ifaceName);
+                NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
                 if (iface == NULL){
                     throw cRuntimeError("No interface called %s on this device", ifaceName);
                 }
@@ -412,7 +412,7 @@ void EigrpDeviceConfigurator::loadEigrpInterfacesConfig(cXMLElement *device, IEi
     {
         // Get interface ID
         const char *ifaceName = ifaceElem->getAttribute("name");
-        InterfaceEntry* iface = (InterfaceEntry*)ift->findInterfaceByName(ifaceName);
+        NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
         if (iface == NULL){
             throw cRuntimeError("No interface called %s on this device", ifaceName);
         }
@@ -615,7 +615,7 @@ void EigrpDeviceConfigurator::loadEigrpProcesses6Config(cXMLElement *device, IEi
         {
             // Get interface ID
             const char *ifaceName = (*procElem)->getNodeValue();
-            InterfaceEntry* iface = (InterfaceEntry*)ift->findInterfaceByName(ifaceName);
+            NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
             if (iface == NULL){
                 throw cRuntimeError("No interface called %s on this device", ifaceName);
             }
@@ -657,12 +657,12 @@ void EigrpDeviceConfigurator::loadEigrpInterfaces6Config(cXMLElement *device, IE
     {
         // Get interface ID
         const char *ifaceName = ifaceElem->getAttribute("name");
-        InterfaceEntry* iface = (InterfaceEntry*)ift->findInterfaceByName(ifaceName);
+        NetworkInterface* iface = (NetworkInterface*)ift->findInterfaceByName(ifaceName);
         if (iface == NULL){
             throw cRuntimeError("No interface called %s on this device", ifaceName);
         }
 
-        auto int6data = iface->findProtocolData<Ipv6InterfaceData>();
+        auto int6data = iface->findProtocolDataForUpdate<Ipv6InterfaceData>();
 
 
         // for each IPv6 address - save info about network prefix

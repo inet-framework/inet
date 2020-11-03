@@ -29,7 +29,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/routing/eigrp/EigrpTimer_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 namespace eigrp {
@@ -47,7 +47,7 @@ protected:
   bool enabled;           /**< EIGRP is enabled on interface */
   bool splitHorizon;      /**< Split horizon rule enabled */
   bool passive;           /**< Interface is passive */
-  double interfaceDatarate; /**< Datarate of InterfaceEntry interace */
+  double interfaceDatarate; /**< Datarate of NetworkInterface interface */
 
   uint64_t bandwidth;       /**< Bandwidth in Kbps (<1-10 000 000>) */
   uint64_t delay;           /**< Delay in us (<1-16 777 215>) */
@@ -63,7 +63,7 @@ protected:
   int stubCount;          /**< Number of stub neighbors on interface */
 
 public:
-  EigrpInterface(InterfaceEntry *iface, int networkId, bool enabled);
+  EigrpInterface(NetworkInterface *iface, int networkId, bool enabled);
   ~EigrpInterface();
 
   bool operator==(const EigrpInterface& iface) const
@@ -117,7 +117,7 @@ public:
   void setMtu(int mtu) { this->mtu = mtu; }
   int getMtu() const { return mtu; }
 
-  bool isMulticastAllowedOnIface(InterfaceEntry *iface);
+  bool isMulticastAllowedOnIface(NetworkInterface *iface);
 
   void setSplitHorizon(bool shEnabled) { this->splitHorizon = shEnabled; }
   bool isSplitHorizonEn() const { return this->splitHorizon; }
@@ -155,7 +155,7 @@ public:
 
 
 /*
- * Tøída reprezentující tabulku EIGRP-ENABLED interfacù
+ * Toida reprezentujici tabulku EIGRP-ENABLED interfacu
  */
 
 class EigrpInterfaceTable : public cSimpleModule

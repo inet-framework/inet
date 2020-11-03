@@ -137,13 +137,13 @@ void EigrpIpv6Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
     if (signalID == interfaceStateChangedSignal)
     {
-        InterfaceEntryChangeDetails *ifcecd = check_and_cast<InterfaceEntryChangeDetails*>(obj);
-        processIfaceStateChange(check_and_cast<InterfaceEntry*>(ifcecd->getInterfaceEntry()));
+        NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
+        processIfaceStateChange(check_and_cast<NetworkInterface*>(ifcecd->getNetworkInterface()));
     }
     else if (signalID == interfaceConfigChangedSignal)
     {
-        InterfaceEntryChangeDetails *ifcecd = check_and_cast<InterfaceEntryChangeDetails*>(obj);
-        InterfaceEntry *iface = check_and_cast<InterfaceEntry*>(ifcecd->getInterfaceEntry());
+        NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
+        NetworkInterface *iface = check_and_cast<NetworkInterface*>(ifcecd->getNetworkInterface());
         EigrpInterface *eigrpIface = getInterfaceById(iface->getInterfaceId());
         double ifParam;
 
@@ -164,7 +164,7 @@ void EigrpIpv6Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     }
 }
 
-void EigrpIpv6Pdm::processIfaceStateChange(InterfaceEntry *iface)
+void EigrpIpv6Pdm::processIfaceStateChange(NetworkInterface *iface)
 {
     EigrpInterface *eigrpIface;
     int ifaceId = iface->getInterfaceId();
@@ -350,8 +350,8 @@ void EigrpIpv6Pdm::processMsgFromNetwork(cMessage *msg)
     int ifaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     cMessage *msgDup = NULL;
 
-    InterfaceEntry::State status = ift->getInterfaceById(ifaceId)->getState();
-    if(status == InterfaceEntry::DOWN || status == InterfaceEntry::GOING_UP )
+    NetworkInterface::State status = ift->getInterfaceById(ifaceId)->getState();
+    if(status == NetworkInterface::DOWN || status == NetworkInterface::GOING_UP )
     {// message received on DOWN or GOING_UP iface -> ignore
         EV_DEBUG << "Received message on DOWN interface - message ignored" << endl;
         return;
@@ -481,7 +481,7 @@ void EigrpIpv6Pdm::processMsgFromRtp(cMessage *msg)
 bool EigrpIpv6Pdm::getDestIpAddress(int destNeigh, Ipv6Address *resultAddress)
 {
     EigrpNeighbor<Ipv6Address> *neigh = NULL;
-    const uint32 *addr = NULL;
+    const uint32_t *addr = NULL;
 
     if (destNeigh == EigrpNeighbor<Ipv6Address>::UNSPEC_ID)
     {// destination neighbor unset -> use multicast
@@ -1507,7 +1507,7 @@ EigrpInterface *EigrpIpv6Pdm::getInterfaceById(int ifaceId)
         return eigrpIftDisabled->findInterface(ifaceId);
 }
 
-void EigrpIpv6Pdm::disableInterface(InterfaceEntry *iface, EigrpInterface *eigrpIface)
+void EigrpIpv6Pdm::disableInterface(NetworkInterface *iface, EigrpInterface *eigrpIface)
 {
     EigrpTimer* hellot;
     EigrpNeighbor<Ipv6Address> *neigh;
@@ -1519,7 +1519,7 @@ void EigrpIpv6Pdm::disableInterface(InterfaceEntry *iface, EigrpInterface *eigrp
 
     if (!eigrpIface->isPassive()) {
         // Unregister multicast address
-        Ipv6InterfaceData *ipv6int = iface->findProtocolData<Ipv6InterfaceData>();
+        Ipv6InterfaceData *ipv6int = iface->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->leaveMulticastGroup(EIGRP_IPV6_MULT);
         ipv6int->removeAddress(EIGRP_IPV6_MULT);
     }
@@ -1570,7 +1570,7 @@ void EigrpIpv6Pdm::disableInterface(InterfaceEntry *iface, EigrpInterface *eigrp
 
 EigrpInterface *EigrpIpv6Pdm::addInterfaceToEigrp(int ifaceId, bool enabled)
 {
-    InterfaceEntry *iface = check_and_cast<InterfaceEntry*>(ift->getInterfaceById(ifaceId));
+    NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
     // create EIGRP interface
     EigrpInterface *eigrpIface = NULL;
 
@@ -1617,7 +1617,7 @@ void EigrpIpv6Pdm::enableInterface(EigrpInterface *eigrpIface)
     //ifaceIpv6->joinMulticastGroup(EIGRP_IPV6_MULT); //join to group FF02::A, optionally
     //ifaceIpv6->assignAddress(EIGRP_IPV6_MULT, false, 0, 0); //add group address to interface, mandatory
 
-    Ipv6InterfaceData *ipv6int = ift->getInterfaceById(ifaceId)->findProtocolData<Ipv6InterfaceData>();
+    Ipv6InterfaceData *ipv6int = ift->getInterfaceById(ifaceId)->getProtocolDataForUpdate<Ipv6InterfaceData>();
     ipv6int->joinMulticastGroup(EIGRP_IPV6_MULT);
     ipv6int->assignAddress(EIGRP_IPV6_MULT, false, 0, 0);
 
@@ -1719,9 +1719,9 @@ void EigrpIpv6Pdm::setPassive(bool passive, int ifaceId)
         eigrpIface = addInterfaceToEigrp(ifaceId, false);
     else if (eigrpIface->isEnabled())
     { // Disable sending and receiving of messages
-        InterfaceEntry *iface = check_and_cast<InterfaceEntry*>(ift->getInterfaceById(ifaceId));
+        NetworkInterface *iface = check_and_cast<NetworkInterface*>(ift->getInterfaceById(ifaceId));
 
-        Ipv6InterfaceData *ipv6int = iface->findProtocolData<Ipv6InterfaceData>();
+        Ipv6InterfaceData *ipv6int = iface->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->leaveMulticastGroup(EIGRP_IPV6_MULT);
 
         //iface->ipv6Data()->leaveMulticastGroup(EIGRP_IPV6_MULT);
