@@ -42,6 +42,7 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
     virtual void removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override;
 
   public:
+    virtual ~NetworkNodeOsgVisualizer();
     virtual NetworkNodeOsgVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override;
 #else // ifdef WITH_OSG
     virtual NetworkNodeVisualization *createNetworkNodeVisualization(cModule *networkNode) const override { return nullptr; }

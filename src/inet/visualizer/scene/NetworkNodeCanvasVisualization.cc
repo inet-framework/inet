@@ -85,6 +85,15 @@ void NetworkNodeCanvasVisualization::removeAnnotation(cFigure *figure)
     isLayoutInvalid = true;
 }
 
+void NetworkNodeCanvasVisualization::removeAnnotation(int index)
+{
+    auto it = annotations.begin() + index;
+    auto figure = (*it).figure;
+    annotations.erase(it);
+    annotationFigure->removeFigure(figure);
+    isLayoutInvalid = true;
+}
+
 void NetworkNodeCanvasVisualization::setAnnotationSize(cFigure *figure, cFigure::Point size)
 {
     for (auto it = annotations.begin(); it != annotations.end(); it++) {

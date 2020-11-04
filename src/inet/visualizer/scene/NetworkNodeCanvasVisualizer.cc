@@ -24,6 +24,15 @@ namespace visualizer {
 
 Define_Module(NetworkNodeCanvasVisualizer);
 
+NetworkNodeCanvasVisualizer::~NetworkNodeCanvasVisualizer()
+{
+    for (auto& it : networkNodeVisualizations) {
+        auto networkNodeVisualization = it.second;
+        while (networkNodeVisualization->getNumAnnotations() != 0)
+            networkNodeVisualization->removeAnnotation(0);
+    }
+}
+
 void NetworkNodeCanvasVisualizer::initialize(int stage)
 {
     NetworkNodeVisualizerBase::initialize(stage);

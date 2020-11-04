@@ -30,6 +30,15 @@ Define_Module(NetworkNodeOsgVisualizer);
 
 #ifdef WITH_OSG
 
+NetworkNodeOsgVisualizer::~NetworkNodeOsgVisualizer()
+{
+    for (auto& it : networkNodeVisualizations) {
+        auto networkNodeVisualization = it.second;
+        while (networkNodeVisualization->getNumAnnotations() != 0)
+            networkNodeVisualization->removeAnnotation(0);
+    }
+}
+
 void NetworkNodeOsgVisualizer::initialize(int stage)
 {
     NetworkNodeVisualizerBase::initialize(stage);

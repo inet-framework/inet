@@ -206,6 +206,15 @@ void NetworkNodeOsgVisualization::removeAnnotation(osg::Node *node)
     updateAnnotationPositions();
 }
 
+void NetworkNodeOsgVisualization::removeAnnotation(int index)
+{
+    auto it = annotations.begin() + index;
+    auto node = (*it).node;
+    annotations.erase(it);
+    annotationNode->removeChild(node->getParent(0));
+    updateAnnotationPositions();
+}
+
 #endif // ifdef WITH_OSG
 
 } // namespace visualizer
