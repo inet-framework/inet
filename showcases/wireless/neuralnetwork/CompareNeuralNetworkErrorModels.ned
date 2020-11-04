@@ -17,24 +17,31 @@
 
 package inet.examples.wireless.neuralnetwork;
 
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.common.packetlevel.NoiseSource;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
-import inet.physicallayer.errormodel.packetlevel.NeuralNetworkErrorModelTrainingDatasetGenerator;
 
-network GenerateNeuralNetworkErrorModelTrainingDataset
+network CompareNeuralNetworkErrorModels
 {
+    parameters:
+        int numHosts;
+        int numNoiseSources;
     submodules:
+        configurator: Ipv4NetworkConfigurator {
+            parameters:
+                @display("p=100,100;is=s");
+        }
         radioMedium: <> like IRadioMedium {
             parameters:
-                @display("p=200,100");
+                @display("p=100,200;is=s");
         }
-        radio: <> like IRadio {
+        host[numHosts]: WirelessHost {
             parameters:
-                @display("p=200,200");
+                @display("r=,,#707070;p=250,200");
         }
-        trainingDatasetGenerator: NeuralNetworkErrorModelTrainingDatasetGenerator {
+        noiseSource[numNoiseSources]: NoiseSource {
             parameters:
-                @display("p=200,300");
+                @display("r=,,#707070;p=350,300");
         }
-    connections allowunconnected:
 }
