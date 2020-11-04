@@ -43,8 +43,9 @@ void EigrpSplitter::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::eigrp, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::eigrp, gate("ipOut"), nullptr);
+        registerService(Protocol::eigrp, gate("splitterIn"), gate("splitterOut"));
+        registerService(Protocol::eigrp, gate("splitter6In"), gate("splitter6Out"));
+        registerProtocol(Protocol::eigrp, gate("ipOut"), gate("ipIn"));
     }
 }
 
