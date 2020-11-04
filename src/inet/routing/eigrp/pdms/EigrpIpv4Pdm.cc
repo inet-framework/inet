@@ -1598,7 +1598,8 @@ void EigrpIpv4Pdm::enableInterface(EigrpInterface *eigrpIface, Ipv4Address& ifAd
     //ifaceIpv4->joinMulticastGroup(EIGRP_IPV4_MULT);
 
     InterfaceEntry *ie = ift->getInterfaceById(ifaceId);
-    ie->joinMulticastGroup(EIGRP_IPV4_MULT);
+    Ipv4InterfaceData *idata = ie->getProtocolData<Ipv4InterfaceData>();
+    idata->joinMulticastGroup(EIGRP_IPV4_MULT);
 
     eigrpIface->setNetworkId(networkId);
 
