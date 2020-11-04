@@ -1,0 +1,30 @@
+# working directory,                   command line arguments,                                     simulation time limit,  fingerprint,     expected result, tags
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_unequal_cost_lb -r 0,                         3min,         c162-d49f/~tNl,  PASS,  eigrp
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_no_load_balanc -r 0,                          3min,         e840-d0a3/~tNl,  PASS,  eigrp
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_no_split_horizon -r 0,                        3min,         fb13-6823/~tNl,  PASS,  eigrp
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_passive_interface -r 0,                       3min,         390e-d8f1/~tNl,  PASS,  eigrp
+/examples/eigrp/basic/,                -f omnetpp.ini -c Scenario1 -r 0,                                     3min,         decd-8a03/~tNl,  PASS,  eigrp
+/examples/eigrp/basic/,                -f omnetpp.ini -c Scenario2 -r 0,                                     3min,         3706-3958/~tNl,  PASS,  eigrp
+
+/examples/eigrp/snake/,                -f omnetpp.ini -c General -r 0,                                       3min,         c55f-5c21/~tNl,  PASS,  eigrp
+
+/examples/eigrp/square_stub/,          -f omnetpp.ini -c General -r 0,                                       3min,         389d-efde/~tNl,  PASS,  eigrp
+
+/examples/eigrp/square_stub_mesh/,     -f omnetpp.ini -c General -r 0,                                       3min,         822c-b2bd/~tNl,  PASS,  eigrp
+
+/examples/eigrp/testing_scenario/,     -f omnetpp.ini -c General -r 0,                                       3min,         58f4-fede/~tNl,  PASS,  eigrp
+
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         6c9a-b218/~tNl,  PASS,  eigrp
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         57a2-3ad9/~tNl,  PASS,  eigrp
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change_global-addr -r 0,  3min,         ec5d-2cf1/~tNl,  PASS,  eigrp
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         0dd3-3d49/~tNl,  PASS,  eigrp
+
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change -r 0,               3min,         1651-3a62/~tNl,  PASS,  eigrp
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         1740-6064/~tNl,  PASS,  eigrp
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change_global-addr -r 0,   3min,         aa9c-c9a7/~tNl,  PASS,  eigrp
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         d916-0f0d/~tNl,  PASS,  eigrp
+
+/examples/eigrp/two_node/,             -f omnetpp.ini -c General -r 0,                                       3min,         2c6a-9db7/~tNl,  PASS,  eigrp
+
+/examples/eigrp/two_node6/,            -f omnetpp.ini -c General -r 0,                                       3min,         6b05-8a56/~tNl,  PASS,  eigrp
+
