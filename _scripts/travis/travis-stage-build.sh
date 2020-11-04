@@ -14,7 +14,7 @@ set -e # make the script exit with error if any executed command exits with erro
 
 ccache -cCz # we don't use ccache across builds, only across stages within each build
 
-export PATH="/root/omnetpp-5.4.1-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
+export PATH="/root/omnetpp-6.0pre9-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
 
 # this is where the cloned INET repo is mounted into the container (as prescribed in /.travis.yml)
 cd /$TRAVIS_REPO_SLUG
@@ -23,10 +23,9 @@ cd /$TRAVIS_REPO_SLUG
 
 cp -r /root/nsc-0.5.3 3rdparty
 
-# enabling some features only with native compilation, because we don't [want to?] have cross-compiled ffmpeg and NSC
-if [ "$TARGET_PLATFORM" = "linux" ]; then
-    opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
+opp_featuretool enable all
 
+if [ "$TARGET_PLATFORM" = "linux" ]; then
     # In the fingerprints stage we have to force enable diagnostics coloring
     # to make ccache work well, see https://github.com/ccache/ccache/issues/222
     # We do it here as well to make the compiler arguments match.
@@ -36,12 +35,21 @@ if [ "$TARGET_PLATFORM" = "linux" ]; then
 
     # On linux we can't use precompiled headers, because ccache can't work with them,
     # and we need ccache, but we are fine without precompiled headers (on linux that is).
+    # Even though precompiled headers are disabled automatically in makefrag if ccache is detected,
+    # we still have to force-enable them when cross-compiling, so we need this variable...
     PCH=no
 else
-    # When compiling to windows, we have to enable precompiled headers, otherwise the
+    # Disabling some features when cross-compiling, because:
+    # - we don't [want to?] have cross-compiled ffmpeg
+    #   (and leaving it enabled messes up the include paths)
+    # - ExternalInterface is only supported on Linux
+    # - lwIP and NSC does not seem to compile on at least Windows, oh well...
+    opp_featuretool disable VoIPStream VoIPStream_examples ExternalInterface ExternalInterface_examples emulation_showcases TCP_lwIP TCP_NSC
+
+    # When compiling to windows, we have to force-enable precompiled headers, otherwise the
     # debug builds take too long, sometimes exceeding 50 minutes.
-    # And we don't need ccache here anyway (only the linux build is used in the second stage).
     # When compiling to macos, it doesn't really matter, but let's enable them just in case.
+    # And we don't need ccache here anyway (only the linux build is used in the second stage).
     PCH=yes
 fi
 
@@ -55,6 +63,16 @@ if [ "$TARGET_PLATFORM" = "windows" ]; then
 fi
 
 make makefiles
+
+if [ "$TARGET_PLATFORM" = "windows" ]; then
+    # This is here to stop make from invoking the final .dll linker twice, seeing that
+    # both the .dll and the import lib for it (.dll.a) are targets, that have to be
+    # made the same way. This is a problem because when cross-compiling to mingw, in
+    # debug mode, one linker needs 5GB+ RAM, and it won't fit twice on the CI machines.
+    sed -i 's|  TARGET_FILES+= $(TARGET_DIR)/$(TARGET_IMPLIB)||g' src/Makefile
+    sed -i 's|$O/$(TARGET) $O/$(TARGET_IMPLIB): $(OBJS)|$O/$(TARGET): $(OBJS)|g' src/Makefile
+fi
+
 make MODE=$MODE USE_PRECOMPILED_HEADER=$PCH -j $(nproc)
 
 echo -e "\nccache summary:\n"
