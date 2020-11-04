@@ -74,8 +74,10 @@ void PacketTransmitter::endTx()
     delete txSignal;
     txSignal = nullptr;
     // 4. notify producer
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
-    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+    if (producer != nullptr) {
+        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+    }
 }
 
 void PacketTransmitter::scheduleTxEndTimer(Signal *signal)

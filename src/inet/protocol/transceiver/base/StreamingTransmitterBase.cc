@@ -66,17 +66,19 @@ void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t sig
                 transmissionChannel = outputGate->findTransmissionChannel();
                 if (transmissionChannel != nullptr && !transmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
                     transmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-                producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+                if (producer != nullptr)
+                    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
             }
         }
         else if (auto notification = dynamic_cast<cPostPathCutNotification *>(object)) {
             if (outputGate == notification->pathStartGate) {
                 transmissionChannel = nullptr;
-                producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+                if (producer != nullptr)
+                    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
             }
         }
         else if (auto notification = dynamic_cast<cPostParameterChangeNotification *>(object)) {
-            if (notification->par->getOwner() == transmissionChannel && notification->par->getType() == cPar::BOOL && strcmp(notification->par->getName(), "disabled") == 0)
+            if (producer != nullptr && notification->par->getOwner() == transmissionChannel && notification->par->getType() == cPar::BOOL && strcmp(notification->par->getName(), "disabled") == 0)
                 producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
         }
     }
