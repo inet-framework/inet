@@ -108,6 +108,7 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -121,8 +122,6 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
     virtual std::string getPacketDropVisualizationText(const PacketDrop *packetDrop) const;
 
   public:
-    virtual ~PacketDropVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

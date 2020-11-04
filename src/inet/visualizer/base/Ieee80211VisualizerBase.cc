@@ -34,7 +34,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization::Ieee80211Visualization(int netw
 {
 }
 
-Ieee80211VisualizerBase::~Ieee80211VisualizerBase()
+void Ieee80211VisualizerBase::preDelete(cComponent *root)
 {
     if (displayAssociations) {
         unsubscribe();

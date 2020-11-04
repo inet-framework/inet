@@ -69,6 +69,7 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -79,8 +80,6 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
     virtual void removeAllConnectionVisualizations();
 
   public:
-    virtual ~TransportConnectionVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

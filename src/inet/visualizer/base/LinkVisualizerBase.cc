@@ -46,7 +46,7 @@ const char *LinkVisualizerBase::DirectiveResolver::resolveDirective(char directi
     return result.c_str();
 }
 
-LinkVisualizerBase::~LinkVisualizerBase()
+void LinkVisualizerBase::preDelete(cComponent *root)
 {
     if (displayLinks) {
         unsubscribe();

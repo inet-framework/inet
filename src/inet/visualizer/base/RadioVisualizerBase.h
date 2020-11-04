@@ -80,6 +80,7 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -92,8 +93,6 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const = 0;
 
   public:
-    virtual ~RadioVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override;
 };
 

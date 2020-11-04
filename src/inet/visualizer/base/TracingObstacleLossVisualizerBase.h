@@ -59,6 +59,7 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -71,8 +72,6 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const = 0;
 
   public:
-    virtual ~TracingObstacleLossVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

@@ -93,6 +93,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -114,8 +115,6 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void processSignal(cComponent *source, simsignal_t signal, std::function<void (cIListener *)> receiveSignal);
 
   public:
-    virtual ~StatisticVisualizerBase();
-
 #define PROCESS_SIGNAL(value) { processSignal(source, signal, [=] (cIListener *listener) { listener->receiveSignal(source, signal, value, details); }); }
     virtual void receiveSignal(cComponent* source, simsignal_t signal, bool b, cObject* details) override { PROCESS_SIGNAL(b); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_SIGNAL(l); }

@@ -50,7 +50,7 @@ const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directi
     return result.c_str();
 }
 
-InfoVisualizerBase::~InfoVisualizerBase()
+void InfoVisualizerBase::preDelete(cComponent *root)
 {
     if (displayInfos)
         removeAllInfoVisualizations();

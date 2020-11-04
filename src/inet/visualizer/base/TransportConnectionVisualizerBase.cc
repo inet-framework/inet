@@ -35,7 +35,7 @@ TransportConnectionVisualizerBase::TransportConnectionVisualization::TransportCo
 {
 }
 
-TransportConnectionVisualizerBase::~TransportConnectionVisualizerBase()
+void TransportConnectionVisualizerBase::preDelete(cComponent *root)
 {
     if (displayTransportConnections) {
         unsubscribe();

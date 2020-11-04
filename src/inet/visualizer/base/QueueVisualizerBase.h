@@ -69,6 +69,7 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const = 0;
     virtual void addQueueVisualization(const QueueVisualization *queueVisualization);
@@ -76,9 +77,6 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     virtual void removeQueueVisualization(const QueueVisualization *queueVisualization);
     virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const = 0;
     virtual void removeAllQueueVisualizations();
-
-  public:
-    virtual ~QueueVisualizerBase();
 };
 
 } // namespace visualizer

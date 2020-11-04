@@ -64,7 +64,7 @@ const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char
     return result.c_str();
 }
 
-RoutingTableVisualizerBase::~RoutingTableVisualizerBase()
+void RoutingTableVisualizerBase::preDelete(cComponent *root)
 {
     if (displayRoutingTables) {
         unsubscribe();

@@ -37,7 +37,7 @@ LinkBreakVisualizerBase::LinkBreakVisualization::LinkBreakVisualization(int tran
 {
 }
 
-LinkBreakVisualizerBase::~LinkBreakVisualizerBase()
+void LinkBreakVisualizerBase::preDelete(cComponent *root)
 {
     if (displayLinkBreaks) {
         unsubscribe();

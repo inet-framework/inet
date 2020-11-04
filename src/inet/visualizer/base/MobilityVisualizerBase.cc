@@ -27,7 +27,7 @@ MobilityVisualizerBase::MobilityVisualization::MobilityVisualization(IMobility *
 {
 }
 
-MobilityVisualizerBase::~MobilityVisualizerBase()
+void MobilityVisualizerBase::preDelete(cComponent *root)
 {
     if (displayMobility)
         unsubscribe();

@@ -81,6 +81,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -102,8 +103,6 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const = 0;
 
   public:
-    virtual ~RoutingTableVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 };
 
