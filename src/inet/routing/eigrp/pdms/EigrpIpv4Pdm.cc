@@ -1536,9 +1536,11 @@ void EigrpIpv4Pdm::disableInterface(InterfaceEntry *iface, EigrpInterface *eigrp
 
     EV_DEBUG << "EIGRP disabled on interface " << eigrpIface->getName() << "(" << ifaceId << ")" << endl;
 
-    //iface->ipv4Data()->leaveMulticastGroup(EIGRP_IPV4_MULT);
-    Ipv4InterfaceData *idata = iface->getProtocolData<Ipv4InterfaceData>();
-    idata->leaveMulticastGroup(EIGRP_IPV4_MULT);
+    if (!eigrpIface->isPassive()) {
+        //iface->ipv4Data()->leaveMulticastGroup(EIGRP_IPV4_MULT);
+        Ipv4InterfaceData *idata = iface->getProtocolData<Ipv4InterfaceData>();
+        idata->leaveMulticastGroup(EIGRP_IPV4_MULT);
+    }
 
     // stop hello timer
     if ((hellot = eigrpIface->getHelloTimer()) != NULL)

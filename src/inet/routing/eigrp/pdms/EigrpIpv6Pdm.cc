@@ -1517,10 +1517,12 @@ void EigrpIpv6Pdm::disableInterface(InterfaceEntry *iface, EigrpInterface *eigrp
 
     EV_DEBUG << "EIGRP disabled on interface " << eigrpIface->getName() << "(" << ifaceId << ")" << endl;
 
-    // Unregister multicast address
-    Ipv6InterfaceData *ipv6int = iface->findProtocolData<Ipv6InterfaceData>();
-    ipv6int->leaveMulticastGroup(EIGRP_IPV6_MULT);
-    ipv6int->removeAddress(EIGRP_IPV6_MULT);
+    if (!eigrpIface->isPassive()) {
+        // Unregister multicast address
+        Ipv6InterfaceData *ipv6int = iface->findProtocolData<Ipv6InterfaceData>();
+        ipv6int->leaveMulticastGroup(EIGRP_IPV6_MULT);
+        ipv6int->removeAddress(EIGRP_IPV6_MULT);
+    }
 
     //iface->ipv6Data()->leaveMulticastGroup(EIGRP_IPV6_MULT);
     //iface->ipv6Data()->removeAddress(EIGRP_IPV6_MULT);
