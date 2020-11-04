@@ -60,7 +60,6 @@ class INET_API ModuleRefByGate
     }
 
     operator T *() const {
-        checkReference();
         return referencedModule;
     }
 
