@@ -44,6 +44,17 @@ simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
 simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 
+std::ostream& operator << (std::ostream& o, const EtherEncap::Socket& t)
+{
+    o << "(id:" << t.socketId
+            << ",local:" << t.localAddress
+            << ",remote:" << t.remoteAddress
+            << ",protocol" << (t.protocol ? t.protocol->getName() : "<null>")
+            << ",steal:" << (t.steal ? "on":"off")
+            << ")";
+    return o;
+}
+
 EtherEncap::~EtherEncap()
 {
     for (auto it : socketIdToSocketMap)
@@ -72,6 +83,7 @@ void EtherEncap::initialize(int stage)
         useSNAP = par("useSNAP");
         networkInterface = findContainingNicModule(this);     //TODO or getContainingNicModule() ? or use a macaddresstable?
 
+        WATCH_PTRMAP(socketIdToSocketMap);
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
