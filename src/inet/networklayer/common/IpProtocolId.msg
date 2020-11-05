@@ -27,6 +27,8 @@ enum IpProtocolId
     IP_PROT_XTP = 36;
     IP_PROT_IPv6 = 41;
     IP_PROT_RSVP = 46;
+    IP_PROT_ESP = 50;
+    IP_PROT_AH = 51;
     IP_PROT_IPv6_ICMP = 58;
     IP_PROT_NONE = 59;
     IP_PROT_EIGRP = 88;
