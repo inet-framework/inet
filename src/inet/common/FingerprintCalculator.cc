@@ -86,7 +86,7 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
                     auto packet = dynamic_cast<Packet *>(cpacket);
                     if (packet == nullptr)
                         packet = dynamic_cast<Packet *>(cpacket->getEncapsulatedPacket());
-                    if (packet != nullptr) {
+                    if (packet != nullptr && packet->getTotalLength().get() > 0) {
                         if (packet->getTotalLength().get() % 8 == 0) {
                             const auto& content = packet->peekAllAsBytes();
                             for (auto byte : content->getBytes())
