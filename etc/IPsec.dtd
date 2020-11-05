@@ -1,0 +1,17 @@
+<!-- IPsec configuration -->
+<!ELEMENT IpsecSPD SecurityPolicy*>  <!-- root element, tag name can be anything -->
+<!ELEMENT SecurityPolicy (Selector,Direction,Action,Protection?,IcvNumBits?,SecurityAssociation*)>
+<!ELEMENT Selector (LocalAddress?,RemoteAddress?,Protocol?,LocalPort?,RemotePort?,ICMPType?,ICMPCode?)>
+<!ELEMENT SecurityAssociation (SPI,Selector?)>
+
+<!ELEMENT Direction (#PCDATA)> <!-- IN|OUT-->
+<!ELEMENT Action (#PCDATA)> <!-- BYPASS|DISCARD|PROTECT -->
+<!ELEMENT Protection (#PCDATA)> <!-- AH|ESP -->
+<!ELEMENT IcvNumBits (#PCDATA)> <!-- integer -->
+<!ELEMENT LocalAddress (#PCDATA)> <!-- comma-separated list of addresses / address ranges, in any address notation understood by INET incl. host names -->
+<!ELEMENT RemoteAddress (#PCDATA)> <!-- comma-separated list of addresses / address ranges, in any address notation understood by INET incl. host names -->
+<!ELEMENT Protocol (#PCDATA)> <!-- comma-separated list of protocol names/numbers and/or their ranges -->
+<!ELEMENT LocalPort (#PCDATA)> <!-- comma-separated list of port numbers / port number ranges -->
+<!ELEMENT RemotePort (#PCDATA)> <!-- comma-separated list of port numbers / port number ranges -->
+<!ELEMENT ICMPType (#PCDATA)> <!-- comma-separated list of integers / integer ranges -->
+<!ELEMENT ICMPCode (#PCDATA)> <!-- comma-separated list of integers / integer ranges -->

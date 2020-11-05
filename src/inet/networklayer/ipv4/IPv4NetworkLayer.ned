@@ -21,6 +21,9 @@ package inet.networklayer.ipv4;
 import inet.networklayer.contract.IARP;
 import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
+import inet.networklayer.ipv4.ipsec.SecurityAssociationDatabase;
+import inet.networklayer.ipv4.ipsec.SecurityPolicyDatabase;
+import inet.networklayer.ipv4.ipsec.IPsec;
 
 
 //
@@ -32,6 +35,7 @@ module IPv4NetworkLayer like INetworkLayer
 {
     parameters:
         bool proxyARP = default(true);
+        bool hasIpsec = default(false);
         string igmpType = default("IGMPv2");
         string arpType = default("ARP");
         string interfaceTableModule;
@@ -81,6 +85,15 @@ module IPv4NetworkLayer like INetworkLayer
                 @display("p=239,70");
         }
 
+        ipsec: IPsec if hasIpsec {
+            @display("p=164,162");
+        }
+        spd: SecurityPolicyDatabase if hasIpsec {
+            @display("p=250,120");
+        }
+        sad: SecurityAssociationDatabase if hasIpsec {
+            @display("p=250,162");
+        }
     connections allowunconnected:
         for i=0..sizeof(transportIn)-1 {
             transportIn[i] --> { @display("m=n"); } --> ip.transportIn++;

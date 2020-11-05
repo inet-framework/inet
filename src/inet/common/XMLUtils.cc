@@ -9,7 +9,7 @@ const cXMLElement *getUniqueChild(const cXMLElement *node, const char *name)
 {
     const cXMLElement *child = getUniqueChildIfExists(node, name);
     if (!child)
-        throw cRuntimeError("XML error: exactly one %s element expected", name);
+        throw cRuntimeError(node, "XML error: exactly one %s element expected", name);
 
     return child;
 }
@@ -18,7 +18,7 @@ const cXMLElement *getUniqueChildIfExists(const cXMLElement *node, const char *n
 {
     cXMLElementList list = node->getChildrenByTagName(name);
     if (list.size() > 1)
-        throw cRuntimeError("XML error: at most one %s element expected", name);
+        throw cRuntimeError(node, "XML error: at most one %s element expected", name);
     else if (list.size() == 1)
         return *list.begin();
     else
@@ -67,7 +67,7 @@ void checkTags(const cXMLElement *node, const char *allowed)
                 break;
 
         if (i == tags.size())
-            throw cRuntimeError("Subtag <%s> not expected in <%s>",
+            throw cRuntimeError(node, "Subtag <%s> not expected in <%s>",
                     child->getTagName(), node->getTagName());
     }
 }
@@ -151,7 +151,7 @@ const char *getRequiredAttribute(const cXMLElement& node, const char *attr)
 {
     const char *s = node.getAttribute(attr);
     if (!(s && *s))
-        throw cRuntimeError("required attribute %s of <%s> missing at %s",
+        throw cRuntimeError(&node, "required attribute %s of <%s> missing at %s",
                 attr, node.getTagName(), node.getSourceLocation());
     return s;
 }

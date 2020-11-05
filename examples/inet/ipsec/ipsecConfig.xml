@@ -1,0 +1,124 @@
+<ipsecConfig>
+    <Devices>
+        <Device id="client1">
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>client1</LocalAddress>
+                    <RemoteAddress>server</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1025</LocalPort>
+                    <RemotePort>1000</RemotePort>
+                </Selector>
+                <Direction>IN</Direction>
+                <Action>PROTECT</Action>
+                <Protection>ESP</Protection>
+                <IcvNumBits>256</IcvNumBits>
+                <SecurityAssociation>
+                    <SPI>1</SPI> <!-- Must match SPI for OUT rule at the other host -->
+                </SecurityAssociation>
+            </SecurityPolicy>
+
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>client1</LocalAddress>
+                    <RemoteAddress>server</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1025</LocalPort>
+                    <RemotePort>1000</RemotePort>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>PROTECT</Action>
+                <Protection>ESP</Protection>
+                <IcvNumBits>256</IcvNumBits>
+                <SecurityAssociation>
+                    <SPI>50</SPI> <!-- Must match SPI for OUT rule at the other host -->
+                </SecurityAssociation>
+            </SecurityPolicy>
+
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>client1</LocalAddress>
+                    <RemoteAddress>server</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1026</LocalPort>
+                    <RemotePort>1001</RemotePort>
+                </Selector>
+                <Direction>IN</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>client1</LocalAddress>
+                    <RemoteAddress>server</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1026</LocalPort>
+                    <RemotePort>1001</RemotePort>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+        </Device>
+
+        <Device id="server">
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>server</LocalAddress>
+                    <RemoteAddress>client1</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1000</LocalPort>
+                    <RemotePort>1025</RemotePort>
+                </Selector>
+                <Direction>IN</Direction>
+                <Action>PROTECT</Action>
+                <Protection>ESP</Protection>
+                <IcvNumBits>256</IcvNumBits>
+                <SecurityAssociation>
+                    <SPI>50</SPI> <!-- Must match SPI for OUT rule at the other host -->
+                </SecurityAssociation>
+            </SecurityPolicy>
+
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>server</LocalAddress>
+                    <RemoteAddress>client1</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1000</LocalPort>
+                    <RemotePort>1025</RemotePort>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>PROTECT</Action>
+                <Protection>ESP</Protection>
+                <IcvNumBits>256</IcvNumBits>
+                <SecurityAssociation>
+                    <SPI>1</SPI> <!-- Must match SPI for OUT rule at the other host -->
+                </SecurityAssociation>
+            </SecurityPolicy>
+
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>server</LocalAddress>
+                    <RemoteAddress>client1</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1001</LocalPort>
+                    <RemotePort>1026</RemotePort>
+                </Selector>
+                <Direction>IN</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>server</LocalAddress>
+                    <RemoteAddress>client1</RemoteAddress>
+                    <Protocol>TCP</Protocol>
+                    <LocalPort>1001</LocalPort>
+                    <RemotePort>1026</RemotePort>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+        </Device>
+    </Devices>
+
+</ipsecConfig>
