@@ -25,10 +25,8 @@ Define_Module(PcapFilePacketConsumer);
 
 void PcapFilePacketConsumer::initialize(int stage)
 {
-    PacketSinkBase::initialize(stage);
+    PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        inputGate = gate("in");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
         pcapWriter.setFlush(par("alwaysFlush"));
         pcapWriter.open(par("filename"), par("snaplen"));
         networkType = static_cast<PcapLinkType>(par("networkType").intValue());
