@@ -54,7 +54,7 @@ class INET_API ByteCountChunk : public Chunk
     /** @name Constructors, destructors and duplication related functions */
     //@{
     ByteCountChunk();
-    ByteCountChunk(const ByteCountChunk& other);
+    ByteCountChunk(const ByteCountChunk& other) = default;
     ByteCountChunk(B length, uint8_t data = '?');
 
     virtual ByteCountChunk *dup() const override { return new ByteCountChunk(*this); }

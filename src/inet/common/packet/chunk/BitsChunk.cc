@@ -27,12 +27,6 @@ BitsChunk::BitsChunk() :
 {
 }
 
-BitsChunk::BitsChunk(const BitsChunk& other) :
-    Chunk(other),
-    bits(other.bits)
-{
-}
-
 BitsChunk::BitsChunk(const std::vector<bool>& bits) :
     Chunk(),
     bits(bits)

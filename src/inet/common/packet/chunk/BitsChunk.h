@@ -54,7 +54,7 @@ class INET_API BitsChunk : public Chunk
     /** @name Constructors, destructors and duplication related functions */
     //@{
     BitsChunk();
-    BitsChunk(const BitsChunk& other);
+    BitsChunk(const BitsChunk& other) = default;
     BitsChunk(const std::vector<bool>& bits);
 
     virtual BitsChunk *dup() const override { return new BitsChunk(*this); }

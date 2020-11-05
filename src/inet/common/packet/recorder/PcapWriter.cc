@@ -20,7 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <errno.h>
+#include <cerrno>
 #include "inet/common/INETUtils.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/recorder/PcapWriter.h"
@@ -54,7 +54,7 @@ struct pcaprec_hdr
 
 PcapWriter::~PcapWriter()
 {
-    close();
+    PcapWriter::close(); // NOTE: admitting that this will not call overridden methods from the destructor
 }
 
 void PcapWriter::open(const char *filename, unsigned int snaplen_par)

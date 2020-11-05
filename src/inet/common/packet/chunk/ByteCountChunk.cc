@@ -30,13 +30,6 @@ ByteCountChunk::ByteCountChunk() :
 {
 }
 
-ByteCountChunk::ByteCountChunk(const ByteCountChunk& other) :
-    Chunk(other),
-    length(other.length),
-    data(other.data)
-{
-}
-
 ByteCountChunk::ByteCountChunk(B length, uint8_t data) :
     Chunk(),
     length(length),
