@@ -691,13 +691,12 @@ void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t
     ASSERT(duration <= signal->getDuration());
     if (duration == signal->getDuration())
         return;
-    signal->setDuration(duration);
     int64_t newBitLength = duration.dbl() * signal->getBitrate();
     if (auto packet = check_and_cast_nullable<Packet *>(signal->decapsulate())) {
         // TODO removed length calculation based on the PHY layer (parallel bits, bit order, etc.)
         if (newBitLength < packet->getBitLength()) {
             packet->trimFront();
-            packet->setBackOffset(b(newBitLength));
+            packet->setBackOffset(B(newBitLength / 8)); //TODO rounded down to byte align instead of b(newBitLength)
             packet->trimBack();
             packet->setBitError(true);
         }
@@ -705,6 +704,7 @@ void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t
     }
     signal->setBitError(true);
     signal->setBitLength(newBitLength);
+    signal->setDuration(duration);
 }
 
 } // namespace inet
