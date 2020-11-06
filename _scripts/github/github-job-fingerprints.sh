@@ -1,7 +1,6 @@
 #!/bin/env bash
 
 # This script runs the fingerprints job on GitHub.
-# All arguments are passed to the fingerprinttest script.
 #
 # The following environment variables must be set when invoked:
 #    MODE                   - must be "debug" or "release"
@@ -23,16 +22,14 @@ cd $GITHUB_WORKSPACE
 cp -r /root/nsc-0.5.3 3rdparty
 
 echo "::group::Enable all features"
-opp_featuretool enable all
+opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
 
 echo "::group::Run fingerprint tests"
-echo -e "Additional arguments passed to fingerprint test script: " $@ "\n"
-
 cd tests/fingerprint
 if [ "$MODE" = "debug" ]; then
-    ./fingerprinttest -d "$@" -a --cmdenv-express-mode=true
+    ./fingerprinttest
 else
-    ./fingerprinttest "$@" -a --cmdenv-express-mode=true
+    ./fingerprinttest
 fi
 echo "::endgroup::"
