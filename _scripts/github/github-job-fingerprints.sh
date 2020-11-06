@@ -27,9 +27,21 @@ echo "::endgroup::"
 
 echo "::group::Run fingerprint tests"
 cd tests/fingerprint
-if [ "$MODE" = "debug" ]; then
-    ./fingerprinttest
-else
-    ./fingerprinttest
-fi
+# this indirectly calls the script named simply "inet", which handles the MODE envvar internally
+./fingerprinttest | tee fingerprinttest.out
+#                ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
+EXITCODE="${PIPESTATUS[0]}"
 echo "::endgroup::"
+
+# grep returns 1 if no lines were selected, we have to suppress that with "|| true"
+FAILS=$(grep -P "PASS \\(unexpected\\)|FAILED \\(should be|ERROR \\(should be" fingerprinttest.out || true)
+
+if [ -n "$FAILS" ]
+then
+    # newline characters are replaced with '%0A' to make them appear as multiline on the web UI
+    # Source: https://github.com/actions/starter-workflows/issues/68#issuecomment-581479448
+    # (Also: https://github.com/mheap/phpunit-github-actions-printer/pull/14 )
+    echo "::error::${FAILS//$'\n'/%0A}"
+fi
+
+exit $EXITCODE

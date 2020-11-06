@@ -37,6 +37,28 @@ echo "::endgroup::"
 
 echo "::group::Run $TESTDIR tests"
 cd tests/$TESTDIR
-./runtest
+./runtest | tee runtest.out
+#        ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
+EXITCODE="${PIPESTATUS[0]}"
 echo "::endgroup::"
 
+
+DIFFPATTERN="([^\n]*\n[?] *\^\n)" # matches a line that looks like "?     ^" and the line before it
+
+FAILPATTERN="test: FAIL |FAILED tests:|FAIL: [^0]"
+UNRESOLVEDPATTERN="test: UNRESOLVED |UNRESOLVED tests: |UNRESOLVED: [^0]"
+LINEPATTERN="([^\n]*($FAILPATTERN|$UNRESOLVEDPATTERN)[^\n]*\n)"
+
+# the "| tr -d" is there only to get rid of the terminating NUL which is there because
+# of "grep -z" which is needed to make the entire input look like one long line
+FAILS=$(grep -P -zo "$DIFFPATTERN|$LINEPATTERN" runtest.out | tr -d '\0')
+
+if [ -n "$FAILS" ]
+then
+    # newline characters are replaced with '%0A' to make them appear as multiline on the web UI
+    # Source: https://github.com/actions/starter-workflows/issues/68#issuecomment-581479448
+    # (Also: https://github.com/mheap/phpunit-github-actions-printer/pull/14 )
+    echo "::error::${FAILS//$'\n'/%0A}"
+fi
+
+exit $EXITCODE
