@@ -13,6 +13,11 @@ set -e # make the script exit with error if any executed command exits with erro
 
 export PATH="/root/omnetpp-6.0pre9-$TARGET_PLATFORM/bin:$PATH"
 
+# HACK: When cross-building to macOS, the linker complains about this
+# being a missing search directory, so let's make sure it exists...
+# (Just to silence that warning...)
+mkdir -p /root/omnetpp-6.0pre9-macosx/tools/macosx/lib
+
 # this is where the cloned INET repo is mounted into the container
 cd $GITHUB_WORKSPACE
 
