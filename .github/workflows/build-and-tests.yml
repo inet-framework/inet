@@ -2,10 +2,12 @@ name: Build and tests
 
 on:
   schedule:
-    - cron: '00 21 * * *' # * is a special character in YAML so we have to quote this string
+      # https://crontab.guru/#0_21_*_*_1-5
+    - cron: "0 21 * * 1-5" # "At 21:00 on every day-of-week from Monday through Friday."
   pull_request:
-    branches: [ master ]
+    branches: [ "master" ]
   workflow_dispatch:
+    # nothing
 
 jobs:
   build-native:
