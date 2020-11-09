@@ -19,15 +19,15 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #include "inet/physicallayer/ethernet/EthernetSignal_m.h"
-#include "inet/physicallayer/ethernet/EtherPhy.h"
+#include "inet/physicallayer/ethernet/EthernetPhy.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(EtherPhy);
+Define_Module(EthernetPhy);
 
-void EtherPhy::initialize(int stage)
+void EthernetPhy::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -36,7 +36,7 @@ void EtherPhy::initialize(int stage)
     }
 }
 
-void EtherPhy::handleMessage(cMessage *message)
+void EthernetPhy::handleMessage(cMessage *message)
 {
     if (message->getArrivalGate() == upperLayerInGate) {
         Packet *packet = check_and_cast<Packet *>(message);

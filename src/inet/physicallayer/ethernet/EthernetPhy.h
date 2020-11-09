@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERPHY_H
-#define __INET_ETHERPHY_H
+#ifndef __INET_ETHERNETPHY_H
+#define __INET_ETHERNETPHY_H
 
 #include "inet/common/INETDefs.h"
 
@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API EtherPhy : public cSimpleModule
+class INET_API EthernetPhy : public cSimpleModule
 {
   protected:
     cGate *physInGate = nullptr;

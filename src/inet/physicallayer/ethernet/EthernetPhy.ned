@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ethernet;
 
-simple EtherPhy
+simple EthernetPhy
 {
     parameters:
         @display("i=block/rxtx");

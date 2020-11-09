@@ -569,8 +569,8 @@
     <filename>inet.linklayer.ethernet.EthernetInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ethernet.EtherPhy</name>
-    <filename>inet.physicallayer.ethernet.EtherPhy.html</filename>
+    <name>inet.physicallayer.ethernet.EthernetPhy</name>
+    <filename>inet.physicallayer.ethernet.EthernetPhy.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.EthernetQosQueue</name>
