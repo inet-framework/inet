@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet;
+package inet.linklayer.ethernet.basic;
 
 //
 // Dummy encapsulation/decapsulation module for ~EthernetInterface.

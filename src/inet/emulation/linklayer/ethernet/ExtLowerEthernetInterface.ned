@@ -19,7 +19,7 @@ package inet.emulation.linklayer.ethernet;
 
 import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.IEtherEncap;
+import inet.linklayer.ethernet.basic.IEtherEncap;
 
 //
 // This module provides an Ethernet network interface suitable for emulation.

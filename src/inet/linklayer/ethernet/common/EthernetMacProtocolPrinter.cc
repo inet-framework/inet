@@ -17,8 +17,8 @@
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "common/EthernetMacProtocolPrinter.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacProtocolPrinter.h"
 
 namespace inet {
 

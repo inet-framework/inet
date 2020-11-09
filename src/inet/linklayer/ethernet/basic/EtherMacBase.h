@@ -25,7 +25,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/ethernet/EthernetSignal_m.h"
 #include "inet/queueing/contract/IPacketQueue.h"

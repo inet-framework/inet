@@ -19,9 +19,9 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "common/EthernetMacProtocolDissector.h"
+#include "inet/linklayer/ethernet/common/Ethernet.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacProtocolDissector.h"
 
 namespace inet {
 

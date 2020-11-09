@@ -16,12 +16,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -29,10 +29,10 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EthernetCommand_m.h"
-#include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/basic/EtherEncap.h"
+#include "inet/linklayer/ethernet/common/EthernetCommand_m.h"
+#include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 

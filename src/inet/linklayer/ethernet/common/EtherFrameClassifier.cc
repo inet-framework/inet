@@ -16,8 +16,8 @@
 //
 
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ethernet/EtherFrameClassifier.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EtherFrameClassifier.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet;
+package inet.linklayer.ethernet.common;
 
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketQueue;

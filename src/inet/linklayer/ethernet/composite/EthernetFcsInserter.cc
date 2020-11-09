@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/composite/EthernetFcsInserter.h"
 
 namespace inet {

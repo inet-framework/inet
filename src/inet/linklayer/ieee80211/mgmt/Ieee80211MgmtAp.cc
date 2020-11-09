@@ -20,7 +20,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #endif // ifdef WITH_ETHERNET
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

@@ -19,8 +19,8 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "common/EthernetSocket.h"
-#include "inet/linklayer/ethernet/EthernetCommand_m.h"
+#include "inet/linklayer/ethernet/common/EthernetSocket.h"
+#include "inet/linklayer/ethernet/common/EthernetCommand_m.h"
 
 namespace inet {
 

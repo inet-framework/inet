@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet;
+package inet.linklayer.ethernet.basic;
 
 //
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
@@ -43,7 +43,7 @@ simple EtherEncap like IEtherEncap
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
-        string fcsMode @enum("declared", "computed");
+        string fcsMode @enum("declared","computed");
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EtherEncap and LLC modules
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
@@ -53,9 +53,9 @@ simple EtherEncap like IEtherEncap
         @signal[decapPk](type=cPacket);
         @signal[pauseSent](type=long); // pause units
         @signal[packetDropped](type=inet::Packet);
-        @statistic[encapPk](title="packets encapsulated";source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[decapPk](title="packets decapsulated";source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[pauseSent](title="pause sent";record=count,sum,vector);
+        @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[pauseSent](title="pause sent"; record=count,sum,vector);
     gates:
         input upperLayerIn @labels(Ieee802Ctrl/down); // higher layer
         output upperLayerOut @labels(Ieee802Ctrl/up); // higher layer

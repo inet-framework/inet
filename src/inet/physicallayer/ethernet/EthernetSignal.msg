@@ -19,7 +19,7 @@ import inet.common.INETDefs;
 import inet.physicallayer.common.packetlevel.Signal;
 
 cplusplus {{
-#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ethernet/common/Ethernet.h"
 }}
 
 namespace inet::physicallayer;

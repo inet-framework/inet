@@ -20,10 +20,10 @@
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ethernet/basic/EtherEncap.h"
 #include "inet/linklayer/ethernet/basic/EtherMacFullDuplex.h"
-#include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
-#include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/ethernet/EthernetSignal_m.h"
 

@@ -19,6 +19,7 @@ package inet.linklayer.ethernet;
 
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ethernet.basic.IEtherEncap;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
 
