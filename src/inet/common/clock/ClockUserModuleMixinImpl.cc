@@ -16,7 +16,7 @@
 //
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/common/base/ClockUserModuleMixinImpl.h"
+#include "inet/common/clock/ClockUserModuleMixinImpl.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #ifdef WITH_QUEUEING
 #include "inet/queueing/base/PacketGateBase.h"

@@ -18,7 +18,7 @@
 #ifndef __INET_INTERPACKETGAP_H
 #define __INET_INTERPACKETGAP_H
 
-#include "inet/common/base/ClockUserModuleMixin.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

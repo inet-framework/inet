@@ -20,7 +20,7 @@
 
 #include "inet/clock/contract/ClockTime.h"
 #include "inet/clock/contract/IClock.h"
-#include "inet/common/base/ClockUserModuleMixin.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETTRANSMITTERBASE_H
 #define __INET_PACKETTRANSMITTERBASE_H
 
-#include "inet/common/base/ClockUserModuleMixin.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/common/ModuleRef.h"

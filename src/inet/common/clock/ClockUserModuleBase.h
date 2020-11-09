@@ -18,7 +18,7 @@
 #ifndef __INET_CLOCKUSERMODULEBASE_H
 #define __INET_CLOCKUSERMODULEBASE_H
 
-#include "inet/common/base/ClockUserModuleMixin.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 
 namespace inet {
 

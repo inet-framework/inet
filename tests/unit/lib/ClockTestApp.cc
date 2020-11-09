@@ -1,4 +1,4 @@
-#include "inet/common/base/ClockUserModuleMixin.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 
 namespace inet {
 
