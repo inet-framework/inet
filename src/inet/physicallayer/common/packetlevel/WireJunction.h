@@ -56,7 +56,6 @@ class INET_API WireJunction : public cSimpleModule, protected cListener
     long numMessages;    // number of messages handled
 
   protected:
-    virtual const char *getGateName() const { return "port"; }
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

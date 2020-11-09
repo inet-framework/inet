@@ -31,7 +31,10 @@ inline std::ostream& operator<<(std::ostream& os, cMessage *msg)
 
 void WireJunction::initialize()
 {
-    std::string gateName = getGateName();
+    auto gateNames = getGateNames();
+    if (gateNames.size() != 1)
+        throw cRuntimeError("Cannot find the gate vector");
+    std::string gateName = gateNames[0];
     numPorts = gateSize(gateName.c_str());
     inputGateBaseId = gateBaseId((gateName+"$i").c_str());
     outputGateBaseId = gateBaseId((gateName+"$o").c_str());
