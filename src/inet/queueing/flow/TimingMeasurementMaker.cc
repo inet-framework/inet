@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/FlowTag.h"
-#include "inet/queueing/timing/TimingMeasurementMaker.h"
+#include "inet/queueing/flow/TimingMeasurementMaker.h"
 
 namespace inet {
 namespace queueing {
