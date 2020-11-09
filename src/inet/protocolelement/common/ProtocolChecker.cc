@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/common/ProtocolChecker.h"
+#include "inet/protocolelement/common/ProtocolChecker.h"
 
 namespace inet {
 

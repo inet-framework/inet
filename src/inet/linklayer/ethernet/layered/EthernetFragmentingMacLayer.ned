@@ -17,7 +17,7 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
+import inet.protocolelement.fragmentation.FragmentTagBasedDefragmenter;
 
 module EthernetFragmentingMacLayer extends EthernetMacLayer
 {

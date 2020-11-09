@@ -20,9 +20,9 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/selectivity/DestinationMacAddressHeader_m.h"
-#include "inet/protocol/selectivity/ReceiveAtMacAddress.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/selectivity/DestinationMacAddressHeader_m.h"
+#include "inet/protocolelement/selectivity/ReceiveAtMacAddress.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/transceiver/StreamThroughTransmitter.h"
+#include "inet/protocolelement/transceiver/StreamThroughTransmitter.h"
 
 namespace inet {
 

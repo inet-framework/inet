@@ -16,10 +16,10 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/fragmentation/FragmentNumberHeaderInserter.h"
-#include "inet/protocol/fragmentation/header/FragmentNumberHeader_m.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/fragmentation/FragmentNumberHeaderInserter.h"
+#include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
+#include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 

@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/protocol/transceiver/StreamingTransmitter.h"
+#include "inet/protocolelement/transceiver/StreamingTransmitter.h"
 
 namespace inet {
 

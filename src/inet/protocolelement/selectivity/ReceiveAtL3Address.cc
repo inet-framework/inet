@@ -18,9 +18,9 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/selectivity/DestinationL3AddressHeader_m.h"
-#include "inet/protocol/selectivity/ReceiveAtL3Address.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/selectivity/DestinationL3AddressHeader_m.h"
+#include "inet/protocolelement/selectivity/ReceiveAtL3Address.h"
 
 namespace inet {
 

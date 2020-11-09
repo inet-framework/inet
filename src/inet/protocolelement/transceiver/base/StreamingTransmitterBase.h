@@ -18,7 +18,7 @@
 #ifndef __INET_STREAMINGTRANSMITTERBASE_H
 #define __INET_STREAMINGTRANSMITTERBASE_H
 
-#include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
+#include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
 
 namespace inet {
 

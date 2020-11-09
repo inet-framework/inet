@@ -18,7 +18,7 @@
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/protocol/transceiver/base/PacketReceiverBase.h"
+#include "inet/protocolelement/transceiver/base/PacketReceiverBase.h"
 
 namespace inet {
 

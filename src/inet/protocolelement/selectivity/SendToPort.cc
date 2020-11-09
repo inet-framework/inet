@@ -19,9 +19,9 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/selectivity/DestinationPortHeader_m.h"
-#include "inet/protocol/selectivity/SendToPort.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/selectivity/DestinationPortHeader_m.h"
+#include "inet/protocolelement/selectivity/SendToPort.h"
 
 namespace inet {
 

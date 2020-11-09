@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.aggregation.base;
+package inet.protocolelement.aggregation.base;
 
-import inet.protocol.aggregation.contract.IAggregatorPolicy;
+import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 import inet.queueing.base.PacketPusherBase;
 
 module AggregatorBase extends PacketPusherBase

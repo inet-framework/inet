@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.measurement;
+package inet.protocolelement.measurement;
 
 import inet.queueing.contract.IPacketFlow;
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/aggregation/policy/LengthBasedAggregatorPolicy.h"
+#include "inet/protocolelement/aggregation/policy/LengthBasedAggregatorPolicy.h"
 
 namespace inet {
 

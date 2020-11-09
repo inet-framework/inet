@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.acknowledgement;
+package inet.protocolelement.acknowledgement;
 
 simple ReceiveWithAcknowledge
 {

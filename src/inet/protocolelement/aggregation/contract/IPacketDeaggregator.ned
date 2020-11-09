@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.aggregation.contract;
+package inet.protocolelement.aggregation.contract;
 
 moduleinterface IPacketDeaggregator
 {

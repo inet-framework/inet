@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.fragmentation;
+package inet.protocolelement.fragmentation;
 
 import inet.queueing.base.PacketFilterBase;
 

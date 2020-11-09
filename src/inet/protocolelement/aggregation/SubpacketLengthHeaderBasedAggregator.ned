@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.aggregation;
+package inet.protocolelement.aggregation;
 
-import inet.protocol.aggregation.base.AggregatorBase;
-import inet.protocol.aggregation.contract.IPacketAggregator;
+import inet.protocolelement.aggregation.base.AggregatorBase;
+import inet.protocolelement.aggregation.contract.IPacketAggregator;
 
 module SubpacketLengthHeaderBasedAggregator extends AggregatorBase like IPacketAggregator
 {

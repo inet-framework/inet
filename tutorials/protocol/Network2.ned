@@ -17,8 +17,8 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocol.transceiver.PacketReceiver;
-import inet.protocol.transceiver.PacketTransmitter;
+import inet.protocolelement.transceiver.PacketReceiver;
+import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 

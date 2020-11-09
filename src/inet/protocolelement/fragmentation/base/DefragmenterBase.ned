@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.fragmentation.base;
+package inet.protocolelement.fragmentation.base;
 
 import inet.queueing.base.PacketPusherBase;
 

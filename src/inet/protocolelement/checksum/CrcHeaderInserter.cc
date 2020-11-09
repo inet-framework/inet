@@ -17,9 +17,9 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/checksum/CrcHeaderInserter.h"
-#include "inet/protocol/checksum/header/CrcHeader_m.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
+#include "inet/protocolelement/checksum/CrcHeaderInserter.h"
+#include "inet/protocolelement/checksum/header/CrcHeader_m.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
 
 namespace inet {
 

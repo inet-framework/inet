@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.fragmentation.contract;
+package inet.protocolelement.fragmentation.contract;
 
 moduleinterface IPacketDefragmenter
 {

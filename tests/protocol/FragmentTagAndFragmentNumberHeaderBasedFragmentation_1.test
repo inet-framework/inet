@@ -6,10 +6,10 @@ Tests FragmentTag and FragmentNumberHeader based fragmentation.
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.fragmentation.FragmentNumberHeaderChecker;
-import inet.protocol.fragmentation.FragmentNumberHeaderInserter;
-import inet.protocol.fragmentation.FragmentTagBasedFragmenter;
-import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderChecker;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderInserter;
+import inet.protocolelement.fragmentation.FragmentTagBasedFragmenter;
+import inet.protocolelement.fragmentation.FragmentTagBasedDefragmenter;
 
 network TestFragmentTagAndFragmentNumberHeaderBasedFragmentation
 {

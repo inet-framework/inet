@@ -17,7 +17,7 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.contract.IProtocolHeaderChecker;
+import inet.protocolelement.contract.IProtocolHeaderChecker;
 import inet.queueing.base.PacketFilterBase;
 
 simple EthernetMacHeaderChecker extends PacketFilterBase like IProtocolHeaderChecker

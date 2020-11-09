@@ -18,7 +18,7 @@
 #ifndef __INET_SUBPACKETLENGTHHEADERBASEDAGGREGATOR_H
 #define __INET_SUBPACKETLENGTHHEADERBASEDAGGREGATOR_H
 
-#include "inet/protocol/aggregation/base/AggregatorBase.h"
+#include "inet/protocolelement/aggregation/base/AggregatorBase.h"
 
 namespace inet {
 

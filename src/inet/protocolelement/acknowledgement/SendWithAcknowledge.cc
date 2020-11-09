@@ -17,10 +17,10 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/acknowledgement/AcknowledgeHeader_m.h"
-#include "inet/protocol/acknowledgement/SendWithAcknowledge.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/ordering/SequenceNumberHeader_m.h"
+#include "inet/protocolelement/acknowledgement/AcknowledgeHeader_m.h"
+#include "inet/protocolelement/acknowledgement/SendWithAcknowledge.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {
 

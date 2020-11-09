@@ -18,7 +18,7 @@
 #ifndef __INET_AGGREGATORBASE_H
 #define __INET_AGGREGATORBASE_H
 
-#include "inet/protocol/aggregation/contract/IAggregatorPolicy.h"
+#include "inet/protocolelement/aggregation/contract/IAggregatorPolicy.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

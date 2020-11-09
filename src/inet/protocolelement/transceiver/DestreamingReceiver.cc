@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/transceiver/DestreamingReceiver.h"
+#include "inet/protocolelement/transceiver/DestreamingReceiver.h"
 
 namespace inet {
 

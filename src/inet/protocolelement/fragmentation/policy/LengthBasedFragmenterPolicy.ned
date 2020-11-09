@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.fragmentation.policy;
+package inet.protocolelement.fragmentation.policy;
 
-import inet.protocol.fragmentation.contract.IFragmenterPolicy;
+import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 
 simple LengthBasedFragmenterPolicy like IFragmenterPolicy
 {

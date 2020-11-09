@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/protocol/fragmentation/header/FragmentNumberHeader_m.h"
-#include "inet/protocol/fragmentation/serializer/FragmentNumberHeaderSerializer.h"
+#include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
+#include "inet/protocolelement/fragmentation/serializer/FragmentNumberHeaderSerializer.h"
 
 namespace inet {
 

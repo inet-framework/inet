@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.transceiver;
+package inet.protocolelement.transceiver;
 
-import inet.protocol.transceiver.base.PacketTransmitterBase;
-import inet.protocol.transceiver.contract.IPacketTransmitter;
+import inet.protocolelement.transceiver.base.PacketTransmitterBase;
+import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 
 //
 // This module receives packets from the upper layer as a whole. It also sends

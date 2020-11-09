@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.transceiver;
+package inet.protocolelement.transceiver;
 
-import inet.protocol.transceiver.base.StreamingReceiverBase;
-import inet.protocol.transceiver.contract.IPacketReceiver;
+import inet.protocolelement.transceiver.base.StreamingReceiverBase;
+import inet.protocolelement.transceiver.contract.IPacketReceiver;
 
 //
 // This module receives signals from the physical medium (wire) as a whole. It

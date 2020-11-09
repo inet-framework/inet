@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/protocol/ordering/SequenceNumberHeaderSerializer.h"
-#include "inet/protocol/ordering/SequenceNumberHeader_m.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeaderSerializer.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {
 

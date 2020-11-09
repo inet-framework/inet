@@ -18,7 +18,7 @@
 #ifndef __INET_LENGTHBASEDFRAGMENTERPOLICY_H
 #define __INET_LENGTHBASEDFRAGMENTERPOLICY_H
 
-#include "inet/protocol/fragmentation/contract/IFragmenterPolicy.h"
+#include "inet/protocolelement/fragmentation/contract/IFragmenterPolicy.h"
 
 namespace inet {
 

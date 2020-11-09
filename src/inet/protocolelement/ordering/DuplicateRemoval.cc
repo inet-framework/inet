@@ -16,9 +16,9 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/ordering/DuplicateRemoval.h"
-#include "inet/protocol/ordering/SequenceNumberHeader_m.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/ordering/DuplicateRemoval.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {
 

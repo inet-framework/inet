@@ -17,8 +17,8 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.contract.IProtocolHeaderChecker;
-import inet.protocol.contract.IProtocolHeaderInserter;
+import inet.protocolelement.contract.IProtocolHeaderChecker;
+import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.contract.IPacketFlow;
 
 module EthernetLayer like IEthernetLayer

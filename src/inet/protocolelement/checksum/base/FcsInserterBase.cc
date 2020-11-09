@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/checksum/EthernetCRC.h"
-#include "inet/protocol/checksum/base/FcsInserterBase.h"
+#include "inet/protocolelement/checksum/base/FcsInserterBase.h"
 
 namespace inet {
 

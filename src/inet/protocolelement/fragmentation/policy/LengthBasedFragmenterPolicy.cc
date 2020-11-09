@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/fragmentation/policy/LengthBasedFragmenterPolicy.h"
+#include "inet/protocolelement/fragmentation/policy/LengthBasedFragmenterPolicy.h"
 
 namespace inet {
 

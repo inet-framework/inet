@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.checksum.base;
+package inet.protocolelement.checksum.base;
 
 import inet.queueing.base.PacketFilterBase;
 

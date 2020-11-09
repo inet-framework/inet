@@ -17,14 +17,14 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocol.acknowledgement.Resending;
-import inet.protocol.checksum.FcsHeaderChecker;
-import inet.protocol.checksum.FcsHeaderInserter;
-import inet.protocol.common.InterPacketGap;
-import inet.protocol.ordering.Reordering;
-import inet.protocol.ordering.SequenceNumbering;
-import inet.protocol.transceiver.PacketReceiver;
-import inet.protocol.transceiver.PacketTransmitter;
+import inet.protocolelement.acknowledgement.Resending;
+import inet.protocolelement.checksum.FcsHeaderChecker;
+import inet.protocolelement.checksum.FcsHeaderInserter;
+import inet.protocolelement.common.InterPacketGap;
+import inet.protocolelement.ordering.Reordering;
+import inet.protocolelement.ordering.SequenceNumbering;
+import inet.protocolelement.transceiver.PacketReceiver;
+import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.server.InstantServer;
 import inet.queueing.sink.PassivePacketSink;

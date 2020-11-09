@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.fragmentation;
+package inet.protocolelement.fragmentation;
 
-import inet.protocol.fragmentation.base.DefragmenterBase;
-import inet.protocol.fragmentation.contract.IPacketDefragmenter;
+import inet.protocolelement.fragmentation.base.DefragmenterBase;
+import inet.protocolelement.fragmentation.contract.IPacketDefragmenter;
 
 simple FragmentTagBasedDefragmenter extends DefragmenterBase like IPacketDefragmenter
 {

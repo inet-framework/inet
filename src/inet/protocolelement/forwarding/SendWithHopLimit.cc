@@ -17,9 +17,9 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/forwarding/HopLimitHeader_m.h"
-#include "inet/protocol/forwarding/SendWithHopLimit.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
+#include "inet/protocolelement/forwarding/HopLimitHeader_m.h"
+#include "inet/protocolelement/forwarding/SendWithHopLimit.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
 
 namespace inet {
 

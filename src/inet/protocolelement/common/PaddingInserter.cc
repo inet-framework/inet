@@ -17,7 +17,7 @@
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/protocol/common/PaddingInserter.h"
+#include "inet/protocolelement/common/PaddingInserter.h"
 
 namespace inet {
 

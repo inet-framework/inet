@@ -18,7 +18,7 @@
 #ifndef __INET_STREAMTHROUGHRECEIVER_H
 #define __INET_STREAMTHROUGHRECEIVER_H
 
-#include "inet/protocol/transceiver/base/StreamingReceiverBase.h"
+#include "inet/protocolelement/transceiver/base/StreamingReceiverBase.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/server/PreemptingServer.h"
+#include "inet/protocolelement/server/PreemptingServer.h"
 
 namespace inet {
 

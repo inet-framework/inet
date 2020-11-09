@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/acknowledgement/Resending.h"
+#include "inet/protocolelement/acknowledgement/Resending.h"
 
 namespace inet {
 

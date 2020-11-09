@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocol/common/InterPacketGap.h"
+#include "inet/protocolelement/common/InterPacketGap.h"
 #include "inet/queueing/common/ProgressTag_m.h"
 
 namespace inet {

@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/aggregation/header/SubpacketLengthHeader_m.h"
-#include "inet/protocol/aggregation/SubpacketLengthHeaderBasedAggregator.h"
+#include "inet/protocolelement/aggregation/header/SubpacketLengthHeader_m.h"
+#include "inet/protocolelement/aggregation/SubpacketLengthHeaderBasedAggregator.h"
 
 namespace inet {
 

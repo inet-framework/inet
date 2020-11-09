@@ -18,8 +18,8 @@
 #ifndef __INET_CRCHEADERINSERTER_H
 #define __INET_CRCHEADERINSERTER_H
 
-#include "inet/protocol/common/HeaderPosition.h"
-#include "inet/protocol/checksum/base/CrcInserterBase.h"
+#include "inet/protocolelement/common/HeaderPosition.h"
+#include "inet/protocolelement/checksum/base/CrcInserterBase.h"
 
 namespace inet {
 

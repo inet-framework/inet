@@ -17,8 +17,8 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/common/PreemptableStreamer.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
+#include "inet/protocolelement/common/PreemptableStreamer.h"
+#include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 

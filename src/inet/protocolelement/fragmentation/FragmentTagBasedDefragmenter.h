@@ -18,7 +18,7 @@
 #ifndef __INET_FRAGMENTTAGBASEDDEFRAGMENTER_H
 #define __INET_FRAGMENTTAGBASEDDEFRAGMENTER_H
 
-#include "inet/protocol/fragmentation/base/DefragmenterBase.h"
+#include "inet/protocolelement/fragmentation/base/DefragmenterBase.h"
 
 namespace inet {
 

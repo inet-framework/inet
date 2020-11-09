@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.fragmentation.base;
+package inet.protocolelement.fragmentation.base;
 
-import inet.protocol.fragmentation.contract.IFragmenterPolicy;
+import inet.protocolelement.fragmentation.contract.IFragmenterPolicy;
 import inet.queueing.base.PacketPusherBase;
 
 module FragmenterBase extends PacketPusherBase

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/common/HeaderPosition.h"
+#include "inet/protocolelement/common/HeaderPosition.h"
 
 namespace inet {
 

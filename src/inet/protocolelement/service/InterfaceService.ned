@@ -15,20 +15,20 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.service;
+package inet.protocolelement.service;
 
 import inet.common.MessageDispatcher;
 import inet.networklayer.common.NetworkInterface;
-import inet.protocol.acknowledgement.ReceiveWithAcknowledge;
-import inet.protocol.acknowledgement.Resending;
-import inet.protocol.acknowledgement.SendWithAcknowledge;
-import inet.protocol.checksum.CrcHeaderChecker;
-import inet.protocol.checksum.CrcHeaderInserter;
-import inet.protocol.dispatching.ReceiveWithProtocol;
-import inet.protocol.dispatching.SendWithProtocol;
-import inet.protocol.selectivity.ReceiveAtMacAddress;
-import inet.protocol.selectivity.SendToMacAddress;
-import inet.protocol.transceiver.PacketTransmitter;
+import inet.protocolelement.acknowledgement.ReceiveWithAcknowledge;
+import inet.protocolelement.acknowledgement.Resending;
+import inet.protocolelement.acknowledgement.SendWithAcknowledge;
+import inet.protocolelement.checksum.CrcHeaderChecker;
+import inet.protocolelement.checksum.CrcHeaderInserter;
+import inet.protocolelement.dispatching.ReceiveWithProtocol;
+import inet.protocolelement.dispatching.SendWithProtocol;
+import inet.protocolelement.selectivity.ReceiveAtMacAddress;
+import inet.protocolelement.selectivity.SendToMacAddress;
+import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.common.PacketMultiplexer;
 
 module InterfaceService extends NetworkInterface

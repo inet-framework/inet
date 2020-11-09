@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/fragmentation/base/DefragmenterBase.h"
+#include "inet/protocolelement/fragmentation/base/DefragmenterBase.h"
 
 namespace inet {
 

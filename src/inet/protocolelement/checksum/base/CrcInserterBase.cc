@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/checksum/TcpIpChecksum.h"
-#include "inet/protocol/checksum/base/CrcInserterBase.h"
+#include "inet/protocolelement/checksum/base/CrcInserterBase.h"
 
 namespace inet {
 

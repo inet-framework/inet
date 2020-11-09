@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.service;
+package inet.protocolelement.service;
 
-import inet.protocol.aggregation.SubpacketLengthHeaderBasedAggregator;
-import inet.protocol.aggregation.SubpacketLengthHeaderBasedDeaggregator;
-import inet.protocol.fragmentation.FragmentNumberHeaderBasedDefragmenter;
-import inet.protocol.ordering.Reordering;
-import inet.protocol.ordering.SequenceNumbering;
+import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedAggregator;
+import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedDeaggregator;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
+import inet.protocolelement.ordering.Reordering;
+import inet.protocolelement.ordering.SequenceNumbering;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 

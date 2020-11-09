@@ -18,7 +18,7 @@
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/common/PacketDeserializer.h"
+#include "inet/protocolelement/common/PacketDeserializer.h"
 
 namespace inet {
 

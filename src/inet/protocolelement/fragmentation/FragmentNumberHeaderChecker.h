@@ -18,7 +18,7 @@
 #ifndef __INET_FRAGMENTNUMBERHEADERCHECKER_H
 #define __INET_FRAGMENTNUMBERHEADERCHECKER_H
 
-#include "inet/protocol/common/HeaderPosition.h"
+#include "inet/protocolelement/common/HeaderPosition.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {

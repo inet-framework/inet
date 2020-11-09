@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.ordering;
+package inet.protocolelement.ordering;
 
 import inet.queueing.base.PacketPusherBase;
 

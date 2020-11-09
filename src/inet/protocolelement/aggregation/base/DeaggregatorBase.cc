@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/aggregation/base/DeaggregatorBase.h"
+#include "inet/protocolelement/aggregation/base/DeaggregatorBase.h"
 
 namespace inet {
 

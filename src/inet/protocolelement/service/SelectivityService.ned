@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.service;
+package inet.protocolelement.service;
 
-import inet.protocol.selectivity.ReceiveAtL3Address;
-import inet.protocol.selectivity.ReceiveAtPort;
-import inet.protocol.selectivity.SendToL3Address;
-import inet.protocol.selectivity.SendToPort;
+import inet.protocolelement.selectivity.ReceiveAtL3Address;
+import inet.protocolelement.selectivity.ReceiveAtPort;
+import inet.protocolelement.selectivity.SendToL3Address;
+import inet.protocolelement.selectivity.SendToPort;
 
 module SelectivityService
 {

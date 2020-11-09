@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/common/PacketSerializer.h"
+#include "inet/protocolelement/common/PacketSerializer.h"
 
 namespace inet {
 

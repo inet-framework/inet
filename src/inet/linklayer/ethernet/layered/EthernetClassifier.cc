@@ -19,7 +19,7 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
+#include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 #include "inet/queueing/function/PacketClassifierFunction.h"
 
 namespace inet {

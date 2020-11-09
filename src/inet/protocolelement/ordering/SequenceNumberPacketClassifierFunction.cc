@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/ordering/SequenceNumberHeader_m.h"
-#include "inet/protocol/ordering/SequenceNumberPacketClassifierFunction.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
+#include "inet/protocolelement/ordering/SequenceNumberPacketClassifierFunction.h"
 
 namespace inet {
 

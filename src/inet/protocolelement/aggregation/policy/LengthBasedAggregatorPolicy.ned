@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.aggregation.policy;
+package inet.protocolelement.aggregation.policy;
 
-import inet.protocol.aggregation.contract.IAggregatorPolicy;
+import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 
 simple LengthBasedAggregatorPolicy like IAggregatorPolicy
 {

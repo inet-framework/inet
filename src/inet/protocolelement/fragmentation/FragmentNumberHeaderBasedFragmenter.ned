@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.fragmentation;
+package inet.protocolelement.fragmentation;
 
-import inet.protocol.fragmentation.base.FragmenterBase;
-import inet.protocol.fragmentation.contract.IPacketFragmenter;
+import inet.protocolelement.fragmentation.base.FragmenterBase;
+import inet.protocolelement.fragmentation.contract.IPacketFragmenter;
 
 module FragmentNumberHeaderBasedFragmenter extends FragmenterBase like IPacketFragmenter
 {

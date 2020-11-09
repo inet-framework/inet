@@ -18,7 +18,7 @@
 #ifndef __INET_STREAMINGRECEIVERBASE_H
 #define __INET_STREAMINGRECEIVERBASE_H
 
-#include "inet/protocol/transceiver/base/PacketReceiverBase.h"
+#include "inet/protocolelement/transceiver/base/PacketReceiverBase.h"
 
 namespace inet {
 

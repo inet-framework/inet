@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/transceiver/base/StreamingTransmitterBase.h"
+#include "inet/protocolelement/transceiver/base/StreamingTransmitterBase.h"
 
 namespace inet {
 

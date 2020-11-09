@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/common/AccessoryProtocol.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
 
 namespace inet {
 

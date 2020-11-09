@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.dispatching;
+package inet.protocolelement.dispatching;
 
 simple SendWithProtocol
 {

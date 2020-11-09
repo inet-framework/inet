@@ -18,8 +18,8 @@
 #ifndef __INET_FRAGMENTTAGBASEDFRAGMENTER_H
 #define __INET_FRAGMENTTAGBASEDFRAGMENTER_H
 
-#include "inet/protocol/common/HeaderPosition.h"
-#include "inet/protocol/fragmentation/base/FragmenterBase.h"
+#include "inet/protocolelement/common/HeaderPosition.h"
+#include "inet/protocolelement/fragmentation/base/FragmenterBase.h"
 
 namespace inet {
 

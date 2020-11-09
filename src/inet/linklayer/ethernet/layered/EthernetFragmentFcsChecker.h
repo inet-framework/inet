@@ -18,7 +18,7 @@
 #ifndef __INET_ETHERNETFRAGMENTFCSCHECKER_H
 #define __INET_ETHERNETFRAGMENTFCSCHECKER_H
 
-#include "inet/protocol/checksum/base/FcsCheckerBase.h"
+#include "inet/protocolelement/checksum/base/FcsCheckerBase.h"
 
 namespace inet {
 

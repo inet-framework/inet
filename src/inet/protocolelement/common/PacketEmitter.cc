@@ -17,7 +17,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/protocol/common/PacketEmitter.h"
+#include "inet/protocolelement/common/PacketEmitter.h"
 
 namespace inet {
 

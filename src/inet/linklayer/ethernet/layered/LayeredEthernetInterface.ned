@@ -20,8 +20,8 @@ package inet.linklayer.ethernet.layered;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.ethernet.IEthernetPhyLayer;
-import inet.protocol.measurement.IMeasurementLayer;
-import inet.protocol.trafficconditioner.ITrafficConditionerLayer;
+import inet.protocolelement.measurement.IMeasurementLayer;
+import inet.protocolelement.trafficconditioner.ITrafficConditionerLayer;
 
 //
 // This module implements an Ethernet network interface.

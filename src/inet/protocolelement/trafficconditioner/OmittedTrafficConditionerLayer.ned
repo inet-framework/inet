@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.trafficconditioner;
+package inet.protocolelement.trafficconditioner;
 
 module OmittedTrafficConditionerLayer like ITrafficConditionerLayer
 {

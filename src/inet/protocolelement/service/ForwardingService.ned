@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.service;
+package inet.protocolelement.service;
 
 import inet.common.MessageDispatcher;
-import inet.protocol.forwarding.Forwarding;
-import inet.protocol.forwarding.ReceiveWithHopLimit;
-import inet.protocol.forwarding.SendWithHopLimit;
+import inet.protocolelement.forwarding.Forwarding;
+import inet.protocolelement.forwarding.ReceiveWithHopLimit;
+import inet.protocolelement.forwarding.SendWithHopLimit;
 
 module ForwardingService
 {

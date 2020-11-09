@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocol/aggregation/base/AggregatorBase.h"
+#include "inet/protocolelement/aggregation/base/AggregatorBase.h"
 
 namespace inet {
 

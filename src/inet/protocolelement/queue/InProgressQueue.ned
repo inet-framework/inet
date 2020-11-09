@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.queue;
+package inet.protocolelement.queue;
 
 import inet.queueing.queue.PacketQueue;
 

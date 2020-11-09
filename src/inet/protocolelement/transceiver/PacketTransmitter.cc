@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/transceiver/PacketTransmitter.h"
+#include "inet/protocolelement/transceiver/PacketTransmitter.h"
 
 namespace inet {
 

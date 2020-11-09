@@ -20,9 +20,9 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/protocol/forwarding/Forwarding.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/selectivity/DestinationL3AddressHeader_m.h"
+#include "inet/protocolelement/forwarding/Forwarding.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/selectivity/DestinationL3AddressHeader_m.h"
 
 namespace inet {
 

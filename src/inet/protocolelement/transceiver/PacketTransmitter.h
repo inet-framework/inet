@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETTRANSMITTER_H
 #define __INET_PACKETTRANSMITTER_H
 
-#include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
+#include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
 
 namespace inet {
 

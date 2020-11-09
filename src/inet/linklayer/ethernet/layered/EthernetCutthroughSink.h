@@ -18,7 +18,7 @@
 #ifndef __INET_ETHERNETCUTTHROUGHSINK_H
 #define __INET_ETHERNETCUTTHROUGHSINK_H
 
-#include "inet/protocol/common/PacketStreamer.h"
+#include "inet/protocolelement/common/PacketStreamer.h"
 
 namespace inet {
 

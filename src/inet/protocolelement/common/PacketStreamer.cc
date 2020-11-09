@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocol/common/PacketStreamer.h"
+#include "inet/protocolelement/common/PacketStreamer.h"
 
 namespace inet {
 

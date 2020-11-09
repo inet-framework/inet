@@ -18,7 +18,7 @@
 package inet.linklayer.ieee8022;
 
 import inet.common.MessageDispatcher;
-import inet.protocol.common.ProtocolChecker;
+import inet.protocolelement.common.ProtocolChecker;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFlow;

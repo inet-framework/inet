@@ -18,7 +18,7 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #include "inet/physicallayer/ethernet/EthernetPhyProtocolDissector.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
+#include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 

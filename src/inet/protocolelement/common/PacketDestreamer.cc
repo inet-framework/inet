@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocol/common/PacketDestreamer.h"
+#include "inet/protocolelement/common/PacketDestreamer.h"
 
 namespace inet {
 

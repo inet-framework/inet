@@ -6,8 +6,8 @@ Tests CRC checksum.
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.checksum.CrcHeaderInserter;
-import inet.protocol.checksum.CrcHeaderChecker;
+import inet.protocolelement.checksum.CrcHeaderInserter;
+import inet.protocolelement.checksum.CrcHeaderChecker;
 
 network TestCrc
 {

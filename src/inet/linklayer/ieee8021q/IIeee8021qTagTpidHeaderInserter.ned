@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee8021q;
 
-import inet.protocol.contract.IProtocolHeaderInserter;
+import inet.protocolelement.contract.IProtocolHeaderInserter;
 
 moduleinterface IIeee8021qTagTpidHeaderInserter extends IProtocolHeaderInserter
 {

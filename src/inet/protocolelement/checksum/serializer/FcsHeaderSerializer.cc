@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/protocol/checksum/header/FcsHeader_m.h"
-#include "inet/protocol/checksum/serializer/FcsHeaderSerializer.h"
+#include "inet/protocolelement/checksum/header/FcsHeader_m.h"
+#include "inet/protocolelement/checksum/serializer/FcsHeaderSerializer.h"
 
 namespace inet {
 

@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocol/fragmentation/base/FragmenterBase.h"
-#include "inet/protocol/fragmentation/header/FragmentNumberHeader_m.h"
+#include "inet/protocolelement/fragmentation/base/FragmenterBase.h"
+#include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
 
 namespace inet {
 

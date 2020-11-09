@@ -17,7 +17,7 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.server.PreemptingServer;
+import inet.protocolelement.server.PreemptingServer;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketQueue;

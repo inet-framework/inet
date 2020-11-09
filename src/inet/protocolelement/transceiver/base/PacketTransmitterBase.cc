@@ -19,7 +19,7 @@
 #include "inet/common/PacketEventTag.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag.h"
-#include "inet/protocol/transceiver/base/PacketTransmitterBase.h"
+#include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
 
 namespace inet {
 

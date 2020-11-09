@@ -6,8 +6,8 @@ Tests packet streaming.
 
 import inet.queueing.source.PassivePacketSource;
 import inet.queueing.sink.ActivePacketSink;
-import inet.protocol.common.PacketStreamer;
-import inet.protocol.common.PacketDestreamer;
+import inet.protocolelement.common.PacketStreamer;
+import inet.protocolelement.common.PacketDestreamer;
 
 network TestStreaming
 {

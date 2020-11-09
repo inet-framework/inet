@@ -17,7 +17,7 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.common.PacketDestreamer;
+import inet.protocolelement.common.PacketDestreamer;
 
 simple EthernetCutthroughSource extends PacketDestreamer
 {

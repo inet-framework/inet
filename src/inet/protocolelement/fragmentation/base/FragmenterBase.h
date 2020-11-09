@@ -18,7 +18,7 @@
 #ifndef __INET_FRAGMENTERBASE_H
 #define __INET_FRAGMENTERBASE_H
 
-#include "inet/protocol/fragmentation/contract/IFragmenterPolicy.h"
+#include "inet/protocolelement/fragmentation/contract/IFragmenterPolicy.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

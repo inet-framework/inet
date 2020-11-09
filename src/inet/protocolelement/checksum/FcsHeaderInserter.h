@@ -18,8 +18,8 @@
 #ifndef __INET_FCSHEADERINSERTER_H
 #define __INET_FCSHEADERINSERTER_H
 
-#include "inet/protocol/checksum/base/FcsInserterBase.h"
-#include "inet/protocol/common/HeaderPosition.h"
+#include "inet/protocolelement/checksum/base/FcsInserterBase.h"
+#include "inet/protocolelement/common/HeaderPosition.h"
 
 namespace inet {
 

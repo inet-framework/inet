@@ -6,8 +6,8 @@ Tests FragmentTag based fragmentation.
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.fragmentation.FragmentTagBasedFragmenter;
-import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
+import inet.protocolelement.fragmentation.FragmentTagBasedFragmenter;
+import inet.protocolelement.fragmentation.FragmentTagBasedDefragmenter;
 
 network TestFragmentTagBasedFragmentation
 {

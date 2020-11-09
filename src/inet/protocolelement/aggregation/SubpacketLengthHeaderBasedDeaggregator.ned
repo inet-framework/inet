@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.aggregation;
+package inet.protocolelement.aggregation;
 
-import inet.protocol.aggregation.base.DeaggregatorBase;
-import inet.protocol.aggregation.contract.IPacketDeaggregator;
+import inet.protocolelement.aggregation.base.DeaggregatorBase;
+import inet.protocolelement.aggregation.contract.IPacketDeaggregator;
 
 simple SubpacketLengthHeaderBasedDeaggregator extends DeaggregatorBase like IPacketDeaggregator
 {

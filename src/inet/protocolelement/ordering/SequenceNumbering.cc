@@ -16,9 +16,9 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/common/AccessoryProtocol.h"
-#include "inet/protocol/ordering/SequenceNumberHeader_m.h"
-#include "inet/protocol/ordering/SequenceNumbering.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
+#include "inet/protocolelement/ordering/SequenceNumbering.h"
 
 namespace inet {
 

@@ -6,8 +6,8 @@ Tests packet serialization.*?
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.common.PacketSerializer;
-import inet.protocol.common.PacketDeserializer;
+import inet.protocolelement.common.PacketSerializer;
+import inet.protocolelement.common.PacketDeserializer;
 
 network TestSerialization
 {

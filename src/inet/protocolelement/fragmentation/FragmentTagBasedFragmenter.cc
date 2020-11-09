@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocol/fragmentation/FragmentTagBasedFragmenter.h"
-#include "inet/protocol/fragmentation/tag/FragmentTag_m.h"
+#include "inet/protocolelement/fragmentation/FragmentTagBasedFragmenter.h"
+#include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 

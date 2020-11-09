@@ -19,7 +19,7 @@
 #define __INET_LENGTHBASEDAGGREGATORPOLICY_H
 
 #include "inet/common/Units.h"
-#include "inet/protocol/aggregation/contract/IAggregatorPolicy.h"
+#include "inet/protocolelement/aggregation/contract/IAggregatorPolicy.h"
 
 namespace inet {
 

@@ -17,7 +17,7 @@
 
 package inet.linklayer.ethernet.layered;
 
-import inet.protocol.contract.IProtocolHeaderInserter;
+import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.base.PacketFlowBase;
 
 simple EthernetMacHeaderInserter extends PacketFlowBase like IProtocolHeaderInserter

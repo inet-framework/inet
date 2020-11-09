@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocol/dispatching/ProtocolHeader_m.h"
-#include "inet/protocol/dispatching/SendWithProtocol.h"
+#include "inet/protocolelement/dispatching/ProtocolHeader_m.h"
+#include "inet/protocolelement/dispatching/SendWithProtocol.h"
 
 namespace inet {
 

@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.service;
+package inet.protocolelement.service;
 
-import inet.protocol.fragmentation.FragmentNumberHeaderBasedDefragmenter;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.common.PacketMultiplexer;
 

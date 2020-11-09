@@ -17,9 +17,9 @@
 
 package inet.physicallayer.ethernet;
 
-import inet.protocol.common.InterPacketGap;
-import inet.protocol.transceiver.contract.IPacketReceiver;
-import inet.protocol.transceiver.contract.IPacketTransmitter;
+import inet.protocolelement.common.InterPacketGap;
+import inet.protocolelement.transceiver.contract.IPacketReceiver;
+import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 

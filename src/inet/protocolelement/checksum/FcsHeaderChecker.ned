@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.checksum;
+package inet.protocolelement.checksum;
 
-import inet.protocol.checksum.base.FcsCheckerBase;
+import inet.protocolelement.checksum.base.FcsCheckerBase;
 
 simple FcsHeaderChecker extends FcsCheckerBase
 {

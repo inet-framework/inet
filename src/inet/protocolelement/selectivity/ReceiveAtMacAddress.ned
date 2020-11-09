@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.selectivity;
+package inet.protocolelement.selectivity;
 
 simple ReceiveAtMacAddress
 {

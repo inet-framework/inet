@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.transceiver.base;
+package inet.protocolelement.transceiver.base;
 
 simple StreamingTransmitterBase extends PacketTransmitterBase
 {
