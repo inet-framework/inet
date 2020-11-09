@@ -283,9 +283,7 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
         return LINKTYPE_PPP_WITH_DIR;
     else if (*protocol == Protocol::ieee80211Mac)
         return LINKTYPE_IEEE802_11;
-    else if (*protocol == Protocol::ipv4)
-        return LINKTYPE_RAW;
-    else if (*protocol == Protocol::ipv6)
+    else if (*protocol == Protocol::ipv4 || *protocol == Protocol::ipv6)
         return LINKTYPE_RAW;
     else if (*protocol == Protocol::ieee802154)
         return LINKTYPE_IEEE802_15_4;

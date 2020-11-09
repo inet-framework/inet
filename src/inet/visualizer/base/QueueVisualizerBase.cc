@@ -36,7 +36,7 @@ QueueVisualizerBase::QueueVisualization::QueueVisualization(queueing::IPacketQue
 {
 }
 
-QueueVisualizerBase::~QueueVisualizerBase()
+void QueueVisualizerBase::preDelete(cComponent *root)
 {
     if (displayQueues)
         removeAllQueueVisualizations();

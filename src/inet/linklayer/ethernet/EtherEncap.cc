@@ -44,6 +44,17 @@ simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
 simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 
+std::ostream& operator << (std::ostream& o, const EtherEncap::Socket& t)
+{
+    o << "(id:" << t.socketId
+            << ",local:" << t.localAddress
+            << ",remote:" << t.remoteAddress
+            << ",protocol" << (t.protocol ? t.protocol->getName() : "<null>")
+            << ",steal:" << (t.steal ? "on":"off")
+            << ")";
+    return o;
+}
+
 EtherEncap::~EtherEncap()
 {
     for (auto it : socketIdToSocketMap)
@@ -72,6 +83,7 @@ void EtherEncap::initialize(int stage)
         useSNAP = par("useSNAP");
         networkInterface = findContainingNicModule(this);     //TODO or getContainingNicModule() ? or use a macaddresstable?
 
+        WATCH_PTRMAP(socketIdToSocketMap);
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
@@ -103,21 +115,29 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
     else if (dynamic_cast<SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketMap.find(socketId);
-        delete it->second;
-        socketIdToSocketMap.erase(it);
-        delete msg;
-        auto indication = new Indication("closed", SOCKET_I_CLOSED);
-        auto ctrl = new SocketClosedIndication();
-        indication->setControlInfo(ctrl);
-        indication->addTag<SocketInd>()->setSocketId(socketId);
-        send(indication, "transportOut");
+        if (it != socketIdToSocketMap.end()) {
+            delete it->second;
+            socketIdToSocketMap.erase(it);
+            auto indication = new Indication("closed", SOCKET_I_CLOSED);
+            auto ctrl = new SocketClosedIndication();
+            indication->setControlInfo(ctrl);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
+            send(indication, "transportOut");
+            delete msg;
+        }
+        else
+            Ieee8022Llc::processCommandFromHigherLayer(msg);
     }
     else if (dynamic_cast<SocketDestroyCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketMap.find(socketId);
-        delete it->second;
-        socketIdToSocketMap.erase(it);
-        delete msg;
+        if (it != socketIdToSocketMap.end()) {
+            delete it->second;
+            socketIdToSocketMap.erase(it);
+            delete msg;
+        }
+        else
+            Ieee8022Llc::processCommandFromHigherLayer(msg);
     }
     else
         Ieee8022Llc::processCommandFromHigherLayer(msg);

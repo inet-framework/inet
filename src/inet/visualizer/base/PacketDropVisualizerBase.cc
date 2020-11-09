@@ -101,7 +101,7 @@ bool PacketDropVisualizerBase::DetailsFilter::matches(const PacketDropDetails *d
     return const_cast<DetailsFilter *>(this)->matchExpression.matches(&matchableObject);
 }
 
-PacketDropVisualizerBase::~PacketDropVisualizerBase()
+void PacketDropVisualizerBase::preDelete(cComponent *root)
 {
     if (displayPacketDrops) {
         unsubscribe();

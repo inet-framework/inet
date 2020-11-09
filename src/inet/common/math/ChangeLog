@@ -1,5 +1,31 @@
 ====== inet-4.x ======
 
+2020-11-02  Levente Mészáros
+
+	Deleted C+11 implementation of index sequence, INET uses C+14 by default.
+
+2020-09-14  Levente Mészáros
+
+	Followed the addition of printOn in cObject with FunctionBase.
+
+2020-06-17  Levente Mészáros
+
+	Added const qualifiers to toDouble.
+
+2020-05-29  Levente Mészáros
+
+	Replaced std::min and std::max with math::minnan and math::maxnan where
+	appropriate to propagate NaNs forward.
+
+2020-03-06  Levente Mészáros
+
+	Properly implemented PeriodicallyInterpolated1DFunction and PeriodicallyInterpolated2DFunction.
+
+2020-03-18  Levente Mészáros
+
+	Added Rasterized2DFunction, LeftCurryingFunction and RightCurryingFunction.
+	Added a few shortcuts for UnilinearFunction and BilinearFunction.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-09-01  Levente Mészáros

@@ -35,6 +35,7 @@
 //  - 8.: Tunnel Error Reporting and Processing
 
 #include <algorithm>
+#include <functional>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -188,8 +189,10 @@ int Ipv6Tunneling::createTunnel(TunnelType tunnelType,
 int Ipv6Tunneling::findTunnel(const Ipv6Address& src, const Ipv6Address& dest,
         const Ipv6Address& destTrigger) const
 {
-    TI it = find_if(tunnels.begin(), tunnels.end(),
-                bind1st(equalTunnel(), std::make_pair((int)0, Tunnel(src, dest, destTrigger))));
+    TI it = std::find_if(tunnels.begin(), tunnels.end(),
+                std::bind(equalTunnel(),
+                    std::make_pair((int)0, Tunnel(src, dest, destTrigger)),
+                    std::placeholders::_1));
 
     if (it != tunnels.end())
         return it->first;

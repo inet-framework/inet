@@ -59,8 +59,10 @@ class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase
 
     virtual void refreshDisplay() override;
 
+    virtual int getNumAnnotations() const { return annotations.size(); }
     virtual void addAnnotation(cFigure *figure, cFigure::Point size, Placement placement = PLACEMENT_ANY, double placementPriority = 0);
     virtual void removeAnnotation(cFigure *figure);
+    virtual void removeAnnotation(int index);
     virtual void setAnnotationSize(cFigure *figure, cFigure::Point size);
     virtual void setAnnotationVisible(cFigure *figure, bool visible);
 };

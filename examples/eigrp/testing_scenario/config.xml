@@ -1,0 +1,93 @@
+<Devices>	
+	<Router id="10.0.1.0"> <!-- R1 -->      
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.1.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>	        		
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>      
+    </Router>
+   
+    <Router id="10.0.2.0"> <!-- R2 -->     
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.24.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.2.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>	        		
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+    </Router>       
+    
+    <Router id="10.0.3.0"> <!-- R3 -->       
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.3.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>       
+    </Router>    
+    
+    <Router id="10.0.4.0"> <!-- R4 -->      
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.24.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.4.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>      
+    </Router>	
+</Devices>

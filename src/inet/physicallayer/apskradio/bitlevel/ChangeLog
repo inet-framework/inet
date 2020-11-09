@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-08-31  Levente Mészáros
+
+	Added evFlags parameter to all printToStream methods and recursive calls.
+
+2020-08-25  Levente Mészáros
+
+	Changed EV output to use the new EV_FIELD macro where appropriate.
+
+2020-06-04  Levente Mészáros
+
+	Added & to const Coord where appropriate.
+	Added & to const Quaternion where appropriate.
+	Added error rates to layered receivers and signal models.
+
+2020-05-14  Levente Mészáros
+
+	Added check to Radio for bitrate.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-09-23  Levente Mészáros

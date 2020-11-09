@@ -30,14 +30,6 @@ SliceChunk::SliceChunk() :
 {
 }
 
-SliceChunk::SliceChunk(const SliceChunk& other) :
-    Chunk(other),
-    chunk(other.chunk),
-    offset(other.offset),
-    length(other.length)
-{
-}
-
 SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
     Chunk(),
     chunk(chunk),

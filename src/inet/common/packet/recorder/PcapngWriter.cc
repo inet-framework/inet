@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <errno.h>
+#include <cerrno>
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -89,7 +89,7 @@ static int roundUp(int value, int multiplier = 4)
 
 PcapngWriter::~PcapngWriter()
 {
-    close();
+    PcapngWriter::close(); // NOTE: admitting that this will not call overridden methods from the destructor
 }
 
 void PcapngWriter::open(const char *filename, unsigned int snaplen)

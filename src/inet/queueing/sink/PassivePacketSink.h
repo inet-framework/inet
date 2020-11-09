@@ -27,9 +27,6 @@ namespace queueing {
 class INET_API PassivePacketSink : public PassivePacketSinkBase
 {
   protected:
-    cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-
     cPar *consumptionIntervalParameter = nullptr;
     cMessage *consumptionTimer = nullptr;
 

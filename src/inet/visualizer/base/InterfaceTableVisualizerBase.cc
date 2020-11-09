@@ -119,7 +119,7 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
     return result.c_str();
 }
 
-InterfaceTableVisualizerBase::~InterfaceTableVisualizerBase()
+void InterfaceTableVisualizerBase::preDelete(cComponent *root)
 {
     if (displayInterfaceTables) {
         unsubscribe();

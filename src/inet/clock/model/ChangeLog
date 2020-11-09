@@ -1,0 +1,6 @@
+2020-07-31  Levente Mészáros and Zoltán Böjthe
+
+	Added new clock model package which supports the simulationo of hardware
+	clocks with clock drift. See the User's Guide for more details.
+
+	Added new modules: IdealClock, OscillatorBasedClock, and SettableClock.

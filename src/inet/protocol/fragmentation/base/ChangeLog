@@ -1,0 +1,3 @@
+2020-08-26  Levente Mészáros
+
+	Added new base package with modules: DefragmenterBase and FragmenterBase.

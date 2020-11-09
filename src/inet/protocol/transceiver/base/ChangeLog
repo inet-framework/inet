@@ -1,0 +1,4 @@
+2020-10-30  Levente Mészáros
+
+	Added new base package with modules: PacketReceiverBase, PacketTransmitterBase,
+	StreamingReceiverBase, and StreamingTransmitterBase.

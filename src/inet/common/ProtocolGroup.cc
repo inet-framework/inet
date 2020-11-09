@@ -118,6 +118,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 46, &Protocol::rsvpTe },
     { 48, &Protocol::dsr },
     { 58, &Protocol::icmpv6 },
+    { 88, &Protocol::eigrp },
     { 89, &Protocol::ospf },
     { 103, &Protocol::pim },
     { 132, &Protocol::sctp },

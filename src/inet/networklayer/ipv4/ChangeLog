@@ -1,5 +1,43 @@
 ====== inet-4.x ======
 
+2020-09-15  Levente Mészáros
+
+	Added missing registerProtocol call to Igmpv2.
+	Added missing icons to module interfaces.
+
+2020-09-11  Levente Mészáros
+
+	Changed Ipv4 to add DispatchProtocolReq only if there's a protocol required
+	by the network interface, otherwise send to the network interface directly.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-07-06  Zoltan Bojthe
+
+	Fix Igmpv2 for missing Ipv4InterfaceData.
+
+2020-07-02  Zoltan Bojthe
+
+	Fixed init stages to use new INITSTAGE_NETWORK_LAYER_PROTOCOLS.
+
+2020-06-30  Levente Mészáros
+
+	Added DispatchProtocolReq tags in Ipv4 to outgoing packets with the protocol of the interface.
+
+2020-04-14  Levente Mészáros
+
+	Added TosInd, EcnInd, and DscpInd for outgoing packets in Ipv4.
+
+2020-02-19  Zoltan Bojthe
+
+	Remove obsolete unused procDelay NED parameter from Ipv4.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-16  Zoltan Bojthe

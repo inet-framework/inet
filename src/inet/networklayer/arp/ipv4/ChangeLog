@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2020-09-11  Levente Mészáros
+
+	Changed to add DispatchProtocolReq only if there's a protocol required by
+	the network interface, otherwise send to the network interface directly.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-06-30  Levente Mészáros
+
+	Added DispatchProtocolReq tags to outgoing packets with the protocol of the interface.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-02-11  Levente Mészáros

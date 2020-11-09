@@ -131,8 +131,10 @@ void StreamThroughTransmitter::endTx()
     lastInputProgressPosition = b(-1);
     // 4. notify producer
     auto gate = inputGate->getPathStartGate();
-    producer->handlePushPacketProcessed(packet, gate, true);
-    producer->handleCanPushPacketChanged(gate);
+    if (producer != nullptr) {
+        producer->handlePushPacketProcessed(packet, gate, true);
+        producer->handleCanPushPacketChanged(gate);
+    }
 }
 
 void StreamThroughTransmitter::abortTx()
@@ -167,8 +169,10 @@ void StreamThroughTransmitter::abortTx()
     lastInputProgressPosition = b(-1);
     // 6. notify producer
     auto gate = inputGate->getPathStartGate();
-    producer->handlePushPacketProcessed(packet, gate, true);
-    producer->handleCanPushPacketChanged(gate);
+    if (producer != nullptr) {
+        producer->handlePushPacketProcessed(packet, gate, true);
+        producer->handleCanPushPacketChanged(gate);
+    }
 }
 
 void StreamThroughTransmitter::scheduleBufferUnderrunTimer()

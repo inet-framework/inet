@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-10-29  Levente Mészáros
+
+	Added virtual and override qualifieres to socket send method.
+
+2020-05-30  Edward Longman
+
+	Mark socket as CLOSED when closed locally and don't close unopened sockets, see #527.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-18  Zoltan Bojthe

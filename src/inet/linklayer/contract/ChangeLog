@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2020-10-13  Levente Mészáros
+
+	Added IPolicyLayer module interface for VLAN policies and perhaps for future policy layers.
+
+2020-10-12  Levente Mészáros
+
+	Renamed IVlanInterface to IVirtualInterface.
+
+2020-06-30  Levente Mészáros
+
+	Added optional cut-through gates to all Ethernet interfaces.
+
+2020-06-17  Zoltan Bojthe
+
+	Eliminated duplicated ITrafficConditioner
+
+2020-04-03  Zoltan Bojthe
+
+	Added bitrate NED parameter to Ethernet interfaces.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-10-14  Levente Mészáros

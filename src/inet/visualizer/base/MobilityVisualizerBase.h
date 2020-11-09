@@ -76,12 +76,10 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
-
-  public:
-    virtual ~MobilityVisualizerBase();
 };
 
 } // namespace visualizer

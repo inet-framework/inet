@@ -1,5 +1,39 @@
 ====== inet-4.x ======
 
+2020-10-21  Zoltan Bojthe
+
+	Disabled receiveSignal() at simulation cleanup.
+
+2020-10-14  Zoltan Bojthe
+
+	Don't use the setTransmissionId() internal function,
+	using curTxPacket->getId() as transmissionId.
+
+2020-09-18  Zoltan Bojthe
+
+	Ported to the OMNeT++ transmission update API.
+
+2020-09-11  Levente Mészáros
+
+	NED: Removed protocol field from network interfaces that doesn't have an
+	external protocol module in the link layer.
+
+2020-07-24  Levente Mészáros
+
+	Added protocol parameter to PppInterface.
+
+2020-07-31  Zoltan Bojthe
+
+	Optimized sendRawBytes.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-06-17  Zoltan Bojthe
+
+	Eliminated duplicated ITrafficConditioner
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-10-14  Levente Mészáros

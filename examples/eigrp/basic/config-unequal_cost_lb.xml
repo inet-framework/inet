@@ -1,0 +1,72 @@
+<Devices>
+    <!-- R2 -->
+    <Router id="10.0.2.0">        
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.24.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.2.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        		<PassiveInterface>eth3</PassiveInterface>
+	     			<Variance>2</Variance>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>    
+        </Routing6>
+        
+    </Router>
+    
+    <!-- R3 -->
+    <Router id="10.0.3.0">
+        <Interfaces>
+            <Interface name="eth0">
+                <EIGRP-IPv4 asNumber="1">
+                	<Delay>11</Delay>
+                </EIGRP-IPv4>
+            </Interface>
+        </Interfaces>
+        
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network> 
+						<Network> 
+	        				<IPAddress>10.0.3.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>    
+        </Routing6>
+        
+    </Router>
+</Devices>

@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2020-08-03  Levente Mészáros
+
+	Extracted a separate OperationalMixin to allow mixing in this behavior into other classes.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-07-31  Levente Mészáros
+
+	Updated required list of mixin instantiations.
+	Fixed template class specializations for optional features.
+
+2020-05-18  Levente Mészáros
+
+	Extracted separate implementation files from OperationalMixin to allow 3rd
+	party projects to use the mixin without modifying INET.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-01-28  ------ inet-4.1.0 released ------

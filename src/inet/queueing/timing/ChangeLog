@@ -1,0 +1,3 @@
+2020-08-14  Levente Mészáros
+
+	Added new timing package with modules: TimingMeasurementStarter and TimingMeasurementMaker.

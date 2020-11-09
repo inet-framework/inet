@@ -1,5 +1,114 @@
 ====== inet-4.x ======
 
+2020-10-21  Levente Mészáros
+
+	Replaced plain pointers with module references in PacketFilterBase/PacketFlowBase.
+
+2020-10-20  Levente Mészáros
+
+	Fixed the usage of network interface ID in PacketTaggerBase.
+
+2020-10-19  Levente Mészáros
+
+	Adapted PacketProcessorBase to the latest OMNeT++ SendOptions parameter.
+
+2020-10-08  Levente Mészáros
+
+	Added attachDirectionTag parameter to PacketSourceBase.
+
+2020-09-22  Levente Mészáros
+
+	Added IdentityTag support to PacketSourceBase and parameters to control
+	whether attach tags to data.
+
+2020-09-03  Levente Mészáros
+
+	Adapted animation of synchronous packet sends in PacketProcessorBase.
+	Added guard to PacketSchedulerBase against propagating a pull packet changed
+	from a gate that would not be scheduled.
+
+2020-08-03  Levente Mészáros
+
+	Merged PacketQueueingElementBase into PacketProcessorBase.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-07-03  Adriaan Nieß
+
+	Fixed calling handleCanPullPacket when gate closes to interrupt packet streams.
+	Added missing signal definition.
+
+2020-07-03  Levente Mészáros
+
+	Added reverseOrder parameter to PacketSchedulerBase.
+	Added support to PacketClassifierBase for pulling packets.
+	Added support to PacketSchedulerBase for pushing packets.
+
+2020-06-19  Levente Mészáros
+
+	Fixed duplicate call in PacketFilterBase when pushPacketEnd is called.
+
+2020-05-18  Levente Mészáros
+
+	Fixed setting arrival time when the envir is not a GUI.
+
+2020-05-05  Levente Mészáros
+
+	Added a few utility functions to PacketProcessorBase.
+	Deleted pushOrSendPacket() without a consumer parameter.
+
+2020-05-04  Levente Mészáros
+
+	Added animation for pushing packet progress.
+	Added reverseOrder parameter to PacketClassifierBase.
+
+2020-04-27  Levente Mészáros
+
+	Extended IPassivePacketSink packet streaming interface with a datarate parameter.
+
+2020-04-23  Levente Mészáros
+
+	Added gateStateChanged signal to packet gates.
+	Added PacketGateBase and IPacketGate.
+
+2020-04-17  Levente Mészáros
+
+	Fixed missing take() calls in pushPacket.
+
+2020-04-16  Levente Mészáros
+
+	Added a separate processPacket method for side effects in PacketFilterBase.
+
+2020-04-14  Zoltan Bojthe
+
+	Renamed IPacketQueueingElement to IPacketProcessor.
+	Added canPushPacket, canPushSomePacket to PacketFilterBase.
+	Added handlePacketProcessed to PacketProcessorBase.
+	Added invalid operation errors as packet streaming implementation to several modules.
+	Implemented packet streaming support in PacketFilterBase, PacketClassifierBase and PacketSchedulerBase.
+	Implemented handle handlePushPacketProcessed and handlePullPacketProcessed in several simple cases.
+	Added default support flags to PacketQueueingElementBase.
+	Added pushOrSendPacket* methods to PacketQueueingElementBase to support packet streaming.
+
+2020-04-09  Levente Mészáros
+
+	Implemented enqueuePacket/dequeuePacket with PacketQueueBase.
+	Moved inputGate/outputGate from derived modules to PacketQueueBase.
+	Removed default argument value for gate parameters in push and pull methods.
+
+2020-04-08  Levente Mészáros
+
+	Reduced redundancy around various PacketFlowBase derived modules.
+	Moved taking packet ownership from protected base class method to public methods.
+	Added new base classes PacketPullerBase, PacketPusherBase, PacketFlowBase.
+	Added separate PacketFilterBase::dropPacket() to allow specifying the reason in derived classes.
+	Added new base class PassivePacketSourceBase.
+	Added the virtual qualifier to interface base classes to allow arbitrary multiple inheritance.
+	Refactored the checking of packet operation support during initialize.
+	Fixed Qtenv animation crash.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

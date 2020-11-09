@@ -50,7 +50,7 @@ class INET_API EncryptedChunk : public Chunk
     /** @name Constructors, destructors and duplication related functions */
     //@{
     EncryptedChunk();
-    EncryptedChunk(const EncryptedChunk& other);
+    EncryptedChunk(const EncryptedChunk& other) = default;
     EncryptedChunk(const Ptr<Chunk>& chunk, b length);
 
     virtual EncryptedChunk *dup() const override { return new EncryptedChunk(*this); }

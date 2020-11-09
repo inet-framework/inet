@@ -39,7 +39,7 @@ void PacketTransmitterBase::initialize(int stage)
         txDatarate = bps(*dataratePar);
         inputGate = gate("in");
         outputGate = gate("out");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
+        producer.reference(inputGate, false);
         txEndTimer = new ClockEvent("TxEndTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -57,7 +57,8 @@ void PacketTransmitterBase::handleMessageWhenUp(cMessage *message)
 
 void PacketTransmitterBase::handleStartOperation(LifecycleOperation *operation)
 {
-    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+    if (producer != nullptr)
+        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
 Signal *PacketTransmitterBase::encodePacket(Packet *packet) const

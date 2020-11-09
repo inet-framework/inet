@@ -60,8 +60,10 @@ class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::N
 
     virtual osg::Node *getMainPart() { return getChild(0); }
 
+    virtual int getNumAnnotations() const { return annotations.size(); }
     virtual void addAnnotation(osg::Node *annotation, osg::Vec3d size, double priority);
     virtual void removeAnnotation(osg::Node *node);
+    virtual void removeAnnotation(int index);
 };
 
 #endif // ifdef WITH_OSG

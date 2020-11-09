@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2020-08-25  Levente Mészáros
+
+	Adapted to new EV_FIELD macro.
+
+2020-08-03  Levente Mészáros
+
+	Removed setArrival calls, this is not needed anymore.
+
+2020-05-19  Levente Mészáros
+
+	Added packet event insertion to several modules.
+
+2020-04-08  Levente Mészáros
+
+	Moved taking packet ownership from protected base class method to public methods.
+	Added new InstantServer module.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

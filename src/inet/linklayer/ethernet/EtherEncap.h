@@ -59,6 +59,7 @@ class INET_API EtherEncap : public Ieee8022Llc
         bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
     };
 
+    friend std::ostream& operator << (std::ostream& o, const Socket& t);
     std::map<int, Socket *> socketIdToSocketMap;
 
   protected:

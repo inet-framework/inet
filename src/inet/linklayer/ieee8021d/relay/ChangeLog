@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2020-10-27  Levente Mészáros
+
+	Changed to duplicate the packet instead of creating a new one when forwarding.
+
+2020-10-13  Levente Mészáros
+
+	Added VlanInd -> VlanReq to forwarding.
+
+2020-09-15  Levente Mészáros
+
+	Refactored Ieee8021dRelay to be based on MacRelayUnitBase module.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-01-28  ------ inet-4.1.0 released ------
@@ -14,7 +34,8 @@
 
 2018-09-27  Levente Mészáros
 
-	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
 2018-09-19  Zoltan Bojthe
 
 	Adapted to the new protocol specific data storage API of InterfaceEntry.

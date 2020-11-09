@@ -143,6 +143,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual bool isSignalPropagationInProgress(const physicallayer::ITransmission *transmission) const;
     virtual bool isSignalTransmissionInProgress(const physicallayer::ITransmission *transmission) const;
@@ -161,8 +162,6 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) = 0;
 
   public:
-    virtual ~MediumVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 #endif // WITH_RADIO
 };

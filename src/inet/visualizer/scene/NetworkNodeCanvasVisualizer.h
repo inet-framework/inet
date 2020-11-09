@@ -42,6 +42,7 @@ class INET_API NetworkNodeCanvasVisualizer : public NetworkNodeVisualizerBase
     virtual void removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override;
 
   public:
+    virtual ~NetworkNodeCanvasVisualizer();
     virtual NetworkNodeCanvasVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override;
 };
 

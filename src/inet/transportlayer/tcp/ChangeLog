@@ -1,5 +1,57 @@
 ====== inet-4.x ======
 
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-09-03  Andras Varga
+
+	Removed ulong, as its size is platform-dependent (on Windows, long=int32!)
+
+2020-09-02  Andras Varga
+
+	Renamed packet -> tcpSegment and tcpseg -> tcpHeader, for clarity.
+
+2020-09-01  Andras Varga
+
+	Removed code to withhold last, fractional segment if there's more data in
+	the send buffer. See #558.
+
+	I have not found an explicit statement about this in the RFCs. However, I
+	found pcap traces of TCP file transfers (e.g. tcp-ethereal-file1.trace on
+	https://wiki.wireshark.org/SampleCaptures), which contain several
+	instances of a burst of full-size segments followed by a fractional one,
+	which indicates that this change is probably right.
+
+2020-08-31  Andras Varga
+
+	Updating state->snd_max moved into sendSegment()
+
+2020-08-28  Andras Varga
+
+	Removed state->sentBytes, converted to retval of sendSegment().
+
+	It was only used immediately after a sendSegment(), and contained the
+	payload length in the segment just sent. This is better done with
+	sendSegment()'s return value.
+
+2020-08-25  Andras Varga
+
+	Fixed #558: Nagle was not obeyed for data > MSS sent (credit: Marius Poke)
+
+2020-06-04  Zoltan Bojthe
+
+	Added new statistic tcpRcvPayloadBytes to TcpConnection: amount of payload
+	bytes received (including duplicates, out of order etc) for TCP throughput.
+
+2020-06-03  Marcel Marek
+
+	Added signal/statistics for rcvdPayloadBytes
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-18  Marcel Marek

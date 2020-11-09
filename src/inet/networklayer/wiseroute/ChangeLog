@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-04-06  Zoltan Bojthe
+
+	Fixed using the new headerKind field of WiseRouteHeader instead of cMessage.kind.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-07  Zoltan Bojthe

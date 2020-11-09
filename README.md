@@ -1,7 +1,7 @@
-| CI Status | master |
-|-----------|:------:|
-| Build and fingerprint tests | [![Travis CI][travis-master]][1] |
-| Feature enablement tests    | [![CircleCI][circle-master]][3]  |
+| CI Status                |                                      |
+|--------------------------|-------------------------------------:|
+| Build and tests          | [![GitHub badge][github-badge]][1]   |
+| Feature enablement tests | [![CircleCI badge][circle-badge]][2] |
 
 
 Warning this version needs at least omnet++ 6-pre9.
@@ -74,12 +74,8 @@ Inetmanet is compatible with inet framework but it has several differences.
 
 
 
-[travis-master]: https://travis-ci.org/inet-framework/inet.svg?branch=master
-[travis-integration]: https://travis-ci.org/inet-framework/inet.svg?branch=integration
-[circle-master]: https://circleci.com/gh/inet-framework/inet/tree/master.svg?style=svg
-[circle-integration]: https://circleci.com/gh/inet-framework/inet/tree/integration.svg?style=svg
+[github-badge]: https://github.com/inet-framework/inet/workflows/Build%20and%20tests/badge.svg?branch=master
+[circle-badge]: https://circleci.com/gh/inet-framework/inet/tree/master.svg?style=svg
 
-[1]: https://travis-ci.org/inet-framework/inet/branches
-[2]: https://travis-ci.org/inet-framework/inet/branches
-[3]: https://circleci.com/gh/inet-framework/workflows/inet/tree/master
-[4]: https://circleci.com/gh/inet-framework/workflows/inet/tree/integration
+[1]: https://github.com/inet-framework/inet/actions?query=workflow%3A%22Build+and+tests%22
+[2]: https://circleci.com/gh/inet-framework/workflows/inet/tree/master

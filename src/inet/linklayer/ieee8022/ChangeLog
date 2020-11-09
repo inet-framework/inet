@@ -1,5 +1,31 @@
 ====== inet-4.x ======
 
+2020-10-30  Levente Mészáros
+
+	Reused SocketBase and default socket commands in socket and related processing.
+
+2020-10-29  Levente Mészáros
+
+	Refactored Ieee8022LlcLayer similarly to EthernetLayer and Ieee8021qLayer for socket support.
+	Refactored Ieee8022SocketTable and Ieee8022Socket*Processor classes similarly
+	to Ethernet and 802.1Q variants.
+
+2020-09-25  Levente Mészáros
+
+	Refactored and documented the 802.2 LLC and SNAP header chunks according to the standard.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-06-11  Levente Mészáros
+
+	Added a separate 802.2 LLC header.
+
+2020-04-20  Levente Mészáros
+
+	Added optional CTAG, STAG and LLC support to the new Ethernet interface.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-09-02  Zoltan Bojthe

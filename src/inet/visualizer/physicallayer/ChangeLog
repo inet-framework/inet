@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2020-10-21  Levente Mészáros
+
+	Moved visualization removal in destructors to visualizer base classes.
+	Added check if the network node visualizer is still present
+	when removing other visualizations which add annotations.
+	Changed pointers to NetworkNode*Visualizer to use ModuleRefByPar.
+
+2020-03-18  Levente Mészáros
+
+	Added powerDensityMapPixelMode and spectrogramPixelMode parameters.
+
+2020-01-09  Levente Mészáros
+
+	Fixed medium signal power density visualization when dragging a network node.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-18  Levente Mészáros

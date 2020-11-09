@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-07-02  Zoltan Bojthe
+
+	Fixed init stages to use new INITSTAGE_NETWORK_LAYER_PROTOCOLS.
+
+2020-01-08  Zoltan Bojthe
+
+	Fixed Ipv6HeaderSerializer.
+	Fixed Ipv6Header field types, added 'reserved' field.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-05  Zoltan Bojthe

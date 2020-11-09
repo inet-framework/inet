@@ -28,12 +28,6 @@ BytesChunk::BytesChunk() :
 {
 }
 
-BytesChunk::BytesChunk(const BytesChunk& other) :
-    Chunk(other),
-    bytes(other.bytes)
-{
-}
-
 BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
     Chunk(),
     bytes(bytes)

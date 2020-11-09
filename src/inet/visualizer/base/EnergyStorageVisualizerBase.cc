@@ -31,7 +31,7 @@ EnergyStorageVisualizerBase::EnergyStorageVisualization::EnergyStorageVisualizat
 {
 }
 
-EnergyStorageVisualizerBase::~EnergyStorageVisualizerBase()
+void EnergyStorageVisualizerBase::preDelete(cComponent *root)
 {
     if (displayEnergyStorages)
         removeAllEnergyStorageVisualizations();

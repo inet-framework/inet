@@ -54,7 +54,7 @@ class INET_API BytesChunk : public Chunk
     /** @name Constructors, destructors and duplication related functions */
     //@{
     BytesChunk();
-    BytesChunk(const BytesChunk& other);
+    BytesChunk(const BytesChunk& other) = default;
     BytesChunk(const std::vector<uint8_t>& bytes);
     BytesChunk(const uint8_t *buffer, size_t bufLen) : Chunk(), bytes(buffer, buffer + bufLen) { }
 

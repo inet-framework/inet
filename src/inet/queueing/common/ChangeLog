@@ -1,5 +1,49 @@
 ====== inet-4.x ======
 
+2020-09-04  Levente Mészáros
+
+	Refactored a few more EV statements to use the new macros.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-07-22  Levente Mészáros
+
+	Added ProgressTag to store datarate and position parameters when streaming packets.
+
+2020-06-19  Levente Mészáros
+
+	Extended propagation of register service calls in PacketMultiplexer.
+	Added packet event insertion to several modules.
+
+2020-05-18  Levente Mészáros
+
+	Fixed message handling in PacketDelayer.
+
+2020-08-03  Levente Mészáros
+
+	Removed setArrival calls, this is not needed anymore.
+
+2020-05-05  Levente Mészáros
+
+	Fixed incorrect base class of PacketCloner.
+
+2020-05-04  Levente Mészáros
+
+	Added OmittedPacketFLow module to support optional packet flow submodules.
+
+2020-04-14  Levente Mészáros
+
+	Added protocol registration support to PacketMultiplexer.
+	Implemented packet streaming support in PacketMultiplexer.
+	Implemented handle handlePushPacketProcessed and handlePullPacketProcessed.
+
+2020-04-08  Levente Mészáros
+
+	Moved taking packet ownership from protected base class method to public methods.
+	Added the virtual qualifier to interface base classes to allow arbitrary multiple inheritance.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

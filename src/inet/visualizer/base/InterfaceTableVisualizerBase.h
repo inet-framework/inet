@@ -76,6 +76,7 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -96,8 +97,6 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) = 0;
 
   public:
-    virtual ~InterfaceTableVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

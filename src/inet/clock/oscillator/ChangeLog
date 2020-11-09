@@ -1,0 +1,4 @@
+2020-07-31  Levente Mészáros and Zoltán Böjthe
+
+	Added new oscillator package with modules: IdealOscillator,
+	ConstantDriftOscillator, and RandomDriftOscillator.

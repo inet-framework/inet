@@ -33,7 +33,7 @@ StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int modu
 {
 }
 
-StatisticVisualizerBase::~StatisticVisualizerBase()
+void StatisticVisualizerBase::preDelete(cComponent *root)
 {
     if (displayStatistics) {
         unsubscribe();

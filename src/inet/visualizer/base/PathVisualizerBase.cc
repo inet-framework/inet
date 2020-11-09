@@ -57,7 +57,7 @@ const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directi
     return result.c_str();
 }
 
-PathVisualizerBase::~PathVisualizerBase()
+void PathVisualizerBase::preDelete(cComponent *root)
 {
     if (displayRoutes) {
         unsubscribe();

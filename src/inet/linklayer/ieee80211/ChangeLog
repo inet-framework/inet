@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2020-09-25  Levente Mészáros
+
+	Moved Ieee80211EtherType* to ieee802 folder.
+
+2020-09-11  Levente Mészáros
+
+	Removed protocol field from network interfaces that doesn't have an external
+	protocol module in the link layer.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-01-22  Levente Mészáros

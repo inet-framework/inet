@@ -1,5 +1,35 @@
 ====== inet-4.x ======
 
+2020-08-05  Levente Mészáros
+
+	Moved DynamicClassifier under queueing.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-07-03  Levente Mészáros
+
+	Moved reverseOrder parameter handling into the classifyPacket functions.
+
+2020-05-04  Levente Mészáros
+
+	Adapted packet classifiers to new naming scheme that includes Req/Ind.
+
+2020-04-15  Levente Mészáros
+
+	Changed pullPacketProgress to allow the active module to control the packet streaming.
+
+2020-04-14  Levente Mészáros
+
+	Implemented handle handlePushPacketProcessed and handlePullPacketProcessed.
+
+2020-04-08  Levente Mészáros
+
+	Moved taking packet ownership from protected base class method to public methods.
+	Added the virtual qualifier to interface base classes to allow arbitrary multiple inheritance.
+	Fixed initializing various function fields to nullptr.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

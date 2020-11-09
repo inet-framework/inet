@@ -29,7 +29,7 @@ RadioVisualizerBase::RadioVisualization::RadioVisualization(const int radioModul
 {
 }
 
-RadioVisualizerBase::~RadioVisualizerBase()
+void RadioVisualizerBase::preDelete(cComponent *root)
 {
     if (displayRadios) {
         unsubscribe();

@@ -1,0 +1,38 @@
+<Devices>
+	<!-- R1 -->
+	<Router id="10.0.1.0">
+        <Interfaces>
+            <Interface name="eth0">
+                <EIGRP-IPv4 asNumber="1">
+                	<SplitHorizon>disabled</SplitHorizon>
+                </EIGRP-IPv4>
+            </Interface>        
+        </Interfaces>
+        
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.1.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+	        		</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>
+        </Routing6>
+        
+    </Router>
+</Devices>

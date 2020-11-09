@@ -1,0 +1,208 @@
+<Devices>
+	<!-- R1 -->
+	<Router id="2001:db8:a::1">
+        <Interfaces>
+            <Interface name="eth2">
+            	<IPv6Address>fe80:a::1/10</IPv6Address>
+                <IPv6Address>2001:db8:a::1/64</IPv6Address>
+                <EIGRP-IPv6 asNumber='1'>
+                </EIGRP-IPv6>
+            </Interface>
+            <Interface name="eth0">               
+				<IPv6Address>2001:db8:12::1/64</IPv6Address>
+				<IPv6Address>fe80:12::1/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>
+            <Interface name="eth1">               
+				<IPv6Address>2001:db8:13::1/64</IPv6Address>
+				<IPv6Address>fe80:13::1/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>        
+        </Interfaces>
+        
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.1.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+					</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>
+        	<EIGRP>
+	        	<ProcessIPv6 asNumber="1" routerId="10.0.1.0">
+	        		<PassiveInterface>eth2</PassiveInterface>
+	        	</ProcessIPv6>
+        	</EIGRP>
+        </Routing6>
+    </Router>
+    
+    <!-- R2 -->
+    <Router id="2001:db8:b::1">
+        <Interfaces>
+            <Interface name="eth3">
+                <IPv6Address>fe80:b::1/10</IPv6Address>
+                <IPv6Address>2001:db8:b::1/64</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>
+            <Interface name="eth0">
+                <IPv6Address>2001:db8:12::2/64</IPv6Address>
+                <IPv6Address>fe80:12::2/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1'/>
+            </Interface>
+            <Interface name="eth1">
+                <IPv6Address>2001:db8:23::2/64</IPv6Address>
+                <IPv6Address>fe80:23::2/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1'/>
+            </Interface> 
+            <Interface name="eth2">
+                <IPv6Address>2001:db8:24::2/64</IPv6Address>
+                <IPv6Address>fe80:24::2/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1'/>
+            </Interface>
+        </Interfaces>
+        
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.2.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.12.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.24.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+	        		</Networks>
+	        		<PassiveInterface>eth3</PassiveInterface>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>
+        	<EIGRP>
+	        	<ProcessIPv6 asNumber="1" routerId="10.0.2.0">
+	        		<PassiveInterface>eth3</PassiveInterface>
+	        	</ProcessIPv6>
+        	</EIGRP>
+        </Routing6>
+    </Router>
+
+	<!-- R3 -->
+	<Router id="2001:db8:c::1">
+        <Interfaces>
+            <Interface name="eth2">
+                <IPv6Address>fe80:c::1/10</IPv6Address>
+                <IPv6Address>2001:db8:c::1/64</IPv6Address>
+                <EIGRP-IPv6 asNumber='1'>
+                </EIGRP-IPv6>
+            </Interface>
+            <Interface name="eth1">
+				<IPv6Address>2001:db8:23::3/64</IPv6Address>
+				<IPv6Address>fe80:23::3/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>
+            <Interface name="eth0">
+				<IPv6Address>2001:db8:13::3/64</IPv6Address>
+				<IPv6Address>fe80:13::3/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>        
+        </Interfaces>
+        
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.3.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.13.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.23.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+	        		</Networks>
+	        		<PassiveInterface>eth2</PassiveInterface>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>
+        	<EIGRP>
+	        	<ProcessIPv6 asNumber="1" routerId="10.0.3.0">
+	        		<PassiveInterface>eth2</PassiveInterface>
+	        	</ProcessIPv6>
+        	</EIGRP>
+        </Routing6>
+    </Router>
+    
+	<!-- R4 -->
+	<Router id="2001:db8:d::1">
+        <Interfaces>
+            <Interface name="eth1">
+            	<IPv6Address>fe80:d::1/10</IPv6Address>
+                <IPv6Address>2001:db8:d::1/64</IPv6Address>
+                <EIGRP-IPv6 asNumber='1'>
+                </EIGRP-IPv6>
+            </Interface>
+            <Interface name="eth0">
+				<IPv6Address>2001:db8:24::4/64</IPv6Address>
+				<IPv6Address>fe80:24::4/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>        
+        </Interfaces>
+        
+        <Routing>
+        	<EIGRP>
+	        	<ProcessIPv4 asNumber="1">
+	        		<Networks>
+	        			<Network> 
+	        				<IPAddress>10.0.4.0</IPAddress>						 
+						 	<Wildcard>0.0.0.255</Wildcard>
+						</Network>
+						<Network> 
+	        				<IPAddress>10.0.24.0</IPAddress>						 
+						 	<Wildcard>0.0.0.3</Wildcard>
+						</Network>
+	        		</Networks>
+	        		<PassiveInterface>eth1</PassiveInterface>
+	        	</ProcessIPv4>
+        	</EIGRP>
+        </Routing>
+        
+        <Routing6>
+        	<EIGRP>
+	        	<ProcessIPv6 asNumber="1" routerId="10.0.4.0">
+	        		<PassiveInterface>eth1</PassiveInterface>
+	        	</ProcessIPv6>
+        	</EIGRP>
+        </Routing6>
+    </Router>
+</Devices>

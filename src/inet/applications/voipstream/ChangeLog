@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2020-10-21  Zoltan Bojthe
+
+	Fixed swapped inBytesPerSample and outBytesPerSample.
+
+2020-09-11  Levente Mészáros
+
+	Updated for avcodec-7:4.2.4.
+
+	Fixed sample format, old hack didn't work under Ubuntu 20.04. BUT: This
+	change alters the fingerprints of VoIP simulations.
+
+2020-07-20  Levente Mészáros
+
+	Fixed warmup period for compound source expressions, see bug #549.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-28  Zoltan Bojthe

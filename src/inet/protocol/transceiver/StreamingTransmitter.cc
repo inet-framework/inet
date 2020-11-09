@@ -86,8 +86,10 @@ void StreamingTransmitter::endTx()
     txStartClockTime = -1;
     // 4. notify producer
     auto gate = inputGate->getPathStartGate();
-    producer->handlePushPacketProcessed(packet, gate, true);
-    producer->handleCanPushPacketChanged(gate);
+    if (producer != nullptr) {
+        producer->handlePushPacketProcessed(packet, gate, true);
+        producer->handleCanPushPacketChanged(gate);
+    }
 }
 
 void StreamingTransmitter::abortTx()
@@ -116,8 +118,10 @@ void StreamingTransmitter::abortTx()
     txStartClockTime = -1;
     // 6. notify producer
     auto gate = inputGate->getPathStartGate();
-    producer->handlePushPacketProcessed(packet, gate, true);
-    producer->handleCanPushPacketChanged(gate);
+    if (producer != nullptr) {
+        producer->handlePushPacketProcessed(packet, gate, true);
+        producer->handleCanPushPacketChanged(gate);
+    }
 }
 
 void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)

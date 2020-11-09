@@ -63,6 +63,7 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -76,8 +77,6 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     virtual std::string getIcon(W power) const;
 
   public:
-    virtual ~Ieee80211VisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

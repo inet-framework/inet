@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-05-18  Levente Mészáros
+
+	Extended path visualization support with labels allowing multiple paths along the same path.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-01-28  ------ inet-4.1.0 released ------

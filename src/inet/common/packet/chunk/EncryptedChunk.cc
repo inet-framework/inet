@@ -29,13 +29,6 @@ EncryptedChunk::EncryptedChunk() :
 {
 }
 
-EncryptedChunk::EncryptedChunk(const EncryptedChunk& other) :
-    Chunk(other),
-    chunk(other.chunk),
-    length(other.length)
-{
-}
-
 EncryptedChunk::EncryptedChunk(const Ptr<Chunk>& chunk, b length) :
     Chunk(),
     chunk(chunk),

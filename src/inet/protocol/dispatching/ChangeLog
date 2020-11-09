@@ -1,0 +1,3 @@
+2020-08-03  Levente Mészáros
+
+	Added new dispatching package with modules: ReceiveWithProtocol and SendWithProtocol.

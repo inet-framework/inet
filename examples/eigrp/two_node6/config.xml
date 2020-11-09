@@ -1,0 +1,61 @@
+<Devices>
+	<!-- R1 -->
+	<Router id="10.0.1.0">
+        <Interfaces>
+            <Interface name="eth0">
+                <IPv6Address>fe80::1/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>
+            <Interface name="eth1">
+				<IPv6Address>fe80::1/10</IPv6Address>
+				<IPv6Address>2001:3::1/64</IPv6Address>
+				<IPv6Address>2001:A::1/48</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>        
+        </Interfaces>
+        
+        <Routing>
+        </Routing>
+        
+        <Routing6>
+        	<EIGRP>
+	        	<ProcessIPv6 asNumber="1" routerId="10.0.1.0">
+	        		<PassiveInterface>eth1</PassiveInterface>
+	        		<Variance>2</Variance>
+	        		<Stub />
+	        		<MaximumPath>32</MaximumPath>
+	        	</ProcessIPv6>
+        	</EIGRP>
+        </Routing6>
+        
+    </Router>
+    
+    <!-- R2 -->
+    <Router id="10.0.2.0">
+        <Interfaces>
+            <Interface name="eth0">
+            	<IPv6Address>fe80::2/10</IPv6Address>
+                <EIGRP-IPv6 asNumber='1' />
+            </Interface>
+            <Interface name="eth1">
+                <IPv6Address>fe80::2/10</IPv6Address>
+                <IPv6Address>2001:4::1/64</IPv6Address>
+                <IPv6Address>2001:B::1/48</IPv6Address>
+                <EIGRP-IPv6 asNumber='1'/>
+            </Interface> 
+        </Interfaces>
+        
+        <Routing>
+        </Routing>
+        
+        <Routing6>
+        	<EIGRP>
+	        	<ProcessIPv6 asNumber="1" routerId="10.0.2.0">
+	        		<PassiveInterface>eth1</PassiveInterface>
+	        	</ProcessIPv6>
+        	</EIGRP>
+        </Routing6>
+        
+    </Router>
+    
+</Devices>

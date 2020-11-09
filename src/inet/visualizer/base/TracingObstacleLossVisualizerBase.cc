@@ -27,7 +27,7 @@ namespace visualizer {
 using namespace inet::physicalenvironment;
 using namespace inet::physicallayer;
 
-TracingObstacleLossVisualizerBase::~TracingObstacleLossVisualizerBase()
+void TracingObstacleLossVisualizerBase::preDelete(cComponent *root)
 {
     if (displayIntersections) {
         unsubscribe();

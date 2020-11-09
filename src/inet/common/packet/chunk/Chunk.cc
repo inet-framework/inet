@@ -32,6 +32,8 @@ Chunk::Chunk() :
 }
 
 Chunk::Chunk(const Chunk& other) :
+    cObject(other),
+    SharedBase<Chunk>(other),
     id(nextId++),
     flags(other.flags & ~CF_IMMUTABLE),
     regionTags(other.regionTags)

@@ -65,6 +65,7 @@ class INET_API LinkBreakVisualizerBase : public VisualizerBase, public cListener
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -78,8 +79,6 @@ class INET_API LinkBreakVisualizerBase : public VisualizerBase, public cListener
     virtual cModule *findNode(MacAddress address);
 
   public:
-    virtual ~LinkBreakVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

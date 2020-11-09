@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<scenario>
+  	<!-- Scenarios for stub --> 	 	
+  	<at t="10">    	
+    	<disconnect src-module="R1" src-gate="ethg[1]"/>    	
+  	</at>
+  	<at t="30">    	
+    	<disconnect src-module="R1" src-gate="ethg[2]"/>    	
+  	</at>
+  
+</scenario>

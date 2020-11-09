@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-10-21  Levente Mészáros
+
+	Moved the deletion of the connection specific buffer to TcpLwipConnection.
+
+2020-09-16  Levente Mészáros
+
+	Replaced (u)int8..64 with the standard (u)int8..64_t types.
+
+2020-09-02  Zoltan Bojthe
+
+	Replaced assert to cRuntimeError (usage error instead of model error).
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-27  Zoltan Bojthe

@@ -106,6 +106,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
+    virtual void preDelete(cComponent *root) override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -133,8 +134,6 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet);
 
   public:
-    virtual ~PathVisualizerBase();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

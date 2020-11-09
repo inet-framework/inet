@@ -71,7 +71,6 @@ class INET_API ModuleRefByPar
     }
 
     operator T *() const {
-        checkReference();
         return referencedModule;
     }
 

@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-07-30  Zoltan Bojthe
+
+	Added optional clock support to UdpBasicApp.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-05-07  Levente Mészáros
+
+	Changed UdpSocketIo to allow destAddr to be not filled (e.g. sink behavior).
+
+2020-05-04  Levente Mészáros
+
+	Added optional outbound/inbound packet flow submodules to UdpApp, TcpClientApp and TcpServerConnection.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-19  Levente Mészáros

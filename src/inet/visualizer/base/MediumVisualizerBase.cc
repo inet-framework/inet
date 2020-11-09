@@ -33,7 +33,7 @@ namespace visualizer {
 
 using namespace inet::physicallayer;
 
-MediumVisualizerBase::~MediumVisualizerBase()
+void MediumVisualizerBase::preDelete(cComponent *root)
 {
     // NOTE: lookup the medium module again because it may have been deleted first
     auto radioMediumModule = findModuleFromPar<cModule>(par("mediumModule"), this);

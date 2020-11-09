@@ -1,5 +1,39 @@
 ====== inet-4.x ======
 
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-06-29  Zoltan Bojthe
+
+	Fixed Stop/Crash handlers and some memory leak.
+	Optimized jitter: jitterTimer contains owned packet, jitterTimers are stored in std::set.
+
+2020-05-30  Edward Longman
+
+	Reimplement sendDelayed the Dymo jitter packet with local timer queue, see #527.
+
+	sendDelayed relies on the assumption that the receiving module will be in
+	the same state after the delay.
+
+	When the Dymo module sends a packet it delays it delays it to reduce
+	contention probability for MANET (RFC5148). If the host node shuts down
+	between scheduling and delivery the Ipv4 module throws a runtime error.
+	The sendDelayed message can't be tracked or cancelled from Dymo once
+	scheduled.
+
+	Therefore this adds a replacement map of outgoing packets with random
+	jitter added. Then the queue can be properly cleared on Stop operation
+	since the outgoing packets can be tracked.
+
+2020-05-30  Edward Longman
+
+	Cancel Dymo timers on StopOperation, see #527.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-09-02  Zoltan Bojthe

@@ -29,13 +29,6 @@ BitCountChunk::BitCountChunk() :
 {
 }
 
-BitCountChunk::BitCountChunk(const BitCountChunk& other) :
-    Chunk(other),
-    length(other.length),
-    data(other.data)
-{
-}
-
 BitCountChunk::BitCountChunk(b length, bool data) :
     Chunk(),
     length(length),

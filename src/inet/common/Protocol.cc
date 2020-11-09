@@ -121,6 +121,7 @@ const Protocol Protocol::manet("manet", "MANET");
 const Protocol Protocol::mobileipv6("mobileipv6", "Mobile IPv6");
 const Protocol Protocol::mpls("mpls", "MPLS");
 const Protocol Protocol::ospf("ospf", "OSPF");
+const Protocol Protocol::eigrp("eigrp", "EIGRP");
 const Protocol Protocol::pim("pim", "PIM");
 const Protocol Protocol::ppp("ppp", "PPP", Protocol::LinkLayer);
 const Protocol Protocol::rip("rip", "RIP");

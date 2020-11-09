@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2020-09-11  Levente Mészáros
+
+	Removed protocol field from network interfaces that doesn't have an external
+	protocol module in the link layer.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-06-30  Zoltan Bojthe
+
+	Added subscribe/unsubscribe for lifecycle signals.
+
+2020-05-30  Edward Longman
+
+	Implement LifecycleOperations for Ieee802154Mac to stop timers and start in IDLE.
+	Detect if currentTxFrame has been deleted when Radio does shutdown, see #527.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-11-14  Zoltan Bojthe
@@ -62,7 +80,8 @@
 
 2018-09-27  Levente Mészáros
 
-	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
 
 2018-08-17  Zoltan Bojthe
 

@@ -65,7 +65,7 @@ class INET_API SliceChunk : public Chunk
     /** @name Constructors, destructors and duplication related functions */
     //@{
     SliceChunk();
-    SliceChunk(const SliceChunk& other);
+    SliceChunk(const SliceChunk& other) = default;
     SliceChunk(const Ptr<Chunk>& chunk, b offset, b length);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }

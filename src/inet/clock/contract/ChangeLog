@@ -1,0 +1,3 @@
+2020-07-31  Levente Mészáros and Zoltán Böjthe
+
+	Added new clock contract package with module interfaces: IClock and IOscillator.

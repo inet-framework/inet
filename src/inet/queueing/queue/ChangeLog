@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2020-08-25  Levente Mészáros
+
+	Adapted to new EV_FIELD macro.
+
+2020-08-04  Levente Mészáros
+
+	Added OmittedPacketQueue module.
+
+2020-07-24  Levente Mészáros
+
+	Renamed several functions related to the word pop for consistency.
+
+2020-07-20  Levente Mészáros
+
+	Fixed warmup period for compound source expressions, see bug #549.
+
+2020-05-19  Levente Mészáros
+
+	Added packet event insertion to PacketQueue.
+
+2020-04-23  Levente Mészáros
+
+	Added SelectiveQueue, a priority queue with packet gates for each internal queue.
+
+2020-04-17  Levente Mészáros
+
+	Fixed missing take() calls in pushPacket.
+
+2020-04-09  Levente Mészáros
+
+	Implemented enqueuePacket/dequeuePacket with PacketQueueBase.
+
+2020-04-08  Levente Mészáros
+
+	Moved taking packet ownership from protected base class method to public methods.
+
+2020-02-18  Levente Mészáros
+
+	Added @defaultStatistic for a few modules.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2018-10-03  Levente Mészáros

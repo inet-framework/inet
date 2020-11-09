@@ -37,8 +37,8 @@ void PacketMultiplexer::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (int i = 0; i < (int)inputGates.size(); i++)
-            checkPacketOperationSupport(inputGates[i]);
+        for (auto & inputGate : inputGates)
+            checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }
 }
@@ -150,8 +150,8 @@ void PacketMultiplexer::handleRegisterProtocol(const Protocol& protocol, cGate *
     if (g != outputGate)
         registerProtocol(protocol, outputGate, servicePrimitive);
     else if (g == outputGate && servicePrimitive == SP_INDICATION)
-        for (int i = 0; i < (int)inputGates.size(); i++)
-            registerProtocol(protocol, inputGates[i], servicePrimitive);
+        for (auto & inputGate : inputGates)
+            registerProtocol(protocol, inputGate, servicePrimitive);
 }
 
 } // namespace queueing

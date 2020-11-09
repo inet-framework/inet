@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-08-31  Levente Mészáros
+
+	Added evFlags parameter to all printToStream methods and recursive calls.
+
+2020-08-25  Levente Mészáros
+
+	Changed EV output to use the new EV_FIELD macro where appropriate.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-09-23  Levente Mészáros

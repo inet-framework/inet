@@ -21,6 +21,7 @@
 #include "inet/common/base/ClockUserModuleMixin.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
+#include "inet/common/ModuleRef.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
@@ -38,7 +39,7 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
 
     cGate *inputGate = nullptr;
     cGate *outputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
+    ModuleRef<IActivePacketSource> producer;
 
     bps txDatarate = bps(NaN);
     Signal *txSignal = nullptr;

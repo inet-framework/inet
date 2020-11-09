@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-06-04  Levente Mészáros
+
+	Added & to const Coord where appropriate.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-18  Levente Mészáros
