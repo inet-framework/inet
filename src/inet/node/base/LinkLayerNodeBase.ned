@@ -25,7 +25,7 @@ import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IVirtualInterface;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.ethernet.layered.IEthernetLayer;
+import inet.linklayer.ethernet.composite.IEthernetLayer;
 import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.networklayer.common.InterfaceTable;
 

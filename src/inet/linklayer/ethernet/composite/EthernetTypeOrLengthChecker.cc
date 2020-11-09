@@ -20,7 +20,7 @@
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/layered/EthernetTypeOrLengthChecker.h"
+#include "inet/linklayer/ethernet/composite/EthernetTypeOrLengthChecker.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

@@ -22,7 +22,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/layered/EthernetMacHeaderInserter.h"
+#include "inet/linklayer/ethernet/composite/EthernetMacHeaderInserter.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

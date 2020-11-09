@@ -21,7 +21,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/queueing/base/PacketFlowBase.h"
-#include "inet/linklayer/ethernet/layered/EthernetSocketTable.h"
+#include "inet/linklayer/ethernet/composite/EthernetSocketTable.h"
 
 namespace inet {
 

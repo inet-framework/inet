@@ -17,7 +17,7 @@
 
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ethernet/layered/EthernetSocketCommandProcessor.h"
+#include "inet/linklayer/ethernet/composite/EthernetSocketCommandProcessor.h"
 #include "inet/linklayer/ethernet/EthernetCommand_m.h"
 
 namespace inet {

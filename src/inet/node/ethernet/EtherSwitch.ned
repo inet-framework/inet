@@ -29,7 +29,7 @@ import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.IPolicyLayer;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.ethernet.IEtherEncap;
-import inet.linklayer.ethernet.layered.IEthernetLayer;
+import inet.linklayer.ethernet.composite.IEthernetLayer;
 import inet.linklayer.ieee8021q.Ieee8021qLayer;
 import inet.networklayer.common.InterfaceTable;
 

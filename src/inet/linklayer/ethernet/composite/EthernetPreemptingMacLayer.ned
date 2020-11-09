@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet.layered;
+package inet.linklayer.ethernet.composite;
 
 import inet.protocolelement.server.PreemptingServer;
 import inet.queueing.classifier.PacketClassifier;

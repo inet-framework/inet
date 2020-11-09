@@ -18,7 +18,7 @@
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/layered/EthernetFragmentFcsInserter.h"
+#include "inet/linklayer/ethernet/composite/EthernetFragmentFcsInserter.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {

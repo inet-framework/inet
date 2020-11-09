@@ -17,7 +17,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ethernet/layered/EthernetPauseCommandProcessor.h"
+#include "inet/linklayer/ethernet/composite/EthernetPauseCommandProcessor.h"
 
 namespace inet {
 

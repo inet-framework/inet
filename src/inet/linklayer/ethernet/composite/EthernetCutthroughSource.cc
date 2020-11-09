@@ -21,7 +21,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/layered/EthernetCutthroughSource.h"
+#include "inet/linklayer/ethernet/composite/EthernetCutthroughSource.h"
 
 namespace inet {
 
