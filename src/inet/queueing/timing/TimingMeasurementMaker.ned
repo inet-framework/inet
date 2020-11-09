@@ -28,7 +28,7 @@ simple TimingMeasurementMaker extends PacketFlowBase like IPacketFlow
         int offset @unit(b) = default(0b); // designates the packet part to be measured
         int length @unit(b) = default(-1b); // designates the packet part to be measured
         string flowName = default(""); // start packet flow to separate measurement from other measurements
-        string measure = default("*"); // match expression for a combination of: elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
+        string measure = default("*"); // match expression for a combination of: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
         bool endMeasurement = default(true);
         @class(TimingMeasurementMaker);
         @display("i=block/timer");
