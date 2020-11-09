@@ -33,12 +33,12 @@ import inet.linklayer.contract.IEtherMac;
 // being used. This allows for a much simpler simulation model
 // for MAC. (In "traditional" Ethernet simulations, most of the code
 // deals with the shared medium and the CSMA/CD mechanism.)
-// ~EtherMacFullDuplex implements Ethernet without shared medium and CSMA/CD.
-// (If you need half-duplex operation, see ~EtherMac which is for a full-blown
+// ~EthernetMac implements Ethernet without shared medium and CSMA/CD.
+// (If you need half-duplex operation, see ~EthernetCsmaMac which is for a full-blown
 // and therefore more complicated Ethernet MAC model.)
 //
-// ~EtherMacFullDuplex performs transmission and reception of frames.
-// It does not do encapsulation/decapsulation; see ~Ieee8022Llc and ~EtherEncap
+// ~EthernetMac performs transmission and reception of frames.
+// It does not do encapsulation/decapsulation; see ~Ieee8022Llc and ~EthernetEncapsulation
 // for that.
 //
 // Supported variations:
@@ -71,7 +71,7 @@ import inet.linklayer.contract.IEtherMac;
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (~EtherEncap).
+// this is done by higher layers (~EthernetEncapsulation).
 //
 // When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
@@ -111,10 +111,10 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EtherMac, ~EthernetInterface, ~IPacketQueue, ~EtherEncap, ~Ieee8022Llc
+// @see ~EthernetCsmaMac, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
-module EtherMacFullDuplex like IEtherMac
+module EthernetMac like IEtherMac
 {
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module
@@ -122,13 +122,13 @@ module EtherMacFullDuplex like IEtherMac
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
-        bool duplexMode;                    // must be set to "true", as EtherMacFullDuplex does not support half-duplex operation
+        bool duplexMode;                    // must be set to "true", as EthernetMac does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
         int mtu @unit(B) = default(1500B);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
-        @class(EtherMacFullDuplex);
+        @class(EthernetMac);
         @display("i=block/rxtx");
 
         @signal[txPk](type=inet::Packet);
@@ -155,11 +155,11 @@ module EtherMacFullDuplex like IEtherMac
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherEncap or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherEncap or ~IMacRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EtherFrame);            // to physical layer or the network
     submodules:
-        queue: <default("EtherQueue")> like IPacketQueue {
+        queue: <default("EthernetQueue")> like IPacketQueue {
             parameters:
                 packetCapacity = default(1000);
                 @display("p=100,100");

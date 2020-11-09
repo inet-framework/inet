@@ -1,7 +1,7 @@
 package inet.test.moduletest.lib;
 
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.EtherQosQueue;
+import inet.linklayer.ethernet.EthernetQosQueue;
 
 
 simple EthTestApp
@@ -21,7 +21,7 @@ module EthTestHost
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         *.interfaceTableModule = "";
         eth.csmacdSupport = csmacdSupport;
-        eth.encap.typename = "OmittedEtherEncap";
+        eth.encap.typename = "OmittedEthernetEncapsulation";
         eth.queueType = queueType;
         @networkNode();
     gates:

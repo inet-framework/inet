@@ -19,9 +19,10 @@ package inet.linklayer.ethernet;
 
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.basic.IEtherEncap;
+import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
+
 
 //
 // This module represents an Ethernet network interface.
@@ -56,11 +57,11 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
             parameters:
                 @display("p=700,100");
         }
-        encap: <default("EtherEncap")> like IEtherEncap {
+        encap: <default("EthernetEncapsulation")> like IEthernetEncapsulation {
             parameters:
                 @display("p=500,200");
         }
-        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
+        mac: <default(csmacdSupport ? "EthernetCsmaMac" : "EthernetMac")> like IEtherMac {
             parameters:
                 queue.packetCapacity = default(10000);
                 @display("p=500,300");

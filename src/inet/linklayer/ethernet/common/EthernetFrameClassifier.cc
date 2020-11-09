@@ -16,14 +16,14 @@
 //
 
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ethernet/common/EtherFrameClassifier.h"
+#include "inet/linklayer/ethernet/common/EthernetFrameClassifier.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 
 namespace inet {
 
-Define_Module(EtherFrameClassifier);
+Define_Module(EthernetFrameClassifier);
 
-int EtherFrameClassifier::classifyPacket(Packet *packet)
+int EthernetFrameClassifier::classifyPacket(Packet *packet)
 {
     //FIXME need another way to detect pause frame
     auto header = packet->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE);

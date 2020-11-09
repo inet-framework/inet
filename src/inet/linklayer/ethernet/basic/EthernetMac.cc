@@ -20,8 +20,8 @@
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ethernet/basic/EtherEncap.h"
-#include "inet/linklayer/ethernet/basic/EtherMacFullDuplex.h"
+#include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
+#include "inet/linklayer/ethernet/basic/EthernetMac.h"
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -32,42 +32,42 @@ namespace inet {
 // TODO: refactor using a statemachine that is present in a single function
 // TODO: this helps understanding what interactions are there and how they affect the state
 
-Define_Module(EtherMacFullDuplex);
+Define_Module(EthernetMac);
 
-EtherMacFullDuplex::EtherMacFullDuplex()
+EthernetMac::EthernetMac()
 {
 }
 
-void EtherMacFullDuplex::initialize(int stage)
+void EthernetMac::initialize(int stage)
 {
-    EtherMacBase::initialize(stage);
+    EthernetMacBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         if (!par("duplexMode"))
-            throw cRuntimeError("Half duplex operation is not supported by EtherMacFullDuplex, use the EtherMac module for that! (Please enable csmacdSupport on EthernetInterface)");
+            throw cRuntimeError("Half duplex operation is not supported by EthernetMac, use the EthernetCsmaMac module for that! (Please enable csmacdSupport on EthernetInterface)");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         beginSendFrames();    //FIXME choose an another stage for it
     }
 }
 
-void EtherMacFullDuplex::initializeStatistics()
+void EthernetMac::initializeStatistics()
 {
-    EtherMacBase::initializeStatistics();
+    EthernetMacBase::initializeStatistics();
 
     // initialize statistics
     totalSuccessfulRxTime = 0.0;
 }
 
-void EtherMacFullDuplex::initializeFlags()
+void EthernetMac::initializeFlags()
 {
-    EtherMacBase::initializeFlags();
+    EthernetMacBase::initializeFlags();
 
     duplexMode = true;
     physInGate->setDeliverImmediately(false);
 }
 
-void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
+void EthernetMac::handleMessageWhenUp(cMessage *msg)
 {
     if (channelsDiffer)
         readChannelParameters(true);
@@ -83,7 +83,7 @@ void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
     processAtHandleMessageFinished();
 }
 
-void EtherMacFullDuplex::handleSelfMessage(cMessage *msg)
+void EthernetMac::handleSelfMessage(cMessage *msg)
 {
     EV_TRACE << "Self-message " << msg << " received\n";
 
@@ -97,7 +97,7 @@ void EtherMacFullDuplex::handleSelfMessage(cMessage *msg)
         throw cRuntimeError("Unknown self message received!");
 }
 
-void EtherMacFullDuplex::startFrameTransmission()
+void EthernetMac::startFrameTransmission()
 {
     ASSERT(currentTxFrame);
     EV_DETAIL << "Transmitting a copy of frame " << currentTxFrame << endl;
@@ -131,7 +131,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
-void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
+void EthernetMac::handleUpperPacket(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
@@ -184,7 +184,7 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
     }
 }
 
-void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
+void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
 {
     EV_INFO << signal << " received." << endl;
 
@@ -257,7 +257,7 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
     }
 }
 
-void EtherMacFullDuplex::handleEndIFGPeriod()
+void EthernetMac::handleEndIFGPeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     if (transmitState != WAIT_IFG_STATE)
@@ -271,7 +271,7 @@ void EtherMacFullDuplex::handleEndIFGPeriod()
     beginSendFrames();
 }
 
-void EtherMacFullDuplex::handleEndTxPeriod()
+void EthernetMac::handleEndTxPeriod()
 {
     // we only get here if transmission has finished successfully
     if (transmitState != TRANSMITTING_STATE)
@@ -311,9 +311,9 @@ void EtherMacFullDuplex::handleEndTxPeriod()
     }
 }
 
-void EtherMacFullDuplex::finish()
+void EthernetMac::finish()
 {
-    EtherMacBase::finish();
+    EthernetMacBase::finish();
 
     simtime_t t = simTime();
     simtime_t totalRxChannelIdleTime = t - totalSuccessfulRxTime;
@@ -321,7 +321,7 @@ void EtherMacFullDuplex::finish()
     recordScalar("rx channel utilization (%)", 100 * (totalSuccessfulRxTime / t));
 }
 
-void EtherMacFullDuplex::handleEndPausePeriod()
+void EthernetMac::handleEndPausePeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     if (transmitState != PAUSE_STATE)
@@ -333,7 +333,7 @@ void EtherMacFullDuplex::handleEndPausePeriod()
     beginSendFrames();
 }
 
-void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
+void EthernetMac::processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     // statistics
     unsigned long curBytes = packet->getByteLength();
@@ -356,7 +356,7 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
     send(packet, upperLayerOutGateId);
 }
 
-void EtherMacFullDuplex::processPauseCommand(int pauseUnits)
+void EthernetMac::processPauseCommand(int pauseUnits)
 {
     if (transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
@@ -379,7 +379,7 @@ void EtherMacFullDuplex::processPauseCommand(int pauseUnits)
     }
 }
 
-void EtherMacFullDuplex::scheduleEndIFGPeriod()
+void EthernetMac::scheduleEndIFGPeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
@@ -387,7 +387,7 @@ void EtherMacFullDuplex::scheduleEndIFGPeriod()
     scheduleAt(endIFGTime, endIfgTimer);
 }
 
-void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
+void EthernetMac::scheduleEndPausePeriod(int pauseUnits)
 {
     ASSERT(nullptr == currentTxFrame);
     // length is interpreted as 512-bit-time units
@@ -396,7 +396,7 @@ void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
     changeTransmissionState(PAUSE_STATE);
 }
 
-void EtherMacFullDuplex::beginSendFrames()
+void EthernetMac::beginSendFrames()
 {
     if (currentTxFrame) {
         // Other frames are queued, transmit next frame

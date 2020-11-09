@@ -16,7 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/linklayer/ethernet/EtherHub.h"
+#include "inet/linklayer/ethernet/EthernetHub.h"
 #include "inet/physicallayer/ethernet/EthernetSignal_m.h"
 
 namespace inet {

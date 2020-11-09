@@ -18,6 +18,7 @@
 package inet.linklayer.ethernet.composite;
 
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.ethernet.IEthernetPhyLayer;
 
@@ -46,15 +47,15 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
     submodules:
         macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             parameters:
-	            @display("p=400,100");
+                @display("p=400,100");
         }
         cutthroughLayer: EthernetCutthroughLayer {
             parameters:
-	            @display("p=400,200");
+                @display("p=400,200");
         }
         phyLayer: <default("EthernetStreamThroughPhyLayer")> like IEthernetPhyLayer {
             parameters:
-	            @display("p=400,300");
+                @display("p=400,300");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> macLayer.upperLayerIn;

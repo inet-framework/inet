@@ -29,7 +29,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/ethernet/basic/EtherEncap.h"
+#include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 #include "inet/linklayer/ethernet/common/EthernetCommand_m.h"
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
@@ -38,13 +38,13 @@
 
 namespace inet {
 
-Define_Module(EtherEncap);
+Define_Module(EthernetEncapsulation);
 
-simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
-simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
-simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
+simsignal_t EthernetEncapsulation::encapPkSignal = registerSignal("encapPk");
+simsignal_t EthernetEncapsulation::decapPkSignal = registerSignal("decapPk");
+simsignal_t EthernetEncapsulation::pauseSentSignal = registerSignal("pauseSent");
 
-std::ostream& operator << (std::ostream& o, const EtherEncap::Socket& t)
+std::ostream& operator << (std::ostream& o, const EthernetEncapsulation::Socket& t)
 {
     o << "(id:" << t.socketId
             << ",local:" << t.localAddress
@@ -55,13 +55,13 @@ std::ostream& operator << (std::ostream& o, const EtherEncap::Socket& t)
     return o;
 }
 
-EtherEncap::~EtherEncap()
+EthernetEncapsulation::~EthernetEncapsulation()
 {
     for (auto it : socketIdToSocketMap)
         delete it.second;
 }
 
-bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader)
+bool EthernetEncapsulation::Socket::matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader)
 {
     if (!remoteAddress.isUnspecified() && !ethernetMacHeader->getSrc().isBroadcast() && ethernetMacHeader->getSrc() != remoteAddress)
         return false;
@@ -72,7 +72,7 @@ bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHead
     return true;
 }
 
-void EtherEncap::initialize(int stage)
+void EthernetEncapsulation::initialize(int stage)
 {
     Ieee8022Llc::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -90,14 +90,14 @@ void EtherEncap::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
+        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
             //register service and protocol
             registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
         }
     }
 }
 
-void EtherEncap::processCommandFromHigherLayer(Request *msg)
+void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
 {
     auto ctrl = msg->getControlInfo();
     if (dynamic_cast<Ieee802PauseCommand *>(ctrl) != nullptr)
@@ -143,7 +143,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         Ieee8022Llc::processCommandFromHigherLayer(msg);
 }
 
-void EtherEncap::refreshDisplay() const
+void EthernetEncapsulation::refreshDisplay() const
 {
     Ieee8022Llc::refreshDisplay();
     char buf[80];
@@ -151,7 +151,7 @@ void EtherEncap::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void EtherEncap::processPacketFromHigherLayer(Packet *packet)
+void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
 {
     packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
@@ -199,7 +199,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     send(packet, "lowerLayerOut");
 }
 
-const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
+const Ptr<const EthernetMacHeader> EthernetEncapsulation::decapsulateMacHeader(Packet *packet)
 {
     auto ethHeader = packet->popAtFront<EthernetMacHeader>();
     packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
@@ -226,7 +226,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
     return ethHeader;
 }
 
-void EtherEncap::processPacketFromMac(Packet *packet)
+void EthernetEncapsulation::processPacketFromMac(Packet *packet)
 {
     const Protocol *payloadProtocol = nullptr;
     auto ethHeader = decapsulateMacHeader(packet);
@@ -282,7 +282,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
         throw cRuntimeError("Unknown ethernet header");
 }
 
-void EtherEncap::handleSendPause(cMessage *msg)
+void EthernetEncapsulation::handleSendPause(cMessage *msg)
 {
     Ieee802PauseCommand *etherctrl = dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo());
     if (!etherctrl)

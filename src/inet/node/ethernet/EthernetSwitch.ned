@@ -28,8 +28,8 @@ import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.IPolicyLayer;
 import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.ethernet.IEtherEncap;
-import inet.linklayer.ethernet.composite.IEthernetLayer;
+import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
+import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.linklayer.ieee8021q.Ieee8021qLayer;
 import inet.networklayer.common.InterfaceTable;
 
@@ -54,7 +54,7 @@ module EtherSwitch
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        eth[*].encap.typename = default("OmittedEtherEncap");
+        eth[*].encap.typename = default("OmittedEthernetEncapsulation");
         *.fcsMode = fcsMode;
         **.interfaceTableModule = default(absPath(".interfaceTable"));
         **.macTableModule = default(absPath(".macTable"));
@@ -100,7 +100,7 @@ module EtherSwitch
             parameters:
                 @display("p=250,700,row,150;q=txQueue");
         }
-        encap: <default("EtherEncap")> like IEtherEncap if typename != "" {
+        encap: <default("EthernetEncapsulation")> like IEthernetEncapsulation if typename != "" {
             @display("p=800,250");
         }
         policy: <default("OmittedPolicyLayer")> like IPolicyLayer {

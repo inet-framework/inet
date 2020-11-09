@@ -89,7 +89,7 @@ input and output data path.
 
 Network interfaces may also contain an optional external queue
 component. In the absence of an external queue module, :ned:`Ppp` and
-:ned:`EtherMac` use an internal drop-tail queue to buffer the packets
+:ned:`EthernetCsmaMac` use an internal drop-tail queue to buffer the packets
 while the line is busy.
 
 .. _ug:sec:diffserv:traffic-conditioners:

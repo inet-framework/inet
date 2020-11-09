@@ -17,6 +17,7 @@
 
 package inet.linklayer.ethernet.composite;
 
+import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;

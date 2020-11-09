@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet.composite;
+package inet.linklayer.ethernet;
 
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.ethernet.IEthernetPhyLayer;
 import inet.protocolelement.measurement.IMeasurementLayer;
@@ -45,19 +46,19 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
     submodules:
         trafficConditionerLayer: <default("OmittedTrafficConditionerLayer")> like ITrafficConditionerLayer {
             parameters:
-	            @display("p=400,100");
+                @display("p=400,100");
         }
         measurementLayer: <default("OmittedMeasurementLayer")> like IMeasurementLayer {
             parameters:
-	            @display("p=400,200");
+                @display("p=400,200");
         }
         macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             parameters:
-	            @display("p=400,300");
+                @display("p=400,300");
         }
         phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
             parameters:
-	            @display("p=400,400");
+                @display("p=400,400");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> trafficConditionerLayer.upperLayerIn;

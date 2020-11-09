@@ -27,8 +27,8 @@ import inet.queueing.queue.DropTailQueue;
 //
 // Queue module that gives the PAUSE frames a higher priority.
 //
-//# TODO: rename to EtherQosQueue or keep name as it is?
-module EtherQueue extends DropTailQueue
+//# TODO: rename to EthernetQosQueue or keep name as it is?
+module EthernetQueue extends DropTailQueue
 {
     parameters:
         comparatorClass = default("inet::EthernetFrameTypeComparator");
@@ -40,12 +40,12 @@ module EtherQueue extends DropTailQueue
 // data frames.
 //
 //# TODO: rename to CompoundEtherQueue? or CompoundEtherQosQueue?
-module EtherQosQueue extends CompoundPacketQueue like IPacketQueue
+module EthernetQosQueue extends CompoundPacketQueue like IPacketQueue
 {
     parameters:
         @display("i=block/queue");
     submodules:
-        classifier: <default("EtherFrameClassifier")> like IPacketClassifier {
+        classifier: <default("EthernetFrameClassifier")> like IPacketClassifier {
             parameters:
                 @display("p=100,200");
         }
@@ -76,12 +76,12 @@ module EtherQosQueue extends CompoundPacketQueue like IPacketQueue
 // and can be parametrized with an ~IPacketQueue for serving the
 // data frames.
 //
-module EtherQosRedQueue extends CompoundPacketQueue like IPacketQueue
+module EthernetQosRedQueue extends CompoundPacketQueue like IPacketQueue
 {
     parameters:
         @display("i=block/queue");
     submodules:
-        classifier: <default("EtherFrameClassifier")> like IPacketClassifier {
+        classifier: <default("EthernetFrameClassifier")> like IPacketClassifier {
             parameters:
                 @display("p=100,200");
         }

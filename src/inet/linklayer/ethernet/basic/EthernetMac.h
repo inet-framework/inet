@@ -15,24 +15,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERMACFULLDUPLEX_H
-#define __INET_ETHERMACFULLDUPLEX_H
+#ifndef __INET_ETHERNETMAC_H
+#define __INET_ETHERNETMAC_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/ethernet/basic/EtherMacBase.h"
+#include "inet/linklayer/ethernet/basic/EthernetMacBase.h"
 
 namespace inet {
 
 /**
- * A simplified version of EtherMac. Since modern Ethernets typically
+ * A simplified version of EthernetCsmaMac. Since modern Ethernets typically
  * operate over duplex links where's no contention, the original CSMA/CD
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.
  */
-class INET_API EtherMacFullDuplex : public EtherMacBase
+class INET_API EthernetMac : public EthernetMacBase
 {
   public:
-    EtherMacFullDuplex();
+    EthernetMac();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

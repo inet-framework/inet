@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERMACBASE_H
-#define __INET_ETHERMACBASE_H
+#ifndef __INET_ETHERNETMACBASE_H
+#define __INET_ETHERNETMACBASE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
@@ -37,7 +37,7 @@ using namespace inet::physicallayer;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EtherMacBase : public MacProtocolBase
+class INET_API EthernetMacBase : public MacProtocolBase
 {
   public:
         enum MacTransmitState {
@@ -142,8 +142,8 @@ class INET_API EtherMacBase : public MacProtocolBase
     static const double SPEED_OF_LIGHT_IN_CABLE;
 
   public:
-    EtherMacBase();
-    virtual ~EtherMacBase();
+    EthernetMacBase();
+    virtual ~EthernetMacBase();
 
     virtual MacAddress getMacAddress() { return networkInterface ? networkInterface->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
 

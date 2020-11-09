@@ -18,7 +18,7 @@
 #ifndef __INET_ETHERNETCUTTHROUGHSOURCE_H
 #define __INET_ETHERNETCUTTHROUGHSOURCE_H
 
-#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/protocolelement/common/PacketDestreamer.h"
 

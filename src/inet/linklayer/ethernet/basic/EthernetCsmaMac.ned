@@ -24,7 +24,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
 // See the ~IEtherMac for the Ethernet MAC layer general informations.
-// Doesn't do encapsulation/decapsulation; see ~Ieee8022Llc and ~EtherEncap for
+// Doesn't do encapsulation/decapsulation; see ~Ieee8022Llc and ~EthernetEncapsulation for
 // that.
 //
 // Supported variations:
@@ -62,7 +62,7 @@ import inet.linklayer.contract.IEtherMac;
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (~Ieee8022Llc and ~EtherEncap).
+// this is done by higher layers (~Ieee8022Llc and ~EthernetEncapsulation).
 //
 // When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
@@ -103,10 +103,10 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EtherMacFullDuplex, ~EthernetInterface, ~IPacketQueue, ~EtherEncap, ~Ieee8022Llc
+// @see ~EthernetMac, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
-module EtherMac like IEtherMac
+module EthernetCsmaMac like IEtherMac
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -120,7 +120,7 @@ module EtherMac like IEtherMac
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
-        @class(EtherMac);
+        @class(EthernetCsmaMac);
         @display("i=block/rxtx");
 
         @signal[rxPkOk](type=inet::Packet);
@@ -149,11 +149,11 @@ module EtherMac like IEtherMac
         @statistic[backoffSlotsGenerated](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherEncap or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherEncap or ~IMacRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
     submodules:
-        queue: <default("EtherQueue")> like IPacketQueue {
+        queue: <default("EthernetQueue")> like IPacketQueue {
             parameters:
                 packetCapacity = default(1000);
                 @display("p=100,100");

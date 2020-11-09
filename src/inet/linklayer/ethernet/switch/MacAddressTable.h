@@ -21,7 +21,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 
 namespace inet {

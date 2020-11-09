@@ -16,13 +16,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_ETHERENCAP_H
-#define __INET_ETHERENCAP_H
+#ifndef __INET_ETHERNETENCAPSULATION_H
+#define __INET_ETHERNETENCAPSULATION_H
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
-#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
@@ -31,7 +31,7 @@ namespace inet {
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EtherEncap : public Ieee8022Llc
+class INET_API EthernetEncapsulation : public Ieee8022Llc
 {
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
@@ -63,7 +63,7 @@ class INET_API EtherEncap : public Ieee8022Llc
     std::map<int, Socket *> socketIdToSocketMap;
 
   protected:
-    virtual ~EtherEncap();
+    virtual ~EthernetEncapsulation();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 

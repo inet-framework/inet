@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet.basic;
+package inet.linklayer.ethernet.contract;
 
 //
 // Module interface for Ethernet encapsulation/decapsulation.
 //
-moduleinterface IEtherEncap
+moduleinterface IEthernetEncapsulation
 {
     parameters:
         @display("i=block/square");

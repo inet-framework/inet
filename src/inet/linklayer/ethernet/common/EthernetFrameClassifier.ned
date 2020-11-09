@@ -28,10 +28,10 @@ import inet.queueing.contract.IPacketClassifier;
 // This component can be used to build a QoS queue that gives
 // the PAUSE frames the highest priority.
 //
-simple EtherFrameClassifier extends PacketClassifierBase like IPacketClassifier
+simple EthernetFrameClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        @class(EtherFrameClassifier);
+        @class(EthernetFrameClassifier);
         @display("i=block/classifier");
 }
 

@@ -22,8 +22,8 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ethernet/basic/EtherEncap.h"
-#include "inet/linklayer/ethernet/basic/EtherMac.h"
+#include "inet/linklayer/ethernet/basic/EthernetCsmaMac.h"
+#include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
@@ -32,7 +32,7 @@
 
 namespace inet {
 
-// TODO: there is some code that is pretty much the same as the one found in EtherMacFullDuplex.cc (e.g. EtherMac::beginSendFrames)
+// TODO: there is some code that is pretty much the same as the one found in EthernetMac.cc (e.g. EthernetCsmaMac::beginSendFrames)
 // TODO: refactor using a statemachine that is present in a single function
 // TODO: this helps understanding what interactions are there and how they affect the state
 
@@ -42,12 +42,12 @@ static std::ostream& operator<<(std::ostream& out, cMessage *msg)
     return out;
 }
 
-Define_Module(EtherMac);
+Define_Module(EthernetCsmaMac);
 
-simsignal_t EtherMac::collisionSignal = registerSignal("collision");
-simsignal_t EtherMac::backoffSlotsGeneratedSignal = registerSignal("backoffSlotsGenerated");
+simsignal_t EthernetCsmaMac::collisionSignal = registerSignal("collision");
+simsignal_t EthernetCsmaMac::backoffSlotsGeneratedSignal = registerSignal("backoffSlotsGenerated");
 
-EtherMac::~EtherMac()
+EthernetCsmaMac::~EthernetCsmaMac()
 {
     for (auto& rx: rxSignals)
         delete rx.signal;
@@ -56,9 +56,9 @@ EtherMac::~EtherMac()
     cancelAndDelete(endJammingTimer);
 }
 
-void EtherMac::initialize(int stage)
+void EthernetCsmaMac::initialize(int stage)
 {
-    EtherMacBase::initialize(stage);
+    EthernetMacBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         endRxTimer = new cMessage("EndReception", ENDRECEPTION);
@@ -73,9 +73,9 @@ void EtherMac::initialize(int stage)
     }
 }
 
-void EtherMac::initializeStatistics()
+void EthernetCsmaMac::initializeStatistics()
 {
-    EtherMacBase::initializeStatistics();
+    EthernetMacBase::initializeStatistics();
 
     framesSentInBurst = 0;
     bytesSentInBurst = B(0);
@@ -92,16 +92,16 @@ void EtherMac::initializeStatistics()
     WATCH(numBackoffs);
 }
 
-void EtherMac::initializeFlags()
+void EthernetCsmaMac::initializeFlags()
 {
-    EtherMacBase::initializeFlags();
+    EthernetMacBase::initializeFlags();
 
     duplexMode = par("duplexMode");
     frameBursting = !duplexMode && par("frameBursting");
     physInGate->setDeliverImmediately(true);
 }
 
-void EtherMac::processConnectDisconnect()
+void EthernetCsmaMac::processConnectDisconnect()
 {
     if (!connected) {
         for (auto& rx: rxSignals)
@@ -114,7 +114,7 @@ void EtherMac::processConnectDisconnect()
         framesSentInBurst = 0;
     }
 
-    EtherMacBase::processConnectDisconnect();
+    EthernetMacBase::processConnectDisconnect();
 
     if (connected) {
         if (!duplexMode) {
@@ -132,9 +132,9 @@ void EtherMac::processConnectDisconnect()
     }
 }
 
-void EtherMac::readChannelParameters(bool errorWhenAsymmetric)
+void EthernetCsmaMac::readChannelParameters(bool errorWhenAsymmetric)
 {
-    EtherMacBase::readChannelParameters(errorWhenAsymmetric);
+    EthernetMacBase::readChannelParameters(errorWhenAsymmetric);
 
     if (connected && !duplexMode) {
         if (curEtherDescr->halfDuplexFrameMinBytes < B(0))
@@ -142,7 +142,7 @@ void EtherMac::readChannelParameters(bool errorWhenAsymmetric)
     }
 }
 
-void EtherMac::handleSelfMessage(cMessage *msg)
+void EthernetCsmaMac::handleSelfMessage(cMessage *msg)
 {
     // Process different self-messages (timer signals)
     EV_TRACE << "Self-message " << msg << " received\n";
@@ -177,7 +177,7 @@ void EtherMac::handleSelfMessage(cMessage *msg)
     }
 }
 
-void EtherMac::handleMessageWhenUp(cMessage *msg)
+void EthernetCsmaMac::handleMessageWhenUp(cMessage *msg)
 {
     if (channelsDiffer)
         readChannelParameters(true);
@@ -201,7 +201,7 @@ void EtherMac::handleMessageWhenUp(cMessage *msg)
     printState();
 }
 
-void EtherMac::handleSignalFromNetwork(EthernetSignalBase *signal)
+void EthernetCsmaMac::handleSignalFromNetwork(EthernetSignalBase *signal)
 {
     EV_DETAIL << "Received " << signal << " from network.\n";
 
@@ -246,7 +246,7 @@ void EtherMac::handleSignalFromNetwork(EthernetSignalBase *signal)
         processMsgFromNetwork(signal);
 }
 
-void EtherMac::handleUpperPacket(Packet *packet)
+void EthernetCsmaMac::handleUpperPacket(Packet *packet)
 {
 
     EV_INFO << "Received " << packet << " from upper layer." << endl;
@@ -304,7 +304,7 @@ void EtherMac::handleUpperPacket(Packet *packet)
     }
 }
 
-void EtherMac::processMsgFromNetwork(EthernetSignalBase *signal)
+void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
 {
     simtime_t endRxTime = simTime() + signal->getRemainingDuration();
 
@@ -365,7 +365,7 @@ void EtherMac::processMsgFromNetwork(EthernetSignalBase *signal)
     }
 }
 
-void EtherMac::processDetectedCollision()
+void EthernetCsmaMac::processDetectedCollision()
 {
     if (receiveState != RX_COLLISION_STATE) {
         numCollisions++;
@@ -375,7 +375,7 @@ void EtherMac::processDetectedCollision()
     }
 }
 
-void EtherMac::handleEndIFGPeriod()
+void EthernetCsmaMac::handleEndIFGPeriod()
 {
     if (transmitState != WAIT_IFG_STATE && transmitState != SEND_IFG_STATE)
         throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
@@ -399,7 +399,7 @@ void EtherMac::handleEndIFGPeriod()
     beginSendFrames();
 }
 
-B EtherMac::calculateMinFrameLength()
+B EthernetCsmaMac::calculateMinFrameLength()
 {
     bool inBurst = frameBursting && framesSentInBurst;
     B minFrameLength = duplexMode ? MIN_ETHERNET_FRAME_BYTES : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
@@ -407,13 +407,13 @@ B EtherMac::calculateMinFrameLength()
     return minFrameLength;
 }
 
-B EtherMac::calculatePaddedFrameLength(Packet *frame)
+B EthernetCsmaMac::calculatePaddedFrameLength(Packet *frame)
 {
     B minFrameLength = calculateMinFrameLength();
     return std::max(minFrameLength, B(frame->getDataLength()));
 }
 
-void EtherMac::startFrameTransmission()
+void EthernetCsmaMac::startFrameTransmission()
 {
     ASSERT(currentTxFrame);
     EV_DETAIL << "Transmitting a copy of frame " << currentTxFrame << endl;
@@ -483,7 +483,7 @@ void EtherMac::startFrameTransmission()
     }
 }
 
-void EtherMac::handleEndTxPeriod()
+void EthernetCsmaMac::handleEndTxPeriod()
 {
     EV_DETAIL << "TX successfully finished\n";
 
@@ -539,7 +539,7 @@ void EtherMac::handleEndTxPeriod()
     }
 }
 
-void EtherMac::handleEndRxPeriod()
+void EthernetCsmaMac::handleEndRxPeriod()
 {
     simtime_t dt = simTime() - channelBusySince;
 
@@ -578,7 +578,7 @@ void EtherMac::handleEndRxPeriod()
     }
 }
 
-void EtherMac::handleEndBackoffPeriod()
+void EthernetCsmaMac::handleEndBackoffPeriod()
 {
     if (transmitState != BACKOFF_STATE)
         throw cRuntimeError("At end of BACKOFF and not in BACKOFF_STATE");
@@ -596,7 +596,7 @@ void EtherMac::handleEndBackoffPeriod()
     }
 }
 
-void EtherMac::sendSignal(EthernetSignalBase *signal, simtime_t_cref duration)
+void EthernetCsmaMac::sendSignal(EthernetSignalBase *signal, simtime_t_cref duration)
 {
     ASSERT(curTxSignal == nullptr);
     signal->setDuration(duration);
@@ -604,7 +604,7 @@ void EtherMac::sendSignal(EthernetSignalBase *signal, simtime_t_cref duration)
     send(signal, SendOptions().transmissionId(curTxSignal->getId()).duration(duration), physOutGate);
 }
 
-void EtherMac::sendJamSignal()
+void EthernetCsmaMac::sendJamSignal()
 {
     // abort current transmission
     ASSERT(curTxSignal != nullptr);
@@ -625,14 +625,14 @@ void EtherMac::sendJamSignal()
     changeTransmissionState(JAMMING_STATE);
 }
 
-void EtherMac::txFinished()
+void EthernetCsmaMac::txFinished()
 {
     ASSERT(curTxSignal != nullptr);
     delete curTxSignal;
     curTxSignal = nullptr;
 }
 
-void EtherMac::handleEndJammingPeriod()
+void EthernetCsmaMac::handleEndJammingPeriod()
 {
     if (transmitState != JAMMING_STATE)
         throw cRuntimeError("At end of JAMMING but not in JAMMING_STATE");
@@ -642,7 +642,7 @@ void EtherMac::handleEndJammingPeriod()
     handleRetransmission();
 }
 
-void EtherMac::handleRetransmission()
+void EthernetCsmaMac::handleRetransmission()
 {
     if (++backoffs > MAX_ATTEMPTS) {
         EV_DETAIL << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
@@ -669,7 +669,7 @@ void EtherMac::handleRetransmission()
     numBackoffs++;
 }
 
-void EtherMac::printState()
+void EthernetCsmaMac::printState()
 {
 #define CASE(x)    case x: \
         EV_DETAIL << #x; break
@@ -701,9 +701,9 @@ void EtherMac::printState()
 #undef CASE
 }
 
-void EtherMac::finish()
+void EthernetCsmaMac::finish()
 {
-    EtherMacBase::finish();
+    EthernetMacBase::finish();
 
     simtime_t t = simTime();
     simtime_t totalChannelIdleTime = t - totalSuccessfulRxTxTime - totalCollisionTime;
@@ -714,7 +714,7 @@ void EtherMac::finish()
     recordScalar("backoffs", numBackoffs);
 }
 
-void EtherMac::handleEndPausePeriod()
+void EthernetCsmaMac::handleEndPausePeriod()
 {
     if (transmitState != PAUSE_STATE)
         throw cRuntimeError("At end of PAUSE and not in PAUSE_STATE");
@@ -723,7 +723,7 @@ void EtherMac::handleEndPausePeriod()
     beginSendFrames();
 }
 
-void EtherMac::frameReceptionComplete()
+void EthernetCsmaMac::frameReceptionComplete()
 {
     ASSERT(rxSignals.size() == 1);
     EthernetSignalBase *signal = rxSignals[0].signal;
@@ -767,7 +767,7 @@ void EtherMac::frameReceptionComplete()
     }
 }
 
-void EtherMac::processReceivedDataFrame(Packet *packet)
+void EthernetCsmaMac::processReceivedDataFrame(Packet *packet)
 {
     // statistics
     unsigned long curBytes = packet->getByteLength();
@@ -787,7 +787,7 @@ void EtherMac::processReceivedDataFrame(Packet *packet)
     send(packet, "upperLayerOut");
 }
 
-void EtherMac::processReceivedControlFrame(Packet *packet)
+void EthernetCsmaMac::processReceivedControlFrame(Packet *packet)
 {
     packet->popAtFront<EthernetMacHeader>();
     const auto& controlFrame = packet->peekAtFront<EthernetControlFrameBase>();
@@ -822,14 +822,14 @@ void EtherMac::processReceivedControlFrame(Packet *packet)
     delete packet;
 }
 
-void EtherMac::scheduleEndIFGPeriod()
+void EthernetCsmaMac::scheduleEndIFGPeriod()
 {
     changeTransmissionState(WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
     scheduleAt(endIFGTime, endIfgTimer);
 }
 
-void EtherMac::fillIFGIfInBurst()
+void EthernetCsmaMac::fillIFGIfInBurst()
 {
     if (!frameBursting)
         return;
@@ -861,7 +861,7 @@ void EtherMac::fillIFGIfInBurst()
     }
 }
 
-void EtherMac::scheduleEndPausePeriod(int pauseUnits)
+void EthernetCsmaMac::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->txrate;
@@ -869,7 +869,7 @@ void EtherMac::scheduleEndPausePeriod(int pauseUnits)
     changeTransmissionState(PAUSE_STATE);
 }
 
-void EtherMac::beginSendFrames()
+void EthernetCsmaMac::beginSendFrames()
 {
     if (currentTxFrame) {
         // Other frames are queued, therefore wait IFG period and transmit next frame
@@ -883,7 +883,7 @@ void EtherMac::beginSendFrames()
     }
 }
 
-void EtherMac::updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime)
+void EthernetCsmaMac::updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime)
 {
     simtime_t maxEndRxTime = endRxTime;
     bool found = false;
@@ -911,9 +911,9 @@ void EtherMac::updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime)
     }
 }
 
-void EtherMac::dropCurrentTxFrame(PacketDropDetails& details)
+void EthernetCsmaMac::dropCurrentTxFrame(PacketDropDetails& details)
 {
-    EtherMacBase::dropCurrentTxFrame(details);
+    EthernetMacBase::dropCurrentTxFrame(details);
     delete curTxSignal;
     curTxSignal = nullptr;
 }

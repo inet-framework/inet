@@ -16,27 +16,27 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#ifndef __INET_ETHERMAC_H
-#define __INET_ETHERMAC_H
+#ifndef __INET_ETHERNETCSMAMAC_H
+#define __INET_ETHERNETCSMAMAC_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ethernet/basic/EtherMacBase.h"
+#include "inet/linklayer/ethernet/basic/EthernetMacBase.h"
 
 namespace inet {
 
 /**
  * Ethernet MAC module which supports both half-duplex (CSMA/CD) and full-duplex
- * operation. (See also EtherMacFullDuplex which has a considerably smaller
+ * operation. (See also EthernetMac which has a considerably smaller
  * code with all the CSMA/CD complexity removed.)
  *
  * See NED file for more details.
  */
-class INET_API EtherMac : public EtherMacBase
+class INET_API EthernetCsmaMac : public EthernetMacBase
 {
   public:
-    EtherMac() {}
-    virtual ~EtherMac();
+    EthernetCsmaMac() {}
+    virtual ~EthernetCsmaMac();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

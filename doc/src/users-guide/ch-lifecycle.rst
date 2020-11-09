@@ -43,7 +43,7 @@ examples how INET components react to a *crash* lifecycle event:
 
 -  :ned:`Ipv4RoutingTable` clears the route table
 
--  :ned:`EtherMac` and other MAC protocols clear their queues and reset
+-  :ned:`EthernetCsmaMac` and other MAC protocols clear their queues and reset
    their state associated with the current transmission(s)
 
 -  :ned:`Ospfv2` clears its full state

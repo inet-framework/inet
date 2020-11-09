@@ -24,7 +24,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ethernet/basic/EtherMacBase.h"
+#include "inet/linklayer/ethernet/basic/EthernetMacBase.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
@@ -35,9 +35,9 @@
 
 namespace inet {
 
-const double EtherMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
+const double EthernetMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 
-const EtherMacBase::EtherDescr EtherMacBase::nullEtherDescr = {
+const EthernetMacBase::EtherDescr EthernetMacBase::nullEtherDescr = {
     0.0,
     0.0,
     0,
@@ -48,7 +48,7 @@ const EtherMacBase::EtherDescr EtherMacBase::nullEtherDescr = {
     0.0
 };
 
-const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
+const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     {
         ETHERNET_TXRATE,
         0.5 / ETHERNET_TXRATE,
@@ -152,27 +152,27 @@ static int compareEthernetFrameType(Packet *a, Packet *b)
 
 Register_Packet_Comparator_Function(EthernetFrameTypeComparator, compareEthernetFrameType);
 
-simsignal_t EtherMacBase::rxPkOkSignal = registerSignal("rxPkOk");
-simsignal_t EtherMacBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
-simsignal_t EtherMacBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
+simsignal_t EthernetMacBase::rxPkOkSignal = registerSignal("rxPkOk");
+simsignal_t EthernetMacBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
+simsignal_t EthernetMacBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
 
-simsignal_t EtherMacBase::transmissionStateChangedSignal = registerSignal("transmissionStateChanged");
-simsignal_t EtherMacBase::receptionStateChangedSignal = registerSignal("receptionStateChanged");
+simsignal_t EthernetMacBase::transmissionStateChangedSignal = registerSignal("transmissionStateChanged");
+simsignal_t EthernetMacBase::receptionStateChangedSignal = registerSignal("receptionStateChanged");
 
-EtherMacBase::EtherMacBase()
+EthernetMacBase::EthernetMacBase()
 {
     lastTxFinishTime = -1.0;    // never equals to current simtime
     curEtherDescr = &nullEtherDescr;
 }
 
-EtherMacBase::~EtherMacBase()
+EthernetMacBase::~EthernetMacBase()
 {
     cancelAndDelete(endTxTimer);
     cancelAndDelete(endIfgTimer);
     cancelAndDelete(endPauseTimer);
 }
 
-void EtherMacBase::initialize(int stage)
+void EthernetMacBase::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -212,12 +212,12 @@ void EtherMacBase::initialize(int stage)
     }
 }
 
-void EtherMacBase::initializeQueue()
+void EthernetMacBase::initializeQueue()
 {
     txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 }
 
-void EtherMacBase::initializeFlags()
+void EthernetMacBase::initializeFlags()
 {
     displayStringTextFormat = par("displayStringTextFormat");
     sendRawBytes = par("sendRawBytes");
@@ -235,7 +235,7 @@ void EtherMacBase::initializeFlags()
     frameBursting = false;
 }
 
-void EtherMacBase::initializeStatistics()
+void EthernetMacBase::initializeStatistics()
 {
     numFramesSent = numFramesReceivedOK = numBytesSent = numBytesReceivedOK = 0;
     numFramesPassedToHL = numDroppedBitError = numDroppedNotForUs = 0;
@@ -256,7 +256,7 @@ void EtherMacBase::initializeStatistics()
     WATCH(numPauseFramesSent);
 }
 
-void EtherMacBase::configureNetworkInterface()
+void EthernetMacBase::configureNetworkInterface()
 {
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
@@ -268,7 +268,7 @@ void EtherMacBase::configureNetworkInterface()
     networkInterface->setBroadcast(true);
 }
 
-void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
+void EthernetMacBase::handleStartOperation(LifecycleOperation *operation)
 {
     networkInterface->setState(NetworkInterface::State::UP);
     initializeFlags();
@@ -276,7 +276,7 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
     readChannelParameters(true);
 }
 
-void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
+void EthernetMacBase::handleStopOperation(LifecycleOperation *operation)
 {
     if (currentTxFrame != nullptr || !txQueue->isEmpty()) {
         networkInterface->setState(NetworkInterface::State::GOING_DOWN);
@@ -289,7 +289,7 @@ void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
     }
 }
 
-void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
+void EthernetMacBase::handleCrashOperation(LifecycleOperation *operation)
 {
 //    clearQueue();
     connected = false;
@@ -299,7 +299,7 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 }
 
 // TODO: this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
-void EtherMacBase::processAtHandleMessageFinished()
+void EthernetMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
         if (currentTxFrame == nullptr && txQueue->isEmpty()) {
@@ -313,7 +313,7 @@ void EtherMacBase::processAtHandleMessageFinished()
     }
 }
 
-void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void EthernetMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
     if (signalID == POST_MODEL_CHANGE) {
@@ -333,7 +333,7 @@ void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     }
 }
 
-void EtherMacBase::processConnectDisconnect()
+void EthernetMacBase::processConnectDisconnect()
 {
     if (!connected) {
         cancelEvent(endTxTimer);
@@ -366,22 +366,22 @@ void EtherMacBase::processConnectDisconnect()
     //FIXME when connect, set statuses to RECONNECT or IDLE
 }
 
-void EtherMacBase::encapsulate(Packet *frame)
+void EthernetMacBase::encapsulate(Packet *frame)
 {
     auto phyHeader = makeShared<EthernetPhyHeader>();
     frame->insertAtFront(phyHeader);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
 }
 
-void EtherMacBase::decapsulate(Packet *packet)
+void EthernetMacBase::decapsulate(Packet *packet)
 {
     auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
     ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
-//FIXME should use it in EtherMac, EtherMacFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.
-bool EtherMacBase::verifyCrcAndLength(Packet *packet)
+//FIXME should use it in EthernetCsmaMac, EthernetMac, etc. modules. But should not use it in EtherBus, EtherHub.
+bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
 
@@ -421,7 +421,7 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
     return true;
 }
 
-void EtherMacBase::refreshConnection()
+void EthernetMacBase::refreshConnection()
 {
     Enter_Method("refreshConnection");
 
@@ -432,7 +432,7 @@ void EtherMacBase::refreshConnection()
         processConnectDisconnect();
 }
 
-bool EtherMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
+bool EthernetMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     // Current ethernet mac implementation does not support the configuration of multicast
     // ethernet address groups. We rather accept all multicast frames (just like they were
@@ -471,7 +471,7 @@ bool EtherMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMac
     return true;
 }
 
-void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
+void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 {
     // When the connected channels change at runtime, we'll receive
     // two separate notifications (one for the rx channel and one for the tx one),
@@ -539,7 +539,7 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
     }
 }
 
-void EtherMacBase::printParameters()
+void EthernetMacBase::printParameters()
 {
     // Dump parameters
     EV_DETAIL << "MAC address: " << getMacAddress() << (promiscuous ? ", promiscuous mode" : "") << endl
@@ -552,7 +552,7 @@ void EtherMacBase::printParameters()
               << endl;
 }
 
-void EtherMacBase::finish()
+void EthernetMacBase::finish()
 {
     {
         simtime_t t = simTime();
@@ -568,7 +568,7 @@ void EtherMacBase::finish()
     }
 }
 
-void EtherMacBase::refreshDisplay() const
+void EthernetMacBase::refreshDisplay() const
 {
     MacProtocolBase::refreshDisplay();
 
@@ -635,19 +635,19 @@ void EtherMacBase::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, text);
 }
 
-void EtherMacBase::changeTransmissionState(MacTransmitState newState)
+void EthernetMacBase::changeTransmissionState(MacTransmitState newState)
 {
     transmitState = newState;
     emit(transmissionStateChangedSignal, newState);
 }
 
-void EtherMacBase::changeReceptionState(MacReceiveState newState)
+void EthernetMacBase::changeReceptionState(MacReceiveState newState)
 {
     receiveState = newState;
     emit(receptionStateChangedSignal, newState);
 }
 
-void EtherMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
+void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
 {
     auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
@@ -685,7 +685,7 @@ void EtherMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
     packet->insertAtBack(ethFcs);
 }
 
-void EtherMacBase::cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration)
+void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration)
 {
     ASSERT(duration <= signal->getDuration());
     if (duration == signal->getDuration())

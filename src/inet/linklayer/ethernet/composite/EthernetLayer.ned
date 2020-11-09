@@ -17,6 +17,7 @@
 
 package inet.linklayer.ethernet.composite;
 
+import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.protocolelement.contract.IProtocolHeaderChecker;
 import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.contract.IPacketFlow;

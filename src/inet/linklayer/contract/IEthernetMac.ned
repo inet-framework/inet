@@ -19,18 +19,18 @@ package inet.linklayer.contract;
 
 //
 // Interface for Ethernet MAC implementations. All Ethernet MAC implementations
-// should implement this (i.e. declared as: EtherMac like IEtherMac).
-// The existing implementations are these: ~EtherMac and ~EtherMacFullDuplex.
+// should implement this (i.e. declared as: EthernetCsmaMac like IEtherMac).
+// The existing implementations are these: ~EthernetCsmaMac and ~EthernetMac.
 //
-// Doesn't do encapsulation/decapsulation; see ~EtherEncap for that.
+// Doesn't do encapsulation/decapsulation; see ~EthernetEncapsulation for that.
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to ~EtherEncap (in hosts)
+// - upperLayerIn and upperLayerOut are usually connected to ~EthernetEncapsulation (in hosts)
 //   or ~IMacRelayUnit (in a switch)
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (~EtherEncap).
+// this is done by higher layers (~EthernetEncapsulation).
 //
 // When a frame is received from the higher layers, it must be an Ethernet frame,
 // and with all protocol fields filled out (including the destination MAC address).
@@ -53,8 +53,8 @@ moduleinterface IEtherMac
         int mtu @unit(B);
         @display("i=block/rxtx");
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherEncap or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherEncap or ~IMacRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 

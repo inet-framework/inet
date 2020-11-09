@@ -17,11 +17,13 @@
 
 package inet.linklayer.ethernet.basic;
 
+import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
+
 //
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
 //
 // Expected environment:
-// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EtherMac
+// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EthernetCsmaMac
 // - upperLayerIn, upperLayerOut gates should be connected to higher layer
 //   protocol or application
 //
@@ -30,7 +32,7 @@ package inet.linklayer.ethernet.basic;
 //   (~EthernetMacHeader) or Ethernet SNAP frame (~Ieee8022LlcSnapHeader)
 //   depending on the useSNAP module parameter,
 //   and sent to MAC. The ~EtherType is taken from the ~PacketProtocolTag tag
-//   attached to the packet. The source address will be filled in by ~EtherMac.
+//   attached to the packet. The source address will be filled in by ~EthernetCsmaMac.
 // - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
 //   higher layer: it will send a PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.
@@ -38,13 +40,13 @@ package inet.linklayer.ethernet.basic;
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
 //
-simple EtherEncap like IEtherEncap
+simple EthernetEncapsulation like IEthernetEncapsulation
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
         string fcsMode @enum("declared","computed");
-        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EtherEncap and LLC modules
+        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation

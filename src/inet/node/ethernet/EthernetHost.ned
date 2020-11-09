@@ -23,9 +23,8 @@ import inet.applications.ethernet.EtherAppServer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.EtherEncap;
+import inet.linklayer.ethernet.basic.EthernetEncapsulation;
 import inet.networklayer.common.InterfaceTable;
-
 
 //
 // An example host with one Ethernet port and a traffic generator that
@@ -45,7 +44,7 @@ module EtherHost
         eth.csmacdSupport = csmacdSupport;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
-        eth.encap.typename = "OmittedEtherEncap";
+        eth.encap.typename = "OmittedEthernetEncapsulation";
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -68,7 +67,7 @@ module EtherHost
             parameters:
                 @display("p=350,158;b=300,5,,,,1");
         }
-        llc: EtherEncap {
+        llc: EthernetEncapsulation {
             parameters:
                 registerProtocol = true;
                 @display("p=350,240");

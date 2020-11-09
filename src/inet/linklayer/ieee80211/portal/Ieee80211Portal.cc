@@ -21,7 +21,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/basic/EtherEncap.h"
+#include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 #include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
 #endif // ifdef WITH_ETHERNET
 
@@ -67,7 +67,7 @@ void Ieee80211Portal::handleMessage(cMessage *message)
 void Ieee80211Portal::encapsulate(Packet *packet)
 {
 #ifdef WITH_ETHERNET
-    auto ethernetHeader = EtherEncap::decapsulateMacHeader(packet);       // do not use const auto& : trimChunks() delete it from packet
+    auto ethernetHeader = EthernetEncapsulation::decapsulateMacHeader(packet);       // do not use const auto& : trimChunks() delete it from packet
     packet->trim();
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
     packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());

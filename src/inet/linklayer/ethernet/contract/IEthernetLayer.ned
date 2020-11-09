@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet.composite;
+package inet.linklayer.ethernet.contract;
 
 moduleinterface IEthernetLayer
 {

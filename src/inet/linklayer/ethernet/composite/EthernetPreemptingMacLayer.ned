@@ -17,6 +17,7 @@
 
 package inet.linklayer.ethernet.composite;
 
+import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.protocolelement.server.PreemptingServer;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
@@ -62,7 +63,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
             @display("p=600,200");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } -->  queue.in;
+        upperLayerIn --> { @display("m=n"); } --> queue.in;
         queue.out --> outboundClassifier.in;
         outboundClassifier.out++ --> expressMacLayer.upperLayerIn;
         outboundClassifier.out++ --> preemptableMacLayer.upperLayerIn;

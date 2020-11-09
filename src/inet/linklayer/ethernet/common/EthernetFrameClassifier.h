@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERFRAMECLASSIFIER_H
-#define __INET_ETHERFRAMECLASSIFIER_H
+#ifndef __INET_ETHERNETFRAMECLASSIFIER_H
+#define __INET_ETHERNETFRAMECLASSIFIER_H
 
 #include "inet/queueing/base/PacketClassifierBase.h"
 
@@ -29,7 +29,7 @@ namespace inet {
  * - PAUSE frames
  * - others
  */
-class INET_API EtherFrameClassifier : public queueing::PacketClassifierBase
+class INET_API EthernetFrameClassifier : public queueing::PacketClassifierBase
 {
   public:
     /**
