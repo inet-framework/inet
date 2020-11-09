@@ -24,7 +24,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ethernet/EtherMacBase.h"
+#include "inet/linklayer/ethernet/basic/EtherMacBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
