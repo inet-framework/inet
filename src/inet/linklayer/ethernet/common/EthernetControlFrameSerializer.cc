@@ -18,7 +18,7 @@
 #include <algorithm>
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
-#include "inet/linklayer/ethernet/EthernetControlFrameSerializer.h"
+#include "common/EthernetControlFrameSerializer.h"
 
 namespace inet {
 

@@ -19,7 +19,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ethernet/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/EthernetMacHeaderSerializer.h"
+#include "common/EthernetMacHeaderSerializer.h"
 
 namespace inet {
 

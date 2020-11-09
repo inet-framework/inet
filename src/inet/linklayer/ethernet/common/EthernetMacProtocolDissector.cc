@@ -21,7 +21,7 @@
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/EthernetMacProtocolDissector.h"
+#include "common/EthernetMacProtocolDissector.h"
 
 namespace inet {
 
