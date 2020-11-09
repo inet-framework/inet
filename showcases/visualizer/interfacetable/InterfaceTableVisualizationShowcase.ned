@@ -2,7 +2,7 @@ package inet.showcases.visualizer.interfacetable;
 
 import inet.node.inet.AdhocHost;
 import inet.node.aodv.AodvRouter;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
@@ -44,7 +44,7 @@ network InterfaceTableVisualizationAdvancedFeaturesShowcase
         host2: StandardHost {
             @display("p=80,218");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             @display("p=196,181");
         }
         router: Router {

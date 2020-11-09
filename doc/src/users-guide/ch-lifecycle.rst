@@ -51,7 +51,7 @@ examples how INET components react to a *crash* lifecycle event:
 -  :ned:`UdpBasicApp`, :ned:`TcpSessionApp` and other applications reset
    their state and stop/restart their timers
 
--  :ned:`EtherSwitch`, :ned:`AccessPoint`, and other L2 bridging devices
+-  :ned:`EthernetSwitch`, :ned:`AccessPoint`, and other L2 bridging devices
    clear their MAC address tables
 
 While down, network interfaces, and components in general, ignore

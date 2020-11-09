@@ -4,7 +4,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100G;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -22,7 +22,7 @@ network PacketDropQueueOverflowShowcase
         source: StandardHost {
             @display("p=80,198");
         }
-        etherSwitch: EtherSwitch {
+        etherSwitch: EthernetSwitch {
             @display("p=211,197");
         }
         router: Router {

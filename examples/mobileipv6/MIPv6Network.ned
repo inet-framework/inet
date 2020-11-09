@@ -24,7 +24,7 @@
 package inet.examples.mobileipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.ipv6.Router6;
 import inet.node.wireless.AccessPoint;
 import inet.node.xmipv6.CorrespondentNode6;
@@ -91,7 +91,7 @@ network mIPv6Network
             parameters:
                 @display("p=566,172;i=device/accesspoint_s");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=405,467;i=device/hub_s");
         }

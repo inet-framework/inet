@@ -17,7 +17,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.aodv.AodvRouter;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
@@ -86,16 +86,16 @@ network NetworkPathComplexShowcase
         videoServer: StandardHost {
             @display("p=249.24,639.984");
         }
-        etherSwitch0: EtherSwitch {
+        etherSwitch0: EthernetSwitch {
             @display("p=249.24,160.8");
         }
-        etherSwitch1: EtherSwitch {
+        etherSwitch1: EthernetSwitch {
             @display("p=947.52496,229.665");
         }
-        etherSwitch2: EtherSwitch {
+        etherSwitch2: EthernetSwitch {
             @display("p=279.865,515.805");
         }
-        etherSwitch3: EtherSwitch {
+        etherSwitch3: EthernetSwitch {
             @display("p=731.665,448.03497");
         }
         router1: Router {
@@ -215,10 +215,10 @@ network NetworkPathRIPShowcase
         accessPoint1: AccessPoint {
             @display("p=876.36,479.184");
         }
-        etherSwitch0: EtherSwitch {
+        etherSwitch0: EthernetSwitch {
             @display("p=876.36,276.576");
         }
-        etherSwitch1: EtherSwitch {
+        etherSwitch1: EthernetSwitch {
             @display("p=329.64,402");
         }
         router0: Router {

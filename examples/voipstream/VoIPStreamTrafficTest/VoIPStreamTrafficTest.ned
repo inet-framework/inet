@@ -18,7 +18,7 @@
 package inet.examples.voipstream.VoIPStreamTrafficTest;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -46,7 +46,7 @@ network VoIPStreamTrafficTest
             parameters:
                 @display("p=54,133;i=device/laptop_l");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=190,224;i=device/switch");
         }
@@ -73,7 +73,7 @@ network VoIPStreamTrafficTest
         host2: StandardHost {
             @display("p=589,332");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=473,224");
         }
     connections:

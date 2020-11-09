@@ -19,7 +19,7 @@ package inet.examples.dhcp;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 
 
@@ -31,7 +31,7 @@ network WiredNetWithDHCP
         server: StandardHost {
             @display("p=400,225");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=450,350");
         }

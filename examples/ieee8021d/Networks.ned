@@ -19,8 +19,8 @@ import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
 
 
 network SwitchNetwork
@@ -35,43 +35,43 @@ network SwitchNetwork
         l2NetworkConfigurator: L2NetworkConfigurator {
             @display("p=100,100;is=s");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             parameters:
                 @display("p=400,100");
             gates:
                 ethg[];
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             parameters:
                 @display("p=475,300");
             gates:
                 ethg[];
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             parameters:
                 @display("p=550,100");
             gates:
                 ethg[];
         }
-        switch4: EtherSwitch {
+        switch4: EthernetSwitch {
             parameters:
                 @display("p=400,200");
             gates:
                 ethg[];
         }
-        switch5: EtherSwitch {
+        switch5: EthernetSwitch {
             parameters:
                 @display("p=625,300");
             gates:
                 ethg[];
         }
-        switch6: EtherSwitch {
+        switch6: EthernetSwitch {
             parameters:
                 @display("p=325,300");
             gates:
                 ethg[];
         }
-        switch7: EtherSwitch {
+        switch7: EthernetSwitch {
             parameters:
                 @display("p=550,200");
             gates:
@@ -92,53 +92,53 @@ network SwitchNetwork
 network LargeNet extends SwitchNetwork
 {
     submodules:
-        host1: EtherHost {
+        host1: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,200");
         }
-        host2: EtherHost {
+        host2: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=775,300");
         }
 
-        host3: EtherHost {
+        host3: EthernetHost {
             parameters:
             csmacdSupport = false;
             eth.duplexMode = true;
             @display("p=700,100");
         }
-        host4: EtherHost {
+        host4: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=775,470");
         }
-        host5: EtherHost {
+        host5: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=325,470");
         }
-        host6: EtherHost {
+        host6: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=325,370");
         }
-        switch8: EtherSwitch {
+        switch8: EthernetSwitch {
             @display("p=475,370");
         }
-        switch9: EtherSwitch {
+        switch9: EthernetSwitch {
             @display("p=475,470");
         }
-        switch10: EtherSwitch {
+        switch10: EthernetSwitch {
             @display("p=625,470");
         }
-        switch11: EtherSwitch {
+        switch11: EthernetSwitch {
             @display("p=625,370");
         }
     connections:

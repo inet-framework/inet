@@ -51,7 +51,7 @@ taste of the built-in network nodes.
    optional mobility model, optional energy models, and any number of
    applications which are entirely configurable from INI files.
 
--  :ned:`EtherSwitch` models an :protocol:`Ethernet` switch containing a
+-  :ned:`EthernetSwitch` models an :protocol:`Ethernet` switch containing a
    relay unit and one MAC unit per port.
 
 -  :ned:`Router` provides the most common routing protocols:

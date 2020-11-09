@@ -55,7 +55,7 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         unsigned int bridgePriority;
         MacAddress bridgeAddress;
         unsigned int portPriority;
-        unsigned int portNum;    // The number of the switch port (i.e. EtherSwitch ethg[] gate index).
+        unsigned int portNum;    // The number of the switch port (i.e. EthernetSwitch ethg[] gate index).
 
         simtime_t age;    // This parameter is conveyed to enable a switch to discard information whose age exceeds Max Age. (STP,RSTP)
         simtime_t maxAge;

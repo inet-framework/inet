@@ -16,8 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-package inet.linklayer.ethernet;
-
+package inet.node.ethernet;
 
 //
 // An Ethernet hub model.
@@ -32,10 +31,11 @@ package inet.linklayer.ethernet;
 // to precisely model what happens when the link state changes,
 // you cannot use this module.
 //
-simple EtherHub
+simple EthernetHub
 {
     parameters:
         @networkNode();
+        @class(inet::WireJunction);
         @labels(node,ethernet-node);
         @display("i=device/hub;bgb=155,104");
         @signal[packetReceived](type=cMessage);

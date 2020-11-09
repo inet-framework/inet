@@ -17,7 +17,7 @@ package inet.examples.ethernet.vlan;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 
 network VlanExample
@@ -29,10 +29,10 @@ network VlanExample
         host1: StandardHost {
             @display("p=250,100");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=350,100");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=450,100");
         }
         host2: StandardHost {

@@ -4,7 +4,7 @@ package inet.examples.ospfv2.simpletest;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
@@ -27,7 +27,7 @@ network SimpleTest
             gates:
                 ethg[1];
         }
-        N1: EtherSwitch {
+        N1: EthernetSwitch {
             parameters:
                 @display("p=400,150");
             gates:
@@ -47,7 +47,7 @@ network SimpleTest
             gates:
                 ethg[2];
         }
-        N2: EtherSwitch {
+        N2: EthernetSwitch {
             parameters:
                 @display("p=850,150");
             gates:

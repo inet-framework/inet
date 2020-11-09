@@ -18,10 +18,10 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import ned.DatarateChannel;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
 
-module EtherHostQ extends EtherHost
+module EtherHostQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";
@@ -74,7 +74,7 @@ network SpeedTest
             parameters:
                 @display("p=210,210");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=140,140");
             gates:

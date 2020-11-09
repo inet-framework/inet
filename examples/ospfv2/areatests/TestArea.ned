@@ -2,7 +2,7 @@
 package inet.examples.ospfv2.areatests;
 
 import inet.common.misc.ThruputMeteringChannel;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
@@ -26,7 +26,7 @@ module TestArea
         H[numHosts]: StandardHost {
             @display("i=device/laptop;p=100,400,row,100");
         }
-        N[numHosts]: EtherSwitch {
+        N[numHosts]: EthernetSwitch {
             @display("p=100,300,row,100");
         }
         R[numHosts]: OspfRouter {

@@ -5,7 +5,7 @@ package inet.examples.ospfv2.fulltest;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
@@ -25,7 +25,7 @@ module OspfLan
     gates:
         inout ethg[];
     submodules:
-        hub: EtherSwitch {
+        hub: EthernetSwitch {
             @display("p=100,100");
         }
         host[h]: StandardHost;

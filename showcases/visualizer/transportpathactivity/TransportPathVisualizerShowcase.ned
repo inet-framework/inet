@@ -15,7 +15,7 @@
 package inet.showcases.visualizer.transportpathactivity;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -102,16 +102,16 @@ network TransportPathVisualizerFilteringShowcase
         videoStreamClient: StandardHost {
             @display("p=78.792,427.728");
         }
-        switch0: EtherSwitch {
+        switch0: EthernetSwitch {
             @display("p=268.536,173.664");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=805.60803,147.936");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=255.672,426.12");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=668.928,545.112");
         }
         router0: Router {

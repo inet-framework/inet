@@ -22,14 +22,13 @@ import inet.applications.ethernet.EtherTrafGen;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.InterfaceTable;
 
-
 //
 // An example host with one Ethernet interface and an Ethernet traffic
 // generator directly connected to it. This host model does not contain
 // higher layer protocols (IP, TCP). By default is configured to use
 // half-duplex MAC (CSMA/CD).
 //
-module EtherHost2
+module EthernetHost2
 {
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD

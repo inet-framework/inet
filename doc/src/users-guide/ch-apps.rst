@@ -492,6 +492,6 @@ applications should be connected directly to the :ned:`EtherLlc` or an
 EthernetInterface NIC module.
 
 The model also contains a host component that groups the applications
-and the LLC and MAC components together (:ned:`EtherHost`). This node
+and the LLC and MAC components together (:ned:`EthernetHost`). This node
 does not contain higher layer protocols, it generates Ethernet traffic
 directly. By default it is configured to use half duplex MAC (CSMA/CD).

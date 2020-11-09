@@ -17,7 +17,7 @@ package inet.showcases.visualizer.datalinkactivity;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.aodv.AodvRouter;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -111,16 +111,16 @@ network DataLinkVisualizerFilteringShowcase
             parameters:
                 @display("p=80,120");
         }
-        etherSwitch1: EtherSwitch {
+        etherSwitch1: EthernetSwitch {
             @display("p=376.896,169.12");
         }
-        etherSwitch3: EtherSwitch {
+        etherSwitch3: EthernetSwitch {
             @display("p=723.592,200.528");
         }
         source1: StandardHost {
             @display("p=206.568,50.736");
         }
-        etherSwitch4: EtherSwitch {
+        etherSwitch4: EthernetSwitch {
             @display("p=484.408,283.88");
         }
         destination1: StandardHost {
@@ -132,7 +132,7 @@ network DataLinkVisualizerFilteringShowcase
         source2: StandardHost {
             @display("p=173.952,227.104");
         }
-        etherSwitch2: EtherSwitch {
+        etherSwitch2: EthernetSwitch {
             @display("p=329.784,428.84");
         }
         host1: StandardHost {

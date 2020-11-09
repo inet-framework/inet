@@ -541,20 +541,20 @@
     <filename>inet.linklayer.ethernet.EthernetFrameClassifier.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.node.ethernet.EtherHost</name>
-    <filename>inet.node.ethernet.EtherHost.html</filename>
+    <name>inet.node.ethernet.EthernetHost</name>
+    <filename>inet.node.ethernet.EthernetHost.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.node.ethernet.EtherHost2</name>
-    <filename>inet.node.ethernet.EtherHost2.html</filename>
+    <name>inet.node.ethernet.EthernetHost2</name>
+    <filename>inet.node.ethernet.EthernetHost2.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.EtherHub</name>
-    <filename>inet.linklayer.ethernet.EtherHub.html</filename>
+    <name>inet.linklayer.ethernet.EthernetHub</name>
+    <filename>inet.linklayer.ethernet.EthernetHub.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.node.ethernet.EtherLink</name>
-    <filename>inet.node.ethernet.EtherLink.html</filename>
+    <name>inet.node.ethernet.EthernetLink</name>
+    <filename>inet.node.ethernet.EthernetLink.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.EthernetCsmaMac</name>
@@ -585,8 +585,8 @@
     <filename>inet.linklayer.ethernet.EthernetQueue.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.node.ethernet.EtherSwitch</name>
-    <filename>inet.node.ethernet.EtherSwitch.html</filename>
+    <name>inet.node.ethernet.EthernetSwitch</name>
+    <filename>inet.node.ethernet.EthernetSwitch.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.ethernet.EtherTrafGen</name>

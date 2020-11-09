@@ -18,9 +18,9 @@ checks:
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHost;
 
-module EtherHostQ extends EtherHost
+module EtherHostQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";

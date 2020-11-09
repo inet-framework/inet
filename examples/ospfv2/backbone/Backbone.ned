@@ -3,7 +3,7 @@ package inet.examples.ospfv2.backbone;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
@@ -26,13 +26,13 @@ network Backbone
             gates:
                 ethg[3];
         }
-        N1: EtherSwitch {
+        N1: EthernetSwitch {
             parameters:
                 @display("p=500,370");
             gates:
                 ethg[2];
         }
-        N2: EtherSwitch {
+        N2: EthernetSwitch {
             parameters:
                 @display("p=617,520");
             gates:
@@ -56,13 +56,13 @@ network Backbone
             gates:
                 ethg[2];
         }
-        N4: EtherSwitch {
+        N4: EthernetSwitch {
             parameters:
                 @display("p=500,190");
             gates:
                 ethg[4];
         }
-        N5: EtherSwitch {
+        N5: EthernetSwitch {
             parameters:
                 @display("p=850,640");
             gates:
@@ -86,13 +86,13 @@ network Backbone
             gates:
                 ethg[2];
         }
-        N6: EtherSwitch {
+        N6: EthernetSwitch {
             parameters:
                 @display("p=150,640");
             gates:
                 ethg[3];
         }
-        N3: EtherSwitch {
+        N3: EthernetSwitch {
             parameters:
                 @display("p=383,520");
             gates:

@@ -32,7 +32,7 @@ import inet.networklayer.common.InterfaceTable;
 // does not contain higher layer protocols (IP, TCP). By default it is
 // configured to use half-duplex MAC (CSMA/CD).
 //
-module EtherHost
+module EthernetHost
 {
     parameters:
         bool hasStatus = default(false);

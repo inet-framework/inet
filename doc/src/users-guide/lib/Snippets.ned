@@ -24,7 +24,7 @@ import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.Ipv4;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -41,7 +41,7 @@ network WiredNetworkExample
         configurator: Ipv4NetworkConfigurator; // network autoconfiguration
         server: StandardHost; // predefined standard host
         router: Router; // predefined router
-        switch: EtherSwitch; // predefined ethernet switch
+        switch: EthernetSwitch; // predefined ethernet switch
         client[numClients]: StandardHost;
     connections: // network level connections
         router.pppg++ <--> { datarate = 1GBps; } <--> server.pppg++; // PPP

@@ -23,7 +23,7 @@ package inet.examples.inet.shutdownrestart;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
@@ -55,7 +55,7 @@ network NClients
         r3: Router {
             @display("p=800,150");
         }
-        s: EtherSwitch {
+        s: EthernetSwitch {
             @display("p=350,150");
         }
         cli[n]: StandardHost {

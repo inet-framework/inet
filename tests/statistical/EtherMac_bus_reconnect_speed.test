@@ -15,11 +15,11 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.linklayer.ethernet.EtherBus;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHost;
 import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
-module EtherHostQ extends EtherHost
+module EtherHostQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";

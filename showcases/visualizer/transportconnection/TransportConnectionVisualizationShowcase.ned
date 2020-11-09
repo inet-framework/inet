@@ -4,7 +4,7 @@ package inet.showcases.visualizer.transportconnection;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
@@ -41,7 +41,7 @@ network TransportConnectionVisualizationMultipleConnectionsShowcase
         host2: StandardHost {
             @display("p=59,329");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             @display("p=199,213");
         }
         router: Router {
@@ -73,7 +73,7 @@ network Complexer
         host2: StandardHost {
             @display("p=59,329");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             @display("p=199,213");
         }
         router: Router {

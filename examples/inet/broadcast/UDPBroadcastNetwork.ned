@@ -1,7 +1,7 @@
 package inet.examples.inet.broadcast;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -39,7 +39,7 @@ network UDPBroadcastNetwork
                 config = xmldoc("config.xml");
                 @display("p=100,100;is=s");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             @display("p=700,199");
         }
         nonTarget: StandardHost {

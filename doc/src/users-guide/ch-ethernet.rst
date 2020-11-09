@@ -33,23 +33,23 @@ There are several node models that can be used in an Ethernet network:
 -  Node models such as :ned:`StandardHost` and :ned:`Router` are
    Ethernet-capable
 
--  :ned:`EtherSwitch` models an Ethernet switch, i.e. a multiport
+-  :ned:`EthernetSwitch` models an Ethernet switch, i.e. a multiport
    bridging device
 
--  :ned:`EtherHub` models an Ethernet hub or multiport repeater
+-  :ned:`EthernetHub` models an Ethernet hub or multiport repeater
 
 -  :ned:`EtherBus` models the coaxial cable (10BASE2 or 10BASE5 network
    segments) on legacy Ethernet networks
 
--  :ned:`EtherHost` is a sample node which can be used to generate “raw”
+-  :ned:`EthernetHost` is a sample node which can be used to generate “raw”
    Ethernet traffic
 
 .. _ug:sec:ethernet:etherswitch:
 
-EtherSwitch
+EthernetSwitch
 ~~~~~~~~~~~
 
-:ned:`EtherSwitch` models an Ethernet switch. Ethernet switches play an
+:ned:`EthernetSwitch` models an Ethernet switch. Ethernet switches play an
 important role in modern Ethernet LANs. Unlike passive hubs and
 repeaters that work in the physical layer, the switches operate in the
 data link layer and relay frames between the connected subnets.
@@ -65,10 +65,10 @@ default it uses half-duplex MAC with CSMA/CD.
 
 .. _ug:sec:ethernet:etherhub:
 
-EtherHub
+EthernetHub
 ~~~~~~~~
 
-:ned:`EtherHub` models an Ethernet hub. Ethernet hubs are a simple
+:ned:`EthernetHub` models an Ethernet hub. Ethernet hubs are a simple
 broadcast devices. Messages arriving on a port are regenerated and
 broadcast to every other port.
 

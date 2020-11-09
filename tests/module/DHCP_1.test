@@ -5,7 +5,7 @@ Testing DHCP protocol
 
 import inet.test.moduletest.lib.*;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.common.misc.ThruputMeteringChannel;
 
@@ -22,7 +22,7 @@ network DhcpExample
         }
     submodules:
         srv: StandardHost;
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=186,250");
         }

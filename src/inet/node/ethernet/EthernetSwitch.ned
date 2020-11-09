@@ -41,7 +41,7 @@ import inet.networklayer.common.InterfaceTable;
 // it must be set to false, otherwise it can be set to true.
 // By default used half duples CSMA/CD mac
 //
-module EtherSwitch
+module EthernetSwitch
 {
     parameters:
         @networkNode();

@@ -151,7 +151,7 @@ bool StpTester::isForwarding(Topology::Node *node, unsigned int portNum)
     cModule *tmpIfTable = node->getModule()->getSubmodule("interfaceTable");
     IInterfaceTable *ifTable = dynamic_cast<IInterfaceTable *>(tmpIfTable);
 
-    // EtherHost has no InterfaceTable
+    // EthernetHost has no InterfaceTable
     if (ifTable == nullptr)
         return true;
 

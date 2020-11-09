@@ -18,10 +18,10 @@ checks:
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHost;
 
 
-module EtherHostFullDuplexQ extends EtherHost
+module EtherHostFullDuplexQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";

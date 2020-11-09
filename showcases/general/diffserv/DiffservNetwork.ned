@@ -19,7 +19,7 @@ package inet.showcases.general.diffserv;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -51,7 +51,7 @@ network DiffservNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("is=s;p=100,100");
         }
-        etherSwitch: EtherSwitch {
+        etherSwitch: EthernetSwitch {
             @display("p=400,150");
         }
         internet: Router {
