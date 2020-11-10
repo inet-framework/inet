@@ -21,6 +21,7 @@
 #include "inet/queueing/base/PacketServerBase.h"
 
 namespace inet {
+namespace queueing {
 
 using namespace inet::queueing;
 
@@ -52,6 +53,7 @@ class INET_API PreemptingServer : public PacketServerBase
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
+} // namespace queueing
 } // namespace inet
 
 #endif

@@ -18,6 +18,7 @@
 #include "inet/queueing/server/PreemptingServer.h"
 
 namespace inet {
+namespace queueing {
 
 Define_Module(PreemptingServer);
 
@@ -98,4 +99,5 @@ void PreemptingServer::handlePushPacketProcessed(Packet *packet, cGate *gate, bo
     }
 }
 
+} // namespace queueing
 } // namespace inet
