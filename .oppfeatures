@@ -337,7 +337,7 @@
                        Includes a switch model with various relay unit implementations,
                        and also Ethernet-level traffic generators."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing Ieee8022 physicallayer protocolsupport"
         labels = "protocols"
         nedPackages = "
                        inet.applications.ethernet
@@ -851,7 +851,7 @@
                        inet.linklayer.ieee8021ae
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_IEEE80211"
+        compileFlags = "-DWITH_IEEE8021AE"
         linkerFlags = ""
         />
     <feature
@@ -859,7 +859,7 @@
         name="IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio ackingwireless"
+        requires = "mobility radio ackingwireless Ieee8022"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
@@ -902,13 +902,13 @@
         id="phynoise"
         name="Physical layer noise"
         description = "Physical layer noise"
-        requires = "phywireless"
+        requires = "phywireless radio"
         labels = ""
         nedPackages = "
                        inet.physicallayer.wireless.noise
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_APSKRADIO"
+        compileFlags = "-DWITH_PHYNOISE"
         linkerFlags = ""
         />
     <feature
@@ -968,7 +968,7 @@
                        data link layer and network layer communications, and more.
                        Supports both canvas (2D) and OSG (3D) graphics."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing"
         labels = ""
         nedPackages = "
                        inet.visualizer.base
@@ -1095,7 +1095,7 @@
         name="DiffServ"
         description = "Components for implementing Differentiated Services"
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing"
         labels = ""
         nedPackages = "
                        inet.networklayer.diffserv
@@ -1181,7 +1181,7 @@
         name="IEEE 802.2"
         description = ""
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing"
         labels = ""
         nedPackages = "
                        inet.linklayer.ieee8022
@@ -1312,7 +1312,7 @@
         name="Protocol support"
         description = "Aggregation, fragmentation, etc."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "physicallayer queueing"
         labels = ""
         nedPackages = "
                        inet.protocolelement
