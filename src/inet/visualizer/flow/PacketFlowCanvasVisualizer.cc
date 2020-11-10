@@ -18,7 +18,7 @@
 #include "inet/common/FlowTag.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/switch/MacRelayUnit.h"
+#include "inet/linklayer/ethernet/common/MacRelayUnit.h"
 #endif
 
 #ifdef WITH_IEEE8021D

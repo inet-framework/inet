@@ -1917,16 +1917,16 @@
     <filename>inet.linklayer.loopback.LoopbackInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.switch.MacAddressTable</name>
-    <filename>inet.linklayer.ethernet.switch.MacAddressTable.html</filename>
+    <name>inet.linklayer.ethernet.common.MacAddressTable</name>
+    <filename>inet.linklayer.ethernet.common.MacAddressTable.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.base.MacProtocolBase</name>
     <filename>inet.linklayer.base.MacProtocolBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.switch.MacRelayUnit</name>
-    <filename>inet.linklayer.ethernet.switch.MacRelayUnit.html</filename>
+    <name>inet.linklayer.ethernet.common.MacRelayUnit</name>
+    <filename>inet.linklayer.ethernet.common.MacRelayUnit.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.inet.ManetRouter</name>

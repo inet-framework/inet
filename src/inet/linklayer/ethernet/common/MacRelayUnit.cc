@@ -20,7 +20,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/ethernet/switch/MacRelayUnit.h"
+#include "inet/linklayer/ethernet/common/MacRelayUnit.h"
 
 namespace inet {
 
