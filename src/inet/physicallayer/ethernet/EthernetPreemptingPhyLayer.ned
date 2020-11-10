@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ethernet;
 
-import inet.protocolelement.common.InterPacketGap;
+import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.transceiver.contract.IPacketReceiver;
 import inet.protocolelement.transceiver.contract.IPacketTransmitter;
 import inet.queueing.classifier.PacketClassifier;
@@ -54,7 +54,7 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
         m1: PacketMultiplexer {
             @display("p=200,300");
         }
-        interFrameGapInserter: InterPacketGap {
+        interFrameGapInserter: InterpacketGapInserter {
             duration = default(96s / dropUnit(bitrate));
             @display("p=200,400");
         }

@@ -171,7 +171,7 @@ TODO	protocolelement/server: maybe merge into queueing?
 	protocolelement/checksum/CrcHeaderInserter
 	protocolelement/checksum/FcsHeaderChecker
 	protocolelement/checksum/FcsHeaderInserter
-TODO	protocolelement/common/InterPacketGap -> InterpacketGapInserter
+	protocolelement/common/InterpacketGapInserter
 	protocolelement/common/PacketDeserializer
 	protocolelement/common/PacketDestreamer
 	protocolelement/common/PacketEmitter

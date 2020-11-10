@@ -16,22 +16,22 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/protocolelement/common/InterPacketGap.h"
+#include "inet/protocolelement/common/InterpacketGapInserter.h"
 #include "inet/queueing/common/ProgressTag_m.h"
 
 namespace inet {
 
-Define_Module(InterPacketGap);
+Define_Module(InterpacketGapInserter);
 
 // TODO: review streaming operation with respect to holding back packet push until the packet gap elapses
 
-InterPacketGap::~InterPacketGap()
+InterpacketGapInserter::~InterpacketGapInserter()
 {
     cancelAndDelete(timer);
     cancelAndDeleteClockEvent(progress);
 }
 
-void InterPacketGap::initialize(int stage)
+void InterpacketGapInserter::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -48,7 +48,7 @@ void InterPacketGap::initialize(int stage)
     }
 }
 
-void InterPacketGap::handleMessage(cMessage *message)
+void InterpacketGapInserter::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
         if (message == timer) {
@@ -88,39 +88,39 @@ void InterPacketGap::handleMessage(cMessage *message)
     updateDisplayString();
 }
 
-void InterPacketGap::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
+void InterpacketGapInserter::receivePacketStart(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     pushOrSendPacketStart(packet, outputGate, consumer, bps(datarate), packet->getTransmissionId());
 }
 
-void InterPacketGap::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
+void InterpacketGapInserter::receivePacketProgress(cPacket *cpacket, cGate *gate, double datarate, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     pushOrSendPacketProgress(packet, outputGate, consumer, bps(datarate), b(bitPosition), b(extraProcessableBitLength), packet->getTransmissionId());
 }
 
-void InterPacketGap::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
+void InterpacketGapInserter::receivePacketEnd(cPacket *cpacket, cGate *gate, double datarate)
 {
     auto packet = check_and_cast<Packet *>(cpacket);
     pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
 }
 
-bool InterPacketGap::canPushSomePacket(cGate *gate) const
+bool InterpacketGapInserter::canPushSomePacket(cGate *gate) const
 {
     // TODO: getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()));
 }
 
-bool InterPacketGap::canPushPacket(Packet *packet, cGate *gate) const
+bool InterpacketGapInserter::canPushPacket(Packet *packet, cGate *gate) const
 {
     // TODO: getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()));
 }
 
-void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
+void InterpacketGapInserter::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -142,7 +142,7 @@ void InterPacketGap::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void InterPacketGap::handleCanPushPacketChanged(cGate *gate)
+void InterpacketGapInserter::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (packetEndTime + durationPar->doubleValue() <= getClockTime()) {
@@ -156,7 +156,7 @@ void InterPacketGap::handleCanPushPacketChanged(cGate *gate)
     }
 }
 
-void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void InterpacketGapInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -164,7 +164,7 @@ void InterPacketGap::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
     updateDisplayString();
 }
 
-void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
+void InterpacketGapInserter::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -172,7 +172,7 @@ void InterPacketGap::pushPacketEnd(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void InterpacketGapInserter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -180,14 +180,14 @@ void InterPacketGap::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
     updateDisplayString();
 }
 
-void InterPacketGap::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void InterpacketGapInserter::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     packetEndTime = getClockTime();
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
-void InterPacketGap::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     auto now = getClockTime();
     if (now >= packetEndTime) {
@@ -214,7 +214,7 @@ void InterPacketGap::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *g
     }
 }
 
-const char *InterPacketGap::resolveDirective(char directive) const
+const char *InterpacketGapInserter::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

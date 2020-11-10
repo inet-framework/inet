@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INTERPACKETGAP_H
-#define __INET_INTERPACKETGAP_H
+#ifndef __INET_INTERPACKETGAPINSERTER_H
+#define __INET_INTERPACKETGAPINSERTER_H
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketPusherBase.h"
@@ -25,7 +25,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API InterPacketGap : public ClockUserModuleMixin<PacketPusherBase>
+class INET_API InterpacketGapInserter : public ClockUserModuleMixin<PacketPusherBase>
 {
   protected:
     cPar *durationPar = nullptr;
@@ -49,7 +49,7 @@ class INET_API InterPacketGap : public ClockUserModuleMixin<PacketPusherBase>
     virtual const char *resolveDirective(char directive) const override;
 
   public:
-    virtual ~InterPacketGap();
+    virtual ~InterpacketGapInserter();
 
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 

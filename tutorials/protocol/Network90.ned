@@ -19,7 +19,7 @@ package inet.tutorials.protocol;
 
 import inet.protocolelement.checksum.FcsHeaderChecker;
 import inet.protocolelement.checksum.FcsHeaderInserter;
-import inet.protocolelement.common.InterPacketGap;
+import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.protocolelement.ordering.SequenceNumbering;
 import inet.protocolelement.queue.InProgressQueue;
@@ -88,7 +88,7 @@ module SenderHost
         fcsInserter: FcsHeaderInserter {
             @display("p=200,1100");
         }
-        interPacketGap: InterPacketGap {
+        InterpacketGapInserter: InterpacketGapInserter {
             @display("p=200,1200");
         }
         transmitter: StreamThroughTransmitter {
@@ -110,8 +110,8 @@ module SenderHost
         inProgressQueue.out --> preemptingServer.in;
         // TODO:        preemptingServer.preemptedOut --> multiplexer2.in++;
         preemptingServer.out --> fcsInserter.in;
-        fcsInserter.out --> interPacketGap.in;
-        interPacketGap.out --> transmitter.in;
+        fcsInserter.out --> InterpacketGapInserter.in;
+        InterpacketGapInserter.out --> transmitter.in;
         transmitter.out --> g;
 }
 

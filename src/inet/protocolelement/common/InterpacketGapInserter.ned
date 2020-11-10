@@ -19,7 +19,7 @@ package inet.protocolelement.common;
 
 import inet.queueing.base.PacketProcessorBase;
 
-simple InterPacketGap extends PacketProcessorBase
+simple InterpacketGapInserter extends PacketProcessorBase
 {
     parameters:
         string clockModule = default(""); // relative path of a module that implements IClock; optional
@@ -27,7 +27,7 @@ simple InterPacketGap extends PacketProcessorBase
         volatile double duration @unit(s);
         displayStringTextFormat = default("delayed %p pk (%l)\nifg: %g");
         @display("i=block/timer");
-        @class(InterPacketGap);
+        @class(InterpacketGapInserter);
     gates:
         input in;
         output out;

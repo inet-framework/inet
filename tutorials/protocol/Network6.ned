@@ -20,7 +20,7 @@ package inet.tutorials.protocol;
 import inet.protocolelement.acknowledgement.Resending;
 import inet.protocolelement.checksum.FcsHeaderChecker;
 import inet.protocolelement.checksum.FcsHeaderInserter;
-import inet.protocolelement.common.InterPacketGap;
+import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.transceiver.PacketReceiver;
 import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.queue.PacketQueue;
@@ -50,7 +50,7 @@ module ClientHost6
         fcsInserter: FcsHeaderInserter {
             @display("p=150,500");
         }
-        interPacketGap: InterPacketGap {
+        InterpacketGapInserter: InterpacketGapInserter {
             @display("p=150,600");
         }
         transmitter: PacketTransmitter {
@@ -61,8 +61,8 @@ module ClientHost6
         queue.out --> server.in;
         server.out --> resending.in;
         resending.out --> fcsInserter.in;
-        fcsInserter.out --> interPacketGap.in;
-        interPacketGap.out --> transmitter.in;
+        fcsInserter.out --> InterpacketGapInserter.in;
+        InterpacketGapInserter.out --> transmitter.in;
         transmitter.out --> out;
 }
 
