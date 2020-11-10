@@ -29,11 +29,11 @@ module MeasurementLayer like IMeasurementLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        measurementStarter: <default("TimingMeasurementStarter")> like IPacketFlow {
+        measurementStarter: <default("FlowMeasurementStarter")> like IPacketFlow {
             parameters:
                 @display("p=150,100");
         }
-        measurementMaker: <default("TimingMeasurementMaker")> like IPacketFlow {
+        measurementMaker: <default("FlowMeasurementRecorder")> like IPacketFlow {
             parameters:
                 @display("p=350,100");
         }

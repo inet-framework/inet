@@ -18,12 +18,12 @@
 #include "inet/common/FlowTag.h"
 #include "inet/common/PacketEventTag_m.h"
 #include "inet/common/TimeTag_m.h"
-#include "inet/queueing/flow/TimingMeasurementStarter.h"
+#include "inet/queueing/flow/FlowMeasurementStarter.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(TimingMeasurementStarter);
+Define_Module(FlowMeasurementStarter);
 
 static bool matchesString(cMatchExpression& matchExpression, const char *string)
 {
@@ -31,7 +31,7 @@ static bool matchesString(cMatchExpression& matchExpression, const char *string)
     return matchExpression.matches(&matchableString);
 }
 
-void TimingMeasurementStarter::initialize(int stage)
+void FlowMeasurementStarter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -51,7 +51,7 @@ void TimingMeasurementStarter::initialize(int stage)
     }
 }
 
-void TimingMeasurementStarter::processPacket(Packet *packet)
+void FlowMeasurementStarter::processPacket(Packet *packet)
 {
     if (packetFilter.matches(packet)) {
         startMeasurements(packet);
@@ -59,7 +59,7 @@ void TimingMeasurementStarter::processPacket(Packet *packet)
     }
 }
 
-void TimingMeasurementStarter::startMeasurements(Packet *packet) const
+void FlowMeasurementStarter::startMeasurements(Packet *packet) const
 {
     auto length = this->length == b(-1) ? packet->getTotalLength() : this->length;
     if (measureElapsedTime)

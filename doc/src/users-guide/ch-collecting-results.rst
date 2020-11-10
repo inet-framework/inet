@@ -100,9 +100,9 @@ collected data.
 In order to configure one of the above packet flow measurements, you can use
 the following modules:
 
--  :ned:`TimingMeasurementStarter`: classifies packets to enter packet flows and
+-  :ned:`FlowMeasurementStarter`: classifies packets to enter packet flows and
    starts timing measurements or packet event collection.
--  :ned:`TimingMeasurementMaker`: completes timing measurements, collects statistics
+-  :ned:`FlowMeasurementRecorder`: completes timing measurements, collects statistics
    and makes packets leave the packet flow.
 -  :ned:`MeasurementLayer`: can be added to network nodes and network interfaces
    for optional packet flow measurements.

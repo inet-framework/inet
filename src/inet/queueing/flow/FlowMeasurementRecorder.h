@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TIMINGMEASUREMENTMAKER_H
-#define __INET_TIMINGMEASUREMENTMAKER_H
+#ifndef __INET_FLOWMEASUREMENTMAKER_H
+#define __INET_FLOWMEASUREMENTMAKER_H
 
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/TimeTag_m.h"
@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API TimingMeasurementMaker : public PacketFlowBase
+class INET_API FlowMeasurementRecorder : public PacketFlowBase
 {
   public:
     static simsignal_t lifeTimeSignal;

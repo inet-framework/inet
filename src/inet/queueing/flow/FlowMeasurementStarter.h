@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TIMINGMEASUREMENTSTARTER_H
-#define __INET_TIMINGMEASUREMENTSTARTER_H
+#ifndef __INET_FLOWMEASUREMENTSTARTER_H
+#define __INET_FLOWMEASUREMENTSTARTER_H
 
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API TimingMeasurementStarter : public PacketFlowBase
+class INET_API FlowMeasurementStarter : public PacketFlowBase
 {
   protected:
     PacketFilter packetFilter;

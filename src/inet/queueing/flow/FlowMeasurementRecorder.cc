@@ -16,20 +16,20 @@
 //
 
 #include "inet/common/FlowTag.h"
-#include "inet/queueing/flow/TimingMeasurementMaker.h"
+#include "inet/queueing/flow/FlowMeasurementRecorder.h"
 
 namespace inet {
 namespace queueing {
 
-simsignal_t TimingMeasurementMaker::lifeTimeSignal = cComponent::registerSignal("lifeTime");
-simsignal_t TimingMeasurementMaker::elapsedTimeSignal = cComponent::registerSignal("elapsedTime");
-simsignal_t TimingMeasurementMaker::delayingTimeSignal = cComponent::registerSignal("delayingTime");
-simsignal_t TimingMeasurementMaker::queueingTimeSignal = cComponent::registerSignal("queueingTime");
-simsignal_t TimingMeasurementMaker::processingTimeSignal = cComponent::registerSignal("processingTime");
-simsignal_t TimingMeasurementMaker::transmissionTimeSignal = cComponent::registerSignal("transmissionTime");
-simsignal_t TimingMeasurementMaker::propagationTimeSignal = cComponent::registerSignal("propagationTime");
+simsignal_t FlowMeasurementRecorder::lifeTimeSignal = cComponent::registerSignal("lifeTime");
+simsignal_t FlowMeasurementRecorder::elapsedTimeSignal = cComponent::registerSignal("elapsedTime");
+simsignal_t FlowMeasurementRecorder::delayingTimeSignal = cComponent::registerSignal("delayingTime");
+simsignal_t FlowMeasurementRecorder::queueingTimeSignal = cComponent::registerSignal("queueingTime");
+simsignal_t FlowMeasurementRecorder::processingTimeSignal = cComponent::registerSignal("processingTime");
+simsignal_t FlowMeasurementRecorder::transmissionTimeSignal = cComponent::registerSignal("transmissionTime");
+simsignal_t FlowMeasurementRecorder::propagationTimeSignal = cComponent::registerSignal("propagationTime");
 
-Define_Module(TimingMeasurementMaker);
+Define_Module(FlowMeasurementRecorder);
 
 static bool matchesString(cMatchExpression& matchExpression, const char *string)
 {
@@ -37,7 +37,7 @@ static bool matchesString(cMatchExpression& matchExpression, const char *string)
     return matchExpression.matches(&matchableString);
 }
 
-void TimingMeasurementMaker::initialize(int stage)
+void FlowMeasurementRecorder::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -59,7 +59,7 @@ void TimingMeasurementMaker::initialize(int stage)
     }
 }
 
-void TimingMeasurementMaker::processPacket(Packet *packet)
+void FlowMeasurementRecorder::processPacket(Packet *packet)
 {
     if (packetFilter.matches(packet)) {
         makeMeasurements(packet);
@@ -68,7 +68,7 @@ void TimingMeasurementMaker::processPacket(Packet *packet)
     }
 }
 
-void TimingMeasurementMaker::makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t signal, simtime_t value)
+void FlowMeasurementRecorder::makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t signal, simtime_t value)
 {
     EV_INFO << "Making measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
     if (flowName != nullptr && *flowName != '\0')
@@ -78,7 +78,7 @@ void TimingMeasurementMaker::makeMeasurement(Packet *packet, b offset, b length,
     emit(signal, value, &details);
 }
 
-void TimingMeasurementMaker::makeMeasurements(Packet *packet)
+void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
 {
     b length = this->length == b(-1) ? packet->getTotalLength() - offset : this->length;
     if (measureLifeTime)
@@ -107,7 +107,7 @@ void TimingMeasurementMaker::makeMeasurements(Packet *packet)
         makeMeasurement<PropagationTimeTag>(packet, offset, length, propagationTimeSignal);
 }
 
-void TimingMeasurementMaker::endMeasurements(Packet *packet)
+void FlowMeasurementRecorder::endMeasurements(Packet *packet)
 {
     std::set<std::string> endedFlowNames;
     b length = this->length == b(-1) ? packet->getTotalLength() - offset : this->length;

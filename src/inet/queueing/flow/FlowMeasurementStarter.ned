@@ -20,7 +20,7 @@ package inet.queueing.flow;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
-simple TimingMeasurementStarter extends PacketFlowBase like IPacketFlow
+simple FlowMeasurementStarter extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
@@ -29,7 +29,7 @@ simple TimingMeasurementStarter extends PacketFlowBase like IPacketFlow
         int length @unit(b) = default(-1b); // designates the packet part to be measured
         string flowName = default(""); // use packet flow to separate measurement from other measurements
         string measure = default("*"); // match expression for a combination of: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
-        @class(TimingMeasurementStarter);
+        @class(FlowMeasurementStarter);
         @display("i=block/timer");
         @signal[packetFlowStarted](type=inet::Packet);
 }
