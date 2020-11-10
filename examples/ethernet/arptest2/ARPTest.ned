@@ -19,7 +19,7 @@
 
 package inet.examples.ethernet.arptest2;
 
-import inet.linklayer.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.Router;

@@ -1,5 +1,5 @@
 
-import inet.linklayer.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.EthernetHost2;
 import ned.DatarateChannel;
 

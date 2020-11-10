@@ -1,6 +1,6 @@
 package inet.tests.ethernet;
 
-import inet.linklayer.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.EthernetHost2;
 import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;

@@ -35,7 +35,7 @@ simple EthernetHub
 {
     parameters:
         @networkNode();
-        @class(inet::WireJunction);
+        @class(::inet::physicallayer::WireJunction);
         @labels(node,ethernet-node);
         @display("i=device/hub;bgb=155,104");
         @signal[packetReceived](type=cMessage);

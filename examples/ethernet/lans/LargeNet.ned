@@ -19,7 +19,7 @@
 
 package inet.examples.ethernet.lans;
 
-import inet.linklayer.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.EthernetHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.physicallayer.common.packetlevel.WireJunction;

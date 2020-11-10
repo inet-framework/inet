@@ -20,7 +20,7 @@
 
 package inet.examples.ethernet.lans;
 
-import inet.linklayer.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EthernetHost;
