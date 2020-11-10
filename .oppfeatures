@@ -612,6 +612,34 @@
         linkerFlags = ""
         />
     <feature
+        id="EIGRP"
+        name="EIGRP"
+        description = "EIGRP routing"
+        initiallyEnabled = "true"
+        requires = "IPv4 IPv6"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.eigrp
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_EIGRP"
+        linkerFlags = ""
+        />
+    <feature
+        id="EIGRP_examples"
+        name="EIGRP examples"
+        description = "EIGRP routing examples"
+        initiallyEnabled = "true"
+        requires = "IPv4 IPv6 EIGRP Ethernet"
+        labels = "routing"
+        nedPackages = "
+                       inet.examples.eigrp
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="GPSR"
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
@@ -747,10 +775,49 @@
         linkerFlags = ""
         />
     <feature
+        id="physicallayer"
+        name="Physical layer Base"
+        description = "Physical layer Base"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.common
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PHYSICALLAYER"
+        linkerFlags = ""
+        />
+    <feature
+        id="phywired"
+        name="Wired Physical layer"
+        description = "Wired Physical layer"
+        requires = "physicallayer"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.wired.common
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PHY_WIRED"
+        linkerFlags = ""
+        />
+    <feature
+        id="phywireless"
+        name="Wireless Physical layer"
+        description = "Wireless Physical layer"
+        requires = "physicallayer"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.wireless.common.signal
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PHY_WIRELESS"
+        linkerFlags = ""
+        />
+    <feature
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"
-        requires = ""
+        requires = "phywireless"
         labels = ""
         nedPackages = "
                        inet.physicallayer.wireless.common.analogmodel
@@ -770,6 +837,20 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RADIO"
+        linkerFlags = ""
+        />
+    <feature
+        id="Ieee8021ae"
+        name="IEEE 802.1ae"
+        description = "Provides IEEE 802.1ae"
+        initiallyEnabled = "true"
+        requires = "queueing"
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.linklayer.ieee8021ae
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_IEEE80211"
         linkerFlags = ""
         />
     <feature
@@ -811,6 +892,19 @@
         labels = ""
         nedPackages = "
                        inet.physicallayer.wireless.apsk
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_APSKRADIO"
+        linkerFlags = ""
+        />
+    <feature
+        id="phynoise"
+        name="Physical layer noise"
+        description = "Physical layer noise"
+        requires = "phywireless"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.wireless.noise
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_APSKRADIO"
