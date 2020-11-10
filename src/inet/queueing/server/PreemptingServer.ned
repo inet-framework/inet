@@ -15,11 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocolelement.server;
+package inet.queueing.server;
 
 import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
-
 
 simple PreemptingServer extends PacketServerBase like IPacketServer
 {

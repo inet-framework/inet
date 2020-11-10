@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-10-19  Levente Mészáros
+
+	Added new PreemptingServer.
+
 2020-08-25  Levente Mészáros
 
 	Adapted to new EV_FIELD macro.
