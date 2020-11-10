@@ -22,7 +22,7 @@ import inet.protocolelement.checksum.FcsHeaderInserter;
 import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.protocolelement.ordering.SequenceNumbering;
-import inet.protocolelement.queue.InProgressQueue;
+import inet.queueing.queue.InProgressQueue;
 import inet.protocolelement.transceiver.PacketReceiver;
 import inet.protocolelement.transceiver.StreamThroughTransmitter;
 import inet.queueing.classifier.ContentBasedClassifier;

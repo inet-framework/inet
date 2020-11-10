@@ -31,6 +31,7 @@
 2020-04-09  Levente Mészáros
 
 	Implemented enqueuePacket/dequeuePacket with PacketQueueBase.
+	Added InProgressQueue.
 
 2020-04-08  Levente Mészáros
 

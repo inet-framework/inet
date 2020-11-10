@@ -15,9 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.protocolelement.queue;
-
-import inet.queueing.queue.PacketQueue;
+package inet.queueing.queue;
 
 simple InProgressQueue extends PacketQueue
 {

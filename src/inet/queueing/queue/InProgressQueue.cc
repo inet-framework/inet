@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocolelement/queue/InProgressQueue.h"
+#include "inet/queueing/queue/InProgressQueue.h"
 
 namespace inet {
 

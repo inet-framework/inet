@@ -26,7 +26,6 @@
 	protocolelement/fragmentation/policy
 	protocolelement/fragmentation/serializer
 	protocolelement/measurement
-TODO	protocolelement/queue: maybe merge into queueing?
 	protocolelement/service
 	protocolelement/trafficconditioner
 	protocolelement/transceiver
@@ -204,7 +203,6 @@ TODO	protocolelement/queue: maybe merge into queueing?
 	protocolelement/ordering/DuplicateRemoval
 	protocolelement/ordering/Reordering
 	protocolelement/ordering/SequenceNumbering
-TODO	protocolelement/queue/InProgressQueue ???
 	protocolelement/selectivity/ReceiveAtL3Address
 	protocolelement/selectivity/ReceiveAtMacAddress
 	protocolelement/selectivity/ReceiveAtPort
@@ -250,6 +248,7 @@ TODO	protocolelement/queue/InProgressQueue ???
 	queueing/contract/IPacketPusher
 	queueing/filter/OmittedPacketFilter
 	queueing/gate/PeriodicGate
+	queueing/queue/InProgressQueue
 	queueing/queue/OmittedPacketQueue
 	queueing/queue/SelectiveQueue
 	queueing/server/InstantServer
