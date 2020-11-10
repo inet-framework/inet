@@ -19,7 +19,7 @@ package inet.linklayer.ethernet.compound;
 
 import inet.queueing.queue.SelectiveQueue;
 
-module EthernetSelectiveQueue extends SelectiveQueue
+module EthernetGatingQueue extends SelectiveQueue
 {
     parameters:
         classifier.classifierClass = default("inet::queueing::PacketUserPriorityIndClassifier");
