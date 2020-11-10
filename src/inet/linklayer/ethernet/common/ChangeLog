@@ -1,0 +1,565 @@
+====== inet-4.x ======
+
+2020-10-27  Levente Mészáros
+
+	Changed to duplicate the packet instead of creating a new one when forwarding.
+
+2020-10-19  Levente Mészáros
+
+	Moved the call to getInterfaceById where the outgoingInterfaceId is not -1.
+
+2020-10-13  Levente Mészáros
+
+	Added VlanInd -> VlanReq to forwarding to relays.
+
+2020-09-15  Levente Mészáros
+
+	Refactored MacRelayUnit to be based on MacRelayUnitBase module.
+
+2020-08-03  Levente Mészáros
+
+	Updated all registerService, registerProtocol methods and calls.
+
+2020-07-22  Levente Mészáros
+
+	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.
+
+2020-06-30  Levente Mészáros
+
+	Changed relaying mechanism in MacRelayUnit to use MacAddressInd instead of Ethernet header.
+
+2020-02-28  Rudolf Hornig
+
+	Fixed crash when inspecting mac address table in Qtenv.
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized tag usage.
+
+2019-08-07  Zoltan Bojthe
+
+	Redesigned file format for 'addressTableFile' parameter
+
+2019-07-31  Zoltan Bojthe
+
+	Renamed port to interfaceId in MacAddressTable.
+
+2019-07-26  Zoltan Bojthe
+
+	Added support for lifecycle interface to MacAddressTable.
+
+2019-07-25  Rudolf Hornig
+
+	MacAddressTable now initializes correctly from a file.
+
+2019-01-23  Levente Mészáros
+
+	Extracted a separate updateDisplayString() method.
+	Added display string texts to MacAddressTable and MacRelayUnit.
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2018-10-10  Zoltan Bojthe
+
+	Changed MacRelayUnit base class to LayeredProtocolBase.
+
+2018-09-28  Levente Mészáros
+
+	Extracted INITSTAGE_LINK_LAYER from INITSTAGE_NETWORK_INTERFACE_CONFIGURATION where applicable.
+
+2018-09-27  Levente Mészáros
+
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+
+2018-09-04  Zoltan Bojthe
+
+	Removed multicast addresses from MacAddressTable, because more ports can use same multicast address.
+	Reduced differences between MacRelayUnit and Ieee8021dRelay relay units.
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-21  Zoltan Bojthe
+
+	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    EtherMACBase -> EtherMacBase
+	    IMACAddressTable -> IMacAddressTable
+	    IMACRelayUnit -> IMacRelayUnit
+	    MACAddress -> MacAddress
+	    MACAddressTable -> MacAddressTable
+	    MACRelayUnit -> MacRelayUnit
+	    MAC_compare -> MacCompare
+
+2017-11-16  Levente Mészáros
+
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-09-13  Levente Mészáros
+
+	Added clearTags() and removePoppedChunks() calls when reusing packets in relay units.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-01-30  Zoltan Bojthe
+
+	Added FIXME to MACRelayUnit: should handle multicast mac addresses correctly.
+
+2017-01-25  Zoltan Bojthe
+
+	Moved phy layer frames to EtherPhyFrame.msg.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-04-19  Levente Meszaros
+
+	RelayUnit: Added packetReceivedFromLowerSignal and
+	packetSentToLowerSignal signals.
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-08  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-12-18  Zoltan Bojthe
+
+	MACAddressTable: changed default value of agingTime parameter -
+	fingerprints changed
+
+2013-12-05  Benjamin Seregi (benmartin92)
+
+	Ieee8021DRelay: added interface autoselection.
+
+2013-12-04  Benjamin Seregi (benmartin92)
+
+	STP/RSTP/Relays: MAC table module access changed to work with
+	IMACAddressTable.
+
+2013-11-07  Benjamin Seregi (benmartin92)
+
+	Relay: folder name Relay -> relay - added isStpAware: if the switch is
+	STP/RSTP unaware then all its ports are forwarding (and learning) -
+	IEEE8021DRelay implements IMACRelayUnit interface - added STPGate to each
+	IMACRelayUnit implementations
+
+2013-10-31  Benjamin Seregi (benmartin92)
+
+	IEEE8021DRelay: InterfaceTableAccess replaced with getSubmodule()
+
+2013-10-31  Benjamin Seregi (benmartin92)
+
+	IEEE8021DRelay: EthernetIIFrame --> EtherFrame.
+
+2013-10-28  Benjamin Seregi (benmartin92)
+
+	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
+
+2013-10-28  Benjamin Seregi (benmartin92)
+
+	IEEE8021DRelay: module added. This relay module is intended to work with
+	both STP and RSTP. IEEE8021DBPDU: BPDU message added for RSTP/STP.
+
+2013-10-11  Benjamin Seregi (benmartin92)
+
+	MACAddressTable: Some (eg.: STP, RSTP) protocols may need to change
+	agingTime
+
+2013-09-18  Benjamin Seregi (benmartin92)
+
+	MACAddressTable:
+
+	- MACAddressTable now has removeAgedEntriesIfNeeded() for efficient MAC
+	 table purge.
+	- Added clearTable() for lifecycle.
+
+	MACRelayUnit: Added a simplified MACRelayUnit. It was necessary because
+	MAC address table management has been separated from MACRelayUnitBase
+	module.
+
+	IMACRelayUnit: This moduleinterface changed to work with MACRelayUnit.
+	There are no need for MAC address table configuration parameters anymore.
+
+	EtherSwitch: Added MACAddressTable.
+
+	Examples: ethernet/lans/largeNet example changed to work with the new
+	RelayUnit.
+
+	MACAddressTableAccess: MACAddressTable access name changed to macTable.
+
+2013-09-12  Benjamin Seregi (benmartin92)
+
+	Switch: MACAddressTable changes:
+
+	- Now it uses std::map for efficient Address Table search and access
+	- Some major renaming: registerMAC -> updateTableWithAddress,
+	 resolveMAC -> getPortForAddress, etc.
+	- Some parts of code are based on MACRelayUnitBase.
+	- resolveMAC/getPortForAddress: outputPorts removed from parameters
+	 as it is not needed because getPortForAddress always returns a
+	 single port.
+
+2013-11-07 Benjamin Seregi
+
+	MACAddressTable: new module added because MACAddressTable was separated
+	from the RelayUnit. The new MACTable is ready for future VLAN support.
+
+	IEEE8021DRelay: added a new relay for supporting STP/RSTP protocols.
+	The CPU and memory modelling are no longer supported with this relay.
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-24  Zoltan Bojthe
+
+	switch: MACRelay to use InterfaceTable/InterfaceEntry instead of direct
+	access to the EtherMAC module
+
+	Assert tests added for detects differrences between returned values by
+	MAC and by IE
+
+2013-06-18  Zoltan Bojthe
+
+	MACRelayUnit: added lifecycle support
+
+2013-06-17  Zoltan Bojthe
+
+	MACRelayUnitPP: added timer pointer to PortBuffer
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-01-04  Zoltan Bojthe
+
+	make use of ETHER_PAUSE_COMMAND_PADDED_BYTES constant
+
+2011-12-20  Andras Varga
+
+	statistics revised:
+	- change statistics titles to lowercase
+	- add "max" to places where "timeavg" was present and appropriate
+	- for usedBufferBytes, removed "histogram" recording mode (it made
+	  no sense here) and added "timeavg" instead
+
+2011-08-22  Zoltan Bojthe
+
+	Remove empty finish() functions
+
+2011-08-22  Zoltan Bojthe
+
+	Bugfix: buffer was too small for sprintf() outputs
+
+2011-08-04  Zoltan Bojthe
+
+	Rename PAUSE_BITTIME to PAUSE_UNIT_BITS and use it
+
+2011-08-04  Zoltan Bojthe
+
+	Added "_BYTES" suffix to the names of byte length constants
+
+2011-07-15  Zoltan Bojthe
+
+	Fix for bug #355: pauseInterval calculation is wrong in MACRelayUnits
+
+	Added a new pauseFinished array for storing the finish time of the last
+	PASE for each port. Finish times differ when datarates differ on ports.
+
+	Also add a config for examples/ethernet/test/switch example for testing
+	PAUSE.
+
+	Bug description: The pause interval was calculated from 100kbps instead
+	of the actual datarate [check-in 2011-12-08]
+
+2011-07-15  Zoltan Bojthe
+
+	Fix for bug #351: Ethernet PAUSE frames are dropped.
+
+	Solution: MACRelayUnitBase to set dest=MULTICAST_PAUSE_ADDRESS
+	on outgoing PAUSE frames.
+
+	Bug description: Ethernet PAUSE frames are generated in EtherEncap,
+	EtherLLC and MACRelayUnitBase classes. However the destination address
+	is not filled in, so the receiving MACs drop the frame, because it is
+	not destined to them (unless in promiscous mode). This makes the flow
+	control ineffective.
+
+	The destination address of the frame may be set to either the unique DA
+	of the station to be paused, or to the globally assigned multicast
+	address 01-80-C2-00-00-01 (hex). This multicast address has been
+	reserved by the IEEE 802.3 standard for use in MAC Control PAUSE frames.
+	It is also reserved in the IEEE 802.1D bridging standard as an address
+	that will not be forward by bridges. This ensures the frame will not
+	propagate beyond the local link segment. [check-in 2011-12-08]
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-08-15  Andras Varga
+
+	Adapted units to recent OMNeT++ change: replaced Kbps,KB,MB,GB with
+	kbps,KiB,MiB,GiB
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-06-21  Zoltan Bojthe
+
+	fix #352: MACRelayUnitBase::readAddressTable() should check addressTable
+	capacity
+
+2011-06-10  Zoltan Bojthe
+
+	MACRelayUnit fixes: remove numWirelessPorts, don't send back packet to
+	wireless port
+
+	The AP management send back packets to radio
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-04-27  Rudolf Hornig
+
+	Ethernet refactoring. EtherHostQ removed. csmacdSupport parameter added
+	to Switch, EtherHost and EthernetInterface.
+
+	Files moved from src/linklayer/etherswitch to src/linklayer/ethernet/switch
+
+2011-04-07  Rudolf Hornig
+
+	Fix for MacRelayUnit. Now correctly broadcasts the packets on all
+	wireless interfaces.
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-29  Zoltan Bojthe
+
+	featuresupport: add ETHERNET feature
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-01  Rudolf Hornig
+
+	Module interface renaming.
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2010-03-05  Andras Varga
+
+	removed redundant (long) conversion from emit() calls
+
+2010-03-05  Andras Varga
+
+	fixed `title="title"' lines
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-03-05  Andras Varga
+
+	update for omnet++ 4.1b3:
+
+	renamed @signal to @statistic modeHint= to record=
+
+2010-06-24  Zoltan Bojthe
+
+	use signals for statistics recording
+
+2009-07-19  Andras Varga
+
+	added further module @labels (ethernet-node, wireless-node, mpls-node);
+	added default icons to several module types; more gate labels
+
+2009-07-17  Levente Meszaros
+
+	added gate @labels properties
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2004-05-10  Andras Varga
+
+	* EtherMAC: auto MAC address assignment
+
+	* EtherMAC: auto-configuration of transmission rate and duplex/half duplex i
+	  mode.
+
+	* it's no longer an error if EtherMAC is not connected to the network
+	  ("unplugged cable")
+
+	* elaboration of Ethernet frame types: Ethernet II, 802.3 with LLC,
+	  802.3 with LLC and SNAP.
+
+	* added EtherEncap, which does encapsulation/decapsulation with
+	  Ethernet II frames.
+
+	* communication between LLC and higher layers changed: now it uses
+	  controlInfo() as introduced in OMNeT++ 3.0
+
+	* PAUSE handling fixed: PAUSE frames to be sent have now priority
+	  in the MAC (they overtake normal frames in the queue).
+	  MACRelayUnits: minimal time interval introduced that must elapse
+	  before sending another PAUSE frame.
+
+	* new example network: models a very large Ethernet LAN. Ini files
+	  for old example networks available in test/ subdir.
+
+	* sample application changed to EtherAppCli+EtherAppSrv. EtherAppCli
+	  sends requests of at configurable intervals to EtherAppSrv.
+	  Each request contains how many bytes EtherAppSrv should send back
+	  in response. If this number is 0, no frames are sent; if it is
+	  larger than ~1500, several frames are sent back.
+
+2004-04-26  Andras Varga
+
+	* Checkin of the Ethernet model, including the switch relay unit.
+	The model was largely written during my stay between February
+	and October 2003 at CTIE, Monash University, Melbourne, Australia,
+	on the invitation of Dr. Ahmet Sekercioglu.
+
+	If you are interested in the early history of the Ethernet code,
+	change to the project root and type
+
+	$ gitk -- NetworkInterfaces/Ethernet INET/src/networkinterfaces/ethernet \
+	    INET/src/linklayer/ethernet
