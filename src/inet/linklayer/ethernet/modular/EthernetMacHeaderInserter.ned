@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet.compound;
+package inet.linklayer.ethernet.modular;
 
 import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.base.PacketFlowBase;

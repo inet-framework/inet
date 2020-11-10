@@ -20,7 +20,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetCommand_m.h"
-#include "inet/linklayer/ethernet/compound/EthernetSocketPacketProcessor.h"
+#include "inet/linklayer/ethernet/modular/EthernetSocketPacketProcessor.h"
 
 namespace inet {
 

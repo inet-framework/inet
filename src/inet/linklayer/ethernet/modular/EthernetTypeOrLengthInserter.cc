@@ -19,7 +19,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/compound/EthernetTypeOrLengthInserter.h"
+#include "inet/linklayer/ethernet/modular/EthernetTypeOrLengthInserter.h"
 
 namespace inet {
 
