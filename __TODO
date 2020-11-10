@@ -31,6 +31,7 @@ INET 4.3 release TODO items:
 
 ===============================================================================
 
+ - ThruputMeteringChannel -> result filter + visualizer for measuring the channel throughput using channel signals and result for analysis
  - Add Ethernet socket support to layered model.
  - Implement fingerprints for figures and values for all example simulations.
  - update all EV statements to use EV_FIELD
