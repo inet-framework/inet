@@ -17,9 +17,9 @@
 
 package inet.linklayer.ethernet.modular;
 
-import inet.queueing.queue.SelectiveQueue;
+import inet.queueing.queue.GatingPriorityQueue;
 
-module EthernetGatingQueue extends SelectiveQueue
+module EthernetGatingQueue extends GatingPriorityQueue
 {
     parameters:
         classifier.classifierClass = default("inet::queueing::PacketUserPriorityIndClassifier");
