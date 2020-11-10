@@ -1202,7 +1202,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.protocol
+                       inet.protocolelement
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_PROTOCOL"
