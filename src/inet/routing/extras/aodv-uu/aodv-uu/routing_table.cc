@@ -122,13 +122,13 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
     }
 
 
-    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == nullptr)
+    if ((rt = new rt_table_t) == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
     }
 
-    memset(rt, 0, sizeof(rt_table_t));
+    //memset(rt, 0, sizeof(rt_table_t));
     rt->dest_addr = dest_addr;
     rt->next_hop = next;
     rt->dest_seqno = seqno;
@@ -441,7 +441,8 @@ void NS_CLASS rt_table_delete(rt_table_t * rt)
     timer_remove(&rt->hello_timer);
     timer_remove(&rt->ack_timer);
     rt_tbl.num_entries = (int) aodvRtTableMap.size();
-    free(rt);
+    //free(rt);
+    delete rt;
     return;
 }
 
@@ -502,12 +503,12 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
     DEBUG(LOG_INFO, 0, "modifyAODVTables");
     /* Check if we already have an entry for dest_addr */
 
-    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == nullptr)
+    if ((rt = new rt_table_t) == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
     }
-    memset(rt, 0, sizeof(rt_table_t));
+    //memset(rt, 0, sizeof(rt_table_t));
     rt->dest_addr = dest_addr;
     rt->next_hop = next;
     rt->dest_seqno = seqno;

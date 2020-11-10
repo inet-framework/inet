@@ -195,16 +195,16 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
 
 void DSRUU::omnet_deliver(struct dsr_pkt *dp)
 {
-    int dsr_opts_len = 0;
+   // int dsr_opts_len = 0;
     if (!dp->dh.opth.empty())
     {
-        dsr_opts_len = dp->dh.opth.begin()->p_len + DSR_OPT_HDR_LEN;
+//        dsr_opts_len = dp->dh.opth.begin()->p_len + DSR_OPT_HDR_LEN;
         dsr_opt_remove(dp);
     }
 
-    auto outInterface = interfaceId;
-    if (isLocalAddress(dp->dst.s_addr))
-        outInterface = -1;
+//    auto outInterface = interfaceId;
+//    if (isLocalAddress(dp->dst.s_addr))
+//        outInterface = -1;
 
     auto dgram = newDsrPacket(dp, interfaceId, false);
 
@@ -366,7 +366,7 @@ void DSRUU::initialize(int stage)
         // ASSERT(stage >= STAGE:IP_LAYER_READY_FOR_HOOK_REGISTRATION);
 
         int  num_80211 = 0;
-        NetworkInterface *   i_face;
+        //NetworkInterface *   i_face;
 
         for (int i = 0; i < getInterfaceTable()->getNumInterfaces(); i++)
         {
@@ -374,7 +374,7 @@ void DSRUU::initialize(int stage)
             auto name = ie->getInterfaceName();
             if (strstr(name, "wlan")!=nullptr)
             {
-                i_face = ie;
+                //i_face = ie;
                 num_80211++;
                 interfaceId = ie->getInterfaceId();
             }
@@ -735,8 +735,8 @@ void DSRUU::processLinkBreak(const Packet *pkt)
     if (header80211 == nullptr)
         return;
 
-    auto sender = header80211->getTransmitterAddress();
-    auto receiver = header80211->getReceiverAddress();
+    //auto sender = header80211->getTransmitterAddress();
+    //auto receiver = header80211->getReceiverAddress();
 
     const auto& networkHeader = findNetworkProtocolHeader(const_cast<Packet *>(pkt));
     if (networkHeader == nullptr)
@@ -1168,7 +1168,9 @@ void DSRUU::EtxMsgSend(void *data) {
     Packet * pkt = new Packet();
 
     EtxList *list = etxHeader->addExtension(numNeighbor);
-    memcpy(list, neigh, sizeof(EtxList) * numNeighbor);
+    for (int i = 0; i < numNeighbor; i++)
+        list[i] = neigh[i];
+    //memcpy(list, neigh, sizeof(EtxList) * numNeighbor);
     etxHeader->setChunkLength(B(8*numNeighbor));
     insertDsrProtocolHeader(pkt, etxHeader);
 

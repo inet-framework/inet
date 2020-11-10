@@ -67,6 +67,33 @@ struct rt_table
     int nprec;          /* Number of precursors */
     bool pending;
     std::vector<precursor_t> precursors;      /* List of neighbors using the route */
+    rt_table(){
+        clear();
+    }
+    virtual ~rt_table(){
+        clear();
+    }
+    virtual void clear() {
+        dest_addr.s_addr.reset();
+        dest_seqno = 0;
+        ifindex = 0;   /* Network interface index... */
+        next_hop.s_addr.reset();    /* IP address of the next hop to the dest */
+        hcnt = 0;      /* Distance (in hops) to the destination */
+        flags = 0;        /* Routing flags */
+        state = 0;     /* The state of this entry */
+        cost = 0; // without the last node
+        hopfix = 0;
+
+        rt_timer.clear();
+        ack_timer.clear();
+        hello_timer.clear();
+        memset(&last_hello_time,0,sizeof(last_hello_time));
+        memset(&hash,0,sizeof(hash_value));
+        hello_cnt = 0;
+        nprec = 0;          /* Number of precursors */
+        pending = false;
+        precursors.clear();
+    }
 };
 #else
 typedef struct precursor

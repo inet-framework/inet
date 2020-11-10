@@ -619,6 +619,16 @@ private:
             unsigned short id;
             struct timeval last_ack_req;
             usecs_t t_srtt, rto, t_rxtcur, t_rttmin, t_rttvar, jitter;  /* RTT in usec */
+            void clear() {
+                addr.S_addr.reset();
+                memset(&hw_addr, 0, sizeof(hw_addr));
+                id = 0;
+                memset(&last_ack_req, 0, sizeof(last_ack_req));
+                t_srtt = rto = t_rxtcur = t_rttmin = t_rttvar = jitter =0;
+            }
+            neighbor () {
+                clear();
+            }
         };
 
 

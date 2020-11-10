@@ -163,7 +163,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
     struct Id_Entry *id_entry=nullptr;
     int exist=1;
     struct Id_Entry_Route *id_r = nullptr;
-    int res = 0;
+    //int res = 0;
 
     auto it = dsrRreqTbl.find(initiator.s_addr);
     if (it != dsrRreqTbl.end())
@@ -176,7 +176,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
 
     if (!e)
     {
-        res = -ENOMEM;
+        //res = -ENOMEM;
         return 1;
     }
 
@@ -203,7 +203,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
         id_e = new Id_Entry();
         if (!id_e)
         {
-            res = -ENOMEM;
+            //res = -ENOMEM;
             return 1;
         }
         id_r = new Id_Entry_Route;

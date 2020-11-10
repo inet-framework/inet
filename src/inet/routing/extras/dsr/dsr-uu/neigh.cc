@@ -66,7 +66,7 @@ NSCLASS neighbor * NSCLASS neigh_tbl_create(struct in_addr addr,
 
     if (!neigh)
         return nullptr;
-    memset(neigh, 0, sizeof(neighbor));
+    //memset(neigh, 0, sizeof(neighbor));
     neigh->id = id;
     neigh->addr = addr;
     neigh->t_srtt = DSR_SRTTBASE;

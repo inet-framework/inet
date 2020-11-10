@@ -211,7 +211,8 @@ void NS_CLASS initialize(int stage)
         debug = 0;
 #endif
         /* Set host parameters */
-        memset(&this_host, 0, sizeof(struct host_info));
+        //memset(&this_host, 0, sizeof(this_host));
+        this_host.clear();
         memset(dev_indices, 0, sizeof(unsigned int) * MAX_NR_INTERFACES);
         this_host.seqno = 1;
         this_host.rreq_id = 0;
@@ -309,7 +310,7 @@ NS_CLASS ~AODVUU()
 #ifdef AODV_USE_STL_RT
     while (!aodvRtTableMap.empty())
     {
-        free (aodvRtTableMap.begin()->second);
+        delete (aodvRtTableMap.begin()->second);
         aodvRtTableMap.erase(aodvRtTableMap.begin());
     }
 #else

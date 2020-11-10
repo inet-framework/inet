@@ -46,8 +46,14 @@ struct timer
 {
     int used;
     simtime_t timeout;
-    timeout_func_t handler;
-    void *data;
+    timeout_func_t handler = nullptr;
+    void *data = nullptr;
+    void clear() {
+        used = 0;
+        timeout = simtime_t::ZERO;
+        handler = nullptr;
+        data = nullptr;
+    }
 };
 #else
 struct timer

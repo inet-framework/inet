@@ -126,6 +126,28 @@ struct host_info
     u_int32_t rreq_id;      /* RREQ id */
     int nif;            /* Number of interfaces to broadcast on */
     struct dev_info devs[MAX_NR_INTERFACES];
+    virtual void clear() {
+        seqno = 0;        /* Sequence number */
+        bcast_time.tv_sec = 0;  /* The time of the last broadcast msg sent */
+        bcast_time.tv_usec = 0;
+
+        fwd_time.tv_sec = 0;    /* The time a data packet was last forwarded */
+        fwd_time.tv_usec = 0;
+        rreq_id = 0;      /* RREQ id */
+        nif = 0;            /* Number of interfaces to broadcast on */
+        for (auto i = 0; i < MAX_NR_INTERFACES; i++) {
+            devs[i].enabled = 0;        /* 1 if struct is used, else 0 */
+            devs[i].sock = 0;           /* AODV socket associated with this device */
+        #ifdef CONFIG_GATEWAY
+            devs[i].psock = 0;          /* Socket to send buffered data packets. */
+        #endif
+            devs[i].ifindex = 0;
+            memset(&devs[i].ifname,0,sizeof(devs[i].ifname));
+            devs[i].ipaddr.S_addr.reset();  /* The local IP address */
+            devs[i].netmask.S_addr.reset(); /* The netmask we use */
+            devs[i].broadcast.S_addr.reset();
+        }
+    }
 };
 
 /*
