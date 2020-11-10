@@ -9,7 +9,7 @@
 	linklayer/ethernet/base
 	linklayer/ethernet/basic
 	linklayer/ethernet/common
-	linklayer/ethernet/compound
+	linklayer/ethernet/modular
 	linklayer/ethernet/contract
 	linklayer/virtual
 	networks
@@ -62,35 +62,35 @@
 	linklayer/base/MacRelayUnitBase
 	linklayer/common/OmittedPolicyLayer
 	linklayer/contract/IPolicyLayer
-	linklayer/ethernet/compound/CompoundEthernetInterface
-	linklayer/ethernet/compound/EthernetAddressChecker
-	linklayer/ethernet/compound/EthernetAddressInserter
-	linklayer/ethernet/compound/EthernetCutthroughInterface
-	linklayer/ethernet/compound/EthernetCutthroughLayer
-	linklayer/ethernet/compound/EthernetCutthroughSink
-	linklayer/ethernet/compound/EthernetCutthroughSource
-	linklayer/ethernet/compound/EthernetFcsChecker
-	linklayer/ethernet/compound/EthernetFcsInserter
-	linklayer/ethernet/compound/EthernetFragmentFcsChecker
-	linklayer/ethernet/compound/EthernetFragmentFcsInserter
-	linklayer/ethernet/compound/EthernetFragmentingMacLayer
-	linklayer/ethernet/compound/EthernetGatingQueue
-	linklayer/ethernet/compound/EthernetLayer
-	linklayer/ethernet/compound/EthernetMacHeaderChecker
-	linklayer/ethernet/compound/EthernetMacHeaderInserter
-	linklayer/ethernet/compound/EthernetMacLayer
-	linklayer/ethernet/compound/EthernetPauseCommandProcessor
-	linklayer/ethernet/compound/EthernetPreemptingMacLayer
-	linklayer/ethernet/compound/EthernetPriorityQueue
-	linklayer/ethernet/compound/EthernetQueue
-	linklayer/ethernet/compound/EthernetSocketCommandProcessor
-	linklayer/ethernet/compound/EthernetSocketPacketProcessor
-	linklayer/ethernet/compound/EthernetSocketTable
-	linklayer/ethernet/compound/EthernetStreamingMacLayer
-	linklayer/ethernet/compound/EthernetTypeOrLengthChecker
-	linklayer/ethernet/compound/EthernetTypeOrLengthInserter
-	linklayer/ethernet/compound/IEthernetLayer
-	linklayer/ethernet/compound/IEthernetMacLayer
+	linklayer/ethernet/modular/LayeredEthernetInterface
+	linklayer/ethernet/modular/EthernetAddressChecker
+	linklayer/ethernet/modular/EthernetAddressInserter
+	linklayer/ethernet/modular/EthernetCutthroughInterface
+	linklayer/ethernet/modular/EthernetCutthroughLayer
+	linklayer/ethernet/modular/EthernetCutthroughSink
+	linklayer/ethernet/modular/EthernetCutthroughSource
+	linklayer/ethernet/modular/EthernetFcsChecker
+	linklayer/ethernet/modular/EthernetFcsInserter
+	linklayer/ethernet/modular/EthernetFragmentFcsChecker
+	linklayer/ethernet/modular/EthernetFragmentFcsInserter
+	linklayer/ethernet/modular/EthernetFragmentingMacLayer
+	linklayer/ethernet/modular/EthernetGatingQueue
+	linklayer/ethernet/modular/EthernetLayer
+	linklayer/ethernet/modular/EthernetMacHeaderChecker
+	linklayer/ethernet/modular/EthernetMacHeaderInserter
+	linklayer/ethernet/modular/EthernetMacLayer
+	linklayer/ethernet/modular/EthernetPauseCommandProcessor
+	linklayer/ethernet/modular/EthernetPreemptingMacLayer
+	linklayer/ethernet/modular/EthernetPriorityQueue
+	linklayer/ethernet/modular/EthernetQueue
+	linklayer/ethernet/modular/EthernetSocketCommandProcessor
+	linklayer/ethernet/modular/EthernetSocketPacketProcessor
+	linklayer/ethernet/modular/EthernetSocketTable
+	linklayer/ethernet/modular/EthernetStreamingMacLayer
+	linklayer/ethernet/modular/EthernetTypeOrLengthChecker
+	linklayer/ethernet/modular/EthernetTypeOrLengthInserter
+	linklayer/ethernet/modular/IEthernetLayer
+	linklayer/ethernet/modular/IEthernetMacLayer
 	linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderChecker
 	linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderInserter
 	linklayer/ieee8021ae/IIeee8021aeTagEpdHeaderChecker
@@ -324,7 +324,7 @@
 	common/SubmoduleLayout
 	linklayer/base/MacRelayUnitBase
 	linklayer/ethernet/EthernetControlFrameSerializer
-	linklayer/ethernet/compound/EthernetClassifier
+	linklayer/ethernet/modular/EthernetClassifier
 	linklayer/ieee802/Ieee802EpdHeaderSerializer
 	linklayer/ieee802/Ieee802EpdProtocolDissector
 	linklayer/ieee802/Ieee802EpdProtocolPrinter
