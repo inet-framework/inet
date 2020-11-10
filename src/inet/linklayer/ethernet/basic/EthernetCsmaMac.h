@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ethernet/basic/EthernetMacBase.h"
+#include "inet/linklayer/ethernet/base/EthernetMacBase.h"
 
 namespace inet {
 

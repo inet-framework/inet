@@ -19,7 +19,7 @@
 #define __INET_ETHERNETMAC_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/ethernet/basic/EthernetMacBase.h"
+#include "inet/linklayer/ethernet/base/EthernetMacBase.h"
 
 namespace inet {
 
