@@ -23,7 +23,6 @@ import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 import inet.protocolelement.ordering.SequenceNumbering;
 import inet.protocolelement.queue.InProgressQueue;
-import inet.protocolelement.server.PreemptingServer;
 import inet.protocolelement.transceiver.PacketReceiver;
 import inet.protocolelement.transceiver.StreamThroughTransmitter;
 import inet.queueing.classifier.ContentBasedClassifier;
@@ -32,6 +31,7 @@ import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.marker.PacketTagger;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.server.InstantServer;
+import inet.queueing.server.PreemptingServer;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
@@ -191,5 +191,5 @@ network Network90
             @display("p=200,100");
         }
     connections:
-        sender.g --> { delay = 1us; } --> receiver.g;
+        sender.g --> {  delay = 1us; } --> receiver.g;
 }

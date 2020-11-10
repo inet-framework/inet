@@ -27,7 +27,6 @@
 	protocolelement/fragmentation/serializer
 	protocolelement/measurement
 TODO	protocolelement/queue: maybe merge into queueing?
-TODO	protocolelement/server: maybe merge into queueing?
 	protocolelement/service
 	protocolelement/trafficconditioner
 	protocolelement/transceiver
@@ -212,7 +211,6 @@ TODO	protocolelement/queue/InProgressQueue ???
 	protocolelement/selectivity/SendToL3Address
 	protocolelement/selectivity/SendToMacAddress
 	protocolelement/selectivity/SendToPort
-	protocolelement/server/PreemptingServer
 	protocolelement/service/DataService
 	protocolelement/service/ForwardingService
 	protocolelement/service/InterfaceService
@@ -256,6 +254,7 @@ TODO	protocolelement/queue/InProgressQueue ???
 	queueing/queue/SelectiveQueue
 	queueing/server/InstantServer
 	queueing/server/OmittedPacketServer
+	queueing/server/PreemptingServer
 	queueing/shaper/OmittedTrafficConditioner
 	queueing/flow/FlowMeasurementRecorder
 	queueing/flow/FlowMeasurementStarter
