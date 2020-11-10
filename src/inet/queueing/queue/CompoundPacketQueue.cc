@@ -16,14 +16,14 @@
 //
 
 #include "inet/common/Simsignals.h"
-#include "inet/queueing/queue/CompoundPacketQueue.h"
+#include "inet/queueing/queue/CompoundPacketQueueBase.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(CompoundPacketQueue);
+Define_Module(CompoundPacketQueueBase);
 
-void CompoundPacketQueue::initialize(int stage)
+void CompoundPacketQueueBase::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -47,7 +47,7 @@ void CompoundPacketQueue::initialize(int stage)
         updateDisplayString();
 }
 
-void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
+void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -64,7 +64,7 @@ void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
     }
 }
 
-Packet *CompoundPacketQueue::pullPacket(cGate *gate)
+Packet *CompoundPacketQueueBase::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = provider->pullPacket(outputGate->getPathStartGate());
@@ -74,7 +74,7 @@ Packet *CompoundPacketQueue::pullPacket(cGate *gate)
     return packet;
 }
 
-void CompoundPacketQueue::removePacket(Packet *packet)
+void CompoundPacketQueueBase::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
     collection->removePacket(packet);
@@ -82,7 +82,7 @@ void CompoundPacketQueue::removePacket(Packet *packet)
     updateDisplayString();
 }
 
-void CompoundPacketQueue::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == packetPushedSignal) {
         Enter_Method("receivePacketPushedSignal");

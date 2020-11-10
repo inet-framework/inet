@@ -257,8 +257,8 @@
     <filename>inet.mobility.single.CircleMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.queueing.queue.CompoundPacketQueue</name>
-    <filename>inet.queueing.queue.CompoundPacketQueue.html</filename>
+    <name>inet.queueing.queue.CompoundPacketQueueBase</name>
+    <filename>inet.queueing.queue.CompoundPacketQueueBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue</name>

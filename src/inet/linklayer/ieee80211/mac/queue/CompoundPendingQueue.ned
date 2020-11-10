@@ -18,11 +18,11 @@
 package inet.linklayer.ieee80211.mac.queue;
 
 import inet.queueing.classifier.PacketClassifier;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 
-module CompoundPendingQueue extends CompoundPacketQueue
+module CompoundPendingQueue extends CompoundPacketQueueBase
 {
     parameters:
         packetCapacity = default(100); // -1 means unlimited

@@ -25,9 +25,9 @@ import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 
-module StreamableSelectiveQueue extends CompoundPacketQueue
+module StreamableSelectiveQueue extends CompoundPacketQueueBase
 {
     parameters:
         int numQueues;

@@ -17,7 +17,7 @@
 
 package inet.networklayer.diffserv;
 
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.DropTailQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 import inet.queueing.scheduler.WrrScheduler;
@@ -48,7 +48,7 @@ import inet.queueing.sink.PassivePacketSink;
 //
 // @see ~AFxyQueue
 //
-module DiffservQueue extends CompoundPacketQueue
+module DiffservQueue extends CompoundPacketQueueBase
 {
     parameters:
         string interfaceTableModule;

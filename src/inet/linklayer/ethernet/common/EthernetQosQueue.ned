@@ -21,7 +21,7 @@ import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
 import inet.queueing.filter.RedDropper;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.DropTailQueue;
 
 //
@@ -40,7 +40,7 @@ module EthernetQueue extends DropTailQueue
 // data frames.
 //
 //# TODO: rename to CompoundEtherQueue? or CompoundEtherQosQueue?
-module EthernetQosQueue extends CompoundPacketQueue like IPacketQueue
+module EthernetQosQueue extends CompoundPacketQueueBase like IPacketQueue
 {
     parameters:
         @display("i=block/queue");
@@ -76,7 +76,7 @@ module EthernetQosQueue extends CompoundPacketQueue like IPacketQueue
 // and can be parametrized with an ~IPacketQueue for serving the
 // data frames.
 //
-module EthernetQosRedQueue extends CompoundPacketQueue like IPacketQueue
+module EthernetQosRedQueue extends CompoundPacketQueueBase like IPacketQueue
 {
     parameters:
         @display("i=block/queue");

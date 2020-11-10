@@ -141,7 +141,7 @@ The following simpler equation about the number of packets always holds true for
 -  :ned:`DropTailQueue`: drops packets at the tail of the queue, the most commonly used queue
 -  :ned:`PriorityQueue`: contains several subqueues that share a buffer
 -  :ned:`RedDropperQueue`: combines random early detection with a queue
--  :ned:`CompoundPacketQueue`: allows building complex queues by pure NED composition
+-  :ned:`CompoundPacketQueueBase`: allows building complex queues by pure NED composition
 
 Buffers
 -------

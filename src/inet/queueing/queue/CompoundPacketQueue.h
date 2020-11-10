@@ -26,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API CompoundPacketQueue : public PacketQueueBase, public cListener
+class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListener
 {
   protected:
     int packetCapacity = -1;

@@ -23,7 +23,7 @@ import inet.queueing.filter.RedDropper;
 //
 // Combines a packet queue with random early detection (RED) dropper.
 //
-module RedDropperQueue extends CompoundPacketQueue
+module RedDropperQueue extends CompoundPacketQueueBase
 {
     submodules:
         red: RedDropper {

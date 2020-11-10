@@ -20,7 +20,7 @@ package inet.examples.diffserv.onedomain;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.filter.RedDropper;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.DropTailQueue;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.WrrScheduler;
@@ -28,7 +28,7 @@ import inet.queueing.scheduler.WrrScheduler;
 //
 // Diffserv Queue used in Experiment 2.1 - 2.4.
 //
-module DSQueue2 extends CompoundPacketQueue
+module DSQueue2 extends CompoundPacketQueueBase
 {
     submodules:
         classifier: BehaviorAggregateClassifier {
