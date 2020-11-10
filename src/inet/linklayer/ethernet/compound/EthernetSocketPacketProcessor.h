@@ -19,7 +19,7 @@
 #define __INET_ETHERNETSOCKETPACKETPROCESSOR_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/linklayer/ethernet/composite/EthernetSocketTable.h"
+#include "inet/linklayer/ethernet/compound/EthernetSocketTable.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

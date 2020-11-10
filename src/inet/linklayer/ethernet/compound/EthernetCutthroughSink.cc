@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ethernet/composite/EthernetCutthroughSink.h"
+#include "inet/linklayer/ethernet/compound/EthernetCutthroughSink.h"
 
 namespace inet {
 

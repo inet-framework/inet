@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet.composite;
+package inet.linklayer.ethernet.compound;
 
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.queueing.contract.IPacketFilter;

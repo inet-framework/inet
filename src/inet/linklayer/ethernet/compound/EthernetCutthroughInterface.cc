@@ -18,7 +18,7 @@
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ethernet/composite/EthernetCutthroughInterface.h"
+#include "inet/linklayer/ethernet/compound/EthernetCutthroughInterface.h"
 
 namespace inet {
 

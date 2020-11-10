@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ethernet/composite/EthernetSocketTable.h"
+#include "inet/linklayer/ethernet/compound/EthernetSocketTable.h"
 
 namespace inet {
 
