@@ -37,11 +37,22 @@ echo "::endgroup::"
 
 echo "::group::Run $TESTDIR tests"
 cd tests/$TESTDIR
-./runtest | tee runtest.out
+# This is a magical "process substitution" for piping stderr into tee...
+# Source: https://stackoverflow.com/a/692407/635587
+ # the "| cat" is there to hide the exit code temporarily
+./runtest > >(tee runtest.out) 2> >(tee runtest.err >&2) | cat
 #        ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
 EXITCODE="${PIPESTATUS[0]}"
 echo "::endgroup::"
 
+ERRORS=$(cat runtest.err)
+if [ -n "$ERRORS" ]
+then
+    # newline characters are replaced with '%0A' to make them appear as multiline on the web UI
+    # Source: https://github.com/actions/starter-workflows/issues/68#issuecomment-581479448
+    # (Also: https://github.com/mheap/phpunit-github-actions-printer/pull/14 )
+    echo "::error::${ERRORS//$'\n'/%0A}"
+fi
 
 DIFFPATTERN="([^\n]*\n[?] *\^\n)" # matches a line that looks like "?     ^" and the line before it
 
