@@ -18,7 +18,7 @@
 #ifndef __INET_APSKMODULATOR_H
 #define __INET_APSKMODULATOR_H
 
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"

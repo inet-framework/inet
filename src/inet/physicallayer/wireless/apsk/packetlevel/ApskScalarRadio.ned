@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.wireless.apskradio.packetlevel;
+package inet.physicallayer.wireless.apsk.packetlevel;
 
 //
 // This radio model provides a hypothetical radio that simply uses one of the

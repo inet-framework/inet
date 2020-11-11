@@ -17,7 +17,7 @@
 
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskPhyHeaderSerializer.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskPhyHeaderSerializer.h"
 
 namespace inet {
 namespace physicallayer {

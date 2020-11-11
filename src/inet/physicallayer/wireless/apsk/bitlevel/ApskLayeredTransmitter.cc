@@ -16,10 +16,10 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskEncoder.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskLayeredTransmitter.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskModulator.h"
-#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredTransmitter.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskModulator.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.wireless.apskradio.packetlevel.errormodel;
+package inet.physicallayer.wireless.apsk.packetlevel.errormodel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
 

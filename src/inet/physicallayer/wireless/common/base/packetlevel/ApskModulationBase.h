@@ -19,7 +19,7 @@
 #define __INET_APSKMODULATIONBASE_H
 
 #include "inet/common/ShortBitVector.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 
 namespace inet {

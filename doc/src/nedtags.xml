@@ -73,88 +73,88 @@
     <filename>inet.node.base.ApplicationLayerNodeBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskDecoder</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskDecoder.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskDecoder</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskDecoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskDemodulator</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskDemodulator.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskDemodulator</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskDemodulator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadio</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadio.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalRadio</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadioMedium</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalReceiver</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalReceiver.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalReceiver</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalTransmitter</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalTransmitter</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskEncoder</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskEncoder.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskEncoder</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskEncoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.errormodel.ApskErrorModel</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.errormodel.ApskErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.errormodel.ApskErrorModel</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.errormodel.ApskErrorModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadio</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadio.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredDimensionalRadio</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredDimensionalRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadioMedium</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredDimensionalRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredDimensionalRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.errormodel.ApskLayeredErrorModel</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.errormodel.ApskLayeredErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.errormodel.ApskLayeredErrorModel</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.errormodel.ApskLayeredErrorModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredReceiver</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredReceiver.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredReceiver</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadio</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadio.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadio</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadioMedium</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredTransmitter</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredTransmitter</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskModulator</name>
-    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskModulator.html</filename>
+    <name>inet.physicallayer.wireless.apsk.bitlevel.ApskModulator</name>
+    <filename>inet.physicallayer.wireless.apsk.bitlevel.ApskModulator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskRadio</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskRadio.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskRadio</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadio</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadio.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadio</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadioMedium</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarReceiver</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarReceiver.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarReceiver</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarTransmitter</name>
-    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarTransmitter</name>
+    <filename>inet.physicallayer.wireless.apsk.packetlevel.ApskScalarTransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.ratecontrol.ArfRateControl</name>

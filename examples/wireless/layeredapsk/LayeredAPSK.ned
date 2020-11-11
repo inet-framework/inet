@@ -19,7 +19,7 @@ package inet.examples.wireless.layeredapsk;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadioMedium;
+import inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 network LayeredApsk

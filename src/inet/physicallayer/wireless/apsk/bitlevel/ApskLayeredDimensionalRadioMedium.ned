@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.wireless.apskradio.bitlevel;
+package inet.physicallayer.wireless.apsk.bitlevel;
 
 import inet.physicallayer.wireless.common.medium.RadioMedium;
 

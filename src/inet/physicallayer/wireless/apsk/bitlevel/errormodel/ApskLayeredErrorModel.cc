@@ -16,9 +16,9 @@
 //
 
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskSymbol.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/errormodel/ApskLayeredErrorModel.h"
-#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/errormodel/ApskLayeredErrorModel.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"

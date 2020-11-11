@@ -810,7 +810,7 @@
         requires = "mobility radio Ieee80211"
         labels = ""
         nedPackages = "
-                       inet.physicallayer.wireless.apskradio
+                       inet.physicallayer.wireless.apsk
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_APSKRADIO"

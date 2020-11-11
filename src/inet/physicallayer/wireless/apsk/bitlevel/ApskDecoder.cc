@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/chunk/BitsChunk.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskDecoder.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskDecoder.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 
 namespace inet {

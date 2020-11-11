@@ -18,7 +18,7 @@
 #ifndef __INET_APSKENCODER_H
 #define __INET_APSKENCODER_H
 
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskCode.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskCode.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"

@@ -17,7 +17,7 @@
 
 package inet.physicallayer.wireless.ieee802154.bitlevel;
 
-import inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadioMedium;
+import inet.physicallayer.wireless.apsk.packetlevel.ApskDimensionalRadioMedium;
 
 module Ieee802154UwbIrRadioMedium extends ApskDimensionalRadioMedium
 {

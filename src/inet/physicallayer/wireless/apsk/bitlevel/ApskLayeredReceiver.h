@@ -18,7 +18,7 @@
 #ifndef __INET_APSKLAYEREDRECEIVER_H
 #define __INET_APSKLAYEREDRECEIVER_H
 
-#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/SnirReceiverBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"

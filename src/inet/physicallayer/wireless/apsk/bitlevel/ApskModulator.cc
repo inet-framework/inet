@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskModulator.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskModulator.h"
 #include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"

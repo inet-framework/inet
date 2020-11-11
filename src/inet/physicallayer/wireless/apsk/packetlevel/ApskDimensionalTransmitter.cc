@@ -17,9 +17,9 @@
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
-#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskDimensionalTransmission.h"
-#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskDimensionalTransmitter.h"
-#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskDimensionalTransmission.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskDimensionalTransmitter.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 
 namespace inet {
 

@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/chunk/BitsChunk.h"
-#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskEncoder.h"
-#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 
 namespace inet {
 
