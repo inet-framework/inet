@@ -16,14 +16,14 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
-#include "inet/physicallayer/common/packetlevel/Interference.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionResult.h"
+#include "inet/physicallayer/wireless/common/signal/Interference.h"
 
 namespace inet {
 namespace physicallayer {

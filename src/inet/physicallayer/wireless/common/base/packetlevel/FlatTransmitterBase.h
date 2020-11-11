@@ -18,7 +18,7 @@
 #ifndef __INET_FLATTRANSMITTERBASE_H
 #define __INET_FLATTRANSMITTERBASE_H
 
-#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmitterBase.h"
 
 namespace inet {
 

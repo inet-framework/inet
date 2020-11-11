@@ -18,13 +18,13 @@
 #ifndef __INET_LAYEREDRECEPTIONRESULT_H
 #define __INET_LAYEREDRECEPTIONRESULT_H
 
-#include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionResult.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionResult.h"
 
 namespace inet {
 namespace physicallayer {

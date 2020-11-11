@@ -18,7 +18,7 @@
 #ifndef __INET_SIGNALPACKETMODEL_H
 #define __INET_SIGNALPACKETMODEL_H
 
-#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalPacketModel.h"
 
 namespace inet {
 namespace physicallayer {

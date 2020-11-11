@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract.packetlevel;
+package inet.physicallayer.wireless.common.contract.packetlevel;
 
 //
 // The neighbor cache model computes the affected set of receivers on the medium

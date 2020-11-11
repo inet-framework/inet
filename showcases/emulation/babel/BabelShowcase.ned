@@ -1,7 +1,7 @@
 package inet.showcases.emulation.babel;
 
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 network BabelShowcase

@@ -15,18 +15,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
-#include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
 
 namespace inet {
 namespace physicallayer {

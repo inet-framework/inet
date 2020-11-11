@@ -24,7 +24,7 @@ import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
 import inet.networklayer.common.NetworkInterface;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
 // This module implements an IEEE 802.11 network interface.

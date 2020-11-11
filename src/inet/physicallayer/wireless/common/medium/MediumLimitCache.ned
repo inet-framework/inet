@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.packetlevel;
+package inet.physicallayer.wireless.common.medium;
 
-import inet.physicallayer.contract.packetlevel.IMediumLimitCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
 
 module MediumLimitCache like IMediumLimitCache
 {

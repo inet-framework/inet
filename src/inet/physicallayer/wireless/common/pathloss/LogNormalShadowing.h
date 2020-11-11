@@ -26,7 +26,7 @@
 #ifndef __INET_LOGNORMALSHADOWING_H
 #define __INET_LOGNORMALSHADOWING_H
 
-#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 

@@ -26,7 +26,7 @@
 #ifndef __INET_UWBIRSTOCHASTICPATHLOSS_H
 #define __INET_UWBIRSTOCHASTICPATHLOSS_H
 
-#include "inet/physicallayer/base/packetlevel/PathLossBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PathLossBase.h"
 
 namespace inet {
 

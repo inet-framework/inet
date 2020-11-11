@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/errormodel/bitlevel/StochasticLayeredErrorModel.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/errormodel/bitlevel/StochasticLayeredErrorModel.h"
 
 namespace inet {
 namespace physicallayer {

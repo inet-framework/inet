@@ -24,8 +24,8 @@
 ***************************************************************************/
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/pathloss/TwoRayGroundReflection.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/pathloss/TwoRayGroundReflection.h"
 
 namespace inet {
 

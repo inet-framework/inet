@@ -18,16 +18,16 @@
 #ifndef __INET_IRECEIVER_H
 #define __INET_IRECEIVER_H
 
-#include "inet/physicallayer/contract/packetlevel/IInterference.h"
-#include "inet/physicallayer/contract/packetlevel/IListening.h"
-#include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
-#include "inet/physicallayer/contract/packetlevel/INoise.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
-#include "inet/physicallayer/contract/packetlevel/IReception.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
-#include "inet/physicallayer/contract/packetlevel/ISnir.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IListening.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IListeningDecision.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INoise.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionResult.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 

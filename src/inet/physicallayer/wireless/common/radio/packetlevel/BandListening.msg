@@ -18,7 +18,7 @@
 import inet.common.Units;
 
 cplusplus {{
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 }}
 
 namespace inet::physicallayer;

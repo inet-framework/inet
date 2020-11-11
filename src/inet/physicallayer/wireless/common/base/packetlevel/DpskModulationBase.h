@@ -18,7 +18,7 @@
 #ifndef __INET_DPSKMODULATIONBASE_H
 #define __INET_DPSKMODULATIONBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

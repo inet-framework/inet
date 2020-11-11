@@ -19,8 +19,8 @@
 #define __INET_IEEE802154UWBIRRECEIVER_H
 
 #include <vector>
-#include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
-#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
+#include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
 
 namespace inet {
 

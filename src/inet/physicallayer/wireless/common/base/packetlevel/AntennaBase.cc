@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/base/packetlevel/AntennaBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/AntennaBase.h"
 
 namespace inet {
 

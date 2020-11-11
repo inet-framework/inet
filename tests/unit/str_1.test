@@ -6,7 +6,7 @@ Test EV macros.
 #include "inet/common/Units.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "inet/physicallayer/common/Signal.h"
 
 %global:
 

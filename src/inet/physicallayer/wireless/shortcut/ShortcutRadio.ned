@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.shortcut;
+package inet.physicallayer.wireless.shortcut;
 
-import inet.physicallayer.base.packetlevel.PhysicalLayerBase;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.base.packetlevel.PhysicalLayerBase;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
 // This module implements a simple shortcut to peer radio protocol that completely

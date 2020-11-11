@@ -31,18 +31,18 @@
 #endif
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
-#include "inet/physicallayer/common/packetlevel/Interference.h"
-#include "inet/physicallayer/common/packetlevel/Radio.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/signal/Interference.h"
 #endif
 
 #ifdef WITH_ACKINGWIRELESS
-#include "inet/physicallayer/unitdisk/UnitDiskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
 #endif
 
 namespace inet {

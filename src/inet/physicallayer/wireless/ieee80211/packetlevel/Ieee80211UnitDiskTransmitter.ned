@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.packetlevel;
+package inet.physicallayer.wireless.ieee80211.packetlevel;
 
 //
 // @see ~Ieee80211UnitDiskReceiver, ~Ieee80211UnitDiskRadio, ~UnitDiskRadioMedium.

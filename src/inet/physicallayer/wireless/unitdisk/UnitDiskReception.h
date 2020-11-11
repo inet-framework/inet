@@ -18,7 +18,7 @@
 #ifndef __INET_UNITDISKRECEPTION_H
 #define __INET_UNITDISKRECEPTION_H
 
-#include "inet/physicallayer/base/packetlevel/ReceptionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
 
 namespace inet {
 

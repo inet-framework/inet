@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/unitdisk/UnitDiskListening.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskListening.h"
 
 namespace inet {
 

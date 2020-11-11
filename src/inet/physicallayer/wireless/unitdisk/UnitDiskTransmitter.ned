@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.unitdisk;
+package inet.physicallayer.wireless.unitdisk;
 
-import inet.physicallayer.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 //
 // This transmitter model produces transmissions that are parameterized with

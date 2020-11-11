@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/Interference.h"
+#include "inet/physicallayer/wireless/common/signal/Interference.h"
 
 namespace inet {
 namespace physicallayer {

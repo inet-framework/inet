@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/communicationcache/MapCommunicationCache.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/communicationcache/MapCommunicationCache.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
 namespace physicallayer {

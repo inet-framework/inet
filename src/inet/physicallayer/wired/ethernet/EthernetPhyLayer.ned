@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ethernet;
+package inet.physicallayer.wired.ethernet;
 
 import inet.protocolelement.common.InterpacketGapInserter;
 import inet.protocolelement.transceiver.contract.IPacketReceiver;

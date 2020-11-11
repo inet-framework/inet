@@ -15,11 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
 
 namespace inet {
 namespace physicallayer {

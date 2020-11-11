@@ -345,7 +345,7 @@
                        inet.linklayer.ieee8021q
                        inet.linklayer.vlan
                        inet.node.ethernet
-                       inet.physicallayer.ethernet
+                       inet.physicallayer.wired.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
@@ -753,19 +753,20 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.physicallayer.analogmodel
-                       inet.physicallayer.antenna
-                       inet.physicallayer.backgroundnoise
-                       inet.physicallayer.base
-                       inet.physicallayer.common
-                       inet.physicallayer.communicationcache
-                       inet.physicallayer.energyconsumer
-                       inet.physicallayer.errormodel
-                       inet.physicallayer.modulation
-                       inet.physicallayer.neighborcache
-                       inet.physicallayer.obstacleloss
-                       inet.physicallayer.pathloss
-                       inet.physicallayer.propagation
+                       inet.physicallayer.wireless.common.analogmodel
+                       inet.physicallayer.wireless.common.antenna
+                       inet.physicallayer.wireless.common.backgroundnoise
+                       inet.physicallayer.wireless.common.base
+                       inet.physicallayer.wireless.common.communicationcache
+                       inet.physicallayer.wireless.common.energyconsumer
+                       inet.physicallayer.wireless.common.errormodel
+                       inet.physicallayer.wireless.common.medium
+                       inet.physicallayer.wireless.common.modulation
+                       inet.physicallayer.wireless.common.neighborcache
+                       inet.physicallayer.wireless.common.obstacleloss
+                       inet.physicallayer.wireless.common.pathloss
+                       inet.physicallayer.wireless.common.propagation
+                       inet.physicallayer.wireless.common.radio
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RADIO"
@@ -780,7 +781,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
-                       inet.physicallayer.ieee80211
+                       inet.physicallayer.wireless.ieee80211
                        inet.node.wireless
                       "
         extraSourceFolders = ""
@@ -796,7 +797,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee802154
-                       inet.physicallayer.ieee802154
+                       inet.physicallayer.wireless.ieee802154
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IEEE802154"
@@ -809,7 +810,7 @@
         requires = "mobility radio Ieee80211"
         labels = ""
         nedPackages = "
-                       inet.physicallayer.apskradio
+                       inet.physicallayer.wireless.apskradio
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_APSKRADIO"
@@ -828,7 +829,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.acking
-                       inet.physicallayer.unitdisk
+                       inet.physicallayer.wireless.unitdisk
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ACKINGWIRELESS"
@@ -843,7 +844,7 @@
         labels = ""
         nedPackages = "
                        inet.linklayer.shortcut
-                       inet.physicallayer.shortcut
+                       inet.physicallayer.wireless.shortcut
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_SHORTCUT"

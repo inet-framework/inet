@@ -15,15 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceptionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
 
 namespace inet {
 namespace physicallayer {

@@ -16,9 +16,9 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
-#include "inet/physicallayer/common/packetlevel/NoiseDimensionalTransmitter.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/noise/NoiseDimensionalTransmitter.h"
 
 namespace inet {
 

@@ -21,9 +21,9 @@
 #define DI DelayedInitializer
 
 #include "inet/common/DelayedInitializer.h"
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HtCode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtCode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 namespace physicallayer {

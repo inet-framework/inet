@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
-#include "inet/physicallayer/errormodel/packetlevel/StochasticErrorModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/errormodel/packetlevel/StochasticErrorModel.h"
 
 namespace inet {
 

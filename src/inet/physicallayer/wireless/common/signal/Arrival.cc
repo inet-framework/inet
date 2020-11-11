@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/Arrival.h"
+#include "inet/physicallayer/wireless/common/signal/Arrival.h"
 
 namespace inet {
 namespace physicallayer {

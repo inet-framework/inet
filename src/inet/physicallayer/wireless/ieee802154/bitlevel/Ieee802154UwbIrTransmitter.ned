@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154.bitlevel;
+package inet.physicallayer.wireless.ieee802154.bitlevel;
 
-import inet.physicallayer.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 module Ieee802154UwbIrTransmitter like ITransmitter
 {

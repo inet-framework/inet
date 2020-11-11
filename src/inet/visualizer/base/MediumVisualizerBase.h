@@ -26,8 +26,8 @@
 #include "inet/visualizer/util/Placement.h"
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/common/packetlevel/PowerFunctions.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/signal/PowerFunctions.h"
 #endif // WITH_RADIO
 
 namespace inet {

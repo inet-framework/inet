@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/energyconsumer/StateBasedCcEnergyConsumer.h"
+#include "inet/physicallayer/wireless/common/energyconsumer/StateBasedCcEnergyConsumer.h"
 
 namespace inet {
 

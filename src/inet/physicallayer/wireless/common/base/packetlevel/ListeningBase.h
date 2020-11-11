@@ -18,7 +18,7 @@
 #ifndef __INET_LISTENINGBASE_H
 #define __INET_LISTENINGBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IListening.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IListening.h"
 
 namespace inet {
 

@@ -18,11 +18,11 @@
 #ifndef __INET_IWIRELESSSIGNAL_H
 #define __INET_IWIRELESSSIGNAL_H
 
-#include "inet/physicallayer/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/contract/packetlevel/IListening.h"
-#include "inet/physicallayer/contract/packetlevel/IPhysicalLayerFrame.h"
-#include "inet/physicallayer/contract/packetlevel/IReception.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IListening.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IPhysicalLayerFrame.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 

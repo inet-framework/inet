@@ -16,11 +16,11 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmitter.h"
-#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211UnitDiskTransmitter.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
 
 namespace inet {
 namespace physicallayer {

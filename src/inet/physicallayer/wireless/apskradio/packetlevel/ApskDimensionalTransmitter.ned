@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apskradio.packetlevel;
+package inet.physicallayer.wireless.apskradio.packetlevel;
 
-import inet.physicallayer.base.packetlevel.DimensionalTransmitterBase;
+import inet.physicallayer.wireless.common.base.packetlevel.DimensionalTransmitterBase;
 
 //
 // This transmitter model produces transmissions that use dimensional

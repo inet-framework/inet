@@ -17,12 +17,12 @@
 
 import inet.common.INETDefs;
 import inet.common.Units;
-import inet.physicallayer.contract.packetlevel.IModulation;
+import inet.physicallayer.wireless.common.contract.packetlevel.IModulation;
 
 cplusplus {{
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 }}
 
 namespace inet::physicallayer;

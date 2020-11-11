@@ -33,8 +33,8 @@
 
 #include <vector>
 #include "inet/common/math/Functions.h"
-#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
-#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
 
 namespace inet {
 

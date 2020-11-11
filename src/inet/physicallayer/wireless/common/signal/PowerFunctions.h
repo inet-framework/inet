@@ -20,9 +20,9 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/math/Functions.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
 namespace inet {
 

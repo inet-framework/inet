@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
 namespace physicallayer {

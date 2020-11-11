@@ -18,8 +18,8 @@
 #ifndef __INET_MEDIUMLIMITCACHE_H
 #define __INET_MEDIUMLIMITCACHE_H
 
-#include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IMediumLimitCache.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 namespace physicallayer {

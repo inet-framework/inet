@@ -18,8 +18,8 @@
 #ifndef __INET_WIRELESSSIGNAL_H
 #define __INET_WIRELESSSIGNAL_H
 
-#include "inet/physicallayer/common/packetlevel/Signal.h"
-#include "inet/physicallayer/contract/packetlevel/IWirelessSignal.h"
+#include "inet/physicallayer/common/Signal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 
 namespace inet {
 namespace physicallayer {

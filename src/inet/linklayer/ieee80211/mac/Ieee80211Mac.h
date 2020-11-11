@@ -29,7 +29,7 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Mcf.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Pcf.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
 namespace ieee80211 {

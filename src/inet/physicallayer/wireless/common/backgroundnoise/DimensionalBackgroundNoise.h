@@ -18,8 +18,8 @@
 #ifndef __INET_DIMENSIONALBACKGROUNDNOISE_H
 #define __INET_DIMENSIONALBACKGROUNDNOISE_H
 
-#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
-#include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"
 
 namespace inet {
 

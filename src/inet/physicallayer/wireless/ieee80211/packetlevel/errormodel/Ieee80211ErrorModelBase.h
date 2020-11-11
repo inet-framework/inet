@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211ERRORMODELBASE_H
 #define __INET_IEEE80211ERRORMODELBASE_H
 
-#include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ErrorModelBase.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 
 namespace inet {
 

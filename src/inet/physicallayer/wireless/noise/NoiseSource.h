@@ -18,9 +18,9 @@
 #ifndef __INET_NOISESOURCE_H
 #define __INET_NOISESOURCE_H
 
-#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 namespace physicallayer {

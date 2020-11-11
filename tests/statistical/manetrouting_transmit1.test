@@ -8,7 +8,7 @@ Testing manetrouting with AODV routing protocol, UDP forwarding
 
 import inet.networklayer.configurator.ipv4.Ipv4FlatNetworkConfigurator;
 import inet.node.aodv.AodvRouter;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 // 

@@ -28,7 +28,7 @@
  * 				Foundation under grant number 5005-67322.
  ***************************************************************************/
 
-#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
+#include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
 
 namespace inet {
 

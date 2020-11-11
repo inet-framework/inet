@@ -29,9 +29,9 @@
 #include "inet/visualizer/util/AnimationSpeedInterpolator.h"
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/IWirelessSignal.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 #endif // WITH_RADIO
 
 namespace inet {

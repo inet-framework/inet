@@ -16,11 +16,11 @@
 //
 
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
-#include "inet/physicallayer/base/packetlevel/ScalarAnalogModelBase.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 

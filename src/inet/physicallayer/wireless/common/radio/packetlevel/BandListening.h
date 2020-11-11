@@ -19,7 +19,7 @@
 #define __INET_BANDLISTENING_H
 
 #include "inet/common/Units.h"
-#include "inet/physicallayer/base/packetlevel/ListeningBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ListeningBase.h"
 
 namespace inet {
 namespace physicallayer {

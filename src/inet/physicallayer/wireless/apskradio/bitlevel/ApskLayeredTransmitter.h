@@ -18,13 +18,13 @@
 #ifndef __INET_APSKLAYEREDTRANSMITTER_H
 #define __INET_APSKLAYEREDTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
-#include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
-#include "inet/physicallayer/contract/bitlevel/IEncoder.h"
-#include "inet/physicallayer/contract/bitlevel/IModulator.h"
-#include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDigitalAnalogConverter.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IEncoder.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IModulator.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IPulseShaper.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitter.h"
 
 namespace inet {
 

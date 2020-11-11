@@ -25,7 +25,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EthernetHost;
 import inet.node.ethernet.EthernetSwitch;
-import inet.physicallayer.common.packetlevel.WireJunction;
+import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
 
 

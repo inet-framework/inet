@@ -15,15 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apskradio.bitlevel;
+package inet.physicallayer.wireless.apskradio.bitlevel;
 
-import inet.physicallayer.base.packetlevel.SnirReceiverBase;
-import inet.physicallayer.contract.bitlevel.IAnalogDigitalConverter;
-import inet.physicallayer.contract.bitlevel.IDecoder;
-import inet.physicallayer.contract.bitlevel.IDemodulator;
-import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
-import inet.physicallayer.contract.bitlevel.IPulseFilter;
-import inet.physicallayer.contract.packetlevel.IReceiver;
+import inet.physicallayer.wireless.common.base.packetlevel.SnirReceiverBase;
+import inet.physicallayer.wireless.common.contract.bitlevel.IAnalogDigitalConverter;
+import inet.physicallayer.wireless.common.contract.bitlevel.IDecoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator;
+import inet.physicallayer.wireless.common.contract.bitlevel.ILayeredErrorModel;
+import inet.physicallayer.wireless.common.contract.bitlevel.IPulseFilter;
+import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
 // This receiver model is part of a simple hypothetical layered radio. It

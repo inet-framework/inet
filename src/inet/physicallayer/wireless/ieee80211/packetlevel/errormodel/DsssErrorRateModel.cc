@@ -21,7 +21,7 @@
 #include <math.h>
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
 
 namespace inet {
 

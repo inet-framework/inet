@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambling.h"
 
 namespace inet {
 namespace physicallayer {

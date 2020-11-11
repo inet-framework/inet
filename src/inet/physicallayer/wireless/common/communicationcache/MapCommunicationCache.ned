@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.communicationcache;
+package inet.physicallayer.wireless.common.communicationcache;
 
-import inet.physicallayer.contract.packetlevel.ICommunicationCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache;
 
 //
 // This communication cache model stores radio, transmission and reception

@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/ethernet/EthernetFragmentPhyHeaderInserter.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetFragmentPhyHeaderInserter.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {

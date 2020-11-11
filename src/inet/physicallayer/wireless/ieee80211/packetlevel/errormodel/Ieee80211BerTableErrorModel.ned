@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.packetlevel.errormodel;
+package inet.physicallayer.wireless.ieee80211.packetlevel.errormodel;
 
-import inet.physicallayer.base.packetlevel.ErrorModelBase;
+import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
 
 module Ieee80211BerTableErrorModel extends ErrorModelBase
 {

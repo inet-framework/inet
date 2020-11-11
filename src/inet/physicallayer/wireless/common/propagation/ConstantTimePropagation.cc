@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/Arrival.h"
-#include "inet/physicallayer/propagation/ConstantTimePropagation.h"
+#include "inet/physicallayer/wireless/common/signal/Arrival.h"
+#include "inet/physicallayer/wireless/common/propagation/ConstantTimePropagation.h"
 
 namespace inet {
 

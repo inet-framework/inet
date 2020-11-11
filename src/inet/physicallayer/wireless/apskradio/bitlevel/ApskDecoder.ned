@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apskradio.bitlevel;
+package inet.physicallayer.wireless.apskradio.bitlevel;
 
-import inet.physicallayer.contract.bitlevel.IDecoder;
-import inet.physicallayer.contract.bitlevel.IFecCoder;
-import inet.physicallayer.contract.bitlevel.IInterleaver;
-import inet.physicallayer.contract.bitlevel.IScrambler;
+import inet.physicallayer.wireless.common.contract.bitlevel.IDecoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
+import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 
 //
 // This module is part of a simple hypothetical layered receiver. It computes

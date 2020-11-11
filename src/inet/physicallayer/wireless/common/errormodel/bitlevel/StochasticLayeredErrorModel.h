@@ -18,7 +18,7 @@
 #ifndef __INET_STOCHASTICLAYEREDERRORMODEL_H
 #define __INET_STOCHASTICLAYEREDERRORMODEL_H
 
-#include "inet/physicallayer/base/bitlevel/LayeredErrorModelBase.h"
+#include "inet/physicallayer/wireless/common/base/bitlevel/LayeredErrorModelBase.h"
 
 namespace inet {
 

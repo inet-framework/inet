@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ShortBitVector.h"
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
 
 namespace inet {
 namespace physicallayer {

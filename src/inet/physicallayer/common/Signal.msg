@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "inet/physicallayer/common/Signal.h"
 }}
 
 namespace inet::physicallayer;

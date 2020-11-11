@@ -18,7 +18,7 @@
 #ifndef __INET_DBPSKMODULATION_H
 #define __INET_DBPSKMODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/DpskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/DpskModulationBase.h"
 
 namespace inet {
 

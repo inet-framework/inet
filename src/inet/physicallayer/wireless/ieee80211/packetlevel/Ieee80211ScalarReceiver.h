@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211SCALARRECEIVER_H
 #define __INET_IEEE80211SCALARRECEIVER_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
 
 namespace inet {
 

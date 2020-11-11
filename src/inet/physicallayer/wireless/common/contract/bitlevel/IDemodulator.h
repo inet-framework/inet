@@ -18,8 +18,8 @@
 #ifndef __INET_IDEMODULATOR_H
 #define __INET_IDEMODULATOR_H
 
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalSymbolModel.h"
 
 namespace inet {
 

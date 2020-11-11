@@ -19,8 +19,8 @@ import inet.common.INETDefs;
 import inet.common.Units;
 
 cplusplus {{
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 }}
 
 namespace inet::physicallayer;

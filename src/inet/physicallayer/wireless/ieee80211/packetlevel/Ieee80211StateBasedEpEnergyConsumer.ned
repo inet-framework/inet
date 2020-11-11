@@ -15,7 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.energyconsumer;
+package inet.physicallayer.wireless.ieee80211.packetlevel;
+
+import inet.physicallayer.wireless.common.energyconsumer.StateBasedEpEnergyConsumer;
 
 //
 // This module provides a radio power consumer model for IEEE 802.11 radios.

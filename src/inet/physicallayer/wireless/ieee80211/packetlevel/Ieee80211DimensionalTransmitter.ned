@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.packetlevel;
+package inet.physicallayer.wireless.ieee80211.packetlevel;
 
-import inet.physicallayer.base.packetlevel.DimensionalTransmitterBase;
+import inet.physicallayer.wireless.common.base.packetlevel.DimensionalTransmitterBase;
 
 //
 // This transmitter model produces IEEE 802.11 transmissions that have

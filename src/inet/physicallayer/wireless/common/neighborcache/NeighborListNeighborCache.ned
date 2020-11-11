@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.neighborcache;
+package inet.physicallayer.wireless.common.neighborcache;
 
-import inet.physicallayer.contract.packetlevel.INeighborCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
 
 //
 // This neighbor cache model maintains a separate periodically updated neighbor

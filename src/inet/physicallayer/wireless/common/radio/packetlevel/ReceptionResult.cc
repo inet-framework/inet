@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionResult.h"
 
 namespace inet {
 namespace physicallayer {

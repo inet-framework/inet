@@ -21,7 +21,7 @@
 //#include "inet/common/Complex.h"
 #include <complex>
 
-#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
 
 namespace inet {
 

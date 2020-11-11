@@ -21,8 +21,8 @@
 #ifndef __INET_IEEE80211YANSERRORMODEL_H
 #define __INET_IEEE80211YANSERRORMODEL_H
 
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/modulation/MqamModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/MqamModulation.h"
 
 namespace inet {
 

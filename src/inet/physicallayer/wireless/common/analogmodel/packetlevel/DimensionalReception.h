@@ -19,7 +19,7 @@
 #define __INET_DIMENSIONALRECEPTION_H
 
 #include "inet/common/math/Functions.h"
-#include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceptionBase.h"
 
 namespace inet {
 

@@ -17,9 +17,9 @@
 
 import inet.common.INETDefs;
 import inet.common.Units;
-import inet.physicallayer.contract.packetlevel.RadioControlInfo;
-import inet.physicallayer.ieee80211.mode.IIeee80211Mode;
-import inet.physicallayer.ieee80211.mode.Ieee80211Channel;
+import inet.physicallayer.wireless.common.contract.packetlevel.RadioControlInfo;
+import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
+import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
 
 namespace inet::physicallayer;
 

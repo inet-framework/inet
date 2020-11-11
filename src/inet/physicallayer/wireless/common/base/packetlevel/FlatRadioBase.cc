@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 

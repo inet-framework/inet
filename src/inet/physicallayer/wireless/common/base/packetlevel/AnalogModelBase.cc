@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/physicallayer/base/packetlevel/AnalogModelBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/AnalogModelBase.h"
 
 namespace inet {
 

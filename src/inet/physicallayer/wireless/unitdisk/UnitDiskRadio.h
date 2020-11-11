@@ -18,7 +18,7 @@
 #ifndef __INET_UNITDISKRADIO_H
 #define __INET_UNITDISKRADIO_H
 
-#include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 
 namespace inet {
 

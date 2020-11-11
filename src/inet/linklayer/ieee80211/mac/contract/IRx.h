@@ -21,7 +21,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
 namespace ieee80211 {

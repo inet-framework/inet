@@ -20,7 +20,7 @@ package inet.linklayer.ethernet;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.networklayer.common.NetworkInterface;
-import inet.physicallayer.ethernet.IEthernetPhyLayer;
+import inet.physicallayer.wired.ethernet.IEthernetPhyLayer;
 import inet.protocolelement.measurement.IMeasurementLayer;
 import inet.protocolelement.trafficconditioner.ITrafficConditionerLayer;
 

@@ -18,7 +18,7 @@
 package inet.networks;
 
 import inet.environment.contract.IPhysicalEnvironment;
-import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
 
 network Ieee80211NetworkBase extends WirelessNetworkBase
 {

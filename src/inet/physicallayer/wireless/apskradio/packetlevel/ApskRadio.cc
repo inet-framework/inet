@@ -18,11 +18,11 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskRadio.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskEncoder.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskLayeredTransmitter.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskRadio.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
 namespace physicallayer {

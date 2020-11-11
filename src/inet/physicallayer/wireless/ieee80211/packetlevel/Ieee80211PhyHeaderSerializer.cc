@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeaderSerializer.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeaderSerializer.h"
 
 namespace inet {
 

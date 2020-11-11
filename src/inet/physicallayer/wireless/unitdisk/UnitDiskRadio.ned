@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.unitdisk;
+package inet.physicallayer.wireless.unitdisk;
 
-import inet.physicallayer.common.packetlevel.Radio;
+import inet.physicallayer.wireless.common.radio.packetlevel.Radio;
 
 //
 // This radio model provides a very simple but fast and predictable physical

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.packetlevel;
+package inet.physicallayer.wireless.ieee80211.packetlevel;
 
 //
 // This receiver model receives an IEEE 802.11 transmission successfully if the

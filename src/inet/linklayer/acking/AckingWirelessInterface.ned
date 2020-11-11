@@ -20,7 +20,7 @@ package inet.linklayer.acking;
 import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.NetworkInterface;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
 // This module implements a highly abstracted wireless network interface (NIC)

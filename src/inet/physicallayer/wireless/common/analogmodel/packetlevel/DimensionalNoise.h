@@ -19,7 +19,7 @@
 #define __INET_DIMENSIONALNOISE_H
 
 #include "inet/common/math/Functions.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 
 namespace inet {
 

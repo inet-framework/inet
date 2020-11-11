@@ -17,10 +17,10 @@
 
 import inet.common.INETDefs;
 import inet.common.Units;
-import inet.physicallayer.base.packetlevel.FlatReceptionBase;
+import inet.physicallayer.wireless.common.base.packetlevel.FlatReceptionBase;
 
 cplusplus {{
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 }}
 
 namespace inet::physicallayer;

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/modulation/MaskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/MaskModulation.h"
 
 namespace inet {
 

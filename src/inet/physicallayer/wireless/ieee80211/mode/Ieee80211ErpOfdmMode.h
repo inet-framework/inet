@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211ERPOFDMMODE_H
 #define __INET_IEEE80211ERPOFDMMODE_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 

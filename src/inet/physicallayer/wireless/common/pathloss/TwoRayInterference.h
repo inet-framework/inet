@@ -1,7 +1,7 @@
 #ifndef __INET_TWORAYINTERFERENCE_H
 #define __INET_TWORAYINTERFERENCE_H
 
-#include <inet/physicallayer/contract/packetlevel/IPathLoss.h>
+#include <inet/physicallayer/wireless/common/contract/packetlevel/IPathLoss.h>
 
 namespace inet {
 namespace physicallayer {

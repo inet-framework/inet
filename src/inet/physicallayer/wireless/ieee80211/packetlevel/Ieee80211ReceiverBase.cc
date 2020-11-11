@@ -16,10 +16,10 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 
 namespace inet {
 

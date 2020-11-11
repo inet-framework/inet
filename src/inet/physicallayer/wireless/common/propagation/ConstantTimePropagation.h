@@ -18,7 +18,7 @@
 #ifndef __INET_CONSTANTTIMEPROPAGATION_H
 #define __INET_CONSTANTTIMEPROPAGATION_H
 
-#include "inet/physicallayer/base/packetlevel/PropagationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PropagationBase.h"
 
 namespace inet {
 

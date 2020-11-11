@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/antenna/InterpolatingAntenna.h"
+#include "inet/physicallayer/wireless/common/antenna/InterpolatingAntenna.h"
 
 namespace inet {
 

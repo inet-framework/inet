@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/physicallayer/unitdisk/UnitDiskPhyHeader_m.h"
-#include "inet/physicallayer/unitdisk/UnitDiskPhyHeaderSerializer.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeaderSerializer.h"
 
 namespace inet {
 

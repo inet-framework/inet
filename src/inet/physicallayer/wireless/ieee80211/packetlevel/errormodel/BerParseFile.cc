@@ -23,7 +23,7 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/BerParseFile.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/BerParseFile.h"
 
 namespace inet {
 

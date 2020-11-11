@@ -18,7 +18,7 @@
 #ifndef __INET_COMMUNICATIONCACHEBASE_H
 #define __INET_COMMUNICATIONCACHEBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ICommunicationCache.h"
 
 namespace inet {
 

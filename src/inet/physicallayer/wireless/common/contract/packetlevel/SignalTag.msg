@@ -20,7 +20,7 @@ import inet.common.TagBase;
 import inet.common.Units;
 
 cplusplus{{
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerDefs.h"
 }}
 
 namespace inet;

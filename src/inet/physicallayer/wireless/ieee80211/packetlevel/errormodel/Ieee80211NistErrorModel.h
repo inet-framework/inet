@@ -21,10 +21,10 @@
 #ifndef __INET_IEEE80211NISTERRORMODEL_H
 #define __INET_IEEE80211NISTERRORMODEL_H
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 
 namespace inet {
 namespace physicallayer {

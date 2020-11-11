@@ -19,7 +19,7 @@ import inet.common.INETDefs;
 import inet.common.geometry.Geometry;
 
 cplusplus {{
-#include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 }}
 
 namespace inet::physicallayer;

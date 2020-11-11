@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base.packetlevel;
+package inet.physicallayer.wireless.common.base.packetlevel;
 
 import inet.common.LayeredProtocolBase;
 

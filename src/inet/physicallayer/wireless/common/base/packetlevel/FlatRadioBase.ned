@@ -15,9 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base.packetlevel;
-
-import inet.physicallayer.common.packetlevel.Radio;
+package inet.physicallayer.wireless.common.base.packetlevel;
 
 //
 // This module servces as a base module for flat radio models.

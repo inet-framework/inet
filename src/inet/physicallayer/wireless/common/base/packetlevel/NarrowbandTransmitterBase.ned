@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base.packetlevel;
+package inet.physicallayer.wireless.common.base.packetlevel;
 
-import inet.physicallayer.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 //
 // This module servces as a base module for narrowband transmitter models.

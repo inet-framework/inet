@@ -23,7 +23,7 @@
 *
 ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/LogNormalShadowing.h"
+#include "inet/physicallayer/wireless/common/pathloss/LogNormalShadowing.h"
 
 namespace inet {
 

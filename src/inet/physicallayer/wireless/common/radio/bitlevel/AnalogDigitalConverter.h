@@ -18,9 +18,9 @@
 #ifndef __INET_ANALOGDIGITALCONVERTER_H
 #define __INET_ANALOGDIGITALCONVERTER_H
 
-#include "inet/physicallayer/analogmodel/bitlevel/SignalAnalogModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IAnalogDigitalConverter.h"
 
 namespace inet {
 namespace physicallayer {

@@ -26,7 +26,7 @@ import inet.linklayer.ieee80211.llc.IIeee80211Llc;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
 // This module provides an IEEE 802.11 network interface suitable for emulation.

@@ -15,11 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-import inet.physicallayer.ieee80211.mode.IIeee80211Mode;
-import inet.physicallayer.ieee80211.mode.Ieee80211Channel;
+import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
+import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
 
 cplusplus {{
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
 }}
 
 namespace inet::physicallayer;

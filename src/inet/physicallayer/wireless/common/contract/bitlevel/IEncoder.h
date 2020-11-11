@@ -18,9 +18,9 @@
 #ifndef __INET_IENCODER_H
 #define __INET_IENCODER_H
 
-#include "inet/physicallayer/contract/bitlevel/ICode.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ICode.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalPacketModel.h"
 
 namespace inet {
 namespace physicallayer {

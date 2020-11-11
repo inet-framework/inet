@@ -29,8 +29,8 @@
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 
 namespace inet {

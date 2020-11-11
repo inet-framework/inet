@@ -19,7 +19,7 @@ package inet.examples.wireless.corruptionmode;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.apskradio.packetlevel.ApskScalarRadioMedium;
+import inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadioMedium;
 
 network CorruptionModeExample
 {

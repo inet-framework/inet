@@ -23,7 +23,7 @@
 *
 ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/RayleighFading.h"
+#include "inet/physicallayer/wireless/common/pathloss/RayleighFading.h"
 
 namespace inet {
 

@@ -19,8 +19,8 @@
 #define __INET_SHORTCUTRADIO_H
 
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
 

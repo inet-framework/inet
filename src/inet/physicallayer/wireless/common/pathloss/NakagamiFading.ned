@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.pathloss;
+package inet.physicallayer.wireless.common.pathloss;
 
 module NakagamiFading extends FreeSpacePathLoss
 {

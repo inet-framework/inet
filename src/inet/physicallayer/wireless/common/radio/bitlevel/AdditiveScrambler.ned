@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.bitlevel;
+package inet.physicallayer.wireless.common.radio.bitlevel;
 
-import inet.physicallayer.contract.bitlevel.IScrambler;
+import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 
 // Scrambler module converts an input string into a seemingly random
 // output string of the same length.

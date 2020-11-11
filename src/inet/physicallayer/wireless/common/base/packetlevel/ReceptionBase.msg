@@ -17,10 +17,10 @@
 
 import inet.common.INETDefs;
 import inet.common.geometry.Geometry;
-import inet.physicallayer.common.packetlevel.WirelessSignal;
+import inet.physicallayer.wireless.common.signal.WirelessSignal;
 
 cplusplus {{
-#include "inet/physicallayer/base/packetlevel/ReceptionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
 }}
 
 namespace inet::physicallayer;

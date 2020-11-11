@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/DpskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/DpskModulationBase.h"
 
 namespace inet {
 

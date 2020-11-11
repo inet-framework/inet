@@ -18,7 +18,7 @@
 #ifndef __INET_MODESETLISTENER_H
 #define __INET_MODESETLISTENER_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 namespace ieee80211 {

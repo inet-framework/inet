@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.propagation;
+package inet.physicallayer.wireless.common.propagation;
 
-import inet.physicallayer.base.packetlevel.PropagationBase;
+import inet.physicallayer.wireless.common.base.packetlevel.PropagationBase;
 
 //
 // This propagation model computes the propagation time to be independent of

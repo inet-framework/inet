@@ -18,14 +18,14 @@
 #ifndef __INET_IEEE80211OFDMENCODER_H
 #define __INET_IEEE80211OFDMENCODER_H
 
-#include "inet/physicallayer/contract/bitlevel/IEncoder.h"
-#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
-#include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
-#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IEncoder.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IFecCoder.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmCode.h"
 
 namespace inet {
 namespace physicallayer {

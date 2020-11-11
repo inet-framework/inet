@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
-#include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/wireless/common/medium/CommunicationLog.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 
 namespace inet {
 namespace physicallayer {

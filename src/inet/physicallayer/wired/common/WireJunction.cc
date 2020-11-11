@@ -16,7 +16,7 @@
  */
 
 #include "inet/common/Simsignals.h"
-#include "inet/physicallayer/common/packetlevel/WireJunction.h"
+#include "inet/physicallayer/wired/common/WireJunction.h"
 
 namespace inet {
 namespace physicallayer {

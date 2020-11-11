@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base.packetlevel;
+package inet.physicallayer.wireless.common.base.packetlevel;
 
-import inet.physicallayer.contract.packetlevel.IObstacleLoss;
+import inet.physicallayer.wireless.common.contract.packetlevel.IObstacleLoss;
 
 //
 // This module servces as a base module for tracing obstacle loss models.

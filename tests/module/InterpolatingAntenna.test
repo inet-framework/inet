@@ -3,7 +3,7 @@
 Tests InterpolatingAntenna for a simple configuration.
 
 %file: test.cc
-#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 
 namespace InterpolatingAntenna {
 
@@ -41,7 +41,7 @@ void AntennaTest::initialize(int stage)
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 simple AntennaTest
 {

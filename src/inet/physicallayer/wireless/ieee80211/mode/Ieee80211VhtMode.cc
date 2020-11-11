@@ -17,9 +17,9 @@
 
 #include <tuple>
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
-#include "inet/physicallayer/modulation/QbpskModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtCode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/common/modulation/QbpskModulation.h"
 
 namespace inet {
 namespace physicallayer {

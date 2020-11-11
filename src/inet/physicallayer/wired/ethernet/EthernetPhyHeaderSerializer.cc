@@ -17,8 +17,8 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeaderSerializer.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeaderSerializer.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/modulation/16PpmModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/16PpmModulation.h"
 
 namespace inet {
 

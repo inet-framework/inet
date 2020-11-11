@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base.packetlevel;
+package inet.physicallayer.wireless.common.base.packetlevel;
 
-import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
+import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase;
 
 //
 // This transmitter model produces transmissions that use dimensional

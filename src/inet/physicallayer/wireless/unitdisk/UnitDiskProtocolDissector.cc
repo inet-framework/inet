@@ -17,8 +17,8 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/physicallayer/unitdisk/UnitDiskPhyHeader_m.h"
-#include "inet/physicallayer/unitdisk/UnitDiskProtocolDissector.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskProtocolDissector.h"
 
 
 namespace inet {

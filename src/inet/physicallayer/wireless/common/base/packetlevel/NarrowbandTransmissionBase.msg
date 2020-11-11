@@ -17,10 +17,10 @@
 
 import inet.common.INETDefs;
 import inet.common.Units;
-import inet.physicallayer.base.packetlevel.TransmissionBase;
+import inet.physicallayer.wireless.common.base.packetlevel.TransmissionBase;
 
 cplusplus {{
-#include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmissionBase.h"
 }}
 
 namespace inet::physicallayer;

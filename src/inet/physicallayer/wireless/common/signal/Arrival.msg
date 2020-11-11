@@ -18,7 +18,7 @@
 import inet.common.geometry.Geometry;
 
 cplusplus {{
-#include "inet/physicallayer/common/packetlevel/Arrival.h"
+#include "inet/physicallayer/wireless/common/signal/Arrival.h"
 }}
 
 namespace inet::physicallayer;

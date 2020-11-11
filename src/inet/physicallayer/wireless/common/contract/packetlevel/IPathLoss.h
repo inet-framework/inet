@@ -18,8 +18,8 @@
 #ifndef __INET_IPATHLOSS_H
 #define __INET_IPATHLOSS_H
 
-#include "inet/physicallayer/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 

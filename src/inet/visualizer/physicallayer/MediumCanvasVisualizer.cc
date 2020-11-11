@@ -21,10 +21,10 @@
 #include "inet/common/figures/SignalFigure.h"
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #endif // WITH_RADIO
 
 #include "inet/visualizer/physicallayer/MediumCanvasVisualizer.h"

@@ -22,8 +22,8 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/physicallayer/shortcut/ShortcutPhyHeader_m.h"
-#include "inet/physicallayer/shortcut/ShortcutRadio.h"
+#include "inet/physicallayer/wireless/shortcut/ShortcutPhyHeader_m.h"
+#include "inet/physicallayer/wireless/shortcut/ShortcutRadio.h"
 
 namespace inet {
 namespace physicallayer {

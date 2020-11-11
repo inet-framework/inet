@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "inet/common/BitVector.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
 
 namespace inet {
 namespace physicallayer {

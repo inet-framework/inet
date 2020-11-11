@@ -18,7 +18,7 @@
 #ifndef __INET_APSKSCALARTRANSMISSION_H
 #define __INET_APSKSCALARTRANSMISSION_H
 
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 
 namespace inet {
 

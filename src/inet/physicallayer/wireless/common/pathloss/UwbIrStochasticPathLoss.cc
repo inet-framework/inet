@@ -23,7 +23,7 @@
  * description: this AnalogueModel models free-space pathloss
  ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/UwbIrStochasticPathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/UwbIrStochasticPathLoss.h"
 
 namespace inet {
 

@@ -6,7 +6,7 @@ import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;

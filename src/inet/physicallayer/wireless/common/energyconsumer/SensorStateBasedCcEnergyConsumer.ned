@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.energyconsumer;
+package inet.physicallayer.wireless.common.energyconsumer;
 
 //
 // This module provides a radio energy consumer model. The current consumption is

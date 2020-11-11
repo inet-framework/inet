@@ -19,7 +19,7 @@
 #define __INET_IEEE80211VHTINTERLEAVING_H
 
 #include "inet/common/Units.h"
-#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IInterleaver.h"
 
 namespace inet {
 namespace physicallayer {

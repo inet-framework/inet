@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.bitlevel;
+package inet.physicallayer.wireless.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.packetlevel.ITransmitter;
-import inet.physicallayer.contract.bitlevel.IDigitalAnalogConverter;
-import inet.physicallayer.contract.bitlevel.IEncoder;
-import inet.physicallayer.contract.bitlevel.IModulator;
-import inet.physicallayer.contract.bitlevel.IPulseShaper;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.contract.bitlevel.IDigitalAnalogConverter;
+import inet.physicallayer.wireless.common.contract.bitlevel.IEncoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
+import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 
 //
 // This module implements an IEEE 802.11 OFDM transmitter.

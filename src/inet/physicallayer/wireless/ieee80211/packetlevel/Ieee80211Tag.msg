@@ -17,8 +17,8 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
-import inet.physicallayer.ieee80211.mode.IIeee80211Mode;
-import inet.physicallayer.ieee80211.mode.Ieee80211Channel;
+import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
+import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
 
 namespace inet::physicallayer;
 

@@ -19,7 +19,7 @@
 #define __INET_ITRANSMITTER_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 

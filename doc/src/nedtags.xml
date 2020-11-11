@@ -57,8 +57,8 @@
     <filename>inet.mobility.single.AnsimMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.AntennaBase</name>
-    <filename>inet.physicallayer.base.packetlevel.AntennaBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.AntennaBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.AntennaBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.routing.aodv.Aodv</name>
@@ -73,88 +73,88 @@
     <filename>inet.node.base.ApplicationLayerNodeBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskDecoder</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskDecoder.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskDecoder</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskDecoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskDemodulator</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskDemodulator.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskDemodulator</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskDemodulator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskDimensionalRadio</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskDimensionalRadio.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadio</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskDimensionalRadioMedium</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskDimensionalRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskDimensionalReceiver</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskDimensionalReceiver.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalReceiver</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskDimensionalTransmitter</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskDimensionalTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalTransmitter</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskEncoder</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskEncoder.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskEncoder</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskEncoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.errormodel.ApskErrorModel</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.errormodel.ApskErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.errormodel.ApskErrorModel</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.errormodel.ApskErrorModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskLayeredDimensionalRadio</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskLayeredDimensionalRadio.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadio</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskLayeredDimensionalRadioMedium</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskLayeredDimensionalRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredDimensionalRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.errormodel.ApskLayeredErrorModel</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.errormodel.ApskLayeredErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.errormodel.ApskLayeredErrorModel</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.errormodel.ApskLayeredErrorModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskLayeredReceiver</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskLayeredReceiver.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredReceiver</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskLayeredScalarRadio</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskLayeredScalarRadio.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadio</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskLayeredScalarRadioMedium</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskLayeredScalarRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskLayeredTransmitter</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskLayeredTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredTransmitter</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskLayeredTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.bitlevel.ApskModulator</name>
-    <filename>inet.physicallayer.apskradio.bitlevel.ApskModulator.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.bitlevel.ApskModulator</name>
+    <filename>inet.physicallayer.wireless.apskradio.bitlevel.ApskModulator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskRadio</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskRadio.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskRadio</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskScalarRadio</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskScalarRadio.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadio</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskScalarRadioMedium</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskScalarRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadioMedium</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskScalarReceiver</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskScalarReceiver.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarReceiver</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.apskradio.packetlevel.ApskScalarTransmitter</name>
-    <filename>inet.physicallayer.apskradio.packetlevel.ApskScalarTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarTransmitter</name>
+    <filename>inet.physicallayer.wireless.apskradio.packetlevel.ApskScalarTransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.ratecontrol.ArfRateControl</name>
@@ -169,8 +169,8 @@
     <filename>inet.mobility.single.AttachedMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.antenna.AxiallySymmetricAntenna</name>
-    <filename>inet.physicallayer.antenna.AxiallySymmetricAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.antenna.AxiallySymmetricAntenna</name>
+    <filename>inet.physicallayer.wireless.common.antenna.AxiallySymmetricAntenna.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy</name>
@@ -217,8 +217,8 @@
     <filename>inet.mobility.single.BonnMotionMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.BreakpointPathLoss</name>
-    <filename>inet.physicallayer.pathloss.BreakpointPathLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.BreakpointPathLoss</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.BreakpointPathLoss.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.source.BurstyPacketProducer</name>
@@ -265,16 +265,16 @@
     <filename>inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.antenna.ConstantGainAntenna</name>
-    <filename>inet.physicallayer.antenna.ConstantGainAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.antenna.ConstantGainAntenna</name>
+    <filename>inet.physicallayer.wireless.common.antenna.ConstantGainAntenna.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.propagation.ConstantSpeedPropagation</name>
-    <filename>inet.physicallayer.propagation.ConstantSpeedPropagation.html</filename>
+    <name>inet.physicallayer.wireless.common.propagation.ConstantSpeedPropagation</name>
+    <filename>inet.physicallayer.wireless.common.propagation.ConstantSpeedPropagation.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.propagation.ConstantTimePropagation</name>
-    <filename>inet.physicallayer.propagation.ConstantTimePropagation.html</filename>
+    <name>inet.physicallayer.wireless.common.propagation.ConstantTimePropagation</name>
+    <filename>inet.physicallayer.wireless.common.propagation.ConstantTimePropagation.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.classifier.ContentBasedClassifier</name>
@@ -309,8 +309,8 @@
     <filename>inet.node.xmipv6.CorrespondentNode6.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.antenna.CosineAntenna</name>
-    <filename>inet.physicallayer.antenna.CosineAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.antenna.CosineAntenna</name>
+    <filename>inet.physicallayer.wireless.common.antenna.CosineAntenna.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.csmaca.CsmaCaInterface</name>
@@ -365,28 +365,28 @@
     <filename>inet.applications.dhcp.DhcpServer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.obstacleloss.DielectricObstacleLoss</name>
-    <filename>inet.physicallayer.obstacleloss.DielectricObstacleLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.obstacleloss.DielectricObstacleLoss</name>
+    <filename>inet.physicallayer.wireless.common.obstacleloss.DielectricObstacleLoss.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.diffserv.DiffservQueue</name>
     <filename>inet.networklayer.diffserv.DiffservQueue.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.analogmodel.packetlevel.DimensionalAnalogModel</name>
-    <filename>inet.physicallayer.analogmodel.packetlevel.DimensionalAnalogModel.html</filename>
+    <name>inet.physicallayer.wireless.common.analogmodel.packetlevel.DimensionalAnalogModel</name>
+    <filename>inet.physicallayer.wireless.common.analogmodel.packetlevel.DimensionalAnalogModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.backgroundnoise.DimensionalBackgroundNoise</name>
-    <filename>inet.physicallayer.backgroundnoise.DimensionalBackgroundNoise.html</filename>
+    <name>inet.physicallayer.wireless.common.backgroundnoise.DimensionalBackgroundNoise</name>
+    <filename>inet.physicallayer.wireless.common.backgroundnoise.DimensionalBackgroundNoise.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.DimensionalTransmitterBase</name>
-    <filename>inet.physicallayer.base.packetlevel.DimensionalTransmitterBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.DimensionalTransmitterBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.DimensionalTransmitterBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.antenna.DipoleAntenna</name>
-    <filename>inet.physicallayer.antenna.DipoleAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.antenna.DipoleAntenna</name>
+    <filename>inet.physicallayer.wireless.common.antenna.DipoleAntenna.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.queue.DropHeadQueue</name>
@@ -481,8 +481,8 @@
     <filename>inet.power.base.EpEnergyStorageBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.ErrorModelBase</name>
-    <filename>inet.physicallayer.base.packetlevel.ErrorModelBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.ethernet.Eth100G</name>
@@ -569,8 +569,8 @@
     <filename>inet.linklayer.ethernet.EthernetInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ethernet.EthernetPhy</name>
-    <filename>inet.physicallayer.ethernet.EthernetPhy.html</filename>
+    <name>inet.physicallayer.wired.ethernet.EthernetPhy</name>
+    <filename>inet.physicallayer.wired.ethernet.EthernetPhy.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.EthernetQosQueue</name>
@@ -657,16 +657,16 @@
     <filename>inet.environment.ground.FlatGround.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.FlatRadioBase</name>
-    <filename>inet.physicallayer.base.packetlevel.FlatRadioBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.flooding.Flooding</name>
     <filename>inet.networklayer.flooding.Flooding.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.FreeSpacePathLoss</name>
-    <filename>inet.physicallayer.pathloss.FreeSpacePathLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.GaussMarkovMobility</name>
@@ -685,8 +685,8 @@
     <filename>inet.node.gpsr.GpsrRouter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.neighborcache.GridNeighborCache</name>
-    <filename>inet.physicallayer.neighborcache.GridNeighborCache.html</filename>
+    <name>inet.physicallayer.wireless.common.neighborcache.GridNeighborCache</name>
+    <filename>inet.physicallayer.wireless.common.neighborcache.GridNeighborCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.environment.objectcache.GridObjectCache</name>
@@ -757,16 +757,16 @@
     <filename>inet.queueing.contract.IActivePacketSource.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IAnalogDigitalConverter</name>
-    <filename>inet.physicallayer.contract.bitlevel.IAnalogDigitalConverter.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IAnalogDigitalConverter</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IAnalogDigitalConverter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IAnalogModel</name>
-    <filename>inet.physicallayer.contract.packetlevel.IAnalogModel.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IAntenna</name>
-    <filename>inet.physicallayer.contract.packetlevel.IAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IAntenna</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IAntenna.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.contract.IApp</name>
@@ -777,8 +777,8 @@
     <filename>inet.networklayer.contract.IArp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IBackgroundNoise</name>
-    <filename>inet.physicallayer.contract.packetlevel.IBackgroundNoise.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.routing.contract.IBgp</name>
@@ -829,8 +829,8 @@
     <filename>inet.linklayer.ieee80211.mac.contract.ICollisionController.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.ICommunicationCache</name>
-    <filename>inet.physicallayer.contract.packetlevel.ICommunicationCache.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.contract.IContention</name>
@@ -853,20 +853,20 @@
     <filename>inet.power.storage.IdealEpEnergyStorage.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.obstacleloss.IdealObstacleLoss</name>
-    <filename>inet.physicallayer.obstacleloss.IdealObstacleLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.obstacleloss.IdealObstacleLoss</name>
+    <filename>inet.physicallayer.wireless.common.obstacleloss.IdealObstacleLoss.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IDecoder</name>
-    <filename>inet.physicallayer.contract.bitlevel.IDecoder.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IDecoder</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IDecoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IDemodulator</name>
-    <filename>inet.physicallayer.contract.bitlevel.IDemodulator.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IDemodulator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IDigitalAnalogConverter</name>
-    <filename>inet.physicallayer.contract.bitlevel.IDigitalAnalogConverter.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IDigitalAnalogConverter</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IDigitalAnalogConverter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.contract.IDs</name>
@@ -877,48 +877,48 @@
     <filename>inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211BerTableErrorModel</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211BerTableErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211BerTableErrorModel</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211BerTableErrorModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.linklayer.Ieee80211CanvasVisualizer</name>
     <filename>inet.visualizer.linklayer.Ieee80211CanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadio</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadio</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalReceiver</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalReceiver.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalReceiver</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalTransmitter</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalTransmitter</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalTransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.Ieee80211Interface</name>
     <filename>inet.linklayer.ieee80211.Ieee80211Interface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredDimensionalRadioMedium</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredDimensionalRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredDimensionalRadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredDimensionalRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredOfdmReceiver</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredOfdmReceiver.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredOfdmReceiver</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredOfdmReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredOfdmTransmitter</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredOfdmTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredOfdmTransmitter</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredOfdmTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredScalarRadioMedium</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredScalarRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredScalarRadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.llc.Ieee80211LlcEpd</name>
@@ -957,36 +957,36 @@
     <filename>inet.linklayer.ieee80211.mib.Ieee80211Mib.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDecoder</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDecoder.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmDecoder</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmDecoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDemodulator</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDemodulator.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmDemodulator</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmDemodulator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmEncoder</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmEncoder.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmEncoder</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmEncoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.errormodel.Ieee80211OfdmErrorModel</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.errormodel.Ieee80211OfdmErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.errormodel.Ieee80211OfdmErrorModel</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.errormodel.Ieee80211OfdmErrorModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmInterleaver</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmInterleaver.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmInterleaver</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmInterleaver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmModulator</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmModulator.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmModulator</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmModulator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmRadio</name>
-    <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmRadio</name>
+    <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmRadio.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.linklayer.Ieee80211OsgVisualizer</name>
@@ -997,56 +997,56 @@
     <filename>inet.linklayer.ieee80211.portal.Ieee80211Portal.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211Radio</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211Radio.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211RadioMedium</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211RadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211ReceiverBase</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211ReceiverBase.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ReceiverBase</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ReceiverBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadio</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarReceiver</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarReceiver.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarReceiver</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarTransmitter</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarTransmitter</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.energyconsumer.Ieee80211StateBasedCcEnergyConsumer</name>
-    <filename>inet.physicallayer.energyconsumer.Ieee80211StateBasedCcEnergyConsumer.html</filename>
+    <name>inet.physicallayer.wireless.common.energyconsumer.Ieee80211StateBasedCcEnergyConsumer</name>
+    <filename>inet.physicallayer.wireless.common.energyconsumer.Ieee80211StateBasedCcEnergyConsumer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.energyconsumer.Ieee80211StateBasedEpEnergyConsumer</name>
-    <filename>inet.physicallayer.energyconsumer.Ieee80211StateBasedEpEnergyConsumer.html</filename>
+    <name>inet.physicallayer.wireless.common.energyconsumer.Ieee80211StateBasedEpEnergyConsumer</name>
+    <filename>inet.physicallayer.wireless.common.energyconsumer.Ieee80211StateBasedEpEnergyConsumer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211TransmitterBase</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211TransmitterBase.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211TransmitterBase</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211TransmitterBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211UnitDiskRadio</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211UnitDiskRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskRadio</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211UnitDiskReceiver</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211UnitDiskReceiver.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskReceiver</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.Ieee80211UnitDiskTransmitter</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211UnitDiskTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskTransmitter</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211UnitDiskTransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.linklayer.Ieee80211Visualizer</name>
@@ -1057,28 +1057,28 @@
     <filename>inet.visualizer.base.Ieee80211VisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211YansErrorModel</name>
-    <filename>inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211YansErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211YansErrorModel</name>
+    <filename>inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211YansErrorModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee802154.Ieee802154Mac</name>
     <filename>inet.linklayer.ieee802154.Ieee802154Mac.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadio</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadio</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadioMedium</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalReceiver</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalReceiver.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalReceiver</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalTransmitter</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalTransmitter</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalTransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee802154.Ieee802154NarrowbandInterface</name>
@@ -1089,44 +1089,44 @@
     <filename>inet.linklayer.ieee802154.Ieee802154NarrowbandMac.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandRadio</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandRadio</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadio</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadio</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarReceiver</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarReceiver.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarReceiver</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarTransmitter</name>
-    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarTransmitter</name>
+    <filename>inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarTransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee802154.Ieee802154UwbIrInterface</name>
     <filename>inet.linklayer.ieee802154.Ieee802154UwbIrInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrRadio</name>
-    <filename>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrRadio.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrRadio</name>
+    <filename>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrRadioMedium</name>
-    <filename>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrRadioMedium</name>
+    <filename>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrReceiver</name>
-    <filename>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrReceiver.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrReceiver</name>
+    <filename>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrTransmitter</name>
-    <filename>inet.physicallayer.ieee802154.bitlevel.Ieee802154UwbIrTransmitter.html</filename>
+    <name>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrTransmitter</name>
+    <filename>inet.physicallayer.wireless.ieee802154.bitlevel.Ieee802154UwbIrTransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee8021d.relay.Ieee8021dRelay</name>
@@ -1141,8 +1141,8 @@
     <filename>inet.linklayer.ieee8022.Ieee8022Llc.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IEncoder</name>
-    <filename>inet.physicallayer.contract.bitlevel.IEncoder.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IEncoder</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IEncoder.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.power.contract.IEnergyConsumer</name>
@@ -1197,8 +1197,8 @@
     <filename>inet.power.contract.IEpEnergyStorage.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IErrorModel</name>
-    <filename>inet.physicallayer.contract.packetlevel.IErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.IEthernetEncapsulation</name>
@@ -1217,8 +1217,8 @@
     <filename>inet.linklayer.contract.IExternalInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IFecCoder</name>
-    <filename>inet.physicallayer.contract.bitlevel.IFecCoder.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy</name>
@@ -1305,8 +1305,8 @@
     <filename>inet.visualizer.contract.IInterfaceTableVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IInterleaver</name>
-    <filename>inet.physicallayer.contract.bitlevel.IInterleaver.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.ipv4.IIpv4</name>
@@ -1325,8 +1325,8 @@
     <filename>inet.applications.generic.IIpvxTrafficGenerator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.ILayeredErrorModel</name>
-    <filename>inet.physicallayer.contract.bitlevel.ILayeredErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.ILayeredErrorModel</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.ILayeredErrorModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.ILinkBreakVisualizer</name>
@@ -1365,8 +1365,8 @@
     <filename>inet.routing.contract.IManetRouting.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IMediumLimitCache</name>
-    <filename>inet.physicallayer.contract.packetlevel.IMediumLimitCache.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.IMediumVisualizer</name>
@@ -1381,8 +1381,8 @@
     <filename>inet.visualizer.contract.IMobilityVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IModulator</name>
-    <filename>inet.physicallayer.contract.bitlevel.IModulator.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IModulator</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IModulator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy</name>
@@ -1393,8 +1393,8 @@
     <filename>inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.INeighborCache</name>
-    <filename>inet.physicallayer.contract.packetlevel.INeighborCache.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.configurator.contract.INetworkConfigurator</name>
@@ -1509,16 +1509,16 @@
     <filename>inet.node.internetcloud.InternetCloud.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.antenna.InterpolatingAntenna</name>
-    <filename>inet.physicallayer.antenna.InterpolatingAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.antenna.InterpolatingAntenna</name>
+    <filename>inet.physicallayer.wireless.common.antenna.InterpolatingAntenna.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.environment.contract.IObjectCache</name>
     <filename>inet.environment.contract.IObjectCache.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IObstacleLoss</name>
-    <filename>inet.physicallayer.contract.packetlevel.IObstacleLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IObstacleLoss</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IObstacleLoss.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.routing.contract.IOspf</name>
@@ -1577,8 +1577,8 @@
     <filename>inet.queueing.contract.IPassivePacketSource.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IPathLoss</name>
-    <filename>inet.physicallayer.contract.packetlevel.IPathLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.environment.contract.IPhysicalEnvironment</name>
@@ -1589,8 +1589,8 @@
     <filename>inet.visualizer.contract.IPhysicalEnvironmentVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IPhysicalLayer</name>
-    <filename>inet.physicallayer.contract.packetlevel.IPhysicalLayer.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IPhysicalLayer</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IPhysicalLayer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.IPhysicalLinkVisualizer</name>
@@ -1605,16 +1605,16 @@
     <filename>inet.linklayer.contract.IPppInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IPropagation</name>
-    <filename>inet.physicallayer.contract.packetlevel.IPropagation.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IPropagation</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IPropagation.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IPulseFilter</name>
-    <filename>inet.physicallayer.contract.bitlevel.IPulseFilter.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IPulseFilter</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IPulseFilter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IPulseShaper</name>
-    <filename>inet.physicallayer.contract.bitlevel.IPulseShaper.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.ipv4.Ipv4</name>
@@ -1685,12 +1685,12 @@
     <filename>inet.visualizer.contract.IQueueVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IRadio</name>
-    <filename>inet.physicallayer.contract.packetlevel.IRadio.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IRadio</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IRadio.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IRadioMedium</name>
-    <filename>inet.physicallayer.contract.packetlevel.IRadioMedium.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.IRadioVisualizer</name>
@@ -1705,8 +1705,8 @@
     <filename>inet.linklayer.ieee80211.mac.contract.IRateSelection.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.IReceiver</name>
-    <filename>inet.physicallayer.contract.packetlevel.IReceiver.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IReceiver</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IReceiver.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.contract.IRoutingTable</name>
@@ -1733,24 +1733,24 @@
     <filename>inet.visualizer.contract.ISceneVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.bitlevel.IScrambler</name>
-    <filename>inet.physicallayer.contract.bitlevel.IScrambler.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.bitlevel.IScrambler</name>
+    <filename>inet.physicallayer.wireless.common.contract.bitlevel.IScrambler.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.transportlayer.contract.ISctp</name>
     <filename>inet.transportlayer.contract.ISctp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.antenna.IsotropicAntenna</name>
-    <filename>inet.physicallayer.antenna.IsotropicAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.antenna.IsotropicAntenna</name>
+    <filename>inet.physicallayer.wireless.common.antenna.IsotropicAntenna.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.backgroundnoise.IsotropicDimensionalBackgroundNoise</name>
-    <filename>inet.physicallayer.backgroundnoise.IsotropicDimensionalBackgroundNoise.html</filename>
+    <name>inet.physicallayer.wireless.common.backgroundnoise.IsotropicDimensionalBackgroundNoise</name>
+    <filename>inet.physicallayer.wireless.common.backgroundnoise.IsotropicDimensionalBackgroundNoise.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.backgroundnoise.IsotropicScalarBackgroundNoise</name>
-    <filename>inet.physicallayer.backgroundnoise.IsotropicScalarBackgroundNoise.html</filename>
+    <name>inet.physicallayer.wireless.common.backgroundnoise.IsotropicScalarBackgroundNoise</name>
+    <filename>inet.physicallayer.wireless.common.backgroundnoise.IsotropicScalarBackgroundNoise.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.contract.ISpanningTree</name>
@@ -1773,8 +1773,8 @@
     <filename>inet.linklayer.contract.ITrafficConditioner.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.contract.packetlevel.ITransmitter</name>
-    <filename>inet.physicallayer.contract.packetlevel.ITransmitter.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.ITransportConnectionVisualizer</name>
@@ -1833,20 +1833,20 @@
     <filename>inet.queueing.scheduler.LabelScheduler.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.analogmodel.bitlevel.LayeredDimensionalAnalogModel</name>
-    <filename>inet.physicallayer.analogmodel.bitlevel.LayeredDimensionalAnalogModel.html</filename>
+    <name>inet.physicallayer.wireless.common.analogmodel.bitlevel.LayeredDimensionalAnalogModel</name>
+    <filename>inet.physicallayer.wireless.common.analogmodel.bitlevel.LayeredDimensionalAnalogModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.bitlevel.LayeredErrorModelBase</name>
-    <filename>inet.physicallayer.base.bitlevel.LayeredErrorModelBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.bitlevel.LayeredErrorModelBase</name>
+    <filename>inet.physicallayer.wireless.common.base.bitlevel.LayeredErrorModelBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.LayeredProtocolBase</name>
     <filename>inet.common.LayeredProtocolBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.analogmodel.bitlevel.LayeredScalarAnalogModel</name>
-    <filename>inet.physicallayer.analogmodel.bitlevel.LayeredScalarAnalogModel.html</filename>
+    <name>inet.physicallayer.wireless.common.analogmodel.bitlevel.LayeredScalarAnalogModel</name>
+    <filename>inet.physicallayer.wireless.common.analogmodel.bitlevel.LayeredScalarAnalogModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.ldp.Ldp</name>
@@ -1905,8 +1905,8 @@
     <filename>inet.linklayer.lmac.LMacInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.LogNormalShadowing</name>
-    <filename>inet.physicallayer.pathloss.LogNormalShadowing.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.LogNormalShadowing</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.LogNormalShadowing.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.loopback.Loopback</name>
@@ -1933,8 +1933,8 @@
     <filename>inet.node.inet.ManetRouter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.communicationcache.MapCommunicationCache</name>
-    <filename>inet.physicallayer.communicationcache.MapCommunicationCache.html</filename>
+    <name>inet.physicallayer.wireless.common.communicationcache.MapCommunicationCache</name>
+    <filename>inet.physicallayer.wireless.common.communicationcache.MapCommunicationCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.classifier.MarkovClassifier</name>
@@ -2033,24 +2033,24 @@
     <filename>inet.networklayer.diffserv.MultiFieldClassifier.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.NakagamiFading</name>
-    <filename>inet.physicallayer.pathloss.NakagamiFading.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.NakagamiFading</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.NakagamiFading.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.NarrowbandRadioBase</name>
-    <filename>inet.physicallayer.base.packetlevel.NarrowbandRadioBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.NarrowbandRadioBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.NarrowbandRadioBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.NarrowbandReceiverBase</name>
-    <filename>inet.physicallayer.base.packetlevel.NarrowbandReceiverBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase</name>
-    <filename>inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.neighborcache.NeighborListNeighborCache</name>
-    <filename>inet.physicallayer.neighborcache.NeighborListNeighborCache.html</filename>
+    <name>inet.physicallayer.wireless.common.neighborcache.NeighborListNeighborCache</name>
+    <filename>inet.physicallayer.wireless.common.neighborcache.NeighborListNeighborCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.misc.NetAnimTrace</name>
@@ -2385,8 +2385,8 @@
     <filename>inet.queueing.base.PacketTaggerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.antenna.ParabolicAntenna</name>
-    <filename>inet.physicallayer.antenna.ParabolicAntenna.html</filename>
+    <name>inet.physicallayer.wireless.common.antenna.ParabolicAntenna</name>
+    <filename>inet.physicallayer.wireless.common.antenna.ParabolicAntenna.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.sink.PassivePacketSink</name>
@@ -2441,8 +2441,8 @@
     <filename>inet.visualizer.base.PhysicalEnvironmentVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.PhysicalLayerBase</name>
-    <filename>inet.physicallayer.base.packetlevel.PhysicalLayerBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.PhysicalLayerBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.PhysicalLayerBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.physicallayer.PhysicalLinkCanvasVisualizer</name>
@@ -2521,8 +2521,8 @@
     <filename>inet.node.wireless.Probe.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.PropagationBase</name>
-    <filename>inet.physicallayer.base.packetlevel.PropagationBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.PropagationBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.PropagationBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.originator.QosAckHandler</name>
@@ -2549,8 +2549,8 @@
     <filename>inet.linklayer.ieee80211.mac.originator.QosRtsPolicy.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.neighborcache.QuadTreeNeighborCache</name>
-    <filename>inet.physicallayer.neighborcache.QuadTreeNeighborCache.html</filename>
+    <name>inet.physicallayer.wireless.common.neighborcache.QuadTreeNeighborCache</name>
+    <filename>inet.physicallayer.wireless.common.neighborcache.QuadTreeNeighborCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.tokengenerator.QueueBasedTokenGenerator</name>
@@ -2621,8 +2621,8 @@
     <filename>inet.linklayer.ieee80211.mac.rateselection.RateSelection.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.RayleighFading</name>
-    <filename>inet.physicallayer.pathloss.RayleighFading.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.RayleighFading</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.RayleighFading.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.recipient.RecipientAckPolicy</name>
@@ -2661,8 +2661,8 @@
     <filename>inet.queueing.queue.RedDropperQueue.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.communicationcache.ReferenceCommunicationCache</name>
-    <filename>inet.physicallayer.communicationcache.ReferenceCommunicationCache.html</filename>
+    <name>inet.physicallayer.wireless.common.communicationcache.ReferenceCommunicationCache</name>
+    <filename>inet.physicallayer.wireless.common.communicationcache.ReferenceCommunicationCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.sink.RequestConsumer</name>
@@ -2673,8 +2673,8 @@
     <filename>inet.queueing.source.ResponseProducer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.RicianFading</name>
-    <filename>inet.physicallayer.pathloss.RicianFading.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.RicianFading</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.RicianFading.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.routing.rip.Rip</name>
@@ -2793,8 +2793,8 @@
     <filename>inet.linklayer.ieee80211.mac.Rx.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.analogmodel.packetlevel.ScalarAnalogModel</name>
-    <filename>inet.physicallayer.analogmodel.packetlevel.ScalarAnalogModel.html</filename>
+    <name>inet.physicallayer.wireless.common.analogmodel.packetlevel.ScalarAnalogModel</name>
+    <filename>inet.physicallayer.wireless.common.analogmodel.packetlevel.ScalarAnalogModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.scenario.ScenarioManager</name>
@@ -2865,12 +2865,12 @@
     <filename>inet.node.inet.SensorNode.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.energyconsumer.SensorStateBasedCcEnergyConsumer</name>
-    <filename>inet.physicallayer.energyconsumer.SensorStateBasedCcEnergyConsumer.html</filename>
+    <name>inet.physicallayer.wireless.common.energyconsumer.SensorStateBasedCcEnergyConsumer</name>
+    <filename>inet.physicallayer.wireless.common.energyconsumer.SensorStateBasedCcEnergyConsumer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.energyconsumer.SensorStateBasedEpEnergyConsumer</name>
-    <filename>inet.physicallayer.energyconsumer.SensorStateBasedEpEnergyConsumer.html</filename>
+    <name>inet.physicallayer.wireless.common.energyconsumer.SensorStateBasedEpEnergyConsumer</name>
+    <filename>inet.physicallayer.wireless.common.energyconsumer.SensorStateBasedEpEnergyConsumer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.shortcut.ShortcutInterface</name>
@@ -2929,8 +2929,8 @@
     <filename>inet.networklayer.diffserv.SingleRateThreeColorMeter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.SnirReceiverBase</name>
-    <filename>inet.physicallayer.base.packetlevel.SnirReceiverBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.SnirReceiverBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.SnirReceiverBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.inet.StandardHost</name>
@@ -2941,12 +2941,12 @@
     <filename>inet.node.ipv6.StandardHost6.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.energyconsumer.StateBasedCcEnergyConsumer</name>
-    <filename>inet.physicallayer.energyconsumer.StateBasedCcEnergyConsumer.html</filename>
+    <name>inet.physicallayer.wireless.common.energyconsumer.StateBasedCcEnergyConsumer</name>
+    <filename>inet.physicallayer.wireless.common.energyconsumer.StateBasedCcEnergyConsumer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.energyconsumer.StateBasedEpEnergyConsumer</name>
-    <filename>inet.physicallayer.energyconsumer.StateBasedEpEnergyConsumer.html</filename>
+    <name>inet.physicallayer.wireless.common.energyconsumer.StateBasedEpEnergyConsumer</name>
+    <filename>inet.physicallayer.wireless.common.energyconsumer.StateBasedEpEnergyConsumer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.static.StaticConcentricMobility</name>
@@ -2981,12 +2981,12 @@
     <filename>inet.visualizer.base.StatisticVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.errormodel.packetlevel.StochasticErrorModel</name>
-    <filename>inet.physicallayer.errormodel.packetlevel.StochasticErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.common.errormodel.packetlevel.StochasticErrorModel</name>
+    <filename>inet.physicallayer.wireless.common.errormodel.packetlevel.StochasticErrorModel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.errormodel.bitlevel.StochasticLayeredErrorModel</name>
-    <filename>inet.physicallayer.errormodel.bitlevel.StochasticLayeredErrorModel.html</filename>
+    <name>inet.physicallayer.wireless.common.errormodel.bitlevel.StochasticLayeredErrorModel</name>
+    <filename>inet.physicallayer.wireless.common.errormodel.bitlevel.StochasticLayeredErrorModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee8021d.stp.Stp</name>
@@ -2997,8 +2997,8 @@
     <filename>inet.linklayer.ieee8021d.tester.StpTester.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.SuiPathLoss</name>
-    <filename>inet.physicallayer.pathloss.SuiPathLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.SuiPathLoss</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.SuiPathLoss.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.SuperpositioningMobility</name>
@@ -3137,8 +3137,8 @@
     <filename>inet.queueing.base.TokenGeneratorBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.base.packetlevel.TracingObstacleLossBase</name>
-    <filename>inet.physicallayer.base.packetlevel.TracingObstacleLossBase.html</filename>
+    <name>inet.physicallayer.wireless.common.base.packetlevel.TracingObstacleLossBase</name>
+    <filename>inet.physicallayer.wireless.common.base.packetlevel.TracingObstacleLossBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.physicallayer.TracingObstacleLossCanvasVisualizer</name>
@@ -3221,12 +3221,12 @@
     <filename>inet.networklayer.diffserv.TwoRateThreeColorMeter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.TwoRayGroundReflection</name>
-    <filename>inet.physicallayer.pathloss.TwoRayGroundReflection.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.TwoRayGroundReflection</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.TwoRayGroundReflection.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.TwoRayInterference</name>
-    <filename>inet.physicallayer.pathloss.TwoRayInterference.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.TwoRayInterference</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.TwoRayInterference.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.Tx</name>
@@ -3301,12 +3301,12 @@
     <filename>inet.queueing.classifier.UserPriorityClassifier.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.pathloss.UwbIrStochasticPathLoss</name>
-    <filename>inet.physicallayer.pathloss.UwbIrStochasticPathLoss.html</filename>
+    <name>inet.physicallayer.wireless.common.pathloss.UwbIrStochasticPathLoss</name>
+    <filename>inet.physicallayer.wireless.common.pathloss.UwbIrStochasticPathLoss.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.communicationcache.VectorCommunicationCache</name>
-    <filename>inet.physicallayer.communicationcache.VectorCommunicationCache.html</filename>
+    <name>inet.physicallayer.wireless.common.communicationcache.VectorCommunicationCache</name>
+    <filename>inet.physicallayer.wireless.common.communicationcache.VectorCommunicationCache.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.VehicleMobility</name>

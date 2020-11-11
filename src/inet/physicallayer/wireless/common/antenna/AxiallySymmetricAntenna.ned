@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.antenna;
+package inet.physicallayer.wireless.common.antenna;
 
-import inet.physicallayer.base.packetlevel.AntennaBase;
+import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 
 // This antenna model computes the antenna gain from the direction using linear
 // interpolation. The gain parameter contains a sequence of angle [degree] and

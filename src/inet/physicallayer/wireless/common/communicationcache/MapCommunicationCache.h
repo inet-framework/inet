@@ -18,7 +18,7 @@
 #ifndef __INET_MAPCOMMUNICATIONCACHE_H
 #define __INET_MAPCOMMUNICATIONCACHE_H
 
-#include "inet/physicallayer/base/packetlevel/CommunicationCacheBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/CommunicationCacheBase.h"
 
 namespace inet {
 namespace physicallayer {

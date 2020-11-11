@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskScalarReceiver.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskScalarTransmission.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskScalarReceiver.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
 namespace inet {
 

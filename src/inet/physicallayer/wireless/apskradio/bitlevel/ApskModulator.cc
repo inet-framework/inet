@@ -15,11 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/bitlevel/ApskModulator.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskModulator.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
 
 namespace inet {
 

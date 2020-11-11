@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmCode.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
 
 namespace inet {
 namespace physicallayer {

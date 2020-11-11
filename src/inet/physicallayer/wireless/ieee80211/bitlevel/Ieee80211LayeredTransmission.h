@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211LAYEREDTRANSMISSION_H
 #define __INET_IEEE80211LAYEREDTRANSMISSION_H
 
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 
 namespace inet {
 

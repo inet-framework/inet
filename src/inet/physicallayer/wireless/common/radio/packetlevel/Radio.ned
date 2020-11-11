@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.packetlevel;
+package inet.physicallayer.wireless.common.radio.packetlevel;
 
-import inet.physicallayer.base.packetlevel.PhysicalLayerBase;
-import inet.physicallayer.contract.packetlevel.IAntenna;
-import inet.physicallayer.contract.packetlevel.IRadio;
-import inet.physicallayer.contract.packetlevel.IReceiver;
-import inet.physicallayer.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.base.packetlevel.PhysicalLayerBase;
+import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 import inet.power.contract.IEnergyConsumer;
 
 //
@@ -55,7 +55,7 @@ module Radio extends PhysicalLayerBase like IRadio
         string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
         string energySourceModule = default("");           // module path of the energy source module which provides energy to the radio
 
-        string initialRadioMode @enum("off", "sleep", "receiver", "transmitter", "transceiver") = default("off");
+        string initialRadioMode @enum("off","sleep","receiver","transmitter","transceiver") = default("off");
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // time parameters to switch between radio modes
 
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out

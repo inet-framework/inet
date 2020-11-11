@@ -23,7 +23,7 @@
 *
 ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/NakagamiFading.h"
+#include "inet/physicallayer/wireless/common/pathloss/NakagamiFading.h"
 
 namespace inet {
 

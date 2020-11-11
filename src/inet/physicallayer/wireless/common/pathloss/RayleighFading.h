@@ -26,7 +26,7 @@
 #ifndef __INET_RAYLEIGHFADING_H
 #define __INET_RAYLEIGHFADING_H
 
-#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 

@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base.packetlevel;
+package inet.physicallayer.wireless.common.base.packetlevel;
 
 import inet.mobility.contract.IMobility;
-import inet.physicallayer.contract.packetlevel.IAntenna;
+import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 
 //
 // This module servces as the base module for antenna models.

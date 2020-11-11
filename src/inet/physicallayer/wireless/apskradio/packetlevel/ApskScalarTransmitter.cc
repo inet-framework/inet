@@ -16,11 +16,11 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskScalarTransmission.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskScalarTransmitter.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskScalarTransmission.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskScalarTransmitter.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 

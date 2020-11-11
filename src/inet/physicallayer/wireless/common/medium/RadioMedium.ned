@@ -15,17 +15,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.packetlevel;
+package inet.physicallayer.wireless.common.medium;
 
-import inet.physicallayer.contract.packetlevel.IAnalogModel;
-import inet.physicallayer.contract.packetlevel.ICommunicationCache;
-import inet.physicallayer.contract.packetlevel.IMediumLimitCache;
-import inet.physicallayer.contract.packetlevel.INeighborCache;
-import inet.physicallayer.contract.packetlevel.IObstacleLoss;
-import inet.physicallayer.contract.packetlevel.IPathLoss;
-import inet.physicallayer.contract.packetlevel.IPropagation;
-import inet.physicallayer.contract.packetlevel.IBackgroundNoise;
-import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
+import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.IObstacleLoss;
+import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
+import inet.physicallayer.wireless.common.contract.packetlevel.IPropagation;
+import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
 
 //
 // The medium model describes the shared physical medium where communication
@@ -38,7 +38,7 @@ module RadioMedium like IRadioMedium
 {
     parameters:
         string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
-        string signalAnalogRepresentation @enum("unitDisk", "scalar", "dimensional") = default("scalar");
+        string signalAnalogRepresentation @enum("unitDisk","scalar","dimensional") = default("scalar");
 
         // filter parameters that control when signals are sent to receiver radios
         string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send signals to a radio if it's outside the provided range

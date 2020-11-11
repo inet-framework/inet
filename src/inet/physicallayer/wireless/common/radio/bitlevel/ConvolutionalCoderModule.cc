@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoderModule.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoderModule.h"
 
 namespace inet {
 namespace physicallayer {

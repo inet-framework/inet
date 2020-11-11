@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.errormodel.bitlevel;
+package inet.physicallayer.wireless.common.errormodel.bitlevel;
 
-import inet.physicallayer.base.bitlevel.LayeredErrorModelBase;
+import inet.physicallayer.wireless.common.base.bitlevel.LayeredErrorModelBase;
 
 module StochasticLayeredErrorModel extends LayeredErrorModelBase
 {

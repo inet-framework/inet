@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211TRANSMISSIONBASE_H
 #define __INET_IEEE80211TRANSMISSIONBASE_H
 
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 
 namespace inet {
 

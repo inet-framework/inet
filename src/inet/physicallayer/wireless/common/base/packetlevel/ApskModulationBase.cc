@@ -15,15 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/DsssOqpsk16Modulation.h"
-#include "inet/physicallayer/modulation/MpskModulation.h"
-#include "inet/physicallayer/modulation/MqamModulation.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam256Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/DsssOqpsk16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/MpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/MqamModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam256Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
 
 namespace inet {
 

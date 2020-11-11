@@ -19,7 +19,7 @@
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/geometry/object/LineSegment.h"
-#include "inet/physicallayer/obstacleloss/DielectricObstacleLoss.h"
+#include "inet/physicallayer/wireless/common/obstacleloss/DielectricObstacleLoss.h"
 
 namespace inet {
 

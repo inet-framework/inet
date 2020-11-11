@@ -18,7 +18,7 @@
 #ifndef __INET_GFSKMODULATIONBASE_H
 #define __INET_GFSKMODULATIONBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

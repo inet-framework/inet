@@ -18,14 +18,14 @@
 #ifndef __INET_IEEE80211OFDMDEMODULATOR_H
 #define __INET_IEEE80211OFDMDEMODULATOR_H
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
 namespace physicallayer {

@@ -18,8 +18,8 @@
 #ifndef __INET_ANALOGMODELBASE_H
 #define __INET_ANALOGMODELBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
-#include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 
 namespace inet {
 

@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.bitlevel;
+package inet.physicallayer.wireless.common.radio.bitlevel;
 
-import inet.physicallayer.contract.bitlevel.IFecCoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 
 // <b>Transfer function (octal) matrix</b>
 //

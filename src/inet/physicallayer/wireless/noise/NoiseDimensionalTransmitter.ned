@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.packetlevel;
+package inet.physicallayer.wireless.noise;
 
-import inet.physicallayer.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 module NoiseDimensionalTransmitter like ITransmitter
 {

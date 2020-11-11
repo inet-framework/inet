@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/PulseShaper.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/PulseShaper.h"
 
 namespace inet {
 namespace physicallayer {

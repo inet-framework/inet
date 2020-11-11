@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 
 namespace inet {
 

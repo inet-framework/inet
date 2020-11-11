@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.bitlevel;
+package inet.physicallayer.wireless.ieee80211.bitlevel;
 
-import inet.physicallayer.base.packetlevel.FlatRadioBase;
+import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 
 module Ieee80211OfdmRadio extends FlatRadioBase
 {

@@ -17,15 +17,15 @@
 
 #include <algorithm>
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ErpOfdmMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211FhssMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211IrMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211FhssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211IrMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 
 namespace inet {
 

@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract.packetlevel;
+package inet.physicallayer.wireless.common.contract.packetlevel;
 
-import inet.physicallayer.contract.packetlevel.IPhysicalLayer;
+import inet.physicallayer.wireless.common.contract.packetlevel.IPhysicalLayer;
 
 //
 // Module interface for radio modules. Radio modules deal with the transmission of

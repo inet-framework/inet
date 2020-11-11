@@ -18,9 +18,9 @@
 #ifndef __INET_IRECEPTIONRESULT_H
 #define __INET_IRECEPTIONRESULT_H
 
-#include "inet/physicallayer/contract/packetlevel/IReception.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 

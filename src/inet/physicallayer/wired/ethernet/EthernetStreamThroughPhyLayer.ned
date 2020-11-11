@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ethernet;
+package inet.physicallayer.wired.ethernet;
 
 module EthernetStreamThroughPhyLayer extends EthernetPhyLayer
 {

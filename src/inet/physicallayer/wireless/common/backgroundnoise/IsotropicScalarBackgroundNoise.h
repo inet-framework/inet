@@ -18,7 +18,7 @@
 #ifndef __INET_ISOTROPICSCALARBACKGROUNDNOISE_H
 #define __INET_ISOTROPICSCALARBACKGROUNDNOISE_H
 
-#include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"
 
 namespace inet {
 

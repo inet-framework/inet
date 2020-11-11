@@ -15,8 +15,8 @@ The test works in the following way:
 
 %includes:
 #include "inet/common/BitVector.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
 
 %inifile: omnetpp.ini
 

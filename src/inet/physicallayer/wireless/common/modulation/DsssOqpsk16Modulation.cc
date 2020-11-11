@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/modulation/DsssOqpsk16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/DsssOqpsk16Modulation.h"
 
 namespace inet {
 

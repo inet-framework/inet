@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.errormodel.packetlevel;
+package inet.physicallayer.wireless.common.errormodel.packetlevel;
 
-import inet.physicallayer.base.packetlevel.ErrorModelBase;
+import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
 
 //
 // This error model provides parameters to specify the constant packet error

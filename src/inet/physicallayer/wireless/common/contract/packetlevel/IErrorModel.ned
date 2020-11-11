@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract.packetlevel;
+package inet.physicallayer.wireless.common.contract.packetlevel;
 
 //
 // The error model describes how the signal to noise ratio affects the amount of

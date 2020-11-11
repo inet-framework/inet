@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/PropagationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PropagationBase.h"
 
 namespace inet {
 

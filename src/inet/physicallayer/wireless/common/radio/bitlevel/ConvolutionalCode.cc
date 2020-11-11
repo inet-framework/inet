@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/INETMath.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
 
 namespace inet {
 namespace physicallayer {

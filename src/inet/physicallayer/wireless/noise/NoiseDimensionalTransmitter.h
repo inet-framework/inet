@@ -18,9 +18,9 @@
 #ifndef __INET_NOISEDIMENSIONALTRANSMITTER_H
 #define __INET_NOISEDIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
-#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitter.h"
 
 namespace inet {
 

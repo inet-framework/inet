@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211OFDMRADIO_H
 #define __INET_IEEE80211OFDMRADIO_H
 
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
 
 namespace inet {
 

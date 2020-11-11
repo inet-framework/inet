@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.packetlevel;
+package inet.physicallayer.wireless.noise;
 
 import inet.mobility.contract.IMobility;
-import inet.physicallayer.contract.packetlevel.IAntenna;
-import inet.physicallayer.contract.packetlevel.IRadio;
-import inet.physicallayer.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 module NoiseSource like IRadio
 {

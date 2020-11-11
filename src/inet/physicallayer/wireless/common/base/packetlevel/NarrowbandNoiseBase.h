@@ -19,7 +19,7 @@
 #define __INET_NARROWBANDNOISEBASE_H
 
 #include "inet/common/Units.h"
-#include "inet/physicallayer/base/packetlevel/NoiseBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NoiseBase.h"
 
 namespace inet {
 

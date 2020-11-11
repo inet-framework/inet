@@ -18,7 +18,7 @@
 #ifndef __INET_SIGNALSAMPLEMODEL_H
 #define __INET_SIGNALSAMPLEMODEL_H
 
-#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalSampleModel.h"
 
 namespace inet {
 namespace physicallayer {

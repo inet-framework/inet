@@ -15,15 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
 
 namespace inet {
 namespace physicallayer {

@@ -21,7 +21,7 @@ package inet.linklayer.ieee802154;
 
 import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.NetworkInterface;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
 // This module implements an IEEE 802.15.4 narrowband network interface.

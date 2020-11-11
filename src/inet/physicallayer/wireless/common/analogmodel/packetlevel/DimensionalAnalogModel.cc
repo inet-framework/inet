@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalAnalogModel.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
 namespace inet {
 

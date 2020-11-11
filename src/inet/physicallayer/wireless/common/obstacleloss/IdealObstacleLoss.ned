@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.obstacleloss;
+package inet.physicallayer.wireless.common.obstacleloss;
 
-import inet.physicallayer.base.packetlevel.TracingObstacleLossBase;
+import inet.physicallayer.wireless.common.base.packetlevel.TracingObstacleLossBase;
 
 //
 // This obstacle loss model determines power loss by checking if there is any

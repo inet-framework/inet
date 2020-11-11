@@ -15,22 +15,22 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskDecoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskDemodulator.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskLayeredReceiver.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskDecoder.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskDemodulator.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskLayeredReceiver.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/LayeredReceptionResult.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 
 namespace inet {
 namespace physicallayer {

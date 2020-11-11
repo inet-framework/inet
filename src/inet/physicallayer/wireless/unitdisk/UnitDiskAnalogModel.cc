@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/unitdisk/UnitDiskAnalogModel.h"
-#include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
-#include "inet/physicallayer/unitdisk/UnitDiskReception.h"
-#include "inet/physicallayer/unitdisk/UnitDiskSnir.h"
-#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskAnalogModel.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskReception.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskSnir.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
 
 namespace inet {
 namespace physicallayer {

@@ -18,10 +18,10 @@
 #ifndef __INET_ISIGNALBITMODEL_H
 #define __INET_ISIGNALBITMODEL_H
 
-#include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
-#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
-#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IFecCoder.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
 
 namespace inet {
 namespace physicallayer {

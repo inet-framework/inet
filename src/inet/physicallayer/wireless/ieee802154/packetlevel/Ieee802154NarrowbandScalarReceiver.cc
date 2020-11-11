@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/physicallayer/ieee802154/packetlevel/Ieee802154NarrowbandScalarReceiver.h"
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandScalarReceiver.h"
 
 namespace inet {
 

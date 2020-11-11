@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeaderChecker.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeaderChecker.h"
 
 namespace inet {
 

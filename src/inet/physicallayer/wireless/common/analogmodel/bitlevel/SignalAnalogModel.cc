@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/bitlevel/SignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel.h"
 
 namespace inet {
 

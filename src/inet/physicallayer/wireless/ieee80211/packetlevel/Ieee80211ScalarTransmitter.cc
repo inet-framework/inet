@@ -16,12 +16,12 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmitter.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarTransmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 namespace inet {
 

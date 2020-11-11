@@ -24,7 +24,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EthernetHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.common.packetlevel.WireJunction;
+import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
 
 

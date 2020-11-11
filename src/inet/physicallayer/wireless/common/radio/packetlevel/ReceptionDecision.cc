@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
 
 namespace inet {
 namespace physicallayer {

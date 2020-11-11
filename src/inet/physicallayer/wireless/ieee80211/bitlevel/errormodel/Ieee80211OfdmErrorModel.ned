@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.bitlevel.errormodel;
+package inet.physicallayer.wireless.ieee80211.bitlevel.errormodel;
 
-import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
-import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+import inet.physicallayer.wireless.common.contract.bitlevel.ILayeredErrorModel;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
 
 // This is the error model for the layered IEEE 802.11
 // OFDM PHY infrastructure (IEEE 802.11-2012, Clause 18).

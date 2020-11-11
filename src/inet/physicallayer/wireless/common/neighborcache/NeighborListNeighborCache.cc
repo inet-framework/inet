@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/neighborcache/NeighborListNeighborCache.h"
+#include "inet/physicallayer/wireless/common/neighborcache/NeighborListNeighborCache.h"
 
 namespace inet {
 namespace physicallayer {

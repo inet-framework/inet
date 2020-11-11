@@ -19,7 +19,7 @@
 #define __INET_APSKPHYHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/ChunkSerializer.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
 
 namespace inet {
 

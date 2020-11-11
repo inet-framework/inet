@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/AnalogDigitalConverter.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AnalogDigitalConverter.h"
 
 namespace inet {
 namespace physicallayer {

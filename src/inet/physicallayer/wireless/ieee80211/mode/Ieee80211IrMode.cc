@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211IrMode.h"
-#include "inet/physicallayer/modulation/16PpmModulation.h"
-#include "inet/physicallayer/modulation/4PpmModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211IrMode.h"
+#include "inet/physicallayer/wireless/common/modulation/16PpmModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/4PpmModulation.h"
 
 namespace inet {
 

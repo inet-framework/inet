@@ -19,7 +19,7 @@
 #define __INET_DIMENSIONALTRANSMISSION_H
 
 #include "inet/common/math/Functions.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 
 namespace inet {
 

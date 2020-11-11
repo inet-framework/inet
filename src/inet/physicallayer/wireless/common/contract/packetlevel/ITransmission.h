@@ -22,10 +22,10 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 #include "inet/common/IPrintableObject.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 namespace physicallayer {

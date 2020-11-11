@@ -21,7 +21,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "inet/physicallayer/common/Signal.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 

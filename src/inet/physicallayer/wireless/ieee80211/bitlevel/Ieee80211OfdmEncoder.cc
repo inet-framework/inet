@@ -17,16 +17,16 @@
 
 #include "inet/common/ShortBitVector.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
 
 namespace inet {
 

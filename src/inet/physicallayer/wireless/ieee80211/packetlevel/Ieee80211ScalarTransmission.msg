@@ -16,12 +16,12 @@
 //
 
 import inet.common.INETDefs;
-import inet.physicallayer.analogmodel.packetlevel.ScalarTransmission;
-import inet.physicallayer.ieee80211.mode.IIeee80211Mode;
-import inet.physicallayer.ieee80211.mode.Ieee80211Channel;
+import inet.physicallayer.wireless.common.analogmodel.packetlevel.ScalarTransmission;
+import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
+import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
 
 cplusplus {{
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
 }}
 
 namespace inet::physicallayer;

@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/unitdisk/UnitDiskListening.h"
-#include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
-#include "inet/physicallayer/unitdisk/UnitDiskReceiver.h"
-#include "inet/physicallayer/unitdisk/UnitDiskReception.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskListening.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskReceiver.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskReception.h"
 
 namespace inet {
 namespace physicallayer {

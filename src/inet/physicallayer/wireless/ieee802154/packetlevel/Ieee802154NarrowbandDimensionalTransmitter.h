@@ -20,8 +20,8 @@
 #ifndef __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMITTER_H
 #define __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
 

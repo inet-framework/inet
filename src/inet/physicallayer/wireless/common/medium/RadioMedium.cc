@@ -23,10 +23,10 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/common/packetlevel/Interference.h"
-#include "inet/physicallayer/common/packetlevel/Radio.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
+#include "inet/physicallayer/wireless/common/signal/Interference.h"
 
 namespace inet {
 namespace physicallayer {

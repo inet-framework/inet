@@ -18,9 +18,9 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee802154/packetlevel/Ieee802154NarrowbandScalarTransmitter.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandScalarTransmitter.h"
 
 namespace inet {
 namespace physicallayer {

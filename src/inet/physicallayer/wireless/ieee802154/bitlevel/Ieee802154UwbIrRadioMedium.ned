@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154.bitlevel;
+package inet.physicallayer.wireless.ieee802154.bitlevel;
 
-import inet.physicallayer.apskradio.packetlevel.ApskDimensionalRadioMedium;
+import inet.physicallayer.wireless.apskradio.packetlevel.ApskDimensionalRadioMedium;
 
 module Ieee802154UwbIrRadioMedium extends ApskDimensionalRadioMedium
 {

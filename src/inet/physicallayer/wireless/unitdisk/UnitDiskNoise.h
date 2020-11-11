@@ -18,7 +18,7 @@
 #ifndef __INET_UNITDISKNOISE_H
 #define __INET_UNITDISKNOISE_H
 
-#include "inet/physicallayer/base/packetlevel/NoiseBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NoiseBase.h"
 
 namespace inet {
 

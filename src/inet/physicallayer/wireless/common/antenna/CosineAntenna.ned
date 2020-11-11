@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.antenna;
+package inet.physicallayer.wireless.common.antenna;
 
-import inet.physicallayer.base.packetlevel.AntennaBase;
+import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 
 //
 // Models a hypotetical antenna with a cosine-based radiation pattern.

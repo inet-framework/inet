@@ -19,7 +19,7 @@
 #define __INET_TRACINGOBSTACLELOSSBASE_H
 
 #include "inet/environment/contract/IPhysicalObject.h"
-#include "inet/physicallayer/contract/packetlevel/ITracingObstacleLoss.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITracingObstacleLoss.h"
 
 namespace inet {
 

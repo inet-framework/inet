@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apskradio.packetlevel.errormodel;
+package inet.physicallayer.wireless.apskradio.packetlevel.errormodel;
 
-import inet.physicallayer.base.packetlevel.ErrorModelBase;
+import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
 
 //
 // This error model determines packet error rate, bit error rate, and symbol

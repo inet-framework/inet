@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
 
 namespace inet {
 

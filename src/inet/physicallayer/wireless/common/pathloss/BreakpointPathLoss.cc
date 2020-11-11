@@ -1,5 +1,5 @@
 
-#include "inet/physicallayer/pathloss/BreakpointPathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/BreakpointPathLoss.h"
 
 namespace inet {
 

@@ -16,10 +16,10 @@
 //
 
 cplusplus {{
-#include "inet/physicallayer/common/packetlevel/WirelessSignal.h"
+#include "inet/physicallayer/wireless/common/signal/WirelessSignal.h"
 }}
 
-import inet.physicallayer.common.packetlevel.Signal;
+import inet.physicallayer.common.Signal;
 
 namespace inet::physicallayer;
 

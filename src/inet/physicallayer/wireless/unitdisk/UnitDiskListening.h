@@ -18,7 +18,7 @@
 #ifndef __INET_UNITDISKLISTENING_H
 #define __INET_UNITDISKLISTENING_H
 
-#include "inet/physicallayer/base/packetlevel/ListeningBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ListeningBase.h"
 
 namespace inet {
 

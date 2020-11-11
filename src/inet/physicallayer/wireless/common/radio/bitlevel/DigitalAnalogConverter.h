@@ -18,10 +18,10 @@
 #ifndef __INET_DIGITALANALOGCONVERTER_H
 #define __INET_DIGITALANALOGCONVERTER_H
 
-#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerDefs.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDigitalAnalogConverter.h"
 
 namespace inet {
 namespace physicallayer {

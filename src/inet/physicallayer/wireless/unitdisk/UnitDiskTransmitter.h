@@ -18,7 +18,7 @@
 #ifndef __INET_UNITDISKTRANSMITTER_H
 #define __INET_UNITDISKTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
 
 namespace inet {
 

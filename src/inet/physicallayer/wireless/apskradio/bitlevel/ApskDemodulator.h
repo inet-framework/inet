@@ -18,12 +18,12 @@
 #ifndef __INET_APSKDEMODULATOR_H
 #define __INET_APSKDEMODULATOR_H
 
-#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalSymbolModel.h"
 
 namespace inet {
 

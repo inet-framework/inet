@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.bitlevel;
+package inet.physicallayer.wireless.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.bitlevel.IEncoder;
-import inet.physicallayer.contract.bitlevel.IFecCoder;
-import inet.physicallayer.contract.bitlevel.IInterleaver;
-import inet.physicallayer.contract.bitlevel.IScrambler;
+import inet.physicallayer.wireless.common.contract.bitlevel.IEncoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IInterleaver;
+import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 
 // This is the encoder module for the layered IEEE 802.11
 // OFDM PHY infrastructure (IEEE 802.11-2012, Clause 18).

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 
 namespace inet {
 namespace physicallayer {

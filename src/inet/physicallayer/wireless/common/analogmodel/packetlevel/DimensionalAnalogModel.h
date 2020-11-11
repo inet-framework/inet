@@ -18,7 +18,7 @@
 #ifndef __INET_DIMENSIONALANALOGMODEL_H
 #define __INET_DIMENSIONALANALOGMODEL_H
 
-#include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalAnalogModelBase.h"
 
 namespace inet {
 

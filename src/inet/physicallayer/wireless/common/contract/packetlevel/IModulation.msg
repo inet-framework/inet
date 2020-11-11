@@ -18,8 +18,8 @@
 import inet.common.INETDefs;
 
 cplusplus {{
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
-#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 }}
 
 namespace inet::physicallayer;

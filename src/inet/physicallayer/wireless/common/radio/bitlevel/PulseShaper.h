@@ -18,9 +18,9 @@
 #ifndef __INET_PULSESHAPER_H
 #define __INET_PULSESHAPER_H
 
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IPulseShaper.h"
 
 namespace inet {
 namespace physicallayer {

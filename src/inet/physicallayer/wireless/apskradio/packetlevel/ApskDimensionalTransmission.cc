@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/packetlevel/ApskDimensionalTransmission.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskDimensionalTransmission.h"
 
 namespace inet {
 

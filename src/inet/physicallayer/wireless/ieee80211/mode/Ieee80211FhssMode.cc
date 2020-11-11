@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211FhssMode.h"
-#include "inet/physicallayer/modulation/2GfskModulation.h"
-#include "inet/physicallayer/modulation/4GfskModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211FhssMode.h"
+#include "inet/physicallayer/wireless/common/modulation/2GfskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/4GfskModulation.h"
 
 namespace inet {
 

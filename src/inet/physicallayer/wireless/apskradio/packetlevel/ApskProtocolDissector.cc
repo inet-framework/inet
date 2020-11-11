@@ -17,8 +17,8 @@
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskProtocolDissector.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskProtocolDissector.h"
 
 namespace inet {
 

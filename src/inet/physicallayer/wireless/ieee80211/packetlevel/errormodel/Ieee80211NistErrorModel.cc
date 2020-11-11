@@ -18,19 +18,19 @@
 // Author: Gary Pei <guangyu.pei@boeing.com>
 //
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/Qam1024Modulation.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam256Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/QbpskModulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam1024Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam256Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/wireless/common/modulation/QbpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
 
 namespace inet {
 

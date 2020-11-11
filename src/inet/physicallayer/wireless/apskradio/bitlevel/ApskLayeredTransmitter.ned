@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apskradio.bitlevel;
+package inet.physicallayer.wireless.apskradio.bitlevel;
 
-import inet.physicallayer.contract.packetlevel.ITransmitter;
-import inet.physicallayer.contract.bitlevel.IDigitalAnalogConverter;
-import inet.physicallayer.contract.bitlevel.IEncoder;
-import inet.physicallayer.contract.bitlevel.IModulator;
-import inet.physicallayer.contract.bitlevel.IPulseShaper;
+import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
+import inet.physicallayer.wireless.common.contract.bitlevel.IDigitalAnalogConverter;
+import inet.physicallayer.wireless.common.contract.bitlevel.IEncoder;
+import inet.physicallayer.wireless.common.contract.bitlevel.IModulator;
+import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 
 //
 // This transmitter model is part of a simple hypothetical layered radio. It

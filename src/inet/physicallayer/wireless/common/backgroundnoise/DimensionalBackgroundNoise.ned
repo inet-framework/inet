@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.backgroundnoise;
+package inet.physicallayer.wireless.common.backgroundnoise;
 
-import inet.physicallayer.contract.packetlevel.IBackgroundNoise;
+import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 
 module DimensionalBackgroundNoise like IBackgroundNoise
 {

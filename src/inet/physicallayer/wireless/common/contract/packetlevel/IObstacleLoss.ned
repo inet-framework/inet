@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract.packetlevel;
+package inet.physicallayer.wireless.common.contract.packetlevel;
 
 //
 // The obstacle loss model describes the reduction of power as the signal passes

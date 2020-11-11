@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/physicallayer/shortcut/ShortcutPhyHeader_m.h"
-#include "inet/physicallayer/shortcut/ShortcutPhyProtocolDissector.h"
+#include "inet/physicallayer/wireless/shortcut/ShortcutPhyHeader_m.h"
+#include "inet/physicallayer/wireless/shortcut/ShortcutPhyProtocolDissector.h"
 
 namespace inet {
 

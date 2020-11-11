@@ -16,8 +16,8 @@
 //
 
 #include "WirelessSignal.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 namespace physicallayer {

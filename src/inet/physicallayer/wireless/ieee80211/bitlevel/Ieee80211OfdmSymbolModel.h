@@ -19,7 +19,7 @@
 #define __INET_IEEE80211OFDMSYMBOLMODEL_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
 
 namespace inet {
 

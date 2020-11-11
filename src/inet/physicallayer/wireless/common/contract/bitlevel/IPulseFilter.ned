@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract.bitlevel;
+package inet.physicallayer.wireless.common.contract.bitlevel;
 
 moduleinterface IPulseFilter
 {

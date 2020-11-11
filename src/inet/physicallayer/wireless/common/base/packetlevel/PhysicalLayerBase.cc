@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/Simsignals.h"
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerBase.h"
 
 namespace inet {
 

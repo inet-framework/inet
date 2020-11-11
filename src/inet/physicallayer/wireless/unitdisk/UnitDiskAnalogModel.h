@@ -18,7 +18,7 @@
 #ifndef __INET_UNITDISKANALOGMODEL_H
 #define __INET_UNITDISKANALOGMODEL_H
 
-#include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAnalogModel.h"
 
 namespace inet {
 

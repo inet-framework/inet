@@ -18,7 +18,7 @@
 #ifndef __INET_INTERFERENCE_H
 #define __INET_INTERFERENCE_H
 
-#include "inet/physicallayer/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
 
 namespace inet {
 namespace physicallayer {

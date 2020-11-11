@@ -18,10 +18,10 @@
 #ifndef __INET_IEEE80211RECEIVERBASE_H
 #define __INET_IEEE80211RECEIVERBASE_H
 
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 namespace physicallayer {

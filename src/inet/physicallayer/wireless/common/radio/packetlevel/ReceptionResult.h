@@ -18,8 +18,8 @@
 #ifndef __INET_RECEPTIONRESULT_H
 #define __INET_RECEPTIONRESULT_H
 
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionResult.h"
 
 namespace inet {
 namespace physicallayer {

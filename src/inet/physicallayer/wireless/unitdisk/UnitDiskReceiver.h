@@ -18,7 +18,7 @@
 #ifndef __INET_UNITDISKRECEIVER_H
 #define __INET_UNITDISKRECEIVER_H
 
-#include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
 
 namespace inet {
 

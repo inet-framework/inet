@@ -24,8 +24,8 @@
 #include "inet/common/TimeTag_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceptionBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
 namespace utils {

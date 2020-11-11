@@ -17,9 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-package inet.physicallayer.ieee802154.packetlevel;
+package inet.physicallayer.wireless.ieee802154.packetlevel;
 
-import inet.physicallayer.common.packetlevel.RadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
 
 module Ieee802154NarrowbandDimensionalRadioMedium extends RadioMedium
 {

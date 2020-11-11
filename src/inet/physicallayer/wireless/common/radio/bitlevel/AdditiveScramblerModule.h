@@ -18,8 +18,8 @@
 #ifndef __INET_ADDITIVESCRAMBLERMODULE_H
 #define __INET_ADDITIVESCRAMBLERMODULE_H
 
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambling.h"
 
 namespace inet {
 namespace physicallayer {

@@ -17,7 +17,7 @@
 
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
 namespace physicallayer {

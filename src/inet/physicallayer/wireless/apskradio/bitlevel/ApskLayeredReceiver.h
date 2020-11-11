@@ -18,18 +18,18 @@
 #ifndef __INET_APSKLAYEREDRECEIVER_H
 #define __INET_APSKLAYEREDRECEIVER_H
 
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/base/packetlevel/SnirReceiverBase.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
-#include "inet/physicallayer/contract/bitlevel/IDecoder.h"
-#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
-#include "inet/physicallayer/contract/bitlevel/IPulseFilter.h"
-#include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/SnirReceiverBase.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IAnalogDigitalConverter.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDecoder.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ILayeredErrorModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IPulseFilter.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 

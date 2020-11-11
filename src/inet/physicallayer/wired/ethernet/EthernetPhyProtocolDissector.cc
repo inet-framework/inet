@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetPhyProtocolDissector.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyProtocolDissector.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {

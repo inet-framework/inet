@@ -27,7 +27,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {

@@ -22,7 +22,7 @@
 *
 ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/SuiPathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/SuiPathLoss.h"
 
 namespace inet {
 

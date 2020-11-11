@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/common/packetlevel/NoiseSource.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
+#include "inet/physicallayer/wireless/noise/NoiseSource.h"
 
 namespace inet {
 namespace physicallayer {

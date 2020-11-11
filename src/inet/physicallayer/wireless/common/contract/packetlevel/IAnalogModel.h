@@ -18,13 +18,13 @@
 #ifndef __INET_IANALOGMODEL_H
 #define __INET_IANALOGMODEL_H
 
-#include "inet/physicallayer/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/contract/packetlevel/IInterference.h"
-#include "inet/physicallayer/contract/packetlevel/IListening.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IReception.h"
-#include "inet/physicallayer/contract/packetlevel/ISnir.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IListening.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 namespace physicallayer {

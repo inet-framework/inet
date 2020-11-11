@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
 
 namespace inet {
 namespace physicallayer {

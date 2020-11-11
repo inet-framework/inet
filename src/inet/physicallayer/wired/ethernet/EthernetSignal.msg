@@ -16,7 +16,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.physicallayer.common.packetlevel.Signal;
+import inet.physicallayer.common.Signal;
 
 cplusplus {{
 #include "inet/linklayer/ethernet/common/Ethernet.h"

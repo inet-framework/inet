@@ -18,9 +18,9 @@
 #ifndef __INET_IEEE80211OFDMMODE_H
 #define __INET_IEEE80211OFDMMODE_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeBase.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmCode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
 namespace physicallayer {

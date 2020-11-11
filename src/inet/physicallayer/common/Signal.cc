@@ -17,7 +17,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Units.h"
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "inet/physicallayer/common/Signal.h"
 
 namespace inet {
 namespace physicallayer {

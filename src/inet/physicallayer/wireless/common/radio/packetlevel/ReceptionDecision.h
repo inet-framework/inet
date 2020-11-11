@@ -18,7 +18,7 @@
 #ifndef __INET_RECEPTIONDECISION_H
 #define __INET_RECEPTIONDECISION_H
 
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
 
 namespace inet {
 namespace physicallayer {

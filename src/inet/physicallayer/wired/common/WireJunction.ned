@@ -16,7 +16,7 @@
 //
 
 
-package inet.physicallayer.common.packetlevel;
+package inet.physicallayer.wired.common;
 
 //
 // Models a generic wiring hub.

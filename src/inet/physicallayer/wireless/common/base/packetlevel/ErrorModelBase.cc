@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ErrorModelBase.h"
 
 namespace inet {
 

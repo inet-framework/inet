@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARTRANSMISSION_H
 #define __INET_SCALARTRANSMISSION_H
 
-#include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 
 namespace inet {
 

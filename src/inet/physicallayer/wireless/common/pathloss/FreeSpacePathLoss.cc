@@ -23,7 +23,7 @@
 *
 ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 

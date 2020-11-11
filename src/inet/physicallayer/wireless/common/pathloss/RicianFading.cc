@@ -23,7 +23,7 @@
 *
 ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/RicianFading.h"
+#include "inet/physicallayer/wireless/common/pathloss/RicianFading.h"
 
 namespace inet {
 

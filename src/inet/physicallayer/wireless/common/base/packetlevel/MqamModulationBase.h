@@ -18,7 +18,7 @@
 #ifndef __INET_MQAMMODULATIONBASE_H
 #define __INET_MQAMMODULATIONBASE_H
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 

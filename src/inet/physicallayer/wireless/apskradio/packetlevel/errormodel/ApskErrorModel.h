@@ -18,7 +18,7 @@
 #ifndef __INET_APSKERRORMODEL_H
 #define __INET_APSKERRORMODEL_H
 
-#include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ErrorModelBase.h"
 
 namespace inet {
 

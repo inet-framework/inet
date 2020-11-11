@@ -22,7 +22,7 @@ package inet.examples.ethernet.lans;
 import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.EthernetHost;
 import inet.node.ethernet.EthernetSwitch;
-import inet.physicallayer.common.packetlevel.WireJunction;
+import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
 
 

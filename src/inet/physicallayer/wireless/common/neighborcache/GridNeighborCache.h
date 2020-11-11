@@ -19,7 +19,7 @@
 #define __INET_GRIDNEIGHBORCACHE_H
 
 #include "inet/common/geometry/container/SpatialGrid.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 
 namespace inet {
 namespace physicallayer {

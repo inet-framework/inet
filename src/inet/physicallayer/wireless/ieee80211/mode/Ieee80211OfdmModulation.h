@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211OFDMMODULATION_H
 #define __INET_IEEE80211OFDMMODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 namespace physicallayer {

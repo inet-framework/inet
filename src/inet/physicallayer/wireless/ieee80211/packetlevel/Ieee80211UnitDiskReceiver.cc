@@ -16,13 +16,13 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskReceiver.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211UnitDiskReceiver.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
 
 namespace inet {
 namespace physicallayer {

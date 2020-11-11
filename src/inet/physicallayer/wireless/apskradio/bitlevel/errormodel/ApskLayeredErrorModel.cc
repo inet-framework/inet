@@ -15,16 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
-#include "inet/physicallayer/apskradio/bitlevel/errormodel/ApskLayeredErrorModel.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/apskradio/bitlevel/errormodel/ApskLayeredErrorModel.h"
+#include "inet/physicallayer/wireless/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
 
 namespace inet {
 

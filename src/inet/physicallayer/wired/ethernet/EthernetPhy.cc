@@ -17,9 +17,9 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/ethernet/EthernetSignal_m.h"
-#include "inet/physicallayer/ethernet/EthernetPhy.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhy.h"
 
 namespace inet {
 

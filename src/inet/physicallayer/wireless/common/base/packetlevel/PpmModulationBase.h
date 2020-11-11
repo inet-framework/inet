@@ -18,7 +18,7 @@
 #ifndef __INET_PPMMODULATIONBASE_H
 #define __INET_PPMMODULATIONBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

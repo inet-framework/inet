@@ -19,7 +19,7 @@
 #define __INET_COSINEANTENNA_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/base/packetlevel/AntennaBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/AntennaBase.h"
 
 namespace inet {
 

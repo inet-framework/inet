@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/AdditiveScramblerModule.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScramblerModule.h"
 
 namespace inet {
 namespace physicallayer {

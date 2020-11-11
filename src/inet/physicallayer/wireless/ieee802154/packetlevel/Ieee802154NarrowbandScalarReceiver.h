@@ -20,7 +20,7 @@
 #ifndef __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
 #define __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
 
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 
 namespace inet {
 

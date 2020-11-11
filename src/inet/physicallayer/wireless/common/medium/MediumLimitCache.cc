@@ -16,8 +16,7 @@
 //
 
 #include <algorithm>
-
-#include "inet/physicallayer/common/packetlevel/MediumLimitCache.h"
+#include "inet/physicallayer/wireless/common/medium/MediumLimitCache.h"
 
 namespace inet {
 namespace physicallayer {

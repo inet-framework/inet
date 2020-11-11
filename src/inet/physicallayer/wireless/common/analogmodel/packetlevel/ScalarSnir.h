@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARSNIR_H
 #define __INET_SCALARSNIR_H
 
-#include "inet/physicallayer/base/packetlevel/SnirBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/SnirBase.h"
 
 namespace inet {
 

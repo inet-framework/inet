@@ -18,9 +18,9 @@
 #ifndef __INET_IRECEPTION_H
 #define __INET_IRECEPTION_H
 
-#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 

@@ -19,8 +19,8 @@
 #define __INET_ILAYEREDERRORMODEL_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/contract/packetlevel/ISnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
 
 namespace inet {
 

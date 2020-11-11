@@ -19,7 +19,7 @@
 #define __INET_ADDITIVESCRAMBLING_H
 
 #include "inet/common/ShortBitVector.h"
-#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IScrambler.h"
 
 namespace inet {
 namespace physicallayer {

@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.bitlevel;
+package inet.physicallayer.wireless.ieee80211.bitlevel;
 
-import inet.physicallayer.common.packetlevel.RadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
 
 module Ieee80211LayeredDimensionalRadioMedium extends RadioMedium
 {

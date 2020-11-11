@@ -18,7 +18,7 @@
 #ifndef __INET_QAM256MODULATION_H
 #define __INET_QAM256MODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/MqamModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/MqamModulationBase.h"
 
 namespace inet {
 

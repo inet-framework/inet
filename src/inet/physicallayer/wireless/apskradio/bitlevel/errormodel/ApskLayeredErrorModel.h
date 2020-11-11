@@ -18,7 +18,7 @@
 #ifndef __INET_APSKLAYEREDERRORMODEL_H
 #define __INET_APSKLAYEREDERRORMODEL_H
 
-#include "inet/physicallayer/base/bitlevel/LayeredErrorModelBase.h"
+#include "inet/physicallayer/wireless/common/base/bitlevel/LayeredErrorModelBase.h"
 
 namespace inet {
 

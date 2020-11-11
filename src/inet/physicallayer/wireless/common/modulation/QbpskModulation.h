@@ -18,7 +18,7 @@
 #ifndef __INET_QBPSKMODULATION_H
 #define __INET_QBPSKMODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/MqamModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/MqamModulationBase.h"
 
 namespace inet {
 

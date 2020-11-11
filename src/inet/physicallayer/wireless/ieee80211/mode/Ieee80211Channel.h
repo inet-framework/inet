@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211CHANNEL_H
 #define __INET_IEEE80211CHANNEL_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 
 namespace inet {
 

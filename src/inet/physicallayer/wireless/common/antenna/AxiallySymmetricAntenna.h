@@ -18,7 +18,7 @@
 #ifndef __INET_AXIALLYSYMMETRICANTENNA_H
 #define __INET_AXIALLYSYMMETRICANTENNA_H
 
-#include "inet/physicallayer/base/packetlevel/AntennaBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/AntennaBase.h"
 
 namespace inet {
 

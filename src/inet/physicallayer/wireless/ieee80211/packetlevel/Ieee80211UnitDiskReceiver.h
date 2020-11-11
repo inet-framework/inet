@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211UNITDISKRECEIVER_H
 #define __INET_IEEE80211UNITDISKRECEIVER_H
 
-#include "inet/physicallayer/unitdisk/UnitDiskReceiver.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskReceiver.h"
 
 namespace inet {
 

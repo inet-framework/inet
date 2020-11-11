@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 
 namespace inet {
 namespace physicallayer {
