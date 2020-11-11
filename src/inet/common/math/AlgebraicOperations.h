@@ -24,7 +24,7 @@ namespace inet {
 
 namespace math {
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API AddedFunction : public FunctionBase<R, D>
 {
   protected:
@@ -34,7 +34,7 @@ class INET_API AddedFunction : public FunctionBase<R, D>
   public:
     AddedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) :
         function1(function1), function2(function2)
-    { }
+    {}
 
     virtual typename D::I getDomain() const override {
         return function1->getDomain().getIntersected(function2->getDomain());
@@ -44,7 +44,7 @@ class INET_API AddedFunction : public FunctionBase<R, D>
         return function1->getValue(p) + function2->getValue(p);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             // NOTE: optimization for 0 + x
             if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
@@ -120,7 +120,7 @@ class INET_API AddedFunction : public FunctionBase<R, D>
     }
 };
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API SubtractedFunction : public FunctionBase<R, D>
 {
   protected:
@@ -130,7 +130,7 @@ class INET_API SubtractedFunction : public FunctionBase<R, D>
   public:
     SubtractedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) :
         function1(function1), function2(function2)
-    { }
+    {}
 
     virtual typename D::I getDomain() const override {
         return function1->getDomain().getIntersected(function2->getDomain());
@@ -140,7 +140,7 @@ class INET_API SubtractedFunction : public FunctionBase<R, D>
         return function1->getValue(p) - function2->getValue(p);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
                 if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
@@ -188,9 +188,10 @@ class INET_API SubtractedFunction : public FunctionBase<R, D>
         function2->printStructure(os, level + 3);
         os << ")";
     }
+
 };
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API MultipliedFunction : public FunctionBase<R, D>
 {
   protected:
@@ -200,7 +201,7 @@ class INET_API MultipliedFunction : public FunctionBase<R, D>
   public:
     MultipliedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<double, D>>& function2) :
         function1(function1), function2(function2)
-    { }
+    {}
 
     virtual typename D::I getDomain() const override {
         return function1->getDomain().getIntersected(function2->getDomain());
@@ -214,7 +215,7 @@ class INET_API MultipliedFunction : public FunctionBase<R, D>
         return function1->getValue(p) * function2->getValue(p);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             // NOTE: optimization for 0 * x
             if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
@@ -267,7 +268,7 @@ class INET_API MultipliedFunction : public FunctionBase<R, D>
     }
 };
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API DividedFunction : public FunctionBase<double, D>
 {
   protected:
@@ -275,7 +276,7 @@ class INET_API DividedFunction : public FunctionBase<double, D>
     const Ptr<const IFunction<R, D>> function2;
 
   public:
-    DividedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) : function1(function1), function2(function2) { }
+    DividedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) : function1(function1), function2(function2) {}
 
     virtual typename D::I getDomain() const override {
         return function1->getDomain().getIntersected(function2->getDomain());
@@ -285,7 +286,7 @@ class INET_API DividedFunction : public FunctionBase<double, D>
         return unit(function1->getValue(p) / function2->getValue(p)).get();
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<double, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<double, D> *)> callback) const override {
         function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             // NOTE: optimization for 0 / x
             if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
@@ -344,15 +345,15 @@ class INET_API DividedFunction : public FunctionBase<double, D>
     }
 };
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API SummedFunction : public FunctionBase<R, D>
 {
   protected:
     std::vector<Ptr<const IFunction<R, D>>> functions;
 
   public:
-    SummedFunction() { }
-    SummedFunction(const std::vector<Ptr<const IFunction<R, D>>>& functions) : functions(functions) { }
+    SummedFunction() {}
+    SummedFunction(const std::vector<Ptr<const IFunction<R, D>>>& functions) : functions(functions) {}
 
     const std::vector<Ptr<const IFunction<R, D>>>& getElements() const { return functions; }
 
@@ -378,12 +379,12 @@ class INET_API SummedFunction : public FunctionBase<R, D>
         return sum;
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         ConstantFunction<R, D> g(R(0));
         partition(0, i, callback, &g);
     }
 
-    virtual void partition(int index, const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback, const IFunction<R, D> *f) const {
+    virtual void partition(int index, const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback, const IFunction<R, D> *f) const {
         if (index == (int)functions.size())
             simplifyAndCall(i, f, callback);
         else {

@@ -405,7 +405,7 @@ void Igmpv3::processRouterSourceTimer(cMessage *msg)
     if (groupData->filter == IGMPV3_FM_INCLUDE) {
         groupData->deleteSourceRecord(sourceRecord->sourceAddr);
     }
-    for (auto & elem : groupData->sources) {
+    for (auto& elem : groupData->sources) {
         if (elem.second->sourceTimer->isScheduled()) {
             last = false;
         }
@@ -439,7 +439,7 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
     /*
      * creating GroupRecord for each group on interface
      */
-    for (auto & elem : interfaceData->groups) {
+    for (auto& elem : interfaceData->groups) {
         GroupRecord gr;
         if (elem.second->filter == IGMPV3_FM_INCLUDE) {
             gr.setRecordType(IGMPV3_RT_IS_IN);
@@ -680,7 +680,7 @@ void Igmpv3::processReport(Packet *packet)
                 EV_DETAIL << "Received IS_IN" << receivedSources << " report.\n";
                 // INCLUDE(A)   -> IS_IN(B) -> INCLUDE(A+B)    : (B) = GMI
                 // EXCLUDE(X,Y) -> IS_IN(A) -> EXCLUDE(X+A,Y-A): (A) = GMI
-                for (auto & receivedSource : receivedSources) {
+                for (auto& receivedSource : receivedSources) {
                     EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << groupMembershipInterval << "'.\n";
                     SourceRecord *record = groupData->getOrCreateSourceRecord(receivedSource);
                     startTimer(record->sourceTimer, groupMembershipInterval);
@@ -704,7 +704,7 @@ void Igmpv3::processReport(Packet *packet)
 
                 // Router State == INCLUDE(A),   Report == IS_EX(B): (B-A) = 0
                 // Router State == EXCLUDE(X,Y), Report == IS_EX(A): (A-X-Y) = GMI
-                for (auto & receivedSource : receivedSources) {
+                for (auto& receivedSource : receivedSources) {
                     if (!groupData->hasSourceRecord(receivedSource)) {
                         SourceRecord *record = groupData->createSourceRecord(receivedSource);
                         double timerValue = groupData->filter == IGMPV3_FM_INCLUDE ? 0.0 : groupMembershipInterval;
@@ -722,7 +722,7 @@ void Igmpv3::processReport(Packet *packet)
 
                 // INCLUDE(A)   -> ALLOW(B) -> INCLUDE(A+B):     (B) = GMI
                 // EXCLUDE(X,Y) -> ALLOW(A) -> EXCLUDE(X+A,Y-A): (A) = GMI
-                for (auto & receivedSource : receivedSources) {
+                for (auto& receivedSource : receivedSources) {
                     EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << groupMembershipInterval << "'.\n";
                     SourceRecord *record = groupData->getOrCreateSourceRecord(receivedSource);
                     startTimer(record->sourceTimer, groupMembershipInterval);
@@ -734,7 +734,7 @@ void Igmpv3::processReport(Packet *packet)
                 if (groupData->filter == IGMPV3_FM_INCLUDE) {
                     // INCLUDE(A) -> BLOCK(B) -> INCLUDE(A): Send Q(G,A*B)
                     Ipv4AddressVector sourcesA;
-                    for (auto & elem : groupData->sources)
+                    for (auto& elem : groupData->sources)
                         sourcesA.push_back(elem.first);
 
                     Ipv4AddressVector aIntersectB = set_intersection(sourcesA, receivedSources);
@@ -756,7 +756,7 @@ void Igmpv3::processReport(Packet *packet)
                     }
                     // Send Q(G,A-Y)
                     Ipv4AddressVector ySources;
-                    for (auto & elem : groupData->sources) {
+                    for (auto& elem : groupData->sources) {
                         if (!elem.second->sourceTimer->isScheduled()) {
                             ySources.push_back(elem.first);
                         }
@@ -774,14 +774,14 @@ void Igmpv3::processReport(Packet *packet)
 
                 if (groupData->filter == IGMPV3_FM_INCLUDE) {
                     // INCLUDE(A) -> TO_IN (B) -> INCLUDE (A+B): (B)=GMI
-                    for (auto & receivedSource : receivedSources) {
+                    for (auto& receivedSource : receivedSources) {
                         EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << groupMembershipInterval << "'.\n";
                         SourceRecord *record = groupData->getOrCreateSourceRecord(receivedSource);
                         startTimer(record->sourceTimer, groupMembershipInterval);
                     }
                     // Send Q(G,A-B)
                     Ipv4AddressVector sourcesA;
-                    for (auto & elem : groupData->sources)
+                    for (auto& elem : groupData->sources)
                         sourcesA.push_back(elem.first);
                     Ipv4AddressVector aMinusB = set_complement(sourcesA, receivedSources);
                     if (!aMinusB.empty()) {
@@ -793,13 +793,13 @@ void Igmpv3::processReport(Packet *packet)
                 else if (groupData->filter == IGMPV3_FM_EXCLUDE) {
                     // compute X before modifying the state
                     Ipv4AddressVector sourcesX;
-                    for (auto & elem : groupData->sources) {
+                    for (auto& elem : groupData->sources) {
                         if (elem.second->sourceTimer->isScheduled())
                             sourcesX.push_back(elem.first);
                     }
 
                     // EXCLUDE(X,Y) -> TO_IN(A) -> EXCLUDE(X+A,Y-A): (A) = GMI
-                    for (auto & receivedSource : receivedSources) {
+                    for (auto& receivedSource : receivedSources) {
                         EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << groupMembershipInterval << "'.\n";
                         SourceRecord *record = groupData->getOrCreateSourceRecord(receivedSource);
                         startTimer(record->sourceTimer, groupMembershipInterval);
@@ -832,11 +832,11 @@ void Igmpv3::processReport(Packet *packet)
 
                     // save A
                     Ipv4AddressVector sourcesA;
-                    for (auto & elem : groupData->sources)
+                    for (auto& elem : groupData->sources)
                         sourcesA.push_back(elem.first);
 
                     // (B-A) = 0
-                    for (auto & receivedSource : receivedSources) {
+                    for (auto& receivedSource : receivedSources) {
                         if (!groupData->hasSourceRecord(receivedSource)) {
                             EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '0'.\n";
                             groupData->createSourceRecord(receivedSource);
@@ -844,7 +844,7 @@ void Igmpv3::processReport(Packet *packet)
                     }
 
                     // Delete A-B
-                    for (auto & elem : sourcesA) {
+                    for (auto& elem : sourcesA) {
                         if (find(receivedSources.begin(), receivedSources.end(), elem) == receivedSources.end()) {
                             EV_DETAIL << "Deleting source record of '" << elem << "'.\n";
                             groupData->deleteSourceRecord(elem);
@@ -866,7 +866,7 @@ void Igmpv3::processReport(Packet *packet)
 
                     // save Y
                     Ipv4AddressVector sourcesY;
-                    for (auto & elem : groupData->sources) {
+                    for (auto& elem : groupData->sources) {
                         if (!elem.second->sourceTimer->isScheduled())
                             sourcesY.push_back(elem.first);
                     }
@@ -882,7 +882,7 @@ void Igmpv3::processReport(Packet *packet)
                     }
 
                     // (A-X-Y) = GMI FIXME should be set to Group Timer
-                    for (auto & receivedSource : receivedSources) {
+                    for (auto& receivedSource : receivedSources) {
                         if (!groupData->hasSourceRecord(receivedSource)) {
                             EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << groupMembershipInterval << "'.\n";
                             SourceRecord *record = groupData->createSourceRecord(receivedSource);
@@ -923,7 +923,7 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
-        msg->setMaxRespTimeCode(codeTime((uint16_t)(maxRespTime*10.0)));
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(maxRespTime * 10.0)));
         msg->setChunkLength(B(12));
         insertCrc(msg, packet);
         packet->insertAtFront(msg);
@@ -952,7 +952,7 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
-        msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0*lastMemberQueryInterval)));
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(12));
         insertCrc(msg, packet);
@@ -1200,7 +1200,7 @@ string Igmpv3::RouterGroupData::getStateInfo() const
 void Igmpv3::RouterGroupData::printSourceList(ostream& out, bool withRunningTimer) const
 {
     bool first = true;
-    for (const auto & elem : sources) {
+    for (const auto& elem : sources) {
         bool timerIsRunning = elem.second->sourceTimer && elem.second->sourceTimer->isScheduled();
         if (withRunningTimer == timerIsRunning) {
             if (!first)
@@ -1218,7 +1218,7 @@ void Igmpv3::RouterGroupData::collectForwardedSources(Ipv4MulticastSourceList& r
         case IGMPV3_FM_INCLUDE:
             result.filterMode = MCAST_INCLUDE_SOURCES;
             result.sources.clear();
-            for (const auto & elem : sources) {
+            for (const auto& elem : sources) {
                 if (elem.second->sourceTimer && elem.second->sourceTimer->isScheduled())
                     result.sources.push_back(elem.first);
             }
@@ -1227,7 +1227,7 @@ void Igmpv3::RouterGroupData::collectForwardedSources(Ipv4MulticastSourceList& r
         case IGMPV3_FM_EXCLUDE:
             result.filterMode = MCAST_EXCLUDE_SOURCES;
             result.sources.clear();
-            for (const auto & elem : sources) {
+            for (const auto& elem : sources) {
                 if (!elem.second->sourceTimer || !elem.second->sourceTimer->isScheduled())
                     result.sources.push_back(elem.first);
             }
@@ -1251,7 +1251,7 @@ Igmpv3::HostInterfaceData::~HostInterfaceData()
 {
     owner->cancelAndDelete(generalQueryTimer);
 
-    for (auto & elem : groups)
+    for (auto& elem : groups)
         delete elem.second;
 }
 
@@ -1297,7 +1297,7 @@ Igmpv3::RouterInterfaceData::~RouterInterfaceData()
 {
     owner->cancelAndDelete(generalQueryTimer);
 
-    for (auto & elem : groups)
+    for (auto& elem : groups)
         delete elem.second;
 }
 
@@ -1404,11 +1404,11 @@ uint8_t Igmpv3::codeTime(uint16_t time)
 
 const std::string Igmpv3::getRouterStateString(Igmpv3::RouterState rs)
 {
-    if(rs == IGMPV3_RS_INITIAL)
+    if (rs == IGMPV3_RS_INITIAL)
         return "INITIAL";
-    else if(rs == IGMPV3_RS_QUERIER)
+    else if (rs == IGMPV3_RS_QUERIER)
         return "QUERIER";
-    else if(rs == IGMPV3_RS_NON_QUERIER)
+    else if (rs == IGMPV3_RS_NON_QUERIER)
         return "NON_QUERIER";
 
     return "UNKNOWN";
@@ -1416,11 +1416,11 @@ const std::string Igmpv3::getRouterStateString(Igmpv3::RouterState rs)
 
 const std::string Igmpv3::getRouterGroupStateString(Igmpv3::RouterGroupState rgs)
 {
-    if(rgs == IGMPV3_RGS_NO_MEMBERS_PRESENT)
+    if (rgs == IGMPV3_RGS_NO_MEMBERS_PRESENT)
         return "NO_MEMBERS_PRESENT";
-    else if(rgs == IGMPV3_RGS_MEMBERS_PRESENT)
+    else if (rgs == IGMPV3_RGS_MEMBERS_PRESENT)
         return "MEMBERS_PRESENT";
-    else if(rgs == IGMPV3_RGS_CHECKING_MEMBERSHIP)
+    else if (rgs == IGMPV3_RGS_CHECKING_MEMBERSHIP)
         return "CHECKING_MEMBERSHIP";
 
     return "UNKNOWN";
@@ -1428,11 +1428,11 @@ const std::string Igmpv3::getRouterGroupStateString(Igmpv3::RouterGroupState rgs
 
 const std::string Igmpv3::getHostGroupStateString(Igmpv3::HostGroupState hgs)
 {
-    if(hgs == IGMPV3_HGS_NON_MEMBER)
+    if (hgs == IGMPV3_HGS_NON_MEMBER)
         return "NON_MEMBER";
-    else if(hgs == IGMPV3_HGS_DELAYING_MEMBER)
+    else if (hgs == IGMPV3_HGS_DELAYING_MEMBER)
         return "DELAYING_MEMBER";
-    else if(hgs == IGMPV3_HGS_IDLE_MEMBER)
+    else if (hgs == IGMPV3_HGS_IDLE_MEMBER)
         return "IDLE_MEMBER";
 
     return "UNKNOWN";
@@ -1440,9 +1440,9 @@ const std::string Igmpv3::getHostGroupStateString(Igmpv3::HostGroupState hgs)
 
 const std::string Igmpv3::getFilterModeString(Igmpv3::FilterMode fm)
 {
-    if(fm == IGMPV3_FM_INCLUDE)
+    if (fm == IGMPV3_FM_INCLUDE)
         return "INCLUDE";
-    else if(fm == IGMPV3_FM_EXCLUDE)
+    else if (fm == IGMPV3_FM_EXCLUDE)
         return "EXCLUDE";
 
     return "UNKNOWN";

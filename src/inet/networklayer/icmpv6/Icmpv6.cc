@@ -129,7 +129,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
             processEchoReply(packet, echoReply);
         }
         else
-            throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(),icmpv6msg->getName());
+            throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(), icmpv6msg->getName());
     }
 }
 
@@ -171,7 +171,7 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     auto addressReq = replyPacket->addTag<L3AddressReq>();
     addressReq->setDestAddress(addressInd->getSrcAddress());
 
-    if (addressInd->getDestAddress().isMulticast()    /*TODO check for anycast too*/) {
+    if (addressInd->getDestAddress().isMulticast() /*TODO check for anycast too*/) {
         IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         auto ipv6Data = it->getInterfaceById(requestPacket->getTag<InterfaceInd>()->getInterfaceId())->getProtocolDataForUpdate<Ipv6InterfaceData>();
         addressReq->setSrcAddress(ipv6Data->getPreferredAddress());
@@ -222,7 +222,7 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     // error when decapsulating the origDatagram on the receiver side.
     // A workaround is to avoid decapsulation, or to manually set the
     // errorMessage length to be larger than the encapsulated message.
-    b copyLength =  B(IPv6_MIN_MTU) - errorMsg->getTotalLength();
+    b copyLength = B(IPv6_MIN_MTU) - errorMsg->getTotalLength();
     errorMsg->insertAtBack(origDatagram->peekDataAt(b(0), std::min(copyLength, origDatagram->getDataLength())));
 
     auto icmpHeader = errorMsg->removeAtFront<Icmpv6Header>();

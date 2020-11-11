@@ -82,7 +82,7 @@ void MobilityOsgVisualizer::removeMobilityVisualization(const IMobility *mobilit
     mobilityVisualizations.erase(mobility);
 }
 
-MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMobilityVisualization(IMobility *mobility)
+MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::ensureMobilityVisualization(IMobility *mobility)
 {
     auto mobilityVisualization = getMobilityVisualization(mobility);
     if (mobilityVisualization == nullptr) {

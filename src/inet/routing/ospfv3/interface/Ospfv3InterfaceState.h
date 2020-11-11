@@ -13,7 +13,7 @@ class INET_API Ospfv3InterfaceState
   public:
     virtual void processEvent(Ospfv3Interface *interface, Ospfv3Interface::Ospfv3InterfaceEvent eventNum) = 0;
     virtual Ospfv3Interface::Ospfv3InterfaceFaState getState() const = 0;
-    virtual ~Ospfv3InterfaceState() {};
+    virtual ~Ospfv3InterfaceState() {}
     virtual std::string getInterfaceStateString() const = 0;
 
   protected:

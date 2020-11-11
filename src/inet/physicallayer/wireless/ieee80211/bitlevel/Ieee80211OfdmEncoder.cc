@@ -100,6 +100,7 @@ Ieee80211OfdmEncoder::~Ieee80211OfdmEncoder()
     delete interleaver;
     delete scrambler;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

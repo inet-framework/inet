@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 /** \file RtpAvProfilePayload32Receiver.cc
  *  * In this file member functions of RtpAvProfilePayload32Receiver are
  *  * implemented.
@@ -70,7 +69,7 @@ void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
         _lowestAllowedTimeStamp = rtpHeader->getTimeStamp();
         _highestSequenceNumber = rtpHeader->getSequenceNumber();
         if (_outputLogLoss.is_open())
-        _outputLogLoss << "sequenceNumberBase" << rtpHeader->getSequenceNumber() << endl;
+            _outputLogLoss << "sequenceNumberBase" << rtpHeader->getSequenceNumber() << endl;
     }
     else if (_outputLogLoss.is_open()) {
         for (int i = _highestSequenceNumber + 1; i < rtpHeader->getSequenceNumber(); i++) {

@@ -58,7 +58,7 @@ const simtime_t Ieee80211DsssMode::getRifsTime() const
     return -1;
 }
 
-
 } // namespace physicallayer
 
 } // namespace inet
+

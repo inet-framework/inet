@@ -43,7 +43,7 @@ simsignal_t PimDm::rcvdStateRefreshPkSignal = registerSignal("rcvdStateRefreshPk
 
 PimDm::~PimDm()
 {
-    for (auto & elem : routes)
+    for (auto& elem : routes)
         delete elem.second;
     routes.clear();
 }
@@ -253,7 +253,7 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         for (int i = 0; i < rt->getNumMulticastRoutes(); i++) {
             // find multicast routes whose source are on the destination of the new unicast route
             Ipv4MulticastRoute *route = rt->getMulticastRoute(i);
-            if (route->getSource() == this && Ipv4Address::maskedAddrAreEqual(route->getOrigin(), entry->getDestination()/*routeSource*/, entry->getNetmask()/*routeNetmask*/)) {
+            if (route->getSource() == this && Ipv4Address::maskedAddrAreEqual(route->getOrigin(), entry->getDestination() /*routeSource*/, entry->getNetmask() /*routeNetmask*/)) {
                 Ipv4Address source = route->getOrigin();
                 Ipv4Route *routeToSource = rt->findBestMatchingRoute(source);
                 NetworkInterface *newRpfInterface = routeToSource->getInterface();
@@ -1134,7 +1134,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
     newRoute->setInInterface(new IMulticastRoute::InInterface(route->upstreamInterface->ie));
-    for (auto & elem : route->downstreamInterfaces) {
+    for (auto& elem : route->downstreamInterfaces) {
         DownstreamInterface *downstream = elem;
         newRoute->addOutInterface(new PimDmOutInterface(downstream->ie, downstream));
     }
@@ -1752,7 +1752,7 @@ void PimDm::clearRoutes()
     }
 
     // clear local table
-    for (auto & elem : routes)
+    for (auto& elem : routes)
         delete elem.second;
     routes.clear();
 }
@@ -1760,14 +1760,14 @@ void PimDm::clearRoutes()
 PimDm::Route::~Route()
 {
     delete upstreamInterface;
-    for (auto & elem : downstreamInterfaces)
+    for (auto& elem : downstreamInterfaces)
         delete elem;
     downstreamInterfaces.clear();
 }
 
 PimDm::DownstreamInterface *PimDm::Route::findDownstreamInterfaceByInterfaceId(int interfaceId) const
 {
-    for (auto & elem : downstreamInterfaces)
+    for (auto& elem : downstreamInterfaces)
         if (elem->ie->getInterfaceId() == interfaceId)
             return elem;
 
@@ -1795,7 +1795,7 @@ PimDm::DownstreamInterface *PimDm::Route::removeDownstreamInterface(int interfac
 
 bool PimDm::Route::isOilistNull()
 {
-    for (auto & elem : downstreamInterfaces) {
+    for (auto& elem : downstreamInterfaces) {
         if (elem->isInOlist())
             return false;
     }
@@ -1957,7 +1957,7 @@ std::ostream& operator<<(std::ostream& out, const PimDm::Route& route)
     }
 
     out << "Downstream interfaces ";
-    if(route.downstreamInterfaces.empty())
+    if (route.downstreamInterfaces.empty())
         out << "(empty) ";
     for (unsigned int i = 0; i < route.downstreamInterfaces.size(); ++i) {
         out << "(name: " << route.downstreamInterfaces[i]->ie->getInterfaceName() << " ";
@@ -1974,11 +1974,11 @@ std::ostream& operator<<(std::ostream& out, const PimDm::Route& route)
 
 const std::string PimDm::graftPruneStateString(UpstreamInterface::GraftPruneState ps)
 {
-    if(ps == UpstreamInterface::FORWARDING)
+    if (ps == UpstreamInterface::FORWARDING)
         return "FORWARDING";
-    else if(ps == UpstreamInterface::PRUNED)
+    else if (ps == UpstreamInterface::PRUNED)
         return "PRUNED";
-    else if(ps == UpstreamInterface::ACK_PENDING)
+    else if (ps == UpstreamInterface::ACK_PENDING)
         return "ACK_PENDING";
 
     return "UNKNOWN";
@@ -1986,9 +1986,9 @@ const std::string PimDm::graftPruneStateString(UpstreamInterface::GraftPruneStat
 
 const std::string PimDm::originatorStateString(UpstreamInterface::OriginatorState os)
 {
-    if(os == UpstreamInterface::NOT_ORIGINATOR)
+    if (os == UpstreamInterface::NOT_ORIGINATOR)
         return "NOT_ORIGINATOR";
-    else if(os == UpstreamInterface::ORIGINATOR)
+    else if (os == UpstreamInterface::ORIGINATOR)
         return "ORIGINATOR";
 
     return "UNKNOWN";
@@ -1996,11 +1996,11 @@ const std::string PimDm::originatorStateString(UpstreamInterface::OriginatorStat
 
 const std::string PimDm::pruneStateString(DownstreamInterface::PruneState ps)
 {
-    if(ps == DownstreamInterface::NO_INFO)
+    if (ps == DownstreamInterface::NO_INFO)
         return "NO_INFO";
-    else if(ps == DownstreamInterface::PRUNE_PENDING)
+    else if (ps == DownstreamInterface::PRUNE_PENDING)
         return "PRUNE_PENDING";
-    else if(ps == DownstreamInterface::PRUNED)
+    else if (ps == DownstreamInterface::PRUNED)
         return "PRUNED";
 
     return "UNKNOWN";

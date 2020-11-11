@@ -66,6 +66,7 @@ class INET_API Ipv6NeighbourCache
         {
             return interfaceID == b.interfaceID ? address < b.address : interfaceID < b.interfaceID;
         }
+
     };
 
     /** Stores a neighbour (or router) entry */
@@ -137,8 +138,8 @@ class INET_API Ipv6NeighbourCache
           public:
             iterator(const iterator& other) : start(other.start), current(other.current) {}
             Neighbour& operator*() { return *current; }
-            iterator& operator++()    /*prefix*/ { current = current->nextDefaultRouter == start ? nullptr : current->nextDefaultRouter; return *this; }
-            iterator operator++(int)    /*postfix*/ { iterator tmp(*this); operator++(); return tmp; }
+            iterator& operator++() /*prefix*/ { current = current->nextDefaultRouter == start ? nullptr : current->nextDefaultRouter; return *this; }
+            iterator operator++(int) /*postfix*/ { iterator tmp(*this); operator++(); return tmp; }
             bool operator==(const iterator& rhs) const { return current == rhs.current; }
             bool operator!=(const iterator& rhs) const { return !(*this == rhs); }
         };

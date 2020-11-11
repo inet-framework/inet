@@ -32,14 +32,14 @@ class INET_API VehicleMobility : public MovingMobilityBase
         double y;
         double timestamp;
 
-        Waypoint(double x, double y, double timestamp) : x(x), y(y), timestamp(timestamp) { }
+        Waypoint(double x, double y, double timestamp) : x(x), y(y), timestamp(timestamp) {}
     };
 
   protected:
     // configuration
     std::vector<Waypoint> waypoints;
 
-    //The ground module given by the "groundModule" parameter, pointer stored for easier access.
+    // The ground module given by the "groundModule" parameter, pointer stored for easier access.
     physicalenvironment::IGround *ground = nullptr;
 
     double speed;

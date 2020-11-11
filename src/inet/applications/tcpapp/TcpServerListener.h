@@ -40,7 +40,7 @@ class INET_API TcpServerListener : public ApplicationBase, public TcpSocket::ICa
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket) override {}
     virtual void socketPeerClosed(TcpSocket *socket) override {}

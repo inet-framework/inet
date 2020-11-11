@@ -58,7 +58,7 @@ void MarkovClassifier::initialize(int stage)
         WATCH(state);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (auto & outputGate : outputGates)
+        for (auto& outputGate : outputGates)
             checkPacketOperationSupport(outputGate);
         checkPacketOperationSupport(inputGate);
         if (collectors[state] != nullptr)

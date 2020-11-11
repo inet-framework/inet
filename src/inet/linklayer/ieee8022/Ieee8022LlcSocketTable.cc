@@ -21,7 +21,7 @@ namespace inet {
 
 Define_Module(Ieee8022LlcSocketTable);
 
-std::ostream& operator << (std::ostream& o, const Ieee8022LlcSocketTable::Socket& t)
+std::ostream& operator<<(std::ostream& o, const Ieee8022LlcSocketTable::Socket& t)
 {
     o << "(id:" << t.socketId << ",lsap:" << t.localSap << ",rsap" << t.remoteSap << ")";
     return o;
@@ -56,7 +56,7 @@ void Ieee8022LlcSocketTable::removeSocket(int socketId)
 
 std::vector<Ieee8022LlcSocketTable::Socket *> Ieee8022LlcSocketTable::findSockets(int localSap, int remoteSap) const
 {
-    std::vector<Ieee8022LlcSocketTable::Socket*> result;
+    std::vector<Ieee8022LlcSocketTable::Socket *> result;
     for (auto& it : socketIdToSocketMap) {
         auto socket = it.second;
         if ((socket->localSap == localSap || socket->localSap == -1) &&

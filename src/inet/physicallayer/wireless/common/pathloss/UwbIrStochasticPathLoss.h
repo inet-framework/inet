@@ -71,7 +71,7 @@ class INET_API UwbIrStochasticPathLoss : public PathLossBase
     double PL0; // 0.000008913; // -50.5 dB   0.000019953
     double muGamma;
     double muSigma;
-    double sigmaGamma; //1.7, 0.3
+    double sigmaGamma; // 1.7, 0.3
     double sigmaSigma;
     double pathloss_exponent;
     bool shadowing;

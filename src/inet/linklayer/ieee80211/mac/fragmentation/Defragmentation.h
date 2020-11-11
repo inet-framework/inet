@@ -26,8 +26,8 @@ namespace ieee80211 {
 
 class INET_API Defragmentation : public IDefragmentation, public cObject
 {
-    public:
-        virtual Packet *defragmentFrames(std::vector<Packet *> *fragmentFrames) override;
+  public:
+    virtual Packet *defragmentFrames(std::vector<Packet *> *fragmentFrames) override;
 };
 
 } // namespace ieee80211

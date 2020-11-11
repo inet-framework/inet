@@ -71,9 +71,9 @@ cFigure::Point OpenStreetMapSceneCanvasVisualizer::toCanvas(const OpenStreetMap&
 
 cGroupFigure *OpenStreetMapSceneCanvasVisualizer::createMapFigure(const OpenStreetMap& map)
 {
-    const cFigure::Color COLOR_HIGHWAY_PRIMARY = {255, 255, 120};
-    const cFigure::Color COLOR_HIGHWAY_RESIDENTIAL = {240, 240, 240};
-    const cFigure::Color COLOR_HIGHWAY_PATH = {128, 128, 128};
+    const cFigure::Color COLOR_HIGHWAY_PRIMARY = { 255, 255, 120 };
+    const cFigure::Color COLOR_HIGHWAY_RESIDENTIAL = { 240, 240, 240 };
+    const cFigure::Color COLOR_HIGHWAY_PATH = { 128, 128, 128 };
 
     auto buildings = new cGroupFigure("buildings");
     buildings->setTags("buildings");
@@ -110,7 +110,8 @@ cGroupFigure *OpenStreetMapSceneCanvasVisualizer::createMapFigure(const OpenStre
 
             std::string highwayType = nullToEmpty(way->getTag("highway"));
             if (highwayType == "primary" || highwayType == "secondary" || highwayType == "tertiary" ||
-                highwayType == "primary_link" || highwayType == "secondary_link" || highwayType == "tertiary_link") {
+                highwayType == "primary_link" || highwayType == "secondary_link" || highwayType == "tertiary_link")
+            {
                 polyline->setLineWidth(8);
                 polyline->setLineColor(COLOR_HIGHWAY_PRIMARY);
                 polyline->setCapStyle(cFigure::CAP_ROUND);

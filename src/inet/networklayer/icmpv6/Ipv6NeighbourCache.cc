@@ -167,7 +167,7 @@ void Ipv6NeighbourCache::remove(NeighbourMap::iterator it)
 // Added by CB
 void Ipv6NeighbourCache::invalidateEntriesForInterfaceID(int interfaceID)
 {
-    for (auto & elem : neighbourMap) {
+    for (auto& elem : neighbourMap) {
         if (elem.first.interfaceID == interfaceID) {
             elem.second.reachabilityState = PROBE;    // we make sure this neighbour is not used anymore in the future, unless reachability can be confirmed
             neighbourDiscovery.cancelAndDelete(elem.second.nudTimeoutEvent);    // 20.9.07 - CB

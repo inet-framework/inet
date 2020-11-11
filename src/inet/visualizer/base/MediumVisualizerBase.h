@@ -37,9 +37,9 @@ namespace visualizer {
 class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 {
 #ifdef WITH_RADIO
+
   protected:
-    enum SignalShape
-    {
+    enum SignalShape {
         SIGNAL_SHAPE_RING,
         SIGNAL_SHAPE_SPHERE,
         SIGNAL_SHAPE_BOTH,

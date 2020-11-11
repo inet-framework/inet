@@ -44,19 +44,22 @@ class INET_API Ieee80211Mib : public cSimpleModule
         ASSOCIATED
     };
 
-    class INET_API BssData {
+    class INET_API BssData
+    {
       public:
         std::string ssid;
         MacAddress bssid;
     };
 
-    class INET_API BssStationData {
+    class INET_API BssStationData
+    {
       public:
         BssStationType stationType = static_cast<BssStationType>(-1);
         bool isAssociated = false;
     };
 
-    class INET_API BssAccessPointData {
+    class INET_API BssAccessPointData
+    {
       public:
         std::map<MacAddress, BssMemberStatus> stations;
     };

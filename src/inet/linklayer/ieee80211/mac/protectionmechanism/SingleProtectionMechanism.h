@@ -36,25 +36,25 @@ namespace ieee80211 {
 //
 class INET_API SingleProtectionMechanism : public ModeSetListener
 {
-    protected:
-        IQosRateSelection *rateSelection = nullptr;
-        // TODO: IRateSelection *nonQoSrateSelection = nullptr;
+  protected:
+    IQosRateSelection *rateSelection = nullptr;
+    // TODO: IRateSelection *nonQoSrateSelection = nullptr;
 
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
-        virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
-        virtual simtime_t computeCtsDurationField(const Ptr<const Ieee80211CtsFrame>& ctsFrame);
-        virtual simtime_t computeBlockAckReqDurationField(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
-        virtual simtime_t computeBlockAckDurationField(const Ptr<const Ieee80211BlockAck>& blockAck);
-        virtual simtime_t computeDataOrMgmtFrameDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
+    virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
+    virtual simtime_t computeCtsDurationField(const Ptr<const Ieee80211CtsFrame>& ctsFrame);
+    virtual simtime_t computeBlockAckReqDurationField(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
+    virtual simtime_t computeBlockAckDurationField(const Ptr<const Ieee80211BlockAck>& blockAck);
+    virtual simtime_t computeDataOrMgmtFrameDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
 
-    public:
-        virtual ~SingleProtectionMechanism() { }
+  public:
+    virtual ~SingleProtectionMechanism() {}
 
-        // TODO: QoSAckPolicy, IQosRateSelection may give wrong answers when communicating with a Non-QoS STA.
-        virtual simtime_t computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
+    // TODO: QoSAckPolicy, IQosRateSelection may give wrong answers when communicating with a Non-QoS STA.
+    virtual simtime_t computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
 };
 
 } /* namespace ieee80211 */

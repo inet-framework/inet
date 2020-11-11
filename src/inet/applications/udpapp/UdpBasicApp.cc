@@ -115,7 +115,7 @@ void UdpBasicApp::sendPacket()
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
-    if(dontFragment)
+    if (dontFragment)
         packet->addTag<FragmentationReq>()->setDontFragment(true);
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));

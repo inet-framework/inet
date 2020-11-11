@@ -199,7 +199,6 @@ bool NonQosRecoveryProcedure::isRetryLimitReached(Packet *packet, const Ptr<cons
         return getRc(packet, failedHeader, shortRetryCounter) >= shortRetryLimit;
 }
 
-
 int NonQosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (packet->getByteLength() >= rtsThreshold)
@@ -207,7 +206,6 @@ int NonQosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee8
     else
         return getRc(packet, header, shortRetryCounter);
 }
-
 
 int NonQosRecoveryProcedure::getShortRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
@@ -260,3 +258,4 @@ bool NonQosRecoveryProcedure::isMulticastFrame(const Ptr<const Ieee80211MacHeade
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

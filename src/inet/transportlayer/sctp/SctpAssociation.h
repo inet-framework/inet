@@ -814,7 +814,7 @@ class INET_API SctpStateVariables : public cObject
     bool findPeerRequestNum(uint32_t num);
     bool findPeerStreamToReset(uint16_t sn);
     bool findMatch(uint16_t sn);
-    RequestData* findTypeInRequests(uint16_t type);
+    RequestData *findTypeInRequests(uint16_t type);
     uint16_t getNumRequestsNotPerformed();
 
     // ====== SCTP Authentication =========================================
@@ -902,7 +902,7 @@ class INET_API SctpAssociation : public cObject
 
     typedef std::map<uint32_t, SctpSendStream *> SctpSendStreamMap;
     typedef std::map<uint32_t, SctpReceiveStream *> SctpReceiveStreamMap;
-    typedef std::map<uint32_t,SctpPathVariables*> SctpPathCollection;
+    typedef std::map<uint32_t, SctpPathVariables *> SctpPathCollection;
     SctpPathCollection assocBestPaths;
     SctpPathCollection assocMaxWndPaths;
     SctpPathCollection assocCollectedPaths;
@@ -1046,8 +1046,8 @@ class INET_API SctpAssociation : public cObject
      * of false means that the connection structure must be deleted by the
      * caller (SCTP).
      */
-   // bool processSctpMessage(const Ptr<const SctpHeader>& sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
-   bool processSctpMessage(SctpHeader *sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
+    // bool processSctpMessage(const Ptr<const SctpHeader>& sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
+    bool processSctpMessage(SctpHeader *sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
     /**
      * Process commands from the application.
      * Normally returns true. A return value of false means that the
@@ -1074,21 +1074,27 @@ class INET_API SctpAssociation : public cObject
      * Compare TSNs
      */
     /* Defines see RFC1982 for details */
-    static bool SCTP_UINT16_GT(uint16_t a, uint16_t b) { return (((a < b) && ((uint16_t)(b - a) > (1U<<15))) || \
-                                  ((a > b) && ((uint16_t)(a - b) < (1U<<15)))); }
-    static bool SCTP_UINT16_GE(uint16_t a, uint16_t b) { return (a == b ) || SCTP_UINT16_GT(a, b); }
-    static bool SCTP_UINT32_GT(uint32_t a, uint32_t b) { return ((a < b) && ((uint32_t)(b - a) > (1UL<<31))) ||
-                                  ((a > b) && ((uint32_t)(a - b) < (1UL<<31))); }
+    static bool SCTP_UINT16_GT(uint16_t a, uint16_t b) {
+        return ((a < b) && ((uint16_t)(b - a) > (1U << 15))) || \
+               ((a > b) && ((uint16_t)(a - b) < (1U << 15)));
+    }
+
+    static bool SCTP_UINT16_GE(uint16_t a, uint16_t b) { return (a == b) || SCTP_UINT16_GT(a, b); }
+    static bool SCTP_UINT32_GT(uint32_t a, uint32_t b) {
+        return ((a < b) && ((uint32_t)(b - a) > (1UL << 31))) ||
+               ((a > b) && ((uint32_t)(a - b) < (1UL << 31)));
+    }
+
     static bool SCTP_UINT32_GE(uint32_t a, uint32_t b) { return SCTP_UINT32_GT(a, b) || (a == b); }
-    #define SCTP_TSN_GT(a, b) SCTP_UINT32_GT(a, b)
-    #define SCTP_TSN_GE(a, b) SCTP_UINT32_GE(a, b)
-    #define SCTP_SSN_GT(a, b) SCTP_UINT16_GT(a, b)
-    #define SCTP_SSN_GE(a, b) SCTP_UINT16_GE(a, b)
+    #define SCTP_TSN_GT(a, b)    SCTP_UINT32_GT(a, b)
+    #define SCTP_TSN_GE(a, b)    SCTP_UINT32_GE(a, b)
+    #define SCTP_SSN_GT(a, b)    SCTP_UINT16_GT(a, b)
+    #define SCTP_SSN_GE(a, b)    SCTP_UINT16_GE(a, b)
     static bool tsnGe(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GE(tsn1, tsn2); }
     static bool tsnGt(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GT(tsn1, tsn2); }
     static bool tsnLe(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GE(tsn2, tsn1); }
     static bool tsnLt(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GT(tsn2, tsn1); }
-    static bool tsnBetween(const uint32_t tsn1, const uint32_t midtsn, const uint32_t tsn2) { return (SCTP_TSN_GE(midtsn, tsn1) && SCTP_TSN_GE(tsn2, midtsn)); }
+    static bool tsnBetween(const uint32_t tsn1, const uint32_t midtsn, const uint32_t tsn2) { return SCTP_TSN_GE(midtsn, tsn1) && SCTP_TSN_GE(tsn2, midtsn); }
     static bool ssnGt(const uint16_t ssn1, const uint16_t ssn2) { return SCTP_SSN_GT(ssn1, ssn2); }
     static bool midGt(const uint32_t mid1, const uint32_t mid2) { return SCTP_TSN_GT(mid1, mid2); }
 
@@ -1116,8 +1122,8 @@ class INET_API SctpAssociation : public cObject
 
     /** @name Processing Sctp message arrivals. Invoked from processSctpHeader(). */
     //@{
-   // bool process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg, const L3Address& src, const L3Address& dest);
-   bool process_RCV_Message(SctpHeader *sctpmsg, const L3Address& src, const L3Address& dest);
+    // bool process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg, const L3Address& src, const L3Address& dest);
+    bool process_RCV_Message(SctpHeader *sctpmsg, const L3Address& src, const L3Address& dest);
     /**
      * Process incoming SCTP packets. Invoked from process_RCV_Message
      */
@@ -1493,7 +1499,7 @@ class INET_API SctpAssociation : public cObject
      * ackedBytes: ackednowlged bytes
      * path: path variable (for further investigation, debug, etc)
      */
-    uint32_t updateOLIA(uint32_t w, uint32_t s, uint32_t totalW, double a, uint32_t mtu, uint32_t ackedBytes, SctpPathVariables* path);
+    uint32_t updateOLIA(uint32_t w, uint32_t s, uint32_t totalW, double a, uint32_t mtu, uint32_t ackedBytes, SctpPathVariables *path);
 
     bool addAuthChunkIfNecessary(Ptr<SctpHeader> sctpMsg, uint16_t chunkType, bool authAdded)
     {

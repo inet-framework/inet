@@ -250,7 +250,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 
   public:
     bool isDadInProgress() { return dadInProgress; };
-    void setDadInProgress(bool val) { dadInProgress = val; };
+    void setDadInProgress(bool val) { dadInProgress = val; }
 #endif /* WITH_xMIPv6 */
 
   protected:
@@ -793,7 +793,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 
     const Ipv6Address& getHomeAgentAddress() const { return homeInfo.homeAgentAddr; }    // Zarrar 03.09.07
     const Ipv6Address& getMNHomeAddress() const { return homeInfo.HoA; }    // Zarrar 03.09.07
-    const Ipv6Address& getMnPrefix() const { return homeInfo.prefix    /*.prefix()*/; }    // Zarrar 03.09.07
+    const Ipv6Address& getMnPrefix() const { return homeInfo.prefix /*.prefix()*/; }   // Zarrar 03.09.07
 
     /**
      * Removes a CoA address from the interface if one exists.

@@ -31,14 +31,14 @@ using namespace inet::units::values;
  * original function and the function over the partition return the same
  * values at the corners and center of the subdomain.
  */
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API FunctionChecker
 {
   protected:
     const Ptr<const IFunction<R, D>> function;
 
   public:
-    FunctionChecker(const Ptr<const IFunction<R, D>>& function) : function(function) { }
+    FunctionChecker(const Ptr<const IFunction<R, D>>& function) : function(function) {}
 
     void check() const {
         check(function->getDomain());
@@ -46,7 +46,7 @@ class INET_API FunctionChecker
 
     void check(const typename D::I& i) const {
         function->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
-            auto check = std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
+            auto check = std::function<void(const typename D::P&)>([&] (const typename D::P& p) {
                 if (i1.contains(p)) {
                     R r = function->getValue(p);
                     R r1 = f1->getValue(p);

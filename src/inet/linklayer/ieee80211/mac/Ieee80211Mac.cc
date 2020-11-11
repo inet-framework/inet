@@ -44,7 +44,6 @@ using namespace inet::physicallayer;
 
 Define_Module(Ieee80211Mac);
 
-
 Ieee80211Mac::Ieee80211Mac()
 {
 }
@@ -90,15 +89,15 @@ void Ieee80211Mac::initialize(int stage)
 
 void Ieee80211Mac::initializeRadioMode() {
     const char *initialRadioMode = par("initialRadioMode");
-    if(!strcmp(initialRadioMode, "off"))
+    if (!strcmp(initialRadioMode, "off"))
         radio->setRadioMode(IRadio::RADIO_MODE_OFF);
-    else if(!strcmp(initialRadioMode, "sleep"))
+    else if (!strcmp(initialRadioMode, "sleep"))
         radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-    else if(!strcmp(initialRadioMode, "receiver"))
+    else if (!strcmp(initialRadioMode, "receiver"))
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-    else if(!strcmp(initialRadioMode, "transmitter"))
+    else if (!strcmp(initialRadioMode, "transmitter"))
         radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    else if(!strcmp(initialRadioMode, "transceiver"))
+    else if (!strcmp(initialRadioMode, "transceiver"))
         radio->setRadioMode(IRadio::RADIO_MODE_TRANSCEIVER);
     else
         throw cRuntimeError("Unknown initialRadioMode");
@@ -424,3 +423,4 @@ void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 
 } // namespace ieee80211
 } // namespace inet
+

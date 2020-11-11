@@ -51,8 +51,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         std::vector<InterfaceInfo *> interfaceInfos;
 
       public:
-        Node(cModule *module) : inet::Topology::Node(module->getId()), module(module) { }
-        virtual ~Node() { for (auto & interfaceInfo : interfaceInfos) delete interfaceInfo; }
+        Node(cModule *module) : inet::Topology::Node(module->getId()), module(module) {}
+        virtual ~Node() { for (auto& interfaceInfo : interfaceInfos) delete interfaceInfo; }
     };
 
     /**
@@ -65,7 +65,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         InterfaceInfo *destinationInterfaceInfo = nullptr;
 
       public:
-        Link() { }
+        Link() {}
     };
 
     /**
@@ -102,7 +102,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         int networkId = 0;
 
       public:
-        LinkInfo() { }
+        LinkInfo() {}
     };
 
     /**
@@ -115,7 +115,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         std::map<int, InterfaceInfo *> interfaceInfos;    // all interfaces in the network
 
       public:
-        virtual ~Topology() { for (auto & linkInfo : linkInfos) delete linkInfo; }
+        virtual ~Topology() { for (auto& linkInfo : linkInfos) delete linkInfo; }
 
       protected:
         virtual Node *createNode(cModule *module) override { return new NetworkConfiguratorBase::Node(module); }

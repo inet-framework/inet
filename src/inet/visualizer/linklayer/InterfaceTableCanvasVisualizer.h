@@ -31,7 +31,8 @@ namespace visualizer {
 class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerBase
 {
   protected:
-    class INET_API InterfaceCanvasVisualization : public InterfaceVisualization {
+    class INET_API InterfaceCanvasVisualization : public InterfaceVisualization
+    {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         BoxedLabelFigure *figure = nullptr;

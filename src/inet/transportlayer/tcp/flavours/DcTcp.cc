@@ -32,7 +32,7 @@ simsignal_t DcTcp::calcLoadSignal = cComponent::registerSignal("calcLoad"); // w
 simsignal_t DcTcp::markingProbSignal = cComponent::registerSignal("markingProb"); // will record marking probability
 
 DcTcp::DcTcp() : TcpReno(),
-        state((DcTcpStateVariables *&)TcpAlgorithm::state)
+    state((DcTcpStateVariables *&)TcpAlgorithm::state)
 {
 }
 
@@ -74,7 +74,6 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             else {
                 conn->emit(markingProbSignal, 0);
             }
-
 
             // RFC 8257 3.3.4
             if (state->snd_una > state->dctcp_windEnd) {

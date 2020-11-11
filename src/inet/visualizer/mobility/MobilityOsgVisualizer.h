@@ -32,7 +32,8 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API MobilityOsgVisualization : public MobilityVisualization {
+    class INET_API MobilityOsgVisualization : public MobilityVisualization
+    {
       public:
         osg::Geode *trail;
 
@@ -50,7 +51,7 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
     virtual MobilityOsgVisualization *getMobilityVisualization(const IMobility *mobility) const;
     virtual void setMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *entry);
     virtual void removeMobilityVisualization(const IMobility *mobility);
-    virtual MobilityOsgVisualization* ensureMobilityVisualization(IMobility *mobility);
+    virtual MobilityOsgVisualization *ensureMobilityVisualization(IMobility *mobility);
 
     virtual void extendMovementTrail(osg::Geode *trail, const Coord& position) const;
 

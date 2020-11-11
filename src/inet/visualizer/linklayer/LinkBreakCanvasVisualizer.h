@@ -28,7 +28,8 @@ namespace visualizer {
 class INET_API LinkBreakCanvasVisualizer : public LinkBreakVisualizerBase
 {
   protected:
-    class INET_API LinkBreakCanvasVisualization : public LinkBreakVisualization {
+    class INET_API LinkBreakCanvasVisualization : public LinkBreakVisualization
+    {
       public:
         cIconFigure *figure = nullptr;
 

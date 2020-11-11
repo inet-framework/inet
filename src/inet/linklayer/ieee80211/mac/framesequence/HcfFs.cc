@@ -84,3 +84,4 @@ bool HcfFs::hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceCo
 
 } // namespace ieee80211
 } // namespace inet
+

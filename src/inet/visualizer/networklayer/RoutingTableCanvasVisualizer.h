@@ -29,7 +29,8 @@ namespace visualizer {
 class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
 {
   protected:
-    class INET_API RouteCanvasVisualization : public RouteVisualization {
+    class INET_API RouteCanvasVisualization : public RouteVisualization
+    {
       public:
         LabeledLineFigure *figure = nullptr;
 

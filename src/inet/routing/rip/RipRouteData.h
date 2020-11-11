@@ -28,7 +28,7 @@ namespace inet {
 
 class INET_API RipRoute : public cObject
 {
-public:
+  public:
     enum RouteType {
         RIP_ROUTE_RTE,          // route learned from a RipEntry
         RIP_ROUTE_STATIC,       // static route
@@ -37,7 +37,7 @@ public:
         RIP_ROUTE_INTERFACE     // route belongs to a local interface
     };
 
-protected:
+  protected:
     IRoute *route = nullptr;    // the route in the host routing table that is associated with this route, may be nullptr if deleted
     RouteType type = static_cast<RouteType>(-1);    // the type of the route
 
@@ -53,7 +53,7 @@ protected:
     uint16_t tag = 0;                 // route tag (only for REDISTRIBUTE routes)
     simtime_t lastInvalid = 0;      // time of the last invalidation
 
-public:
+  public:
     RipRoute(IRoute *route, RouteType type, int metric, uint16_t routeTag)
     {
         this->route = route;

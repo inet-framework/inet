@@ -21,7 +21,7 @@ namespace inet {
 
 namespace visualizer {
 
-void QueueFilter::setPattern(const char* pattern)
+void QueueFilter::setPattern(const char *pattern)
 {
     matchExpression.setPattern(pattern, true, true, true);
 }
@@ -36,3 +36,4 @@ bool QueueFilter::matches(const queueing::IPacketQueue *queue) const
 } // namespace visualizer
 
 } // namespace inet
+

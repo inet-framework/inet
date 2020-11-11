@@ -18,7 +18,6 @@
 #ifndef __INET_BGPHEADERSERIALIZER_H
 #define __INET_BGPHEADERSERIALIZER_H
 
-
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
@@ -39,7 +38,6 @@ class INET_API BgpHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace bgp
 } // namespace inet
-
 
 #endif
 

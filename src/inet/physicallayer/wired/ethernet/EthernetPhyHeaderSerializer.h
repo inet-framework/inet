@@ -42,7 +42,7 @@ class INET_API EthernetPhyHeaderBaseSerializer : public FieldsChunkSerializer
  */
 class INET_API EthernetPhyHeaderSerializer : public FieldsChunkSerializer
 {
-  friend EthernetPhyHeaderBaseSerializer;
+    friend EthernetPhyHeaderBaseSerializer;
 
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
@@ -57,7 +57,7 @@ class INET_API EthernetPhyHeaderSerializer : public FieldsChunkSerializer
  */
 class INET_API EthernetFragmentPhyHeaderSerializer : public FieldsChunkSerializer
 {
-  friend EthernetPhyHeaderBaseSerializer;
+    friend EthernetPhyHeaderBaseSerializer;
 
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;

@@ -82,19 +82,19 @@ class INET_API IntervalTree
 
       public:
         /// @brief Print the interval node information: set left = nil and right = root
-        void print(Node* left, Node* right) const;
+        void print(Node *left, Node *right) const;
 
         /// @brief Create an empty node
         Node();
 
         /// @brief Create an node storing the interval
-        Node(const Interval* new_interval);
+        Node(const Interval *new_interval);
 
         ~Node();
 
       protected:
         /// @brief interval stored in the node
-        const Interval* stored_interval = nullptr;
+        const Interval *stored_interval = nullptr;
 
         simtime_t key;
 
@@ -105,11 +105,11 @@ class INET_API IntervalTree
         /// @brief red or black node: if red = false then the node is black
         bool red = false;
 
-        Node* left = nullptr;
+        Node *left = nullptr;
 
-        Node* right = nullptr;
+        Node *right = nullptr;
 
-        Node* parent = nullptr;
+        Node *parent = nullptr;
     };
 
     /// @brief Class describes the information needed when we take the
@@ -118,7 +118,7 @@ class INET_API IntervalTree
     struct it_recursion_node
     {
       public:
-        Node* start_node = nullptr;
+        Node *start_node = nullptr;
 
         unsigned int parent_index = 0;
 
@@ -133,55 +133,55 @@ class INET_API IntervalTree
     void print() const;
 
     /// @brief Delete one node of the interval tree
-    const Interval* deleteNode(Node* node);
+    const Interval *deleteNode(Node *node);
 
     /// @brief delete node stored a given interval
-    void deleteNode(const Interval* ivl);
+    void deleteNode(const Interval *ivl);
 
     /// @brief Insert one node of the interval tree
-    Node* insert(const Interval* new_interval);
+    Node *insert(const Interval *new_interval);
 
-    Node* getMinimum(Node *node) const;
+    Node *getMinimum(Node *node) const;
 
-    Node* getMaximum(Node *node) const;
+    Node *getMaximum(Node *node) const;
 
     /// @brief get the predecessor of a given node
-    Node* getPredecessor(Node* node) const;
+    Node *getPredecessor(Node *node) const;
 
     /// @brief Get the successor of a given node
-    Node* getSuccessor(Node* node) const;
+    Node *getSuccessor(Node *node) const;
 
     /// @brief Return result for a given query
-    std::deque<const Interval*> query(simtime_t low, simtime_t high);
+    std::deque<const Interval *> query(simtime_t low, simtime_t high);
 
   protected:
-    Node* root = nullptr;
+    Node *root = nullptr;
 
-    Node* nil = nullptr;
+    Node *nil = nullptr;
 
     /// @brief left rotation of tree node
-    void leftRotate(Node* node);
+    void leftRotate(Node *node);
 
     /// @brief right rotation of tree node
-    void rightRotate(Node* node);
+    void rightRotate(Node *node);
 
     /// @brief recursively insert a node
-    void recursiveInsert(Node* node);
+    void recursiveInsert(Node *node);
 
     /// @brief recursively print a subtree
-    void recursivePrint(Node* node) const;
+    void recursivePrint(Node *node) const;
 
     /// @brief recursively find the node corresponding to the interval
-    Node* recursiveSearch(Node* node, const Interval* ivl) const;
+    Node *recursiveSearch(Node *node, const Interval *ivl) const;
 
     /// @brief Travels up to the root fixing the max_high fields after an insertion or deletion
-    void fixupMaxHigh(Node* node);
+    void fixupMaxHigh(Node *node);
 
-    void deleteFixup(Node* node);
+    void deleteFixup(Node *node);
 
   private:
     unsigned int recursion_node_stack_size = 0;
-    it_recursion_node* recursion_node_stack = nullptr;
+    it_recursion_node *recursion_node_stack = nullptr;
     unsigned int current_parent = 0;
     unsigned int recursion_node_stack_top = 0;
 };

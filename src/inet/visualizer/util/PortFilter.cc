@@ -21,7 +21,7 @@ namespace inet {
 
 namespace visualizer {
 
-void PortFilter::setPattern(const char* pattern)
+void PortFilter::setPattern(const char *pattern)
 {
     matchExpression.setPattern(pattern, false, true, true);
 }
@@ -37,3 +37,4 @@ bool PortFilter::matches(int value) const
 } // namespace visualizer
 
 } // namespace inet
+

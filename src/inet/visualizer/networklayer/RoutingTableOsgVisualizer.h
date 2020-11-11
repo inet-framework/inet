@@ -29,7 +29,8 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API RouteOsgVisualization : public RouteVisualization {
+    class INET_API RouteOsgVisualization : public RouteVisualization
+    {
       public:
         osg::Node *node = nullptr;
 
@@ -52,7 +53,7 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual const RouteVisualization *createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const override { return nullptr; }
-    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override { }
+    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override {}
 
 #endif // ifdef WITH_OSG
 };

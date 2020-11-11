@@ -51,7 +51,7 @@ bool LibTable::resolveLabel(std::string inInterface, int inLabel,
 {
     bool any = (inInterface.length() == 0);
 
-    for (auto & elem : lib) {
+    for (auto& elem : lib) {
         if (!any && elem.inInterface != inInterface)
             continue;
 
@@ -81,7 +81,7 @@ int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
         return newItem.inLabel;
     }
     else {
-        for (auto & elem : lib) {
+        for (auto& elem : lib) {
             if (elem.inLabel != inLabel)
                 continue;
 
@@ -116,7 +116,7 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
     ASSERT(!strcmp(libtable->getTagName(), "libtable"));
     checkTags(libtable, "libentry");
     cXMLElementList list = libtable->getChildrenByTagName("libentry");
-    for (auto & elem : list) {
+    for (auto& elem : list) {
         const cXMLElement& entry = *elem;
 
         checkTags(&entry, "inLabel inInterface outLabel outInterface color");
@@ -128,7 +128,7 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
         newItem.color = getParameterIntValue(&entry, "color", 0);
 
         cXMLElementList ops = getUniqueChild(&entry, "outLabel")->getChildrenByTagName("op");
-        for (auto & ops_oit : ops) {
+        for (auto& ops_oit : ops) {
             const cXMLElement& op = *ops_oit;
             const char *val = op.getAttribute("value");
             const char *code = op.getAttribute("code");

@@ -56,13 +56,12 @@ bool AsExternalLsa::differsFrom(const Ospfv2AsExternalLsa *asExternalLSA) const
                 const auto& thisTOSInfo = thisContents.getExternalTOSInfo(i);
                 const auto& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
 
-                if (
-                        (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
-                        (thisTOSInfo.routeCost != lsaTOSInfo.routeCost) ||
-                        (thisTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
-                        (thisTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag) ||
-                        (thisTOSInfo.tos != lsaTOSInfo.tos)
-                        ) {
+                if ((thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
+                    (thisTOSInfo.routeCost != lsaTOSInfo.routeCost) ||
+                    (thisTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
+                    (thisTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag) ||
+                    (thisTOSInfo.tos != lsaTOSInfo.tos))
+                {
                     differentBody = true;
                     break;
                 }

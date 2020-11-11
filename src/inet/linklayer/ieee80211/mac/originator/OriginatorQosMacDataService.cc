@@ -31,14 +31,14 @@ Define_Module(OriginatorQosMacDataService);
 
 void OriginatorQosMacDataService::initialize()
 {
-    aMsduAggregationPolicy = dynamic_cast<IMsduAggregationPolicy*>(getSubmodule("msduAggregationPolicy"));
+    aMsduAggregationPolicy = dynamic_cast<IMsduAggregationPolicy *>(getSubmodule("msduAggregationPolicy"));
     if (aMsduAggregationPolicy)
         aMsduAggregation = new MsduAggregation();
-    aMpduAggregationPolicy = dynamic_cast<IMpduAggregationPolicy*>(getSubmodule("mpduAggregationPolicy"));
+    aMpduAggregationPolicy = dynamic_cast<IMpduAggregationPolicy *>(getSubmodule("mpduAggregationPolicy"));
     if (aMpduAggregationPolicy)
         aMpduAggregation = new MpduAggregation();
     sequenceNumberAssigment = new QoSSequenceNumberAssignment();
-    fragmentationPolicy = dynamic_cast<IFragmentationPolicy*>(getSubmodule("fragmentationPolicy"));
+    fragmentationPolicy = dynamic_cast<IFragmentationPolicy *>(getSubmodule("fragmentationPolicy"));
     fragmentation = new Fragmentation();
 }
 
@@ -112,7 +112,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
         if (fragmentationPolicy)
             fragments = fragmentIfNeeded(packet);
         if (!fragments)
-            fragments = new std::vector<Packet *>({packet});
+            fragments = new std::vector<Packet *>({ packet });
         // if (mpduEncryptionAndIntegrity)
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)
@@ -136,3 +136,4 @@ OriginatorQosMacDataService::~OriginatorQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

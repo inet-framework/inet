@@ -75,7 +75,7 @@ Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
 
 Ospfv2Interface::~Ospfv2Interface()
 {
-    if(parentArea) {
+    if (parentArea) {
         MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
         messageHandler->clearTimer(helloTimer);
         messageHandler->clearTimer(waitTimer);
@@ -151,9 +151,9 @@ void Ospfv2Interface::setIfIndex(IInterfaceTable *ift, int index)
 
 void Ospfv2Interface::changeState(Ospfv2InterfaceState *newState, Ospfv2InterfaceState *currentState)
 {
-    EV_INFO << "Changing the state of interface " << this->getIfIndex() <<
-            " from '" << getStateString(currentState->getState()) <<
-            "' to '" << getStateString(newState->getState()) << "'" << std::endl;
+    EV_INFO << "Changing the state of interface " << this->getIfIndex()
+            << " from '" << getStateString(currentState->getState())
+            << "' to '" << getStateString(newState->getState()) << "'" << std::endl;
 
     if (previousState != nullptr) {
         delete previousState;
@@ -570,8 +570,7 @@ void Ospfv2Interface::sendDelayedAcknowledgements()
     MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
     B maxPacketSize = ((IPv4_MAX_HEADER_LENGTH + OSPFv2_HEADER_LENGTH + OSPFv2_LSA_HEADER_LENGTH) > B(mtu)) ? IPV4_DATAGRAM_LENGTH : B(mtu);
 
-    for (auto & elem : delayedAcknowledgements)
-    {
+    for (auto& elem : delayedAcknowledgements) {
         int ackCount = elem.second.size();
         if (ackCount > 0) {
             while (!(elem.second.empty())) {
@@ -641,37 +640,37 @@ void Ospfv2Interface::ageTransmittedLsaLists()
 std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf)
 {
     std::string neighbors = "";
-    for(auto &neighbor : intf.neighboringRoutersByID) {
+    for (auto& neighbor : intf.neighboringRoutersByID) {
         std::string neighborState = Neighbor::getStateString((neighbor.second)->getState());
         neighbors = neighbors + (neighbor.first).str() + "(" + neighborState + ") ";
     }
 
     return stream << "name: " << intf.getInterfaceName() << " "
-            << "index: " << intf.ifIndex << " "
-            << "type: '" << intf.getTypeString(intf.interfaceType) << "' "
-            << "MTU: " << intf.mtu << " "
-            << "state: '" << intf.getStateString(intf.state->getState()) << "' "
-            << "mode: '" << intf.getModeString(intf.interfaceMode) << "' "
-            << "cost: " << intf.interfaceOutputCost << " "
+                  << "index: " << intf.ifIndex << " "
+                  << "type: '" << intf.getTypeString(intf.interfaceType) << "' "
+                  << "MTU: " << intf.mtu << " "
+                  << "state: '" << intf.getStateString(intf.state->getState()) << "' "
+                  << "mode: '" << intf.getModeString(intf.interfaceMode) << "' "
+                  << "cost: " << intf.interfaceOutputCost << " "
 
-            << "area: " << intf.areaID.str(false) << " "
-            << "transitArea: " << intf.transitAreaID.str(false) << " "
+                  << "area: " << intf.areaID.str(false) << " "
+                  << "transitArea: " << intf.transitAreaID.str(false) << " "
 
-            << "helloInterval: " << intf.helloInterval << " "
-            << "pollInterval: " << intf.pollInterval << " "
-            << "routerDeadInterval: " << intf.routerDeadInterval << " "
-            << "retransmissionInterval: " << intf.retransmissionInterval << " "
+                  << "helloInterval: " << intf.helloInterval << " "
+                  << "pollInterval: " << intf.pollInterval << " "
+                  << "routerDeadInterval: " << intf.routerDeadInterval << " "
+                  << "retransmissionInterval: " << intf.retransmissionInterval << " "
 
-            << "acknowledgementDelay: " << intf.acknowledgementDelay << " "
-            << "interfaceTransmissionDelay: " << intf.interfaceTransmissionDelay << " "
+                  << "acknowledgementDelay: " << intf.acknowledgementDelay << " "
+                  << "interfaceTransmissionDelay: " << intf.interfaceTransmissionDelay << " "
 
-            << "neighboringRouters: " << ((neighbors == "") ? "<none>(down)" : neighbors) << " "
+                  << "neighboringRouters: " << ((neighbors == "") ? "<none>(down)" : neighbors) << " "
 
-            << "routerPriority: " << (int)(intf.routerPriority) << " "
-            << "designatedRouterID: " << intf.designatedRouter.routerID << " "
-            << "designatedRouterInterface: " << intf.designatedRouter.ipInterfaceAddress << " "
-            << "backupDesignatedRouterID: " << intf.backupDesignatedRouter.routerID << " "
-            << "backupDesignatedRouterInterface: " << intf.backupDesignatedRouter.ipInterfaceAddress;
+                  << "routerPriority: " << (int)(intf.routerPriority) << " "
+                  << "designatedRouterID: " << intf.designatedRouter.routerID << " "
+                  << "designatedRouterInterface: " << intf.designatedRouter.ipInterfaceAddress << " "
+                  << "backupDesignatedRouterID: " << intf.backupDesignatedRouter.routerID << " "
+                  << "backupDesignatedRouterInterface: " << intf.backupDesignatedRouter.ipInterfaceAddress;
 }
 
 } // namespace ospfv2

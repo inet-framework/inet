@@ -390,7 +390,7 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
     auto ethHeader = packet->peekAtFront<EthernetMacHeader>();          //FIXME can I use any flags?
     const auto& ethTrailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);          //FIXME can I use any flags?
 
-    switch(ethTrailer->getFcsMode()) {
+    switch (ethTrailer->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
             break;
         case FCS_DECLARED_INCORRECT:
@@ -406,7 +406,7 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
             ethBytes->copyToBuffer(buffer, bufferLength);
             // 2. compute the FCS
             auto computedFcs = ethernetCRC(buffer, bufferLength);
-            delete [] buffer;
+            delete[] buffer;
             isFcsBad = (computedFcs != ethTrailer->getFcs());      //FIXME how to check fcs?
             if (isFcsBad)
                 return false;
@@ -418,7 +418,7 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
     if (isIeee8023Header(*ethHeader)) {
         b payloadLength = B(ethHeader->getTypeOrLength());
 
-        return (payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
+        return payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength());
     }
     return true;
 }
@@ -526,7 +526,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected) {
         // Check valid speeds
-        for (auto & etherDescr : etherDescrs) {
+        for (auto& etherDescr : etherDescrs) {
             if (txRate == etherDescr.txrate) {
                 curEtherDescr = &(etherDescr);
                 if (networkInterface) {
@@ -660,26 +660,25 @@ void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
         packet->insertAtBack(ethPadding);
     }
 
-    switch(ethFcs->getFcsMode()) {
+    switch (ethFcs->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
             ethFcs->setFcs(0xC00DC00DL);
             break;
         case FCS_DECLARED_INCORRECT:
             ethFcs->setFcs(0xBAADBAADL);
             break;
-        case FCS_COMPUTED:
-            { // calculate FCS
-                auto ethBytes = packet->peekDataAsBytes();
-                auto bufferLength = B(ethBytes->getChunkLength()).get();
-                auto buffer = new uint8_t[bufferLength];
-                // 1. fill in the data
-                ethBytes->copyToBuffer(buffer, bufferLength);
-                // 2. compute the FCS
-                auto computedFcs = ethernetCRC(buffer, bufferLength);
-                delete [] buffer;
-                ethFcs->setFcs(computedFcs);
-            }
+        case FCS_COMPUTED: { // calculate FCS
+            auto ethBytes = packet->peekDataAsBytes();
+            auto bufferLength = B(ethBytes->getChunkLength()).get();
+            auto buffer = new uint8_t[bufferLength];
+            // 1. fill in the data
+            ethBytes->copyToBuffer(buffer, bufferLength);
+            // 2. compute the FCS
+            auto computedFcs = ethernetCRC(buffer, bufferLength);
+            delete[] buffer;
+            ethFcs->setFcs(computedFcs);
             break;
+        }
         default:
             throw cRuntimeError("Unknown FCS mode: %d", (int)(ethFcs->getFcsMode()));
     }
@@ -687,14 +686,14 @@ void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
     packet->insertAtBack(ethFcs);
 }
 
-void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration)
+void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t duration)
 {
     ASSERT(duration <= signal->getDuration());
     if (duration == signal->getDuration())
         return;
     signal->setDuration(duration);
     int64_t newBitLength = duration.dbl() * signal->getBitrate();
-    if (auto packet = check_and_cast_nullable<Packet*>(signal->decapsulate())) {
+    if (auto packet = check_and_cast_nullable<Packet *>(signal->decapsulate())) {
         //TODO: removed length calculation based on the PHY layer (parallel bits, bit order, etc.)
         if (newBitLength < packet->getBitLength()) {
             packet->trimFront();
@@ -707,7 +706,6 @@ void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t
     signal->setBitError(true);
     signal->setBitLength(newBitLength);
 }
-
 
 } // namespace inet
 

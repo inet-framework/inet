@@ -34,8 +34,8 @@ class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListen
         const cModule *networkNode;
 
       public:
-        NetworkNodeVisualization(const cModule *networkNode) : networkNode(networkNode) { }
-        virtual ~NetworkNodeVisualization() { }
+        NetworkNodeVisualization(const cModule *networkNode) : networkNode(networkNode) {}
+        virtual ~NetworkNodeVisualization() {}
     };
 
   protected:

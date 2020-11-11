@@ -200,7 +200,7 @@ void Ieee80211MgmtSta::handleCommand(int msgkind, cObject *ctrl)
 
 Ieee80211MgmtSta::ApInfo *Ieee80211MgmtSta::lookupAP(const MacAddress& address)
 {
-    for (auto & elem : apList)
+    for (auto& elem : apList)
         if (elem.address == address)
             return &(elem);
 
@@ -209,7 +209,7 @@ Ieee80211MgmtSta::ApInfo *Ieee80211MgmtSta::lookupAP(const MacAddress& address)
 
 void Ieee80211MgmtSta::clearAPList()
 {
-    for (auto & elem : apList)
+    for (auto& elem : apList)
         if (elem.authTimeoutMsg)
             cancelAndDelete(elem.authTimeoutMsg);
 
@@ -343,7 +343,6 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     if (scanning.channelList.empty())
         for (int i = 0; i < numChannels; i++)
             scanning.channelList.push_back(i);
-
 
     // start scanning
     if (scanning.activeScan)

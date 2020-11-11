@@ -34,7 +34,8 @@ namespace visualizer {
 class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API RouteVisualization : public LineManager::ModuleLine {
+    class INET_API RouteVisualization : public LineManager::ModuleLine
+    {
       public:
         mutable int numRoutes = 1;
         const Ipv4Route *route = nullptr;
@@ -44,12 +45,13 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
         virtual ~RouteVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public StringFormat::IDirectiveResolver
+    {
       protected:
         const Ipv4Route *route = nullptr;
 
       public:
-        DirectiveResolver(const Ipv4Route *route) : route(route) { }
+        DirectiveResolver(const Ipv4Route *route) : route(route) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

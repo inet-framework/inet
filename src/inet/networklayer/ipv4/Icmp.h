@@ -40,6 +40,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
   protected:
     std::set<int> transportProtocols;    // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
+
   protected:
     virtual void processICMPMessage(Packet *);
     virtual void errorOut(Packet *);

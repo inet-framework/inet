@@ -1,4 +1,3 @@
-
 #include "inet/routing/ospfv3/process/Ospfv3Instance.h"
 
 #include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
@@ -6,12 +5,12 @@
 namespace inet {
 namespace ospfv3 {
 
-Ospfv3Instance::Ospfv3Instance(int instanceId, Ospfv3Process* parentProcess, int addressFamily)
+Ospfv3Instance::Ospfv3Instance(int instanceId, Ospfv3Process *parentProcess, int addressFamily)
 {
     this->instanceID = instanceId;
-    this->containingProcess=parentProcess;
+    this->containingProcess = parentProcess;
     this->addressFamily = addressFamily;
-    this->containingModule=findContainingNode(this->containingProcess);
+    this->containingModule = findContainingNode(this->containingProcess);
     this->ift = check_and_cast<IInterfaceTable *>(containingModule->getSubmodule("interfaceTable"));
 }
 
@@ -25,45 +24,45 @@ Ospfv3Instance::~Ospfv3Instance()
 
 bool Ospfv3Instance::hasArea(Ipv4Address areaId)
 {
-    std::map<Ipv4Address, Ospfv3Area*>::iterator areaIt = this->areasById.find(areaId);
+    std::map<Ipv4Address, Ospfv3Area *>::iterator areaIt = this->areasById.find(areaId);
     if (areaIt == this->areasById.end())
         return false;
 
     return true;
 }//hasArea
 
-void Ospfv3Instance::addArea(Ospfv3Area* newArea)
+void Ospfv3Instance::addArea(Ospfv3Area *newArea)
 {
     this->areas.push_back(newArea);
-    this->areasById[newArea->getAreaID()]=newArea;
+    this->areasById[newArea->getAreaID()] = newArea;
 }//addArea
 
-Ospfv3Area* Ospfv3Instance::getAreaById(Ipv4Address areaId)
+Ospfv3Area *Ospfv3Instance::getAreaById(Ipv4Address areaId)
 {
-    std::map<Ipv4Address, Ospfv3Area*>::iterator areaIt = this->areasById.find(areaId);
+    std::map<Ipv4Address, Ospfv3Area *>::iterator areaIt = this->areasById.find(areaId);
     if (areaIt == this->areasById.end())
         return nullptr;
 
     return areaIt->second;
 }//getAreaById
 
-void Ospfv3Instance::processPacket(Packet* pk)
+void Ospfv3Instance::processPacket(Packet *pk)
 {
     const auto& packet = pk->peekAtFront<Ospfv3Packet>();
     EV_INFO << "Process " << this->containingProcess->getProcessID() << " received packet: (" << packet->getClassName() << ")" << packet->getName() << "\n";
-    if (packet->getVersion()!=3) {
+    if (packet->getVersion() != 3) {
         delete pk;
         return;
     }
 
     int intfId = pk->getTag<InterfaceInd>()->getInterfaceId();
     Ipv4Address areaId = packet->getAreaID();
-    Ospfv3Area* area = this->getAreaById(packet->getAreaID());
-    if (area!=nullptr) {
+    Ospfv3Area *area = this->getAreaById(packet->getAreaID());
+    if (area != nullptr) {
         Ospfv3Interface *intf = area->getInterfaceById(intfId);
 
         if (intf == nullptr) {
-            EV_DEBUG <<"Interface is null in instance::processPacket\n";
+            EV_DEBUG << "Interface is null in instance::processPacket\n";
             //it must be the backbone area and...
             if (areaId == Ipv4Address::UNSPECIFIED_ADDRESS) {
                 if (this->getAreaCount() > 1) {
@@ -88,65 +87,61 @@ void Ospfv3Instance::processPacket(Packet* pk)
             }
         }
         if (intf != nullptr) {
-            Ipv6Address destinationAddress =  pk->getTag<L3AddressInd>()->getDestAddress().toIpv6();
+            Ipv6Address destinationAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIpv6();
             Ipv6Address allDRouters = Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
             Ospfv3Interface::Ospfv3InterfaceFaState interfaceState = intf->getState();
 
             // if destination address is ALL_D_ROUTERS the receiving interface must be in DesignatedRouter or Backup state
             if (
-                    ((destinationAddress == allDRouters) &&
-                            (
-                                    (interfaceState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED) ||
-                                    (interfaceState == Ospfv3Interface::INTERFACE_STATE_BACKUP)
-                            )
-                    ) ||
-                    (destinationAddress != allDRouters)
-            )
+                ((destinationAddress == allDRouters) &&
+                 ((interfaceState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED) ||
+                  (interfaceState == Ospfv3Interface::INTERFACE_STATE_BACKUP))) ||
+                 (destinationAddress != allDRouters))
             {
                 // packet authentication
                 ospf::OspfPacketType packetType = static_cast<ospf::OspfPacketType>(packet->getType());
-                Ospfv3Neighbor* neighbor = nullptr;
+                Ospfv3Neighbor *neighbor = nullptr;
 
                 // all packets except HelloPackets are sent only along adjacencies, so a Neighbor must exist
                 if (packetType != ospf::OspfPacketType::HELLO_PACKET)
                     neighbor = intf->getNeighborById(packet->getRouterID());
 
                 switch (packetType) {
-                case ospf::OspfPacketType::HELLO_PACKET:
-                    intf->processHelloPacket(pk);
-                    break;
+                    case ospf::OspfPacketType::HELLO_PACKET:
+                        intf->processHelloPacket(pk);
+                        break;
 
-                case ospf::OspfPacketType::DATABASE_DESCRIPTION_PACKET:
-                    if (neighbor != nullptr) {
-                        EV_DEBUG << "Instance is sending packet to interface\n";
-                        intf->processDDPacket(pk);
-                    }
-                    break;
+                    case ospf::OspfPacketType::DATABASE_DESCRIPTION_PACKET:
+                        if (neighbor != nullptr) {
+                            EV_DEBUG << "Instance is sending packet to interface\n";
+                            intf->processDDPacket(pk);
+                        }
+                        break;
 
-                case ospf::OspfPacketType::LINKSTATE_REQUEST_PACKET:
-                    if (neighbor != nullptr) {
-                        intf->processLSR(pk, neighbor);
-                    }
-                    break;
+                    case ospf::OspfPacketType::LINKSTATE_REQUEST_PACKET:
+                        if (neighbor != nullptr) {
+                            intf->processLSR(pk, neighbor);
+                        }
+                        break;
 
-                case ospf::OspfPacketType::LINKSTATE_UPDATE_PACKET:
-                    if (neighbor != nullptr) {
-                        intf->processLSU(pk, neighbor);
-                    }
-                    break;
+                    case ospf::OspfPacketType::LINKSTATE_UPDATE_PACKET:
+                        if (neighbor != nullptr) {
+                            intf->processLSU(pk, neighbor);
+                        }
+                        break;
 
-                case ospf::OspfPacketType::LINKSTATE_ACKNOWLEDGEMENT_PACKET:
-                    if (neighbor != nullptr) {
-                        intf->processLSAck(pk, neighbor);
-                    }
-                    break;
+                    case ospf::OspfPacketType::LINKSTATE_ACKNOWLEDGEMENT_PACKET:
+                        if (neighbor != nullptr) {
+                            intf->processLSAck(pk, neighbor);
+                        }
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
                 }
             }
             else {
-                delete(pk);
+                delete pk;
             }
         }
     }
@@ -162,7 +157,7 @@ void Ospfv3Instance::removeFromAllRetransmissionLists(LSAKeyType lsaKey)
 
 void Ospfv3Instance::init()
 {
-    for (auto it = this->areas.begin(); it!=this->areas.end(); it++)
+    for (auto it = this->areas.begin(); it != this->areas.end(); it++)
         (*it)->init();
 
     WATCH_PTRVECTOR(this->areas);
@@ -171,7 +166,7 @@ void Ospfv3Instance::init()
 void Ospfv3Instance::debugDump()
 {
     EV_DEBUG << "Instance " << this->getInstanceID() << "\n";
-    for (auto it=this->areas.begin();it!=this->areas.end(); it++) {
+    for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
         EV_DEBUG << "\tArea id " << (*it)->getAreaID() << " has these interfaces:\n";
         (*it)->debugDump();
     }
@@ -180,7 +175,7 @@ void Ospfv3Instance::debugDump()
 Ipv4Address Ospfv3Instance::getNewInterAreaPrefixLinkStateID()
 {
     Ipv4Address currIP = this->interAreaPrefixLsID;
-    int newIP = currIP.getInt()+1;
+    int newIP = currIP.getInt() + 1;
     this->interAreaPrefixLsID = Ipv4Address(newIP);
     return currIP;
 }
@@ -188,7 +183,7 @@ Ipv4Address Ospfv3Instance::getNewInterAreaPrefixLinkStateID()
 void Ospfv3Instance::subtractInterAreaPrefixLinkStateID()
 {
     Ipv4Address currIP = this->interAreaPrefixLsID;
-    int newIP = currIP.getInt()-1;
+    int newIP = currIP.getInt() - 1;
     this->interAreaPrefixLsID = Ipv4Address(newIP);
 }
 
@@ -205,16 +200,16 @@ std::string Ospfv3Instance::detailedInfo() const
         out << "IPv6 (router-id " << routerID << ")\n\n";
 
     out << "Neighbor ID\tPri\tState\t\tDead Time\tInterface ID\tInterface\n";
-    for (auto it=this->areas.begin(); it!=this->areas.end(); it++) {
+    for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
         int intfCount = (*it)->getInterfaceCount();
-        for (int i=0; i<intfCount; i++) {
-            Ospfv3Interface* intf = (*it)->getInterface(i);
+        for (int i = 0; i < intfCount; i++) {
+            Ospfv3Interface *intf = (*it)->getInterface(i);
             int neiCount = intf->getNeighborCount();
-            for (int n=0; n<neiCount; n++) {
-                Ospfv3Neighbor* neighbor = intf->getNeighbor(n);
+            for (int n = 0; n < neiCount; n++) {
+                Ospfv3Neighbor *neighbor = intf->getNeighbor(n);
                 out << neighbor->getNeighborID() << "\t";
                 out << neighbor->getNeighborPriority() << "\t";
-                switch(neighbor->getState()) {
+                switch (neighbor->getState()) {
                     case Ospfv3Neighbor::DOWN_STATE:
                         out << "DOWN\t\t";
                         break;
@@ -259,7 +254,7 @@ std::string Ospfv3Instance::detailedInfo() const
                 int dead = intf->getDeadInterval() - ((int)simTime().dbl() - neighbor->getLastHelloTime());
                 if (dead < 0)
                     dead = 0;
-                out << dead << "\t\t";//"00:00:40\t\t";
+                out << dead << "\t\t"; //"00:00:40\t\t";
                 out << neighbor->getNeighborInterfaceID() << "\t\t";
                 out << intf->getIntName() << "\n";
             }

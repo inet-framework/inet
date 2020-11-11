@@ -160,6 +160,7 @@ class INET_API TcpSocket : public ISocket
             delete packet;
             socketDataArrived(socket);
         }
+
     };
 
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
@@ -217,7 +218,7 @@ class INET_API TcpSocket : public ISocket
      */
     int getSocketId() const override { return connId; }
 
-    ChunkQueue *getReceiveQueue() { if (receiveQueue == nullptr) receiveQueue = new ChunkQueue(); return receiveQueue; }
+    ChunkQueue *getReceiveQueue() { if (receiveQueue == nullptr) receiveQueue = new ChunkQueue();return receiveQueue; }
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
@@ -234,7 +235,7 @@ class INET_API TcpSocket : public ISocket
      */
     static const char *stateName(TcpSocket::State state);
 
-    void setState(TcpSocket::State state) { sockstate = state; };
+    void setState(TcpSocket::State state) { sockstate = state; }
 
     /** @name Getter functions */
     //@{

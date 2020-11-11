@@ -20,7 +20,6 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/mpls/MplsPacket_m.h"
 
-
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::mpls, MplsProtocolDissector);

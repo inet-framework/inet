@@ -35,7 +35,8 @@ namespace visualizer {
 class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::NetworkNodeVisualization, public osg::PositionAttitudeTransform
 {
   protected:
-    class INET_API Annotation {
+    class INET_API Annotation
+    {
       public:
         osg::Node *node;
         osg::Vec3d size;
@@ -44,7 +45,6 @@ class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::N
       public:
         Annotation(osg::Node *node, osg::Vec3d size, double priority);
     };
-
 
   protected:
     osg::Vec3d size;

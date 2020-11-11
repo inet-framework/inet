@@ -113,6 +113,7 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     //INetworkSocket::ICallback:
     virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;
     virtual void socketClosed(INetworkSocket *socket) override;
+
   public:
     PingApp();
     virtual ~PingApp();

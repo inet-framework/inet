@@ -267,10 +267,7 @@ bool PatternMatcher::doMatch(const char *s, int k, int suffixlen)
                 if (suffixlen > 0 && k == (int)pattern.size() - 2)
                     len -= suffixlen;
                 // compare
-                if (iscasesensitive ?
-                    strncmp(s, e.literalstring.c_str(), len) :
-                    strncasecmp(s, e.literalstring.c_str(), len)
-                    )
+                if (iscasesensitive ? strncmp(s, e.literalstring.c_str(), len) : strncasecmp(s, e.literalstring.c_str(), len))
                     return false;
                 s += len;
                 break;
@@ -412,5 +409,6 @@ bool PatternMatcher::containsWildcards(const char *pattern)
            strchr(pattern, '\\') || strchr(pattern, '{') ||
            strstr(pattern, "..");
 }
-};
+
+} // namespace inet
 

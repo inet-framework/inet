@@ -32,9 +32,9 @@
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
 #ifdef __linux__
-#define UI_REFRESH_TIME 100000 /* refresh time of the UI in us */
+#define UI_REFRESH_TIME    100000 /* refresh time of the UI in us */
 #else
-#define UI_REFRESH_TIME 500
+#define UI_REFRESH_TIME    500
 #endif
 
 namespace inet {
@@ -143,8 +143,7 @@ int RealTimeScheduler::receiveUntil(int64_t targetTime)
     // in order to keep UI responsiveness by invoking getEnvir()->idle()
     int64_t curTime = opp_get_monotonic_clock_nsecs();
 
-    while ((targetTime - curTime) >= 2000000 || (targetTime - curTime) >= 2*UI_REFRESH_TIME)
-    {
+    while ((targetTime - curTime) >= 2000000 || (targetTime - curTime) >= 2 * UI_REFRESH_TIME) {
         if (receiveWithTimeout(UI_REFRESH_TIME))
             return 1;
         if (getEnvir()->idle())
@@ -184,8 +183,7 @@ cEvent *RealTimeScheduler::takeNextEvent()
     // if needed, wait until that time arrives
     int64_t curTime = opp_get_monotonic_clock_nsecs();
 
-    if (targetTime > curTime)
-    {
+    if (targetTime > curTime) {
         int status = receiveUntil(targetTime);
         if (status == -1)
             return nullptr; // interrupted by user

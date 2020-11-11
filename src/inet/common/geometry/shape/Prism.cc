@@ -23,10 +23,8 @@ Prism::Prism(double height, const Polygon& base) :
     height(height),
     base(base)
 {
-    if (height > 0)
-    {
-        if (base.getPoints().size() >= 3)
-        {
+    if (height > 0) {
+        if (base.getPoints().size() >= 3) {
             genereateFaces();
             computeOutwardNormalVectors();
         }
@@ -41,7 +39,7 @@ Coord Prism::computeBoundingBoxSize() const
 {
     Coord min = base.getPoints()[0];
     Coord max = min;
-    for (const auto & elem : base.getPoints()) {
+    for (const auto& elem : base.getPoints()) {
         min = min.min(elem);
         max = max.max(elem);
     }
@@ -55,8 +53,7 @@ void Prism::genereateFaces()
     // TODO: Coord baseNormalUnitVector = base.getNormalUnitVector();
     const std::vector<Coord>& basePoints = base.getPoints();
     std::vector<Coord> translatedCopyPoints;
-    for (auto & basePoint : basePoints)
-    {
+    for (auto& basePoint : basePoints) {
         Coord point = basePoint;
         point.z += height;
         translatedCopyPoints.push_back(point);
@@ -64,13 +61,12 @@ void Prism::genereateFaces()
     Polygon translatedCopy(translatedCopyPoints);
     faces.push_back(translatedCopy);
     unsigned int basePointsSize = basePoints.size();
-    for (unsigned int i = 0; i < basePointsSize; i++)
-    {
+    for (unsigned int i = 0; i < basePointsSize; i++) {
         std::vector<Coord> facePoints;
         facePoints.push_back(basePoints[i]);
         facePoints.push_back(translatedCopyPoints[i]);
-        facePoints.push_back(translatedCopyPoints[(i+1) % basePointsSize]);
-        facePoints.push_back(basePoints[(i+1) % basePointsSize]);
+        facePoints.push_back(translatedCopyPoints[(i + 1) % basePointsSize]);
+        facePoints.push_back(basePoints[(i + 1) % basePointsSize]);
         Polygon face(facePoints);
         faces.push_back(face);
     }
@@ -83,7 +79,7 @@ Coord Prism::computeOutwardNormalVector(unsigned int faceId) const
     const std::vector<Coord>& testPoints = testFace.getPoints();
     // This is a good test point: for convex polygons, the centroid is always an interior point.
     Coord testCentroid;
-    for (auto & testPoint : testPoints)
+    for (auto& testPoint : testPoints)
         testCentroid += testPoint;
     testCentroid /= testPoints.size();
     Coord facePoint = face.getPoints()[0];
@@ -104,7 +100,7 @@ bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const Ro
 
 bool Prism::isVisibleFromView(unsigned int faceId, const RotationMatrix& viewRotation, const RotationMatrix& rotation) const
 {
-    Coord zNormal(0,0,1);
+    Coord zNormal(0, 0, 1);
     Coord rotatedFaceNormal = viewRotation.rotateVector(rotation.rotateVector(normalVectorsForFaces.at(faceId)));
     return rotatedFaceNormal * zNormal > 0;
 }
@@ -121,46 +117,39 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
     // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
     const auto& p0 = lineSegment.getPoint1();
     const auto& p1 = lineSegment.getPoint2();
-    if (p0 == p1)
-    {
+    if (p0 == p1) {
         normal1 = normal2 = Coord::NIL;
         return false;
     }
     Coord segmentDirection = p1 - p0;
     double tE = 0;
     double tL = 1;
-    for (unsigned int i = 0; i < faces.size(); i++)
-    {
+    for (unsigned int i = 0; i < faces.size(); i++) {
         const auto& face = faces[i];
         const auto& normalVec = normalVectorsForFaces[i];
         const std::vector<Coord>& pointList = face.getPoints();
         const auto& f0 = pointList[0];
         double N = (f0 - p0) * normalVec;
         double D = segmentDirection * normalVec;
-        if (D < 0)
-        {
+        if (D < 0) {
             double t = N / D;
-            if (t > tE)
-            {
+            if (t > tE) {
                 tE = t;
                 normal1 = normalVec;
                 if (tE > tL)
                     return false;
             }
         }
-        else if (D > 0)
-        {
+        else if (D > 0) {
             double t = N / D;
-            if (t < tL)
-            {
+            if (t < tL) {
                 tL = t;
                 normal2 = normalVec;
                 if (tL < tE)
                     return false;
             }
         }
-        else
-        {
+        else {
             if (N < 0)
                 return false;
         }
@@ -171,8 +160,7 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
         normal2 = Coord::NIL;
     intersection1 = p0 + segmentDirection * tE;
     intersection2 = p0 + segmentDirection * tL;
-    if (intersection1 == intersection2)
-    {
+    if (intersection1 == intersection2) {
         normal1 = normal2 = Coord::NIL;
         return false;
     }
@@ -181,10 +169,8 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
 
 void inet::Prism::setHeight(double height)
 {
-    if (height != this->height)
-    {
-        if (height > 0)
-        {
+    if (height != this->height) {
+        if (height > 0) {
             this->height = height;
             genereateFaces();
             computeOutwardNormalVectors();
@@ -196,10 +182,8 @@ void inet::Prism::setHeight(double height)
 
 void inet::Prism::setBase(const Polygon& base)
 {
-    if (base.getPoints() != this->base.getPoints())
-    {
-        if (base.getPoints().size() >= 3)
-        {
+    if (base.getPoints() != this->base.getPoints()) {
+        if (base.getPoints().size() >= 3) {
             this->base = base;
             genereateFaces();
             computeOutwardNormalVectors();
@@ -209,16 +193,14 @@ void inet::Prism::setBase(const Polygon& base)
     }
 }
 
-void Prism::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const
+void Prism::computeVisibleFaces(std::vector<std::vector<Coord>>& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const
 {
-    for (unsigned int i = 0; i < this->faces.size(); i++)
-    {
+    for (unsigned int i = 0; i < this->faces.size(); i++) {
         const Polygon& face = this->faces.at(i);
-        if (isVisibleFromView(i, viewRotation, rotation))
-        {
+        if (isVisibleFromView(i, viewRotation, rotation)) {
             const std::vector<Coord>& facePoints = face.getPoints();
             std::vector<Coord> points;
-            for (const auto & facePoint : facePoints)
+            for (const auto& facePoint : facePoints)
                 points.push_back(facePoint);
             faces.push_back(points);
         }
@@ -226,3 +208,4 @@ void Prism::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const R
 }
 
 } // namespace inet
+

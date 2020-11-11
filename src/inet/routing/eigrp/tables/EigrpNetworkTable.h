@@ -31,7 +31,7 @@ namespace eigrp {
 /**
  * Network for EIGRP routing.
  */
-template<typename IPAddress>
+template <typename IPAddress>
 class EigrpNetwork
 {
   protected:
@@ -40,8 +40,8 @@ class EigrpNetwork
     IPAddress mask;
 
   public:
-    EigrpNetwork(IPAddress &address, IPAddress &mask, int id) :
-            networkId(id), address(address), mask(mask) {}
+    EigrpNetwork(IPAddress& address, IPAddress& mask, int id) :
+        networkId(id), address(address), mask(mask) {}
 
     const IPAddress& getAddress() const {
         return address;
@@ -66,12 +66,13 @@ class EigrpNetwork
     void setNetworkId(int networkId) {
         this->networkId = networkId;
     }
+
 };
 
 /**
  * Table with networks for routing.
  */
-template<typename IPAddress>
+template <typename IPAddress>
 class EigrpNetworkTable : cObject
 {
   protected:
@@ -81,7 +82,7 @@ class EigrpNetworkTable : cObject
   public:
     static const int UNSPEC_NETID = 0;
 
-    EigrpNetworkTable() : networkCnt(1) { }
+    EigrpNetworkTable() : networkCnt(1) {}
     virtual ~EigrpNetworkTable();
 
     EigrpNetwork<IPAddress> *addNetwork(IPAddress& address, IPAddress& mask);
@@ -98,3 +99,4 @@ class EigrpNetworkTable : cObject
 } //eigrp
 } //inet
 #endif /* EIGRPNETWORKTABLE_H_ */
+

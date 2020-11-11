@@ -65,7 +65,7 @@ Neighbor::Neighbor(RouterId neighbor) :
 Neighbor::~Neighbor()
 {
     reset();
-    if(parentInterface && parentInterface->getArea()) {
+    if (parentInterface && parentInterface->getArea()) {
         MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(inactivityTimer);
         messageHandler->clearTimer(pollTimer);
@@ -82,9 +82,9 @@ Neighbor::~Neighbor()
 
 void Neighbor::changeState(NeighborState *newState, NeighborState *currentState)
 {
-    EV_INFO << "Changing neighborhood state of " << this->getNeighborID().str(false) <<
-            " from '" << getStateString(currentState->getState()) <<
-            "' to '" << getStateString(newState->getState()) << "'" << std::endl;
+    EV_INFO << "Changing neighborhood state of " << this->getNeighborID().str(false)
+            << " from '" << getStateString(currentState->getState())
+            << "' to '" << getStateString(newState->getState()) << "'" << std::endl;
 
     if (previousState != nullptr) {
         delete previousState;
@@ -100,19 +100,19 @@ void Neighbor::processEvent(Neighbor::NeighborEventType event)
 
 void Neighbor::reset()
 {
-    for (auto & elem : linkStateRetransmissionList)
+    for (auto& elem : linkStateRetransmissionList)
         delete elem;
     linkStateRetransmissionList.clear();
 
-    for (auto & elem : databaseSummaryList)
+    for (auto& elem : databaseSummaryList)
         delete elem;
     databaseSummaryList.clear();
 
-    for (auto & elem : linkStateRequestList)
+    for (auto& elem : linkStateRequestList)
         delete elem;
     linkStateRequestList.clear();
 
-    if(parentInterface && parentInterface->getArea())
+    if (parentInterface && parentInterface->getArea())
         parentInterface->getArea()->getRouter()->getMessageHandler()->clearTimer(ddRetransmissionTimer);
 
     clearUpdateRetransmissionTimer();
@@ -199,8 +199,8 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     ddPacket->setDdSequenceNumber(ddSequenceNumber);
 
     B maxPacketSize = (((IPv4_MAX_HEADER_LENGTH + OSPFv2_HEADER_LENGTH + OSPFv2_DD_HEADER_LENGTH + OSPFv2_LSA_HEADER_LENGTH) > B(parentInterface->getMtu())) ?
-                          IPV4_DATAGRAM_LENGTH :
-                          B(parentInterface->getMtu())) - IPv4_MAX_HEADER_LENGTH;
+                       IPV4_DATAGRAM_LENGTH :
+                       B(parentInterface->getMtu())) - IPv4_MAX_HEADER_LENGTH;
     B packetSize = OSPFv2_HEADER_LENGTH + OSPFv2_DD_HEADER_LENGTH;
 
     if (init || databaseSummaryList.empty()) {
@@ -457,7 +457,7 @@ void Neighbor::addToRetransmissionList(const Ospfv2Lsa *lsa)
     }
 
     if (it != linkStateRetransmissionList.end()) {
-        delete (*it);
+        delete *it;
         *it = static_cast<Ospfv2Lsa *>(lsaCopy);
     }
     else {
@@ -472,7 +472,7 @@ void Neighbor::removeFromRetransmissionList(LsaKeyType lsaKey)
         if (((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
-            delete (*it);
+            delete *it;
             it = linkStateRetransmissionList.erase(it);
         }
         else {
@@ -495,7 +495,7 @@ bool Neighbor::isLinkStateRequestListEmpty(LsaKeyType lsaKey) const
 
 Ospfv2Lsa *Neighbor::findOnRetransmissionList(LsaKeyType lsaKey)
 {
-    for (auto & elem : linkStateRetransmissionList) {
+    for (auto& elem : linkStateRetransmissionList) {
         if (((elem)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             ((elem)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
@@ -514,7 +514,7 @@ void Neighbor::startUpdateRetransmissionTimer()
 
 void Neighbor::clearUpdateRetransmissionTimer()
 {
-    if(parentInterface && parentInterface->getArea()) {
+    if (parentInterface && parentInterface->getArea()) {
         MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(updateRetransmissionTimer);
     }
@@ -533,7 +533,7 @@ void Neighbor::removeFromRequestList(LsaKeyType lsaKey)
         if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
-            delete (*it);
+            delete *it;
             it = linkStateRequestList.erase(it);
         }
         else {
@@ -561,7 +561,7 @@ bool Neighbor::isLSAOnRequestList(LsaKeyType lsaKey) const
 
 Ospfv2LsaHeader *Neighbor::findOnRequestList(LsaKeyType lsaKey)
 {
-    for (auto & elem : linkStateRequestList) {
+    for (auto& elem : linkStateRequestList) {
         if (((elem)->getLinkStateID() == lsaKey.linkStateID) &&
             ((elem)->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
@@ -580,7 +580,7 @@ void Neighbor::startRequestRetransmissionTimer()
 
 void Neighbor::clearRequestRetransmissionTimer()
 {
-    if(parentInterface && parentInterface->getArea()) {
+    if (parentInterface && parentInterface->getArea()) {
         MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(requestRetransmissionTimer);
     }
@@ -599,7 +599,7 @@ void Neighbor::addToTransmittedLSAList(LsaKeyType lsaKey)
 
 bool Neighbor::isOnTransmittedLSAList(LsaKeyType lsaKey) const
 {
-    for (const auto & elem : transmittedLSAs) {
+    for (const auto& elem : transmittedLSAs) {
         if ((elem.lsaKey.linkStateID == lsaKey.linkStateID) &&
             (elem.lsaKey.advertisingRouter == lsaKey.advertisingRouter))
         {

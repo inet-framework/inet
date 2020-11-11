@@ -37,7 +37,7 @@ void RtpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint16Be(rtpHeader->getSequenceNumber());
     stream.writeUint32Be(rtpHeader->getTimeStamp());
     stream.writeUint32Be(rtpHeader->getSsrc());
-    for(size_t i = 0; i < csrcArraySize; ++i){
+    for (size_t i = 0; i < csrcArraySize; ++i) {
         stream.writeUint32Be(rtpHeader->getCsrc(i));
     }
 }
@@ -55,7 +55,7 @@ const Ptr<Chunk> RtpPacketSerializer::deserialize(MemoryInputStream& stream) con
     rtpHeader->setSequenceNumber(stream.readUint16Be());
     rtpHeader->setTimeStamp(stream.readUint32Be());
     rtpHeader->setSsrc(stream.readUint32Be());
-    for(size_t i = 0; i < csrcArraySize; ++i){
+    for (size_t i = 0; i < csrcArraySize; ++i) {
         rtpHeader->setCsrc(i, stream.readUint32Be());
     }
     rtpHeader->setChunkLength(B(12 + csrcArraySize * 4));

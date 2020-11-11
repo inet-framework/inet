@@ -13,9 +13,9 @@ class INET_API Ospfv3InterfaceStateDown : public Ospfv3InterfaceState
 {
   public:
     ~Ospfv3InterfaceStateDown() {};
-    void processEvent(Ospfv3Interface* intf,Ospfv3Interface::Ospfv3InterfaceEvent event) override;
+    void processEvent(Ospfv3Interface *intf, Ospfv3Interface::Ospfv3InterfaceEvent event) override;
     Ospfv3Interface::Ospfv3InterfaceFaState getState() const override { return Ospfv3Interface::INTERFACE_STATE_DOWN; }
-    std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateDown"); };
+    std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateDown"); }
 };
 
 } // namespace ospfv3

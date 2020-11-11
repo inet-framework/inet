@@ -43,7 +43,7 @@ void LifecycleController::Callback::invoke()
 
 //----
 
-template<typename T>
+template <typename T>
 void vector_delete_element(std::vector<T *>& v, T *p)
 {
     auto it = std::find(v.begin(), v.end(), p);

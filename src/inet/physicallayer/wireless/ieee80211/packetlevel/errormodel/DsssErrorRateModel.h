@@ -20,7 +20,7 @@
 
 #ifndef __INET_DSSSERRORRATEMODEL_H
 #define __INET_DSSSERRORRATEMODEL_H
-//#include <stdint.h>
+// #include <stdint.h>
 
 #include "inet/common/INETDefs.h"
 
@@ -80,8 +80,8 @@ class INET_API DsssErrorRateModel
     static double GetDsssDqpskCck5_5SuccessRate(double sinr, uint32_t nbits);
     static double GetDsssDqpskCck11SuccessRate(double sinr, uint32_t nbits);
 #ifdef ENABLE_GSL
-    static double SymbolErrorProb16Cck(double e2);    /// equation (18) in Pursley's paper
-    static double SymbolErrorProb256Cck(double e1);    /// equation (17) in Pursley's paper
+    static double SymbolErrorProb16Cck(double e2); /// equation (18) in Pursley's paper
+    static double SymbolErrorProb256Cck(double e1); /// equation (17) in Pursley's paper
 #else // ifdef ENABLE_GSL
 
   protected:

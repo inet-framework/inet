@@ -47,3 +47,4 @@ void InterfaceOperationBase::initialize(cModule *module, StringMap& params)
 }
 
 } // namespace inet
+

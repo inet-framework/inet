@@ -87,7 +87,7 @@ void ScalarAnalogModelBase::addReception(const ScalarReception *reception, simti
 void ScalarAnalogModelBase::addNoise(const ScalarNoise *noise, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W> *powerChanges) const
 {
     const std::map<simtime_t, W> *noisePowerChanges = noise->getPowerChanges();
-    for (const auto & noisePowerChange : *noisePowerChanges) {
+    for (const auto& noisePowerChange : *noisePowerChanges) {
         std::map<simtime_t, W>::iterator jt = powerChanges->find(noisePowerChange.first);
         if (jt != powerChanges->end())
             jt->second += noisePowerChange.second;

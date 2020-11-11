@@ -41,8 +41,7 @@ template <typename IPAddress>
 class EigrpDual : public cObject /* cSimpleModule */
 {
   public:
-    enum DualEvent
-    {
+    enum DualEvent {
         RECV_UPDATE = 0,    /**< Change of route distance in received update message or on interface */
         RECV_QUERY,         /**< Received query message */
         RECV_REPLY,         /**< Received reply message */
@@ -102,3 +101,4 @@ class EigrpDual : public cObject /* cSimpleModule */
 } //eigrp
 } //inet
 #endif /* EIGRPDUAL_H_ */
+

@@ -34,8 +34,9 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
         const IIeee80211Mode *mode;
     };
 
-    struct EntryNetBitrateComparator {
-        bool operator() (const Entry& left, const Entry& right) { return left.mode->getDataMode()->getNetBitrate() < right.mode->getDataMode()->getNetBitrate(); }
+    struct EntryNetBitrateComparator
+    {
+        bool operator()(const Entry& left, const Entry& right) { return left.mode->getDataMode()->getNetBitrate() < right.mode->getDataMode()->getNetBitrate(); }
     };
 
   protected:
@@ -81,10 +82,10 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     int getCwMin() const { return entries[0].mode->getLegacyCwMin(); }
     int getCwMax() const { return entries[0].mode->getLegacyCwMax(); }
 
-    IIeee80211Mode *_getSlowestMode() const { return const_cast<IIeee80211Mode*>(getSlowestMode()); }
-    IIeee80211Mode *_getFastestMode() const { return const_cast<IIeee80211Mode*>(getFastestMode()); }
-    IIeee80211Mode *_getSlowestMandatoryMode() const { return const_cast<IIeee80211Mode*>(getSlowestMandatoryMode()); }
-    IIeee80211Mode *_getFastestMandatoryMode() const { return const_cast<IIeee80211Mode*>(getFastestMandatoryMode()); }
+    IIeee80211Mode *_getSlowestMode() const { return const_cast<IIeee80211Mode *>(getSlowestMode()); }
+    IIeee80211Mode *_getFastestMode() const { return const_cast<IIeee80211Mode *>(getFastestMode()); }
+    IIeee80211Mode *_getSlowestMandatoryMode() const { return const_cast<IIeee80211Mode *>(getSlowestMandatoryMode()); }
+    IIeee80211Mode *_getFastestMandatoryMode() const { return const_cast<IIeee80211Mode *>(getFastestMandatoryMode()); }
 };
 
 } // namespace physicallayer

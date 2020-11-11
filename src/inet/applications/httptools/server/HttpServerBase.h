@@ -61,12 +61,12 @@ class INET_API HttpServerBase : public HttpNodeBase
         std::string body;
     };
 
-    std::string hostName;    // the server name, e.g. www.example.com.
-    int port = -1;    // the listening port of the server
-    bool scriptedMode = false;    // set to true if a scripted site definition is used
-    std::map<std::string, HtmlPageData> htmlPages;    // A map of html pages, keyed by a resource URL. Used in scripted mode
-    std::map<std::string, unsigned int> resources;    // a map of resource, keyed by a resource URL. Used in scripted mode
-    simtime_t activationTime;    // the activation time of the server -- initial startup delay
+    std::string hostName; // the server name, e.g. www.example.com.
+    int port = -1; // the listening port of the server
+    bool scriptedMode = false; // set to true if a scripted site definition is used
+    std::map<std::string, HtmlPageData> htmlPages; // A map of html pages, keyed by a resource URL. Used in scripted mode
+    std::map<std::string, unsigned int> resources; // a map of resource, keyed by a resource URL. Used in scripted mode
+    simtime_t activationTime; // the activation time of the server -- initial startup delay
 
     // Basic statistics
     long htmlDocsServed = 0;
@@ -74,13 +74,13 @@ class INET_API HttpServerBase : public HttpNodeBase
     long textResourcesServed = 0;
     long badRequests = 0;
 
-    rdObject *rdReplyDelay = nullptr;    ///< The processing delay of the server.
-    rdObject *rdHtmlPageSize = nullptr;    ///< The HTML page size distribution for the site.
-    rdObject *rdTextResourceSize = nullptr;    ///< The text resource size distribution for the site.
-    rdObject *rdImageResourceSize = nullptr;    ///< The image resource size distribution for the site.
-    rdObject *rdNumResources = nullptr;    ///< Number of resources per HTML page.
-    rdObject *rdTextImageResourceRatio = nullptr;    ///< The ratio of text resources to images referenced in HTML pages.
-    rdObject *rdErrorMsgSize = nullptr;    ///< The size of error messages.
+    rdObject *rdReplyDelay = nullptr; ///< The processing delay of the server.
+    rdObject *rdHtmlPageSize = nullptr; ///< The HTML page size distribution for the site.
+    rdObject *rdTextResourceSize = nullptr; ///< The text resource size distribution for the site.
+    rdObject *rdImageResourceSize = nullptr; ///< The image resource size distribution for the site.
+    rdObject *rdNumResources = nullptr; ///< Number of resources per HTML page.
+    rdObject *rdTextImageResourceRatio = nullptr; ///< The ratio of text resources to images referenced in HTML pages.
+    rdObject *rdErrorMsgSize = nullptr; ///< The size of error messages.
 
   protected:
     virtual void initialize(int stage) override;

@@ -46,7 +46,8 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     virtual void finish() override;
 
   protected:
-    class RxSignal {
+    class RxSignal
+    {
       public:
         long transmissionId = -1;
         EthernetSignalBase *signal = nullptr;

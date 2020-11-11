@@ -30,7 +30,8 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API LinkOsgVisualization : public LinkVisualization {
+    class INET_API LinkOsgVisualization : public LinkVisualization
+    {
       public:
         inet::osg::LineNode *node = nullptr;
 

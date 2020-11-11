@@ -69,7 +69,7 @@ void copyBlockAckFrameFields(const Ptr<ieee80211::Ieee80211BlockAck> to, const P
     to->setReserved(from->getReserved());
 }
 
-}
+} // namespace
 
 namespace ieee80211 {
 
@@ -106,6 +106,7 @@ void Ieee80211MsduSubframeHeaderSerializer::serialize(MemoryOutputStream& stream
     stream.writeMacAddress(msduSubframe->getSa());
     stream.writeUint16Be(msduSubframe->getLength());
 }
+
 const Ptr<Chunk> Ieee80211MsduSubframeHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto msduSubframe = makeShared<Ieee80211MsduSubframeHeader>();
@@ -124,6 +125,7 @@ void Ieee80211MpduSubframeHeaderSerializer::serialize(MemoryOutputStream& stream
     stream.writeByte(0);
     stream.writeByte(0x4E);
 }
+
 const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto mpduSubframe = makeShared<Ieee80211MpduSubframeHeader>();
@@ -180,45 +182,45 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                     case 3: {
                         stream.writeByte(actionFrame->getCategory());
                         switch (actionFrame->getBlockAckAction()) {
-                        case 0: {
-                            auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(chunk);
-                            stream.writeByte(addbaRequest->getBlockAckAction());
-                            stream.writeByte(addbaRequest->getDialogToken());
-                            stream.writeBit(addbaRequest->getAMsduSupported());
-                            stream.writeBit(addbaRequest->getBlockAckPolicy());
-                            stream.writeUint4(addbaRequest->getTid());
-                            stream.writeNBitsOfUint64Be(addbaRequest->getBufferSize(), 10);
-                            stream.writeUint16Be(addbaRequest->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
-                            stream.writeUint4(addbaRequest->get_fragmentNumber());
-                            stream.writeNBitsOfUint64Be(addbaRequest->getStartingSequenceNumber().getRaw(), 12);
-                            ASSERT(stream.getLength() - startPos == addbaRequest->getChunkLength());
-                            break;
-                        }
-                        case 1: {
-                            auto addbaResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(chunk);
-                            stream.writeByte(addbaResponse->getBlockAckAction());
-                            stream.writeByte(addbaResponse->getDialogToken());
-                            stream.writeUint16Be(addbaResponse->getStatusCode());
-                            stream.writeBit(addbaResponse->getAMsduSupported());
-                            stream.writeBit(addbaResponse->getBlockAckPolicy());
-                            stream.writeUint4(addbaResponse->getTid());
-                            stream.writeNBitsOfUint64Be(addbaResponse->getBufferSize(), 10);
-                            stream.writeUint16Be(addbaResponse->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
-                            ASSERT(stream.getLength() - startPos == addbaResponse->getChunkLength());
-                            break;
-                        }
-                        case 2: {
-                            auto delba = dynamicPtrCast<const Ieee80211Delba>(chunk);
-                            stream.writeByte(delba->getBlockAckAction());
-                            stream.writeNBitsOfUint64Be(delba->getReserved(), 11);
-                            stream.writeBit(delba->getInitiator());
-                            stream.writeUint4(delba->getTid());
-                            stream.writeUint16Be(delba->getReasonCode());
-                            ASSERT(stream.getLength() - startPos == delba->getChunkLength());
-                            break;
-                        }
-                        default:
-                            throw cRuntimeError("Ieee80211MacHeaderSerializer: cannot serialize the Ieee80211ActionFrame frame, blockAckAction %d not supported.", actionFrame->getBlockAckAction());
+                            case 0: {
+                                auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(chunk);
+                                stream.writeByte(addbaRequest->getBlockAckAction());
+                                stream.writeByte(addbaRequest->getDialogToken());
+                                stream.writeBit(addbaRequest->getAMsduSupported());
+                                stream.writeBit(addbaRequest->getBlockAckPolicy());
+                                stream.writeUint4(addbaRequest->getTid());
+                                stream.writeNBitsOfUint64Be(addbaRequest->getBufferSize(), 10);
+                                stream.writeUint16Be(addbaRequest->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
+                                stream.writeUint4(addbaRequest->get_fragmentNumber());
+                                stream.writeNBitsOfUint64Be(addbaRequest->getStartingSequenceNumber().getRaw(), 12);
+                                ASSERT(stream.getLength() - startPos == addbaRequest->getChunkLength());
+                                break;
+                            }
+                            case 1: {
+                                auto addbaResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(chunk);
+                                stream.writeByte(addbaResponse->getBlockAckAction());
+                                stream.writeByte(addbaResponse->getDialogToken());
+                                stream.writeUint16Be(addbaResponse->getStatusCode());
+                                stream.writeBit(addbaResponse->getAMsduSupported());
+                                stream.writeBit(addbaResponse->getBlockAckPolicy());
+                                stream.writeUint4(addbaResponse->getTid());
+                                stream.writeNBitsOfUint64Be(addbaResponse->getBufferSize(), 10);
+                                stream.writeUint16Be(addbaResponse->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
+                                ASSERT(stream.getLength() - startPos == addbaResponse->getChunkLength());
+                                break;
+                            }
+                            case 2: {
+                                auto delba = dynamicPtrCast<const Ieee80211Delba>(chunk);
+                                stream.writeByte(delba->getBlockAckAction());
+                                stream.writeNBitsOfUint64Be(delba->getReserved(), 11);
+                                stream.writeBit(delba->getInitiator());
+                                stream.writeUint4(delba->getTid());
+                                stream.writeUint16Be(delba->getReasonCode());
+                                ASSERT(stream.getLength() - startPos == delba->getChunkLength());
+                                break;
+                            }
+                            default:
+                                throw cRuntimeError("Ieee80211MacHeaderSerializer: cannot serialize the Ieee80211ActionFrame frame, blockAckAction %d not supported.", actionFrame->getBlockAckAction());
                         }
                         break;
                     }
@@ -546,7 +548,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
                     std::vector<uint8_t> bytes;
                     bytes.push_back(stream.readByte());
                     bytes.push_back(stream.readByte());
-                    BitVector* blockAckBitmap = new BitVector(bytes);
+                    BitVector *blockAckBitmap = new BitVector(bytes);
                     basicBlockAck->setBlockAckBitmap(i, *blockAckBitmap);
                 }
                 return basicBlockAck;

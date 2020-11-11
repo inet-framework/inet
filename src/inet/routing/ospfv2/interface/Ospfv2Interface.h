@@ -99,7 +99,7 @@ class INET_API Ospfv2Interface
     std::map<RouterId, Neighbor *> neighboringRoutersByID;
     std::map<Ipv4Address, Neighbor *> neighboringRoutersByAddress;
     std::vector<Neighbor *> neighboringRouters;
-    std::map<Ipv4Address, std::list<Ospfv2LsaHeader> > delayedAcknowledgements;
+    std::map<Ipv4Address, std::list<Ospfv2LsaHeader>> delayedAcknowledgements;
     DesignatedRouterId designatedRouter;
     DesignatedRouterId backupDesignatedRouter;
     Metric interfaceOutputCost;

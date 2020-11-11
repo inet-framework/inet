@@ -38,7 +38,8 @@ inline bool isNotEmpty(const char *s) { return s && s[0]; }
 class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API PathVisualization : public LineManager::ModulePath {
+    class INET_API PathVisualization : public LineManager::ModulePath
+    {
       public:
         std::string label;
         mutable int numPackets = 0;
@@ -50,14 +51,15 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
         virtual ~PathVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public StringFormat::IDirectiveResolver
+    {
       protected:
         const PathVisualization *pathVisualization = nullptr;
         const cPacket *packet = nullptr;
 
       public:
         DirectiveResolver(const PathVisualization *pathVisualization, const cPacket *packet) :
-            pathVisualization(pathVisualization), packet(packet) { }
+            pathVisualization(pathVisualization), packet(packet) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

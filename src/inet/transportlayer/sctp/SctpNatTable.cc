@@ -42,8 +42,8 @@ SctpNatTable::SctpNatTable()
 
 SctpNatTable::~SctpNatTable()
 {
-    for (auto & elem : natEntries)
-        delete(elem);
+    for (auto& elem : natEntries)
+        delete elem;
     natEntries.clear();
 }
 
@@ -51,7 +51,7 @@ SctpNatEntry *SctpNatTable::findNatEntry(L3Address srcAddr, uint16_t srcPrt, L3A
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method("findNatEntry");
-    for (auto & elem : natEntries)
+    for (auto& elem : natEntries)
         if ((elem)->getLocalAddress() == srcAddr && (elem)->getLocalPort() == srcPrt &&
             (elem)->getGlobalAddress() == destAddr && (elem)->getGlobalPort() == destPrt && (elem)->getGlobalVTag() == globalVtag)
         {
@@ -64,7 +64,7 @@ SctpNatEntry *SctpNatTable::getEntry(L3Address globalAddr, uint16_t globalPrt, L
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method("getEntry");
-    for (auto & elem : natEntries)
+    for (auto& elem : natEntries)
         if ((elem)->getGlobalAddress() == globalAddr && (elem)->getGlobalPort() == globalPrt &&
             (elem)->getNattedAddress() == nattedAddr && (elem)->getNattedPort() == nattedPrt &&
             (elem)->getLocalVTag() == localVtag)
@@ -80,7 +80,7 @@ SctpNatEntry *SctpNatTable::getSpecialEntry(L3Address globalAddr, uint16_t globa
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method("getSpecialEntry");
 
-    for (auto & elem : natEntries) {
+    for (auto& elem : natEntries) {
         if ((elem)->getGlobalAddress() == globalAddr && (elem)->getGlobalPort() == globalPrt &&
             (elem)->getNattedAddress() == nattedAddr && (elem)->getNattedPort() == nattedPrt &&
             (elem)->getGlobalVTag() == 0)
@@ -95,7 +95,7 @@ SctpNatEntry *SctpNatTable::getLocalInitEntry(L3Address globalAddr, uint16_t loc
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method("getLocalInitEntry");
-    for (auto & elem : natEntries)
+    for (auto& elem : natEntries)
         if ((elem)->getGlobalAddress() == globalAddr && (elem)->getGlobalPort() == localPrt &&
             (elem)->getLocalPort() == globalPrt)
         {
@@ -108,7 +108,7 @@ SctpNatEntry *SctpNatTable::getLocalEntry(L3Address globalAddr, uint16_t localPr
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method("getLocalEntry");
-    for (auto & elem : natEntries)
+    for (auto& elem : natEntries)
         if ((elem)->getGlobalAddress() == globalAddr && (elem)->getGlobalPort() == localPrt &&
             (elem)->getLocalPort() == globalPrt && (elem)->getLocalVTag() == localVtag)
         {
@@ -133,7 +133,7 @@ void SctpNatTable::removeEntry(SctpNatEntry *entry)
 
 void SctpNatTable::printNatTable()
 {
-    for (auto & elem : natEntries) {
+    for (auto& elem : natEntries) {
         EV_INFO << "localAddr:" << (elem)->getLocalAddress() << "  globalAddr:" << (elem)->getGlobalAddress() << "  localPort:" << (elem)->getLocalPort() << "  globalPort:" << (elem)->getGlobalPort() << "  nattedAddr:" << (elem)->getNattedAddress() << "  nattedPort:" << (elem)->getNattedPort() << "  localVtag:" << (elem)->getLocalVTag() << "  globalVtag:" << (elem)->getGlobalVTag() << "\n";
     }
 }

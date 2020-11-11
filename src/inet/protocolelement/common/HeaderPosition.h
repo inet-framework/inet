@@ -22,8 +22,7 @@
 
 namespace inet {
 
-enum HeaderPosition
-{
+enum HeaderPosition {
     HP_UNDEFINED,
     HP_NONE,
     HP_FRONT,

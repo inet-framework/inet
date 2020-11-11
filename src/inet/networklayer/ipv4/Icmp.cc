@@ -84,9 +84,10 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 
     // don't send ICMP error messages response to unspecified, broadcast or multicast addresses
     if ((inputInterfaceId != -1 && origSrcAddr.isUnspecified())
-            || origSrcAddr.isMulticast()
-            || origSrcAddr.isLimitedBroadcastAddress()
-            || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
+        || origSrcAddr.isMulticast()
+        || origSrcAddr.isLimitedBroadcastAddress()
+        || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId))
+    {
         EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << ipv4Header << endl;
         delete packet;
         return;

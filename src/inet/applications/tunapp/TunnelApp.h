@@ -28,7 +28,7 @@ namespace inet {
 
 class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public Ipv4Socket::ICallback, public TunSocket::ICallback
 {
-protected:
+  protected:
     const Protocol *protocol = nullptr;
     const char *interface = nullptr;
     const char *destinationAddress = nullptr;
@@ -41,11 +41,11 @@ protected:
     TunSocket tunSocket;
     SocketMap socketMap;
 
-public:
+  public:
     TunnelApp();
     virtual ~TunnelApp();
 
-protected:
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;

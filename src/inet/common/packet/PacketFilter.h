@@ -56,7 +56,7 @@ class INET_API PacketFilter
     cMatchExpression chunkMatchExpression;
 
   public:
-    void setPattern(const char* packetPattern, const char* chunkPattern);
+    void setPattern(const char *packetPattern, const char *chunkPattern);
 
     bool matches(const cPacket *packet) const;
 };

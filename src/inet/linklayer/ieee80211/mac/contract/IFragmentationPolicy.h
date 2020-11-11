@@ -27,10 +27,10 @@ class Ieee80211DataOrMgmtHeader;
 
 class INET_API IFragmentationPolicy
 {
-    public:
-        virtual ~IFragmentationPolicy() { }
+  public:
+    virtual ~IFragmentationPolicy() {}
 
-        virtual std::vector<int> computeFragmentSizes(Packet *frame) = 0;
+    virtual std::vector<int> computeFragmentSizes(Packet *frame) = 0;
 };
 
 } // namespace ieee80211

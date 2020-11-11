@@ -99,7 +99,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
      * Creates and returns an exact copy of this object.
      * See cObject for more details.
      */
-//    virtual ThruputMeteringChannel *dup() const {return new ThruputMeteringChannel(*this);}
+//    virtual ThruputMeteringChannel *dup() const { return new ThruputMeteringChannel(*this); }
 
     /**
      * Add parameters and initialize the stat variables

@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 #include "inet/transportlayer/rtp/Reports_m.h"

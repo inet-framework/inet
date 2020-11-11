@@ -41,7 +41,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
     b offset = b(0);
     b length = b(-1);
     bool endMeasurement_ = false;
-    const char* flowName = nullptr;
+    const char *flowName = nullptr;
     cMatchExpression flowNameMatcher;
     bool measureLifeTime = false;
     bool measureElapsedTime = false;

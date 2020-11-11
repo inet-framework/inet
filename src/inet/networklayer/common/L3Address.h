@@ -60,7 +60,7 @@ class INET_API L3Address
 
   public:
     L3Address() { set(NONE, 0); }
-    L3Address(const L3Address& other) : hi(other.hi), lo(other.lo) { }
+    L3Address(const L3Address& other) : hi(other.hi), lo(other.lo) {}
     explicit L3Address(const char *str) { tryParse(str); }
     L3Address(const Ipv4Address& addr) { set(addr); }
     L3Address(const Ipv6Address& addr) { set(addr); }
@@ -123,6 +123,7 @@ class INET_API L3Address
         buf->unpack(hi);
         buf->unpack(lo);
     }
+
 };
 
 inline std::ostream& operator<<(std::ostream& os, const L3Address& address)

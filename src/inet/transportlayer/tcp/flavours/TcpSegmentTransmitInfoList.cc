@@ -73,7 +73,7 @@ void TcpSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
 
 const TcpSegmentTransmitInfoList::Item *TcpSegmentTransmitInfoList::get(uint32_t seq) const
 {
-    for (const auto & elem : regions) {
+    for (const auto& elem : regions) {
         if (seqLess(seq, elem.beg))
             break;
         if (seqLE(elem.beg, seq) && seqLess(seq, elem.end))

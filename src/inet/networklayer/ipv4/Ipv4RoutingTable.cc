@@ -55,9 +55,9 @@ std::ostream& operator<<(std::ostream& os, const Ipv4MulticastRoute& e)
 
 Ipv4RoutingTable::~Ipv4RoutingTable()
 {
-    for (auto & elem : routes)
+    for (auto& elem : routes)
         delete elem;
-    for (auto & elem : multicastRoutes)
+    for (auto& elem : multicastRoutes)
         delete elem;
 }
 

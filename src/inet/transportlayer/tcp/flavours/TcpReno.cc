@@ -129,11 +129,10 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
                 state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32_t(1));
                 state->sndCwr = true;
                 performSsCa = false;
-                EV_INFO
-                               << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
-                               << state->ssthresh << "\n";
+                EV_INFO << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
+                        << state->ssthresh << "\n";
                 EV_INFO << "cwnd /= 2: received ECN-Echo ACK... new cwnd = "
-                               << state->snd_cwnd << "\n";
+                        << state->snd_cwnd << "\n";
 
                 // rfc-3168 page 18:
                 // The sending TCP MUST reset the retransmit timer on receiving

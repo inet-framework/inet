@@ -42,7 +42,7 @@ inline std::ostream& operator<<(std::ostream& out, const UdpVideoStreamServer::V
 
 UdpVideoStreamServer::~UdpVideoStreamServer()
 {
-    for (auto & elem : streams)
+    for (auto& elem : streams)
         cancelAndDelete(elem.second.timer);
 }
 
@@ -155,7 +155,7 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
 
 void UdpVideoStreamServer::clearStreams()
 {
-    for (auto & elem : streams)
+    for (auto& elem : streams)
         cancelAndDelete(elem.second.timer);
     streams.clear();
 }

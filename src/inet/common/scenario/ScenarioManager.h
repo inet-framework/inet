@@ -59,7 +59,7 @@ class INET_API ScenarioManager : public cSimpleModule
 
   protected:
     // utilities
-    typedef std::pair<cGate*,cGate*> GatePair;
+    typedef std::pair<cGate *, cGate *> GatePair;
     cModule *getRequiredModule(const char *path);
     cModule *getRequiredModule(const cXMLElement *node, const char *attr);
     cGate *findMandatorySingleGateTowards(cModule *srcModule, cModule *destModule);

@@ -38,7 +38,7 @@ BitVector ConvolutionalCoder::getPuncturedIndices(unsigned int length) const
     int puncturingMatrixSize = puncturingMatrix.at(0).getSize();
     for (unsigned int i = 0; i < codeRateParamaterN; i++) {
         int idx = 0;
-        for (unsigned int j = 0; codeRateParamaterN *j + i < length; j++) {
+        for (unsigned int j = 0; codeRateParamaterN * j + i < length; j++) {
             int place = idx % puncturingMatrixSize;
             bool stolen = !puncturingMatrix.at(i).getBit(place);
             isPunctured.setBit(codeRateParamaterN * j + i, stolen);
@@ -292,7 +292,7 @@ bool ConvolutionalCoder::isCompletelyDecoded(unsigned int encodedLength, unsigne
     return (pos + 1) * codeRateParamaterN > encodedLength;
 }
 
-void ConvolutionalCoder::parseMatrix(const char *strMatrix, std::vector<std::vector<int> >& matrix) const
+void ConvolutionalCoder::parseMatrix(const char *strMatrix, std::vector<std::vector<int>>& matrix) const
 {
     cStringTokenizer tokenizer(strMatrix, ";");
     while (tokenizer.hasMoreTokens()) {
@@ -309,7 +309,7 @@ void ConvolutionalCoder::parseVector(const char *strVector, std::vector<int>& ve
         vector.push_back(atoi(tokenizer.nextToken()));
 }
 
-void ConvolutionalCoder::convertToShortBitVectorMatrix(std::vector<std::vector<int> >& matrix, std::vector<ShortBitVector>& boolMatrix) const
+void ConvolutionalCoder::convertToShortBitVectorMatrix(std::vector<std::vector<int>>& matrix, std::vector<ShortBitVector>& boolMatrix) const
 {
     for (auto& elem : matrix) {
         std::vector<int> matrixRow = elem;
@@ -339,7 +339,7 @@ ShortBitVector ConvolutionalCoder::octalToBinary(int octalNum, int fixedSize) co
     return ShortBitVector(decimal, fixedSize);
 }
 
-void ConvolutionalCoder::setTransferFunctionMatrix(std::vector<std::vector<int> >& transferFMatrix)
+void ConvolutionalCoder::setTransferFunctionMatrix(std::vector<std::vector<int>>& transferFMatrix)
 {
     for (unsigned int i = 0; i < transferFMatrix.size(); i++) {
         const std::vector<int>& row = transferFMatrix.at(i);
@@ -358,7 +358,7 @@ void ConvolutionalCoder::setTransferFunctionMatrix(std::vector<std::vector<int> 
 void ConvolutionalCoder::printTransferFunctionMatrix() const
 {
     std::cout << "Transfer function matrix" << endl;
-    for (auto & elem : transferFunctionMatrix) {
+    for (auto& elem : transferFunctionMatrix) {
         std::cout << elem.at(0);
         for (unsigned int j = 1; j < elem.size(); j++)
             std::cout << "," << elem.at(j);
@@ -481,8 +481,7 @@ std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBi
         }
     }
     std::pair<BitVector, bool> result = traversePath(bestNode, trellisGraph, isTruncatedMode);
-    if (result.second)
-    {
+    if (result.second) {
         EV_DEBUG << "Recovered message: " << result.first << endl;
         EV_DEBUG << "Number of errors: " << bestNode.numberOfErrors
                  << " Cumulative error (Hamming distance): " << bestNode.comulativeHammingDistance
@@ -507,10 +506,10 @@ ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode *convolutionalCod
     codeRatePuncturingK = convolutionalCode->getCodeRatePuncturingK();
     codeRatePuncturingN = convolutionalCode->getCodeRatePuncturingN();
     parseVector(strConstraintLengthVector, constraintLengths);
-    std::vector<std::vector<int> > pMatrix;
+    std::vector<std::vector<int>> pMatrix;
     parseMatrix(strPuncturingMatrix, pMatrix);
     convertToShortBitVectorMatrix(pMatrix, puncturingMatrix);
-    std::vector<std::vector<int> > transferFMatrix;
+    std::vector<std::vector<int>> transferFMatrix;
     parseMatrix(strTransferFunctionMatrix, transferFMatrix);
     codeRateParamaterK = transferFMatrix.size();
     codeRateParamaterN = transferFMatrix.at(0).size();

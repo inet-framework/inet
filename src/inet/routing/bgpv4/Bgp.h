@@ -32,7 +32,7 @@ namespace bgp {
 
 class INET_API Bgp : public cSimpleModule, protected cListener, public LifecycleUnsupported
 {
-private:
+  private:
     IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
     bool isUp = false;

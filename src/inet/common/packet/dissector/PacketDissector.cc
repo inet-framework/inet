@@ -56,7 +56,7 @@ void PacketDissector::ProtocolDissectorCallback::dissectPacket(Packet *packet, c
 
 // ProtocolDataUnit
 
-PacketDissector::ProtocolDataUnit::ProtocolDataUnit(int level, const Protocol* protocol) :
+PacketDissector::ProtocolDataUnit::ProtocolDataUnit(int level, const Protocol *protocol) :
     level(level),
     protocol(protocol)
 {

@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/Rtp.h"
 
 #include "inet/common/ModuleAccess.h"

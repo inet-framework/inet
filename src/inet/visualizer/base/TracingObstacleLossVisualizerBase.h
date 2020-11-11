@@ -29,13 +29,14 @@ namespace visualizer {
 class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API ObstacleLossVisualization {
+    class INET_API ObstacleLossVisualization
+    {
       public:
         mutable AnimationPosition obstacleLossAnimationPosition;
 
       public:
-        ObstacleLossVisualization() { }
-        virtual ~ObstacleLossVisualization() { }
+        ObstacleLossVisualization() {}
+        virtual ~ObstacleLossVisualization() {}
     };
 
   protected:

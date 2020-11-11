@@ -85,6 +85,7 @@ void MediumOsgVisualizer::initialize(int stage)
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
+
 void MediumOsgVisualizer::refreshDisplay() const
 {
     if (displaySignals) {
@@ -278,7 +279,7 @@ osg::Node *MediumOsgVisualizer::createSphereSignalNode(const ITransmission *tran
     auto transmissionStart = transmission->getStartPosition();
     auto startSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
     auto endSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
-    cFigure::Color color = signalColorSet.getColor(transmission->getId());;
+    cFigure::Color color = signalColorSet.getColor(transmission->getId());
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
     auto startStateSet = inet::osg::createStateSet(color, 0.99, false); // <1 opacity so it will be in the TRANSPARENT_BIN
@@ -395,7 +396,7 @@ void MediumOsgVisualizer::handleRadioAdded(const IRadio *radio)
             auto stateSet = inet::osg::createLineStateSet(interferenceRangeLineColor, interferenceRangeLineStyle, interferenceRangeLineWidth);
             circle->setStateSet(stateSet);
             auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::NO_ROTATION, false);
-//            auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::ROTATE_TO_SCREEN, false);
+            // auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::ROTATE_TO_SCREEN, false);
             networkNodeVisualization->addChild(autoTransform);
         }
         if (displayCommunicationRanges) {
@@ -404,7 +405,7 @@ void MediumOsgVisualizer::handleRadioAdded(const IRadio *radio)
             auto stateSet = inet::osg::createLineStateSet(communicationRangeLineColor, communicationRangeLineStyle, communicationRangeLineWidth);
             circle->setStateSet(stateSet);
             auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::NO_ROTATION, false);
-//            auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::ROTATE_TO_SCREEN, false);
+            // auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::ROTATE_TO_SCREEN, false);
             networkNodeVisualization->addChild(autoTransform);
         }
         setRadioOsgNode(radio, group);

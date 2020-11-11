@@ -30,7 +30,7 @@ DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, cons
 std::ostream& DimensionalTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DimensionalTransmission";
-    if (level <= PRINT_LEVEL_DEBUG)
+//    if (level <= PRINT_LEVEL_DEBUG)
 //        stream << EV_FIELD(powerMax, power->getMax())
 //               << EV_FIELD(powerMin, power->getMin());
     if (level <= PRINT_LEVEL_TRACE)

@@ -29,25 +29,24 @@ namespace ieee80211 {
 
 class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
 {
-    protected:
-        enum CacheType
-        {
-            SHARED,
-            TIME_PRIORITY,
-            DATA
-        };
-        typedef std::pair<MacAddress, Tid> Key;
+  protected:
+    enum CacheType {
+        SHARED,
+        TIME_PRIORITY,
+        DATA
+    };
+    typedef std::pair<MacAddress, Tid> Key;
 
-        std::map<Key, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
-        std::map<MacAddress, SequenceNumber> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
-        std::map<MacAddress, SequenceNumber> lastSentSharedSeqNums; // last sent sequence numbers per RA
-        SequenceNumber lastSentSharedCounterSeqNum = 0;
+    std::map<Key, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
+    std::map<MacAddress, SequenceNumber> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
+    std::map<MacAddress, SequenceNumber> lastSentSharedSeqNums; // last sent sequence numbers per RA
+    SequenceNumber lastSentSharedCounterSeqNum = 0;
 
-    protected:
-        virtual CacheType getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming);
+  protected:
+    virtual CacheType getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming);
 
-    public:
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
+  public:
+    virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 };
 
 } /* namespace ieee80211 */

@@ -36,7 +36,7 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
     virtual Packet *computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const;
 
   public:
-    ReceiverBase() { }
+    ReceiverBase() {}
 
     virtual W getMinInterferencePower() const override { return W(NaN); }
     virtual W getMinReceptionPower() const override { return W(NaN); }

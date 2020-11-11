@@ -18,6 +18,7 @@ class INET_API LSATrackingInfo
         ORIGINATED = 0,
         FLOODED = 1
     };
+
   private:
     InstallSource source;
     unsigned long installTime;
@@ -171,13 +172,13 @@ class INET_API Ospfv3SpfVertex
 {
   private:
     VertexID vertexID;
-    Ospfv3Lsa* asocLSA;
+    Ospfv3Lsa *asocLSA;
     int distance; //link state cost of the current set of shortest paths from the root
     uint16_t type; //router or network lsa
     // Ospfv3SpfVertex* parent = nullptr;   //TODO unused field
 
   public:
-    Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance);
+    Ospfv3SpfVertex(Ospfv3Lsa *asocLSA, int distance);
 };
 
 //unsigned int calculateLSASize(const Ospfv3Lsa *lsaC);

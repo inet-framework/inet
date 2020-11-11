@@ -38,8 +38,7 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
         stream.writeByte(transportPseudoHeader->getProtocolId());
         stream.writeUint16Be(B(transportPseudoHeader->getPacketLength()).get());
     }
-    else
-    if (nwProtId == Protocol::ipv6.getId()) {
+    else if (nwProtId == Protocol::ipv6.getId()) {
         ASSERT(transportPseudoHeader->getChunkLength() == B(40));
         stream.writeIpv6Address(transportPseudoHeader->getSrcAddress().toIpv6());
         stream.writeIpv6Address(transportPseudoHeader->getDestAddress().toIpv6());

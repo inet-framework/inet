@@ -30,8 +30,7 @@ simsignal_t Contention::stateChangedSignal = registerSignal("stateChanged");
 Register_Enum(Contention::State,
         (Contention::IDLE,
          Contention::DEFER,
-         Contention::IFS_AND_BACKOFF)
-         );
+         Contention::IFS_AND_BACKOFF));
 
 Define_Module(Contention);
 
@@ -229,7 +228,7 @@ void Contention::scheduleTransmissionRequest()
             waitInterval -= backoffOptimizationDelta;
     }
     scheduledTransmissionTime = now + waitInterval;
-    EV_INFO << ", waitInterval = " <<  waitInterval << ".\n";
+    EV_INFO << ", waitInterval = " << waitInterval << ".\n";
     scheduleTransmissionRequestFor(scheduledTransmissionTime);
 }
 
@@ -280,3 +279,4 @@ void Contention::updateDisplayString(simtime_t expectedChannelAccess)
 
 } // namespace ieee80211
 } // namespace inet
+

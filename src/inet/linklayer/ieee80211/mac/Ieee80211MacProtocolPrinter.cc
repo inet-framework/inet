@@ -89,7 +89,7 @@ void Ieee80211MacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Pro
 
             case ST_PSPOLL:
                 context.typeColumn << "Pspoll";    //TODO
-            break;
+                break;
 
             case ST_RTS: {
                 context.typeColumn << "RTS";

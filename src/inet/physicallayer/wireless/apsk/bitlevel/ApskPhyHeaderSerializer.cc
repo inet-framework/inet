@@ -35,7 +35,7 @@ void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Apsk Phy header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
     stream.writeUint16Be(phyHeader->getCrc());
-    //TODO write protocol
+    // TODO write protocol
 
     b remainders = phyHeader->getChunkLength() - (stream.getLength() - startPosition);
     if (remainders < b(0))
@@ -56,7 +56,7 @@ const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream,
     auto crc = stream.readUint16Be();
     phyHeader->setCrc(crc);
     phyHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
-    //TODO read protocol
+    // TODO read protocol
 
     b curLength = stream.getPosition() - startPosition;
     b remainders = headerLength - curLength;

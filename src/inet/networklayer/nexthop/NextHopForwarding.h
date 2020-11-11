@@ -71,7 +71,7 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
         L3Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
     IInterfaceTable *interfaceTable;

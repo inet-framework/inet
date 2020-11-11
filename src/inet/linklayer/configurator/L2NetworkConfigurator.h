@@ -34,7 +34,7 @@ namespace inet {
 class INET_API L2NetworkConfigurator : public cSimpleModule
 {
   public:
-    L2NetworkConfigurator() { }
+    L2NetworkConfigurator() {}
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
 
   protected:

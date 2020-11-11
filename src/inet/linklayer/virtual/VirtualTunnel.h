@@ -43,11 +43,11 @@ class VirtualTunnel : public cSimpleModule, public EthernetSocket::ICallback, pu
 
     virtual void socketDataArrived(EthernetSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override { throw cRuntimeError("Invalid operation"); }
-    virtual void socketClosed(EthernetSocket *socket) override { }
+    virtual void socketClosed(EthernetSocket *socket) override {}
 
     virtual void socketDataArrived(Ieee8021qSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(Ieee8021qSocket *socket, Indication *indication) override { throw cRuntimeError("Invalid operation"); }
-    virtual void socketClosed(Ieee8021qSocket *socket) override { }
+    virtual void socketClosed(Ieee8021qSocket *socket) override {}
 
   public:
     virtual ~VirtualTunnel() { delete socket; }

@@ -75,7 +75,7 @@ void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Addres
             std::copy(sctpPacketBytes.begin(), sctpPacketBytes.end(), (uint8_t *)buffer);
             auto crc = SctpChecksum::checksum(buffer, length);
             sctpHeader->setCrc(crc);
-            delete [] buffer;
+            delete[] buffer;
             break;
         }
         default:

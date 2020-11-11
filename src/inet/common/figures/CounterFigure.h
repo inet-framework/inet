@@ -52,7 +52,7 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
 
   public:
     CounterFigure(const char *name = nullptr);
-    virtual ~CounterFigure() {};
+    virtual ~CounterFigure() {}
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 

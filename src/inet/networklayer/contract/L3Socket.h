@@ -43,6 +43,7 @@ class INET_API L3Socket : public INetworkSocket
         virtual void socketClosed(INetworkSocket *socket) override { socketClosed(check_and_cast<L3Socket *>(socket)); }
         virtual void socketClosed(L3Socket *socket) = 0;
     };
+
   protected:
     bool bound = false;
     bool isOpen_ = false;

@@ -35,9 +35,8 @@ class INET_API Ieee8022LlcSocketTable : public cSimpleModule
 
         friend std::ostream& operator<<(std::ostream& o, const Socket& t);
 
-        Socket(int socketId) : socketId(socketId) { }
+        Socket(int socketId) : socketId(socketId) {}
     };
-
 
   protected:
     std::map<int, Socket *> socketIdToSocketMap;

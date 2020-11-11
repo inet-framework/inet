@@ -21,7 +21,6 @@
     email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfilePayload32Sender.h"
 
 #include <string.h>
@@ -99,7 +98,7 @@ bool RtpAvProfilePayload32Sender::sendPacket()
     int pictureType;
     char *ptr;
 
-    for (ptr = description; *ptr == ' ' || *ptr == '\t' ; ptr++)
+    for (ptr = description; *ptr == ' ' || *ptr == '\t'; ptr++)
         ;
     switch (*ptr) {
         case 'I':

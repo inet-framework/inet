@@ -131,8 +131,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const NetworkInt
             SIMTIME_STR(simTime()),
             host->getFullPath().c_str(),
             ie->getInterfaceName(),
-            (ipv4Data != nullptr ? ipv4Data->getIPAddress().str().c_str() : Ipv4Address().str().c_str())
-            );
+            (ipv4Data != nullptr ? ipv4Data->getIPAddress().str().c_str() : Ipv4Address().str().c_str()));
     fflush(routingLogFile);
 }
 
@@ -162,8 +161,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
             route->getDestinationAsGeneric().str().c_str(),
             route->getPrefixLength(),
             route->getNextHopAsGeneric().str().c_str(),
-            (ie ? ie->getInterfaceName() : "*")
-            );
+            (ie ? ie->getInterfaceName() : "*"));
     fflush(routingLogFile);
 }
 
@@ -173,8 +171,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 //    fprintf(routingLogFile, "ID  %s  %d  %s\n",
 //            SIMTIME_STR(simTime()),
 //            getParentModule()->getId(), //XXX we assume routing table is direct child of the node compound module
-//            a.str().c_str()
-//            );
+//            a.str().c_str());
 //    fflush(routingLogFile);
 //}
 

@@ -203,12 +203,12 @@ const ITransmissionSymbolModel *Ieee80211LayeredOfdmTransmitter::createSymbolMod
         const std::vector<const ISymbol *> *signalSymbols = signalFieldSymbolModel->getSymbols();
         std::vector<const ISymbol *> *mergedSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OfdmSymbol *ofdmSymbol = nullptr;
-        for (auto & signalSymbol : *signalSymbols) {
+        for (auto& signalSymbol : *signalSymbols) {
             ofdmSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(signalSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
         const std::vector<const ISymbol *> *dataSymbols = dataFieldSymbolModel->getSymbols();
-        for (auto & dataSymbol : *dataSymbols) {
+        for (auto& dataSymbol : *dataSymbols) {
             ofdmSymbol = dynamic_cast<const Ieee80211OfdmSymbol *>(dataSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
@@ -250,7 +250,7 @@ b Ieee80211LayeredOfdmTransmitter::getPaddingLength(const Ieee80211OfdmMode *mod
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
     unsigned int dataBitsLength = 6 + b(length).get() + 16;
-    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
+    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0 * dataBitsLength / dataBitsPerOFDMSymbol));
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
     return b(numberOfPadBits);
@@ -300,11 +300,11 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::computeMode(Hz bandwid
     return new Ieee80211OfdmMode("", new Ieee80211OfdmPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
-const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::getMode(const Packet* packet) const
+const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::getMode(const Packet *packet) const
 {
-    const auto& modeReq = const_cast<Packet*>(packet)->findTag<Ieee80211ModeReq>();
+    const auto& modeReq = const_cast<Packet *>(packet)->findTag<Ieee80211ModeReq>();
     if (isCompliant)
-        return modeReq != nullptr ? check_and_cast<const Ieee80211OfdmMode*>(modeReq->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
+        return modeReq != nullptr ? check_and_cast<const Ieee80211OfdmMode *>(modeReq->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
     else
         return mode;
 }

@@ -22,7 +22,6 @@
  * @brief Class representing a CLNS Address type
   */
 
-
 #ifndef __INET_CLNSADDRESSTYPE_H
 #define __INET_CLNSADDRESSTYPE_H
 
@@ -35,7 +34,6 @@ class INET_API CLNSAddressType : public IL3AddressType
 {
   public:
     static CLNSAddressType INSTANCE;
-
 
   public:
     CLNSAddressType() {}

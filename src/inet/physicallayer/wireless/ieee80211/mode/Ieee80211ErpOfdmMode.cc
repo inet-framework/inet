@@ -21,8 +21,8 @@ namespace inet {
 namespace physicallayer {
 
 Ieee80211ErpOfdmMode::Ieee80211ErpOfdmMode(const char *name, bool isErpOnly, const Ieee80211OfdmPreambleMode *preambleMode, const Ieee80211OfdmSignalMode *signalMode, const Ieee80211OfdmDataMode *dataMode) :
-        Ieee80211OfdmMode(name, preambleMode, signalMode, dataMode, MHz(20), MHz(20)), // review the channel spacing
-        isErpOnly(isErpOnly)
+    Ieee80211OfdmMode(name, preambleMode, signalMode, dataMode, MHz(20), MHz(20)), // review the channel spacing
+    isErpOnly(isErpOnly)
 {
 
 }
@@ -52,3 +52,4 @@ const simtime_t Ieee80211ErpOfdmMode::getRifsTime() const
 
 } /* namespace physicallayer */
 } /* namespace inet */
+

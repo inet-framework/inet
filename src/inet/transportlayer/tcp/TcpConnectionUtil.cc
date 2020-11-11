@@ -405,7 +405,8 @@ void TcpConnection::sendAvailableDataToApp()
             indication->addTag<SocketInd>()->setSocketId(socketId);
             indication->setControlInfo(cmd);
             sendToApp(indication);
-        } else {
+        }
+        else {
             while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 msg->addTag<SocketInd>()->setSocketId(socketId);
@@ -569,7 +570,8 @@ void TcpConnection::sendSyn()
         tcpHeader->setCwrBit(true);
         state->ecnSynSent = true;
         EV << "ECN-setup SYN packet sent\n";
-    } else {
+    }
+    else {
         // rfc 3168 page 16:
         // A host that is not willing to use ECN on a TCP connection SHOULD
         // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
@@ -606,7 +608,8 @@ void TcpConnection::sendSynAck()
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(false);
         EV << "ECN-setup SYN-ACK packet sent\n";
-    } else {
+    }
+    else {
         tcpHeader->setEceBit(false);
         tcpHeader->setCwrBit(false);
         if (state->endPointIsWillingECN)
@@ -615,11 +618,12 @@ void TcpConnection::sendSynAck()
     if (state->ecnWillingness && state->endPointIsWillingECN) {
         state->ect = true;
         EV << "both end-points are willing to use ECN... ECN is enabled\n";
-    } else { //TODO: not sure if we have to.
-             // rfc-3168, page 16:
-             // A host that is not willing to use ECN on a TCP connection SHOULD
-             // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
-             // SYN-ACK packets that it sends to indicate this unwillingness.
+    }
+    else { //TODO: not sure if we have to.
+           // rfc-3168, page 16:
+           // A host that is not willing to use ECN on a TCP connection SHOULD
+           // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
+           // SYN-ACK packets that it sends to indicate this unwillingness.
         state->ect = false;
         if (state->endPointIsWillingECN)
             EV << "ECN is disabled\n";
@@ -705,7 +709,7 @@ void TcpConnection::sendAck()
     // flag set).  After the receipt of the CWR packet, acknowledgments for
     // subsequent non-CE data packets do not have the ECN-Echo flag set.
 
-    TcpStateVariables* state = getState();
+    TcpStateVariables *state = getState();
     if (state && state->ect) {
         if (tcpAlgorithm->shouldMarkAck()) {
             tcpHeader->setEceBit(true);
@@ -909,7 +913,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // yet been acknowledged, small segments cannot be sent until the outstanding
         // data is acknowledged.
         bool unacknowledgedData = (state->snd_una != state->snd_max);
-        bool containsFin = state->send_fin && (state->snd_nxt+bytesToSend) == state->snd_fin_seq;
+        bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
         if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else
@@ -1270,7 +1274,8 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             // Update WS variables
             if (state->ws_manual_scale > -1) {
                 state->rcv_wnd_scale = state->ws_manual_scale;
-            } else {
+            }
+            else {
                 ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
                 state->rcv_wnd_scale = 0;
 

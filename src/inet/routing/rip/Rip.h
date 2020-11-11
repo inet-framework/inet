@@ -56,11 +56,12 @@ struct RipNetworkInterface
     RipMode mode = NO_RIP;    // RIP mode of this interface
 
     RipNetworkInterface(const NetworkInterface *ie)
-    : ie(ie), metric(1), mode(NO_RIP)
+        : ie(ie), metric(1), mode(NO_RIP)
     {
         ASSERT(!ie->isLoopback());
         ASSERT(ie->isMulticast());
     }
+
 };
 
 /**
@@ -121,11 +122,11 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     static simsignal_t badResponseSignal;
     static simsignal_t numRoutesSignal;
 
-public:
+  public:
     Rip();
     ~Rip();
 
-protected:
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -159,7 +160,7 @@ protected:
 
     virtual void sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const NetworkInterface *destInterface);
 
-private:
+  private:
     RipNetworkInterface *findRipInterfaceById(int interfaceId);
 
     RipRoute *findRipRoute(const L3Address& destAddress, int prefixLength);
@@ -177,10 +178,12 @@ private:
         NetworkInterface *ie = dynamic_cast<NetworkInterface *>(route->getSource());
         return ie && ie->isLoopback();
     }
+
     bool isLocalInterfaceRoute(const IRoute *route) {
         NetworkInterface *ie = dynamic_cast<NetworkInterface *>(route->getSource());
         return ie && !ie->isLoopback();
     }
+
     bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
 };
 

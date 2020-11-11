@@ -29,8 +29,7 @@
 
 namespace inet {
 
-enum LabelOpCode
-{
+enum LabelOpCode {
     PUSH_OPER,
     SWAP_OPER,
     POP_OPER

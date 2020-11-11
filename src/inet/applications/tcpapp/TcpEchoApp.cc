@@ -75,7 +75,6 @@ void TcpEchoApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-
 void TcpEchoApp::finish()
 {
     TcpServerHostApp::finish();
@@ -122,7 +121,7 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
     delete rcvdPkt;
 }
 
-  /*
+/*
    * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
    */
 void TcpEchoAppThread::timerExpired(cMessage *timer)

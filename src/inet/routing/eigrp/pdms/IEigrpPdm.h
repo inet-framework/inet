@@ -87,7 +87,7 @@ class IEigrpPdm
      * Determine whether there are Feasibles Successors for specified route.
      * @param resultDmin return parameter with minimal distance to the destination.
      */
-    virtual bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t &resultDmin) = 0;
+    virtual bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t& resultDmin) = 0;
     /**
      * Sets Reply Status Table for specified network.
      * @param route route network
@@ -113,8 +113,9 @@ class IEigrpPdm
     /**
      * Sends update message to all stub neighbors.
      */
-    virtual void sendUpdateToStubs(EigrpRouteSource<IPAddress> *succ ,EigrpRouteSource<IPAddress> *oldSucc, EigrpRoute<IPAddress> *route) = 0;
+    virtual void sendUpdateToStubs(EigrpRouteSource<IPAddress> *succ, EigrpRouteSource<IPAddress> *oldSucc, EigrpRoute<IPAddress> *route) = 0;
 };
 } //eigrp
 } //inet
 #endif /* IEIGRPPDM_H_ */
+

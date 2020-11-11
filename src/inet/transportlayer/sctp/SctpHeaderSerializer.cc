@@ -30,7 +30,6 @@
 #include "inet/transportlayer/sctp/SctpChecksum.h"
 #include "inet/transportlayer/sctp/headers/sctphdr.h"
 
-
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <arpa/inet.h>
 #include <netinet/in.h>    // htonl, ntohl, ...
@@ -38,7 +37,7 @@
 #endif // if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
 #include <sys/types.h>
-#define MAXBUFLEN 1<<16
+#define MAXBUFLEN    1 << 16
 
 namespace inet {
 
@@ -110,7 +109,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
 
             case INIT: {
-                EV_INFO << "serialize INIT size=" << (unsigned long)B(msg->getChunkLength()).get() <<  "\n";
+                EV_INFO << "serialize INIT size=" << (unsigned long)B(msg->getChunkLength()).get() << "\n";
 
                 // source data from internal struct:
                 SctpInitChunk *initChunk = check_and_cast<SctpInitChunk *>(chunk);
@@ -135,10 +134,12 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     if (initChunk->getIpv4Supported() && initChunk->getIpv6Supported()) {
                         sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
                         sup_addr->address_type_2 = htons(INIT_PARAM_IPV6);
-                    } else if (initChunk->getIpv4Supported()) {
+                    }
+                    else if (initChunk->getIpv4Supported()) {
                         sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
                         sup_addr->address_type_2 = 0;
-                    } else {
+                    }
+                    else {
                         sup_addr->address_type_1 = htons(INIT_PARAM_IPV6);
                         sup_addr->address_type_2 = 0;
                     }
@@ -267,10 +268,12 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     if (initAckChunk->getIpv4Supported() && initAckChunk->getIpv6Supported()) {
                         sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
                         sup_addr->address_type_2 = htons(INIT_PARAM_IPV6);
-                    } else if (initAckChunk->getIpv4Supported()) {
+                    }
+                    else if (initAckChunk->getIpv4Supported()) {
                         sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
                         sup_addr->address_type_2 = 0;
-                    } else {
+                    }
+                    else {
                         sup_addr->address_type_1 = htons(INIT_PARAM_IPV6);
                         sup_addr->address_type_2 = 0;
                     }
@@ -384,14 +387,14 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         sizePeerKeyVector = sizeVector;
                     else
                         sizeKeyVector = sizeVector;
-                 /* ToDo */
-                 //   calculateSharedKey();
+                    /* ToDo */
+                    //   calculateSharedKey();
                     free(vector);
                 }
                 int32_t cookielen = initAckChunk->getCookieArraySize();
                 if (cookielen == 0) {
                     SctpCookie *stateCookie = (SctpCookie *)(initAckChunk->getStateCookie());
-                  //  SctpCookie *stateCookie = check_and_cast<SctpCookie *>(initAckChunk->getStateCookie());
+                    //  SctpCookie *stateCookie = check_and_cast<SctpCookie *>(initAckChunk->getStateCookie());
                     struct init_cookie_parameter *cookie = (struct init_cookie_parameter *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parPtr);
                     cookie->type = htons(INIT_PARAM_COOKIE);
                     cookie->length = htons(SCTP_COOKIE_LENGTH + 4);
@@ -403,7 +406,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         cookie->peerTieTag[i] = stateCookie->getPeerTieTag(i);
                     }
                     parPtr += (SCTP_COOKIE_LENGTH + 4);
-                } else {
+                }
+                else {
                     struct tlv *cookie = (struct tlv *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parPtr);
                     cookie->type = htons(INIT_PARAM_COOKIE);
                     cookie->length = htons(cookielen + 4);
@@ -489,28 +493,84 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 break;
             }
 
-            case HEARTBEAT :
-                {
-                    EV_INFO << simTime() << "  SctpAssociation:: Heartbeat sent \n";
-                    SctpHeartbeatChunk *heartbeatChunk = check_and_cast<SctpHeartbeatChunk *>(chunk);
+            case HEARTBEAT: {
+                EV_INFO << simTime() << "  SctpAssociation:: Heartbeat sent \n";
+                SctpHeartbeatChunk *heartbeatChunk = check_and_cast<SctpHeartbeatChunk *>(chunk);
 
-                    // destination is send buffer:
-                    struct heartbeat_chunk *hbc = (struct heartbeat_chunk *)(buffer + writtenbytes);    // append data to buffer
+                // destination is send buffer:
+                struct heartbeat_chunk *hbc = (struct heartbeat_chunk *)(buffer + writtenbytes);    // append data to buffer
 
-                    // fill buffer with data from Sctp init ack chunk structure
-                    hbc->type = heartbeatChunk->getSctpChunkType();
+                // fill buffer with data from Sctp init ack chunk structure
+                hbc->type = heartbeatChunk->getSctpChunkType();
 
-                    // deliver info:
-                    struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbc) + sizeof(struct heartbeat_chunk));
-                    L3Address addr = heartbeatChunk->getRemoteAddr();
-                    simtime_t time = heartbeatChunk->getTimeField();
-                    int32_t infolen = 0;
+                // deliver info:
+                struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbc) + sizeof(struct heartbeat_chunk));
+                L3Address addr = heartbeatChunk->getRemoteAddr();
+                simtime_t time = heartbeatChunk->getTimeField();
+                int32_t infolen = 0;
+#ifdef WITH_IPv4
+                if (addr.getType() == L3Address::IPv4) {
+                    infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32_t);
+                    hbi->type = htons(1);    // mandatory
+                    hbi->length = htons(infolen + 4);
+                    struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)hbc) + 8);
+                    ipv4addr->type = htons(INIT_PARAM_IPV4);
+                    ipv4addr->length = htons(8);
+                    ipv4addr->address = htonl(addr.toIpv4().getInt());
+                    HBI_ADDR(hbi).v4addr = *ipv4addr;
+                }
+#endif // ifdef WITH_IPv4
+#ifdef WITH_IPv6
+                if (addr.getType() == L3Address::IPv6) {
+                    infolen = 20 + sizeof(uint32_t);
+                    hbi->type = htons(1);    // mandatory
+                    hbi->length = htons(infolen + 4);
+                    struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)hbc) + 8);
+                    ipv6addr->type = htons(INIT_PARAM_IPV6);
+                    ipv6addr->length = htons(20);
+                    for (int32_t j = 0; j < 4; j++) {
+                        ipv6addr->address[j] = htonl(addr.toIpv6().words()[j]);
+                    }
+                    HBI_ADDR(hbi).v6addr = *ipv6addr;
+                }
+#endif // ifdef WITH_IPv6
+                ASSERT(infolen != 0);
+                HBI_TIME(hbi) = htonl((uint32_t)time.dbl());
+                hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
+                writtenbytes += sizeof(struct heartbeat_chunk) + infolen + 4;
+                break;
+            }
+
+            case HEARTBEAT_ACK: {
+                EV_INFO << simTime() << " SctpAssociation:: HeartbeatAck sent \n";
+                SctpHeartbeatAckChunk *heartbeatAckChunk = check_and_cast<SctpHeartbeatAckChunk *>(chunk);
+
+                // destination is send buffer:
+                struct heartbeat_ack_chunk *hbac = (struct heartbeat_ack_chunk *)(buffer + writtenbytes);    // append data to buffer
+
+                // fill buffer with data from Sctp init ack chunk structure
+                hbac->type = heartbeatAckChunk->getSctpChunkType();
+
+                // deliver info:
+                struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbac) + sizeof(struct heartbeat_ack_chunk));
+                int32_t infolen = heartbeatAckChunk->getInfoArraySize();
+                hbi->type = htons(1);    //mandatory
+                if (infolen > 0) {
+                    hbi->length = htons(infolen + 4);
+                    for (int32_t i = 0; i < infolen; i++) {
+                        HBI_INFO(hbi)[i] = heartbeatAckChunk->getInfo(i);
+                    }
+                }
+                else {
+                    L3Address addr = heartbeatAckChunk->getRemoteAddr();
+                    simtime_t time = heartbeatAckChunk->getTimeField();
+
 #ifdef WITH_IPv4
                     if (addr.getType() == L3Address::IPv4) {
                         infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32_t);
                         hbi->type = htons(1);    // mandatory
                         hbi->length = htons(infolen + 4);
-                        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)hbc) + 8);
+                        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)hbac) + 8);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
                         ipv4addr->length = htons(8);
                         ipv4addr->address = htonl(addr.toIpv4().getInt());
@@ -522,7 +582,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         infolen = 20 + sizeof(uint32_t);
                         hbi->type = htons(1);    // mandatory
                         hbi->length = htons(infolen + 4);
-                        struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)hbc) + 8);
+                        struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)hbac) + 8);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
                         ipv6addr->length = htons(20);
                         for (int32_t j = 0; j < 4; j++) {
@@ -531,71 +591,13 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         HBI_ADDR(hbi).v6addr = *ipv6addr;
                     }
 #endif // ifdef WITH_IPv6
-                    ASSERT(infolen != 0);
                     HBI_TIME(hbi) = htonl((uint32_t)time.dbl());
-                    hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
-                    writtenbytes += sizeof(struct heartbeat_chunk) + infolen + 4;
-                    break;
                 }
+                hbac->length = htons(sizeof(struct heartbeat_ack_chunk) + infolen + 4);
+                writtenbytes += sizeof(struct heartbeat_ack_chunk) + infolen + 4;
 
-            case HEARTBEAT_ACK :
-                {
-                    EV_INFO << simTime() << " SctpAssociation:: HeartbeatAck sent \n";
-                    SctpHeartbeatAckChunk *heartbeatAckChunk = check_and_cast<SctpHeartbeatAckChunk *>(chunk);
-
-                    // destination is send buffer:
-                    struct heartbeat_ack_chunk *hbac = (struct heartbeat_ack_chunk *)(buffer + writtenbytes);    // append data to buffer
-
-                    // fill buffer with data from Sctp init ack chunk structure
-                    hbac->type = heartbeatAckChunk->getSctpChunkType();
-
-                    // deliver info:
-                    struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbac) + sizeof(struct heartbeat_ack_chunk));
-                    int32_t infolen = heartbeatAckChunk->getInfoArraySize();
-                    hbi->type = htons(1);    //mandatory
-                    if (infolen > 0) {
-                        hbi->length = htons(infolen + 4);
-                        for (int32_t i = 0; i < infolen; i++) {
-                            HBI_INFO(hbi)[i] = heartbeatAckChunk->getInfo(i);
-                        }
-                    }
-                    else {
-                        L3Address addr = heartbeatAckChunk->getRemoteAddr();
-                        simtime_t time = heartbeatAckChunk->getTimeField();
-
-#ifdef WITH_IPv4
-                        if (addr.getType() == L3Address::IPv4) {
-                            infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32_t);
-                            hbi->type = htons(1);    // mandatory
-                            hbi->length = htons(infolen + 4);
-                            struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)hbac) + 8);
-                            ipv4addr->type = htons(INIT_PARAM_IPV4);
-                            ipv4addr->length = htons(8);
-                            ipv4addr->address = htonl(addr.toIpv4().getInt());
-                            HBI_ADDR(hbi).v4addr = *ipv4addr;
-                        }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-                        if (addr.getType() == L3Address::IPv6) {
-                            infolen = 20 + sizeof(uint32_t);
-                            hbi->type = htons(1);    // mandatory
-                            hbi->length = htons(infolen + 4);
-                            struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)hbac) + 8);
-                            ipv6addr->type = htons(INIT_PARAM_IPV6);
-                            ipv6addr->length = htons(20);
-                            for (int32_t j = 0; j < 4; j++) {
-                                ipv6addr->address[j] = htonl(addr.toIpv6().words()[j]);
-                            }
-                            HBI_ADDR(hbi).v6addr = *ipv6addr;
-                        }
-#endif // ifdef WITH_IPv6
-                        HBI_TIME(hbi) = htonl((uint32_t)time.dbl());
-                    }
-                    hbac->length = htons(sizeof(struct heartbeat_ack_chunk) + infolen + 4);
-                    writtenbytes += sizeof(struct heartbeat_ack_chunk) + infolen + 4;
-
-                    break;
-                }
+                break;
+            }
 
             case ABORT: {
                 EV_INFO << simTime() << " SctpAssociation:: Abort sent \n";
@@ -983,7 +985,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                                 }
                                 if (i < numParameters - 1) {
                                     parPtr += ADD_PADDING(outparam->getStreamNumbersArraySize() * 2);
-                                } else {
+                                }
+                                else {
                                     parPtr += outparam->getStreamNumbersArraySize() * 2;
                                 }
                             }
@@ -1003,7 +1006,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                                 }
                                 if (i < numParameters - 1) {
                                     parPtr += ADD_PADDING(inparam->getStreamNumbersArraySize() * 2);
-                                } else {
+                                }
+                                else {
                                     parPtr += inparam->getStreamNumbersArraySize() * 2;
                                 }
                             }
@@ -1050,7 +1054,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                             break;
                         }
 
-                       case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
+                        case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
                             SctpAddStreamsRequestParameter *outstreams = check_and_cast<SctpAddStreamsRequestParameter *>(parameter);
                             struct add_streams_request_parameter *addoutp = (struct add_streams_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             addoutp->type = htons(outstreams->getParameterType());
@@ -1125,13 +1129,12 @@ void SctpHeaderSerializer::hmacSha1(const uint8_t *buf, uint32_t buflen, const u
     }
 }
 
-
 const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint16_t paramType;
     int32_t parptr, chunklen, cLen, woPadding;
 
-   // auto position = stream.getPosition();
+    // auto position = stream.getPosition();
     int bufsize = B(stream.getRemainingLength()).get();
     uint8_t buffer[bufsize];
     stream.readBytes(buffer, B(bufsize));
@@ -1237,12 +1240,14 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 const struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)init_chunk) + sizeof(struct init_chunk) + parptr);
                                 if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV4) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV4)) {
                                     chunk->setIpv4Supported(true);
-                                } else {
+                                }
+                                else {
                                     chunk->setIpv4Supported(false);
                                 }
                                 if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV6) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV6)) {
                                     chunk->setIpv6Supported(true);
-                                } else {
+                                }
+                                else {
                                     chunk->setIpv6Supported(false);
                                 }
                                 chunklen += 8;
@@ -1266,7 +1271,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 const struct init_ipv6_address_parameter *ipv6addr;
                                 ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)init_chunk) + sizeof(struct init_chunk) + parptr);
                                 Ipv6Address ipv6Addr = Ipv6Address(ipv6addr->address[0], ipv6addr->address[1],
-                                            ipv6addr->address[2], ipv6addr->address[3]);
+                                        ipv6addr->address[2], ipv6addr->address[3]);
                                 L3Address localv6Addr(ipv6Addr);
                                 EV_INFO << "address" << ipv6Addr << "\n";
                                 chunk->setAddressesArraySize(++addrcounter);
@@ -1377,7 +1382,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
 
                                     for (uint32_t i = unknownLen; i < unknownLen + ADD_PADDING(ntohs(unknown->length)); i++)
                                         chunk->setUnrecognizedParameters(i, dv->data[i - unknownLen]);
-                                } else {
+                                }
+                                else {
                                     chunklen += ADD_PADDING(ntohs(unknown->length));
                                 }
                                 EV_INFO << "stopProcessing=" << stopProcessing << " report=" << report << "\n";
@@ -1445,12 +1451,14 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 const struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)iac) + sizeof(struct init_ack_chunk) + parptr);
                                 if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV4) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV4)) {
                                     chunk->setIpv4Supported(true);
-                                } else {
+                                }
+                                else {
                                     chunk->setIpv4Supported(false);
                                 }
                                 if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV6) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV6)) {
                                     chunk->setIpv6Supported(true);
-                                } else {
+                                }
+                                else {
                                     chunk->setIpv6Supported(false);
                                 }
                                 chunklen += 8;
@@ -1473,7 +1481,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 const struct init_ipv6_address_parameter *ipv6addr;
                                 ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parptr);
                                 Ipv6Address ipv6Addr = Ipv6Address(ipv6addr->address[0], ipv6addr->address[1],
-                                            ipv6addr->address[2], ipv6addr->address[3]);
+                                        ipv6addr->address[2], ipv6addr->address[3]);
                                 EV_INFO << "address" << ipv6Addr << "\n";
                                 L3Address localv6Addr(ipv6Addr);
 
@@ -1588,7 +1596,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
 
                                     for (uint32_t i = unknownLen; i < unknownLen + ADD_PADDING(ntohs(unknown->length)); i++)
                                         chunk->setUnrecognizedParameters(i, dv->data[i - unknownLen]);
-                                } else {
+                                }
+                                else {
                                     chunklen += ADD_PADDING(ntohs(unknown->length));
                                 }
                                 EV_INFO << "stopProcessing=" << stopProcessing << "  report=" << report << "\n";
@@ -2165,7 +2174,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
         chunkPtr += cLen;
     }    // end of while()
     EV_INFO << "SctpSerializer - pkt info - " << B(dest->getChunkLength()).get() << " bytes" << endl;
-     return dest;
+    return dest;
 }
 
 bool SctpHeaderSerializer::compareRandom()
@@ -2214,3 +2223,4 @@ void SctpHeaderSerializer::calculateSharedKey()
 } // namespace sctp
 
 } // namespace inet
+

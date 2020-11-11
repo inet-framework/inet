@@ -23,10 +23,11 @@
 
 namespace inet {
 
-template<typename T>
+template <typename T>
 class INET_API ClockUserModuleMixin : public T, public cListener
 {
 #ifdef WITH_CLOCK_SUPPORT
+
   protected:
     IClock *clock = nullptr;
 
@@ -55,13 +56,14 @@ class INET_API ClockUserModuleMixin : public T, public cListener
     using T::exponential;
     using T::normal;
     using T::truncnormal;
-    virtual ClockTime uniform(ClockTime a, ClockTime b, int rng=0) const  {return uniform(a.dbl(), b.dbl(), rng);}
-    virtual ClockTime exponential(ClockTime mean, int rng=0) const  {return exponential(mean.dbl(), rng);}
-    virtual ClockTime normal(ClockTime mean, ClockTime stddev, int rng=0) const  {return normal(mean.dbl(), stddev.dbl(), rng);}
-    virtual ClockTime truncnormal(ClockTime mean, ClockTime stddev, int rng=0) const  {return truncnormal(mean.dbl(), stddev.dbl(), rng);}
+    virtual ClockTime uniform(ClockTime a, ClockTime b, int rng = 0) const { return uniform(a.dbl(), b.dbl(), rng); }
+    virtual ClockTime exponential(ClockTime mean, int rng = 0) const { return exponential(mean.dbl(), rng); }
+    virtual ClockTime normal(ClockTime mean, ClockTime stddev, int rng = 0) const { return normal(mean.dbl(), stddev.dbl(), rng); }
+    virtual ClockTime truncnormal(ClockTime mean, ClockTime stddev, int rng = 0) const { return truncnormal(mean.dbl(), stddev.dbl(), rng); }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 #else // #ifdef WITH_CLOCK_SUPPORT
+
   public:
     virtual void scheduleClockEventAt(clocktime_t time, ClockEvent *msg) { T::scheduleAt(time, msg); }
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *msg) { T::scheduleAfter(delay, msg); }

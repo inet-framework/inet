@@ -68,7 +68,7 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
 
   public:
     HeatMapPlotFigure(const char *name = nullptr);
-    virtual ~HeatMapPlotFigure() {};
+    virtual ~HeatMapPlotFigure() {}
 
     virtual void parse(cProperty *property) override;
     const char **getAllowedPropertyKeys() const override;
@@ -124,14 +124,14 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     void invertXAxis() { invertedXAxis = !invertedXAxis; }
     void invertYAxis() { invertedYAxis = !invertedYAxis; }
 
-    const char* getXAxisLabel() const { return xAxisLabelFigure->getText(); }
-    void setXAxisLabel(const char* text) { xAxisLabelFigure->setText(text); }
+    const char *getXAxisLabel() const { return xAxisLabelFigure->getText(); }
+    void setXAxisLabel(const char *text) { xAxisLabelFigure->setText(text); }
 
-    const char* getYAxisLabel() const { return yAxisLabelFigure->getText(); }
-    void setYAxisLabel(const char* text) { yAxisLabelFigure->setText(text); }
+    const char *getYAxisLabel() const { return yAxisLabelFigure->getText(); }
+    void setYAxisLabel(const char *text) { yAxisLabelFigure->setText(text); }
 
-    const char* getLabel() const { return labelFigure->getText(); }
-    void setLabel(const char* text) { labelFigure->setText(text); }
+    const char *getLabel() const { return labelFigure->getText(); }
+    void setLabel(const char *text) { labelFigure->setText(text); }
 
     int getLabelOffset() const;
     void setLabelOffset(int offset);

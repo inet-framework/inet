@@ -88,7 +88,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     std::map<L3Address, RreqTimer *> targetAddressToRREQTimer;
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;
     std::set<PacketJitterTimer *> packetJitterTimers;
-    std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
+    std::vector<std::pair<L3Address, int>> clientAddressAndPrefixLengthPairs;   // 5.3.  Router Clients and Client Networks
 
   public:
     Dymo();
@@ -161,7 +161,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     const Ptr<Rreq> createRreq(const L3Address& target, int retryCount);
     void sendRreq(const Ptr<Rreq>& rreq);
     void processRreq(Packet *packet, const Ptr<const Rreq>& rreq);
-    b computeRreqLength(const Ptr<Rreq> &rreq);
+    b computeRreqLength(const Ptr<Rreq>& rreq);
 
     // handling RREP packets
     const Ptr<Rrep> createRrep(const Ptr<const RteMsg>& rteMsg);
@@ -169,7 +169,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     void sendRrep(const Ptr<Rrep>& rrep);
     void sendRrep(const Ptr<Rrep>& rrep, IRoute *route);
     void processRrep(Packet *packet, const Ptr<const Rrep>& rrep);
-    b computeRrepLength(const Ptr<Rrep> &rrep);
+    b computeRrepLength(const Ptr<Rrep>& rrep);
 
     // handling RERR packets
     const Ptr<Rerr> createRerr(std::vector<L3Address>& addresses);

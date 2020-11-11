@@ -40,12 +40,13 @@ class INET_API InfoVisualizerBase : public VisualizerBase
         virtual ~InfoVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public StringFormat::IDirectiveResolver
+    {
       protected:
         const cModule *module = nullptr;
 
       public:
-        DirectiveResolver(const cModule *module) : module(module) { }
+        DirectiveResolver(const cModule *module) : module(module) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

@@ -33,6 +33,7 @@ class INET_API TunSocket : public ISocket
         virtual void socketDataArrived(TunSocket *socket, Packet *packet) = 0;
         virtual void socketClosed(TunSocket *socket) = 0;
     };
+
   protected:
     int socketId = -1;
     int interfaceId = -1;

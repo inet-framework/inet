@@ -20,7 +20,6 @@
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
 ***************************************************************************/
 
-
 #ifndef __INET_RTCP_H
 #define __INET_RTCP_H
 

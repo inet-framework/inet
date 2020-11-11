@@ -32,7 +32,7 @@ void FloodingProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protoco
         context.destinationColumn << header->getDestinationAddress();
         B payloadLength = header->getPayloadLengthField();
         context.infoColumn << "Flooding"
-                << " ttl:" << header->getTtl();
+                           << " ttl:" << header->getTtl();
         auto payloadProtocol = header->getProtocol();
         if (payloadProtocol)
             context.infoColumn << " payload:" << payloadProtocol->getName() << " " << payloadLength;

@@ -142,7 +142,7 @@ void InProgressFrames::dropFrame(Packet *packet)
 
 void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
 {
-    for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {
+    for (auto it = inProgressFrames.begin(); it != inProgressFrames.end(); ) {
         auto frame = *it;
         auto header = frame->peekAtFront<Ieee80211MacHeader>();
         if (header->getType() == ST_DATA_WITH_QOS) {
@@ -189,3 +189,4 @@ InProgressFrames::~InProgressFrames()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

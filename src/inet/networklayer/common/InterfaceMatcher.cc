@@ -43,7 +43,7 @@ InterfaceMatcher::Matcher::Matcher(const char *pattern)
 
 InterfaceMatcher::Matcher::~Matcher()
 {
-    for (auto & elem : matchers)
+    for (auto& elem : matchers)
         delete elem;
 }
 
@@ -51,7 +51,7 @@ bool InterfaceMatcher::Matcher::matches(const char *s) const
 {
     if (matchesany)
         return true;
-    for (auto & elem : matchers)
+    for (auto& elem : matchers)
         if (elem->matches(s))
             return true;
 
@@ -77,15 +77,15 @@ bool InterfaceMatcher::Selector::matches(const NetworkInterface *ie)
 
 InterfaceMatcher::InterfaceMatcher(const cXMLElementList& xmlSelectors)
 {
-    for (auto & xmlSelector : xmlSelectors) {
+    for (auto& xmlSelector : xmlSelectors) {
         cXMLElement *interfaceElement = xmlSelector;
-        const char *hostAttr = interfaceElement->getAttribute("hosts");    // "host* router[0..3]"
-        const char *interfaceAttr = interfaceElement->getAttribute("names");    // i.e. interface names, like "eth* ppp0"
+        const char *hostAttr = interfaceElement->getAttribute("hosts"); // "host* router[0..3]"
+        const char *interfaceAttr = interfaceElement->getAttribute("names"); // i.e. interface names, like "eth* ppp0"
 
-        const char *towardsAttr = interfaceElement->getAttribute("towards");    // neighbor host names, like "ap switch"
-        const char *amongAttr = interfaceElement->getAttribute("among");    // neighbor host names, like "host[*] router1"
+        const char *towardsAttr = interfaceElement->getAttribute("towards"); // neighbor host names, like "ap switch"
+        const char *amongAttr = interfaceElement->getAttribute("among"); // neighbor host names, like "host[*] router1"
 
-        if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
+        if (amongAttr && *amongAttr) { // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
                 throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", interfaceElement->getSourceLocation());
             towardsAttr = hostAttr = amongAttr;
@@ -102,7 +102,7 @@ InterfaceMatcher::InterfaceMatcher(const cXMLElementList& xmlSelectors)
 
 InterfaceMatcher::~InterfaceMatcher()
 {
-    for (auto & elem : selectors)
+    for (auto& elem : selectors)
         delete elem;
 }
 

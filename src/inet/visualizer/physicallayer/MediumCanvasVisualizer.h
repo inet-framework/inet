@@ -41,6 +41,7 @@ namespace visualizer {
 class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 {
 #ifdef WITH_RADIO
+
   protected:
     /** @name Parameters */
     //@{

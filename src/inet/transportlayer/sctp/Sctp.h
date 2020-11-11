@@ -186,7 +186,7 @@ class INET_API Sctp : public cSimpleModule
     int udpSockId;
     SctpCrcInsertion crcInsertion;
 
-    SocketOptions* socketOptions;
+    SocketOptions *socketOptions;
 
   protected:
     IRoutingTable *rt;
@@ -229,7 +229,6 @@ class INET_API Sctp : public cSimpleModule
     virtual void finish() override;
     virtual void send_to_ip(Packet *msg);
 
-
     AssocStat *getAssocStat(uint32_t assocId)
     {
         auto found = assocStatMap.find(assocId);
@@ -271,7 +270,7 @@ class INET_API Sctp : public cSimpleModule
     /** Getter and Setter for the socket options **/
     SocketOptions *collectSocketOptions();
 
-    void setSocketOptions(SocketOptions* options) { socketOptions = options; };
+    void setSocketOptions(SocketOptions *options) { socketOptions = options; }
     int getMaxInitRetrans() { return socketOptions->maxInitRetrans; };
     int getMaxInitRetransTimeout() { return socketOptions->maxInitRetransTimeout; };
     double getRtoInitial() { return socketOptions->rtoInitial; };
@@ -286,10 +285,10 @@ class INET_API Sctp : public cSimpleModule
     int getPathMaxRetrans() { return socketOptions->pathMaxRetrans; };
     int getAssocMaxRtx() { return socketOptions->assocMaxRtx; };
     double getHbInterval() { return socketOptions->hbInterval; };
-    void setRtoInitial(double rtoInitial) { socketOptions->rtoInitial = rtoInitial; };
-    void setRtoMin(double rtoMin) { socketOptions->rtoMin = rtoMin; };
-    void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; };
-    void setInterfaceId(int id) { interfaceId = id; };
+    void setRtoInitial(double rtoInitial) { socketOptions->rtoInitial = rtoInitial; }
+    void setRtoMin(double rtoMin) { socketOptions->rtoMin = rtoMin; }
+    void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; }
+    void setInterfaceId(int id) { interfaceId = id; }
     int getInterfaceId() { return interfaceId; };
 };
 

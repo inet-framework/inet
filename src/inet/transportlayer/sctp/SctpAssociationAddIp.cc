@@ -143,7 +143,7 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
                 }
 
                 default:
-                    EV_INFO << "type " <<  atoi(token) << "not known\n";
+                    EV_INFO << "type " << atoi(token) << "not known\n";
                     break;
             }
         }
@@ -158,7 +158,7 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
         sctpAsconf->insertSctpChunks(asconfChunk);
 
         state->asconfChunk = check_and_cast<SctpAsconfChunk *>(asconfChunk->dup());
-       // state->asconfChunk->setName("STATE-ASCONF");
+        // state->asconfChunk->setName("STATE-ASCONF");
 
         Packet *pkt = new Packet("ASCONF");
         sendToIP(pkt, sctpAsconf, targetAddr);
@@ -287,7 +287,7 @@ void SctpAssociation::calculateAssocSharedKey()
 
 bool SctpAssociation::typeInChunkList(const uint16_t type)
 {
-    for (auto & elem : state->peerChunkList) {
+    for (auto& elem : state->peerChunkList) {
         if ((elem) == type) {
             return true;
         }
@@ -297,7 +297,7 @@ bool SctpAssociation::typeInChunkList(const uint16_t type)
 
 bool SctpAssociation::typeInOwnChunkList(const uint16_t type)
 {
-    for (auto & elem : state->chunkList) {
+    for (auto& elem : state->chunkList) {
         if ((elem) == type) {
             return true;
         }

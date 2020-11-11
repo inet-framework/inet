@@ -39,7 +39,7 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public DefaultP
         L3Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
     IInterfaceTable *interfaceTable;

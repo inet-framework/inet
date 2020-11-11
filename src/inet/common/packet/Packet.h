@@ -86,7 +86,7 @@ namespace inet {
  */
 class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedObject, public IRegionTaggedObject
 {
-  friend class PacketDescriptor;
+    friend class PacketDescriptor;
 
   protected:
     /**
@@ -483,7 +483,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     bool hasAtFront(b length = b(-1)) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-        return content->has<T>(frontIterator, length == b(-1) ? -dataLength: length);
+        return content->has<T>(frontIterator, length == b(-1) ? -dataLength : length);
     }
 
     /**
@@ -933,7 +933,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAtFront(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+    void updateAtFront(std::function<void(const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
         updateAtFront<Chunk>(f, length, flags);
     }
 
@@ -945,7 +945,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAtBack(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+    void updateAtBack(std::function<void(const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
         updateAtBack<Chunk>(f, length, flags);
     }
 
@@ -955,7 +955,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * packet. The front and back offsets are not affected. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      */
-    void updateData(std::function<void (const Ptr<Chunk>&)> f, int flags = 0) {
+    void updateData(std::function<void(const Ptr<Chunk>&)> f, int flags = 0) {
         updateData<Chunk>(f, flags);
     }
 
@@ -965,7 +965,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags = 0) {
+    void updateAll(std::function<void(const Ptr<Chunk>&)> f, int flags = 0) {
         updateAll<Chunk>(f, flags);
     }
 
@@ -977,7 +977,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * not affected. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      */
-    void updateDataAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+    void updateDataAt(std::function<void(const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
         updateDataAt<Chunk>(f, offset, length, flags);
     }
 
@@ -989,7 +989,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * updated according to the offset and length parameters. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+    void updateAt(std::function<void(const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
         updateAt<Chunk>(f, offset, length, flags);
     }
 
@@ -1003,7 +1003,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * enumeration members.
      */
     template <typename T>
-    void updateAtFront(std::function<void (const Ptr<T>&)> f, b length = b(-1), int flags = 0) {
+    void updateAtFront(std::function<void(const Ptr<T>&)> f, b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getFrontOffset(), length, flags);
     }
@@ -1016,7 +1016,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * enumeration members.
      */
     template <typename T>
-    void updateAtBack(std::function<void (const Ptr<T>&)> f, b length, int flags = 0) {
+    void updateAtBack(std::function<void(const Ptr<T>&)> f, b length, int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getBackOffset() - length, length, flags);
     }
@@ -1028,7 +1028,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    void updateData(std::function<void (const Ptr<T>&)> f, int flags = 0) {
+    void updateData(std::function<void(const Ptr<T>&)> f, int flags = 0) {
         updateAt<T>(f, getFrontOffset(), getDataLength(), flags);
     }
 
@@ -1039,7 +1039,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    void updateAll(std::function<void (const Ptr<T>&)> f, int flags = 0) {
+    void updateAll(std::function<void(const Ptr<T>&)> f, int flags = 0) {
         updateAt<T>(f, b(0), totalLength, flags);
     }
 
@@ -1052,7 +1052,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * enumeration members.
      */
     template <typename T>
-    void updateDataAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+    void updateDataAt(std::function<void(const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getFrontOffset() + offset, length, flags);
@@ -1069,7 +1069,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * TODO: current limitation: the chunk size cannot be changed
      */
     template <typename T>
-    void updateAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+    void updateAt(std::function<void(const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
@@ -1213,58 +1213,59 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     /**
      * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
      */
-    template<typename T> const Ptr<const T> findTag() const {
+    template <typename T> const Ptr<const T> findTag() const {
         return tags.findTag<T>();
     }
 
     /**
      * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
      */
-    template<typename T> const Ptr<T> findTagForUpdate() {
+    template <typename T> const Ptr<T> findTagForUpdate() {
         return tags.findTagForUpdate<T>();
     }
 
     /**
      * Returns the packet tag for the provided type or throws an exception if no such packet tag is found.
      */
-    template<typename T> const Ptr<const T> getTag() const {
+    template <typename T> const Ptr<const T> getTag() const {
         return tags.getTag<T>();
     }
 
     /**
      * Returns the packet tag for the provided type or throws an exception if no such packet tag is found.
      */
-    template<typename T> const Ptr<T> getTagForUpdate() {
+    template <typename T> const Ptr<T> getTagForUpdate() {
         return tags.getTagForUpdate<T>();
     }
 
     /**
      * Returns a newly added packet tag for the provided type, or throws an exception if such a packet tag is already present.
      */
-    template<typename T> const Ptr<T> addTag() {
+    template <typename T> const Ptr<T> addTag() {
         return tags.addTag<T>();
     }
 
     /**
      * Returns a newly added packet tag for the provided type if absent, or returns the packet tag that is already present.
      */
-    template<typename T> const Ptr<T> addTagIfAbsent() {
+    template <typename T> const Ptr<T> addTagIfAbsent() {
         return tags.addTagIfAbsent<T>();
     }
 
     /**
      * Removes the packet tag for the provided type, or throws an exception if no such packet tag is found.
      */
-    template<typename T> const Ptr<T> removeTag() {
+    template <typename T> const Ptr<T> removeTag() {
         return tags.removeTag<T>();
     }
 
     /**
      * Removes the packet tag for the provided type if present, or returns nullptr if no such packet tag is found.
      */
-    template<typename T> const Ptr<T> removeTagIfPresent() {
+    template <typename T> const Ptr<T> removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
+
     //@}
 
     /** @name Region tagging functions */
@@ -1305,63 +1306,63 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     /**
      * Returns the region tag for the provided type and range, or returns nullptr if no such region tag is found.
      */
-    template<typename T> const Ptr<const T> findRegionTag(b offset = b(0), b length = b(-1)) const {
+    template <typename T> const Ptr<const T> findRegionTag(b offset = b(0), b length = b(-1)) const {
         return regionTags.findTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns the region tag for the provided type and range, or throws an exception if no such region tag is found.
      */
-    template<typename T> const Ptr<const T> getRegionTag(b offset = b(0), b length = b(-1)) const {
+    template <typename T> const Ptr<const T> getRegionTag(b offset = b(0), b length = b(-1)) const {
         return regionTags.getTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const {
+    template <typename T> void mapAllRegionTags(b offset, b length, std::function<void(b, b, const Ptr<const T>&)> f) const {
         return regionTags.mapAllTags<const T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllRegionTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f) {
+    template <typename T> void mapAllRegionTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f) {
         return regionTags.mapAllTagsForUpdate<T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
     }
 
     /**
      * Returns all region tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<SharingRegionTagSet::RegionTag<const T>> getAllRegionTags(b offset = b(0), b length = b(-1)) const {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<const T>> getAllRegionTags(b offset = b(0), b length = b(-1)) const {
         return regionTags.getAllTags<const T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns all region tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllRegionTagsForUpdate(b offset = b(0), b length = b(-1)) {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllRegionTagsForUpdate(b offset = b(0), b length = b(-1)) {
         return regionTags.getAllTagsForUpdate<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns a newly added region tag for the provided type and range, or throws an exception if such a region tag is already present.
      */
-    template<typename T> const Ptr<T> addRegionTag(b offset = b(0), b length = b(-1)) {
+    template <typename T> const Ptr<T> addRegionTag(b offset = b(0), b length = b(-1)) {
         return regionTags.addTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns a newly added region tag for the provided type and range if absent, or returns the region tag that is already present.
      */
-    template<typename T> const Ptr<T> addRegionTagIfAbsent(b offset = b(0), b length = b(-1)) {
+    template <typename T> const Ptr<T> addRegionTagIfAbsent(b offset = b(0), b length = b(-1)) {
         return regionTags.addTagIfAbsent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Returns the newly added region tags for the provided type and range where the tag is absent.
      */
-    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> addRegionTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> addRegionTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
         return regionTags.addTagsWhereAbsent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 

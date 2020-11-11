@@ -155,7 +155,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getTag<InterfaceInd>())->getInterfaceId();
 
-    switch(tcpsegP->getCrcMode()) {
+    switch (tcpsegP->getCrcMode()) {
         case CRC_DECLARED_INCORRECT:
             EV_WARN << "CRC error, packet dropped\n";
             delete packet;
@@ -205,7 +205,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     u16_t rport = tcpsegP->getSrcPort();
 
     if (tcpsegP->getSynBit() && tcpsegP->getAckBit()) {
-        for (auto & elem : tcpAppConnMapM) {
+        for (auto& elem : tcpAppConnMapM) {
             LwipTcpLayer::tcp_pcb *pcb = elem.second->pcbM;
             if (pcb) {
                 if ((pcb->state == LwipTcpLayer::SYN_SENT)
@@ -496,7 +496,7 @@ void TcpLwip::refreshDisplay() const
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (auto & elem : tcpAppConnMapM) {
+    for (auto& elem : tcpAppConnMapM) {
         LwipTcpLayer::tcp_pcb *pcb = (elem).second->pcbM;
 
         if (nullptr == pcb) {
@@ -609,7 +609,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         packet = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
     }
     else {
-        const auto& bytes = makeShared<BytesChunk>((const uint8_t*)dataP, lenP);
+        const auto& bytes = makeShared<BytesChunk>((const uint8_t *)dataP, lenP);
         packet = new Packet(nullptr, bytes);
         const auto& tcpHdr = packet->popAtFront<TcpHeader>();
         packet->trimFront();

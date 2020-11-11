@@ -48,7 +48,7 @@ class INET_API SharingRegionTagSet : public cObject
     template <typename T>
     class INET_API RegionTag : public cObject
     {
-      friend class SharingRegionTagSet__TagBaseRegionTagDescriptor;
+        friend class SharingRegionTagSet__TagBaseRegionTagDescriptor;
 
       protected:
         b offset;
@@ -63,18 +63,25 @@ class INET_API SharingRegionTagSet : public cObject
             ASSERT(offset >= b(0));
             ASSERT(length >= b(0));
         }
-        RegionTag(const RegionTag<T>& other) : offset(other.offset), length(other.length), tag(other.tag) { }
+
+        RegionTag(const RegionTag<T>& other) : offset(other.offset), length(other.length), tag(other.tag) {}
         RegionTag(RegionTag&& other) : offset(other.offset), length(other.length), tag(other.tag) { other.tag = nullptr; }
 
         RegionTag& operator=(const RegionTag& other) {
             if (this != &other) {
-                offset = other.offset; length = other.length; tag = other.tag;
+                offset = other.offset;
+                length = other.length;
+                tag = other.tag;
             }
             return *this;
         }
+
         RegionTag& operator=(RegionTag&& other) {
             if (this != &other) {
-                offset = other.offset; length = other.length; tag = other.tag; other.tag = nullptr;
+                offset = other.offset;
+                length = other.length;
+                tag = other.tag;
+                other.tag = nullptr;
             }
             return *this;
         }
@@ -111,6 +118,7 @@ class INET_API SharingRegionTagSet : public cObject
             stream << "(" << getStartOffset() << ", " << getEndOffset() << ") " << (tag != nullptr ? tag->str() : "<nullptr>");
             return stream.str();
         }
+
     };
 
     typedef RegionTag<TagBase> TagBaseRegionTag;
@@ -124,10 +132,10 @@ class INET_API SharingRegionTagSet : public cObject
     std::vector<SharingRegionTagSet::RegionTag<TagBase>> addTagsWhereAbsent(const std::type_info& typeInfo, b offset, b length, const Ptr<const TagBase>& tag);
     const Ptr<TagBase> removeTag(int index);
 
-    void mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const TagBase>&)> f) const;
-    void mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<TagBase>&)> f);
+    void mapAllTags(b offset, b length, std::function<void(b, b, const Ptr<const TagBase>&)> f) const;
+    void mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<TagBase>&)> f);
 
-    void splitTags(b offset, std::function<bool (const TagBase *)> f = [] (const TagBase *) { return true; });
+    void splitTags(b offset, std::function<bool(const TagBase *)> f = [] (const TagBase *) { return true; });
     template <typename T> void splitTags(b offset);
 
     int getTagIndex(const std::type_info& typeInfo, b offset, b length) const;
@@ -140,8 +148,8 @@ class INET_API SharingRegionTagSet : public cObject
   public:
     /** @name Constructors and operators */
     //@{
-    SharingRegionTagSet() : regionTags(nullptr) { }
-    SharingRegionTagSet(const SharingRegionTagSet& other) : regionTags(other.regionTags) { }
+    SharingRegionTagSet() : regionTags(nullptr) {}
+    SharingRegionTagSet(const SharingRegionTagSet& other) : regionTags(other.regionTags) {}
     SharingRegionTagSet(SharingRegionTagSet&& other) : regionTags(other.regionTags) { other.regionTags = nullptr; }
 
     SharingRegionTagSet& operator=(const SharingRegionTagSet& other);
@@ -224,12 +232,12 @@ class INET_API SharingRegionTagSet : public cObject
     /**
      * Calls the given function with all the shared tags of the provided type and range.
      */
-    template <typename T> void mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const;
+    template <typename T> void mapAllTags(b offset, b length, std::function<void(b, b, const Ptr<const T>&)> f) const;
 
     /**
      * Calls the given function with all the exclusively owned tags of the provided type and range for update.
      */
-    template <typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f);
+    template <typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f);
 
     /**
      * Returns all the shared tags of the provided type and range.
@@ -424,7 +432,7 @@ inline const Ptr<T> SharingRegionTagSet::removeTagIfPresent(b offset, b length)
 }
 
 template <typename T>
-inline void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const
+inline void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<void(b, b, const Ptr<const T>&)> f) const
 {
     mapAllTags(offset, length, [&] (b o, b l, const Ptr<const TagBase>& tag) {
         auto tagObject = tag.get();
@@ -434,7 +442,7 @@ inline void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<vo
 }
 
 template <typename T>
-inline void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f)
+inline void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f)
 {
     splitTags<T>(offset);
     splitTags<T>(offset + length);

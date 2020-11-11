@@ -28,20 +28,20 @@ namespace ieee80211 {
 
 class INET_API EdcaTransmitLifetimeHandler : public ITransmitLifetimeHandler
 {
-    public:
-        simtime_t msduLifetime[4];
-        std::map<SequenceNumber, simtime_t> lifetimes;
+  public:
+    simtime_t msduLifetime[4];
+    std::map<SequenceNumber, simtime_t> lifetimes;
 
-    protected:
-        AccessCategory mapTidToAc(int tid); // TODO: copy
+  protected:
+    AccessCategory mapTidToAc(int tid); // TODO: copy
 
-    public:
-        EdcaTransmitLifetimeHandler(simtime_t bkLifetime, simtime_t beLifetime, simtime_t viLifetime, simtime_t voLifetime);
+  public:
+    EdcaTransmitLifetimeHandler(simtime_t bkLifetime, simtime_t beLifetime, simtime_t viLifetime, simtime_t voLifetime);
 
-        virtual void frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header);
-        virtual void frameTransmitted(const Ptr<const Ieee80211DataHeader>& header);
+    virtual void frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header);
+    virtual void frameTransmitted(const Ptr<const Ieee80211DataHeader>& header);
 
-        virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header);
+    virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header);
 };
 
 } /* namespace ieee80211 */

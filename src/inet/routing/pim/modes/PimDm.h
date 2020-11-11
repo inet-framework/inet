@@ -80,13 +80,13 @@ class INET_API PimDm : public PimBase, protected cListener
         int getInterfaceId() const { return ie->getInterfaceId(); }
         Ipv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
         GraftPruneState getGraftPruneState() const { return graftPruneState; }
-        cMessage * getGraftRetryTimer() const { return graftRetryTimer; }
-        cMessage * getOverrideTimer() const { return overrideTimer; }
+        cMessage *getGraftRetryTimer() const { return graftRetryTimer; }
+        cMessage *getOverrideTimer() const { return overrideTimer; }
         simtime_t getLastPruneSentTime() const { return lastPruneSentTime; }
         bool isSourceDirectlyConnected() const { return isFlagSet(SOURCE_DIRECTLY_CONNECTED); }
         OriginatorState getOriginatorState() const { return originatorState; }
-        cMessage * getSourceActiveTimer() const { return sourceActiveTimer; }
-        cMessage * getStateRefreshTimer() const { return stateRefreshTimer; }
+        cMessage *getSourceActiveTimer() const { return sourceActiveTimer; }
+        cMessage *getStateRefreshTimer() const { return stateRefreshTimer; }
         unsigned short getMaxTtlSeen() const { return maxTtlSeen; }
 
         void startGraftRetryTimer();
@@ -123,8 +123,8 @@ class INET_API PimDm : public PimBase, protected cListener
         Route *route() const { return check_and_cast<Route *>(owner); }
         PimDm *pimdm() const { return check_and_cast<PimDm *>(owner->owner); }
         PruneState getPruneState() { return pruneState; }
-        cMessage * getPruneTimer() const { return pruneTimer; }
-        cMessage * getPrunePendingTimer() const { return prunePendingTimer; }
+        cMessage *getPruneTimer() const { return pruneTimer; }
+        cMessage *getPrunePendingTimer() const { return prunePendingTimer; }
         bool hasConnectedReceivers() const { return isFlagSet(HAS_CONNECTED_RECEIVERS); }
         void setHasConnectedReceivers(bool value) { setFlag(HAS_CONNECTED_RECEIVERS, value); }
         bool isInOlist() const;

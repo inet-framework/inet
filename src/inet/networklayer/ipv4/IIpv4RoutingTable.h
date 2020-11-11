@@ -37,7 +37,7 @@ namespace inet {
 class INET_API IIpv4RoutingTable : public IRoutingTable
 {
   public:
-    virtual ~IIpv4RoutingTable() {};
+    virtual ~IIpv4RoutingTable() {}
 
     /**
      * For debugging

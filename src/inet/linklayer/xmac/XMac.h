@@ -150,7 +150,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
         WAIT_ACK,       //~7: think this is not used
         SEND_ACK,       //8
         WAIT_ACK_TX     //9
-      };
+    };
     /** @brief The current state of the protocol */
     States macState;
 
@@ -182,7 +182,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     physicallayer::IRadio *radio;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-    int              txAttempts;
+    int txAttempts;
     /*@}*/
 
     /** @brief Animate (colorize) the nodes.

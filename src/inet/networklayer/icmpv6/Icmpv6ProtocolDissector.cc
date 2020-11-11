@@ -21,7 +21,6 @@
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
-
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::icmpv6, Icmpv6ProtocolDissector);

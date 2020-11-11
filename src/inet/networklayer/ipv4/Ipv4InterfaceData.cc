@@ -69,7 +69,7 @@ std::string Ipv4MulticastSourceList::str() const
 {
     std::stringstream out;
     out << (filterMode == MCAST_INCLUDE_SOURCES ? "I" : "E");
-    for (auto & elem : sources)
+    for (auto& elem : sources)
         out << " " << elem;
     return out.str();
 }
@@ -86,8 +86,8 @@ std::string Ipv4MulticastSourceList::detailedInfo() const
 
 Ipv4InterfaceData::HostMulticastData::~HostMulticastData()
 {
-    for (auto & elem : joinedMulticastGroups)
-        delete (elem);
+    for (auto& elem : joinedMulticastGroups)
+        delete elem;
     joinedMulticastGroups.clear();
 }
 
@@ -109,7 +109,7 @@ std::string Ipv4InterfaceData::HostMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Joined Groups:";
-    for (auto & elem : joinedMulticastGroups) {
+    for (auto& elem : joinedMulticastGroups) {
         out << " " << elem->multicastGroup    // << "(" << refCounts[i] << ")";
             << " " << elem->sourceList.detailedInfo();
     }
@@ -119,7 +119,7 @@ std::string Ipv4InterfaceData::HostMulticastData::detailedInfo()
 
 Ipv4InterfaceData::RouterMulticastData::~RouterMulticastData()
 {
-    for (auto & elem : reportedMulticastGroups)
+    for (auto& elem : reportedMulticastGroups)
         delete elem;
     reportedMulticastGroups.clear();
 }
@@ -145,7 +145,7 @@ std::string Ipv4InterfaceData::RouterMulticastData::detailedInfo()
     std::stringstream out;
     out << "TTL Threshold: " << multicastTtlThreshold << "\n";
     out << "Multicast Listeners:";
-    for (auto & elem : reportedMulticastGroups) {
+    for (auto& elem : reportedMulticastGroups) {
         out << " " << elem->multicastGroup
             << " " << elem->sourceList.detailedInfo();
     }
@@ -235,7 +235,7 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
     }
 
     std::map<Ipv4Address, int> *counts = oldFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
-    for (const auto & elem : oldSourceList) {
+    for (const auto& elem : oldSourceList) {
         auto count = counts->find(elem);
         if (count == counts->end())
             throw cRuntimeError("Inconsistent reference counts in Ipv4InterfaceData.");
@@ -246,7 +246,7 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
     }
 
     counts = newFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
-    for (const auto & elem : newSourceList) {
+    for (const auto& elem : newSourceList) {
         auto count = counts->find(elem);
         if (count == counts->end())
             (*counts)[elem] = 1;
@@ -301,13 +301,13 @@ bool Ipv4InterfaceData::HostMulticastGroupData::updateSourceList()
     Ipv4AddressVector sourceList;
     if (numOfExcludeModeSockets == 0) {
         // If all socket is in INCLUDE mode, then the sourceList is the union of included sources
-        for (auto & elem : includeCounts)
+        for (auto& elem : includeCounts)
             sourceList.push_back(elem.first);
     }
     else {
         // If some socket is in EXCLUDE mode, then the sourceList contains the sources that are
         // excluded by all EXCLUDE mode sockets except if there is a socket including the source.
-        for (auto & elem : excludeCounts)
+        for (auto& elem : excludeCounts)
             if (elem.second == numOfExcludeModeSockets && includeCounts.find(elem.first) == includeCounts.end())
                 sourceList.push_back(elem.first);
 
@@ -326,7 +326,7 @@ Ipv4InterfaceData::RouterMulticastGroupData *Ipv4InterfaceData::findRouterGroupD
 {
     ASSERT(multicastAddress.isMulticast());
     const RouterMulticastGroupVector& entries = getRouterData()->reportedMulticastGroups;
-    for (const auto & entrie : entries)
+    for (const auto& entrie : entries)
         if ((entrie)->multicastGroup == multicastAddress)
             return entrie;
 
@@ -468,7 +468,7 @@ Ipv4InterfaceData::HostMulticastGroupData *Ipv4InterfaceData::findHostGroupData(
 {
     ASSERT(multicastAddress.isMulticast());
     HostMulticastGroupVector& entries = getHostData()->joinedMulticastGroups;
-    for (auto & entrie : entries)
+    for (auto& entrie : entries)
         if ((entrie)->multicastGroup == multicastAddress)
             return entrie;
 

@@ -51,8 +51,8 @@ static std::string quoteString(const std::string& txt)
             case '\t': *d++ = '\\'; *d++ = 't'; s++; break;
             case '"':  *d++ = '\\'; *d++ = '"'; s++; break;
             case '\\': *d++ = '\\'; *d++ = '\\'; s++; break;
-            default: if (*s < ' ') {*d++='\\'; *d++='x'; sprintf(d,"%2.2X",*s++); d+=2;}
-                     else {*d++ = *s++;}
+            default: if (*s < ' ') {*d++='\\'; *d++='x'; sprintf(d,"%2.2X",*s++); d+=2; }
+                     else {*d++ = *s++; }
         }
     }
     *d++ = '"';
@@ -71,7 +71,7 @@ static ObjectPrinterRecursionControl defaultRecurseIntoMessageFields(void *objec
 
 ObjectPrinter::ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate,
         const std::vector<cMatchExpression *>& objectMatchExpressions,
-        const std::vector<std::vector<cMatchExpression *> >& fieldNameMatchExpressionsList,
+        const std::vector<std::vector<cMatchExpression *>>& fieldNameMatchExpressionsList,
         int indentSize)
 {
     ASSERT(objectMatchExpressions.size() == fieldNameMatchExpressionsList.size());
@@ -84,12 +84,12 @@ ObjectPrinter::ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate,
 ObjectPrinter::ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate, const char *objectFieldMatcherPattern, int indentSize)
 {
     std::vector<cMatchExpression *> objectMatchExpressions;
-    std::vector<std::vector<cMatchExpression *> > fieldNameMatchExpressionsList;
+    std::vector<std::vector<cMatchExpression *>> fieldNameMatchExpressionsList;
 
     cStringTokenizer tokenizer(objectFieldMatcherPattern, "|;");
     std::vector<std::string> patterns = tokenizer.asVector();
 
-    for (auto & pattern : patterns) {
+    for (auto& pattern : patterns) {
         char *objectPattern = (char *)pattern.c_str();
         char *fieldNamePattern = strchr(objectPattern, ':');
 
@@ -99,7 +99,7 @@ ObjectPrinter::ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate,
             std::vector<std::string> fieldNamePatterns = fieldNameTokenizer.asVector();
             std::vector<cMatchExpression *> fieldNameMatchExpressions;
 
-            for (auto & fieldNamePattern : fieldNamePatterns)
+            for (auto& fieldNamePattern : fieldNamePatterns)
                 fieldNameMatchExpressions.push_back(new cMatchExpression(fieldNamePattern.c_str(), false, true, true));
 
             fieldNameMatchExpressionsList.push_back(fieldNameMatchExpressions);
@@ -125,7 +125,7 @@ ObjectPrinter::~ObjectPrinter()
     for (int i = 0; i < (int)objectMatchExpressions.size(); i++) {
         delete objectMatchExpressions[i];
         std::vector<cMatchExpression *>& fieldNameMatchExpressions = fieldNameMatchExpressionsList[i];
-        for (auto & fieldNameMatchExpression : fieldNameMatchExpressions)
+        for (auto& fieldNameMatchExpression : fieldNameMatchExpressions)
             delete fieldNameMatchExpression;
     }
 }

@@ -36,7 +36,7 @@ namespace eigrp {
 /**
  * Class represents EIGRP Neighbor Table.
  */
-template<typename IPAddress>
+template <typename IPAddress>
 class EigrpNeighborTable : public cSimpleModule
 {
   protected:
@@ -49,8 +49,6 @@ class EigrpNeighborTable : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-
-
 
   public:
     EigrpNeighborTable() { neighborCounter = 1; stubCount = 0; }
@@ -67,7 +65,7 @@ class EigrpNeighborTable : public cSimpleModule
      * Finds neighbor by ID.
      */
     EigrpNeighbor<IPAddress> *findNeighborById(int id);
-    EigrpNeighbor<IPAddress> * removeNeighbor(EigrpNeighbor<IPAddress> *neighbor);
+    EigrpNeighbor<IPAddress> *removeNeighbor(EigrpNeighbor<IPAddress> *neighbor);
     /**
      * Returns first neighbor that resides on specified interface.
      */
@@ -86,8 +84,9 @@ class EigrpNeighborTable : public cSimpleModule
 class EigrpIpv4NeighborTable : public EigrpNeighborTable<Ipv4Address>
 {
 //container class for IPv4NT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv4NeighborTable() {};
+
+  public:
+    virtual ~EigrpIpv4NeighborTable() {}
 };
 
 /*
@@ -98,13 +97,13 @@ class INET_API Eigrpv4NeighTableAccess : public ModuleAccess<EigrpIpv4NeighborTa
 };
 */
 
-
 #ifndef DISABLE_EIGRP_IPV6
 class EigrpIpv6NeighborTable : public EigrpNeighborTable<Ipv6Address>
 {
 //container class for IPv6NT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv6NeighborTable() {};
+
+  public:
+    virtual ~EigrpIpv6NeighborTable() {}
 };
 
 /*
@@ -118,3 +117,4 @@ class INET_API Eigrpv6NeighTableAccess : public ModuleAccess<EigrpIpv6NeighborTa
 } //eigrp
 } //inet
 #endif
+

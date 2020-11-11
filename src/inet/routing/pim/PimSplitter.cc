@@ -55,7 +55,7 @@ void PimSplitter::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4) {
-            EV_WARN << "Received ICMP error " << msg->getName() <<  ", ignored\n";
+            EV_WARN << "Received ICMP error " << msg->getName() << ", ignored\n";
             delete msg;
         }
         else if (protocol == &Protocol::pim) {
@@ -105,5 +105,6 @@ void PimSplitter::processPIMPacket(Packet *pkt)
             throw cRuntimeError("PimSplitter: PIM mode of interface '%s' is invalid.", ie->getInterfaceName());
     }
 }
+
 }    // namespace inet
 

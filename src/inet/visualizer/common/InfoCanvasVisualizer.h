@@ -30,7 +30,8 @@ namespace visualizer {
 class INET_API InfoCanvasVisualizer : public InfoVisualizerBase
 {
   protected:
-    class INET_API InfoCanvasVisualization : public InfoVisualization {
+    class INET_API InfoCanvasVisualization : public InfoVisualization
+    {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         BoxedLabelFigure *figure = nullptr;

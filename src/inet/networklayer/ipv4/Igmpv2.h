@@ -98,7 +98,7 @@ class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistration
         virtual ~HostInterfaceData();
         friend inline std::ostream& operator<<(std::ostream& out, const Igmpv2::HostInterfaceData& entry)
         {
-            for(auto& g : entry.groups) {
+            for (auto& g : entry.groups) {
                 out << "(groupAddress: " << g.second->groupAddr << " ";
                 out << "hostGroupState: " << Igmpv2::getHostGroupStateString(g.second->state) << " ";
                 out << "groupTimer: " << g.second->timer->getArrivalTime() << " ";
@@ -122,10 +122,10 @@ class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistration
         {
             out << "routerState: " << Igmpv2::getRouterStateString(entry.igmpRouterState) << " ";
             out << "queryTimer: " << entry.igmpQueryTimer->getArrivalTime() << " ";
-            if(entry.groups.empty())
+            if (entry.groups.empty())
                 out << "(empty)";
             else {
-                for(auto& g : entry.groups) {
+                for (auto& g : entry.groups) {
                     out << "(groupAddress: " << g.second->groupAddr << " ";
                     out << "routerGroupState: " << Igmpv2::getRouterGroupStateString(g.second->state) << " ";
                     out << "timer: " << g.second->timer->getArrivalTime() << " ";

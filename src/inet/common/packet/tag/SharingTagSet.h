@@ -55,8 +55,8 @@ class INET_API SharingTagSet : public cObject
   public:
     /** @name Constructors and operators */
     //@{
-    SharingTagSet() : tags(nullptr) { }
-    SharingTagSet(const SharingTagSet& other) : tags(other.tags) { }
+    SharingTagSet() : tags(nullptr) {}
+    SharingTagSet(const SharingTagSet& other) : tags(other.tags) {}
     SharingTagSet(SharingTagSet&& other) : tags(other.tags) { other.tags = nullptr; }
 
     SharingTagSet& operator=(const SharingTagSet& other);

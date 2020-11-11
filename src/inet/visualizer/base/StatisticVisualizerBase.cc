@@ -226,7 +226,7 @@ void StatisticVisualizerBase::removeAllStatisticVisualizations()
     }
 }
 
-void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t signal, std::function<void (cIListener *)> receiveSignal)
+void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t signal, std::function<void(cIListener *)> receiveSignal)
 {
     auto statisticVisualization = getStatisticVisualization(source, signal);
     if (statisticVisualization != nullptr)

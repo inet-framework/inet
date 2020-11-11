@@ -172,3 +172,4 @@ std::ostream& ByteCountChunk::printFieldsToStream(std::ostream& stream, int leve
 }
 
 } // namespace
+

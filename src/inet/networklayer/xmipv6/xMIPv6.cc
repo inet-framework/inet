@@ -622,7 +622,7 @@ void xMIPv6::updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Add
 xMIPv6::BuTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(NetworkInterface *ie, const Ipv6Address& dest)
 {
     // TODO use STL search algorithm
-    for (auto & elem : transmitIfList) {
+    for (auto& elem : transmitIfList) {
         if (BuTransmitIfEntry *buIfEntry = dynamic_cast<BuTransmitIfEntry *>(elem.second)) {
             if (buIfEntry->ifEntry->getInterfaceId() == ie->getInterfaceId() && buIfEntry->dest == dest)
                 return buIfEntry;
@@ -919,8 +919,8 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
                 //bubble("Established tunnel to mobile node.");
             }
             else {
-                      // we first destroy the already existing RH2 path if
-                      // there exists one
+                // we first destroy the already existing RH2 path if
+                // there exists one
                 Ipv6Address& CNAddress = destAddress;
                 tunneling->destroyTunnelForEntryAndTrigger(CNAddress, HoA);
 
@@ -1556,7 +1556,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     else {
         // must be of type CareOfTestInit
         auto careOfTestInit = CHK(dynamicPtrCast<CareOfTestInit>(tiIfEntry->testInitMsg));
-              // moved the following two lines to here
+        // moved the following two lines to here
         Ipv6Address CoA = ie->getProtocolData<Ipv6InterfaceData>()->getGlobalAddress(Ipv6InterfaceData::CoA);
         ASSERT(!CoA.isUnspecified());
 
@@ -1845,7 +1845,7 @@ bool xMIPv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
     return true;
 }
 
-void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& CoT)
+void xMIPv6::processCoTMessage(Packet *inPacket, const Ptr<const CareOfTest>& CoT)
 {
     if (!validateCoTMessage(inPacket, *CoT)) {
         EV_WARN << "CoT validation not passed: dropping message" << endl;
@@ -2315,7 +2315,7 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
 
 xMIPv6::TimerIfEntry *xMIPv6::searchTimerIfEntry(Ipv6Address& dest, int timerType)
 {
-    for (auto & elem : transmitIfList) {
+    for (auto& elem : transmitIfList) {
         if (elem.first.type == timerType && elem.first.dest == dest)
             return elem.second;
     }
@@ -2382,7 +2382,7 @@ void xMIPv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
 
 void xMIPv6::removeCoAEntries()
 {
-    for (auto & elem : interfaceCoAList) {
+    for (auto& elem : interfaceCoAList) {
         //if (it->first == ie->interfaceId())
         EV_DEBUG << "Cancelling timers for ifID=" << elem.first << " and CoA=" << elem.second << endl;
         cancelEntries(elem.first, elem.second);

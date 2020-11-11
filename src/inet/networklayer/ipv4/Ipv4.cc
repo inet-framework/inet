@@ -204,11 +204,11 @@ void Ipv4::handleMessageWhenUp(cMessage *msg)
         if (auto request = dynamic_cast<Request *>(msg))
             handleRequest(request);
         else
-            handlePacketFromHL(check_and_cast<Packet*>(msg));
+            handlePacketFromHL(check_and_cast<Packet *>(msg));
     }
     else if (msg->arrivedOn("queueIn")) {    // from network
         EV_INFO << "Received " << msg << " from network.\n";
-        handleIncomingDatagram(check_and_cast<Packet*>(msg));
+        handleIncomingDatagram(check_and_cast<Packet *>(msg));
     }
     else
         throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
@@ -763,10 +763,11 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     auto localAddress(ipv4Header->getDestAddress());
     decapsulate(packet);
     bool hasSocket = false;
-    for (const auto &elem: socketIdToSocketDescriptor) {
+    for (const auto& elem: socketIdToSocketDescriptor) {
         if (elem.second->protocolId == protocol->getId()
-                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
-                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+            && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
+        {
             auto *packetCopy = packet->dup();
             packetCopy->setKind(IPv4_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
@@ -788,7 +789,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     else {
         EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
         packet->setFrontOffset(ipv4HeaderPosition);
-        const NetworkInterface* fromIE = getSourceInterface(packet);
+        const NetworkInterface *fromIE = getSourceInterface(packet);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
@@ -884,7 +885,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         details.setReason(HOP_LIMIT_REACHED);
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
-        sendIcmpError(packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+        sendIcmpError(packet, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
     }
@@ -907,7 +908,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         PacketDropDetails details;
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-        sendIcmpError(packet, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
+        sendIcmpError(packet, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
         numDropped++;
         return;
@@ -990,7 +991,7 @@ void Ipv4::encapsulate(Packet *transportPacket)
     // of the outgoing interface after routing
     if (!src.isUnspecified()) {
         if (!nonLocalSrcAddress && rt->getInterfaceByAddress(src) == nullptr)
-        // if interface parameter does not match existing interface, do not send datagram
+            // if interface parameter does not match existing interface, do not send datagram
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 
@@ -1223,7 +1224,7 @@ void Ipv4::reinjectQueuedDatagram(const Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramPreRoutingHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1249,7 +1250,7 @@ INetfilter::IHook::Result Ipv4::datagramPreRoutingHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramForwardHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramForwardHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1275,7 +1276,7 @@ INetfilter::IHook::Result Ipv4::datagramForwardHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1330,14 +1331,14 @@ void Ipv4::stop()
 void Ipv4::flush()
 {
     EV_DEBUG << "Ipv4::flush(): pending packets:\n";
-    for (auto & elem : pendingPackets) {
+    for (auto& elem : pendingPackets) {
         EV_DEBUG << "Ipv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
         elem.second.clear();
     }
     pendingPackets.clear();
 
     EV_DEBUG << "Ipv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
-    for (auto & elem : queuedDatagramsForHooks) {
+    for (auto& elem : queuedDatagramsForHooks) {
         delete elem.packet;
     }
     queuedDatagramsForHooks.clear();
@@ -1347,7 +1348,7 @@ void Ipv4::flush()
 
 INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1376,7 +1377,7 @@ INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramLocalOutHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalOutHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1418,3 +1419,4 @@ void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type
 }
 
 } // namespace inet
+

@@ -30,12 +30,13 @@ void ModeSetListener::initialize(int stage)
         getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
 }
 
-void ModeSetListener::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
+void ModeSetListener::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");
     if (signalID == modesetChangedSignal)
-        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet*>(obj);
+        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

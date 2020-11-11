@@ -23,7 +23,7 @@ namespace inet {
 
 namespace physicallayer {
 
-CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(const RadioCacheEntry &other) :
+CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(const RadioCacheEntry& other) :
     radio(other.radio),
     receptionIntervals(other.receptionIntervals)
 {
@@ -31,14 +31,14 @@ CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(const RadioCacheEntry &
     ASSERT(other.receptionIntervals == nullptr);
 }
 
-CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(RadioCacheEntry &&other) noexcept :
+CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(RadioCacheEntry&& other) noexcept :
     radio(other.radio),
     receptionIntervals(other.receptionIntervals)
 {
     other.receptionIntervals = nullptr;
 }
 
-CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry::operator=(const RadioCacheEntry &other)
+CommunicationCacheBase::RadioCacheEntry& CommunicationCacheBase::RadioCacheEntry::operator=(const RadioCacheEntry& other)
 {
     if (this != &other) {
         // NOTE: only allow copying mostly empty ones for now
@@ -50,7 +50,7 @@ CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry
     return *this;
 }
 
-CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry::operator=(RadioCacheEntry &&other) noexcept
+CommunicationCacheBase::RadioCacheEntry& CommunicationCacheBase::RadioCacheEntry::operator=(RadioCacheEntry&& other) noexcept
 {
     if (this != &other) {
         radio = other.radio;
@@ -71,7 +71,7 @@ CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry()
     receptionDecisions.resize(static_cast<int>(IRadioSignal::SIGNAL_PART_DATA) + 1);
 }
 
-CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(const ReceptionCacheEntry &other) :
+CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(const ReceptionCacheEntry& other) :
     transmission(other.transmission),
     receiver(other.receiver),
     signal(other.signal),
@@ -98,7 +98,7 @@ CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(const Reception
     ASSERT(other.receptionResult == nullptr);
 }
 
-CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheEntry &&other) noexcept :
+CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheEntry&& other) noexcept :
     transmission(other.transmission),
     receiver(other.receiver),
     signal(other.signal),
@@ -126,7 +126,7 @@ CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheE
     other.receptionResult = nullptr;
 }
 
-CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCacheEntry::operator=(const ReceptionCacheEntry &other)
+CommunicationCacheBase::ReceptionCacheEntry& CommunicationCacheBase::ReceptionCacheEntry::operator=(const ReceptionCacheEntry& other)
 {
     if (this != &other) {
         // NOTE: only allow copying mostly empty ones for now
@@ -158,7 +158,7 @@ CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCa
     return *this;
 }
 
-CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCacheEntry::operator=(ReceptionCacheEntry &&other) noexcept
+CommunicationCacheBase::ReceptionCacheEntry& CommunicationCacheBase::ReceptionCacheEntry::operator=(ReceptionCacheEntry&& other) noexcept
 {
     if (this != &other) {
         delete arrival;
@@ -211,14 +211,14 @@ CommunicationCacheBase::ReceptionCacheEntry::~ReceptionCacheEntry()
     delete receptionResult;
 }
 
-CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(const TransmissionCacheEntry &other) :
+CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(const TransmissionCacheEntry& other) :
     transmission(other.transmission),
     interferenceEndTime(other.interferenceEndTime),
     signal(other.signal)
 {
 }
 
-CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(TransmissionCacheEntry &&other) noexcept :
+CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(TransmissionCacheEntry&& other) noexcept :
     transmission(other.transmission),
     interferenceEndTime(other.interferenceEndTime),
     signal(other.signal)
@@ -228,7 +228,7 @@ CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(Transmiss
     other.signal = nullptr;
 }
 
-CommunicationCacheBase::TransmissionCacheEntry &CommunicationCacheBase::TransmissionCacheEntry::operator=(const TransmissionCacheEntry &other)
+CommunicationCacheBase::TransmissionCacheEntry& CommunicationCacheBase::TransmissionCacheEntry::operator=(const TransmissionCacheEntry& other)
 {
     if (this != &other) {
         transmission = other.transmission;
@@ -238,7 +238,7 @@ CommunicationCacheBase::TransmissionCacheEntry &CommunicationCacheBase::Transmis
     return *this;
 }
 
-CommunicationCacheBase::TransmissionCacheEntry &CommunicationCacheBase::TransmissionCacheEntry::operator=(TransmissionCacheEntry &&other) noexcept
+CommunicationCacheBase::TransmissionCacheEntry& CommunicationCacheBase::TransmissionCacheEntry::operator=(TransmissionCacheEntry&& other) noexcept
 {
     if (this != &other) {
         transmission = other.transmission;

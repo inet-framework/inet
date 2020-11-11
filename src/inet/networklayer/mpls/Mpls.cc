@@ -164,7 +164,7 @@ void Mpls::popLabel(Packet *packet)
 {
     ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
     auto oldMplsHeader = packet->popAtFront<MplsHeader>();
-    if(oldMplsHeader->getS()) {
+    if (oldMplsHeader->getS()) {
         packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     }
 }
@@ -305,7 +305,7 @@ void Mpls::sendToL3(Packet *msg)
     send(msg, "netwOut");
 }
 
-void Mpls::handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in)
+void Mpls::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
 {
     if (!strcmp("ifIn", in->getBaseName()))
         registerInterface(interface, gate("netwIn"), gate("netwOut"));

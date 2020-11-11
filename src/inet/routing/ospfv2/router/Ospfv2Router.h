@@ -230,7 +230,7 @@ class INET_API Router
     /**
      * get the default route in the routing table.
      */
-    Ipv4Route* getDefaultRoute();
+    Ipv4Route *getDefaultRoute();
 
     /**
      * Stores information on an AS External Route in externalRoutes and intalls(or
@@ -361,8 +361,7 @@ class INET_API Router
      * @param fromRoutingTable [in] The routing table to look in.
      * @param asbrRouterID     [in] The ID of the AS Boundary Router to look for.
      */
-    std::vector<Ospfv2RoutingTableEntry *>
-    getRoutesToASBoundaryRouter(const std::vector<Ospfv2RoutingTableEntry *>& fromRoutingTable, RouterId routerID) const;
+    std::vector<Ospfv2RoutingTableEntry *> getRoutesToASBoundaryRouter(const std::vector<Ospfv2RoutingTableEntry *>& fromRoutingTable, RouterId routerID) const;
 
     /**
      * Prunes the input std::vector of RoutingTableEntries according to the RFC2328
@@ -381,7 +380,7 @@ class INET_API Router
     Ospfv2RoutingTableEntry *selectLeastCostRoutingEntry(std::vector<Ospfv2RoutingTableEntry *>& entries) const;
 
     void printAsExternalLsa();
-    bool isDirectRoute(Ospfv2RoutingTableEntry &entry);
+    bool isDirectRoute(Ospfv2RoutingTableEntry& entry);
 };
 
 } // namespace ospfv2

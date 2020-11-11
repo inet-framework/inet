@@ -22,7 +22,7 @@
 
 namespace inet {
 
-void PacketFilter::setPattern(const char* packetPattern, const char* chunkPattern)
+void PacketFilter::setPattern(const char *packetPattern, const char *chunkPattern)
 {
     packetMatchExpression.setPattern(packetPattern, false, true, true);
     chunkMatchExpression.setPattern(chunkPattern, false, true, true);
@@ -80,3 +80,4 @@ void PacketFilter::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& c
 }
 
 } // namespace inet
+

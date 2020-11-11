@@ -46,7 +46,6 @@
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"
 #endif /* WITH_xMIPv6 */
 
-
 namespace inet {
 
 #define FRAGMENT_TIMEOUT    60   // 60 sec, from Ipv6 RFC
@@ -54,7 +53,7 @@ namespace inet {
 Define_Module(Ipv6);
 
 Ipv6::Ipv6() :
-        curFragmentId(0)
+    curFragmentId(0)
 {
 }
 
@@ -66,11 +65,11 @@ Ipv6::~Ipv6()
 
 #ifdef WITH_xMIPv6
 Ipv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const NetworkInterface *ie, MacAddress macAddr, bool fromHL) :
-        packet(packet),
-        ipv6Header(ipv6Header),
-        ie(ie),
-        macAddr(macAddr),
-        fromHL(fromHL)
+    packet(packet),
+    ipv6Header(ipv6Header),
+    ie(ie),
+    macAddr(macAddr),
+    fromHL(fromHL)
 {
 }
 
@@ -78,6 +77,7 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
 {
     delete packet;
 }
+
 #endif /* WITH_xMIPv6 */
 
 void Ipv6::initialize(int stage)
@@ -148,7 +148,8 @@ void Ipv6::handleRequest(Request *request)
         delete request;
     }
     else if (dynamic_cast<Ipv6SocketCloseCommand *>(ctrl) != nullptr) {
-        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        int socketId = 0;
+        request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
@@ -162,7 +163,8 @@ void Ipv6::handleRequest(Request *request)
         delete request;
     }
     else if (dynamic_cast<Ipv6SocketDestroyCommand *>(ctrl) != nullptr) {
-        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        int socketId = 0;
+        request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
@@ -219,14 +221,13 @@ void Ipv6::handleMessage(cMessage *msg)
 
     if (auto request = dynamic_cast<Request *>(msg))
         handleRequest(request);
-    else
-    if (msg->getArrivalGate()->isName("transportIn")
-        || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
-        || (msg->arrivedOn("upperTunnelingIn"))    // for tunneling support-CB
+    else if (msg->getArrivalGate()->isName("transportIn")
+             || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
+             || (msg->arrivedOn("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
-        || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
+             || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
 #endif /* WITH_xMIPv6 */
-        )
+             )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
         handleMessageFromHL(check_and_cast<Packet *>(msg));
@@ -437,9 +438,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
         (ipv6Header->getExtensionHeaderArraySize() == 0) &&    // we do not already have extension headers - FIXME: check for RH2 existence
         ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) ||    // for MNs: only if source address is a HoA // 27.08.07 - CB
          rt->isHomeAgent() ||    // but always check for tunnel if node is a HA
-         !rt->isMobileNode()    // or if it is a correspondent or non-MIP node
-        )
-        )
+         !rt->isMobileNode()))    // or if it is a correspondent or non-MIP node
     {
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
             // in case of mobility header we can only search for "real" tunnels
@@ -689,10 +688,11 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     auto localAddress(ipv6Header->getDestAddress());
     decapsulate(packet);
     bool hasSocket = false;
-    for (const auto &elem: socketIdToSocketDescriptor) {
+    for (const auto& elem: socketIdToSocketDescriptor) {
         if (elem.second->protocolId == protocol->getId()
-                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
-                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+            && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
+        {
             auto *packetCopy = packet->dup();
             packetCopy->setKind(IPv6_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
@@ -1125,7 +1125,7 @@ void Ipv6::reinjectQueuedDatagram(const Packet *packet)
 
 INetfilter::IHook::Result Ipv6::datagramPreRoutingHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1151,7 +1151,7 @@ INetfilter::IHook::Result Ipv6::datagramPreRoutingHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv6::datagramForwardHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramForwardHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1177,7 +1177,7 @@ INetfilter::IHook::Result Ipv6::datagramForwardHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1203,7 +1203,7 @@ INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet, const Ne
 
 INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet, const NetworkInterface *inIE)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1229,7 +1229,7 @@ INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet, const Networ
 
 INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalOutHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:

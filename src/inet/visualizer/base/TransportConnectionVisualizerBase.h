@@ -37,7 +37,8 @@ namespace visualizer {
 class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API TransportConnectionVisualization {
+    class INET_API TransportConnectionVisualization
+    {
       public:
         int sourceModuleId = -1;
         int destinationModuleId = -1;

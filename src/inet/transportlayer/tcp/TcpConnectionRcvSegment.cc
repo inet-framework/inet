@@ -431,14 +431,14 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // And we are staying in the TIME_WAIT state.
         //
         sendAck();
-        rescheduleAfter(2*tcpMain->getMsl(), the2MSLTimer);
+        rescheduleAfter(2 * tcpMain->getMsl(), the2MSLTimer);
     }
 
     //
     // RFC 793: sixth, check the URG bit,
     //
     if (tcpHeader->getUrgBit() && (fsm.getState() == TCP_S_ESTABLISHED ||
-                                fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2))
+                                   fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2))
     {
         //"
         // If the URG bit is set, RCV.UP <- max(RCV.UP,SEG.UP), and signal
@@ -575,7 +575,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                                     event = TCP_E_RCV_FIN_ACK;
                                     // start the time-wait timer, turn off the other timers
                                     cancelEvent(finWait2Timer);
-                                    scheduleAfter(2*tcpMain->getMsl(), the2MSLTimer);
+                                    scheduleAfter(2 * tcpMain->getMsl(), the2MSLTimer);
 
                                     // we're entering TIME_WAIT, so we can signal CLOSED the user
                                     // (the only thing left to do is wait until the 2MSL timer expires)
@@ -585,7 +585,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                             case TCP_S_FIN_WAIT_2:
                                 // Start the time-wait timer, turn off the other timers.
                                 cancelEvent(finWait2Timer);
-                                scheduleAfter(2*tcpMain->getMsl(), the2MSLTimer);
+                                scheduleAfter(2 * tcpMain->getMsl(), the2MSLTimer);
 
                                 // we're entering TIME_WAIT, so we can signal CLOSED the user
                                 // (the only thing left to do is wait until the 2MSL timer expires)
@@ -593,7 +593,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
                             case TCP_S_TIME_WAIT:
                                 // Restart the 2 MSL time-wait timeout.
-                                rescheduleAfter(2*tcpMain->getMsl(), the2MSLTimer);
+                                rescheduleAfter(2 * tcpMain->getMsl(), the2MSLTimer);
                                 break;
 
                             default:
@@ -648,7 +648,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                         event = TCP_E_RCV_FIN_ACK;
                         // start the time-wait timer, turn off the other timers
                         cancelEvent(finWait2Timer);
-                        scheduleAfter(2*tcpMain->getMsl(), the2MSLTimer);
+                        scheduleAfter(2 * tcpMain->getMsl(), the2MSLTimer);
 
                         // we're entering TIME_WAIT, so we can signal CLOSED the user
                         // (the only thing left to do is wait until the 2MSL timer expires)
@@ -658,7 +658,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 case TCP_S_FIN_WAIT_2:
                     // Start the time-wait timer, turn off the other timers.
                     cancelEvent(finWait2Timer);
-                    scheduleAfter(2*tcpMain->getMsl(), the2MSLTimer);
+                    scheduleAfter(2 * tcpMain->getMsl(), the2MSLTimer);
 
                     // we're entering TIME_WAIT, so we can signal CLOSED the user
                     // (the only thing left to do is wait until the 2MSL timer expires)
@@ -666,7 +666,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
                 case TCP_S_TIME_WAIT:
                     // Restart the 2 MSL time-wait timeout.
-                    rescheduleAfter(2*tcpMain->getMsl(), the2MSLTimer);
+                    rescheduleAfter(2 * tcpMain->getMsl(), the2MSLTimer);
                     break;
 
                 default:
@@ -836,11 +836,11 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
 
     state->ack_now = true;
 
-        // ECN
-        if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true) {
-            state->endPointIsWillingECN = true;
-            EV << "ECN-setup SYN packet received\n";
-        }
+    // ECN
+    if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true) {
+        state->endPointIsWillingECN = true;
+        EV << "ECN-setup SYN packet received\n";
+    }
 
     sendSynAck();
     startSynRexmitTimer();
@@ -1033,12 +1033,14 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit()) {
                     state->ect = true;
                     EV << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
-                } else {
+                }
+                else {
                     state->ect = false;
                     EV << "non-ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
                 }
                 state->ecnSynSent = false;
-            } else {
+            }
+            else {
                 state->ect = false;
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
@@ -1139,7 +1141,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
 
     //ECN
-    TcpStateVariables* state = getState();
+    TcpStateVariables *state = getState();
     if (state && state->ect) {
         if (tcpHeader->getEceBit() == true)
             EV_INFO << "Received packet with ECE\n";

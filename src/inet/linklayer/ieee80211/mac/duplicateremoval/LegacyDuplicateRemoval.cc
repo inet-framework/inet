@@ -39,3 +39,4 @@ bool LegacyDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHead
 
 } // namespace ieee80211
 } // namespace inet
+

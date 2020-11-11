@@ -296,7 +296,7 @@ void Ipv6Tunneling::destroyTunnels(const Ipv6Address& entry)
 
 void Ipv6Tunneling::destroyTunnelFromTrigger(const Ipv6Address& trigger)
 {
-    for (auto & elem : tunnels) {
+    for (auto& elem : tunnels) {
         if (elem.second.destTrigger == trigger) {
             destroyTunnel(elem.second.entry, elem.second.exit, elem.second.destTrigger);
 
@@ -331,7 +331,7 @@ int Ipv6Tunneling::getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType
 {
     int outInterfaceId = -1;
 
-    for (auto & elem : tunnels) {
+    for (auto& elem : tunnels) {
         if (tunnelType == NORMAL || tunnelType == NON_SPLIT || tunnelType == SPLIT) {
             // we search here for tunnels which have a destination trigger and
             // check whether the trigger is equal to the destination
@@ -346,8 +346,7 @@ int Ipv6Tunneling::getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType
         else if (tunnelType == MOBILITY || tunnelType == HA_OPT || tunnelType == T2RH) {
             if (elem.second.tunnelType != NON_SPLIT &&
                 elem.second.tunnelType != SPLIT &&
-                elem.second.destTrigger == destAddress
-                )
+                elem.second.destTrigger == destAddress)
             {
                 outInterfaceId = elem.first;
                 break;
@@ -457,8 +456,8 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
     }
     else {
 #endif    // WITH_xMIPv6
-      // normal tunnel - just modify controlInfo and send
-      // datagram back to Ipv6 module for encapsulation
+    // normal tunnel - just modify controlInfo and send
+    // datagram back to Ipv6 module for encapsulation
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     auto addresses = packet->addTagIfAbsent<L3AddressReq>();
@@ -528,7 +527,7 @@ int Ipv6Tunneling::lookupTunnels(const Ipv6Address& dest)
     // we search here for tunnels which have a destination trigger and
     // check whether the trigger is equal to the destination
     // only split tunnels or mobility paths are possible entry points
-    for (auto & elem : tunnels) {
+    for (auto& elem : tunnels) {
         if ((elem.second.tunnelType != NON_SPLIT) && (elem.second.destTrigger == dest)) {
             outInterfaceId = elem.first;
             break;
@@ -544,7 +543,7 @@ int Ipv6Tunneling::doPrefixMatch(const Ipv6Address& dest)
 
     // we'll just stop at the first match, because it is assumed that not
     // more than a single non-split tunnel is possible
-    for (auto & elem : tunnels) {
+    for (auto& elem : tunnels) {
         if (elem.second.tunnelType == NON_SPLIT) {
             outInterfaceId = elem.first;
             break;
@@ -556,7 +555,7 @@ int Ipv6Tunneling::doPrefixMatch(const Ipv6Address& dest)
 
 bool Ipv6Tunneling::isTunnelExit(const Ipv6Address& exit)
 {
-    for (auto & elem : tunnels) {
+    for (auto& elem : tunnels) {
         // mobility "tunnels" are not relevant for decapsulation
         // 17.10.07 - same for Home Address Option
         if (elem.second.tunnelType != T2RH && elem.second.tunnelType != HA_OPT

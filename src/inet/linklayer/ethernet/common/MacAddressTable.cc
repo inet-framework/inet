@@ -206,7 +206,7 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
 void MacAddressTable::flush(int interfaceId)
 {
     Enter_Method("MacAddressTable::flush():  Clearing interfaceId %d cache", interfaceId);
-    for (auto & elem : vlanAddressTable) {
+    for (auto& elem : vlanAddressTable) {
         AddressTable *table = elem.second;
         for (auto j = table->begin(); j != table->end(); ) {
             auto cur = j++;
@@ -224,18 +224,18 @@ void MacAddressTable::printState()
 {
     EV << endl << "MAC Address Table" << endl;
     EV << "VLAN ID    MAC    IfId    Inserted" << endl;
-    for (auto & elem : vlanAddressTable) {
+    for (auto& elem : vlanAddressTable) {
         AddressTable *table = elem.second;
-        for (auto & table_j : *table)
+        for (auto& table_j : *table)
             EV << table_j.second.vid << "   " << table_j.first << "   " << table_j.second.interfaceId << "   " << table_j.second.insertionTime << endl;
     }
 }
 
 void MacAddressTable::copyTable(int interfaceIdA, int interfaceIdB)
 {
-    for (auto & elem : vlanAddressTable) {
+    for (auto& elem : vlanAddressTable) {
         AddressTable *table = elem.second;
-        for (auto & table_j : *table)
+        for (auto& table_j : *table)
             if (table_j.second.interfaceId == interfaceIdA)
                 table_j.second.interfaceId = interfaceIdB;
 
@@ -261,7 +261,7 @@ void MacAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
 
 void MacAddressTable::removeAgedEntriesFromAllVlans()
 {
-    for (auto & elem : vlanAddressTable) {
+    for (auto& elem : vlanAddressTable) {
         AddressTable *table = elem.second;
         // TODO: this part could be factored out
         for (auto j = table->begin(); j != table->end(); ) {
@@ -294,7 +294,7 @@ void MacAddressTable::readAddressTable(const char *fileName)
 
     // parse address table file:
     char *line;
-    for (int lineno = 0; (line = fgetline(fp)) != nullptr; delete [] line) {
+    for (int lineno = 0; (line = fgetline(fp)) != nullptr; delete[] line) {
         lineno++;
 
         // lines beginning with '#' are treated as comments
@@ -327,7 +327,7 @@ void MacAddressTable::readAddressTable(const char *fileName)
 
         //   parse MAC address:
         L3Address addr;
-        if (! L3AddressResolver().tryResolve(macAddressStr, addr, L3AddressResolver::ADDR_MAC))
+        if (!L3AddressResolver().tryResolve(macAddressStr, addr, L3AddressResolver::ADDR_MAC))
             throw cRuntimeError("error in line %d in address table file `%s': MAC address '%s' unresolved", lineno, fileName, macAddressStr);
         MacAddress macAddress = addr.toMac();
 
@@ -382,7 +382,7 @@ void MacAddressTable::initializeTable()
 
 void MacAddressTable::clearTable()
 {
-    for (auto & elem : vlanAddressTable)
+    for (auto& elem : vlanAddressTable)
         delete elem.second;
 
     vlanAddressTable.clear();
@@ -391,7 +391,7 @@ void MacAddressTable::clearTable()
 
 MacAddressTable::~MacAddressTable()
 {
-    for (auto & elem : vlanAddressTable)
+    for (auto& elem : vlanAddressTable)
         delete elem.second;
 }
 

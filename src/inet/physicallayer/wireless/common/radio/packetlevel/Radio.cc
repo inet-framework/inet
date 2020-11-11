@@ -79,15 +79,15 @@ void Radio::initialize(int stage)
 
 void Radio::initializeRadioMode() {
     const char *initialRadioMode = par("initialRadioMode");
-    if(!strcmp(initialRadioMode, "off"))
+    if (!strcmp(initialRadioMode, "off"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_OFF);
-    else if(!strcmp(initialRadioMode, "sleep"))
+    else if (!strcmp(initialRadioMode, "sleep"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_SLEEP);
-    else if(!strcmp(initialRadioMode, "receiver"))
+    else if (!strcmp(initialRadioMode, "receiver"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_RECEIVER);
-    else if(!strcmp(initialRadioMode, "transmitter"))
+    else if (!strcmp(initialRadioMode, "transmitter"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_TRANSMITTER);
-    else if(!strcmp(initialRadioMode, "transceiver"))
+    else if (!strcmp(initialRadioMode, "transceiver"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_TRANSCEIVER);
     else
         throw cRuntimeError("Unknown initialRadioMode");
@@ -416,7 +416,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     auto signal = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto arrival = signal->getArrival();
     auto reception = signal->getReception();
-// TODO: should be this, but it breaks fingerprints: if (receptionTimer == nullptr && isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
+    // TODO: should be this, but it breaks fingerprints: if (receptionTimer == nullptr && isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
     if (isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
         auto transmission = signal->getTransmission();
         auto isReceptionAttempted = medium->isReceptionAttempted(this, transmission, part);
@@ -473,7 +473,7 @@ void Radio::endReception(cMessage *timer)
     auto reception = signal->getReception();
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime() == simTime()) {
         auto transmission = signal->getTransmission();
-// TODO: this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
+        // TODO: this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);

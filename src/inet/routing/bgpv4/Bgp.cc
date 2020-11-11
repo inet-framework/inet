@@ -64,8 +64,7 @@ void Bgp::initialize(int stage)
 
 void Bgp::finish()
 {
-    if (!isUp)
-    {
+    if (!isUp) {
         EV_ERROR << "Protocol is turned off. \n";
         return;
     }
@@ -75,8 +74,7 @@ void Bgp::finish()
 
 void Bgp::handleMessage(cMessage *msg)
 {
-    if (!isUp)
-    {
+    if (!isUp) {
         if (msg->isSelfMessage())
             throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
         EV_ERROR << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
@@ -84,7 +82,7 @@ void Bgp::handleMessage(cMessage *msg)
         return;
     }
 
-    if(msg == startupTimer)
+    if (msg == startupTimer)
         createBgpRouter();
     else if (msg->isSelfMessage())    // BGP level
         handleTimer(msg);

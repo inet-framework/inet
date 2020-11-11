@@ -299,7 +299,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                 auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>();
                 if (!ipv4Data || ipv4Data->getIPAddress().isUnspecified()) {
                     delete entry;
-                    return;    // if the address is not defined it isn't included in the global cache
+                    return; // if the address is not defined it isn't included in the global cache
                 }
             }
             Ipv4Address ipv4Address = networkInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
@@ -330,7 +330,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                 auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>();
                 if (ipv6Data == nullptr || ipv6Data->getLinkLocalAddress().isUnspecified()) {
                     delete entry;
-                    return;    // if the address is not defined it isn't included in the global cache
+                    return; // if the address is not defined it isn't included in the global cache
                 }
             }
             Ipv6Address ipv6Address = networkInterface->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();

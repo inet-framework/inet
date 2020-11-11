@@ -43,3 +43,4 @@ const Ptr<Chunk> BitCountChunkSerializer::deserialize(MemoryInputStream& stream,
 }
 
 } // namespace
+

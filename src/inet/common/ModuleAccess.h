@@ -61,10 +61,10 @@ INET_API cModule *findModuleUnderContainingNode(const cModule *from);
  * Returns the pointer to a module of type T or throws an error if module not found
  * or type mismatch.
  */
-template<typename T>
+template <typename T>
 INET_API T *findModuleFromPar(cPar& par, const cModule *from);
 
-template<typename T>
+template <typename T>
 T *findModuleFromPar(cPar& par, const cModule *from)
 {
     const char *path = par;
@@ -87,10 +87,10 @@ T *findModuleFromPar(cPar& par, const cModule *from)
  * Returns the pointer to a module of type T or throws an error if module not found
  * or type mismatch.
  */
-template<typename T>
+template <typename T>
 INET_API T *getModuleFromPar(cPar& par, const cModule *from);
 
-template<typename T>
+template <typename T>
 T *getModuleFromPar(cPar& par, const cModule *from)
 {
     const char *path = par;
@@ -108,7 +108,7 @@ T *getModuleFromPar(cPar& par, const cModule *from)
  * Returns a gate of a module with type T that is on the path starting at the given gate.
  * Returns nullptr if no such module is found along the path.
  */
-template<typename T>
+template <typename T>
 cGate *findConnectedGate(cGate *gate, int direction = 0)
 {
     if (direction < 0 || (direction == 0 && gate->getType() == cGate::INPUT)) {
@@ -143,12 +143,11 @@ cGate *findConnectedGate(cGate *gate, int direction = 0)
         throw cRuntimeError("Unknown gate type");
 }
 
-
 /**
  * Returns a gate of a module with type T that is on the path starting at the given gate.
  * Throws an error if no such module is found along the path.
  */
-template<typename T>
+template <typename T>
 cGate *getConnectedGate(cGate *gate, int direction = 0)
 {
     auto connectedGate = findConnectedGate<T>(gate, direction);
@@ -161,7 +160,7 @@ cGate *getConnectedGate(cGate *gate, int direction = 0)
  * Returns a module of type T that is on the path starting at the given gate.
  * Returns nullptr if no such module is found along the path.
  */
-template<typename T>
+template <typename T>
 T *findConnectedModule(cGate *gate, int direction = 0)
 {
     auto connectedGate = findConnectedGate<T>(gate, direction);
@@ -172,7 +171,7 @@ T *findConnectedModule(cGate *gate, int direction = 0)
  * Returns a module of type T that is on the path starting at the given gate.
  * Throws an error if no such module is found along the path.
  */
-template<typename T>
+template <typename T>
 T *getConnectedModule(cGate *gate, int direction = 0)
 {
     auto module = findConnectedModule<T>(gate, direction);

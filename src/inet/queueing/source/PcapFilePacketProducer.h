@@ -38,7 +38,7 @@ class INET_API PcapFilePacketProducer : public ActivePacketSourceBase
 
   public:
     virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { }
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override {}
 };
 
 } // namespace queueing

@@ -37,10 +37,11 @@ class INET_API Ieee8021dRelay : public MacRelayUnitBase
 
     struct Comp
     {
-        bool operator() (const MacAddressPair& first, const MacAddressPair& second) const
+        bool operator()(const MacAddressPair& first, const MacAddressPair& second) const
         {
-            return (first.first < second.first && first.second < second.first);
+            return first.first < second.first && first.second < second.first;
         }
+
     };
 
     bool in_range(const std::set<MacAddressPair, Comp>& ranges, MacAddress value)

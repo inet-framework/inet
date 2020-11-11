@@ -42,6 +42,7 @@ class INET_API Ipv6Socket : public INetworkSocket
         virtual void socketClosed(INetworkSocket *socket) override { socketClosed(check_and_cast<Ipv6Socket *>(socket)); }
         virtual void socketClosed(Ipv6Socket *socket) = 0;
     };
+
   protected:
     bool bound = false;
     bool isOpen_ = false;
@@ -80,8 +81,9 @@ class INET_API Ipv6Socket : public INetworkSocket
     virtual void close() override;
     virtual void destroy() override;
     virtual bool isOpen() const override { return isOpen_; }
+
   protected:
-    virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv6()); };
+    virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv6()); }
     virtual void connect(L3Address remoteAddress) override { connect(remoteAddress.toIpv6()); }
     virtual void sendTo(Packet *packet, L3Address destAddress) override { sendTo(packet, destAddress.toIpv6()); }
 };

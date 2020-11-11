@@ -96,7 +96,6 @@ std::string TcpBaseAlgStateVariables::detailedInfo() const
     return out.str();
 }
 
-
 simsignal_t TcpBaseAlg::cwndSignal = cComponent::registerSignal("cwnd");    // will record changes to snd_cwnd
 simsignal_t TcpBaseAlg::ssthreshSignal = cComponent::registerSignal("ssthresh");    // will record changes to ssthresh
 simsignal_t TcpBaseAlg::rttSignal = cComponent::registerSignal("rtt");    // will record measured RTT
@@ -672,15 +671,13 @@ bool TcpBaseAlg::shouldMarkAck()
             }
             state->gotCeIndication = false;
         }
-        return  state->ecnEchoState;
+        return state->ecnEchoState;
     }
     return false;
 }
 
-
 void TcpBaseAlg::processEcnInEstablished()
 {
-
 
 }
 

@@ -22,7 +22,7 @@ class INET_API Ospfv3InterfaceStateBackup : public Ospfv3InterfaceState
 {
   public:
     ~Ospfv3InterfaceStateBackup() {};
-    virtual void processEvent(Ospfv3Interface* intf, Ospfv3Interface::Ospfv3InterfaceEvent event) override;
+    virtual void processEvent(Ospfv3Interface *intf, Ospfv3Interface::Ospfv3InterfaceEvent event) override;
     virtual Ospfv3Interface::Ospfv3InterfaceFaState getState() const override { return Ospfv3Interface::INTERFACE_STATE_BACKUP; }
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateBackup"); }
 };

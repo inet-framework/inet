@@ -52,7 +52,7 @@ void MatchableObject::splitIndex(char *indexedName, int& index)
             throw cRuntimeError("Unmatched '['");
         *startbracket = '\0';
         char *end;
-        index = strtol(startbracket+1, &end, 10);
+        index = strtol(startbracket + 1, &end, 10);
         if (end != lastcharp)
             throw cRuntimeError("Brackets [] must contain numeric index");
     }
@@ -61,7 +61,7 @@ void MatchableObject::splitIndex(char *indexedName, int& index)
 bool MatchableObject::findDescriptorField(cClassDescriptor *classDescriptor, const char *attribute, int& fieldId, int& index)
 {
     // attribute may be in the form "fieldName[index]"; split the two
-    char *fieldNameBuf = new char[strlen(attribute)+1];
+    char *fieldNameBuf = new char[strlen(attribute) + 1];
     strcpy(fieldNameBuf, attribute);
     splitIndex(fieldNameBuf, index);
 

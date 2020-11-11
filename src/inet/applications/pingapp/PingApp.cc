@@ -53,7 +53,6 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
-
 namespace inet {
 
 using std::cout;
@@ -175,10 +174,13 @@ void PingApp::handleSelfMessage(cMessage *msg)
             networkProtocol = Protocol::getProtocol(networkProtocolAsString);
         else {
             switch (destAddr.getType()) {
-                case L3Address::IPv4: networkProtocol = &Protocol::ipv4; break;
-                case L3Address::IPv6: networkProtocol = &Protocol::ipv6; break;
+                case L3Address::IPv4: networkProtocol = &Protocol::ipv4;
+                    break;
+                case L3Address::IPv6: networkProtocol = &Protocol::ipv6;
+                    break;
                 case L3Address::MODULEID:
-                case L3Address::MODULEPATH: networkProtocol = &Protocol::nextHopForwarding; break;
+                case L3Address::MODULEPATH: networkProtocol = &Protocol::nextHopForwarding;
+                    break;
                 default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
             }
         }
@@ -543,8 +545,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
 
     int lastId = getSimulation()->getLastComponentId();
 
-    for (int i = 0; i <= lastId; i++)
-    {
+    for (int i = 0; i <= lastId; i++) {
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(getSimulation()->getModule(i));
         if (ift) {
             for (int j = 0; j < ift->getNumInterfaces(); j++) {

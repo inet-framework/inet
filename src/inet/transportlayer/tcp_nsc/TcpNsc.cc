@@ -168,7 +168,7 @@ uint32_t TcpNsc::mapRemote2Nsc(L3Address const& addrP)
 
     // get first free remote NSC IP
     uint32_t ret = remoteFirstInnerIpS.toIpv4().getInt();
-    for (auto & elem : nsc2RemoteMapM) {
+    for (auto& elem : nsc2RemoteMapM) {
         if (elem.first > ret)
             break;
         ret = elem.first + 1;
@@ -347,7 +347,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
         for (unsigned short i = 0; i < numOptions; i++) {
             if (tcpHdr->getHeaderOption(i)->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
                 auto newTcpHdr = staticPtrCast<TcpHeader>(tcpHdr->dupShared());
-                TcpOption* option = newTcpHdr->getHeaderOptionForUpdate(i);
+                TcpOption *option = newTcpHdr->getHeaderOptionForUpdate(i);
                 TcpOptionMaxSegmentSize *mssOption = check_and_cast<TcpOptionMaxSegmentSize *>(option);
                 unsigned int value = mssOption->getMaxSegmentSize();
                 value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
@@ -362,7 +362,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
 
     auto tcpHdr = packet->peekAtFront<TcpHeader>();
 
-    switch(tcpHdr->getCrcMode()) {
+    switch (tcpHdr->getCrcMode()) {
         case CRC_DECLARED_INCORRECT:
             EV_WARN << "CRC error, packet dropped\n";
             delete packet;
@@ -453,7 +453,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
     // Attempt to read from sockets
     int changes = 0;
 
-    for (auto & elem : tcpAppConnMapM) {
+    for (auto& elem : tcpAppConnMapM) {
         TcpNscConnection& c = elem.second;
 
         if (c.pNscSocketM && c.isListenerM) {
@@ -871,7 +871,7 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
         dest = conn->inetSockPairM.remoteM.ipAddrM;
     }
     else {
-        const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcph, lenP - ipHdrLen);
+        const auto& bytes = makeShared<BytesChunk>((const uint8_t *)tcph, lenP - ipHdrLen);
         fp = new Packet(nullptr, bytes);
         const auto& tcpHdr = fp->popAtFront<TcpHeader>();
         fp->trimFront();
@@ -887,7 +887,6 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
     ASSERT(crcMode == CRC_COMPUTED || crcMode == CRC_DECLARED_CORRECT);
     tcpHdr->setCrcMode(crcMode);
     insertTransportProtocolHeader(fp, Protocol::tcp, tcpHdr);
-
 
     b payloadLength = fp->getDataLength() - tcpHdr->getChunkLength();
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
@@ -1104,7 +1103,7 @@ void TcpNsc::process_SEND(TcpNscConnection& connP, Packet *msgP)
 
 void TcpNsc::do_SEND_all()
 {
-    for (auto & elem : tcpAppConnMapM) {
+    for (auto& elem : tcpAppConnMapM) {
         TcpNscConnection& conn = elem.second;
         conn.do_SEND();
     }

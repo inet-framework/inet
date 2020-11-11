@@ -26,7 +26,7 @@ void Ospfv3NeighborStateDown::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
     if (event == Ospfv3Neighbor::START) {
         int hopLimit = (neighbor->getInterface()->getType() == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getPollTimer());
-        Packet* hello = neighbor->getInterface()->prepareHello();
+        Packet *hello = neighbor->getInterface()->prepareHello();
 //        Ospfv3HelloPacket* hello = neighbor->getInterface()->prepareHello();
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->sendPacket(hello, neighbor->getNeighborIP(), neighbor->getInterface()->getIntName().c_str(), hopLimit);
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getNeighborDeadInterval());
@@ -46,7 +46,7 @@ void Ospfv3NeighborStateDown::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
     }
     if (event == Ospfv3Neighbor::POLL_TIMER) {
         int hopLimit = (neighbor->getInterface()->getType() == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
-        Packet* hello = neighbor->getInterface()->prepareHello();
+        Packet *hello = neighbor->getInterface()->prepareHello();
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->sendPacket(hello, neighbor->getNeighborIP(), neighbor->getInterface()->getIntName().c_str(), hopLimit);
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getPollTimer(), neighbor->getNeighborDeadInterval());
     }

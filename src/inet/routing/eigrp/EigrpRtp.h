@@ -34,13 +34,13 @@
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 #include "inet/routing/eigrp/tables/EigrpNeighborTable.h"
 namespace inet {
-namespace eigrp{
+namespace eigrp {
 class EigrpRtp;
 
 /**
  * Queue for storing requests for message sending.
  */
-class EigrpRequestQueue: public cObject
+class EigrpRequestQueue : public cObject
 {
   private:
     typedef std::list<EigrpMsgReq *> MessageQueue;
@@ -147,18 +147,21 @@ class EigrpRtpT : public cSimpleModule
 class EigrpRtp : public EigrpRtpT<Ipv4Address>
 {
 //container class for IPv4RTP, must exist because of Define_Module()
-public:
-    virtual ~EigrpRtp() {};
+
+  public:
+    virtual ~EigrpRtp() {}
 };
 
 #ifndef DISABLE_EIGRP_IPV6
 class EigrpRtp6 : public EigrpRtpT<Ipv6Address>
 {
 //container class for IPv6RTP, must exist because of Define_Module()
-public:
-    virtual ~EigrpRtp6() {};
+
+  public:
+    virtual ~EigrpRtp6() {}
 };
 #endif /* DISABLE_EIGRP_IPV6 */
 } //eigrp
 } //inet
 #endif
+

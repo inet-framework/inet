@@ -31,7 +31,7 @@ namespace inet {
 
 class INET_API Ieee8022Llc : public OperationalBase, public DefaultProtocolRegistrationListener
 {
-protected:
+  protected:
     struct SocketDescriptor
     {
         int socketId = -1;
@@ -39,11 +39,11 @@ protected:
         int remoteSap = -1;
 
         SocketDescriptor(int socketId, int localSap, int remoteSap = -1)
-                : socketId(socketId), localSap(localSap), remoteSap(remoteSap) { }
+            : socketId(socketId), localSap(localSap), remoteSap(remoteSap) {}
 
     };
 
-    friend std::ostream& operator << (std::ostream& o, const SocketDescriptor& t);
+    friend std::ostream& operator<<(std::ostream& o, const SocketDescriptor& t);
 
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;

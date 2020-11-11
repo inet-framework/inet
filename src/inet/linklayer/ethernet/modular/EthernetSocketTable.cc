@@ -60,7 +60,7 @@ void EthernetSocketTable::removeSocket(int socketId)
 
 std::vector<EthernetSocketTable::Socket *> EthernetSocketTable::findSockets(MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol) const
 {
-    std::vector<EthernetSocketTable::Socket*> result;
+    std::vector<EthernetSocketTable::Socket *> result;
     for (auto& it : socketIdToSocketMap) {
         auto socket = it.second;
         if (!socket->localAddress.isUnspecified() && !localAddress.isBroadcast() && localAddress != socket->localAddress)

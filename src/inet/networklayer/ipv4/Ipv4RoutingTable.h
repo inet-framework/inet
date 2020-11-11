@@ -129,10 +129,11 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     // helper for sorting routing table, used by addRoute()
     class RouteLessThan
     {
-        const Ipv4RoutingTable &c;
+        const Ipv4RoutingTable& c;
+
       public:
         RouteLessThan(const Ipv4RoutingTable& c) : c(c) {}
-        bool operator () (const Ipv4Route *a, const Ipv4Route *b) { return c.routeLessThan(a, b); }
+        bool operator()(const Ipv4Route *a, const Ipv4Route *b) { return c.routeLessThan(a, b); }
     };
     bool routeLessThan(const Ipv4Route *a, const Ipv4Route *b) const;
 

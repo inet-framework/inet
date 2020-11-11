@@ -34,3 +34,4 @@ void RtsProcedure::processTransmittedRts(const Ptr<const Ieee80211RtsFrame>& rts
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

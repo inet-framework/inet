@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/RtpReceiverInfo.h"
 
 #include "inet/transportlayer/rtp/Reports_m.h"

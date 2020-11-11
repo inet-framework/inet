@@ -37,7 +37,7 @@ class BgpSession;
 
 class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
 {
-private:
+  private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
@@ -46,7 +46,8 @@ private:
     bool redistributeInternal = false;
     bool redistributeRip = false;
     bool redistributeOspf = false;
-    struct redistributeOspfType_t {
+    struct redistributeOspfType_t
+    {
         bool interArea;
         bool intraArea;
         bool externalType1;
@@ -101,12 +102,12 @@ private:
     void addToAsList(std::string nodeName, AsId id);
     void setNextHopSelf(Ipv4Address peer, bool nextHopSelf);
     void setLocalPreference(Ipv4Address peer, int localPref);
-    bool isExternalAddress(const Ipv4Route &rtEntry);
+    bool isExternalAddress(const Ipv4Route& rtEntry);
     void processMessageFromTCP(cMessage *msg);
 
     void printOpenMessage(const BgpOpenMessage& msg);
     void printUpdateMessage(const BgpUpdateMessage& msg);
-  //  void printNotificationMessage(const BgpNotificationMessage& msg);
+    //  void printNotificationMessage(const BgpNotificationMessage& msg);
     void printKeepAliveMessage(const BgpKeepAliveMessage& msg);
 
   protected:
@@ -119,7 +120,7 @@ private:
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override {}
     virtual void socketFailure(TcpSocket *socket, int code) override;
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
     virtual void socketDeleted(TcpSocket *socket) override {}
     //@}
 
@@ -180,7 +181,7 @@ private:
     int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
-    bool isRouteExcluded(const Ipv4Route &rtEntry);
+    bool isRouteExcluded(const Ipv4Route& rtEntry);
     bool isDefaultRoute(const Ipv4Route *entry) const;
     bool isReachable(const Ipv4Address addr) const;
 };

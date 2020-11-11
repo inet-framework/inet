@@ -58,7 +58,7 @@ void Ieee8021qSocketTable::removeSocket(int socketId)
 
 std::vector<Ieee8021qSocketTable::Socket *> Ieee8021qSocketTable::findSockets(const Protocol *protocol, int vlanId) const
 {
-    std::vector<Ieee8021qSocketTable::Socket*> result;
+    std::vector<Ieee8021qSocketTable::Socket *> result;
     for (auto& it : socketIdToSocketMap) {
         auto socket = it.second;
         if (socket->protocol != nullptr && protocol != socket->protocol)

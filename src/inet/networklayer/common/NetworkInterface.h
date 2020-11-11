@@ -43,7 +43,7 @@ enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
 class INET_API MacEstimateCostProcess
 {
   public:
-    virtual ~MacEstimateCostProcess() {};
+    virtual ~MacEstimateCostProcess() {}
     virtual double getCost(int, MacAddress&) = 0;
     virtual double getNumCost() = 0;
     virtual int getNumNeighbors() = 0;
@@ -67,7 +67,7 @@ class INET_API InterfaceProtocolData : public TagBase
     virtual void changed(simsignal_t signalID, int fieldId);
 
   public:
-    InterfaceProtocolData(int id) : id(id) { }
+    InterfaceProtocolData(int id) : id(id) {}
 
     /**
      * Returns the NetworkInterface that contains this data object, or nullptr
@@ -253,7 +253,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns the protocol data at the given index.
      */
-    const InterfaceProtocolData* getProtocolData(int index) const {
+    const InterfaceProtocolData *getProtocolData(int index) const {
         return static_cast<const InterfaceProtocolData *>(protocolDataSet.getTag(index));
     }
 
@@ -265,35 +265,35 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns the protocol data for the provided type or returns nullptr if no such protocol data is found.
      */
-    template<typename T> const T *findProtocolData() const {
+    template <typename T> const T *findProtocolData() const {
         return protocolDataSet.findTag<T>();
     }
 
     /**
      * Returns the protocol data for the provided type or returns nullptr if no such protocol data is found.
      */
-    template<typename T> T *findProtocolDataForUpdate() {
+    template <typename T> T *findProtocolDataForUpdate() {
         return protocolDataSet.findTagForUpdate<T>();
     }
 
     /**
      * Returns the protocol data for the provided type or throws an exception if no such protocol data is found.
      */
-    template<typename T> const T *getProtocolData() const {
+    template <typename T> const T *getProtocolData() const {
         return protocolDataSet.getTag<T>();
     }
 
     /**
      * Returns the protocol data for the provided type or throws an exception if no such protocol data is found.
      */
-    template<typename T> T *getProtocolDataForUpdate() {
+    template <typename T> T *getProtocolDataForUpdate() {
         return protocolDataSet.getTagForUpdate<T>();
     }
 
     /**
      * Returns a newly added protocol data for the provided type, or throws an exception if such a protocol data is already present.
      */
-    template<typename T> T *addProtocolData() {
+    template <typename T> T *addProtocolData() {
         auto t = protocolDataSet.addTag<T>();
         auto ipd = static_cast<InterfaceProtocolData *>(t);
         ipd->ownerp = this;
@@ -304,7 +304,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns a newly added protocol data for the provided type if absent, or returns the protocol data that is already present.
      */
-    template<typename T> T *addProtocolDataIfAbsent() {
+    template <typename T> T *addProtocolDataIfAbsent() {
         auto t = protocolDataSet.addTagIfAbsent<T>();
         auto ipd = static_cast<InterfaceProtocolData *>(t);
         if (ipd->ownerp != this) {
@@ -317,7 +317,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Removes the protocol data for the provided type, or throws an exception if no such protocol data is found.
      */
-    template<typename T> T *removeProtocolData() {
+    template <typename T> T *removeProtocolData() {
         auto t = protocolDataSet.removeTag<T>();
         check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
         changed(interfaceConfigChangedSignal, t->id);
@@ -327,7 +327,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Removes the protocol data for the provided type if present, or returns nullptr if no such protocol data is found.
      */
-    template<typename T> T *removeProtocolDataIfPresent() {
+    template <typename T> T *removeProtocolDataIfPresent() {
         auto t = protocolDataSet.removeTagIfPresent<T>();
         if (t != nullptr) {
             check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
@@ -335,6 +335,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
         }
         return t;
     }
+
     //@}
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
@@ -363,7 +364,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     //@}
 };
 
-std::ostream& operator <<(std::ostream& o, NetworkInterface::State);
+std::ostream& operator<<(std::ostream& o, NetworkInterface::State);
 
 /**
  * Find the nic module (inside the networkNode) containing the given module.

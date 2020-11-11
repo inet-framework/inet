@@ -64,7 +64,7 @@ class ClnsAddress
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const ClnsAddress& toCmp) const { return (systemID == toCmp.systemID && areaID == toCmp.areaID); }
+    bool equals(const ClnsAddress& toCmp) const { return systemID == toCmp.systemID && areaID == toCmp.areaID; }
 
     uint64_t getAreaId() const;
     uint64_t getSystemId() const;
@@ -84,10 +84,10 @@ class ClnsAddress
     /**
      * Compares two CLNS addresses.
      */
-    bool operator<(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID < addr1.getSystemId();}else{ return areaID < addr1.getAreaId();} }
-    bool operator<=(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID <= addr1.getSystemId();}else{ return areaID < addr1.getAreaId();} }
-    bool operator>(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID > addr1.getSystemId();}else{ return areaID > addr1.getAreaId();} }
-    bool operator>=(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID >= addr1.getSystemId();}else{ return areaID > addr1.getAreaId();} }
+    bool operator<(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID < addr1.getSystemId(); } else { return areaID < addr1.getAreaId(); } }
+    bool operator<=(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID <= addr1.getSystemId(); } else { return areaID < addr1.getAreaId(); } }
+    bool operator>(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID > addr1.getSystemId(); } else { return areaID > addr1.getAreaId(); } }
+    bool operator>=(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID >= addr1.getSystemId(); } else { return areaID > addr1.getAreaId(); } }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ClnsAddress& net)

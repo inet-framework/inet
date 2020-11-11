@@ -320,7 +320,7 @@ void UdpBasicBurst::generateBurst()
         destAddr = chooseDestAddr();
 
     Packet *payload = createPacket();
-    if(dontFragment)
+    if (dontFragment)
         payload->addTag<FragmentationReq>()->setDontFragment(true);
     payload->setTimestamp();
     emit(packetSentSignal, payload);

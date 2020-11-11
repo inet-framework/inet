@@ -26,7 +26,7 @@ namespace inet {
 
 class INET_API Message : public cMessage, public IPrintableObject, public ITaggedObject
 {
-  friend class MessageDescriptor;
+    friend class MessageDescriptor;
 
   protected:
     SharingTagSet tags;
@@ -81,58 +81,59 @@ class INET_API Message : public cMessage, public IPrintableObject, public ITagge
     /**
      * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
      */
-    template<typename T> const Ptr<const T> findTag() const {
+    template <typename T> const Ptr<const T> findTag() const {
         return tags.findTag<T>();
     }
 
     /**
      * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
      */
-    template<typename T> const Ptr<T> findTagForUpdate() {
+    template <typename T> const Ptr<T> findTagForUpdate() {
         return tags.findTagForUpdate<T>();
     }
 
     /**
      * Returns the message tag for the provided type or throws an exception if no such message tag is found.
      */
-    template<typename T> const Ptr<const T> getTag() const {
+    template <typename T> const Ptr<const T> getTag() const {
         return tags.getTag<T>();
     }
 
     /**
      * Returns the message tag for the provided type or throws an exception if no such message tag is found.
      */
-    template<typename T> const Ptr<T> getTagForUpdate() {
+    template <typename T> const Ptr<T> getTagForUpdate() {
         return tags.getTagForUpdate<T>();
     }
 
     /**
      * Returns a newly added message tag for the provided type, or throws an exception if such a message tag is already present.
      */
-    template<typename T> const Ptr<T> addTag() {
+    template <typename T> const Ptr<T> addTag() {
         return tags.addTag<T>();
     }
 
     /**
      * Returns a newly added message tag for the provided type if absent, or returns the message tag that is already present.
      */
-    template<typename T> const Ptr<T> addTagIfAbsent() {
+    template <typename T> const Ptr<T> addTagIfAbsent() {
         return tags.addTagIfAbsent<T>();
     }
 
     /**
      * Removes the message tag for the provided type, or throws an exception if no such message tag is found.
      */
-    template<typename T> const Ptr<T> removeTag() {
+    template <typename T> const Ptr<T> removeTag() {
         return tags.removeTag<T>();
     }
 
     /**
      * Removes the message tag for the provided type if present, or returns nullptr if no such message tag is found.
      */
-    template<typename T> const Ptr<T> removeTagIfPresent() {
+    template <typename T> const Ptr<T> removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
+
     //@}
 
     /** @name Utility functions */

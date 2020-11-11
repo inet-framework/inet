@@ -24,29 +24,29 @@ namespace inet {
 
 namespace math {
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API ConstantFunction;
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API AddedFunction;
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API SubtractedFunction;
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API MultipliedFunction;
 
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API DividedFunction;
 
 /**
  * Useful base class for most IFunction implementations with some default behavior.
  */
-template<typename R, typename D>
+template <typename R, typename D>
 class INET_API FunctionBase : public IFunction<R, D>
 {
   public:
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         auto m = (1 << std::tuple_size<typename D::P::type>::value) - 1;
         if (i.getFixed() == m) {
             ASSERT(i.getLower() == i.getUpper());
@@ -168,7 +168,7 @@ class INET_API FunctionBase : public IFunction<R, D>
 
     virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const override {
         os << "over " << i << " → {";
-        iterateCorners(i, std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
+        iterateCorners(i, std::function<void(const typename D::P&)>([&] (const typename D::P& p) {
             os << "\n" << std::string(level + 2, ' ') << "at " << p << " → " << this->getValue(p);
         }));
         os << "\n" << std::string(level, ' ') << "} min = " << getMin(i) << ", max = " << getMax(i) << ", mean = " << getMean(i) << "\n";

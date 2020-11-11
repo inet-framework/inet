@@ -46,7 +46,7 @@ void AarfRateControl::initialize(int stage)
     }
 }
 
-void AarfRateControl::handleMessage(cMessage* msg)
+void AarfRateControl::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't handle self messages");
 }
@@ -60,8 +60,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
 {
     increaseRateIfTimerIsExpired();
 
-    if (!isSuccessful && probing) // probing packet failed
-    {
+    if (!isSuccessful && probing) { // probing packet failed
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
@@ -70,8 +69,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
         multiplyIncreaseThreshold(factor);
         resetTimer();
     }
-    else if (!isSuccessful && retryCount >= decreaseThreshold - 1) // decreaseThreshold consecutive failed transmissions
-    {
+    else if (!isSuccessful && retryCount >= decreaseThreshold - 1) { // decreaseThreshold consecutive failed transmissions
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
@@ -83,8 +81,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     else if (isSuccessful && retryCount == 0)
         numberOfConsSuccTransmissions++;
 
-    if (numberOfConsSuccTransmissions == increaseThreshold)
-    {
+    if (numberOfConsSuccTransmissions == increaseThreshold) {
         numberOfConsSuccTransmissions = 0;
         currentMode = increaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
@@ -116,8 +113,7 @@ void AarfRateControl::resetTimer()
 
 void AarfRateControl::increaseRateIfTimerIsExpired()
 {
-    if (simTime() - timer >= interval)
-    {
+    if (simTime() - timer >= interval) {
         currentMode = increaseRateIfPossible(currentMode);
         emitDatarateChangedSignal();
         updateDisplayString();
@@ -130,7 +126,7 @@ void AarfRateControl::frameReceived(Packet *frame)
 {
 }
 
-const IIeee80211Mode* AarfRateControl::getRate()
+const IIeee80211Mode *AarfRateControl::getRate()
 {
     Enter_Method("getRate");
     increaseRateIfTimerIsExpired();
@@ -138,6 +134,6 @@ const IIeee80211Mode* AarfRateControl::getRate()
     return currentMode;
 }
 
-
 } /* namespace ieee80211 */
 } /* namespace inet */
+

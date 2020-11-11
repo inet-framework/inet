@@ -216,7 +216,6 @@ void Ipv4FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVect
         if (nodeInfo[i].isIPNode)
             numIPNodes++;
 
-
     // update display string
     char buf[80];
     sprintf(buf, "%d Ipv4 nodes\n%d non-Ipv4 nodes", numIPNodes, topo.getNumNodes() - numIPNodes);

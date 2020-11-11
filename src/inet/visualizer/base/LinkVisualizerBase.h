@@ -40,7 +40,8 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
         ACTIVITY_LEVEL_PROTOCOL,
     };
 
-    class INET_API LinkVisualization : public LineManager::ModuleLine {
+    class INET_API LinkVisualization : public LineManager::ModuleLine
+    {
       public:
         mutable AnimationPosition lastUsageAnimationPosition;
 
@@ -49,12 +50,13 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
         virtual ~LinkVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public StringFormat::IDirectiveResolver
+    {
       protected:
         const cPacket *packet = nullptr;
 
       public:
-        DirectiveResolver(const cPacket *packet) : packet(packet) { }
+        DirectiveResolver(const cPacket *packet) : packet(packet) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

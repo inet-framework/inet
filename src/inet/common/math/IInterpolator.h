@@ -28,11 +28,11 @@ namespace math {
  * This interface represents interpolation of values (y) between two points x1 and x2.
  * The types X and Y represent scalar values (double, simtime_t, or some quantity with unit).
  */
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API IInterpolator : public cObject
 {
   public:
-    virtual ~IInterpolator() { }
+    virtual ~IInterpolator() {}
 
     /**
      * Returns the interpolated value for the given x. The value of x must fall

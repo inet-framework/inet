@@ -58,23 +58,23 @@ class INET_API Ospfv3Interface : public cObject
         VIRTUAL_TYPE = 5
     };
 
-    const char* ospfv3IntStateOutput[7] = {
-            "Down",
-            "Loopback",
-            "Waiting",
-            "Point-to-Point",
-            "DROther",
-            "Backup",
-            "DR"
+    const char *ospfv3IntStateOutput[7] = {
+        "Down",
+        "Loopback",
+        "Waiting",
+        "Point-to-Point",
+        "DROther",
+        "Backup",
+        "DR"
     };
 
-    const char* ospfv3IntTypeOutput[6] = {
-            "UNKNOWN",
-            "POINT-TO-POINT",
-            "BROADCAST",
-            "NBMA",
-            "POINT-TO-MULTIPOINT",
-            "VIRTUAL"
+    const char *ospfv3IntTypeOutput[6] = {
+        "UNKNOWN",
+        "POINT-TO-POINT",
+        "BROADCAST",
+        "NBMA",
+        "POINT-TO-MULTIPOINT",
+        "VIRTUAL"
     };
 
     struct AcknowledgementFlags
@@ -88,21 +88,21 @@ class INET_API Ospfv3Interface : public cObject
         bool anyNeighborInExchangeOrLoadingState= false;
     };
 
-    cModule* containingModule=nullptr;
-    Ospfv3Process* containingProcess=nullptr;
-    IInterfaceTable* ift = nullptr;
+    cModule *containingModule = nullptr;
+    Ospfv3Process *containingProcess = nullptr;
+    IInterfaceTable *ift = nullptr;
 
   public:
-    Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3Process* processModule, Ospfv3InterfaceType interfaceType, bool passive);
+    Ospfv3Interface(const char *name, cModule *routerModule, Ospfv3Process *processModule, Ospfv3InterfaceType interfaceType, bool passive);
     virtual ~Ospfv3Interface();
     std::string getIntName() const { return this->interfaceName; }
     void reset();
     void processEvent(Ospfv3Interface::Ospfv3InterfaceEvent);
     void setRouterPriority(int newPriority) { this->routerPriority = newPriority; }
-    void setHelloInterval(int newInterval) { this->helloInterval=newInterval; }
-    void setDeadInterval(int newInterval) { this->deadInterval=newInterval; }
-    void setInterfaceCost(int newInterval) { this->interfaceCost=newInterval; }
-    void setInterfaceType(Ospfv3InterfaceType newType) { this->interfaceType=newType; }
+    void setHelloInterval(int newInterval) { this->helloInterval = newInterval; }
+    void setDeadInterval(int newInterval) { this->deadInterval = newInterval; }
+    void setInterfaceCost(int newInterval) { this->interfaceCost = newInterval; }
+    void setInterfaceType(Ospfv3InterfaceType newType) { this->interfaceType = newType; }
     void setAckDelay(int newAckDelay) { this->ackDelay = newAckDelay; }
     void setDesignatedIP(Ipv6Address newIP) { this->DesignatedRouterIP = newIP; }
     void setBackupIP(Ipv6Address newIP) { this->BackupRouterIP = newIP; }
@@ -130,7 +130,7 @@ class INET_API Ospfv3Interface : public cObject
     Ipv4Address getTransitAreaID() const { return this->transitAreaID; }
 
     Ospfv3InterfaceType getType() const { return this->interfaceType; }
-    Ospfv3Neighbor* getNeighbor(int i) { return this->neighbors.at(i); }
+    Ospfv3Neighbor *getNeighbor(int i) { return this->neighbors.at(i); }
     Ipv6Address getDesignatedIP() const { return this->DesignatedRouterIP; }
     Ipv6Address getBackupIP() const { return this->BackupRouterIP; }
     Ipv4Address getDesignatedID() const { return this->DesignatedRouterID; }
@@ -139,56 +139,56 @@ class INET_API Ospfv3Interface : public cObject
     void removeNeighborByID(Ipv4Address neighborID);
 
     int calculateInterfaceCost(); //only prototype
-    cMessage* getWaitTimer() { return this->waitTimer; }
-    cMessage* getHelloTimer() { return this->helloTimer; }
-    cMessage* getAcknowledgementTimer() { return this->acknowledgementTimer; }
-    Ospfv3Area* getArea() const { return this->containingArea; };
-    void setArea(Ospfv3Area* area) { this->containingArea=area; };
+    cMessage *getWaitTimer() { return this->waitTimer; }
+    cMessage *getHelloTimer() { return this->helloTimer; }
+    cMessage *getAcknowledgementTimer() { return this->acknowledgementTimer; }
+    Ospfv3Area *getArea() const { return this->containingArea; };
+    void setArea(Ospfv3Area *area) { this->containingArea = area; }
 
-    Ospfv3InterfaceState* getCurrentState() { return this->state; };
-    Ospfv3InterfaceState* getPreviousState() { return this->previousState; };
-    void changeState(Ospfv3InterfaceState* currentState, Ospfv3InterfaceState* newState);
+    Ospfv3InterfaceState *getCurrentState() { return this->state; };
+    Ospfv3InterfaceState *getPreviousState() { return this->previousState; };
+    void changeState(Ospfv3InterfaceState *currentState, Ospfv3InterfaceState *newState);
     Ospfv3Interface::Ospfv3InterfaceFaState getState() const;
 
-    void processHelloPacket(Packet* packet);
-    void processDDPacket(Packet* packet);
-    bool preProcessDDPacket(Packet* packet, Ospfv3Neighbor* neighbor, bool inExchangeStart);
-    void processLSR(Packet* packet, Ospfv3Neighbor* neighbor);
-    void processLSU(Packet* packet, Ospfv3Neighbor* neighbor);
-    void processLSAck(Packet* packet, Ospfv3Neighbor* neighbor);
-    bool floodLSA(const Ospfv3Lsa* lsa, Ospfv3Interface* interface=nullptr, Ospfv3Neighbor* neighbor=nullptr);
+    void processHelloPacket(Packet *packet);
+    void processDDPacket(Packet *packet);
+    bool preProcessDDPacket(Packet *packet, Ospfv3Neighbor *neighbor, bool inExchangeStart);
+    void processLSR(Packet *packet, Ospfv3Neighbor *neighbor);
+    void processLSU(Packet *packet, Ospfv3Neighbor *neighbor);
+    void processLSAck(Packet *packet, Ospfv3Neighbor *neighbor);
+    bool floodLSA(const Ospfv3Lsa *lsa, Ospfv3Interface *interface = nullptr, Ospfv3Neighbor *neighbor = nullptr);
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
     bool hasAnyNeighborInState(int state) const;
     void ageTransmittedLSALists();
 
-    Packet* prepareHello();
-    Packet* prepareLSUHeader();
-    Packet* prepareUpdatePacket(std::vector<Ospfv3Lsa *>lsas);
+    Packet *prepareHello();
+    Packet *prepareLSUHeader();
+    Packet *prepareUpdatePacket(std::vector<Ospfv3Lsa *> lsas);
 
-    Ospfv3Neighbor* getNeighborById(Ipv4Address neighborId);
-    void addNeighbor(Ospfv3Neighbor*);
+    Ospfv3Neighbor *getNeighborById(Ipv4Address neighborId);
+    void addNeighbor(Ospfv3Neighbor *);
 
     std::string str() const override;
     std::string detailedInfo() const;
     void acknowledgeLSA(const Ospfv3LsaHeader& lsaHeader, AcknowledgementFlags ackFlags, Ipv4Address routerID);
 
     // LINK LSA
-    LinkLSA* originateLinkLSA();
+    LinkLSA *originateLinkLSA();
     bool installLinkLSA(const Ospfv3LinkLsa *lsa);
-    void addLinkLSA(LinkLSA* newLSA) { this->linkLSAList.push_back(newLSA); }
+    void addLinkLSA(LinkLSA *newLSA) { this->linkLSAList.push_back(newLSA); }
     int getLinkLSACount() { return this->linkLSAList.size(); }
-    LinkLSA* getLinkLSA(int i) { return this->linkLSAList.at(i); }
-    LinkLSA* getLinkLSAbyKey(LSAKeyType lsaKey);
+    LinkLSA *getLinkLSA(int i) { return this->linkLSAList.at(i); }
+    LinkLSA *getLinkLSAbyKey(LSAKeyType lsaKey);
 //    void installLinkLSA(LinkLSA *lsa);
-    bool updateLinkLSA(LinkLSA* currentLsa,const Ospfv3LinkLsa* newLsa);
-    bool linkLSADiffersFrom(Ospfv3LinkLsa* currentLsa,const Ospfv3LinkLsa* newLsa);
-    LinkLSA* findLinkLSAbyAdvRouter (Ipv4Address advRouter);
+    bool updateLinkLSA(LinkLSA *currentLsa, const Ospfv3LinkLsa *newLsa);
+    bool linkLSADiffersFrom(Ospfv3LinkLsa *currentLsa, const Ospfv3LinkLsa *newLsa);
+    LinkLSA *findLinkLSAbyAdvRouter(Ipv4Address advRouter);
 
     void sendLSAcknowledgement(const Ospfv3LsaHeader *lsaHeader, Ipv6Address destination);
     void addDelayedAcknowledgement(const Ospfv3LsaHeader& lsaHeader);
 
-    void setTransitNetInt(bool isTransit) { this->transitNetworkInterface=isTransit; }
+    void setTransitNetInt(bool isTransit) { this->transitNetworkInterface = isTransit; }
     bool getTransitNetInt() { return this->transitNetworkInterface; }
 
     void addInterfaceAddress(Ipv6AddressRange address) { this->interfaceAddresses.push_back(address); }
@@ -201,14 +201,14 @@ class INET_API Ospfv3Interface : public cObject
     friend class Ospfv3InterfaceState;
 
   private:
-    int interfaceId;//physical id in the simulation
-    int interfaceIndex;//unique value that appears in hello packet
-    std::vector<LinkLSA*> linkLSAList;
+    int interfaceId; //physical id in the simulation
+    int interfaceIndex; //unique value that appears in hello packet
+    std::vector<LinkLSA *> linkLSAList;
     Ipv6Address interfaceLLIP; // link-local ip address
     std::string interfaceName;
     bool passiveInterface;
-    Ospfv3InterfaceState* state;
-    Ospfv3InterfaceState* previousState=nullptr;
+    Ospfv3InterfaceState *state;
+    Ospfv3InterfaceState *previousState = nullptr;
     short helloInterval;
     short deadInterval;
     short pollInterval;
@@ -218,14 +218,14 @@ class INET_API Ospfv3Interface : public cObject
     int routerPriority;
 
     int mtu;
-    Ospfv3Area* containingArea;
+    Ospfv3Area *containingArea;
     Ipv4Address transitAreaID;
     Ospfv3Interface::Ospfv3InterfaceType interfaceType;
 
     std::vector<Ipv6AddressRange> interfaceAddresses; // List of link prefixes
-    std::vector<Ospfv3Neighbor*> neighbors;
-    std::map<Ipv4Address, Ospfv3Neighbor*> neighborsById;
-    std::map<Ipv6Address, std::list<Ospfv3LsaHeader> > delayedAcknowledgements;
+    std::vector<Ospfv3Neighbor *> neighbors;
+    std::map<Ipv4Address, Ospfv3Neighbor *> neighborsById;
+    std::map<Ipv6Address, std::list<Ospfv3LsaHeader>> delayedAcknowledgements;
     std::map<Ipv4Address, LinkLSA *> linkLSAsByID;
 
     //for Intra-Area-Prefix LSA

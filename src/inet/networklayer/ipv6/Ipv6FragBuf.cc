@@ -34,7 +34,7 @@ Ipv6FragBuf::Ipv6FragBuf()
 
 Ipv6FragBuf::~Ipv6FragBuf()
 {
-    for (auto & elem : bufs) {
+    for (auto& elem : bufs) {
         delete elem.second.packet;
     }
 }

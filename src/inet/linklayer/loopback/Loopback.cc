@@ -91,3 +91,4 @@ void Loopback::refreshDisplay() const
 }
 
 } // namespace inet
+

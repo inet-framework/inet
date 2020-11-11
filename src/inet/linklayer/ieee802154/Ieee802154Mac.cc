@@ -528,7 +528,7 @@ void Ieee802154Mac::updateStatusWaitAck(t_mac_event event, cMessage *msg)
     }
 }
 
-void Ieee802154Mac::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
+void Ieee802154Mac::manageMissingAck(t_mac_event /*event*/, cMessage *    /*msg*/)
 {
     if (txAttempts < macMaxFrameRetries) {
         // increment counter

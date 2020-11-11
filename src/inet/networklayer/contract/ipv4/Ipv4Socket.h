@@ -43,6 +43,7 @@ class INET_API Ipv4Socket : public INetworkSocket
         virtual void socketClosed(INetworkSocket *socket) override { socketClosed(check_and_cast<Ipv4Socket *>(socket)); }
         virtual void socketClosed(Ipv4Socket *socket) = 0;
     };
+
   protected:
     bool bound = false;
     bool isOpen_ = false;

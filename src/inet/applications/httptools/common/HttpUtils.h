@@ -31,7 +31,7 @@
 # include <unistd.h>
 #endif // ifdef _WIN32
 
-#include "inet/applications/httptools/common/HttpMessages_m.h"    // for HttpContentType
+#include "inet/applications/httptools/common/HttpMessages_m.h" // for HttpContentType
 
 namespace inet {
 

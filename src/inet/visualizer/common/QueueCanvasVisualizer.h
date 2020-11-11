@@ -30,7 +30,8 @@ namespace visualizer {
 class INET_API QueueCanvasVisualizer : public QueueVisualizerBase
 {
   protected:
-    class INET_API QueueCanvasVisualization : public QueueVisualization {
+    class INET_API QueueCanvasVisualization : public QueueVisualization
+    {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         QueueFigure *figure = nullptr;

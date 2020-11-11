@@ -29,7 +29,7 @@ Define_Module(PimInterfaceTable);
 
 PimInterfaceTable::~PimInterfaceTable()
 {
-    for (auto & elem : pimInterfaces)
+    for (auto& elem : pimInterfaces)
         delete elem;
 }
 

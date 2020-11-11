@@ -68,7 +68,7 @@ namespace inet {
 class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, protected cListener
 {
   protected:
-    cModule *host;    // cached pointer
+    cModule *host; // cached pointer
 
     // primary storage for interfaces: vector indexed by id; may contain NULLs;
     // slots are never reused to ensure id uniqueness
@@ -76,8 +76,8 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
     InterfaceVector idToInterface;
 
     // fields to support getNumInterfaces() and getInterface(pos)
-    mutable int tmpNumInterfaces;    // caches number of non-nullptr elements of idToInterface; -1 if invalid
-    mutable NetworkInterface **tmpInterfaceList;    // caches non-nullptr elements of idToInterface; nullptr if invalid
+    mutable int tmpNumInterfaces; // caches number of non-nullptr elements of idToInterface; -1 if invalid
+    mutable NetworkInterface **tmpInterfaceList; // caches non-nullptr elements of idToInterface; nullptr if invalid
 
   protected:
     // displays summary above the icon

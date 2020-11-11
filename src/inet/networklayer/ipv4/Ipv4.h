@@ -70,7 +70,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
         Ipv4Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, Ipv4Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
   protected:

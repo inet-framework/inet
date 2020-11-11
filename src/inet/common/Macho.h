@@ -220,16 +220,16 @@ class TestAccess;
 
 // Use this macro to define your top state class.
 #define TOPSTATE(TOP) \
-    struct TOP : public ::inet::Macho::MachoLink < TOP, ::inet::Macho::TopBase<TOP> >
+    struct TOP : public ::inet::Macho::MachoLink<TOP, ::inet::Macho::TopBase<TOP>>
 
 // Use this macro for all other state classes.
 #define SUBSTATE(STATE, SUPERSTATE) \
-    struct STATE : public ::inet::Macho::MachoLink < STATE, SUPERSTATE >
+    struct STATE : public ::inet::Macho::MachoLink<STATE, SUPERSTATE>
 
 // Use this macro for template states that receive an anchor as template
 // parameter.
 #define TSUBSTATE(STATE, SUPERSTATE) \
-    struct STATE : public ::inet::Macho::MAchoLink < STATE<typename SUPERSTATE::ANCHOR>, typename SUPERSTATE::SELF >
+    struct STATE : public ::inet::Macho::MAchoLink<STATE<typename SUPERSTATE::ANCHOR>, typename SUPERSTATE::SELF>
 
 // Use this macro in your class definition to give it state functionality
 // (mandatory). If you have a state box declare it BEFORE macro invocation!
@@ -239,7 +239,7 @@ class TestAccess;
     typedef S ANCHOR;    /* Anchor is the first non-template state in the inheritance chain */ \
     /* Constructor and destructor already defined: you can't (and shouldn't) have your own! */ \
     /* For the user a state class "constructor" and "destructor" are its entry and exit method! */ \
-    S(::inet::Macho::_StateInstance & instance) : MLINK(instance) {} \
+    S(::inet::Macho::_StateInstance& instance) : MLINK(instance) {} \
     ~S() {} \
     static const char *_state_name() { return #S; } \
     /* Get to your Box with this method: */ \
@@ -253,34 +253,34 @@ class TestAccess;
     typedef typename S::SUPER SUPER; \
     typedef typename S::TOP TOP; \
     typedef typename S::ANCHOR ANCHOR;    /* Anchor is the first non-template state in the inheritance chain */ \
-    typedef::Macho::MachoLink<S, SUPER> MLINK; \
-    S(::Macho::_StateInstance & instance) : MLINK(instance) {} \
+    typedef ::Macho::MachoLink<S, SUPER> MLINK; \
+    S(::Macho::_StateInstance& instance) : MLINK(instance) {} \
     ~S() {} \
     static const char *_state_name() { return #S; } \
-    typename S::Box & box() { return *static_cast<typename S::Box *>(this->_box()); } \
-    friend class::_VS8_Bug_101615; \
+    typename S::Box& box() { return *static_cast<typename S::Box *>(this->_box()); } \
+    friend class ::_VS8_Bug_101615; \
     using MLINK::dispatch; \
     using MLINK::machine; \
     /* must have these methods to quieten gcc */ \
-    template<class U> void setState() { MLINK::template setState<U>(); } \
-    template<class U, class P1> void setState(const P1 &p1) { MLINK::template setState<U, P1>(p1); } \
-    template<class U, class P1, class P2> void setState(const P1 &p1, const P2 &p2) { MLINK::template setState<U, P1, P2>(p1, p2); } \
-    template<class U, class P1, class P2, class P3> void setState(const P1 &p1, const P2 &p2, const P3 &p3) { MLINK::template setState<U, P1, P2>(p1, p2, p3); } \
-    template<class U, class P1, class P2, class P3, class P4> void setState(const P1 &p1, const P2 &p2, const P3 &p3, const P4 &p4) { MLINK::template setState<U, P1, P2>(p1, p2, p3, p4); } \
-    template<class U, class P1, class P2, class P3, class P4, class P5> void setState(const P1 &p1, const P2 &p2, const P3 &p3, const P4 &p4, const P5 &p5) { MLINK::template setState<U, P1, P2>(p1, p2, p3, p4, p5); } \
-    template<class U, class P1, class P2, class P3, class P4, class P5, class P6> void setState(const P1 &p1, const P2 &p2, const P3 &p3, const P4 &p4, const P5 &p5, const P6 &p6) { MLINK::template setState<U, P1, P2>(p1, p2, p3, p4, p5, p6); } \
-    template<class U> void setStateHistory() { MLINK::template setStateHistory<U>(); } \
+    template <class U> void setState() { MLINK::template setState<U>(); } \
+    template <class U, class P1> void setState(const P1& p1) { MLINK::template setState<U, P1>(p1); } \
+    template <class U, class P1, class P2> void setState(const P1& p1, const P2& p2) { MLINK::template setState<U, P1, P2>(p1, p2); } \
+    template <class U, class P1, class P2, class P3> void setState(const P1& p1, const P2& p2, const P3& p3) { MLINK::template setState<U, P1, P2>(p1, p2, p3); } \
+    template <class U, class P1, class P2, class P3, class P4> void setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4) { MLINK::template setState<U, P1, P2>(p1, p2, p3, p4); } \
+    template <class U, class P1, class P2, class P3, class P4, class P5> void setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5) { MLINK::template setState<U, P1, P2>(p1, p2, p3, p4, p5); } \
+    template <class U, class P1, class P2, class P3, class P4, class P5, class P6> void setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5, const P6& p6) { MLINK::template setState<U, P1, P2>(p1, p2, p3, p4, p5, p6); } \
+    template <class U> void setStateHistory() { MLINK::template setStateHistory<U>(); } \
     void setState(const class Alias& state) { MLINK::setState(state); }
 
 // Use this macro to select deep history strategy.
 #define DEEPHISTORY() \
   private: \
     /* If no superstate has history, SUPER::_setHistorySuper is a NOOP */ \
-    virtual void _saveHistory(::Macho::_StateInstance & self, ::Macho::_StateInstance & shallow, ::Macho::_StateInstance & deep) \
+    virtual void _saveHistory(::Macho::_StateInstance& self, ::Macho::_StateInstance& shallow, ::Macho::_StateInstance& deep) \
     { self.setHistory(&deep); SELF::SUPER::_setHistorySuper(self, deep); } \
   protected: \
     /* Substates may use _setHistorySuper to bubble up history */ \
-    virtual void _setHistorySuper(::Macho::_StateInstance & self, ::Macho::_StateInstance & deep) \
+    virtual void _setHistorySuper(::Macho::_StateInstance& self, ::Macho::_StateInstance& deep) \
     { self.setHistorySuper(deep); } \
   public:
 
@@ -288,18 +288,18 @@ class TestAccess;
 #define HISTORY() \
   private: \
     /* If no superstate has history, SUPER::_setHistorySuper is a NOOP */ \
-    virtual void _saveHistory(::Macho::_StateInstance & self, ::Macho::_StateInstance & shallow, ::Macho::_StateInstance & deep) \
+    virtual void _saveHistory(::Macho::_StateInstance& self, ::Macho::_StateInstance& shallow, ::Macho::_StateInstance& deep) \
     { self.setHistory(&shallow); SELF::SUPER::_setHistorySuper(self, deep); } \
   protected: \
     /* Substates may use _setHistorySuper to bubble up history */ \
-    virtual void _setHistorySuper(::Macho::_StateInstance & self, ::Macho::_StateInstance & deep) \
+    virtual void _setHistorySuper(::Macho::_StateInstance& self, ::Macho::_StateInstance& deep) \
     { self.setHistorySuper(deep); } \
   public:
 
 // Use this macro to have boxes survive state transitions
 #define PERSISTENT() \
   private: \
-    virtual void _deleteBox(::Macho::_StateInstance & instance) {} \
+    virtual void _deleteBox(::Macho::_StateInstance& instance) {} \
   public:
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -311,10 +311,10 @@ namespace Macho {
 
 class _MachineBase;
 
-template<class T>
+template <class T>
 class Machine;
 
-template<class T>
+template <class T>
 class IEvent;
 
 class _StateInstance;
@@ -330,31 +330,31 @@ typedef void *Key;
 // Metaprogramming tools
 
 // Check type equality at compile time.
-template<class T, class U>
+template <class T, class U>
 struct _SameType
 {
 };
 
-template<class T>
+template <class T>
 struct _SameType<T, T>
 {
     typedef bool Check;
 };
 
 // Remove reference modifier from type.
-template<class R>
+template <class R>
 struct DR
 {
     typedef R T;
 };
 
-template<class R>
+template <class R>
 struct DR<R&>
 {
     typedef R T;
 };
 
-template<class R>
+template <class R>
 struct DR<const R&>
 {
     typedef R T;
@@ -363,7 +363,7 @@ struct DR<const R&>
 ////////////////////////////////////////////////////////////////////////////////
 // Superstate for template states: allows multiple numbered instances of the same
 // template state for a single anchor state.
-template<class T, int I>
+template <class T, int I>
 struct Anchor : public T
 {
     typedef Anchor<T, I> SELF;
@@ -386,7 +386,7 @@ class _EmptyBox
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper functions for box creation
-template<class B>
+template <class B>
 void *_createBox(void *& place)
 {
     if (!place)
@@ -400,7 +400,7 @@ void *_createBox(void *& place)
     return box;
 }
 
-template<class B>
+template <class B>
 void _deleteBox(void *& box, void *& place)
 {
     assert(box);
@@ -412,7 +412,7 @@ void _deleteBox(void *& box, void *& place)
 }
 
 #ifdef MACHO_SNAPSHOTS
-template<class B>
+template <class B>
 void *_cloneBox(void *other)
 {
     assert(other);
@@ -423,14 +423,14 @@ void *_cloneBox(void *other)
 
 // Specializations for EmptyBox:
 // EmptyBox object gets reused over and over and never is deleted.
-template<>
+template <>
 void *_createBox<_EmptyBox>(void *& place);
 
-template<>
+template <>
 void _deleteBox<_EmptyBox>(void *& box, void *& place);
 
 #ifdef MACHO_SNAPSHOTS
-template<>
+template <>
 void *_cloneBox<_EmptyBox>(void *other);
 #endif // ifdef MACHO_SNAPSHOTS
 
@@ -477,30 +477,30 @@ class _StateSpecification
     // Initiating more than one transition is considered an error!
     // The new state may receive parameters for its 'init' methods:
     // setState<StateA>("someData");
-    template<class S>
+    template <class S>
     void setState();
 
-    template<class S, class P1>
+    template <class S, class P1>
     void setState(const P1& p1);
 
-    template<class S, class P1, class P2>
+    template <class S, class P1, class P2>
     void setState(const P1& p1, const P2& p2);
 
-    template<class S, class P1, class P2, class P3>
+    template <class S, class P1, class P2, class P3>
     void setState(const P1& p1, const P2& p2, const P3& p3);
 
-    template<class S, class P1, class P2, class P3, class P4>
+    template <class S, class P1, class P2, class P3, class P4>
     void setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4);
 
-    template<class S, class P1, class P2, class P3, class P4, class P5>
+    template <class S, class P1, class P2, class P3, class P4, class P5>
     void setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5);
 
-    template<class S, class P1, class P2, class P3, class P4, class P5, class P6>
+    template <class S, class P1, class P2, class P3, class P4, class P5, class P6>
     void setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5, const P6& p6);
 
     // Initiate transition to a state's history.
     // If state has no history, transition is to the state itself.
-    template<class S>
+    template <class S>
     void setStateHistory();
 
     // Initiate transition to a new state.
@@ -509,11 +509,11 @@ class _StateSpecification
     void setState(const class Alias& state);
 
     // Deprectated!
-    template<class S>
+    template <class S>
     void setStateBox(typename S::Box *box = 0);
 
     // Deprectated!
-    template<class S>
+    template <class S>
     void setStateDirect(typename S::Box *box = 0);
 
     // 'Restore from snapshot' event: set current state.
@@ -550,11 +550,11 @@ class _StateSpecification
     // C++ needs something like package visibility
 
     // for _myStateInstance
-    template<class T>
+    template <class T>
     friend class TopBase;
 
     // for _getInstance
-    template<class C, class P>
+    template <class C, class P>
     friend class MachoLink;
 
     friend class _StateInstance;
@@ -576,7 +576,7 @@ class _StateSpecification
 
 ////////////////////////////////////////////////////////////////////////////////
 // Base class for user defined top state (and indirectly all other states).
-template<class T>
+template <class T>
 class TopBase : public _StateSpecification
 {
   public:
@@ -598,7 +598,7 @@ class TopBase : public _StateSpecification
 // deriving from the superstate and being derived from by the substate.
 // Substates inherit event handlers from superstates for reuse or redefinition
 // this way.
-template<class C, class P>
+template <class C, class P>
 class MachoLink : public P
 {
   public:
@@ -660,7 +660,7 @@ class MachoLink : public P
 
   private:
     // for _getInstance
-    template<class U, class V>
+    template <class U, class V>
     friend class MachoLink;
 
     // for _getInstance
@@ -694,7 +694,7 @@ class MachoLink : public P
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unique identifier for state S.
-template<class S>
+template <class S>
 class StateId
 {
   public:
@@ -864,16 +864,17 @@ class _RootInstance : public _StateInstance
     {
         return new _RootInstance(machine, parent);
     }
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // StateInstance for substates (including Top ;-)
 // Has methods to create state specific objects.
-template<class S>
+template <class S>
 class _SubstateInstance : public _StateInstance
 {
   protected:
-    template<class C, class P>
+    template <class C, class P>
     friend class MachoLink;
 
     _SubstateInstance(_MachineBase& machine, _StateInstance *parent)
@@ -946,7 +947,7 @@ class _IEventBase
 };
 
 // Interface for event objects (bound to a top state)
-template<class TOP>
+template <class TOP>
 class IEvent : protected _IEventBase
 {
     friend class Machine<TOP>;
@@ -954,7 +955,7 @@ class IEvent : protected _IEventBase
 };
 
 // Event with four parameters
-template<class TOP, class R, class P1, class P2, class P3, class P4, class P5, class P6>
+template <class TOP, class R, class P1, class P2, class P3, class P4, class P5, class P6>
 class _Event6 : public IEvent<TOP>
 {
     typedef R (TOP::*Signature)(P1, P2, P3, P4, P5, P6);
@@ -987,7 +988,7 @@ class _Event6 : public IEvent<TOP>
 };
 
 // Event with four parameters
-template<class TOP, class R, class P1, class P2, class P3, class P4, class P5>
+template <class TOP, class R, class P1, class P2, class P3, class P4, class P5>
 class _Event5 : public IEvent<TOP>
 {
     typedef R (TOP::*Signature)(P1, P2, P3, P4, P5);
@@ -1018,7 +1019,7 @@ class _Event5 : public IEvent<TOP>
 };
 
 // Event with four parameters
-template<class TOP, class R, class P1, class P2, class P3, class P4>
+template <class TOP, class R, class P1, class P2, class P3, class P4>
 class _Event4 : public IEvent<TOP>
 {
     typedef R (TOP::*Signature)(P1, P2, P3, P4);
@@ -1047,7 +1048,7 @@ class _Event4 : public IEvent<TOP>
 };
 
 // Event with three parameters
-template<class TOP, class R, class P1, class P2, class P3>
+template <class TOP, class R, class P1, class P2, class P3>
 class _Event3 : public IEvent<TOP>
 {
     typedef R (TOP::*Signature)(P1, P2, P3);
@@ -1074,7 +1075,7 @@ class _Event3 : public IEvent<TOP>
 };
 
 // Event with two parameters
-template<class TOP, class R, class P1, class P2>
+template <class TOP, class R, class P1, class P2>
 class _Event2 : public IEvent<TOP>
 {
     typedef R (TOP::*Signature)(P1, P2);
@@ -1099,7 +1100,7 @@ class _Event2 : public IEvent<TOP>
 };
 
 // Event with one parameter
-template<class TOP, class R, class P1>
+template <class TOP, class R, class P1>
 class _Event1 : public IEvent<TOP>
 {
     typedef R (TOP::*Signature)(P1);
@@ -1122,7 +1123,7 @@ class _Event1 : public IEvent<TOP>
 };
 
 // Event with no parameters
-template<class TOP, class R>
+template <class TOP, class R>
 class _Event0 : public IEvent<TOP>
 {
     typedef R (TOP::*Signature)();
@@ -1143,7 +1144,7 @@ class _Event0 : public IEvent<TOP>
 };
 
 // Event creating functions using type inference
-template<class P1, class P2, class P3, class P4, class P5, class P6, class R, class TOP>
+template <class P1, class P2, class P3, class P4, class P5, class P6, class R, class TOP>
 inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3, P4, P5, P6),
         const typename DR<P1>::T& p1, const typename DR<P2>::T& p2,
         const typename DR<P3>::T& p3, const typename DR<P4>::T& p4,
@@ -1153,7 +1154,7 @@ inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3, P4, P5, P6),
 }
 
 // Event creating functions using type inference
-template<class P1, class P2, class P3, class P4, class P5, class R, class TOP>
+template <class P1, class P2, class P3, class P4, class P5, class R, class TOP>
 inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3, P4, P5),
         const typename DR<P1>::T& p1, const typename DR<P2>::T& p2,
         const typename DR<P3>::T& p3, const typename DR<P4>::T& p4,
@@ -1163,7 +1164,7 @@ inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3, P4, P5),
 }
 
 // Event creating functions using type inference
-template<class P1, class P2, class P3, class P4, class R, class TOP>
+template <class P1, class P2, class P3, class P4, class R, class TOP>
 inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3, P4),
         const typename DR<P1>::T& p1, const typename DR<P2>::T& p2,
         const typename DR<P3>::T& p3, const typename DR<P4>::T& p4)
@@ -1171,7 +1172,7 @@ inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3, P4),
     return new _Event4<TOP, R, P1, P2, P3, P4>(handler, p1, p2, p3, p4);
 }
 
-template<class P1, class P2, class P3, class R, class TOP>
+template <class P1, class P2, class P3, class R, class TOP>
 inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3),
         const typename DR<P1>::T& p1, const typename DR<P2>::T& p2,
         const typename DR<P3>::T& p3)
@@ -1179,21 +1180,21 @@ inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2, P3),
     return new _Event3<TOP, R, P1, P2, P3>(handler, p1, p2, p3);
 }
 
-template<class P1, class P2, class R, class TOP>
+template <class P1, class P2, class R, class TOP>
 inline IEvent<TOP> *Event(R (TOP::*handler)(P1, P2),
         const typename DR<P1>::T& p1, const typename DR<P2>::T& p2)
 {
     return new _Event2<TOP, R, P1, P2>(handler, p1, p2);
 }
 
-template<class P1, class R, class TOP>
+template <class P1, class R, class TOP>
 inline IEvent<TOP> *Event(R (TOP::*handler)(P1),
         const typename DR<P1>::T& p1)
 {
     return new _Event1<TOP, R, P1>(handler, p1);
 }
 
-template<class R, class TOP>
+template <class R, class TOP>
 inline IEvent<TOP> *Event(R (TOP::*handler)())
 {
     return new _Event0<TOP, R>(handler);
@@ -1208,21 +1209,21 @@ inline IEvent<TOP> *Event(R (TOP::*handler)())
 class _VS8_Bug_101615
 {
   public:
-    template<class S, class P1>
+    template <class S, class P1>
     static inline void execute(Macho::_StateInstance& instance, const P1& p1)
     {
         S& behaviour = static_cast<S&>(instance.specification());
         behaviour.init(p1);
     }
 
-    template<class S, class P1, class P2>
+    template <class S, class P1, class P2>
     static inline void execute(Macho::_StateInstance& instance, const P1& p1, const P2& p2)
     {
         S& behaviour = static_cast<S&>(instance.specification());
         behaviour.init(p1, p2);
     }
 
-    template<class S, class P1, class P2, class P3>
+    template <class S, class P1, class P2, class P3>
     static inline void execute(Macho::_StateInstance& instance,
             const P1& p1, const P2& p2, const P3& p3)
     {
@@ -1230,7 +1231,7 @@ class _VS8_Bug_101615
         behaviour.init(p1, p2, p3);
     }
 
-    template<class S, class P1, class P2, class P3, class P4>
+    template <class S, class P1, class P2, class P3, class P4>
     static inline void execute(Macho::_StateInstance& instance,
             const P1& p1, const P2& p2, const P3& p3, const P4& p4)
     {
@@ -1238,7 +1239,7 @@ class _VS8_Bug_101615
         behaviour.init(p1, p2, p3, p4);
     }
 
-    template<class S, class P1, class P2, class P3, class P4, class P5>
+    template <class S, class P1, class P2, class P3, class P4, class P5>
     static inline void execute(Macho::_StateInstance& instance,
             const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5)
     {
@@ -1246,13 +1247,14 @@ class _VS8_Bug_101615
         behaviour.init(p1, p2, p3, p4, p5);
     }
 
-    template<class S, class P1, class P2, class P3, class P4, class P5, class P6>
+    template <class S, class P1, class P2, class P3, class P4, class P5, class P6>
     static inline void execute(Macho::_StateInstance& instance,
             const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5, const P6& p6)
     {
         S& behaviour = static_cast<S&>(instance.specification());
         behaviour.init(p1, p2, p3, p4, p5, p6);
     }
+
 };
 
 namespace Macho {
@@ -1298,6 +1300,7 @@ class _DefaultInitializer : public _StaticInitializer
     {
         instance.init(false);
     }
+
 };
 
 // History initializer: provides no parameters, performs transition to
@@ -1309,6 +1312,7 @@ class _HistoryInitializer : public _StaticInitializer
     {
         instance.init(true);
     }
+
 };
 
 // Special initializer: Helps alias impersonate as history state of given state.
@@ -1334,7 +1338,7 @@ class _AdaptingInitializer : public _Initializer
 };
 
 // Initializers with one to six parameters.
-template<class S, class P1>
+template <class S, class P1>
 class _Initializer1 : public _Initializer
 {
   public:
@@ -1355,7 +1359,7 @@ class _Initializer1 : public _Initializer
     P1 myParam1;
 };
 
-template<class S, class P1, class P2>
+template <class S, class P1, class P2>
 class _Initializer2 : public _Initializer
 {
   public:
@@ -1378,7 +1382,7 @@ class _Initializer2 : public _Initializer
     P2 myParam2;
 };
 
-template<class S, class P1, class P2, class P3>
+template <class S, class P1, class P2, class P3>
 class _Initializer3 : public _Initializer
 {
   public:
@@ -1403,7 +1407,7 @@ class _Initializer3 : public _Initializer
     P3 myParam3;
 };
 
-template<class S, class P1, class P2, class P3, class P4>
+template <class S, class P1, class P2, class P3, class P4>
 class _Initializer4 : public _Initializer
 {
   public:
@@ -1430,7 +1434,7 @@ class _Initializer4 : public _Initializer
     P4 myParam4;
 };
 
-template<class S, class P1, class P2, class P3, class P4, class P5>
+template <class S, class P1, class P2, class P3, class P4, class P5>
 class _Initializer5 : public _Initializer
 {
   public:
@@ -1459,7 +1463,7 @@ class _Initializer5 : public _Initializer
     P5 myParam5;
 };
 
-template<class S, class P1, class P2, class P3, class P4, class P5, class P6>
+template <class S, class P1, class P2, class P3, class P4, class P5, class P6>
 class _Initializer6 : public _Initializer
 {
   public:
@@ -1576,11 +1580,11 @@ class _MachineBase
     // C++ needs something like package visibility
 
     // for getInstance
-    template<class C, class P>
+    template <class C, class P>
     friend class MachoLink;
 
     // for setPendingEvent
-    template<class T>
+    template <class T>
     friend class TopBase;
 
     // for getInstance
@@ -1627,12 +1631,7 @@ class Alias
   public:
     explicit Alias(Key key, bool history = false)
         : myStateKey(key)
-        , myInitializer(
-                history ?
-                static_cast<_Initializer *>(&_theHistoryInitializer)
-                :
-                static_cast<_Initializer *>(&_theDefaultInitializer)
-                )
+        , myInitializer(history ? static_cast<_Initializer *>(&_theHistoryInitializer) : static_cast<_Initializer *>(&_theDefaultInitializer))
     {
         assert(key);
     }
@@ -1711,43 +1710,43 @@ class Alias
 typedef Alias StateAlias;
 
 // Create alias with 0 to 6 parameters.
-template<class S>
+template <class S>
 Alias State()
 {
     return Alias(S::key());
 }
 
-template<class S, class P1>
+template <class S, class P1>
 Alias State(const P1& p1)
 {
     return Alias(S::key(), new _Initializer1<S, P1>(p1));
 }
 
-template<class S, class P1, class P2>
+template <class S, class P1, class P2>
 Alias State(const P1& p1, const P2& p2)
 {
     return Alias(S::key(), new _Initializer2<S, P1, P2>(p1, p2));
 }
 
-template<class S, class P1, class P2, class P3>
+template <class S, class P1, class P2, class P3>
 Alias State(const P1& p1, const P2& p2, const P3& p3)
 {
     return Alias(S::key(), new _Initializer3<S, P1, P2, P3>(p1, p2, p3));
 }
 
-template<class S, class P1, class P2, class P3, class P4>
+template <class S, class P1, class P2, class P3, class P4>
 Alias State(const P1& p1, const P2& p2, const P3& p3, const P4& p4)
 {
     return Alias(S::key(), new _Initializer4<S, P1, P2, P3, P4>(p1, p2, p3, p4));
 }
 
-template<class S, class P1, class P2, class P3, class P4, class P5>
+template <class S, class P1, class P2, class P3, class P4, class P5>
 Alias State(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5)
 {
     return Alias(S::key(), new _Initializer5<S, P1, P2, P3, P4, P5>(p1, p2, p3, p4, p5));
 }
 
-template<class S, class P1, class P2, class P3, class P4, class P5, class P6>
+template <class S, class P1, class P2, class P3, class P4, class P5, class P6>
 Alias State(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5, const P6& p6)
 {
     return Alias(S::key(), new _Initializer6<S, P1, P2, P3, P4, P5, P6>(p1, p2, p3, p4, p5, p6));
@@ -1756,7 +1755,7 @@ Alias State(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5
 // Create alias for state's history: not the current history state, but
 // really the history of a state. This means that the alias may point to
 // different states during its life. Needs a machine instance to take history from.
-template<class S>
+template <class S>
 Alias StateHistory(const _MachineBase& machine)
 {
     return Alias(S::key(), new _AdaptingInitializer(machine));
@@ -1771,7 +1770,7 @@ Alias StateHistory(const _MachineBase& machine)
 // Note that no exit/entry actions of the overwritten machine state are performed!
 // Box destructors however are executed!
 #ifdef MACHO_SNAPSHOTS
-template<class TOP>
+template <class TOP>
 class Snapshot : public _MachineBase
 {
   public:
@@ -1801,7 +1800,7 @@ class Snapshot : public _MachineBase
 // Every possible event handler to be called must therefore appear in the
 // interface of TOP. Events are dispatched by using this operator on a
 // Machine object (e.g. 'machine->event()').
-template<class TOP>
+template <class TOP>
 class Machine : public _MachineBase
 {
   public:
@@ -1830,7 +1829,8 @@ class Machine : public _MachineBase
     {
         // Compile time check: TOP must directly derive from TopBase<TOP>
         typedef typename _SameType<TopBase<TOP>, typename TOP::SUPER>::Check MustDeriveFromTopBase;
-        MustDeriveFromTopBase x; (void)x; // just to avoid local type not used warning
+        MustDeriveFromTopBase x;
+        (void)x; // just to avoid local type not used warning
 
         allocate(theStateCount);
 
@@ -1846,7 +1846,8 @@ class Machine : public _MachineBase
     {
         // Compile time check: TOP must directly derive from TopBase<TOP>
         typedef typename _SameType<TopBase<TOP>, typename TOP::SUPER>::Check MustDeriveFromTopBase;
-        MustDeriveFromTopBase x; (void)x; // to avoid local type not used warning
+        MustDeriveFromTopBase x;
+        (void)x; // to avoid local type not used warning
 
         allocate(theStateCount);
 
@@ -1926,7 +1927,7 @@ class Machine : public _MachineBase
     }
 
   private:
-    template<class C, class P>
+    template <class C, class P>
     friend class MachoLink;
 
   private:
@@ -1937,28 +1938,28 @@ class Machine : public _MachineBase
     friend class Snapshot<TOP>;
 #endif // ifdef MACHO_SNAPSHOTS
 
-    template<class T> friend class StateId;
+    template <class T> friend class StateId;
 
     // Next free identifier for StateInstance objects.
     static ID theStateCount;
 };
 
 // Root is always there and has ID 0, so start from 1
-template<class TOP>
+template <class TOP>
 ID Machine<TOP>::theStateCount = 1;
 
 // Each state has a unique ID number.
 // The identifiers are consecutive integers starting from zero,
 // which allows use as index into a vector for fast access.
 // 'Root' always has zero as id.
-template<class S>
+template <class S>
 const ID StateId<S>::value = Machine<typename S::TOP>::theStateCount++;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation for StateSpecification
 
 // Initiate state transition with 0 to six parameters.
-template<class S>
+template <class S>
 inline void _StateSpecification::setState()
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -1966,7 +1967,7 @@ inline void _StateSpecification::setState()
     m.setPendingState(instance, &_theDefaultInitializer);
 }
 
-template<class S, class P1>
+template <class S, class P1>
 inline void _StateSpecification::setState(const P1& p1)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -1974,7 +1975,7 @@ inline void _StateSpecification::setState(const P1& p1)
     m.setPendingState(instance, new _Initializer1<S, P1>(p1));
 }
 
-template<class S, class P1, class P2>
+template <class S, class P1, class P2>
 inline void _StateSpecification::setState(const P1& p1, const P2& p2)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -1982,7 +1983,7 @@ inline void _StateSpecification::setState(const P1& p1, const P2& p2)
     m.setPendingState(instance, new _Initializer2<S, P1, P2>(p1, p2));
 }
 
-template<class S, class P1, class P2, class P3>
+template <class S, class P1, class P2, class P3>
 inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& p3)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -1990,7 +1991,7 @@ inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& 
     m.setPendingState(instance, new _Initializer3<S, P1, P2, P3>(p1, p2, p3));
 }
 
-template<class S, class P1, class P2, class P3, class P4>
+template <class S, class P1, class P2, class P3, class P4>
 inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -1998,7 +1999,7 @@ inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& 
     m.setPendingState(instance, new _Initializer4<S, P1, P2, P3, P4>(p1, p2, p3, p4));
 }
 
-template<class S, class P1, class P2, class P3, class P4, class P5>
+template <class S, class P1, class P2, class P3, class P4, class P5>
 inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -2006,7 +2007,7 @@ inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& 
     m.setPendingState(instance, new _Initializer5<S, P1, P2, P3, P4, P5>(p1, p2, p3, p4, p5));
 }
 
-template<class S, class P1, class P2, class P3, class P4, class P5, class P6>
+template <class S, class P1, class P2, class P3, class P4, class P5, class P6>
 inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& p3, const P4& p4, const P5& p5, const P6& p6)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -2015,7 +2016,7 @@ inline void _StateSpecification::setState(const P1& p1, const P2& p2, const P3& 
 }
 
 // Initiate state transition to a state's history.
-template<class S>
+template <class S>
 inline void _StateSpecification::setStateHistory()
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -2024,7 +2025,7 @@ inline void _StateSpecification::setStateHistory()
 }
 
 // Deprecated!
-template<class S>
+template <class S>
 inline void _StateSpecification::setStateBox(typename S::Box *box)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -2034,7 +2035,7 @@ inline void _StateSpecification::setStateBox(typename S::Box *box)
 }
 
 // Deprecated!
-template<class S>
+template <class S>
 inline void _StateSpecification::setStateDirect(typename S::Box *box)
 {
     _MachineBase& m = _myStateInstance.machine();
@@ -2045,14 +2046,14 @@ inline void _StateSpecification::setStateDirect(typename S::Box *box)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation for TopBase
-template<class T>
+template <class T>
 inline void TopBase<T>::dispatch(IEvent<TOP> *event)
 {
     assert(event);
     _myStateInstance.machine().setPendingEvent(event);
 }
 
-template<class T>
+template <class T>
 // Returns current state machine instance.
 inline _MachineBase& TopBase<T>::machine()
 {
@@ -2061,7 +2062,7 @@ inline _MachineBase& TopBase<T>::machine()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation for Link
-template<class C, class P>
+template <class C, class P>
 inline MachoLink<C, P>::MachoLink(_StateInstance& instance)
     : P(P::_getInstance(instance.machine()))
     // Can't initialize _myStateInstance with _getInstance,
@@ -2070,21 +2071,21 @@ inline MachoLink<C, P>::MachoLink(_StateInstance& instance)
 {}
 
 // This method keeps '_myStateInstance' attribute private.
-template<class C, class P>
+template <class C, class P>
 inline void *MachoLink<C, P>::_box()
 {
     return _myStateInstance.box();
 }
 
 // Default behaviour: free box on exit.
-template<class C, class P>
+template <class C, class P>
 inline void MachoLink<C, P>::_deleteBox(_StateInstance& instance)
 {
     instance.deleteBox();
 }
 
 // Create StateInstance object of state.
-template<class C, class P>
+template <class C, class P>
 /* static */ inline _StateInstance& MachoLink<C, P>::_getInstance(_MachineBase& machine)
 {
     // Look first in machine for existing StateInstance.
@@ -2096,20 +2097,20 @@ template<class C, class P>
     return *instance;
 }
 
-template<class C, class P>
+template <class C, class P>
 /* static */ inline bool MachoLink<C, P>::isCurrent(const _MachineBase& machine)
 {
     return machine.currentState().isChild(key());
 }
 
 // Deprecated!
-template<class C, class P>
+template <class C, class P>
 /* static */ inline bool MachoLink<C, P>::isCurrentDirect(const _MachineBase& machine)
 {
     return key() == machine.currentState();
 }
 
-template<class C, class P>
+template <class C, class P>
 /* static */ void MachoLink<C, P>::clearHistory(_MachineBase& machine)
 {
     const _StateInstance *instance = machine.getInstance(StateId<C>::value);
@@ -2117,7 +2118,7 @@ template<class C, class P>
         instance->setHistory(0);
 }
 
-template<class C, class P>
+template <class C, class P>
 /* static */ void MachoLink<C, P>::clearHistoryDeep(_MachineBase& machine)
 {
     const _StateInstance *instance = machine.getInstance(StateId<C>::value);
@@ -2125,7 +2126,7 @@ template<class C, class P>
         machine.clearHistoryDeep(Machine<TOP>::theStateCount, *instance);
 }
 
-template<class C, class P>
+template <class C, class P>
 /* static */ Alias MachoLink<C, P>::history(const _MachineBase& machine)
 {
     const _StateInstance *instance = machine.getInstance(StateId<C>::value);
@@ -2137,7 +2138,7 @@ template<class C, class P>
     return Alias(history ? history->key() : key());
 }
 
-template<class C, class P>
+template <class C, class P>
 /* static */ inline Key MachoLink<C, P>::key()
 {
     static _KeyData k = {
@@ -2146,7 +2147,7 @@ template<class C, class P>
     return &k;
 }
 
-template<class C, class P>
+template <class C, class P>
 /* static */ inline Alias MachoLink<C, P>::alias()
 {
     return Alias(key());
@@ -2155,7 +2156,7 @@ template<class C, class P>
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation for Snapshot
 #ifdef MACHO_SNAPSHOTS
-template<class TOP>
+template <class TOP>
 Snapshot<TOP>::Snapshot(Machine<TOP>& machine)
 {
     assert(!machine.myPendingState);

@@ -116,10 +116,11 @@ void SctpClient::initialize(int stage)
         socket.setCallback(this);
 
         if (addresses.size() == 0) {
-        EV_INFO << "Call socket bind\n";
+            EV_INFO << "Call socket bind\n";
             socket.bind(port);
-           EV_INFO << "Nach socket bind\n";
-        } else {
+            EV_INFO << "Nach socket bind\n";
+        }
+        else {
             socket.bindx(addresses, port);
         }
 

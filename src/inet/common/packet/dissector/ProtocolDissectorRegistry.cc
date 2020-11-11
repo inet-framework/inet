@@ -27,12 +27,12 @@ ProtocolDissectorRegistry::~ProtocolDissectorRegistry()
         delete it.second;
 }
 
-void ProtocolDissectorRegistry::registerProtocolDissector(const Protocol* protocol, const ProtocolDissector *dissector)
+void ProtocolDissectorRegistry::registerProtocolDissector(const Protocol *protocol, const ProtocolDissector *dissector)
 {
     protocolDissectors[protocol] = dissector;
 }
 
-const ProtocolDissector *ProtocolDissectorRegistry::findProtocolDissector(const Protocol* protocol) const
+const ProtocolDissector *ProtocolDissectorRegistry::findProtocolDissector(const Protocol *protocol) const
 {
     auto it = protocolDissectors.find(protocol);
     if (it != protocolDissectors.end())
@@ -41,7 +41,7 @@ const ProtocolDissector *ProtocolDissectorRegistry::findProtocolDissector(const 
         return nullptr;
 }
 
-const ProtocolDissector *ProtocolDissectorRegistry::getProtocolDissector(const Protocol* protocol) const
+const ProtocolDissector *ProtocolDissectorRegistry::getProtocolDissector(const Protocol *protocol) const
 {
     auto protocolDissector = findProtocolDissector(protocol);
     if (protocolDissector != nullptr)
@@ -51,3 +51,4 @@ const ProtocolDissector *ProtocolDissectorRegistry::getProtocolDissector(const P
 }
 
 } // namespace
+

@@ -38,7 +38,7 @@ namespace eigrp {
 /**
  * Class represents EIGRP Topology Table.
  */
-template<typename IPAddress>
+template <typename IPAddress>
 class EigrpTopologyTable : public cSimpleModule
 {
   private:
@@ -77,16 +77,15 @@ class EigrpTopologyTable : public cSimpleModule
      * Finds and returns source with given address or create one.
      * @param sourceNew return parameter, it is true if source was created. Else false.
      */
-    EigrpRouteSource<IPAddress> * findOrCreateRoute(const IPAddress& routeAddr, const IPAddress& routeMask,const Ipv4Address& routerId, eigrp::EigrpInterface *eigrpIface, int nextHopId, bool *sourceNew);
+    EigrpRouteSource<IPAddress> *findOrCreateRoute(const IPAddress& routeAddr, const IPAddress& routeMask, const Ipv4Address& routerId, eigrp::EigrpInterface *eigrpIface, int nextHopId, bool *sourceNew);
     /**
      * Deletes unreachable routes from the topology table.
      */
     void purgeTable();
     void delayedRemove(int neighId);
 
-
     uint64_t findRouteDMin(EigrpRoute<IPAddress> *route);
-    bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t &resultDmin);
+    bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t& resultDmin);
     /**
      * Returns best successor to the destination.
      */
@@ -111,16 +110,19 @@ class EigrpTopologyTable : public cSimpleModule
 class EigrpIpv4TopologyTable : public EigrpTopologyTable<Ipv4Address>
 {
 //container class for IPv4TT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv4TopologyTable() {};
+
+  public:
+    virtual ~EigrpIpv4TopologyTable() {}
 };
 
 class EigrpIpv6TopologyTable : public EigrpTopologyTable<Ipv6Address>
 {
 //container class for IPv6TT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv6TopologyTable() {};
+
+  public:
+    virtual ~EigrpIpv6TopologyTable() {}
 };
 } //eigrp
 } //inet
 #endif
+

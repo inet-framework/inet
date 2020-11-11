@@ -30,7 +30,7 @@ void CsmaCaMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protoc
     if (auto header = dynamicPtrCast<const CsmaCaMacHeader>(chunk)) {
         context.sourceColumn << header->getTransmitterAddress();
         context.destinationColumn << header->getReceiverAddress();
-        context.infoColumn << "(CSMA/CA MAC) " << chunk;        //TODO
+        context.infoColumn << "(CSMA/CA MAC) " << chunk; // TODO
     }
     else
         context.infoColumn << "(CSMA/CA MAC) " << chunk;

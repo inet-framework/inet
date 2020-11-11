@@ -44,13 +44,14 @@ class INET_API PacketPrinter : public cMessagePrinter
         std::stringstream infoColumn;
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public StringFormat::IDirectiveResolver
+    {
       protected:
         const Context& context;
         const int numPacket;
 
       public:
-        DirectiveResolver(const Context& context, const int numPacket) : context(context), numPacket(numPacket) { }
+        DirectiveResolver(const Context& context, const int numPacket) : context(context), numPacket(numPacket) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

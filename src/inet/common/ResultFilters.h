@@ -32,7 +32,7 @@ class VoidPtrWrapper : public cObject
     void *object;
 
   public:
-    VoidPtrWrapper(void *object) : object(object) { }
+    VoidPtrWrapper(void *object) : object(object) {}
 
     void *getObject() const { return object; }
 };
@@ -105,14 +105,14 @@ class INET_API MobilityPosFilter : public cObjectResultFilter
 
 class INET_API cPointerResultFilter : public cResultFilter
 {
-    protected:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override { }
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) override { }
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) override { }
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override { }
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override { }
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override { }
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override { }
+  protected:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override {}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) override {}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) override {}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override {}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override {}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override {}
 };
 
 /**
@@ -175,6 +175,7 @@ class INET_API ThroughputFilter : public cObjectResultFilter
 
   protected:
     void emitThroughput(simtime_t endInterval, cObject *details);
+
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
     virtual void finish(cComponent *component, simsignal_t signalID) override;
@@ -214,17 +215,19 @@ class INET_API ElapsedTimeFilter : public cResultFilter
 {
   protected:
     time_t startTime;
+
   public:
     ElapsedTimeFilter();
+
   protected:
     double getElapsedTime();
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override { fire(this, t, getElapsedTime(), details); }
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) override { fire(this, t, getElapsedTime(), details); }
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) override { fire(this, t, getElapsedTime(), details); }
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override { fire(this, t, getElapsedTime(), details); }
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override { fire(this, t, getElapsedTime(), details); }
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override { fire(this, t, getElapsedTime(), details); }
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override { fire(this, t, getElapsedTime(), details); }
 };
 
 class INET_API PacketDropReasonFilter : public cObjectResultFilter

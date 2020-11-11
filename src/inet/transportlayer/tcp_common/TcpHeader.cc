@@ -121,7 +121,6 @@ std::string TcpHeader::str() const
     return stream.str();
 }
 
-
 } // namespace tcp
 
 } // namespace inet

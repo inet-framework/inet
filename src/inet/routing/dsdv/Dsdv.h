@@ -54,7 +54,7 @@ class INET_API Dsdv : public RoutingProtocolBase
     bool isForwardHello = false;
     cMessage *event = nullptr;
     cPar *broadcastDelay = nullptr;
-    std::list<ForwardEntry *> *forwardList  = nullptr;
+    std::list<ForwardEntry *> *forwardList = nullptr;
     NetworkInterface *interface80211ptr = nullptr;
     int interfaceId = -1;
     unsigned int sequencenumber = 0;
@@ -80,7 +80,7 @@ class INET_API Dsdv : public RoutingProtocolBase
     // lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
     virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
-    virtual void handleCrashOperation(LifecycleOperation *operation) override  { stop(); }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
     void start();
     void stop();
 };
@@ -90,17 +90,17 @@ class INET_API Dsdv : public RoutingProtocolBase
  */
 class INET_API DsdvIpv4Route : public Ipv4Route
 {
-    protected:
-        unsigned int sequencenumber; // originated from destination. Ensures loop freeness.
-        simtime_t expiryTime;  // time the routing entry is valid until
+  protected:
+    unsigned int sequencenumber; // originated from destination. Ensures loop freeness.
+    simtime_t expiryTime;  // time the routing entry is valid until
 
-    public:
-        virtual bool isValid() const override { return expiryTime == 0 || expiryTime > simTime(); }
+  public:
+    virtual bool isValid() const override { return expiryTime == 0 || expiryTime > simTime(); }
 
-        simtime_t getExpiryTime() const {return expiryTime;}
-        void setExpiryTime(simtime_t time) {expiryTime = time;}
-        void setSequencenumber(int i) {sequencenumber = i;}
-        unsigned int getSequencenumber() const {return sequencenumber;}
+    simtime_t getExpiryTime() const { return expiryTime; }
+    void setExpiryTime(simtime_t time) { expiryTime = time; }
+    void setSequencenumber(int i) { sequencenumber = i; }
+    unsigned int getSequencenumber() const { return sequencenumber; }
 };
 
 } // namespace inet

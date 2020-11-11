@@ -52,6 +52,7 @@ class INET_API BerParseFile
         {
             return (snr < o.snr) ? true : false;
         }
+
     };
     typedef std::vector<SnrBer> SnrBerList;
     struct LongBer
@@ -61,7 +62,7 @@ class INET_API BerParseFile
     };
 
     typedef std::vector<LongBer *> BerList;
-// A and G
+    // A and G
     typedef std::vector<BerList> BerTable;
     BerTable berTable;
     char phyOpMode;

@@ -46,13 +46,13 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
-    virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket) override {}
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override {}
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
     virtual void socketDeleted(TcpSocket *socket) override {}
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
@@ -141,7 +141,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
      * By default it deletes the status object, redefine it to add code
      * to examine the status.
      */
-    virtual void statusArrived(TcpStatusInfo *status) { }
+    virtual void statusArrived(TcpStatusInfo *status) {}
 };
 
 } // namespace inet

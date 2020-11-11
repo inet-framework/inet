@@ -30,10 +30,9 @@ void SingleProtectionMechanism::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IQosRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
 }
-
 
 //
 // For an RTS that is not part of a dual clear-to-send (CTS) exchange, the Duration/ID field is set
@@ -194,3 +193,4 @@ simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const 
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

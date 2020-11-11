@@ -1,4 +1,3 @@
-
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateBackup.h"
@@ -41,17 +40,14 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
         lsaKey.linkStateID = interface->getArea()->getInstance()->getProcess()->getRouterID();
 
         RouterLSA *routerLSA = interface->getArea()->getRouterLSAbyKey(lsaKey);
-        if (routerLSA != nullptr)
-        {
+        if (routerLSA != nullptr) {
             long sequenceNumber = routerLSA->getHeader().getLsaSequenceNumber();
-            if (sequenceNumber == MAX_SEQUENCE_NUMBER)
-            {
+            if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                 routerLSA->getHeaderForUpdate().setLsaAge(MAX_AGE);
                 interface->getArea()->floodLSA(routerLSA);
                 routerLSA->incrementInstallTime();
             }
-            else
-            {
+            else {
                 RouterLSA *newLSA = interface->getArea()->originateRouterLSA();
 
                 newLSA->getHeaderForUpdate().setLsaSequenceNumber(sequenceNumber + 1);
@@ -62,13 +58,11 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
                 delete newLSA;
             }
         }
-        else // (lsa == nullptr) -> This must be the first time any interface is up...
-        {
+        else { // (lsa == nullptr) -> This must be the first time any interface is up...
             RouterLSA *newLSA = interface->getArea()->originateRouterLSA();
 
             shouldRebuildRoutingTable |= interface->getArea()->installRouterLSA(newLSA);
-            if (shouldRebuildRoutingTable)
-            {
+            if (shouldRebuildRoutingTable) {
                 routerLSA = interface->getArea()->findRouterLSA(interface->getArea()->getInstance()->getProcess()->getRouterID());
                 interface->getArea()->setSpfTreeRoot(routerLSA);
                 interface->getArea()->floodLSA(newLSA);
@@ -76,49 +70,42 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
             delete newLSA;
         }
     }
-    if (oldState == Ospfv3Interface::INTERFACE_STATE_WAITING)
-    {
-        RouterLSA* routerLSA;
+    if (oldState == Ospfv3Interface::INTERFACE_STATE_WAITING) {
+        RouterLSA *routerLSA;
         int routerLSAcount = interface->getArea()->getRouterLSACount();
         int i = 0;
-        while (i < routerLSAcount)
-        {
+        while (i < routerLSAcount) {
             routerLSA = interface->getArea()->getRouterLSA(i);
-            const Ospfv3LsaHeader &header = routerLSA->getHeader();
+            const Ospfv3LsaHeader& header = routerLSA->getHeader();
             if (header.getAdvertisingRouter() == interface->getArea()->getInstance()->getProcess()->getRouterID() &&
-                    interface->getType() == Ospfv3Interface::BROADCAST_TYPE) {
+                interface->getType() == Ospfv3Interface::BROADCAST_TYPE)
+            {
                 EV_DEBUG << "Changing state -> deleting the old router LSA\n";
                 interface->getArea()->deleteRouterLSA(i);
             }
 
             if (interface->getArea()->getRouterLSACount() == routerLSAcount)
                 i++;
-            else //some routerLSA was deleted
-            {
+            else { //some routerLSA was deleted
                 routerLSAcount = interface->getArea()->getRouterLSACount();
                 i = 0;
             }
         }
 
         EV_DEBUG << "Changing state -> new Router LSA\n";
-        RouterLSA* newLSA = interface->getArea()->originateRouterLSA();
-        if (newLSA != nullptr)
-        {
-            if (interface->getArea()->installRouterLSA(newLSA))
-            {
+        RouterLSA *newLSA = interface->getArea()->originateRouterLSA();
+        if (newLSA != nullptr) {
+            if (interface->getArea()->installRouterLSA(newLSA)) {
                 routerLSA = interface->getArea()->findRouterLSA(interface->getArea()->getInstance()->getProcess()->getRouterID());
                 interface->getArea()->setSpfTreeRoot(routerLSA);
                 interface->getArea()->floodLSA(newLSA);
             }
             delete newLSA;
         }
-        if (interface->getType() == Ospfv3Interface::POINTTOPOINT_TYPE || (interface->getArea()->hasAnyPassiveInterface()))
-        {
-            Ospfv3IntraAreaPrefixLsa* prefLSA  = interface->getArea()->originateIntraAreaPrefixLSA();
-            if (prefLSA != nullptr)
-            {
-                if (interface->getArea()->installIntraAreaPrefixLSA(prefLSA))
-                {
+        if (interface->getType() == Ospfv3Interface::POINTTOPOINT_TYPE || (interface->getArea()->hasAnyPassiveInterface())) {
+            Ospfv3IntraAreaPrefixLsa *prefLSA = interface->getArea()->originateIntraAreaPrefixLSA();
+            if (prefLSA != nullptr) {
+                if (interface->getArea()->installIntraAreaPrefixLSA(prefLSA)) {
                     interface->getArea()->floodLSA(prefLSA);
                 }
                 delete prefLSA;
@@ -126,13 +113,14 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
         }
 
         if (nextState == Ospfv3Interface::INTERFACE_STATE_BACKUP ||
-           nextState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED ||
-           nextState == Ospfv3Interface::INTERFACE_STATE_DROTHER) {
-            interface->setTransitNetInt(true);//this interface is in broadcast network
+            nextState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED ||
+            nextState == Ospfv3Interface::INTERFACE_STATE_DROTHER)
+        {
+            interface->setTransitNetInt(true); //this interface is in broadcast network
 
             // if router has any interface as Passive, create separate Intra-Area-Prefix-LSA for these interfaces
             if (interface->getArea()->hasAnyPassiveInterface()) {
-                Ospfv3IntraAreaPrefixLsa* prefLSA  = interface->getArea()->originateIntraAreaPrefixLSA();
+                Ospfv3IntraAreaPrefixLsa *prefLSA = interface->getArea()->originateIntraAreaPrefixLSA();
                 if (prefLSA != nullptr) {
                     if (interface->getArea()->installIntraAreaPrefixLSA(prefLSA))
                         interface->getArea()->floodLSA(prefLSA);
@@ -144,14 +132,14 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
     }
 
     if (nextState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED) {
-        NetworkLSA* newLSA = interface->getArea()->originateNetworkLSA(interface);
+        NetworkLSA *newLSA = interface->getArea()->originateNetworkLSA(interface);
         if (newLSA != nullptr) {
             shouldRebuildRoutingTable |= interface->getArea()->installNetworkLSA(newLSA);
             if (shouldRebuildRoutingTable) {
-                Ospfv3IntraAreaPrefixLsa* prefLSA = interface->getArea()->originateNetIntraAreaPrefixLSA(newLSA, interface, false);
+                Ospfv3IntraAreaPrefixLsa *prefLSA = interface->getArea()->originateNetIntraAreaPrefixLSA(newLSA, interface, false);
                 if (prefLSA != nullptr) {
                     interface->getArea()->installIntraAreaPrefixLSA(prefLSA);
-                    NetworkInterface* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
+                    NetworkInterface *ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
                     auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
                     ipv6int->joinMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 
@@ -175,7 +163,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
 //                interface->getArea()->originateInterAreaPrefixLSA(prefLSA, interface->getArea(), false);
 //            }
         }
-        Ospfv3IntraAreaPrefixLsa* prefLSA = interface->getArea()->originateIntraAreaPrefixLSA();
+        Ospfv3IntraAreaPrefixLsa *prefLSA = interface->getArea()->originateIntraAreaPrefixLSA();
         if (prefLSA != nullptr) {
             shouldRebuildRoutingTable |= interface->getArea()->installIntraAreaPrefixLSA(prefLSA);
             interface->getArea()->floodLSA(prefLSA);
@@ -183,13 +171,13 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
         }
     }
 
-    if (nextState ==  Ospfv3Interface::INTERFACE_STATE_BACKUP) {
-        NetworkInterface* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
+    if (nextState == Ospfv3Interface::INTERFACE_STATE_BACKUP) {
+        NetworkInterface *ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
         auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->joinMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
     }
 
-    if ((oldState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED )&& (nextState != Ospfv3Interface::INTERFACE_STATE_DESIGNATED)) {
+    if ((oldState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED) && (nextState != Ospfv3Interface::INTERFACE_STATE_DESIGNATED)) {
         NetworkLSA *networkLSA = interface->getArea()->findNetworkLSA(interface->getInterfaceId(), interface->getArea()->getInstance()->getProcess()->getRouterID());
 //
         if (networkLSA != nullptr) {
@@ -206,7 +194,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
     if ((oldState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED || oldState == Ospfv3Interface::INTERFACE_STATE_BACKUP) &&
         (nextState != Ospfv3Interface::INTERFACE_STATE_DESIGNATED && nextState != Ospfv3Interface::INTERFACE_STATE_BACKUP))
     {
-        NetworkInterface* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
+        NetworkInterface *ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
         auto ipv6int = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
         ipv6int->leaveMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
     }
@@ -263,8 +251,8 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
 //                EV_DEBUG << "Router " << routerID << " trying backup on neighbor " << neighborID << "\n";
                 if (neighborsBackupDesignatedRouterID == neighborID) {
                     if ((neighborPriority > declaredBackupPriority) ||
-                            ((neighborPriority == declaredBackupPriority) &&
-                                    (neighborID > declaredBackupID)))
+                        ((neighborPriority == declaredBackupPriority) &&
+                         (neighborID > declaredBackupID)))
                     {
                         declaredBackupID = neighborsBackupDesignatedRouterID;
                         declaredBackupPriority = neighborPriority;
@@ -274,8 +262,8 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
                 }
                 if (!backupDeclared) {
                     if ((neighborPriority > highestPriority) ||
-                            ((neighborPriority == highestPriority) &&
-                                    (neighborID > highestRouter)))
+                        ((neighborPriority == highestPriority) &&
+                         (neighborID > highestRouter)))
                     {
                         highestRouter = neighborID;
                         highestRouterIP = neighbor->getNeighborIP();
@@ -291,8 +279,8 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
             if (currentDesignatedRouter != routerID) {
                 if (currentBackupRouter == routerID) {
                     if ((intf->routerPriority > declaredBackupPriority) ||
-                            ((intf->routerPriority == declaredBackupPriority) &&
-                                    (routerID > declaredBackupID)))
+                        ((intf->routerPriority == declaredBackupPriority) &&
+                         (routerID > declaredBackupID)))
                     {
                         declaredBackupID = routerID;
                         declaredBackupIP = intf->getInterfaceLLIP();
@@ -302,8 +290,8 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
                 }
                 if (!backupDeclared) {
                     if ((intf->routerPriority > highestPriority) ||
-                            ((intf->routerPriority == highestPriority) &&
-                                    (routerID > highestRouter)))
+                        ((intf->routerPriority == highestPriority) &&
+                         (routerID > highestRouter)))
                     {
                         declaredBackupID = routerID;
                         declaredBackupIP = intf->getInterfaceLLIP();
@@ -341,8 +329,8 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
 
             if (neighborsDesignatedRouterID == neighborID) {
                 if ((neighborPriority > declaredDesignatedRouterPriority) ||
-                        ((neighborPriority == declaredDesignatedRouterPriority) &&
-                                (neighborID > declaredDesignatedRouterID)))
+                    ((neighborPriority == declaredDesignatedRouterPriority) &&
+                     (neighborID > declaredDesignatedRouterID)))
                 {
 //                    declaredDesignatedRouterID = neighborsDesignatedRouterID;
                     declaredDesignatedRouterPriority = neighborPriority;
@@ -356,8 +344,8 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
         if (intf->routerPriority > 0) {
             if (currentDesignatedRouter == routerID) {
                 if ((intf->routerPriority > declaredDesignatedRouterPriority) ||
-                        ((intf->routerPriority == declaredDesignatedRouterPriority) &&
-                                (routerID > declaredDesignatedRouterID)))
+                    ((intf->routerPriority == declaredDesignatedRouterPriority) &&
+                     (routerID > declaredDesignatedRouterID)))
                 {
                     declaredDesignatedRouterID = routerID;
                     declaredDesignatedRouterIP = intf->getInterfaceLLIP();
@@ -411,13 +399,13 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
     Ipv4Address routersOldBackupID = intf->getBackupID();
 
     intf->setDesignatedID(declaredDesignatedRouterID);
-    EV_DEBUG <<  "declaredDesignatedRouterID = " << declaredDesignatedRouterID << "\n";
-    EV_DEBUG <<  "declaredBackupID = " << declaredBackupID << "\n";
-    for (int g = 0 ; g <  intf->getNeighborCount(); g++) {
-        EV_DEBUG << "@" << g <<  "  - " <<  intf->getNeighbor(g)->getNeighborID() << " / " << intf->getNeighbor(g)->getNeighborInterfaceID()  << "\n";
+    EV_DEBUG << "declaredDesignatedRouterID = " << declaredDesignatedRouterID << "\n";
+    EV_DEBUG << "declaredBackupID = " << declaredBackupID << "\n";
+    for (int g = 0; g < intf->getNeighborCount(); g++) {
+        EV_DEBUG << "@" << g << "  - " << intf->getNeighbor(g)->getNeighborID() << " / " << intf->getNeighbor(g)->getNeighborInterfaceID() << "\n";
     }
 
-    Ospfv3Neighbor* DRneighbor = intf->getNeighborById(declaredDesignatedRouterID);
+    Ospfv3Neighbor *DRneighbor = intf->getNeighborById(declaredDesignatedRouterID);
     if (DRneighbor == nullptr) {
         EV_DEBUG << "DRneighbor == nullptr\n";
         intf->setDesignatedIntID(intf->getInterfaceId());
@@ -478,15 +466,15 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
 
     for (i = 0; i < neighborCount; i++) {
         if ((intf->interfaceType == Ospfv3Interface::NBMA_TYPE) &&
-                ((!wasBackupDesignatedRouter && isBackupDesignatedRouter) ||
-                        (!wasDesignatedRouter && isDesignatedRouter)))
+            ((!wasBackupDesignatedRouter && isBackupDesignatedRouter) ||
+             (!wasDesignatedRouter && isDesignatedRouter)))
         {
             if (intf->getNeighbor(i)->getNeighborPriority() == 0) {
                 intf->getNeighbor(i)->processEvent(Ospfv3Neighbor::START);
             }
         }
         if ((declaredDesignatedRouterID != routersOldDesignatedRouterID) ||
-                (declaredBackupID != routersOldBackupID))
+            (declaredBackupID != routersOldBackupID))
         {
             if (intf->getNeighbor(i)->getState() >= Ospfv3Neighbor::TWOWAY_STATE) {
                 intf->getNeighbor(i)->processEvent(Ospfv3Neighbor::IS_ADJACENCY_OK);
@@ -495,7 +483,7 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
     }
 
     if (intf->getDesignatedID() != intf->getArea()->getInstance()->getProcess()->getRouterID()) {
-        Ospfv3Neighbor* designated = intf->getNeighborById(intf->getDesignatedID());
+        Ospfv3Neighbor *designated = intf->getNeighborById(intf->getDesignatedID());
         if (designated != nullptr)
             intf->setDesignatedIP(designated->getNeighborIP());
     }
@@ -503,7 +491,7 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
         intf->setDesignatedIP(intf->getInterfaceLLIP());
 
     if (intf->getBackupID() != intf->getArea()->getInstance()->getProcess()->getRouterID()) {
-        Ospfv3Neighbor* backup = intf->getNeighborById(intf->getBackupID());
+        Ospfv3Neighbor *backup = intf->getNeighborById(intf->getBackupID());
         if (backup != nullptr)
             intf->setBackupIP(backup->getNeighborIP());
     }

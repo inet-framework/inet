@@ -28,7 +28,7 @@ void RecipientQosAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IQosRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
 }
 
@@ -106,3 +106,4 @@ simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packe
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

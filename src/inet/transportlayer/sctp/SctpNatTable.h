@@ -44,15 +44,15 @@ class INET_API SctpNatEntry : public cObject
     SctpNatEntry();
     ~SctpNatEntry();
 
-    void setLocalAddress(L3Address addr) { localAddress = addr; };
-    void setGlobalAddress(L3Address addr) { globalAddress = addr; };
-    void setNattedAddress(L3Address addr) { nattedAddress = addr; };
-    void setLocalPort(uint16_t port) { localPort = port; };
-    void setGlobalPort(uint16_t port) { globalPort = port; };
-    void setNattedPort(uint16_t port) { nattedPort = port; };
-    void setGlobalVTag(uint32_t tag) { globalVtag = tag; };
-    void setLocalVTag(uint32_t tag) { localVtag = tag; };
-    void setEntryNumber(uint32_t number) { entryNumber = number; };
+    void setLocalAddress(L3Address addr) { localAddress = addr; }
+    void setGlobalAddress(L3Address addr) { globalAddress = addr; }
+    void setNattedAddress(L3Address addr) { nattedAddress = addr; }
+    void setLocalPort(uint16_t port) { localPort = port; }
+    void setGlobalPort(uint16_t port) { globalPort = port; }
+    void setNattedPort(uint16_t port) { nattedPort = port; }
+    void setGlobalVTag(uint32_t tag) { globalVtag = tag; }
+    void setLocalVTag(uint32_t tag) { localVtag = tag; }
+    void setEntryNumber(uint32_t number) { entryNumber = number; }
 
     L3Address getLocalAddress() { return localAddress; };
     L3Address getGlobalAddress() { return globalAddress; };

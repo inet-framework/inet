@@ -26,25 +26,21 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
 {
     bool toDS = aMsduHeader->getToDS();
     bool fromDS = aMsduHeader->getFromDS();
-    if (fromDS == 0 && toDS == 0) // STA to STA
-    {
+    if (fromDS == 0 && toDS == 0) { // STA to STA
         header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
         header->setReceiverAddress(aMsduHeader->getReceiverAddress());
     }
-    else if (fromDS == 1 && toDS == 0) // AP to STA
-    {
+    else if (fromDS == 1 && toDS == 0) { // AP to STA
         header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
         header->setReceiverAddress(subframeHeader->getDa());
         header->setAddress3(subframeHeader->getSa());
     }
-    else if (fromDS == 0 && toDS == 1) // STA to AP
-    {
+    else if (fromDS == 0 && toDS == 1) { // STA to AP
         header->setTransmitterAddress(subframeHeader->getSa());
         header->setReceiverAddress(aMsduHeader->getReceiverAddress());
         header->setAddress3(subframeHeader->getDa());
     }
-    else if (fromDS == 1 && toDS == 1) // AP to AP
-    {
+    else if (fromDS == 1 && toDS == 1) { // AP to AP
         header->setReceiverAddress(aMsduHeader->getReceiverAddress());
         header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
         header->setAddress3(subframeHeader->getDa());
@@ -63,8 +59,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     int tid = amsduHeader->getTid();
     int paddingLength = 0;
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
-    while (aggregatedFrame->getDataLength() > b(0))
-    {
+    while (aggregatedFrame->getDataLength() > b(0)) {
         aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
         const auto& msduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MsduSubframeHeader>();
         const auto& msdu = aggregatedFrame->peekDataAt(b(0), B(msduSubframeHeader->getLength()));

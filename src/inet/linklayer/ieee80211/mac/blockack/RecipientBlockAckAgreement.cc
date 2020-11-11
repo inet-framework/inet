@@ -40,12 +40,13 @@ void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<const Iee
 std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement)
 {
     os << "originator address = " << agreement.blockAckRecord->getOriginatorAddress() << ", "
-    << "tid = " << agreement.blockAckRecord->getTid() << ", "
-    << "starting sequence number = " << agreement.startingSequenceNumber << ", "
-    << "buffer size = " << agreement.bufferSize << ", "
-    << "block ack timeout value = " << agreement.blockAckTimeoutValue;
+       << "tid = " << agreement.blockAckRecord->getTid() << ", "
+       << "starting sequence number = " << agreement.startingSequenceNumber << ", "
+       << "buffer size = " << agreement.bufferSize << ", "
+       << "block ack timeout value = " << agreement.blockAckTimeoutValue;
     return os;
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

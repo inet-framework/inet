@@ -27,7 +27,7 @@ namespace inet {
  */
 class INET_API EmptyChunk : public Chunk
 {
-  friend class Chunk;
+    friend class Chunk;
 
   public:
     static const Ptr<EmptyChunk> singleton;
@@ -63,6 +63,7 @@ class INET_API EmptyChunk : public Chunk
         else
             throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
     }
+
 };
 
 } // namespace

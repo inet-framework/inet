@@ -295,8 +295,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
             if (datalen < snd_buf)
                 break;
 
-            error = tcpLwipM->getLwipTcpLayer()->tcp_write(
-                        pcbM, ((const char *)data) + written, snd_buf, 1);
+            error = tcpLwipM->getLwipTcpLayer()->tcp_write(pcbM, ((const char *)data) + written, snd_buf, 1);
 
             if (error != ERR_OK)
                 break;

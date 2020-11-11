@@ -27,19 +27,19 @@ namespace ieee80211 {
 
 class INET_API RtsPolicy : public ModeSetListener, public IRtsPolicy
 {
-    protected:
-        int rtsThreshold = -1;
-        simtime_t ctsTimeout = -1;
-        IRateSelection *rateSelection = nullptr;
+  protected:
+    int rtsThreshold = -1;
+    simtime_t ctsTimeout = -1;
+    IRateSelection *rateSelection = nullptr;
 
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
-    public:
-        virtual bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const override;
-        virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
-        virtual int getRtsThreshold() const override { return rtsThreshold; }
+  public:
+    virtual bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const override;
+    virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
+    virtual int getRtsThreshold() const override { return rtsThreshold; }
 };
 
 } /* namespace ieee80211 */

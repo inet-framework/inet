@@ -29,7 +29,7 @@ void OriginatorProtectionMechanism::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
 }
 
@@ -114,3 +114,4 @@ simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, co
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

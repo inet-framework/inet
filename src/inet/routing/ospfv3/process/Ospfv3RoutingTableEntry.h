@@ -15,7 +15,7 @@ namespace ospfv3 {
 
 class INET_API Ospfv3RoutingTableEntry : public Ipv6Route
 {
-public:
+  public:
     enum RoutingPathType {
         INTRAAREA = 0,
         INTERAREA = 1,
@@ -30,12 +30,12 @@ public:
     static const unsigned char AREA_BORDER_ROUTER_DESTINATION = 1;
     static const unsigned char AS_BOUNDARY_ROUTER_DESTINATION = 2;
 
-private:
+  private:
     IInterfaceTable *ift = nullptr;
     RoutingDestinationType destinationType = 0;
     Ospfv3Options optionalCapabilities;
     AreaID area;
-    RoutingPathType pathType = (RoutingPathType)-1;
+    RoutingPathType pathType = (RoutingPathType) - 1;
     Metric cost = 0;
     Metric type2Cost = 0;
     const Ospfv3Lsa *linkStateOrigin = nullptr;
@@ -43,7 +43,7 @@ private:
     // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
     // IPv4Route::gateway is nextHops[0].hopAddress
 
-public:
+  public:
     Ospfv3RoutingTableEntry(const Ospfv3RoutingTableEntry& entry, Ipv6Address destPrefix, int prefixLength, SourceType sourceType);
     Ospfv3RoutingTableEntry(IInterfaceTable *ift, Ipv6Address destPrefix, int prefixLength, SourceType sourceType);
     virtual ~Ospfv3RoutingTableEntry() {}
@@ -92,12 +92,12 @@ class INET_API Ospfv3Ipv4RoutingTableEntry : public Ipv4Route
     static const unsigned char AS_BOUNDARY_ROUTER_DESTINATION = 2;
     static const unsigned char ROUTER_DESTINATION = 3;
 
-private:
+  private:
     IInterfaceTable *ift = nullptr;
     RoutingDestinationType destinationType = 0;
     Ospfv3Options optionalCapabilities;
     AreaID area;
-    RoutingPathType pathType = (RoutingPathType)-1;
+    RoutingPathType pathType = (RoutingPathType) - 1;
     Metric cost = 0;
     Metric type2Cost = 0;
     const Ospfv3Lsa *linkStateOrigin = nullptr;
@@ -105,7 +105,7 @@ private:
     // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
     // IPv4Route::gateway is nextHops[0].hopAddress
 
-public:
+  public:
     Ospfv3Ipv4RoutingTableEntry(const Ospfv3Ipv4RoutingTableEntry& entry, Ipv4Address destPrefix, int prefixLength, SourceType sourceType);
     Ospfv3Ipv4RoutingTableEntry(IInterfaceTable *ift, Ipv4Address destPrefix, int prefixLength, SourceType sourceType);
     virtual ~Ospfv3Ipv4RoutingTableEntry() {}

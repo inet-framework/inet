@@ -30,28 +30,28 @@
 
 // checking chunk implementation is disabled by default
 #ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED
-#define CHUNK_CHECK_IMPLEMENTATION_ENABLED 0
+#define CHUNK_CHECK_IMPLEMENTATION_ENABLED       0
 #endif
 
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
-#define CHUNK_CHECK_IMPLEMENTATION(condition)   ASSERT(condition)
+#define CHUNK_CHECK_IMPLEMENTATION(condition)    ASSERT(condition)
 #else
-#define CHUNK_CHECK_IMPLEMENTATION(condition) ;
+#define CHUNK_CHECK_IMPLEMENTATION(condition)    ;
 #endif
 
 // checking chunk usage is enabled in debug mode and disabled in release mode by default
 #ifndef CHUNK_CHECK_USAGE_ENABLED
 #ifdef NDEBUG
-#define CHUNK_CHECK_USAGE_ENABLED 0
+#define CHUNK_CHECK_USAGE_ENABLED    0
 #else
-#define CHUNK_CHECK_USAGE_ENABLED 1
+#define CHUNK_CHECK_USAGE_ENABLED    1
 #endif
 #endif
 
 #if CHUNK_CHECK_USAGE_ENABLED
-#define CHUNK_CHECK_USAGE(condition, format, ...)   ((void) ((condition) ? 0 :  throw cRuntimeError("Error: " format, ##__VA_ARGS__)))
+#define CHUNK_CHECK_USAGE(condition, format, ...)    ((void)((condition) ? 0 : throw cRuntimeError("Error: " format, ## __VA_ARGS__)))
 #else
-#define CHUNK_CHECK_USAGE(condition, format, ...) ;
+#define CHUNK_CHECK_USAGE(condition, format, ...)    ;
 #endif
 
 namespace inet {
@@ -248,10 +248,10 @@ using namespace units::values;
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
 class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject, public IRegionTaggedObject
 {
-  friend class SliceChunk;
-  friend class EncryptedChunk;
-  friend class SequenceChunk;
-  friend class ChunkDescriptor;
+    friend class SliceChunk;
+    friend class EncryptedChunk;
+    friend class SequenceChunk;
+    friend class ChunkDescriptor;
 
   protected:
     /**
@@ -327,9 +327,9 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     class INET_API ForwardIterator : public Iterator
     {
       public:
-        ForwardIterator(b position) : Iterator(true, position, -1) { }
-        ForwardIterator(B position) : Iterator(true, position, -1) { }
-        explicit ForwardIterator(b position, int index) : Iterator(true, position, index) { }
+        ForwardIterator(b position) : Iterator(true, position, -1) {}
+        ForwardIterator(B position) : Iterator(true, position, -1) {}
+        explicit ForwardIterator(b position, int index) : Iterator(true, position, index) {}
         ForwardIterator& operator=(const ForwardIterator& other) { position = other.position; index = other.index; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); return *this; }
     };
 
@@ -339,9 +339,9 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     class INET_API BackwardIterator : public Iterator
     {
       public:
-        BackwardIterator(b position) : Iterator(false, position, -1) { }
-        BackwardIterator(B position) : Iterator(false, position, -1) { }
-        explicit BackwardIterator(b position, int index) : Iterator(false, position, index) { }
+        BackwardIterator(b position) : Iterator(false, position, -1) {}
+        BackwardIterator(B position) : Iterator(false, position, -1) {}
+        explicit BackwardIterator(b position, int index) : Iterator(false, position, index) {}
         BackwardIterator& operator=(const BackwardIterator& other) { position = other.position; index = other.index; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); return *this; }
     };
 
@@ -447,7 +447,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns a mutable copy of this chunk in a shared pointer.
      */
-    virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
+    virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); }
     virtual void forEachChild(cVisitor *v) override;
 
     virtual void parsimPack(cCommBuffer *buffer) const override;
@@ -736,28 +736,28 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns the chunk tag for the provided type and range, or returns nullptr if no such chunk tag is found.
      */
-    template<typename T> const Ptr<const T> findTag(b offset = b(0), b length = b(-1)) const {
+    template <typename T> const Ptr<const T> findTag(b offset = b(0), b length = b(-1)) const {
         return regionTags.findTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
      */
-    template<typename T> const Ptr<const T> getTag(b offset = b(0), b length = b(-1)) const {
+    template <typename T> const Ptr<const T> getTag(b offset = b(0), b length = b(-1)) const {
         return regionTags.getTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const {
+    template <typename T> void mapAllTags(b offset, b length, std::function<void(b, b, const Ptr<const T>&)> f) const {
         return regionTags.mapAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f) {
+    template <typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f) {
         checkMutable();
         return regionTags.mapAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
     }
@@ -765,14 +765,14 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns all chunk tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<SharingRegionTagSet::RegionTag<const T>> getAllTags(b offset = b(0), b length = b(-1)) const {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<const T>> getAllTags(b offset = b(0), b length = b(-1)) const {
         return regionTags.getAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns all chunk tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllTagsForUpdate(b offset = b(0), b length = b(-1)) {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllTagsForUpdate(b offset = b(0), b length = b(-1)) {
         checkMutable();
         return regionTags.getAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -780,7 +780,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns a newly added chunk tag for the provided type and range, or throws an exception if such a chunk tag is already present.
      */
-    template<typename T> const Ptr<T> addTag(b offset = b(0), b length = b(-1)) {
+    template <typename T> const Ptr<T> addTag(b offset = b(0), b length = b(-1)) {
         checkMutable();
         return regionTags.addTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -788,7 +788,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns a newly added chunk tag for the provided type and range if absent, or returns the chunk tag that is already present.
      */
-    template<typename T> const Ptr<T> addTagIfAbsent(b offset = b(0), b length = b(-1)) {
+    template <typename T> const Ptr<T> addTagIfAbsent(b offset = b(0), b length = b(-1)) {
         checkMutable();
         return regionTags.addTagIfAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -796,7 +796,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns the newly added chunk tags for the provided type and range where the tag is absent.
      */
-    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> addTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
+    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> addTagsWhereAbsent(b offset = b(0), b length = b(-1)) {
         checkMutable();
         return regionTags.addTagsWhereAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }

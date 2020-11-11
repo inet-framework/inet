@@ -58,7 +58,7 @@ void MarkovScheduler::initialize(int stage)
         WATCH(state);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (auto & inputGate : inputGates)
+        for (auto& inputGate : inputGates)
             checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
         if (producers[state] != nullptr)

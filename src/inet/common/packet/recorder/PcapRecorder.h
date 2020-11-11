@@ -34,9 +34,10 @@ namespace inet {
 class INET_API PcapRecorder : public cSimpleModule, protected cListener
 {
   public:
-    class INET_API IHelper {
+    class INET_API IHelper
+    {
       public:
-        virtual ~IHelper() { }
+        virtual ~IHelper() {}
 
         /// returns pcapLinkType for given protocol or returns LINKTYPE_INVALID. Protocol storable as or convertable to pcapLinkType.
         virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const = 0;
@@ -45,8 +46,9 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
         virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
 
         /// Create a new Packet or return nullptr. The new packet contains the original packet converted to pcapLinkType format.
-        virtual Packet *tryConvertToLinkType(const Packet* packet, PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
+        virtual Packet *tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
     };
+
   protected:
     typedef std::map<simsignal_t, Direction> SignalList;
     std::vector<const Protocol *> dumpProtocols;
@@ -76,7 +78,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void recordPacket(const cPacket *msg, Direction direction, cComponent *source);
     virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
-    virtual Packet *tryConvertToLinkType(const Packet* packet, PcapLinkType pcapLinkType, const Protocol *protocol) const;
+    virtual Packet *tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const;
     virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
 };
 

@@ -73,9 +73,9 @@ void HeatMapPlotFigure::setValue(int x, int y, double v, int channel)
 
 void HeatMapPlotFigure::setValue(double x, double y, double v, int channel)
 {
-//    ASSERT(minX <= x && x <= maxX);
-//    ASSERT(minY <= y && y <= maxY);
-//    ASSERT(minValue <= v && v <= maxValue);
+    // ASSERT(minX <= x && x <= maxX);
+    // ASSERT(minY <= y && y <= maxY);
+    // ASSERT(minValue <= v && v <= maxValue);
     int xp = std::floor(pixmapFigure->getPixmapWidth() * (x - minX) / (maxX - minX));
     int yp = std::floor(pixmapFigure->getPixmapHeight() * (y - minY) / (maxY - minY));
     double c = (v - minValue) / (maxValue - minValue);
@@ -84,11 +84,11 @@ void HeatMapPlotFigure::setValue(double x, double y, double v, int channel)
 
 void HeatMapPlotFigure::setConstantValue(double x1, double x2, double y1, double y2, double v, int channel)
 {
-//    ASSERT(minX <= x1 && x1 <= maxX);
-//    ASSERT(minX <= x2 && x2 <= maxX);
-//    ASSERT(minY <= y1 && y1 <= maxY);
-//    ASSERT(minY <= y2 && y2 <= maxY);
-//    ASSERT(minValue <= v && v <= maxValue);
+    // ASSERT(minX <= x1 && x1 <= maxX);
+    // ASSERT(minX <= x2 && x2 <= maxX);
+    // ASSERT(minY <= y1 && y1 <= maxY);
+    // ASSERT(minY <= y2 && y2 <= maxY);
+    // ASSERT(minValue <= v && v <= maxValue);
     int x1p = std::floor(pixmapFigure->getPixmapWidth() * (x1 - minX) / (maxX - minX));
     int x2p = std::floor(pixmapFigure->getPixmapWidth() * (x2 - minX) / (maxX - minX));
     int y1p = std::floor(pixmapFigure->getPixmapHeight() * (y1 - minY) / (maxY - minY));
@@ -101,12 +101,12 @@ void HeatMapPlotFigure::setConstantValue(double x1, double x2, double y1, double
 
 void HeatMapPlotFigure::setLinearValue(double x1, double x2, double y1, double y2, double vl, double vu, int axis, int channel)
 {
-//    ASSERT(minX <= x1 && x1 <= maxX);
-//    ASSERT(minX <= x2 && x2 <= maxX);
-//    ASSERT(minY <= y1 && y1 <= maxY);
-//    ASSERT(minY <= y2 && y2 <= maxY);
-//    ASSERT(minValue <= vl && vl <= maxValue);
-//    ASSERT(minValue <= vu && vu <= maxValue);
+    // ASSERT(minX <= x1 && x1 <= maxX);
+    // ASSERT(minX <= x2 && x2 <= maxX);
+    // ASSERT(minY <= y1 && y1 <= maxY);
+    // ASSERT(minY <= y2 && y2 <= maxY);
+    // ASSERT(minValue <= vl && vl <= maxValue);
+    // ASSERT(minValue <= vu && vu <= maxValue);
     int x1p = std::floor(pixmapFigure->getPixmapWidth() * (x1 - minX) / (maxX - minX));
     int x2p = std::floor(pixmapFigure->getPixmapWidth() * (x2 - minX) / (maxX - minX));
     int y1p = std::floor(pixmapFigure->getPixmapHeight() * (y1 - minY) / (maxY - minY));
@@ -130,14 +130,14 @@ void HeatMapPlotFigure::setLinearValue(double x1, double x2, double y1, double y
 
 void HeatMapPlotFigure::setBilinearValue(double x1, double x2, double y1, double y2, double v11, double v21, double v12, double v22, int channel)
 {
-//    ASSERT(minX <= x1 && x1 <= maxX);
-//    ASSERT(minX <= x2 && x2 <= maxX);
-//    ASSERT(minY <= y1 && y1 <= maxY);
-//    ASSERT(minY <= y2 && y2 <= maxY);
-//    ASSERT(minValue <= v11 && v11 <= maxValue);
-//    ASSERT(minValue <= v21 && v21 <= maxValue);
-//    ASSERT(minValue <= v12 && v12 <= maxValue);
-//    ASSERT(minValue <= v22 && v22 <= maxValue);
+    // ASSERT(minX <= x1 && x1 <= maxX);
+    // ASSERT(minX <= x2 && x2 <= maxX);
+    // ASSERT(minY <= y1 && y1 <= maxY);
+    // ASSERT(minY <= y2 && y2 <= maxY);
+    // ASSERT(minValue <= v11 && v11 <= maxValue);
+    // ASSERT(minValue <= v21 && v21 <= maxValue);
+    // ASSERT(minValue <= v12 && v12 <= maxValue);
+    // ASSERT(minValue <= v22 && v22 <= maxValue);
     int x1p = std::floor(pixmapFigure->getPixmapWidth() * (x1 - minX) / (maxX - minX));
     int x2p = std::floor(pixmapFigure->getPixmapWidth() * (x2 - minX) / (maxX - minX));
     int y1p = std::floor(pixmapFigure->getPixmapHeight() * (y1 - minY) / (maxY - minY));
@@ -427,7 +427,7 @@ void HeatMapPlotFigure::redrawYTicks()
     double valueTickYposAdjust[2] = { 0, 0 };
     int fontSize = labelFigure->getFont().pointSize;
     if (yTicks.size() == 1) {
-        valueTickYposAdjust[0] = - (fontSize / 2);
+        valueTickYposAdjust[0] = -(fontSize / 2);
         valueTickYposAdjust[1] = fontSize / 2;
     }
 

@@ -386,17 +386,17 @@ void Ospfv2InterfaceState::printElectionResult(const Ospfv2Interface *onInterfac
 {
     EV_DETAIL << "DR/BDR election is done for interface[" << static_cast<short>(onInterface->getIfIndex()) << "] ";
     switch (onInterface->getType()) {
-    case Ospfv2Interface::BROADCAST:
-        EV_DETAIL << "(Broadcast)";
-        break;
+        case Ospfv2Interface::BROADCAST:
+            EV_DETAIL << "(Broadcast)";
+            break;
 
-    case Ospfv2Interface::NBMA:
-        EV_DETAIL << "(NBMA)";
-        break;
+        case Ospfv2Interface::NBMA:
+            EV_DETAIL << "(NBMA)";
+            break;
 
-    default:
-        EV_DETAIL << "(Unknown)";
-        break;
+        default:
+            EV_DETAIL << "(Unknown)";
+            break;
     }
     EV_DETAIL << " (state: " << onInterface->getStateString(onInterface->getState()) << "):";
     EV_DETAIL << "\n";

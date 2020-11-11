@@ -27,7 +27,7 @@ INET_API void registerInterface(const NetworkInterface& interface, cGate *in, cG
 class INET_API IInterfaceRegistrationListener
 {
   public:
-    virtual void handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in) = 0;
+    virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in) = 0;
 };
 
 } // namespace inet

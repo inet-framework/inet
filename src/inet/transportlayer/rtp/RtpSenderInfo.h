@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_RTPSENDERINFO_H
 #define __INET_RTPSENDERINFO_H
 

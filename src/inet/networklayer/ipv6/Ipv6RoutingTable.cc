@@ -50,7 +50,7 @@ Ipv6RoutingTable::Ipv6RoutingTable()
 
 Ipv6RoutingTable::~Ipv6RoutingTable()
 {
-    for (auto & elem : routeList)
+    for (auto& elem : routeList)
         delete elem;
 }
 
@@ -193,7 +193,7 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         deleteInterfaceRoutes(entry);
     }
     else if (signalID == interfaceStateChangedSignal) {
-        const NetworkInterface *networkInterface = check_and_cast<const NetworkInterfaceChangeDetails*>(obj)->getNetworkInterface();
+        const NetworkInterface *networkInterface = check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface();
         int networkInterfaceId = networkInterface->getInterfaceId();
 
         // an interface went down
@@ -346,7 +346,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(NetworkInterface *ie, cXMLEleme
     // parse prefixes (AdvPrefix elements; they should be inside an AdvPrefixList
     // element, but we don't check that)
     cXMLElementList prefixList = cfg->getElementsByTagName("AdvPrefix");
-    for (auto & elem : prefixList) {
+    for (auto& elem : prefixList) {
         cXMLElement *node = elem;
         Ipv6InterfaceData::AdvPrefix prefix;
 
@@ -368,7 +368,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(NetworkInterface *ie, cXMLEleme
 
     // parse addresses
     cXMLElementList addrList = cfg->getChildrenByTagName("inetAddr");
-    for (auto & elem : addrList) {
+    for (auto& elem : addrList) {
         cXMLElement *node = elem;
         Ipv6Address address = Ipv6Address(node->getNodeValue());
         //We can now decide if the address is tentative or not.
@@ -382,7 +382,7 @@ void Ipv6RoutingTable::configureTunnelFromXml(cXMLElement *cfg)
 
     // parse basic config (attributes)
     cXMLElementList tunnelList = cfg->getElementsByTagName("tunnelEntry");
-    for (auto & elem : tunnelList) {
+    for (auto& elem : tunnelList) {
         cXMLElement *node = elem;
 
         Ipv6Address entry, exit, trigger;
@@ -442,7 +442,7 @@ bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
         return true;
 
     if (isRouter() && (dest == Ipv6Address::ALL_ROUTERS_1 || dest == Ipv6Address::ALL_ROUTERS_2 || dest == Ipv6Address::ALL_ROUTERS_5 ||
-            dest == Ipv6Address::ALL_OSPF_ROUTERS_MCAST || dest == Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST))
+                       dest == Ipv6Address::ALL_OSPF_ROUTERS_MCAST || dest == Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST))
         return true;
 
     // check for solicited-node multicast address
@@ -504,7 +504,7 @@ const Ipv6Route *Ipv6RoutingTable::doLongestPrefixMatch(const Ipv6Address& dest)
 
 bool Ipv6RoutingTable::isPrefixPresent(const Ipv6Address& prefix) const
 {
-    for (const auto & elem : routeList)
+    for (const auto& elem : routeList)
         if (prefix.matches((elem)->getDestPrefix(), 128))
             return true;
 
@@ -555,7 +555,7 @@ void Ipv6RoutingTable::addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, in
 {
     // see if prefix exists in table
     Ipv6Route *route = nullptr;
-    for (auto & elem : routeList) {
+    for (auto& elem : routeList) {
         if ((elem)->getSourceType() == IRoute::ROUTER_ADVERTISEMENT && (elem)->getDestPrefix() == destPrefix && (elem)->getPrefixLength() == prefixLength) {
             route = elem;
             break;
@@ -589,7 +589,7 @@ void Ipv6RoutingTable::addOrUpdateOwnAdvPrefix(const Ipv6Address& destPrefix, in
 
     // see if prefix exists in table
     Ipv6Route *route = nullptr;
-    for (auto & elem : routeList) {
+    for (auto& elem : routeList) {
         if ((elem)->getSourceType() == IRoute::OWN_ADV_PREFIX && (elem)->getDestPrefix() == destPrefix && (elem)->getPrefixLength() == prefixLength) {
             route = elem;
             break;
@@ -812,7 +812,7 @@ void Ipv6RoutingTable::deleteAllRoutes()
 {
     EV_INFO << "/// Removing all routes from rt6 " << endl;
 
-    for (auto & elem : routeList) {
+    for (auto& elem : routeList) {
         emit(routeDeletedSignal, elem);
         delete elem;
     }
@@ -901,7 +901,7 @@ bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, IDone
 
 void Ipv6RoutingTable::printRoutingTable() const
 {
-    for (const auto & elem : routeList)
+    for (const auto& elem : routeList)
         EV_INFO << (elem)->getInterface()->getInterfaceFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->str() << endl;
 }
 

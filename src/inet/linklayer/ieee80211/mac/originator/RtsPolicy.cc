@@ -26,7 +26,7 @@ void RtsPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
         rtsThreshold = par("rtsThreshold");
         ctsTimeout = par("ctsTimeout");
     }

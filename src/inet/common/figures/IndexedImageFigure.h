@@ -39,7 +39,7 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
 
   public:
     IndexedImageFigure(const char *name = nullptr);
-    virtual ~IndexedImageFigure() {};
+    virtual ~IndexedImageFigure() {}
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 

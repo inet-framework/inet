@@ -251,6 +251,7 @@ void Gpsr::processBeacon(Packet *packet)
     neighborPositionTable.setPosition(beacon->getAddress(), beacon->getPosition());
     delete packet;
 }
+
 //
 // handling packets
 //
@@ -380,7 +381,7 @@ std::string Gpsr::getHostName() const
 
 L3Address Gpsr::getSelfAddress() const
 {
-    //TODO choose self address based on a new 'interfaces' parameter
+    // TODO choose self address based on a new 'interfaces' parameter
     L3Address ret = routingTable->getRouterIdAsGeneric();
 #ifdef WITH_IPv6
     if (ret.getType() == L3Address::IPv6) {
@@ -434,7 +435,7 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors() const
             return neighborAddresses;
         else if (planarizationMode == GPSR_RNG_PLANARIZATION) {
             double neighborDistance = (neighborPosition - selfPosition).length();
-            for (auto & witnessAddress : neighborAddresses) {
+            for (auto& witnessAddress : neighborAddresses) {
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - selfPosition).length();
                 double neighborWitnessDistance = (witnessPosition - neighborPosition).length();
@@ -447,7 +448,7 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors() const
         else if (planarizationMode == GPSR_GG_PLANARIZATION) {
             Coord middlePosition = (selfPosition + neighborPosition) / 2;
             double neighborDistance = (neighborPosition - middlePosition).length();
-            for (auto & witnessAddress : neighborAddresses) {
+            for (auto& witnessAddress : neighborAddresses) {
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - middlePosition).length();
                 if (neighborAddress == witnessAddress)
@@ -467,7 +468,7 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors() const
 std::vector<L3Address> Gpsr::getPlanarNeighborsCounterClockwise(double startAngle) const
 {
     std::vector<L3Address> neighborAddresses = getPlanarNeighbors();
-    std::sort(neighborAddresses.begin(), neighborAddresses.end(), [&](const L3Address& address1, const L3Address& address2) {
+    std::sort(neighborAddresses.begin(), neighborAddresses.end(), [&] (const L3Address& address1, const L3Address& address2) {
         // NOTE: make sure the neighbor at startAngle goes to the end
         auto angle1 = getNeighborAngle(address1) - startAngle;
         auto angle2 = getNeighborAngle(address2) - startAngle;

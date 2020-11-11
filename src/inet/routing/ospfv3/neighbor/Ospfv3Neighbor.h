@@ -19,8 +19,7 @@ class Ospfv3Interface;
 class Ospfv3Neighbor
 {
   public:
-    enum Ospfv3NeighborEventType
-    {
+    enum Ospfv3NeighborEventType {
         HELLO_RECEIVED = 0,
         START = 1,
         TWOWAY_RECEIVED = 2,
@@ -40,8 +39,7 @@ class Ospfv3Neighbor
         REQUEST_RETRANSMISSION_TIMER = 16
     };
 
-    enum Ospfv3NeighborStateType
-    {
+    enum Ospfv3NeighborStateType {
         DOWN_STATE = 0,
         ATTEMPT_STATE = 1,
         INIT_STATE = 2,
@@ -52,8 +50,7 @@ class Ospfv3Neighbor
         FULL_STATE = 64
     };
 
-    enum Ospfv3DatabaseExchangeRelationshipType
-    {
+    enum Ospfv3DatabaseExchangeRelationshipType {
         MASTER = 0,
         SLAVE = 1
     };
@@ -64,14 +61,14 @@ class Ospfv3Neighbor
         int age;
     };
 
-    Ospfv3Neighbor(Ipv4Address newId, Ospfv3Interface* parent);
+    Ospfv3Neighbor(Ipv4Address newId, Ospfv3Interface *parent);
     virtual ~Ospfv3Neighbor();
-    void setNeighborPriority(int newPriority) { this->neighborRtrPriority=newPriority; }
-    void setNeighborDeadInterval(int newInterval) { this->neighborsRouterDeadInterval=newInterval; }
-    void setNeighborID(Ipv4Address newId) { this->neighborId=newId; }
-    void setNeighborAddress(Ipv6Address newAddress) { this->neighborIPAddress=newAddress; }
-    void setDesignatedRouterID(Ipv4Address newId) { this->neighborsDesignatedRouter=newId; }
-    void setBackupDesignatedRouterID(Ipv4Address newId) { this->neighborsBackupDesignatedRouter=newId; }
+    void setNeighborPriority(int newPriority) { this->neighborRtrPriority = newPriority; }
+    void setNeighborDeadInterval(int newInterval) { this->neighborsRouterDeadInterval = newInterval; }
+    void setNeighborID(Ipv4Address newId) { this->neighborId = newId; }
+    void setNeighborAddress(Ipv6Address newAddress) { this->neighborIPAddress = newAddress; }
+    void setDesignatedRouterID(Ipv4Address newId) { this->neighborsDesignatedRouter = newId; }
+    void setBackupDesignatedRouterID(Ipv4Address newId) { this->neighborsBackupDesignatedRouter = newId; }
     void setOptions(Ospfv3Options options) { this->neighborOptions = options; }
     void setDatabaseExchangeRelationship(Ospfv3DatabaseExchangeRelationshipType newRelationship) { this->databaseExchangeRelationship = newRelationship; }
     void setDDSequenceNumber(unsigned long newSequenceNmr) { this->ddSequenceNumber = newSequenceNmr; }
@@ -79,7 +76,7 @@ class Ospfv3Neighbor
     void setNeighborInterfaceID(uint32_t newID) { this->neighborInterfaceID = newID; }
     bool designatedRoutersAreSetUp() const { return designatedRoutersSetUp; }
 
-    Ospfv3Interface* getInterface() { return this->containingInterface; }
+    Ospfv3Interface *getInterface() { return this->containingInterface; }
     Ipv4Address getNeighborID() { return this->neighborId; }
     Ipv4Address getNeighborsDR() { return this->neighborsDesignatedRouter; }
     Ipv4Address getNeighborsBackup() { return this->neighborsBackupDesignatedRouter; }
@@ -128,7 +125,7 @@ class Ospfv3Neighbor
 
     void addToRetransmissionList(const Ospfv3Lsa *lsaC);
     void removeFromRetransmissionList(LSAKeyType lsaKey);
-    Ospfv3Lsa* findOnRetransmissionList(LSAKeyType lsaKey);
+    Ospfv3Lsa *findOnRetransmissionList(LSAKeyType lsaKey);
     bool isRetransmissionListEmpty() const { return linkStateRetransmissionList.empty(); }
     void ageTransmittedLSAList();
 
@@ -142,12 +139,12 @@ class Ospfv3Neighbor
     void addToTransmittedLSAList(LSAKeyType lsaKey);
     bool isOnTransmittedLSAList(LSAKeyType lsaKey) const;
 
-    void setLastHelloTime(int time) { this->last_hello_received=time; }
+    void setLastHelloTime(int time) { this->last_hello_received = time; }
     int getLastHelloTime() { return this->last_hello_received; }
 
   private:
-    Ospfv3NeighborState* state = nullptr;
-    Ospfv3NeighborState* previousState = nullptr;
+    Ospfv3NeighborState *state = nullptr;
+    Ospfv3NeighborState *previousState = nullptr;
     cMessage *inactivityTimer = nullptr;
     cMessage *pollTimer = nullptr;
     cMessage *ddRetransmissionTimer = nullptr;
@@ -157,27 +154,27 @@ class Ospfv3Neighbor
     bool requestRetransmissionTimerActive = false;
     Ospfv3DatabaseExchangeRelationshipType databaseExchangeRelationship = static_cast<Ospfv3DatabaseExchangeRelationshipType>(-1);
     bool firstAdjacencyInited = false;
-    unsigned long ddSequenceNumber;//TODO - what is the initial number?
+    unsigned long ddSequenceNumber; //TODO - what is the initial number?
     Ospfv3DdPacketId lastReceivedDDPacket;
-    unsigned short neighborRtrPriority;//neighbor priority
+    unsigned short neighborRtrPriority; //neighbor priority
     Ipv4Address neighborId;
 
     Ipv6Address neighborIPAddress;
-    Ospfv3Options neighborOptions;//options supported by the neighbor
-    Ipv4Address neighborsDesignatedRouter;//DR advertised by the neighbor
-    Ipv4Address neighborsBackupDesignatedRouter;///Backup advertised by the router
+    Ospfv3Options neighborOptions; //options supported by the neighbor
+    Ipv4Address neighborsDesignatedRouter; //DR advertised by the neighbor
+    Ipv4Address neighborsBackupDesignatedRouter; ///Backup advertised by the router
     L3Address neighborsBackupIP;
     L3Address neighborsDesignatedIP;
     uint32_t neighborInterfaceID;
     bool designatedRoutersSetUp = false;
     short neighborsRouterDeadInterval = 0;
-    std::list<Ospfv3Lsa*> linkStateRetransmissionList;
-    std::list<Ospfv3LsaHeader *> databaseSummaryList;//database summary list - complete list of LSAs that make up the area link-state database - the neighbor goes into Database Exchange state
-    std::list<Ospfv3LsaHeader *> linkStateRequestList;//link state request list - list of LSAs that need to be received from the neighbor
-    std::list<TransmittedLSA > transmittedLSAs;//link state retransmission list - LSA were flooded but not acknowledged, these are retransmitted until acknowledged or until the adjacency ends
+    std::list<Ospfv3Lsa *> linkStateRetransmissionList;
+    std::list<Ospfv3LsaHeader *> databaseSummaryList; //database summary list - complete list of LSAs that make up the area link-state database - the neighbor goes into Database Exchange state
+    std::list<Ospfv3LsaHeader *> linkStateRequestList; //link state request list - list of LSAs that need to be received from the neighbor
+    std::list<TransmittedLSA> transmittedLSAs; //link state retransmission list - LSA were flooded but not acknowledged, these are retransmitted until acknowledged or until the adjacency ends
     Packet *lastTransmittedDDPacket = nullptr;
 
-    Ospfv3Interface* containingInterface = nullptr;
+    Ospfv3Interface *containingInterface = nullptr;
     static unsigned long ddSequenceNumberInitSeed;
 
     int last_hello_received = 0;

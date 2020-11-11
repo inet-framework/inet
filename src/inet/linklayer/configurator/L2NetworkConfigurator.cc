@@ -117,7 +117,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
     std::set<NetworkInterface *> matchedBefore;
     cXMLElementList interfaceElements = configuration->getChildrenByTagName("interface");
 
-    for (auto & interfaceElements_i : interfaceElements) {
+    for (auto& interfaceElements_i : interfaceElements) {
         std::set<NetworkInterface *> interfacesSeen;
         cXMLElement *interfaceElement = interfaceElements_i;
 
@@ -231,7 +231,6 @@ Topology::LinkOut *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
             return node->getLinkOut(i);
 
-
     return nullptr;
 }
 
@@ -265,7 +264,7 @@ void L2NetworkConfigurator::configureInterface(NetworkInterface *networkInterfac
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->module == networkNodeModule) {
-            for (auto & elem : node->interfaceInfos) {
+            for (auto& elem : node->interfaceInfos) {
                 InterfaceInfo *interfaceInfo = elem;
                 if (interfaceInfo->networkInterface == networkInterface)
                     return configureInterface(interfaceInfo);
@@ -286,7 +285,7 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 
 L2NetworkConfigurator::Matcher::~Matcher()
 {
-    for (auto & elem : matchers)
+    for (auto& elem : matchers)
         delete elem;
 }
 
@@ -308,10 +307,9 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
     if (matchesany)
         return true;
 
-    for (auto & elem : matchers)
+    for (auto& elem : matchers)
         if (elem->matches(s))
             return true;
-
 
     return false;
 }

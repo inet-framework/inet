@@ -60,8 +60,7 @@ void Ospfv3NeighborStateFull::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
     }
     if (event == Ospfv3Neighbor::UPDATE_RETRANSMISSION_TIMER) {
         EV_DEBUG << "Ospfv3Neighbor::UPDATE_RETRANSMISSION_TIMER caught in FullState\n";
-        if (!neighbor->isRetransmissionListEmpty())
-        {
+        if (!neighbor->isRetransmissionListEmpty()) {
             neighbor->retransmitUpdatePacket();
             neighbor->startUpdateRetransmissionTimer();
             EV_DEBUG << "retransmission done, Timer active again\n";

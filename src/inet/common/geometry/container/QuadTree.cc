@@ -33,7 +33,7 @@ bool QuadTree::insert(const cObject *point, const Coord& pos)
     // points into new quadrants
     if (!hasChild())
         splitPoints();
-    for (auto & elem : quadrants)
+    for (auto& elem : quadrants)
         if (elem->insert(point, pos))
             return true;
     throw cRuntimeError("QuadTree insertion failed for object: %s with position: (%f, %f, %f)", point->getFullName(), pos.x, pos.y, pos.z);
@@ -82,7 +82,7 @@ void QuadTree::splitPoints()
         quadrants[i] = new QuadTree(minBoundaries[i], maxBoundaries[i], quadrantCapacity, this);
     // The node is not a leaf anymore
     // so we have to split its point
-    for (auto & elem : points) {
+    for (auto& elem : points) {
         auto it = lastPosition->find(elem);
         Coord pos;
         if (it != lastPosition->end())
@@ -99,7 +99,7 @@ void QuadTree::splitPoints()
 
 void QuadTree::setToLeaf()
 {
-    for (auto & elem : quadrants)
+    for (auto& elem : quadrants)
         elem = nullptr;
 }
 
@@ -109,32 +109,32 @@ void QuadTree::rangeQuery(const Coord& pos, double range, const IVisitor *visito
     // neighbors vector
     // Note that, a node have points only if it is a leaf node
     if (!hasChild() && doesIntersectWithQuadrant(pos, range))
-        for (auto & elem : points)
+        for (auto& elem : points)
             visitor->visit(elem);
     else if (hasChild())
-        for (auto & elem : quadrants)
+        for (auto& elem : quadrants)
             elem->rangeQuery(pos, range, visitor);
 }
 
 void QuadTree::strictRangeQuery(const Coord& pos, double range, const IVisitor *visitor) const
 {
     if (!hasChild() && doesIntersectWithQuadrant(pos, range)) {
-        for (auto & elem : points) {
+        for (auto& elem : points) {
             Coord otherPos = (*lastPosition)[elem];
             if (pos.sqrdist(otherPos) <= range * range)
                 visitor->visit(elem);
         }
     }
     else if (hasChild()) {
-        for (auto & elem : quadrants)
+        for (auto& elem : quadrants)
             elem->strictRangeQuery(pos, range, visitor);
     }
 }
 
 bool QuadTree::isInRectangleRange(const Coord& pointCoord) const
 {
-    return  pointCoord.x <= boundaryMax.x && pointCoord.x >= boundaryMin.x &&
-            pointCoord.y <= boundaryMax.y && pointCoord.y >= boundaryMin.y;
+    return pointCoord.x <= boundaryMax.x && pointCoord.x >= boundaryMin.x &&
+           pointCoord.y <= boundaryMax.y && pointCoord.y >= boundaryMin.y;
 }
 
 bool QuadTree::doesIntersectWithQuadrant(const Coord& pos, double range) const
@@ -186,7 +186,7 @@ QuadTree *QuadTree::searchQuadrant(const Coord& lastPos)
     if (!hasChild() && isInRectangleRange(lastPos))
         return this;
     else if (hasChild()) {
-        for (auto & elem : quadrants)
+        for (auto& elem : quadrants)
             if (elem->isInRectangleRange(lastPos))
                 return elem->searchQuadrant(lastPos);
         return nullptr;
@@ -204,7 +204,7 @@ void QuadTree::tryToJoinChildQuadrants()
 {
     unsigned int quadrantSum = 0;
 
-    for (auto & elem : quadrants) {
+    for (auto& elem : quadrants) {
         // We surely can't join quadrants if one quadrant has another
         // subquadrants
         if (elem->hasChild())
@@ -218,7 +218,7 @@ void QuadTree::tryToJoinChildQuadrants()
         // Copy the points to the parent node
         for (auto quadrant : quadrants) {
 
-            for (auto & elem : quadrant->points)
+            for (auto& elem : quadrant->points)
                 points.push_back(elem);
             // Delete the child quadrants
             delete quadrant;
@@ -267,7 +267,7 @@ QuadTree::QuadTree(const Coord& boundaryMin, const Coord& boundaryMax, unsigned 
 
 QuadTree::~QuadTree()
 {
-    for (auto & elem : quadrants)
+    for (auto& elem : quadrants)
         delete elem;
     // We clear lastPosition if and only if we delete the whole tree
     // Take a look at the constructor to see why we do this!

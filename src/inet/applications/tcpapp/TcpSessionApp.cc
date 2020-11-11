@@ -35,7 +35,6 @@ Define_Module(TcpSessionApp);
 #define MSGKIND_SEND       2
 #define MSGKIND_CLOSE      3
 
-
 TcpSessionApp::~TcpSessionApp()
 {
     cancelAndDelete(timeoutMsg);

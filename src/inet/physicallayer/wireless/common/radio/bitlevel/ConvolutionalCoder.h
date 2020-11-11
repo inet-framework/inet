@@ -47,7 +47,7 @@ namespace physicallayer {
 class INET_API ConvolutionalCoder : public IFecCoder
 {
   public:
-    typedef std::vector<std::vector<ShortBitVector> > ShortBitVectorMatrix;
+    typedef std::vector<std::vector<ShortBitVector>> ShortBitVectorMatrix;
 
     class TrellisGraphNode
     {
@@ -81,12 +81,12 @@ class INET_API ConvolutionalCoder : public IFecCoder
     ShortBitVector *decimalToOutputSymbol; // maps an outputSymbol (in decimal) to its ShortBitVector representation
     int **stateTransitions; // maps a (state, inputSymbol) pair to the corresponding next state
     unsigned char ***hammingDistanceLookupTable; // lookup table for Hamming distances, the three dimensions are: [outputSymbol, outputSymbol, excludedBits]
-    std::vector<std::vector<TrellisGraphNode> > trellisGraph; // the decoder's trellis graph
+    std::vector<std::vector<TrellisGraphNode>> trellisGraph; // the decoder's trellis graph
     const ConvolutionalCode *convolutionalCode; // this info class holds information related to this encoder
 
   protected:
     inline bool eXOR(bool alpha, bool beta) const { return alpha != beta; }
-    void setTransferFunctionMatrix(std::vector<std::vector<int> >& transferFMatrix);
+    void setTransferFunctionMatrix(std::vector<std::vector<int>>& transferFMatrix);
     ShortBitVector inputSymbolToOutputSymbol(const ShortBitVector& state, const ShortBitVector& inputSymbol) const;
     bool modulo2Adder(const ShortBitVector& shiftRegisters, const ShortBitVector& generatorPolynomial) const;
     ShortBitVector giveNextOutputSymbol(const BitVector& encodedBits, int decodedLength, const BitVector& isPunctured, ShortBitVector& excludedFromHammingDistance) const;
@@ -119,9 +119,9 @@ class INET_API ConvolutionalCoder : public IFecCoder
     void printStateTransitions() const;
     void printOutputs() const;
     void printTransferFunctionMatrix() const;
-    void parseMatrix(const char *strMatrix, std::vector<std::vector<int> >& matrix) const;
+    void parseMatrix(const char *strMatrix, std::vector<std::vector<int>>& matrix) const;
     void parseVector(const char *strVector, std::vector<int>& vector) const;
-    void convertToShortBitVectorMatrix(std::vector<std::vector<int> >& matrix, std::vector<ShortBitVector>& boolMatrix) const;
+    void convertToShortBitVectorMatrix(std::vector<std::vector<int>>& matrix, std::vector<ShortBitVector>& boolMatrix) const;
     ShortBitVector octalToBinary(int octalNum, int fixedSize) const;
     int octalToDec(int octalNum) const;
     std::pair<BitVector, bool> traversePath(const TrellisGraphNode& bestNode, TrellisGraphNode **bestPaths, bool isTruncatedMode) const;

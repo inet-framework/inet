@@ -214,7 +214,7 @@ void RadioCanvasVisualizer::refreshAntennaLobe(const IAntenna *antenna, cPolygon
                 direction = (antennaDirection * lobeDirection).toEulerAngles();
             }
             else
-            direction.beta = angle;
+                direction.beta = angle;
         }
         else if (!strcmp(antennaLobePlane, "yz")) {
             if (antennaLobePlaneGlobal) {

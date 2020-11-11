@@ -34,11 +34,11 @@ const double DsssErrorRateModel::WLAN_SIR_IMPOSSIBLE = 0.1;
 #endif // ifndef ENABLE_GSL
 
 #ifdef BOEING_MODEL
-const double DsssErrorRateModel::spectralEfficiency1bit = 22000000.0 / 1000000.0;    // 1 bit per symbol with 1 MSPS
-const double DsssErrorRateModel::spectralEfficiency2bit = 22000000.0 / 1000000.0 / 2.0;    // 2 bits per symbol, 1 MSPS
+const double DsssErrorRateModel::spectralEfficiency1bit = 22000000.0 / 1000000.0; // 1 bit per symbol with 1 MSPS
+const double DsssErrorRateModel::spectralEfficiency2bit = 22000000.0 / 1000000.0 / 2.0; // 2 bits per symbol, 1 MSPS
 #else // ifdef BOEING_MODEL
-const double DsssErrorRateModel::spectralEfficiency1bit = 2000000.0 / 1000000.0;    // 1 bit per symbol with 1 MSPS
-const double DsssErrorRateModel::spectralEfficiency2bit = 2000000.0 / 1000000.0 / 2.0;    // 2 bits per symbol, 1 MSPS
+const double DsssErrorRateModel::spectralEfficiency1bit = 2000000.0 / 1000000.0; // 1 bit per symbol with 1 MSPS
+const double DsssErrorRateModel::spectralEfficiency2bit = 2000000.0 / 1000000.0 / 2.0; // 2 bits per symbol, 1 MSPS
 #endif // ifdef BOEING_MODEL
 
 double DsssErrorRateModel::DqpskFunction(double x)
@@ -50,14 +50,14 @@ double DsssErrorRateModel::DqpskFunction(double x)
 
 double DsssErrorRateModel::GetDsssDbpskSuccessRate(double sinr, uint32_t nbits)
 {
-    double EbN0 = sinr * spectralEfficiency1bit;    // 1 bit per symbol with 1 MSPS
+    double EbN0 = sinr * spectralEfficiency1bit; // 1 bit per symbol with 1 MSPS
     double ber = 0.5 * exp(-EbN0);
     return pow((1.0 - ber), (int)nbits);
 }
 
 double DsssErrorRateModel::GetDsssDqpskSuccessRate(double sinr, uint32_t nbits)
 {
-    double EbN0 = sinr * spectralEfficiency2bit;    // 2 bits per symbol, 1 MSPS
+    double EbN0 = sinr * spectralEfficiency2bit; // 2 bits per symbol, 1 MSPS
     double ber = DqpskFunction(EbN0);
     return pow((1.0 - ber), (int)nbits);
 }
@@ -79,7 +79,7 @@ double DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(double sinr, uint32_t n
     else if (sinr < WLAN_SIR_IMPOSSIBLE) {
         ber = 0.5;
     }
-    else {    // fitprops.coeff from matlab berfit
+    else { // fitprops.coeff from matlab berfit
         double a1 = 5.3681634344056195e-001;
         double a2 = 3.3092430025608586e-003;
         double a3 = 4.1654372361004000e-001;
@@ -107,7 +107,7 @@ double DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(double sinr, uint32_t nb
     else if (sinr < WLAN_SIR_IMPOSSIBLE) {
         ber = 0.5;
     }
-    else {    // fitprops.coeff from matlab berfit
+    else { // fitprops.coeff from matlab berfit
         double a1 = 7.9056742265333456e-003;
         double a2 = -1.8397449399176360e-001;
         double a3 = 1.0740689468707241e+000;

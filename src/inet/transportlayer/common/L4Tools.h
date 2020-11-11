@@ -44,7 +44,7 @@ const Ptr<T> removeTransportProtocolHeader(Packet *packet)
 
 INET_API const Ptr<TransportHeaderBase> removeTransportProtocolHeader(Packet *packet, const Protocol& protocol);
 
-}
+} // namespace inet
 
 #endif
 

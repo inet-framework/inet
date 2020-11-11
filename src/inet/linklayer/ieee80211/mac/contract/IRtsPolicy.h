@@ -26,12 +26,12 @@ namespace ieee80211 {
 
 class INET_API IRtsPolicy
 {
-    public:
-        virtual ~IRtsPolicy() { }
+  public:
+    virtual ~IRtsPolicy() {}
 
-        virtual bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const = 0;
-        virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
-        virtual int getRtsThreshold() const = 0;
+    virtual bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const = 0;
+    virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
+    virtual int getRtsThreshold() const = 0;
 };
 
 } // namespace ieee80211

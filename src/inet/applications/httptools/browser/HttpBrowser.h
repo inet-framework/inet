@@ -56,14 +56,14 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ReceiveQu
      */
     struct SockData
     {
-        HttpRequestQueue messageQueue;    // Queue of pending messages.
-        TcpSocket *socket = nullptr;    // A reference to the socket object.
-        int pending = 0;    // A counter for the number of outstanding replies.
+        HttpRequestQueue messageQueue; // Queue of pending messages.
+        TcpSocket *socket = nullptr; // A reference to the socket object.
+        int pending = 0; // A counter for the number of outstanding replies.
     };
 
-    SocketMap sockCollection;    // List of active sockets
-    unsigned long numBroken = 0;    // Counter for the number of broken connections
-    unsigned long socketsOpened = 0;    // Counter for opened sockets
+    SocketMap sockCollection; // List of active sockets
+    unsigned long numBroken = 0; // Counter for the number of broken connections
+    unsigned long socketsOpened = 0; // Counter for opened sockets
 
   protected:
     virtual void initialize(int stage) override;

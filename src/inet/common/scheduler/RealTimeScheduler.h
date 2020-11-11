@@ -36,10 +36,12 @@ class INET_API RealTimeScheduler : public cScheduler
         virtual bool notify(int fd) = 0;
     };
 
-    class Entry {
+    class Entry
+    {
       public:
         int fd = -1;
         ICallback *callback = nullptr;
+
       public:
         Entry(int fd, ICallback *callback) : fd(fd), callback(callback) {}
     };
@@ -50,7 +52,7 @@ class INET_API RealTimeScheduler : public cScheduler
     class BeginSimulationEvent : public cEvent
     {
       public:
-        BeginSimulationEvent(const char* name) : cEvent(name) {}
+        BeginSimulationEvent(const char *name) : cEvent(name) {}
         virtual cEvent *dup() const override { return new BeginSimulationEvent(getName()); }
         virtual cObject *getTargetObject() const override { return nullptr; }
         virtual void execute() override { delete this; }

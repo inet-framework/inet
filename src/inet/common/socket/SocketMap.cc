@@ -52,7 +52,7 @@ ISocket *SocketMap::removeSocket(ISocket *socket)
 
 void SocketMap::deleteSockets()
 {
-    for (auto & elem : socketMap)
+    for (auto& elem : socketMap)
         delete elem.second;
     socketMap.clear();
 }
@@ -65,16 +65,16 @@ void SocketMap::addWatch()
 std::ostream& operator<<(std::ostream& out, const ISocket& entry)
 {
     const UdpSocket *udp = dynamic_cast<const UdpSocket *>(&entry);
-    if(udp) {
+    if (udp) {
         out << "UDPConnectionId: " << udp->getSocketId();
     }
 
     const TcpSocket *tcp = dynamic_cast<const TcpSocket *>(&entry);
-    if(tcp) {
+    if (tcp) {
         out << "TCPConnectionId: " << tcp->getSocketId() << " "
-                << " local: " << tcp->getLocalAddress() << ":" << tcp->getLocalPort() << " "
-                << " remote: " << tcp->getRemoteAddress() << ":" << tcp->getRemotePort() << " "
-                << " status: " << TcpSocket::stateName(tcp->getState());
+            << " local: " << tcp->getLocalAddress() << ":" << tcp->getLocalPort() << " "
+            << " remote: " << tcp->getRemoteAddress() << ":" << tcp->getRemotePort() << " "
+            << " status: " << TcpSocket::stateName(tcp->getState());
     }
 
     return out;

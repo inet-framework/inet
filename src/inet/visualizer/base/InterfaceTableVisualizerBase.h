@@ -33,7 +33,8 @@ namespace visualizer {
 class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API InterfaceVisualization {
+    class INET_API InterfaceVisualization
+    {
       public:
         const int networkNodeId = -1;
         const int networkNodeGateId = -1;
@@ -44,12 +45,13 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
         virtual ~InterfaceVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public StringFormat::IDirectiveResolver
+    {
       protected:
         const NetworkInterface *networkInterface = nullptr;
 
       public:
-        DirectiveResolver(const NetworkInterface *networkInterface) : networkInterface(networkInterface) { }
+        DirectiveResolver(const NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

@@ -39,7 +39,7 @@ class INET_API Ipv6AddressType : public IL3AddressType
     virtual L3Address getUnspecifiedAddress() const override { return Ipv6Address::UNSPECIFIED_ADDRESS; }
     virtual L3Address getBroadcastAddress() const override { return Ipv6Address::ALL_NODES_1; }
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return Ipv6Address::LL_MANET_ROUTERS; }
-    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ALL_RIP_ROUTERS_MCAST; };
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ALL_RIP_ROUTERS_MCAST; }
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::ipv6; }
     virtual L3Address getLinkLocalAddress(const NetworkInterface *ie) const override;
 };

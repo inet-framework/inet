@@ -28,7 +28,8 @@ namespace visualizer {
 class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase::NetworkNodeVisualization, public cGroupFigure
 {
   protected:
-    class INET_API Annotation {
+    class INET_API Annotation
+    {
       public:
         cFigure *figure;
         cFigure::Rectangle bounds;

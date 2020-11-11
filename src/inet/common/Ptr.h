@@ -20,10 +20,10 @@
 
 #include "inet/common/INETDefs.h"
 
-#define INET_STD_SHARED_PTR 1
-#define INET_INTRUSIVE_PTR 2
+#define INET_STD_SHARED_PTR        1
+#define INET_INTRUSIVE_PTR         2
 #ifndef INET_PTR_IMPLEMENTATION
-#define INET_PTR_IMPLEMENTATION INET_INTRUSIVE_PTR
+#define INET_PTR_IMPLEMENTATION    INET_INTRUSIVE_PTR
 #endif
 
 #if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
@@ -44,31 +44,31 @@ namespace inet {
 // is not a requirement for OMNeT++/INET simulations
 #if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
 
-template<class T>
+template <class T>
 using Ptr = std::shared_ptr<T>;
 
-template<class T>
+template <class T>
 using SharedBase = std::enable_shared_from_this<T>;
 
-template<class T, typename... Args>
+template <class T, typename... Args>
 Ptr<T> makeShared(Args&&... args)
 {
     return std::make_shared<T>(std::forward<Args>(args)...);
 }
 
-template<class T, class U>
+template <class T, class U>
 Ptr<T> staticPtrCast(const Ptr<U>& r)
 {
     return std::static_pointer_cast<T>(r);
 }
 
-template<class T, class U>
+template <class T, class U>
 Ptr<T> dynamicPtrCast(const Ptr<U>& r)
 {
     return std::dynamic_pointer_cast<T>(r);
 }
 
-template<class T, class U>
+template <class T, class U>
 Ptr<T> constPtrCast(const Ptr<U>& r)
 {
     return std::const_pointer_cast<T>(r);
@@ -76,31 +76,31 @@ Ptr<T> constPtrCast(const Ptr<U>& r)
 
 #elif INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
 
-template<class T>
+template <class T>
 using Ptr = IntrusivePtr<T>;
 
-template<class T>
+template <class T>
 using SharedBase = IntrusivePtrCounter<T>;
 
-template<class T, typename... Args>
+template <class T, typename... Args>
 Ptr<T> makeShared(Args&&... args)
 {
     return IntrusivePtr<T>(new T(std::forward<Args>(args)...));
 }
 
-template<class T, class U>
+template <class T, class U>
 Ptr<T> staticPtrCast(const Ptr<U>& r)
 {
     return static_pointer_cast<T>(r);
 }
 
-template<class T, class U>
+template <class T, class U>
 Ptr<T> dynamicPtrCast(const Ptr<U>& r)
 {
     return dynamic_pointer_cast<T>(r);
 }
 
-template<class T, class U>
+template <class T, class U>
 Ptr<T> constPtrCast(const Ptr<U>& r)
 {
     return const_pointer_cast<T>(r);
@@ -110,14 +110,13 @@ Ptr<T> constPtrCast(const Ptr<U>& r)
 #error "Unknown Ptr implementation"
 #endif
 
-template<class T>
+template <class T>
 Ptr<T> __checknull(const Ptr<T>& p, const char *expr, const char *file, int line)
 {
     if (p == nullptr)
         throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);
     return p;
 }
-
 
 template <typename T>
 class INET_API SharedVector : public std::vector<T>, public SharedBase<SharedVector<T>>

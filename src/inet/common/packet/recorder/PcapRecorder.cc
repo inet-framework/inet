@@ -34,7 +34,7 @@
 
 namespace inet {
 
-//----
+// ----
 
 Define_Module(PcapRecorder);
 
@@ -99,7 +99,7 @@ void PcapRecorder::initialize()
             mname.replace(mname.length() - 3, 3, "");
 
         if (mname[0] == '.') {
-            for (auto & elem : signalList)
+            for (auto& elem : signalList)
                 getParentModule()->subscribe(elem.first, this);
             found = true;
         }
@@ -109,7 +109,7 @@ void PcapRecorder::initialize()
                 if (0 == strcmp(isAllIndex ? submod->getName() : submod->getFullName(), mname.c_str())) {
                     found = true;
 
-                    for (auto & elem : signalList) {
+                    for (auto& elem : signalList) {
                         if (!submod->isSubscribed(elem.first, this)) {
                             submod->subscribe(elem.first, this);
                             EV_INFO << "Subscribing to " << submod->getFullPath() << ":" << getSignalName(elem.first) << EV_ENDL;
@@ -298,7 +298,7 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
     return LINKTYPE_INVALID;
 }
 
-Packet *PcapRecorder::tryConvertToLinkType(const Packet* packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
+Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
     for (IHelper *helper: helpers) {
         if (auto newPacket = helper->tryConvertToLinkType(packet, pcapLinkType, protocol))

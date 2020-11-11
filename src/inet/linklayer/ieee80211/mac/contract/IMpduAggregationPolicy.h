@@ -26,10 +26,10 @@ namespace ieee80211 {
 
 class INET_API IMpduAggregationPolicy
 {
-    public:
-        virtual ~IMpduAggregationPolicy() { }
+  public:
+    virtual ~IMpduAggregationPolicy() {}
 
-        virtual std::vector<Packet *> *computeAggregateFrames(std::vector<Packet *> *frames) = 0;
+    virtual std::vector<Packet *> *computeAggregateFrames(std::vector<Packet *> *frames) = 0;
 };
 
 } // namespace ieee80211

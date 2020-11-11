@@ -43,7 +43,7 @@ namespace inet {
  */
 class INET_API ChunkQueue : public cNamedObject
 {
-  friend class ChunkQueueDescriptor;
+    friend class ChunkQueueDescriptor;
 
   protected:
     b pushedLength = b(0);

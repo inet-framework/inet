@@ -21,7 +21,6 @@
     email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
 ***************************************************************************/
 
-
 #ifndef __INET_RTP_H
 #define __INET_RTP_H
 

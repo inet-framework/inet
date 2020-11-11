@@ -27,16 +27,16 @@ namespace ieee80211 {
 
 class INET_API IRecipientQosMacDataService
 {
-    public:
-        static simsignal_t packetDefragmentedSignal;
-        static simsignal_t packetDeaggregatedSignal;
+  public:
+    static simsignal_t packetDefragmentedSignal;
+    static simsignal_t packetDeaggregatedSignal;
 
-    public:
-        virtual ~IRecipientQosMacDataService() { }
+  public:
+    virtual ~IRecipientQosMacDataService() {}
 
-        virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
-        virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
-        virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) = 0;
+    virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
+    virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
+    virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) = 0;
 };
 
 } // namespace ieee80211

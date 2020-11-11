@@ -82,7 +82,7 @@ void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
         thread->timerExpired(msg);
     }
     else {
-        TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(socketMap.findSocketFor(msg));
+        TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(socketMap.findSocketFor(msg));
         if (socket)
             socket->processMessage(msg);
         else if (serverSocket.belongsToSocket(msg))

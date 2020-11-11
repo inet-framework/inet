@@ -67,7 +67,7 @@ void Ipv4NatTable::handleMessage(cMessage *msg)
 void Ipv4NatTable::parseConfig()
 {
     cXMLElementList xmlEntries = config->getChildrenByTagName("entry");
-    for (auto & xmlEntry : xmlEntries) {
+    for (auto& xmlEntry : xmlEntries) {
         // type
         const char *typeAttr = xmlEntry->getAttribute("type");
         INetfilter::IHook::Type type;
@@ -112,7 +112,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
     Enter_Method("processPacket");
     auto lt = natEntries.lower_bound(type);
     auto ut = natEntries.upper_bound(type);
-    for (; lt != ut; lt++) {
+    for ( ; lt != ut; lt++) {
         const auto& packetFilter = lt->second.first;
         const auto& natEntry = lt->second.second;
         // TODO: this might be slow for too many filters

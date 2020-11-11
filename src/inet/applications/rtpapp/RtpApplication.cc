@@ -161,8 +161,7 @@ void RtpApplication::handleMessage(cMessage *msgIn)
                 break;
 
             default:
-                throw cRuntimeError("Invalid msgKind value %d in message '%s'",
-                    msgIn->getKind(), msgIn->getName());
+                throw cRuntimeError("Invalid msgKind value %d in message '%s'", msgIn->getKind(), msgIn->getName());
         }
     }
     else if (isActiveSession) {

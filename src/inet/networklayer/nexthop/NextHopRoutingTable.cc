@@ -48,9 +48,9 @@ NextHopRoutingTable::NextHopRoutingTable()
 
 NextHopRoutingTable::~NextHopRoutingTable()
 {
-    for (auto & elem : routes)
+    for (auto& elem : routes)
         delete elem;
-    for (auto & elem : multicastRoutes)
+    for (auto& elem : multicastRoutes)
         delete elem;
 }
 
@@ -415,7 +415,7 @@ IRoute *NextHopRoutingTable::createRoute()
 
 void NextHopRoutingTable::printRoutingTable() const
 {
-    for (const auto & elem : routes)
+    for (const auto& elem : routes)
         EV_INFO << (elem)->getInterface()->getInterfaceFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->str() << endl;
 }
 

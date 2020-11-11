@@ -74,7 +74,7 @@ void Ieee80211Portal::encapsulate(Packet *packet)
     if (isIeee8023Header(*ethernetHeader))
         // check that the packet already has an LLC header
         packet->peekAtFront<Ieee8022LlcHeader>();
-    else if (isEth2Header(*ethernetHeader)){
+    else if (isEth2Header(*ethernetHeader)) {
         const auto& ieee8022SnapHeader = makeShared<Ieee8022LlcSnapHeader>();
         ieee8022SnapHeader->setOui(0);
         ieee8022SnapHeader->setProtocolId(ethernetHeader->getTypeOrLength());

@@ -67,10 +67,10 @@ void PimNeighbor::changed()
 
 PimNeighborTable::~PimNeighborTable()
 {
-    for (auto & elem : neighbors) {
-        for (auto & _it2 : elem.second) {
+    for (auto& elem : neighbors) {
+        for (auto& _it2 : elem.second) {
             cancelEvent((_it2)->getLivenessTimer());
-            delete (_it2);
+            delete _it2;
         }
     }
 }
@@ -113,10 +113,9 @@ bool PimNeighborTable::addNeighbor(PimNeighbor *entry, double holdTime)
 
     PimNeighborVector& neighborsOnInterface = neighbors[entry->getInterfaceId()];
 
-    for (auto & elem : neighborsOnInterface)
+    for (auto& elem : neighborsOnInterface)
         if ((elem)->getAddress() == entry->getAddress())
             return false;
-
 
     EV_DETAIL << "Added new neighbor to table: " << entry->str() << "\n";
     entry->nt = this;
@@ -162,7 +161,7 @@ PimNeighbor *PimNeighborTable::findNeighbor(int interfaceId, Ipv4Address addr)
 {
     auto neighborsOnInterface = neighbors.find(interfaceId);
     if (neighborsOnInterface != neighbors.end()) {
-        for (auto & elem : neighborsOnInterface->second)
+        for (auto& elem : neighborsOnInterface->second)
             if ((elem)->getAddress() == addr && (elem)->getInterfaceId() == interfaceId)
                 return elem;
 

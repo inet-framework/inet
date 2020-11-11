@@ -52,7 +52,7 @@ class INET_API Ospfv2ConfigReader
      */
     std::vector<NetworkInterface *> getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
 
-    cXMLElement * findMatchingConfig(const cXMLElementList& routerConfig, const NetworkInterface& intf);
+    cXMLElement *findMatchingConfig(const cXMLElementList& routerConfig, const NetworkInterface& intf);
 
     /**
      * Loads a list of OSPF Areas connected to this router from the config XML.

@@ -45,7 +45,7 @@ void QueueFigure::setMaxElementCount(int maxElementCount)
             boxes.push_back(box);
             addFigure(box);
         }
-        else  {
+        else {
             for (int i = 0; i < maxElementCount; i++) {
                 auto box = new cRectangleFigure("box");
                 box->setOutlined(false);
@@ -76,3 +76,4 @@ void QueueFigure::setElementCount(int elementCount)
 }
 
 } // namespace inet
+

@@ -11,7 +11,7 @@ namespace inet {
  * @ingroup baseUtils
  * @ingroup utils
  */
-template<typename T = cModule *const>
+template <typename T = cModule *const>
 class FindModule
 {
   public:
@@ -84,7 +84,7 @@ class FindModule
  * @brief Finds and returns the pointer to a module of type T.
  * Uses FindModule<>::findSubModule(), FindModule<>::findHost(). See usage e.g. at ConnectionManagerAccess.
  */
-template<typename T = cModule>
+template <typename T = cModule>
 class AccessModuleWrap
 {
   public:
@@ -108,8 +108,6 @@ class AccessModuleWrap
     virtual ~AccessModuleWrap()
     {
     }
-
-    ;
 
     T *get(cModule *const from = nullptr)
     {

@@ -113,21 +113,22 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
         void deleteGroupData(Ipv4Address group);
         friend inline std::ostream& operator<<(std::ostream& out, const Igmpv3::HostInterfaceData& entry)
         {
-            for(auto& g : entry.groups) {
+            for (auto& g : entry.groups) {
                 out << "(groupAddress: " << g.second->groupAddr << " ";
                 out << "hostGroupState: " << Igmpv3::getHostGroupStateString(g.second->state) << " ";
                 out << "groupTimer: " << g.second->timer->getArrivalTime() << " ";
                 out << "queriedSources: ";
-                for(auto &entry : g.second->queriedSources)
+                for (auto& entry : g.second->queriedSources)
                     out << entry << ", ";
                 out << "sourceAddressList: ";
-                for(auto &entry : g.second->sourceAddressList)
+                for (auto& entry : g.second->sourceAddressList)
                     out << entry << ", ";
                 out << "filter: " << Igmpv3::getFilterModeString(g.second->filter) << ") ";
             }
 
             return out;
         }
+
     };
 
     struct RouterInterfaceData;
@@ -186,10 +187,10 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
         {
             out << "routerState: " << Igmpv3::getRouterStateString(entry.state) << " ";
             out << "queryTimer: " << entry.generalQueryTimer->getArrivalTime() << " ";
-            if(entry.groups.empty())
+            if (entry.groups.empty())
                 out << "(empty)";
             else {
-                for(auto& g : entry.groups) {
+                for (auto& g : entry.groups) {
                     out << "(groupAddress: " << g.second->groupAddr << " ";
                     out << "routerGroupState: " << Igmpv3::getRouterGroupStateString(g.second->state) << " ";
                     out << "timer: " << g.second->timer->getArrivalTime() << " ";
@@ -199,6 +200,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
 
             return out;
         }
+
     };
 
   protected:
@@ -223,12 +225,12 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
 
     // group counters
     int numGroups = 0;
-    int numHostGroups  = 0;
-    int numRouterGroups  = 0;
+    int numHostGroups = 0;
+    int numRouterGroups = 0;
 
     // message counters
-    int numQueriesSent  = 0;
-    int numQueriesRecv  = 0;
+    int numQueriesSent = 0;
+    int numQueriesRecv = 0;
     int numGeneralQueriesSent = 0;
     int numGeneralQueriesRecv = 0;
     int numGroupSpecificQueriesSent = 0;

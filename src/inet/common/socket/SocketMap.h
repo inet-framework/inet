@@ -30,7 +30,7 @@ namespace inet {
 class INET_API SocketMap
 {
   protected:
-    std::map<int, ISocket *> socketMap;         // socketId, socketPtr
+    std::map<int, ISocket *> socketMap; // socketId, socketPtr
 
   public:
     SocketMap() {}

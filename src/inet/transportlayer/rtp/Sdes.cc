@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/Sdes.h"
 
 #include <string.h>

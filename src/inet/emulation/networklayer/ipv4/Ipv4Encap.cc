@@ -68,7 +68,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         EV << "Receiving\n";
         decapsulate(packet);
         bool hasSocket = false;
-        for (const auto &elem: socketIdToSocketDescriptor) {
+        for (const auto& elem: socketIdToSocketDescriptor) {
             if (elem.second->protocolId == protocol->getId() &&
                 (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress) &&
                 (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
@@ -76,14 +76,14 @@ void Ipv4Encap::handleMessage(cMessage *msg)
                 auto *packetCopy = packet->dup();
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
-//                emit(packetSentToUpperSignal, packetCopy);
+                // emit(packetSentToUpperSignal, packetCopy);
                 send(packetCopy, "upperLayerOut");
                 hasSocket = true;
             }
         }
         if (upperProtocols.find(protocol) != upperProtocols.end()) {
             EV_INFO << "Passing up to protocol " << protocol << "\n";
-//            emit(packetSentToUpperSignal, packet);
+            // emit(packetSentToUpperSignal, packet);
             send(packet, "upperLayerOut");
         }
         else if (hasSocket) {
@@ -92,8 +92,8 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         else {
             EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
             packet->setFrontOffset(ipv4HeaderPosition);
-//            const NetworkInterface* fromIE = getSourceInterface(packet);
-//            sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+            // const NetworkInterface* fromIE = getSourceInterface(packet);
+            // sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
         send(packet, "upperLayerOut");
     }
@@ -118,7 +118,8 @@ void Ipv4Encap::handleRequest(Request *request)
         delete request;
     }
     else if (dynamic_cast<Ipv4SocketCloseCommand *>(ctrl) != nullptr) {
-        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        int socketId = 0;
+        request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;

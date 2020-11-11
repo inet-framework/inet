@@ -23,10 +23,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 
-
 namespace inet {
 
-#define PCAP_MAGIC      0x1a2b3c4d
+#define PCAP_MAGIC    0x1a2b3c4d
 
 struct pcapng_option_header
 {
@@ -152,7 +151,7 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     doh.length = name.length();
     fwrite(&doh, sizeof(doh), 1, dumpfile);
     fwrite(name.c_str(), name.length(), 1, dumpfile);
-    char padding[] = {0, 0, 0, 0};
+    char padding[] = { 0, 0, 0, 0 };
     int paddingLength = pad(name.length());
     fwrite(padding, paddingLength, 1, dumpfile);
 
@@ -234,7 +233,7 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction 
     fwrite(bytes.data(), packet->getByteLength(), 1, dumpfile);
 
     // packet padding
-    char padding[] = {0, 0, 0, 0};
+    char padding[] = { 0, 0, 0, 0 };
     int paddingLength = pad(packet->getByteLength());
     fwrite(padding, paddingLength, 1, dumpfile);
 

@@ -18,7 +18,7 @@ class INET_API Ospfv3InterfaceStateLoopback : public Ospfv3InterfaceState
 {
   public:
     ~Ospfv3InterfaceStateLoopback() {}
-    virtual void processEvent(Ospfv3Interface* intf, Ospfv3Interface::Ospfv3InterfaceEvent event) override;
+    virtual void processEvent(Ospfv3Interface *intf, Ospfv3Interface::Ospfv3InterfaceEvent event) override;
     Ospfv3Interface::Ospfv3InterfaceFaState getState() const override { return Ospfv3Interface::INTERFACE_STATE_LOOPBACK; }
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateLoopback"); }
 };

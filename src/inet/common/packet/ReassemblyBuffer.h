@@ -38,8 +38,8 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
     b expectedLength;
 
   public:
-    ReassemblyBuffer(b expectedLength = b(-1)) : expectedLength(expectedLength) { }
-    ReassemblyBuffer(const ReassemblyBuffer& other) : ChunkBuffer(other), expectedLength(other.expectedLength) { }
+    ReassemblyBuffer(b expectedLength = b(-1)) : expectedLength(expectedLength) {}
+    ReassemblyBuffer(const ReassemblyBuffer& other) : ChunkBuffer(other), expectedLength(other.expectedLength) {}
 
     /**
      * Returns the expected data length.
@@ -68,8 +68,8 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
         else
             return regions[0].data;
     }
-};
 
+};
 
 } // namespace
 

@@ -33,18 +33,18 @@ namespace osg {
 
 using namespace ::osg;
 
-template<typename T>
+template <typename T>
 class INET_API FindNodesVisitor : public NodeVisitor
 {
   protected:
-    std::vector<T*> foundNodes;
+    std::vector<T *> foundNodes;
 
   public:
     FindNodesVisitor() : NodeVisitor(NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
 
     virtual void apply(Node& node) override;
 
-    virtual const std::vector<T *>& getFoundNodes() const { return foundNodes; };
+    virtual const std::vector<T *>& getFoundNodes() const { return foundNodes; }
 };
 
 /**

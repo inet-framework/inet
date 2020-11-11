@@ -32,7 +32,8 @@ class INET_API EnergyStorageOsgVisualizer : public EnergyStorageVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API EnergyStorageOsgVisualization : public EnergyStorageVisualization {
+    class INET_API EnergyStorageOsgVisualization : public EnergyStorageVisualization
+    {
       public:
         NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Geode *node = nullptr;
@@ -57,7 +58,7 @@ class INET_API EnergyStorageOsgVisualizer : public EnergyStorageVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual EnergyStorageVisualization *createEnergyStorageVisualization(const power::IEnergyStorage *energyStorage) const override { return nullptr; }
-    virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override { }
+    virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override {}
 
 #endif // ifdef WITH_OSG
 };

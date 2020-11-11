@@ -29,27 +29,27 @@ namespace physicallayer {
 
 class INET_API Ieee80211VhtCode : public ICode
 {
-    protected:
-        const Ieee80211ConvolutionalCode *forwardErrorCorrection;
-        const Ieee80211VhtInterleaving *interleaving;
-        const AdditiveScrambling *scrambling;
+  protected:
+    const Ieee80211ConvolutionalCode *forwardErrorCorrection;
+    const Ieee80211VhtInterleaving *interleaving;
+    const AdditiveScrambling *scrambling;
 
-    public:
-        Ieee80211VhtCode(const Ieee80211ConvolutionalCode *forwardErrorCorrection, const Ieee80211VhtInterleaving *interleaving, const AdditiveScrambling *scrambling);
+  public:
+    Ieee80211VhtCode(const Ieee80211ConvolutionalCode *forwardErrorCorrection, const Ieee80211VhtInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
-        const Ieee80211ConvolutionalCode *getForwardErrorCorrection() const { return forwardErrorCorrection; }
-        const AdditiveScrambling *getScrambling() const { return scrambling; }
-        const Ieee80211VhtInterleaving *getInterleaving() const { return interleaving; }
+    const Ieee80211ConvolutionalCode *getForwardErrorCorrection() const { return forwardErrorCorrection; }
+    const AdditiveScrambling *getScrambling() const { return scrambling; }
+    const Ieee80211VhtInterleaving *getInterleaving() const { return interleaving; }
 
-        virtual ~Ieee80211VhtCode();
+    virtual ~Ieee80211VhtCode();
 
 };
 
 class INET_API Ieee80211VhtCompliantCodes
 {
-    public:
-        // Convolutional codes (TODO: LDPC codes).
-        static const Ieee80211VhtCode *getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211OfdmModulation *stream8Modulation, Hz bandwidth, bool withScrambling = true);
+  public:
+    // Convolutional codes (TODO: LDPC codes).
+    static const Ieee80211VhtCode *getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211OfdmModulation *stream8Modulation, Hz bandwidth, bool withScrambling = true);
 
 };
 

@@ -52,11 +52,11 @@ namespace inet {
  * @see Topology::Node, Topology::Link, Topology::LinkIn, Topology::LinkOut
  */
 
-//TODO doucument: graph may be modified by hand; graph nodes/links may or may not correspond to modules/gates
-//TODO add notes: manually added nodes/links may not have cModule*/cGate* pointers (getModule() etc may be nullptr)
-//TODO make more methods virtual
-//TODO inconsistency: Node takes cModule* in ctor, but Link's srcGate/destGate are set in addLink()!!!
-//TODO weight: how to compute automatically from link datarate?
+// TODO doucument: graph may be modified by hand; graph nodes/links may or may not correspond to modules/gates
+// TODO add notes: manually added nodes/links may not have cModule*/cGate* pointers (getModule() etc may be nullptr)
+// TODO make more methods virtual
+// TODO inconsistency: Node takes cModule* in ctor, but Link's srcGate/destGate are set in addLink()!!!
+// TODO weight: how to compute automatically from link datarate?
 
 class INET_API Topology : public cOwnedObject
 {
@@ -98,6 +98,7 @@ class INET_API Topology : public cOwnedObject
             dist = INFINITY;
             outPath = nullptr;
         }
+
         virtual ~Node() {}
 
         /** @name Node attributes: weight, enabled state, correspondence to modules. */
@@ -209,7 +210,7 @@ class INET_API Topology : public cOwnedObject
          * target node. (There may be several paths with the same
          * length.)
          */
-        LinkOut *getPath(int) const { return (LinkOut *)outPath; }      //FIXME check_and_cast?
+        LinkOut *getPath(int) const { return (LinkOut *)outPath; } // FIXME check_and_cast?
         //@}
     };
 

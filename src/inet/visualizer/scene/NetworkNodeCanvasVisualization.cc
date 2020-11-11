@@ -222,8 +222,8 @@ bool NetworkNodeCanvasVisualization::Annotation::comparePlacementPriority(const 
 
 void NetworkNodeCanvasVisualization::layout()
 {
-    std::vector<cFigure::Rectangle> rcs;  // rectangles of annotations already positioned
-    std::vector<cFigure::Point> pts;  // candidate points where annotations may be positioned
+    std::vector<cFigure::Rectangle> rcs; // rectangles of annotations already positioned
+    std::vector<cFigure::Point> pts; // candidate points where annotations may be positioned
     cFigure::Rectangle extendendSubmoduleBounds = submoduleBounds;
     extendendSubmoduleBounds.x -= annotationSpacing / 2;
     extendendSubmoduleBounds.y -= annotationSpacing / 2;
@@ -335,7 +335,7 @@ void NetworkNodeCanvasVisualization::layout()
             }
         }
 
-    found:
+      found:
         // store position and rectangle
         annotation.bounds.x = bestRc.x + annotationSpacing / 2;
         annotation.bounds.y = bestRc.y + annotationSpacing / 2;

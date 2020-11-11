@@ -27,7 +27,8 @@ namespace visualizer {
 class INET_API LineManager
 {
   public:
-    class INET_API ModuleLine {
+    class INET_API ModuleLine
+    {
       public:
         const int sourceModuleId;
         const int destinationModuleId;
@@ -35,10 +36,11 @@ class INET_API LineManager
         mutable int shiftOffset;
 
       public:
-        ModuleLine(int sourceModuleId, int destinationModuleId, double shiftPriority = 0) : sourceModuleId(sourceModuleId), destinationModuleId(destinationModuleId), shiftPriority(shiftPriority), shiftOffset(0) { }
+        ModuleLine(int sourceModuleId, int destinationModuleId, double shiftPriority = 0) : sourceModuleId(sourceModuleId), destinationModuleId(destinationModuleId), shiftPriority(shiftPriority), shiftOffset(0) {}
     };
 
-    class INET_API ModulePath {
+    class INET_API ModulePath
+    {
       public:
         const std::vector<int> moduleIds;
         mutable double shiftPriority;
@@ -47,7 +49,8 @@ class INET_API LineManager
         ModulePath(const std::vector<int>& moduleIds, double shiftPriority = 0) : moduleIds(moduleIds), shiftPriority(shiftPriority) { shiftOffsets.resize(moduleIds.size() - 1); }
     };
 
-    class INET_API CacheEntry {
+    class INET_API CacheEntry
+    {
       public:
         std::vector<const ModuleLine *> moduleLines;
         std::vector<std::pair<const ModulePath *, int>> modulePaths;

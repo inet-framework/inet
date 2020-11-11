@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #ifndef __INET_RTPRECEIVERINFO_H
 #define __INET_RTPRECEIVERINFO_H
 

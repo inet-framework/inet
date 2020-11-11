@@ -32,7 +32,7 @@ class INET_API InterfaceToken
 {
   private:
     uint32_t _normal, _low;
-    short _len;    // in bits, 1..64
+    short _len; // in bits, 1..64
 
   private:
     void copy(const InterfaceToken& t) { _normal = t._normal; _low = t._low; _len = t._len; }

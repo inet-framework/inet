@@ -74,15 +74,15 @@ SctpPeer::~SctpPeer()
     cancelAndDelete(timeMsg);
     cancelAndDelete(timeoutMsg);
     cancelAndDelete(connectTimer);
-    for (auto & elem : bytesPerAssoc)
+    for (auto& elem : bytesPerAssoc)
         delete elem.second;
     bytesPerAssoc.clear();
 
-    for (auto & elem : endToEndDelay)
+    for (auto& elem : endToEndDelay)
         delete elem.second;
     endToEndDelay.clear();
 
-    for (auto & elem : histEndToEndDelay)
+    for (auto& elem : histEndToEndDelay)
         delete elem.second;
     histEndToEndDelay.clear();
 
@@ -398,7 +398,8 @@ void SctpPeer::handleMessage(cMessage *msg)
                     packetsSent++;
                     sendOrSchedule(cmsg);
                 }
-            } else {
+            }
+            else {
                 delete msg;
             }
             break;
@@ -714,7 +715,7 @@ void SctpPeer::finish()
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
-    for (auto & elem : rcvdBytesPerAssoc)
+    for (auto& elem : rcvdBytesPerAssoc)
         EV_DETAIL << getFullPath() << ": received " << elem.second << " bytes in assoc " << elem.first << "\n";
 
     EV_INFO << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";

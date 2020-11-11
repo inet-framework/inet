@@ -76,7 +76,7 @@ bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::s
 
     // forwarding decision for non-labeled datagrams
 
-    for (auto & elem : bindings) {
+    for (auto& elem : bindings) {
         if (!elem.dest.isUnspecified() && !elem.dest.equals(ipv4Header->getDestAddress()))
             continue;
 
@@ -98,7 +98,7 @@ bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::s
 
 void RsvpClassifier::bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel)
 {
-    for (auto & elem : bindings) {
+    for (auto& elem : bindings) {
         if (elem.session != session)
             continue;
 
@@ -128,7 +128,7 @@ void RsvpClassifier::readTableFromXML(const cXMLElement *fectable)
     ASSERT(!strcmp(fectable->getTagName(), "fectable"));
     checkTags(fectable, "fecentry");
     cXMLElementList list = fectable->getChildrenByTagName("fecentry");
-    for (auto & elem : list)
+    for (auto& elem : list)
         readItemFromXML(elem);
 }
 

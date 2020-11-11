@@ -59,6 +59,7 @@ class INET_API MessageDispatcher :
             else
                 return servicePrimitive < other.servicePrimitive;
         }
+
         friend std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo);
     };
 
@@ -96,7 +97,7 @@ class INET_API MessageDispatcher :
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 #endif // #ifdef WITH_QUEUEING
 
-    virtual void handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in) override;
+    virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in) override;
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override;

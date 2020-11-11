@@ -48,7 +48,7 @@ LwipTcpLayer::LwipTcpLayer(LwipTcpStackIf& stackIfP) :
     tcp_timer(0)
 {
     tcp_listen_pcbs.pcbs = nullptr;
-    memset((void*)&inseg, 0, sizeof(inseg));
+    memset((void *)&inseg, 0, sizeof(inseg));
 }
 
 void LwipTcpLayer::if_receive_packet(int interfaceId, void *data, int datalen)
@@ -56,7 +56,7 @@ void LwipTcpLayer::if_receive_packet(int interfaceId, void *data, int datalen)
     struct pbuf *p = pbuf_alloc(PBUF_RAW, datalen, PBUF_RAM);
     memcpy(p->payload, data, datalen);
 
-    tcp_input(p, nullptr    /*interface*/);
+    tcp_input(p, nullptr /*interface*/);
 }
 
 /**
@@ -91,7 +91,7 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
         len += p->len;
     }
     stackIf.ip_output(pcb, src->addr, dest->addr, buffer, p->tot_len);
-    delete [] buffer;
+    delete[] buffer;
     return 0;
 }
 

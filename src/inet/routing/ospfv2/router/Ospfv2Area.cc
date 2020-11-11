@@ -43,7 +43,7 @@ Ospfv2Area::Ospfv2Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id) :
 Ospfv2Area::~Ospfv2Area()
 {
     for (auto interface : associatedInterfaces)
-        delete (interface);
+        delete interface;
     associatedInterfaces.clear();
 
     for (auto routerLSA : routerLSAs)
@@ -149,13 +149,13 @@ std::string Ospfv2Area::detailedInfo() const
     out << info();
 
     out << "RouterLSAs:\n";
-    for (auto &entry : routerLSAs)
+    for (auto& entry : routerLSAs)
         out << "        " << entry << "\n";
     out << "NetworkLSAs:\n";
-    for (auto &entry : networkLSAs)
+    for (auto& entry : networkLSAs)
         out << "        " << entry << "\n";
     out << "SummaryLSAs:\n";
-    for (auto &entry : summaryLSAs)
+    for (auto& entry : summaryLSAs)
         out << "        " << entry << "\n";
 
     return out.str();
@@ -183,7 +183,7 @@ bool Ospfv2Area::hasAddressRange(Ipv4AddressRange addressRange) const
     return false;
 }
 
-Ipv4AddressRange Ospfv2Area::getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise    /*= nullptr*/) const
+Ipv4AddressRange Ospfv2Area::getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise /*= nullptr*/) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
@@ -235,7 +235,7 @@ Ospfv2Interface *Ospfv2Area::getInterface(Ipv4Address address)
 std::vector<int> Ospfv2Area::getInterfaceIndices()
 {
     std::vector<int> indices;
-    for(auto &intf : associatedInterfaces)
+    for (auto& intf : associatedInterfaces)
         indices.push_back(intf->getIfIndex());
     return indices;
 }
@@ -709,7 +709,7 @@ bool Ospfv2Area::hasAnyNeighborInStates(int states) const
 
 void Ospfv2Area::removeFromAllRetransmissionLists(LsaKeyType lsaKey)
 {
-    for (uint32_t i = 0; i <  associatedInterfaces.size(); i++)
+    for (uint32_t i = 0; i < associatedInterfaces.size(); i++)
         associatedInterfaces[i]->removeFromAllRetransmissionLists(lsaKey);
 }
 
@@ -1165,7 +1165,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
 
                 auto lsaIt = summaryLSAsByID.find(lsaKey);
                 if (lsaIt == summaryLSAsByID.end()) {
-                    delete (lsaToReoriginate);
+                    delete lsaToReoriginate;
                     lsaToReoriginate = nullptr;
                     return nullptr;
                 }
@@ -1232,7 +1232,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
 
                     auto lsaIt = summaryLSAsByID.find(lsaKey);
                     if (lsaIt == summaryLSAsByID.end()) {
-                        delete (lsaToReoriginate);
+                        delete lsaToReoriginate;
                         lsaToReoriginate = nullptr;
                         return nullptr;
                     }
@@ -1300,7 +1300,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
 
                         auto originatedIt = originatedLSAs.find(lsaKey);
                         if (originatedIt != originatedLSAs.end()) {
-                            delete (lsaToReoriginate);
+                            delete lsaToReoriginate;
                             lsaToReoriginate = nullptr;
                             return nullptr;
                         }
@@ -1310,7 +1310,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
 
                         auto lsaIt = summaryLSAsByID.find(lsaKey);
                         if (lsaIt == summaryLSAsByID.end()) {
-                            delete (lsaToReoriginate);
+                            delete lsaToReoriginate;
                             lsaToReoriginate = nullptr;
                             return nullptr;
                         }
@@ -1820,10 +1820,10 @@ void Ospfv2Area::calculateShortestPathTree(std::vector<Ospfv2RoutingTableEntry *
     } while (!finished);
 
     // set parent to null for all router LSAs not on the SPF tree
-    for (auto &routerLSA : routerLSAs) {
+    for (auto& routerLSA : routerLSAs) {
         bool onTree = false;
-        for(auto &node : treeVertices) {
-            if(node == routerLSA) {
+        for (auto& node : treeVertices) {
+            if (node == routerLSA) {
                 onTree = true;
                 break;
             }
@@ -1835,10 +1835,10 @@ void Ospfv2Area::calculateShortestPathTree(std::vector<Ospfv2RoutingTableEntry *
         }
     }
     // set parent to null for all network LSAs not on the SPF tree
-    for (auto &networkLSA : networkLSAs) {
+    for (auto& networkLSA : networkLSAs) {
         bool onTree = false;
-        for(auto &node : treeVertices) {
-            if(node == networkLSA) {
+        for (auto& node : treeVertices) {
+            if (node == networkLSA) {
                 onTree = true;
                 break;
             }
@@ -1993,7 +1993,7 @@ std::vector<NextHop> *Ospfv2Area::calculateNextHops(Ospfv2Lsa *destination, Ospf
                             Ipv4AddressRange range = interface->getAddressRange();
                             NextHop nextHop;
                             nextHop.ifIndex = interface->getIfIndex();
-                            if(interface->getNeighborCount() == 1) {
+                            if (interface->getNeighborCount() == 1) {
                                 Neighbor *neighbor = interface->getNeighbor(0);
                                 nextHop.hopAddress = neighbor->getAddress();
                             }
@@ -2097,7 +2097,7 @@ std::vector<NextHop> *Ospfv2Area::calculateNextHops(const Ospfv2Link& destinatio
                 if (isSameNetwork(destination.getLinkID(), Ipv4Address(destination.getLinkData()), interface->getAddressRange().address, interface->getAddressRange().mask)) {
                     NextHop nextHop;
                     nextHop.ifIndex = interface->getIfIndex();
-                    if(interface->getNeighborCount() == 1) {
+                    if (interface->getNeighborCount() == 1) {
                         Neighbor *neighbor = interface->getNeighbor(0);
                         nextHop.hopAddress = neighbor->getAddress();
                     }
@@ -2239,9 +2239,9 @@ bool Ospfv2Area::findSameOrWorseCostRoute(const std::vector<Ospfv2RoutingTableEn
 
         if (summaryLSA.getHeader().getLsType() == SUMMARYLSA_NETWORKS_TYPE) {
             if ((routingEntry->getDestinationType() == Ospfv2RoutingTableEntry::NETWORK_DESTINATION) &&
-                    destination.containedByRange(routingEntry->getDestination(), routingEntry->getNetmask()))
+                destination.containedByRange(routingEntry->getDestination(), routingEntry->getNetmask()))
             {
-                if(isDefaultRoute(routingEntry) && !isAllZero(destination))
+                if (isDefaultRoute(routingEntry) && !isAllZero(destination))
                     foundMatching = false;
                 else
                     foundMatching = true;
@@ -2553,7 +2553,7 @@ void Ospfv2Area::printLSDB()
     for (uint32_t i = 0; i < routerLSAs.size(); i++) {
         Ospfv2RouterLsa *entry = check_and_cast<Ospfv2RouterLsa *>(routerLSAs[i]);
 
-        const Ospfv2LsaHeader &head = entry->getHeader();
+        const Ospfv2LsaHeader& head = entry->getHeader();
         std::string routerId = head.getAdvertisingRouter().str(false);
         EV_INFO << "Router LSA in Area " << areaID.str(false) << " in OSPF router with ID " << routerId << std::endl;
 
@@ -2566,25 +2566,28 @@ void Ospfv2Area::printLSDB()
         EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
 
         EV_INFO << "    Number of links: " << entry->getLinksArraySize() << std::endl << std::endl;
-        for(unsigned int j = 0; j < entry->getLinksArraySize(); j++) {
-            const auto &lEntry = entry->getLinks(j);
+        for (unsigned int j = 0; j < entry->getLinksArraySize(); j++) {
+            const auto& lEntry = entry->getLinks(j);
             LinkType linkType = static_cast<LinkType>(lEntry.getType());
-            if(linkType == POINTTOPOINT_LINK) {
+            if (linkType == POINTTOPOINT_LINK) {
                 EV_INFO << "        Link connected to: another router (point-to-point)" << std::endl;
                 EV_INFO << "        Neighboring router ID (link ID): " << lEntry.getLinkID() << std::endl;
                 EV_INFO << "        Router interface address (link data): " << Ipv4Address(lEntry.getLinkData()).str(false) << std::endl;
                 EV_INFO << "        Link cost: " << lEntry.getLinkCost() << std::endl;
-            } else if(linkType == TRANSIT_LINK) {
+            }
+            else if (linkType == TRANSIT_LINK) {
                 EV_INFO << "        Link connected to: a transit network" << std::endl;
                 EV_INFO << "        DR address (link ID): " << lEntry.getLinkID() << std::endl;
                 EV_INFO << "        Router interface address (link data): " << Ipv4Address(lEntry.getLinkData()).str(false) << std::endl;
                 EV_INFO << "        Link cost: " << lEntry.getLinkCost() << std::endl;
-            } else if(linkType == STUB_LINK) {
+            }
+            else if (linkType == STUB_LINK) {
                 EV_INFO << "        Link connected to: a stub network" << std::endl;
                 EV_INFO << "        Network/subnet number (link ID): " << lEntry.getLinkID() << std::endl;
                 EV_INFO << "        Network mask (link data): " << Ipv4Address(lEntry.getLinkData()).str(false) << std::endl;
                 EV_INFO << "        Link cost: " << lEntry.getLinkCost() << std::endl;
-            } else {
+            }
+            else {
                 EV_INFO << "        Link connected to: a virtual link" << std::endl;
             }
             EV_INFO << std::endl;
@@ -2597,7 +2600,7 @@ void Ospfv2Area::printLSDB()
         Ospfv2NetworkLsa *entry = check_and_cast<Ospfv2NetworkLsa *>(networkLSAs[i]);
 
         // print header info
-        const Ospfv2LsaHeader &head = entry->getHeader();
+        const Ospfv2LsaHeader& head = entry->getHeader();
         EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
         EV_INFO << "    LS type: " << head.getLsType() << std::endl;
         EV_INFO << "    Link state ID: " << head.getLinkStateID() << std::endl;
@@ -2606,7 +2609,7 @@ void Ospfv2Area::printLSDB()
         EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
 
         EV_INFO << "    Number of attached routers: " << entry->getAttachedRoutersArraySize() << std::endl;
-        for(unsigned int j = 0; j < entry->getAttachedRoutersArraySize(); j++)
+        for (unsigned int j = 0; j < entry->getAttachedRoutersArraySize(); j++)
             EV_INFO << "        Attached router: " << entry->getAttachedRouters(j) << std::endl;
         EV_INFO << std::endl;
     }
@@ -2637,14 +2640,14 @@ void Ospfv2Area::printSummaryLsa()
 
 bool Ospfv2Area::isDefaultRoute(Ospfv2RoutingTableEntry *entry) const
 {
-    if(entry->getDestination().getInt() == 0 && entry->getNetmask().getInt() == 0)
+    if (entry->getDestination().getInt() == 0 && entry->getNetmask().getInt() == 0)
         return true;
     return false;
 }
 
 bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
 {
-    if(entry.address.getInt() == 0 && entry.mask.getInt() == 0)
+    if (entry.address.getInt() == 0 && entry.mask.getInt() == 0)
         return true;
     return false;
 }
@@ -2652,3 +2655,4 @@ bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
 } // namespace ospfv2
 
 } // namespace inet
+

@@ -27,7 +27,7 @@ using namespace inet::physicallayer;
 
 Define_Module(TracingObstacleLossCanvasVisualizer);
 
-TracingObstacleLossCanvasVisualizer::ObstacleLossCanvasVisualization::ObstacleLossCanvasVisualization(LabeledLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2) :
+TracingObstacleLossCanvasVisualizer::ObstacleLossCanvasVisualization::ObstacleLossCanvasVisualization(LabeledLineFigure *intersectionFigure, cLineFigure *faceNormalFigure1, cLineFigure *faceNormalFigure2) :
     intersectionFigure(intersectionFigure),
     faceNormalFigure1(faceNormalFigure1),
     faceNormalFigure2(faceNormalFigure2)
@@ -118,7 +118,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     return new ObstacleLossCanvasVisualization(intersectionLine, faceNormal1Line, faceNormal2Line);
 }
 
-void TracingObstacleLossCanvasVisualizer::addObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization)
+void TracingObstacleLossCanvasVisualizer::addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization)
 {
     TracingObstacleLossVisualizerBase::addObstacleLossVisualization(obstacleLossVisualization);
     auto obstacleLossCanvasVisualization = static_cast<const ObstacleLossCanvasVisualization *>(obstacleLossVisualization);
@@ -130,7 +130,7 @@ void TracingObstacleLossCanvasVisualizer::addObstacleLossVisualization(const Obs
     }
 }
 
-void TracingObstacleLossCanvasVisualizer::removeObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization)
+void TracingObstacleLossCanvasVisualizer::removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization)
 {
     TracingObstacleLossVisualizerBase::removeObstacleLossVisualization(obstacleLossVisualization);
     auto obstacleLossCanvasVisualization = static_cast<const ObstacleLossCanvasVisualization *>(obstacleLossVisualization);

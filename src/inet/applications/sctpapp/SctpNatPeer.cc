@@ -91,7 +91,8 @@ void SctpNatPeer::initialize(int stage)
         WATCH(numRequestsToSend);
         timeoutMsg = new cMessage("SrvAppTimer");
         queueSize = par("queueSize");
-   } else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
@@ -227,7 +228,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
             case SCTP_I_ADDRESS_ADDED:
                 if (rendezvous)
                     clientSocket.processMessage(msg);
-               // else
+                // else
                 delete msg;
                 break;
 
@@ -256,7 +257,8 @@ void SctpNatPeer::handleMessage(cMessage *msg)
             case SCTP_I_ESTABLISHED: {
                 if (clientSocket.getState() == SctpSocket::CONNECTING) {
                     clientSocket.processMessage(msg);
-                } else {
+                }
+                else {
                     int32_t count = 0;
                     Message *message = check_and_cast<Message *>(msg);
                     auto& tags = message->getTags();
@@ -368,13 +370,13 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                     for (int i = 0; i < bufferlen; i++) {
                         buffer[i] = vec[i];
                     }
-                    struct nat_message *nat = (struct nat_message *) buffer;
+                    struct nat_message *nat = (struct nat_message *)buffer;
                     peerAddressList.clear();
                     if (nat->multi) {
                         peerAddressList.push_back(Ipv4Address(nat->peer2Addresses[0]));
                         EV << "address 0: " << Ipv4Address(nat->peer2Addresses[0]).str() << endl;
                         peerAddressList.push_back(Ipv4Address(nat->peer2Addresses[1]));
-                        EV << "address 1: " << Ipv4Address(nat->peer2Addresses[1]).str()  << endl;
+                        EV << "address 1: " << Ipv4Address(nat->peer2Addresses[1]).str() << endl;
                     }
                     else {
                         peerAddress = Ipv4Address(nat->peer2Addresses[0]);
@@ -431,7 +433,8 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                             delete msg;
                             sendOrSchedule(cmsg);
                         }
-                    } else {
+                    }
+                    else {
                         delete msg;
                     }
                 }
@@ -445,7 +448,8 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 auto i = rcvdPacketsPerAssoc.find(id);
                 if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SctpSocket::CONNECTED)) {
                     clientSocket.processMessage(msg);
-                } else if (i != rcvdPacketsPerAssoc.end()) {
+                }
+                else if (i != rcvdPacketsPerAssoc.end()) {
                     if (i->second == 0) {
                         Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
                         auto qinfo = cmsg->addTag<SctpCommandReq>();
@@ -455,7 +459,8 @@ void SctpNatPeer::handleMessage(cMessage *msg)
 
                     shutdownReceived = true;
                     delete msg;
-                } else {
+                }
+                else {
                     delete msg;
                 }
                 delete msg;
@@ -508,16 +513,16 @@ void SctpNatPeer::handleTimer(cMessage *msg)
             break;
 
         case SCTP_I_ABORT: {
-                EV << "SctpNatPeer:MsgKIND_ABORT for assoc " << atoi(msg->getName()) << "\n";
+            EV << "SctpNatPeer:MsgKIND_ABORT for assoc " << atoi(msg->getName()) << "\n";
 
-                Request *cmsg = new Request("SCTP_C_CLOSE", SCTP_C_CLOSE);
-                auto& cmd = cmsg->addTag<SctpCommandReq>();
-                id = atoi(msg->getName());
-                cmd->setSocketId(id);
-                cmsg->setControlInfo(cmd.get()); // KLUDGE:
-                sendOrSchedule(cmsg);
-            }
+            Request *cmsg = new Request("SCTP_C_CLOSE", SCTP_C_CLOSE);
+            auto& cmd = cmsg->addTag<SctpCommandReq>();
+            id = atoi(msg->getName());
+            cmd->setSocketId(id);
+            cmsg->setControlInfo(cmd.get()); // KLUDGE:
+            sendOrSchedule(cmsg);
             break;
+        }
 
         case SCTP_C_RECEIVE:
 
@@ -690,11 +695,12 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
         nat->peer2Addresses[0] = L3Address().toIpv4().getInt();
         nat->numAddrPeer1 = 1;
         nat->numAddrPeer2 = 1;
-        buflen = ADD_PADDING(buflen + 4 * (nat->numAddrPeer1 +  nat->numAddrPeer2));
+        buflen = ADD_PADDING(buflen + 4 * (nat->numAddrPeer1 + nat->numAddrPeer2));
         bool mul = par("multi");
         if (mul == true) {
             nat->multi = 1;
-        } else {
+        }
+        else {
             nat->multi = 0;
         }
 
@@ -864,7 +870,8 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         bool mul = par("multi");
         if (mul == true) {
             nat->multi = 1;
-        } else {
+        }
+        else {
             nat->multi = 0;
         }
         nat->peer1Addresses[0] = L3Address().toIpv4().getInt();
@@ -890,20 +897,20 @@ void SctpNatPeer::finish()
 {
     EV << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    for (auto & elem : rcvdBytesPerAssoc) {
+    for (auto& elem : rcvdBytesPerAssoc) {
         EV << getFullPath() << ": received " << elem.second << " bytes in assoc " << elem.first << "\n";
     }
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
-    for (auto & elem : bytesPerAssoc) {
+    for (auto& elem : bytesPerAssoc) {
         delete elem.second;
     }
     bytesPerAssoc.clear();
-    for (auto & elem : endToEndDelay) {
+    for (auto& elem : endToEndDelay) {
         delete elem.second;
     }
     endToEndDelay.clear();
-    for (auto & elem : histEndToEndDelay) {
+    for (auto& elem : histEndToEndDelay) {
         delete elem.second;
     }
     histEndToEndDelay.clear();

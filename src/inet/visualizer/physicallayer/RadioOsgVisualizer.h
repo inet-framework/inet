@@ -32,7 +32,8 @@ class INET_API RadioOsgVisualizer : public RadioVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API RadioOsgVisualization : public RadioVisualization {
+    class INET_API RadioOsgVisualization : public RadioVisualization
+    {
       public:
         NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Geode *node = nullptr;
@@ -57,7 +58,7 @@ class INET_API RadioOsgVisualizer : public RadioVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual RadioVisualization *createRadioVisualization(const physicallayer::IRadio *radio) const override { return nullptr; }
-    virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override { }
+    virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override {}
 
 #endif // ifdef WITH_OSG
 };

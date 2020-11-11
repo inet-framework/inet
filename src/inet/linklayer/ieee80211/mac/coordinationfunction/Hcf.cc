@@ -48,21 +48,21 @@ void Hcf::initialize(int stage)
         hcca = check_and_cast<Hcca *>(getSubmodule("hcca"));
         tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
-        dataAndMgmtRateControl = dynamic_cast<IRateControl*>(getSubmodule("rateControl"));
-        originatorBlockAckAgreementPolicy = dynamic_cast<IOriginatorBlockAckAgreementPolicy*>(getSubmodule("originatorBlockAckAgreementPolicy"));
-        recipientBlockAckAgreementPolicy = dynamic_cast<IRecipientBlockAckAgreementPolicy*>(getSubmodule("recipientBlockAckAgreementPolicy"));
+        dataAndMgmtRateControl = dynamic_cast<IRateControl *>(getSubmodule("rateControl"));
+        originatorBlockAckAgreementPolicy = dynamic_cast<IOriginatorBlockAckAgreementPolicy *>(getSubmodule("originatorBlockAckAgreementPolicy"));
+        recipientBlockAckAgreementPolicy = dynamic_cast<IRecipientBlockAckAgreementPolicy *>(getSubmodule("recipientBlockAckAgreementPolicy"));
         rateSelection = check_and_cast<IQosRateSelection *>(getSubmodule("rateSelection"));
         frameSequenceHandler = new FrameSequenceHandler();
         originatorDataService = check_and_cast<IOriginatorMacDataService *>(getSubmodule(("originatorMacDataService")));
-        recipientDataService = check_and_cast<IRecipientQosMacDataService*>(getSubmodule("recipientMacDataService"));
-        originatorAckPolicy = check_and_cast<IOriginatorQoSAckPolicy*>(getSubmodule("originatorAckPolicy"));
-        recipientAckPolicy = check_and_cast<IRecipientQosAckPolicy*>(getSubmodule("recipientAckPolicy"));
-        singleProtectionMechanism = check_and_cast<SingleProtectionMechanism*>(getSubmodule("singleProtectionMechanism"));
+        recipientDataService = check_and_cast<IRecipientQosMacDataService *>(getSubmodule("recipientMacDataService"));
+        originatorAckPolicy = check_and_cast<IOriginatorQoSAckPolicy *>(getSubmodule("originatorAckPolicy"));
+        recipientAckPolicy = check_and_cast<IRecipientQosAckPolicy *>(getSubmodule("recipientAckPolicy"));
+        singleProtectionMechanism = check_and_cast<SingleProtectionMechanism *>(getSubmodule("singleProtectionMechanism"));
         rtsProcedure = new RtsProcedure();
-        rtsPolicy = check_and_cast<IRtsPolicy*>(getSubmodule("rtsPolicy"));
+        rtsPolicy = check_and_cast<IRtsPolicy *>(getSubmodule("rtsPolicy"));
         recipientAckProcedure = new RecipientAckProcedure();
         ctsProcedure = new CtsProcedure();
-        ctsPolicy = check_and_cast<ICtsPolicy*>(getSubmodule("ctsPolicy"));
+        ctsPolicy = check_and_cast<ICtsPolicy *>(getSubmodule("ctsPolicy"));
         if (originatorBlockAckAgreementPolicy && recipientBlockAckAgreementPolicy) {
             recipientBlockAckAgreementHandler = new RecipientBlockAckAgreementHandler();
             originatorBlockAckAgreementHandler = new OriginatorBlockAckAgreementHandler();
@@ -79,7 +79,7 @@ void Hcf::forEachChild(cVisitor *v)
         v->visit(const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext()));
 }
 
-void Hcf::handleMessage(cMessage* msg)
+void Hcf::handleMessage(cMessage *msg)
 {
     if (msg == startRxTimer) {
         if (!isReceptionInProgress()) {
@@ -191,10 +191,10 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     }
 }
 
-void Hcf::channelGranted(IChannelAccess* channelAccess)
+void Hcf::channelGranted(IChannelAccess *channelAccess)
 {
     Enter_Method("channelGranted");
-    auto edcaf = check_and_cast<Edcaf*>(channelAccess);
+    auto edcaf = check_and_cast<Edcaf *>(channelAccess);
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
         EV_DETAIL << "Channel access granted to the " << printAccessCategory(ac) << " queue" << std::endl;
@@ -211,7 +211,7 @@ void Hcf::channelGranted(IChannelAccess* channelAccess)
         throw cRuntimeError("Channel access granted but channel owner not found!");
 }
 
-FrameSequenceContext* Hcf::buildContext(AccessCategory ac)
+FrameSequenceContext *Hcf::buildContext(AccessCategory ac)
 {
     auto edcaf = edca->getEdcaf(ac);
     auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaf->getTxopProcedure());
@@ -225,7 +225,7 @@ void Hcf::startFrameSequence(AccessCategory ac)
     updateDisplayString();
 }
 
-void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
+void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
 {
     for (auto edcaf : internallyCollidedEdcafs) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -300,7 +300,7 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     EV_INFO << "Processing received frame " << packet->getName() << " as recipient.\n";
     emit(packetReceivedFromPeerSignal, packet);
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
-        recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy*>(recipientAckPolicy), this);
+        recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
         if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
             recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this);
@@ -731,7 +731,6 @@ void Hcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
         throw cRuntimeError("Unknown control response frame");
 }
 
-
 void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     Enter_Method("processMgmtFrame");
@@ -740,11 +739,10 @@ void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHead
 }
 
 void Hcf::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode) const
- {
+{
     ASSERT(mode != nullptr);
     packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
 }
-
 
 bool Hcf::isReceptionInProgress()
 {
@@ -794,3 +792,4 @@ Hcf::~Hcf()
 
 } // namespace ieee80211
 } // namespace inet
+

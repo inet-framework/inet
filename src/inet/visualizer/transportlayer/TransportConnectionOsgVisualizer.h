@@ -31,7 +31,8 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
 #ifdef WITH_OSG
 
   protected:
-    class INET_API TransportConnectionOsgVisualization : public TransportConnectionVisualization {
+    class INET_API TransportConnectionOsgVisualization : public TransportConnectionVisualization
+    {
       public:
         osg::Node *sourceNode = nullptr;
         osg::Node *destinationNode = nullptr;

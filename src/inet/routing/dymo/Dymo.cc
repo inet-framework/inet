@@ -71,9 +71,9 @@ Dymo::Dymo() :
 
 Dymo::~Dymo()
 {
-    for (auto & elem : targetAddressToRREQTimer)
+    for (auto& elem : targetAddressToRREQTimer)
         cancelAndDelete(elem.second);
-    for (auto & pkt_timer : packetJitterTimers){
+    for (auto& pkt_timer : packetJitterTimers) {
         cancelAndDelete(pkt_timer);
     }
     cancelAndDelete(expungeTimer);
@@ -395,8 +395,8 @@ void Dymo::scheduleJitterTimerPacket(cPacket *packet, double delay)
 
     if (delay == 0)
         sendUdpPacket(packet);
-    else{
-        PacketJitterTimer* message = new PacketJitterTimer("PacketJitterTimer");
+    else {
+        PacketJitterTimer *message = new PacketJitterTimer("PacketJitterTimer");
         message->setJitteredPacket(packet);
         scheduleAfter(delay, message);
         packetJitterTimers.insert(message);
@@ -410,7 +410,7 @@ void Dymo::processJitterTimerPacket(PacketJitterTimer *msg)
     delete msg;
 }
 
-void Dymo::cancelJitterTimerPacket(PacketJitterTimer *msg){
+void Dymo::cancelJitterTimerPacket(PacketJitterTimer *msg) {
     packetJitterTimers.erase(msg);
     cancelAndDelete(msg);
 }
@@ -663,7 +663,7 @@ const Ptr<Rreq> Dymo::createRreq(const L3Address& target, int retryCount)
     return rreq;
 }
 
-void Dymo::sendRreq(const Ptr<Rreq> &rreq)
+void Dymo::sendRreq(const Ptr<Rreq>& rreq)
 {
     const L3Address& target = rreq->getTargetNode().getAddress();
     const L3Address& originator = rreq->getOriginatorNode().getAddress();
@@ -848,7 +848,7 @@ b Dymo::computeRrepLength(const Ptr<Rrep>& rrep)
 const Ptr<Rerr> Dymo::createRerr(std::vector<L3Address>& unreachableAddresses)
 {
     auto rerr = makeShared<Rerr>(); // TODO: "RERR");
-    for (auto & unreachableAddresse : unreachableAddresses) {
+    for (auto& unreachableAddresse : unreachableAddresses) {
         const L3Address& unreachableAddress = unreachableAddresse;
         AddressBlock *addressBlock = new AddressBlock();
         addressBlock->setAddress(unreachableAddress);
@@ -1133,7 +1133,7 @@ void Dymo::updateRoutes(Packet *packet, const Ptr<const RteMsg>& rteMsg, const A
     }
 }
 
-IRoute *Dymo::createRoute(Packet *packet, const Ptr<const  RteMsg>& rteMsg, const AddressBlock& addressBlock)
+IRoute *Dymo::createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock)
 {
     IRoute *route = routingTable->createRoute();
     route->setSourceType(IRoute::DYMO);
@@ -1326,7 +1326,7 @@ bool Dymo::isClientAddress(const L3Address& address)
     if (routingTable->isLocalAddress(address))
         return true;
     else {
-        for (auto & elem : clientAddressAndPrefixLengthPairs)
+        for (auto& elem : clientAddressAndPrefixLengthPairs)
             // TODO: check for prefix length too
             if (elem.first == address)
                 return true;
@@ -1430,12 +1430,12 @@ void Dymo::handleStartOperation(LifecycleOperation *operation)
 void Dymo::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a RERR to notify peers about broken routes
-    for (auto & elem : targetAddressToRREQTimer) {
+    for (auto& elem : targetAddressToRREQTimer) {
         cancelRouteDiscovery(elem.first);
         cancelAndDelete(elem.second);
     }
     targetAddressToRREQTimer.clear();
-    for (auto & pkt_timer : packetJitterTimers)
+    for (auto& pkt_timer : packetJitterTimers)
         cancelAndDelete(pkt_timer);
     packetJitterTimers.clear();
 }
@@ -1443,13 +1443,13 @@ void Dymo::handleStopOperation(LifecycleOperation *operation)
 void Dymo::handleCrashOperation(LifecycleOperation *operation)
 {
     targetAddressToSequenceNumber.clear();
-    for (auto & elem : targetAddressToRREQTimer)
+    for (auto& elem : targetAddressToRREQTimer)
         cancelAndDelete(elem.second);
     targetAddressToRREQTimer.clear();
-    for (auto & elem : targetAddressToDelayedPackets)
+    for (auto& elem : targetAddressToDelayedPackets)
         delete elem.second;
     targetAddressToDelayedPackets.clear();
-    for (auto & pkt_timer : packetJitterTimers)
+    for (auto& pkt_timer : packetJitterTimers)
         cancelAndDelete(pkt_timer);
     packetJitterTimers.clear();
 }

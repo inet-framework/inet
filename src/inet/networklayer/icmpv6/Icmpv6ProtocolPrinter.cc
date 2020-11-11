@@ -50,13 +50,13 @@ void Icmpv6ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol 
             case ICMPv6_ECHO_REQUEST: {
                 auto echoHeader = CHK(dynamicPtrCast<const Icmpv6EchoRequestMsg>(header));
                 context.infoColumn << "ICMPv6-ECHO-REQ code=" << echoHeader->getCode()
-                        << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
+                                   << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
                 break;
             }
             case ICMPv6_ECHO_REPLY: {
                 auto echoHeader = CHK(dynamicPtrCast<const Icmpv6EchoReplyMsg>(header));
                 context.infoColumn << "ICMPv6-ECHO-REPLY code=" << echoHeader->getCode()
-                        << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
+                                   << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
                 break;
             }
             case ICMPv6_MLD_QUERY:

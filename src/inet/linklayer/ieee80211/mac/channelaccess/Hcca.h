@@ -28,15 +28,15 @@ namespace ieee80211 {
  */
 class INET_API Hcca : public IChannelAccess, public cSimpleModule
 {
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
-    public:
-        virtual bool isOwning();
+  public:
+    virtual bool isOwning();
 
-        virtual void requestChannel(IChannelAccess::ICallback *callback) override;
-        virtual void releaseChannel(IChannelAccess::ICallback *callback) override;
+    virtual void requestChannel(IChannelAccess::ICallback *callback) override;
+    virtual void releaseChannel(IChannelAccess::ICallback *callback) override;
 };
 
 } /* namespace ieee80211 */

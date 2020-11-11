@@ -31,7 +31,8 @@ namespace visualizer {
 class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionVisualizerBase
 {
   protected:
-    class INET_API TransportConnectionCanvasVisualization : public TransportConnectionVisualization {
+    class INET_API TransportConnectionCanvasVisualization : public TransportConnectionVisualization
+    {
       public:
         LabeledIconFigure *sourceFigure = nullptr;
         LabeledIconFigure *destinationFigure = nullptr;

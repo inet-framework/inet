@@ -37,6 +37,5 @@ class INET_API PimPacketSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-
 #endif
 

@@ -51,7 +51,7 @@ double UwbIrStochasticPathLoss::simtruncnormal(double mean, double stddev, doubl
 {
     double result = a + 1;
     while (result > a || result < -a)
-      result = normal(mean, stddev, 0);
+        result = normal(mean, stddev, 0);
     return result;
 }
 
@@ -115,3 +115,4 @@ double UwbIrStochasticPathLoss::computePathLoss(mps propagationSpeed, Hz frequen
 } // namespace physicallayer
 
 } // namespace inet
+

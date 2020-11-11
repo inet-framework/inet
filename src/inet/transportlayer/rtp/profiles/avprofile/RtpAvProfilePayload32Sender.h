@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 #define __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 

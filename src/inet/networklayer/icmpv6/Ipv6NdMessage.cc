@@ -21,7 +21,7 @@ namespace inet {
 
 const Ipv6NdOption *Ipv6NdOptions::findOption(Ipv6NdOptionTypes t) const
 {
-    for (size_t i=0; i < option_arraysize; i++) {
+    for (size_t i = 0; i < option_arraysize; i++) {
         if (option[i]->getType() == t)
             return option[i];
     }
@@ -30,14 +30,14 @@ const Ipv6NdOption *Ipv6NdOptions::findOption(Ipv6NdOptionTypes t) const
 
 Ipv6NdOption *Ipv6NdOptions::findOptionForUpdate(Ipv6NdOptionTypes t)
 {
-    for (size_t i=0; i < option_arraysize; i++) {
+    for (size_t i = 0; i < option_arraysize; i++) {
         if (option[i]->getType() == t)
             return getOptionForUpdate(i);
     }
     return nullptr;
 }
 
-void Ipv6NdOptions::insertUniqueOption(size_t k, Ipv6NdOption * option)
+void Ipv6NdOptions::insertUniqueOption(size_t k, Ipv6NdOption *option)
 {
     if (findOption(option->getType()))
         throw cRuntimeError("Option %i already exists", (int)option->getType());

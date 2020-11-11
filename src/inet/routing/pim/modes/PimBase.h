@@ -69,12 +69,12 @@ class INET_API PimBase : public RoutingProtocolBase
 
         RouteEntry(PimBase *owner, Ipv4Address source, Ipv4Address group)
             : owner(owner), source(source), group(group), flags(0) {}
-        virtual ~RouteEntry() {};
+        virtual ~RouteEntry() {}
 
         bool isFlagSet(int flag) const { return (flags & flag) != 0; }
         void setFlags(int flags) { this->flags |= flags; }
         void clearFlag(int flag) { flags &= (~flag); }
-        void setFlag(int flag, bool value) { if (value) setFlags(flag); else clearFlag(flag); }
+        void setFlag(int flag, bool value) { if (value) setFlags(flag);else clearFlag(flag); }
     };
 
     struct Interface
@@ -98,7 +98,7 @@ class INET_API PimBase : public RoutingProtocolBase
         bool isFlagSet(int flag) const { return (flags & flag) != 0; }
         void setFlags(int flags) { this->flags |= flags; }
         void clearFlag(int flag) { flags &= (~flag); }
-        void setFlag(int flag, bool value) { if (value) setFlags(flag); else clearFlag(flag); }
+        void setFlag(int flag, bool value) { if (value) setFlags(flag);else clearFlag(flag); }
 
         void startAssertTimer(double assertTime)
         {

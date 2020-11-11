@@ -79,7 +79,7 @@ void ShortcutRadio::handleUpperPacket(Packet *packet)
         else
             throw cRuntimeError("ShortcutRadio not found");
     }
-    transmissionState = IRadio::TRANSMISSION_STATE_IDLE;        //TODO zero time transmission simulated
+    transmissionState = IRadio::TRANSMISSION_STATE_IDLE; // TODO zero time transmission simulated
     emit(transmissionStateChangedSignal, transmissionState);
 }
 

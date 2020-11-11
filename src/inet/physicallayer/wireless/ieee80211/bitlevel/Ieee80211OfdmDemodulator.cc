@@ -71,7 +71,7 @@ const IReceptionBitModel *Ieee80211OfdmDemodulator::demodulate(const IReceptionS
 {
     const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
     BitVector *bitRepresentation = new BitVector();
-    for (auto & symbols_i : *symbols) {
+    for (auto& symbols_i : *symbols) {
         const Ieee80211OfdmSymbol *symbol = dynamic_cast<const Ieee80211OfdmSymbol *>(symbols_i);
         BitVector bits = demodulateSymbol(symbol);
         for (unsigned int j = 0; j < bits.getSize(); j++)

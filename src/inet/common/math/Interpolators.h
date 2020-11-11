@@ -25,7 +25,7 @@ namespace inet {
 
 namespace math {
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API InterpolatorBase : public IInterpolator<X, Y>
 {
   public:
@@ -38,9 +38,10 @@ class INET_API InterpolatorBase : public IInterpolator<X, Y>
         ASSERT(x1 <= x2);
         return math::maxnan(y1, y2);
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API ConstantInterpolatorBase : public InterpolatorBase<X, Y>
 {
     virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
@@ -49,12 +50,13 @@ class INET_API ConstantInterpolatorBase : public InterpolatorBase<X, Y>
         ASSERT(v1 == v2);
         return v1;
     }
+
 };
 
 /**
  * Interpolation that can only be used if y1 == y2.
  */
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API EitherInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
@@ -66,12 +68,13 @@ class INET_API EitherInterpolator : public ConstantInterpolatorBase<X, Y>
         ASSERT(y1 == y2);
         return y1;
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 EitherInterpolator<X, Y> EitherInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API LeftInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
@@ -82,12 +85,13 @@ class INET_API LeftInterpolator : public ConstantInterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return y1;
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 LeftInterpolator<X, Y> LeftInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API RightInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
@@ -98,12 +102,13 @@ class INET_API RightInterpolator : public ConstantInterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return y2;
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 RightInterpolator<X, Y> RightInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API AverageInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
@@ -114,12 +119,13 @@ class INET_API AverageInterpolator : public ConstantInterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return (y1 + y2) / 2;
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 AverageInterpolator<X, Y> AverageInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API MinimumInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
@@ -130,12 +136,13 @@ class INET_API MinimumInterpolator : public ConstantInterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return math::minnan(y1, y2);
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 MinimumInterpolator<X, Y> MinimumInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API MaximumInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
@@ -146,12 +153,13 @@ class INET_API MaximumInterpolator : public ConstantInterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return math::maxnan(y1, y2);
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 MaximumInterpolator<X, Y> MaximumInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API CloserInterpolator : public InterpolatorBase<X, Y>
 {
   public:
@@ -167,12 +175,13 @@ class INET_API CloserInterpolator : public InterpolatorBase<X, Y>
         ASSERT(x1 <= x2);
         return (y1 + y2) / 2;
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 CloserInterpolator<X, Y> CloserInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
 {
   public:
@@ -195,12 +204,13 @@ class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
         ASSERT(x1 <= x2);
         return (y1 + y2) / 2;
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 LinearInterpolator<X, Y> LinearInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 class INET_API LineardbInterpolator : public InterpolatorBase<X, Y>
 {
   public:
@@ -227,12 +237,13 @@ class INET_API LineardbInterpolator : public InterpolatorBase<X, Y>
         auto y2dB = math::fraction2dB(y2);
         return math::dB2fraction((y1dB + y2dB) / 2);
     }
+
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 LineardbInterpolator<X, Y> LineardbInterpolator<X, Y>::singleton;
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 const IInterpolator<X, Y> *createInterpolator(const char *text) {
     if (!strcmp("either", text))
         return &EitherInterpolator<X, Y>::singleton;

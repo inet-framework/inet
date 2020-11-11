@@ -68,7 +68,7 @@ void VoipStreamSender::Buffer::clear(int framesize)
 {
     int newsize = BUFSIZE + framesize;
     if (bufferSize != newsize) {
-        delete [] samples;
+        delete[] samples;
         bufferSize = newsize;
         samples = new char[bufferSize];
     }
@@ -324,8 +324,7 @@ Packet *VoipStreamSender::generatePacket()
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = pEncoderCtx->sample_rate;
 
-    int ret = avcodec_fill_audio_frame(frame,    /*channels*/ 1, pEncoderCtx->sample_fmt,
-                (const uint8_t *)(sampleBuffer.readPtr()), inBytes, 1);
+    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, pEncoderCtx->sample_fmt, (const uint8_t *)(sampleBuffer.readPtr()), inBytes, 1);
     if (ret < 0)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
 
@@ -491,14 +490,11 @@ void VoipStreamSender::readFrame()
                     int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
                     int out_linesize;
                     int ret;
-                    ret = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples,
-                                1, maxOutSamples,
-                                pEncoderCtx->sample_fmt, 0);
+                    ret = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples, 1, maxOutSamples, pEncoderCtx->sample_fmt, 0);
                     if (ret < 0)
                         throw cRuntimeError("failed out_data fill arrays");
 
-                    decoded = avresample_convert(pReSampleCtx, out_data, out_linesize, decoded,
-                                in_data, in_linesize, in_nb_samples);
+                    decoded = avresample_convert(pReSampleCtx, out_data, out_linesize, decoded, in_data, in_linesize, in_nb_samples);
                     if (decoded <= 0 && avresample_get_delay(pReSampleCtx) == 0) {
                         throw cRuntimeError("audio_resample() returns error");
                     }

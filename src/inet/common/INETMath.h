@@ -93,12 +93,12 @@ namespace math {
 /* Constant for comparing doubles. Two doubles at most epsilon apart
    are declared equal.*/
 #ifndef EPSILON
-#define EPSILON     0.001
+#define EPSILON    0.001
 #endif // ifndef EPSILON
 
-#define qNaN        std::numeric_limits<double>::quiet_NaN()
-#define sNaN        std::numeric_limits<double>::signaling_NaN()
-#define NaN         qNaN
+#define qNaN       std::numeric_limits<double>::quiet_NaN()
+#define sNaN       std::numeric_limits<double>::signaling_NaN()
+#define NaN        qNaN
 
 /**
  * Returns the rest of a whole-numbered division.
@@ -205,13 +205,13 @@ inline double n_choose_k(int n, int k) {
     if (n < k)
         return 0.0;
 
-    const int       iK     = (k<<1) > n ? n-k : k;
-    const double    dNSubK = (n-iK);
-    int    i      = 1;
-    double dRes   = i > iK ? 1.0 : (dNSubK+i);
+    const int iK = (k << 1) > n ? n - k : k;
+    const double dNSubK = (n - iK);
+    int i = 1;
+    double dRes = i > iK ? 1.0 : (dNSubK + i);
 
     for (++i; i <= iK; ++i) {
-        dRes *= dNSubK+i;
+        dRes *= dNSubK + i;
         dRes /= i;
     }
     return dRes;
@@ -222,7 +222,7 @@ inline double n_choose_k(int n, int k) {
  * For example, the minimum of NaN and 1 must be NaN independently of the argument order.
  * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
  */
-template<typename T>
+template <typename T>
 inline const T minnan(const T& a, const T& b) {
 static_assert(!std::is_integral<T>::value, "minnan() is only meant for doubles and double based units, use std::min() for integers");
     if (a < b)
@@ -240,7 +240,7 @@ static_assert(!std::is_integral<T>::value, "minnan() is only meant for doubles a
  * For example, the maximum of NaN and 1 must be NaN independently of the argument order.
  * See 'Not a number' section at https://2pi.dk/2016/05/ieee-min-max
  */
-template<typename T>
+template <typename T>
 inline const T maxnan(const T& a, const T& b) {
 static_assert(!std::is_integral<T>::value, "maxnan() is only meant for doubles and double based units, use std::max() for integers");
     if (a > b)

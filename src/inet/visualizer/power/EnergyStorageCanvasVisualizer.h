@@ -30,7 +30,8 @@ namespace visualizer {
 class INET_API EnergyStorageCanvasVisualizer : public EnergyStorageVisualizerBase
 {
   protected:
-    class INET_API EnergyStorageCanvasVisualization : public EnergyStorageVisualization {
+    class INET_API EnergyStorageCanvasVisualization : public EnergyStorageVisualization
+    {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         BarFigure *figure = nullptr;

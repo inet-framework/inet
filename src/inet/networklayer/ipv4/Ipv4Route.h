@@ -76,7 +76,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setGateway(Ipv4Address _gateway) { if (gateway != _gateway) { gateway = _gateway; changed(F_NEXTHOP); } }
     virtual void setInterface(NetworkInterface *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
     virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
-    const char* getSourceTypeAbbreviation() const;
+    const char *getSourceTypeAbbreviation() const;
     virtual void setAdminDist(unsigned int _adminDist) override { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
     virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
 
@@ -225,12 +225,12 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     cObject *getSource() const override { return source; }
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
-    virtual void setEnabled(bool enabled) override {    /*TODO: setEnabled(enabled);*/ }
+    virtual void setEnabled(bool enabled) override { /*TODO: setEnabled(enabled);*/ }
     virtual void setOrigin(const L3Address& origin) override { setOrigin(origin.toIpv4()); }
     virtual void setPrefixLength(int len) override { setOriginNetmask(Ipv4Address::makeNetmask(len)); }    //TODO inconsistent naming
     virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIpv4()); }
 
-    virtual bool isEnabled() const override { return true;    /*TODO: isEnabled();*/ }
+    virtual bool isEnabled() const override { return true; /*TODO: isEnabled();*/ }
     virtual bool isExpired() const override { return !isValid(); }    //TODO rename Ipv4 method
     virtual L3Address getOriginAsGeneric() const override { return getOrigin(); }
     virtual int getPrefixLength() const override { return getOriginNetmask().getNetmaskLength(); }    //TODO inconsistent naming

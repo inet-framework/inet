@@ -62,27 +62,27 @@ Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
     // structs themselves and not pointers.
 
     //   RaTimerList raTimerList;
-    for (const auto & elem : raTimerList) {
+    for (const auto& elem : raTimerList) {
         cancelAndDelete(elem);
-        delete (elem);
+        delete elem;
     }
 
     //   DadList dadList;
-    for (const auto & elem : dadList) {
+    for (const auto& elem : dadList) {
         cancelAndDelete((elem)->timeoutMsg);
-        delete (elem);
+        delete elem;
     }
 
     //   RdList rdList;
-    for (const auto & elem : rdList) {
+    for (const auto& elem : rdList) {
         cancelAndDelete((elem)->timeoutMsg);
-        delete (elem);
+        delete elem;
     }
 
     //   AdvIfList advIfList;
-    for (const auto & elem : advIfList) {
+    for (const auto& elem : advIfList) {
         cancelAndDelete((elem)->raTimeoutMsg);
-        delete (elem);
+        delete elem;
     }
 }
 
@@ -282,33 +282,33 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
      * queued pending completion of address resolution.
      */
     switch (nce->reachabilityState) {
-    case Ipv6NeighbourCache::INCOMPLETE:
-        EV_INFO << "Reachability State is INCOMPLETE. Address Resolution already initiated.\n";
-        EV_INFO << "Add packet to entry's queue until Address Resolution is complete.\n";
-        bubble("Packet added to queue until Address Resolution is complete.");
-        nce->pendingPackets.push_back(packet);
-        pendingQueue.insert(packet);
-        break;
-    case Ipv6NeighbourCache::STALE:
-        EV_INFO << "Reachability State is STALE.\n";
-        send(packet, "ipv6Out");
-        initiateNeighbourUnreachabilityDetection(nce);
-        break;
-    case Ipv6NeighbourCache::REACHABLE:
-        EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-        send(packet, "ipv6Out");
-        break;
-    case Ipv6NeighbourCache::DELAY:
-        EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-        send(packet, "ipv6Out");
-        break;
-    case Ipv6NeighbourCache::PROBE:
-        EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
-        send(packet, "ipv6Out");
-        break;
-    default:
-        throw cRuntimeError("Unknown Neighbour cache entry state.");
-        break;
+        case Ipv6NeighbourCache::INCOMPLETE:
+            EV_INFO << "Reachability State is INCOMPLETE. Address Resolution already initiated.\n";
+            EV_INFO << "Add packet to entry's queue until Address Resolution is complete.\n";
+            bubble("Packet added to queue until Address Resolution is complete.");
+            nce->pendingPackets.push_back(packet);
+            pendingQueue.insert(packet);
+            break;
+        case Ipv6NeighbourCache::STALE:
+            EV_INFO << "Reachability State is STALE.\n";
+            send(packet, "ipv6Out");
+            initiateNeighbourUnreachabilityDetection(nce);
+            break;
+        case Ipv6NeighbourCache::REACHABLE:
+            EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
+            send(packet, "ipv6Out");
+            break;
+        case Ipv6NeighbourCache::DELAY:
+            EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
+            send(packet, "ipv6Out");
+            break;
+        case Ipv6NeighbourCache::PROBE:
+            EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
+            send(packet, "ipv6Out");
+            break;
+        default:
+            throw cRuntimeError("Unknown Neighbour cache entry state.");
+            break;
     }
 }
 
@@ -1095,7 +1095,7 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
 
         //First we extract RS specific information from the received message
         MacAddress macAddr;
-        if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(rs->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+        if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(rs->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
             macAddr = sla->getLinkLayerAddress();
         EV_INFO << "MAC Address '" << macAddr << "' extracted\n";
 
@@ -1173,7 +1173,7 @@ bool Ipv6NeighbourDiscovery::validateRsPacket(Packet *packet, const Ipv6RouterSo
         EV_WARN << "IP source address is unspecified\n";
 
         MacAddress macAddr;
-        if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(rs->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+        if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(rs->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
             macAddr = sla->getLinkLayerAddress();
         if (macAddr.isUnspecified() == false) {
             EV_WARN << " but source link layer address is provided. RS validation failed!\n";
@@ -1331,7 +1331,7 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
             auto option = ra->getOptions().getOption(i);
             if (option->getType() != IPv6ND_PREFIX_INFORMATION)
                 continue;
-            const Ipv6NdPrefixInformation& prefixInfo = *check_and_cast<const Ipv6NdPrefixInformation*>(option);
+            const Ipv6NdPrefixInformation& prefixInfo = *check_and_cast<const Ipv6NdPrefixInformation *>(option);
             if (prefixInfo.getAutoAddressConfFlag() == true) {    //If auto addr conf is set
 #ifndef WITH_xMIPv6
                 processRaPrefixInfoForAddrAutoConf(prefixInfo, ie);    //We process prefix Info and form an addr
@@ -1370,7 +1370,7 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
     int ifID = ie->getInterfaceId();
 
     MacAddress sourceLinkLayerAddress;
-    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ra->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(ra->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
         sourceLinkLayerAddress = sla->getLinkLayerAddress();
 
     /*- If the address is not already present in the host's Default Router List,
@@ -1508,7 +1508,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
         auto option = ra->getOptions().getOption(i);
         if (option->getType() != IPv6ND_PREFIX_INFORMATION)
             continue;
-        const Ipv6NdPrefixInformation& prefixInfo = *check_and_cast<const Ipv6NdPrefixInformation*>(option);
+        const Ipv6NdPrefixInformation& prefixInfo = *check_and_cast<const Ipv6NdPrefixInformation *>(option);
         if (!prefixInfo.getOnlinkFlag())
             break; //skip to next prefix option
 
@@ -1700,7 +1700,7 @@ void Ipv6NeighbourDiscovery::resetRaTimer(NetworkInterface *ie)
         if (msgIE->outputPort() == ie->outputPort())
         {
             EV << "Resetting RA timer for port: " << ie->outputPort();
-            cancelEvent(msg);//Cancel the next scheduled msg.
+            cancelEvent(msg); //Cancel the next scheduled msg.
             simtime_t interval
                 = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(),ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
             scheduleAfter(interval, msg);
@@ -1836,7 +1836,8 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
        address, the sender MUST include its link-layer address (if it has
        one) as a Source Link-Layer Address option.*/
     if (dgDestAddr.matches(Ipv6Address("FF02::1:FF00:0"), 104) &&    // FIXME what's this? make constant...
-            !dgSrcAddr.isUnspecified()) {
+        !dgSrcAddr.isUnspecified())
+    {
         auto sla = new Ipv6NdSourceLinkLayerAddress();
         sla->setLinkLayerAddress(myMacAddr);
         ns->getOptionsForUpdate().insertOption(sla);
@@ -1915,7 +1916,7 @@ bool Ipv6NeighbourDiscovery::validateNsPacket(Packet *packet, const Ipv6Neighbou
         //there is no source link-layer address option in the message.
         else {
             MacAddress sourceLinkLayerAddress;
-            if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+            if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
                 sourceLinkLayerAddress = sla->getLinkLayerAddress();
             if (sourceLinkLayerAddress.isUnspecified() == false) {
                 EV_WARN << " but Source link-layer address is not empty! NS validation failed!\n";
@@ -1980,7 +1981,7 @@ void Ipv6NeighbourDiscovery::processNsWithSpecifiedSrcAddr(Packet *packet, const
 
     //Neighbour Solicitation Information
     MacAddress nsMacAddr;
-    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
         nsMacAddr = sla->getLinkLayerAddress();
     Ipv6Address nsL3SrcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
 
@@ -2042,7 +2043,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     //TODO:ANYCAST will not be implemented here!
 
     MacAddress sourceLinkLayerAddress;
-    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
         sourceLinkLayerAddress = sla->getLinkLayerAddress();
 
     if (sourceLinkLayerAddress.isUnspecified())
@@ -2263,7 +2264,7 @@ bool Ipv6NeighbourDiscovery::validateNaPacket(Packet *packet, const Ipv6Neighbou
 void Ipv6NeighbourDiscovery::processNaForIncompleteNceState(const Ipv6NeighbourAdvertisement *na, Neighbour *nce)
 {
     MacAddress naMacAddr;
-    if (auto tla = check_and_cast_nullable<const Ipv6NdTargetLinkLayerAddress*>(na->getOptions().findOption(IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION)))
+    if (auto tla = check_and_cast_nullable<const Ipv6NdTargetLinkLayerAddress *>(na->getOptions().findOption(IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION)))
         naMacAddr = tla->getLinkLayerAddress();
     bool naRouterFlag = na->getRouterFlag();
     bool naSolicitedFlag = na->getSolicitedFlag();
@@ -2315,7 +2316,7 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
     bool naSolicitedFlag = na->getSolicitedFlag();
     bool naOverrideFlag = na->getOverrideFlag();
     MacAddress naMacAddr;
-    if (auto tla = check_and_cast_nullable<const Ipv6NdTargetLinkLayerAddress*>(na->getOptions().findOption(IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION)))
+    if (auto tla = check_and_cast_nullable<const Ipv6NdTargetLinkLayerAddress *>(na->getOptions().findOption(IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION)))
         naMacAddr = tla->getLinkLayerAddress();
     const Key *nceKey = nce->nceKey;
     NetworkInterface *ie = ift->getInterfaceById(nceKey->interfaceID);
@@ -2625,7 +2626,7 @@ bool Ipv6NeighbourDiscovery::canServeWirelessNodes(NetworkInterface *ie)
     cGate *connectedGate = gate->getPathEndGate();
     if (connectedGate != gate) {
         cModule *connectedNode = getContainingNode(connectedGate->getOwnerModule());
-        if(!connectedNode)
+        if (!connectedNode)
             throw cRuntimeError("The connected module %s is not in a network node.", connectedGate->getOwnerModule()->getFullPath().c_str());
         if (isWirelessAccessPoint(connectedNode))
             return true;

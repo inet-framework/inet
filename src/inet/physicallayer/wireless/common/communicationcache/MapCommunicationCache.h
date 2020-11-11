@@ -59,14 +59,14 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
   public:
     virtual ~MapCommunicationCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override { return stream << "MapCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "MapCommunicationCache"; }
 
     /** @name Radio cache */
     //@{
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual const IRadio *getRadio(int id) const override;
-    virtual void mapRadios(std::function<void (const IRadio *)> f) const override;
+    virtual void mapRadios(std::function<void(const IRadio *)> f) const override;
     //@}
 
     /** @name Transmission cache */
@@ -74,12 +74,12 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
     virtual void addTransmission(const ITransmission *transmission) override;
     virtual void removeTransmission(const ITransmission *transmission) override;
     virtual const ITransmission *getTransmission(int id) const override;
-    virtual void mapTransmissions(std::function<void (const ITransmission *)> f) const override;
+    virtual void mapTransmissions(std::function<void(const ITransmission *)> f) const override;
     //@}
 
     /** @name Interference cache */
     //@{
-    virtual void removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f) override;
+    virtual void removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f) override;
     //@}
 };
 

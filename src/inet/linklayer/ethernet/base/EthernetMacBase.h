@@ -39,24 +39,24 @@ using namespace inet::physicallayer;
 class INET_API EthernetMacBase : public MacProtocolBase
 {
   public:
-        enum MacTransmitState {
-            TX_IDLE_STATE = 1,
-            WAIT_IFG_STATE,
-            SEND_IFG_STATE,
-            TRANSMITTING_STATE,
-            JAMMING_STATE,
-            BACKOFF_STATE,
-            PAUSE_STATE
-            //FIXME add TX_OFF_STATE
-        };
+    enum MacTransmitState {
+        TX_IDLE_STATE = 1,
+        WAIT_IFG_STATE,
+        SEND_IFG_STATE,
+        TRANSMITTING_STATE,
+        JAMMING_STATE,
+        BACKOFF_STATE,
+        PAUSE_STATE
+        //FIXME add TX_OFF_STATE
+    };
 
-        enum MacReceiveState {
-            RX_IDLE_STATE = 1,
-            RECEIVING_STATE,
-            RX_COLLISION_STATE,
-            RX_RECONNECT_STATE
-            //FIXME add RX_OFF_STATE
-        };
+    enum MacReceiveState {
+        RX_IDLE_STATE = 1,
+        RECEIVING_STATE,
+        RX_COLLISION_STATE,
+        RX_RECONNECT_STATE
+        //FIXME add RX_OFF_STATE
+    };
 
   protected:
     // Self-message kind values
@@ -149,8 +149,8 @@ class INET_API EthernetMacBase : public MacProtocolBase
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected; }
 
-    MacTransmitState getTransmitState(){ return transmitState; }
-    MacReceiveState getReceiveState(){ return receiveState; }
+    MacTransmitState getTransmitState() { return transmitState; }
+    MacReceiveState getReceiveState() { return receiveState; }
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
@@ -204,7 +204,7 @@ class INET_API EthernetMacBase : public MacProtocolBase
     void changeTransmissionState(MacTransmitState newState);
     void changeReceptionState(MacReceiveState newState);
 
-    virtual void cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration);
+    virtual void cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t duration);
 };
 
 } // namespace inet

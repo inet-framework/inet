@@ -70,7 +70,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
         Ipv6Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, Ipv6Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
     IInterfaceTable *ift = nullptr;
@@ -106,11 +106,12 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
         const NetworkInterface *ie = nullptr;
         MacAddress macAddr;
         bool fromHL = false;
+
       public:
         ScheduledDatagram(Packet *packet, const Ipv6Header *datagram, const NetworkInterface *ie, MacAddress macAddr, bool fromHL);
         ~ScheduledDatagram();
         const NetworkInterface *getIE() { return ie; }
-        const Ipv6Address& getSrcAddress() {return ipv6Header->getSrcAddress(); }
+        const Ipv6Address& getSrcAddress() { return ipv6Header->getSrcAddress(); }
         const MacAddress& getMacAddress() { return macAddr; }
         bool getFromHL() { return fromHL; }
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }

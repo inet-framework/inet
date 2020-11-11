@@ -59,7 +59,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     class RreqIdentifierCompare
     {
-    public:
+      public:
         bool operator()(const RreqIdentifier& lhs, const RreqIdentifier& rhs) const
         {
             if (lhs.originatorAddr < rhs.originatorAddr)

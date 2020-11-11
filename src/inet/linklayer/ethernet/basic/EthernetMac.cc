@@ -191,7 +191,7 @@ void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
 
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
-        if (dynamic_cast<EthernetSignal*>(signal)) {    // do not count JAM and IFG packets
+        if (dynamic_cast<EthernetSignal *>(signal)) {    // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
             decapsulate(packet);

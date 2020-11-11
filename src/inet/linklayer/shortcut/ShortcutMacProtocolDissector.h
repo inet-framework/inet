@@ -28,7 +28,6 @@ class INET_API ShortcutMacProtocolDissector : public ProtocolDissector
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
-
 } // namespace inet
 
 #endif

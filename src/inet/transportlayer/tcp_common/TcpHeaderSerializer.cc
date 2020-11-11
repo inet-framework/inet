@@ -132,7 +132,8 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
         }
 
         case TCPOPTION_SACK_PERMITTED: {
-            auto *opt = check_and_cast<const TcpOptionSackPermitted *>(option); (void)opt; // UNUSED
+            auto *opt = check_and_cast<const TcpOptionSackPermitted *>(option);
+            (void)opt; // UNUSED
             ASSERT(length == 2);
             break;
         }
@@ -286,7 +287,7 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
     if (length > 2)
         option->setBytesArraySize(length - 2);
     for (unsigned int i = 2; i < length; i++)
-        option->setBytes(i-2, stream.readByte());
+        option->setBytes(i - 2, stream.readByte());
     return option;
 }
 

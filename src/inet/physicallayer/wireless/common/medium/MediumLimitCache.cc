@@ -24,7 +24,7 @@ namespace physicallayer {
 
 Define_Module(MediumLimitCache);
 
-template<typename T> inline T minIgnoreNaN(T a, T b)
+template <typename T> inline T minIgnoreNaN(T a, T b)
 {
     if (std::isnan(a.get()))
         return b;
@@ -36,7 +36,7 @@ template<typename T> inline T minIgnoreNaN(T a, T b)
         return b;
 }
 
-template<typename T> inline T maxIgnoreNaN(T a, T b)
+template <typename T> inline T maxIgnoreNaN(T a, T b)
 {
     if (std::isnan(a.get()))
         return b;
@@ -94,7 +94,7 @@ void MediumLimitCache::initialize(int stage)
     }
 }
 
-std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level, int evFlags) const
+std::ostream& MediumLimitCache::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "RadioMediumLimits";
     if (level <= PRINT_LEVEL_TRACE)
@@ -241,7 +241,7 @@ Coord MediumLimitCache::computeMaxConstreaintArea() const
     return maxConstraintArea;
 }
 
-m MediumLimitCache::getMaxInterferenceRange(const IRadio* radio) const
+m MediumLimitCache::getMaxInterferenceRange(const IRadio *radio) const
 {
     m maxInterferenceRange = computeMaxRange(radio->getTransmitter()->getMaxPower(), minInterferencePower);
     if (!std::isnan(maxInterferenceRange.get()))
@@ -249,7 +249,7 @@ m MediumLimitCache::getMaxInterferenceRange(const IRadio* radio) const
     return radio->getTransmitter()->getMaxInterferenceRange();
 }
 
-m MediumLimitCache::getMaxCommunicationRange(const IRadio* radio) const
+m MediumLimitCache::getMaxCommunicationRange(const IRadio *radio) const
 {
     m maxCommunicationRange = computeMaxRange(radio->getTransmitter()->getMaxPower(), minReceptionPower);
     if (!std::isnan(maxCommunicationRange.get()))

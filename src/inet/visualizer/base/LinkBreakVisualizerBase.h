@@ -33,7 +33,8 @@ namespace visualizer {
 class INET_API LinkBreakVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API LinkBreakVisualization {
+    class INET_API LinkBreakVisualization
+    {
       public:
         mutable AnimationPosition linkBreakAnimationPosition;
         const int transmitterModuleId = -1;

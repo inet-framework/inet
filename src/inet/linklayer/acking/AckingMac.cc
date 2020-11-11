@@ -136,7 +136,7 @@ void AckingMac::handleUpperPacket(Packet *packet)
     txQueue->enqueuePacket(packet);
     if (currentTxFrame || radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
         EV << "Delaying transmission of " << packet << ".\n";
-    else if (!txQueue->isEmpty()){
+    else if (!txQueue->isEmpty()) {
         popTxQueue();
         startTransmitting();
     }
@@ -201,11 +201,11 @@ void AckingMac::acked(Packet *frame)
 
     EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
     cancelEvent(ackTimeoutMsg);
-        deleteCurrentTxFrame();
-        if (!txQueue->isEmpty()) {
-            popTxQueue();
-            startTransmitting();
-        }
+    deleteCurrentTxFrame();
+    if (!txQueue->isEmpty()) {
+        popTxQueue();
+        startTransmitting();
+    }
 }
 
 void AckingMac::encapsulate(Packet *packet)

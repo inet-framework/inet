@@ -32,7 +32,8 @@ namespace visualizer {
 class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API Ieee80211Visualization {
+    class INET_API Ieee80211Visualization
+    {
       public:
         const int networkNodeId = -1;
         const int interfaceId = -1;

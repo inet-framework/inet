@@ -30,7 +30,8 @@ namespace visualizer {
 class INET_API Ieee80211CanvasVisualizer : public Ieee80211VisualizerBase
 {
   protected:
-    class INET_API Ieee80211CanvasVisualization : public Ieee80211Visualization {
+    class INET_API Ieee80211CanvasVisualization : public Ieee80211Visualization
+    {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         LabeledIconFigure *figure = nullptr;

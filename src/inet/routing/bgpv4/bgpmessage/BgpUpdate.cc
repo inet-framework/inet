@@ -32,7 +32,7 @@ unsigned short computePathAttributeBytes(const BgpUpdatePathAttributes& pathAttr
             return contentBytes;
         }
         case BgpUpdateAttributeTypeCode::AS_PATH: {
-            auto& attr = *check_and_cast<const BgpUpdatePathAttributesAsPath*>(&pathAttr);
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesAsPath *>(&pathAttr);
     #ifndef NDEBUG
             {
                 unsigned short s = 0;
@@ -47,19 +47,19 @@ unsigned short computePathAttributeBytes(const BgpUpdatePathAttributes& pathAttr
             return contentBytes;
         }
         case BgpUpdateAttributeTypeCode::NEXT_HOP: {
-            auto& attr = *check_and_cast<const BgpUpdatePathAttributesNextHop*>(&pathAttr);
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesNextHop *>(&pathAttr);
             ASSERT(attr.getLength() == 4);
             contentBytes += 4;
             return contentBytes;
         }
         case BgpUpdateAttributeTypeCode::LOCAL_PREF: {
-            auto& attr = *check_and_cast<const BgpUpdatePathAttributesLocalPref*>(&pathAttr);
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesLocalPref *>(&pathAttr);
             ASSERT(attr.getLength() == 4);
             contentBytes += 4;
             return contentBytes;
         }
         case BgpUpdateAttributeTypeCode::ATOMIC_AGGREGATE: {
-            auto& attr = *check_and_cast<const BgpUpdatePathAttributesAtomicAggregate*>(&pathAttr);
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesAtomicAggregate *>(&pathAttr);
             ASSERT(attr.getLength() == 0);
             return contentBytes;
         }

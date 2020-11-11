@@ -67,7 +67,7 @@ void serializeEncodedSourceAddress(MemoryOutputStream& stream, const EncodedSour
     stream.writeIpv4Address(addr.sourceAddress.toIpv4());
 }
 
-void deserializeEncodedUnicastAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket , EncodedUnicastAddress& addr)
+void deserializeEncodedUnicastAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedUnicastAddress& addr)
 {
     // Encoded-Unicast Address
     uint8_t addressFamily = stream.readByte();  // Address Family: '1' represents the IPv4 address family
@@ -77,7 +77,7 @@ void deserializeEncodedUnicastAddress(MemoryInputStream& stream, const Ptr<PimPa
     addr.unicastAddress = stream.readIpv4Address();
 }
 
-void deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket , EncodedGroupAddress& addr)
+void deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedGroupAddress& addr)
 {
     // Encoded-Group Address:
     uint8_t addressFamily = stream.readByte();  // Address Family: '1' represents the IPv4 address family
@@ -91,7 +91,7 @@ void deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPack
     addr.groupAddress = stream.readIpv4Address();
 }
 
-void deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket , EncodedSourceAddress& addr)
+void deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedSourceAddress& addr)
 {
     // Encoded-Source Address
     uint8_t addressFamily = stream.readByte();  // Address Family: '1' represents the IPv4 address family
@@ -106,7 +106,7 @@ void deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPac
     addr.sourceAddress = stream.readIpv4Address();
 }
 
-}
+} // namespace
 
 void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -124,13 +124,13 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                 stream.writeUint16Be(pimHello->getOptions(i)->getType()); // type
                 switch (pimHello->getOptions(i)->getType()) {
                     case Holdtime: {
-                        const HoldtimeOption* holdtimeOption = static_cast<const HoldtimeOption*>(pimHello->getOptions(i));
+                        const HoldtimeOption *holdtimeOption = static_cast<const HoldtimeOption *>(pimHello->getOptions(i));
                         stream.writeUint16Be(2);    // length
                         stream.writeUint16Be(holdtimeOption->getHoldTime());
                         break;
                     }
                     case LANPruneDelay: {
-                        const LanPruneDelayOption* lanPruneDelayOption = static_cast<const LanPruneDelayOption*>(pimHello->getOptions(i));
+                        const LanPruneDelayOption *lanPruneDelayOption = static_cast<const LanPruneDelayOption *>(pimHello->getOptions(i));
                         stream.writeUint16Be(4);    // length
                         stream.writeBit(0); // FIXME: T bit missing
                         stream.writeNBitsOfUint64Be(lanPruneDelayOption->getPropagationDelay(), 15);
@@ -138,13 +138,13 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                         break;
                     }
                     case DRPriority: {
-                        const DrPriorityOption* drPriorityOption = static_cast<const DrPriorityOption*>(pimHello->getOptions(i));
+                        const DrPriorityOption *drPriorityOption = static_cast<const DrPriorityOption *>(pimHello->getOptions(i));
                         stream.writeUint16Be(4);    // length
                         stream.writeUint32Be(drPriorityOption->getPriority());
                         break;
                     }
                     case GenerationID: {
-                        const GenerationIdOption* generationIdOption = static_cast<const GenerationIdOption*>(pimHello->getOptions(i));
+                        const GenerationIdOption *generationIdOption = static_cast<const GenerationIdOption *>(pimHello->getOptions(i));
                         stream.writeUint16Be(4);    // length
                         stream.writeUint32Be(generationIdOption->getGenerationID());
                         break;
@@ -416,21 +416,4 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
 }
 
 } // namespace inet
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

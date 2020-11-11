@@ -29,7 +29,8 @@ namespace visualizer {
 class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
 {
   protected:
-    class INET_API PacketDropCanvasVisualization : public PacketDropVisualization {
+    class INET_API PacketDropCanvasVisualization : public PacketDropVisualization
+    {
       public:
         LabeledIconFigure *figure;
 

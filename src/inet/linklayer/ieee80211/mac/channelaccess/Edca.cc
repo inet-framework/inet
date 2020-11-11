@@ -26,9 +26,9 @@ void Edca::initialize(int stage)
 {
     if (stage == INITSTAGE_LINK_LAYER) {
         numEdcafs = par("numEdcafs");
-        edcafs = new Edcaf*[numEdcafs];
+        edcafs = new Edcaf *[numEdcafs];
         for (int ac = 0; ac < numEdcafs; ac++) {
-            edcafs[ac] = check_and_cast<Edcaf*>(getSubmodule("edcaf", ac));
+            edcafs[ac] = check_and_cast<Edcaf *>(getSubmodule("edcaf", ac));
         }
         mgmtAndNonQoSRecoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("mgmtAndNonQoSRecoveryProcedure"));
     }
@@ -51,7 +51,7 @@ AccessCategory Edca::mapTidToAc(Tid tid)
     }
 }
 
-Edcaf* Edca::getChannelOwner()
+Edcaf *Edca::getChannelOwner()
 {
     for (int ac = 0; ac < numEdcafs; ac++)
         if (edcafs[ac]->isOwning())
@@ -59,21 +59,21 @@ Edcaf* Edca::getChannelOwner()
     return nullptr;
 }
 
-std::vector<Edcaf*> Edca::getInternallyCollidedEdcafs()
+std::vector<Edcaf *> Edca::getInternallyCollidedEdcafs()
 {
-    std::vector<Edcaf*> collidedEdcafs;
+    std::vector<Edcaf *> collidedEdcafs;
     for (int ac = 0; ac < numEdcafs; ac++)
         if (edcafs[ac]->isInternalCollision())
             collidedEdcafs.push_back(edcafs[ac]);
     return collidedEdcafs;
 }
 
-void Edca::requestChannelAccess(AccessCategory ac, IChannelAccess::ICallback* callback)
+void Edca::requestChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback)
 {
     edcafs[ac]->requestChannel(callback);
 }
 
-void Edca::releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback* callback)
+void Edca::releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback)
 {
     edcafs[ac]->releaseChannel(callback);
 }
@@ -85,3 +85,4 @@ Edca::~Edca()
 
 } // namespace ieee80211
 } // namespace inet
+

@@ -26,11 +26,11 @@ namespace ieee80211 {
 
 class INET_API LegacySequenceNumberAssigment : public ISequenceNumberAssignment
 {
-    protected:
-        SequenceNumber lastSeqNum = 0;
+  protected:
+    SequenceNumber lastSeqNum = 0;
 
-    public:
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
+  public:
+    virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 
 };
 

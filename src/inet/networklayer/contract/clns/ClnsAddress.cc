@@ -27,7 +27,7 @@
 
 #include <iomanip>
 
-namespace inet{
+namespace inet {
 
 const ClnsAddress ClnsAddress::UNSPECIFIED_ADDRESS;
 
@@ -75,30 +75,30 @@ ClnsAddress::ClnsAddress(std::string net)
 
     while (found != std::string::npos) {
         switch (found) {
-        case 2:
-            dots++;
-            // area[0] = (unsigned char) (atoi(net.substr(0, 2).c_str()));
-            areaID += (uint64_t)(strtoul(net.substr(0, 2).c_str(), NULL, 16)) << 16;
-            break;
-        case 7:
-            areaID += (uint64_t)(strtoul(net.substr(3, 4).c_str(), NULL, 16));
-            dots++;
-            break;
-        case 12:
-            dots++;
-            systemID += (uint64_t)(strtoul(net.substr(8, 4).c_str(), NULL, 16)) << 32;
-            break;
-        case 17:
-            dots++;
-            systemID += (uint64_t)(strtoul(net.substr(13, 4).c_str(), NULL, 16)) << 16;
-            break;
-        case 22:
-            dots++;
-            systemID += (uint64_t)(strtoul(net.substr(18, 4).c_str(), NULL, 16));
-            break;
-        default:
-            return;
-            break;
+            case 2:
+                dots++;
+                // area[0] = (unsigned char) (atoi(net.substr(0, 2).c_str()));
+                areaID += (uint64_t)(strtoul(net.substr(0, 2).c_str(), NULL, 16)) << 16;
+                break;
+            case 7:
+                areaID += (uint64_t)(strtoul(net.substr(3, 4).c_str(), NULL, 16));
+                dots++;
+                break;
+            case 12:
+                dots++;
+                systemID += (uint64_t)(strtoul(net.substr(8, 4).c_str(), NULL, 16)) << 32;
+                break;
+            case 17:
+                dots++;
+                systemID += (uint64_t)(strtoul(net.substr(13, 4).c_str(), NULL, 16)) << 16;
+                break;
+            case 22:
+                dots++;
+                systemID += (uint64_t)(strtoul(net.substr(18, 4).c_str(), NULL, 16));
+                break;
+            default:
+                return;
+                break;
         }
 
         found = net.find_first_of(".", found + 1);
@@ -124,7 +124,7 @@ bool ClnsAddress::isUnspecified() const
     return systemID == 0 && areaID == 0;
 }
 
-std::string ClnsAddress::str(bool printUnspec    /* = true */) const
+std::string ClnsAddress::str(bool printUnspec /* = true */) const
 {
     if (printUnspec && isUnspecified())
         return std::string("<unspec>");

@@ -54,7 +54,8 @@ void SctpNatServer::initialize(int stage)
         WATCH(numRequestsToSend);
         inboundStreams = par("inboundStreams");
         outboundStreams = par("outboundStreams");
-    } else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
@@ -124,7 +125,6 @@ void SctpNatServer::sendInfo(NatInfo *info)
     msg->addTag<SocketReq>()->setSocketId(info->peer1Assoc);
     send(msg, "socketOut");
     EV << "abortMsg sent to peer1\n";
-
 
     struct nat_message *nat2 = (struct nat_message *)(buffer2);
     buflen = 16;
@@ -284,10 +284,10 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 for (int i = 0; i < bufferlen; i++) {
                     buffer[i] = vec[i];
                 }
-                struct nat_message *nat = (struct nat_message *) buffer;
+                struct nat_message *nat = (struct nat_message *)buffer;
                 bool found = false;
                 if (natVector.size() > 0) {
-                    for (auto & elem : natVector) {
+                    for (auto& elem : natVector) {
                         if ((elem)->peer1 == nat->peer1 || (elem)->peer1Assoc == assocId) {
                             EV << "found entry: info: Peer1 = " << nat->peer1 << "  peer1Address1=" << nat->peer1Addresses[0] << " peer2=" << nat->peer2 << " peer2Address1=" << nat->peer2Addresses[0] << "\n";
                             if (nat->multi && nat->numAddrPeer1 > 1 && nat->numAddrPeer2 > 1) {
@@ -335,7 +335,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                                 (elem)->peer2Address2 = ind->getRemoteAddr();
 
                             if (!(elem)->multi || ((elem)->multi && !(elem)->peer2Address2.isUnspecified() && !(elem)->peer1Address2.isUnspecified()
-                                                  && !(elem)->peer2Address1.isUnspecified() && !(elem)->peer1Address1.isUnspecified()))
+                                                   && !(elem)->peer2Address1.isUnspecified() && !(elem)->peer1Address1.isUnspecified()))
                             {
                                 EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer1Port=" << (elem)->peer1Port << " peer2Port=" << (elem)->peer2Port << "\n";
                                 sendInfo((elem));
@@ -350,7 +350,6 @@ void SctpNatServer::handleMessage(cMessage *msg)
                     NatInfo *info = new NatInfo();
                     info->peer1 = nat->peer1;
                     EV << info->peer1 << " and assoc " << assocId << "\n";
-                    ;
                     info->multi = nat->multi;
                     info->peer1Address1 = ind->getRemoteAddr();
                     if (info->multi) {
@@ -384,7 +383,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 qinfo->setSocketId(id);
                 send(cmsg, "socketOut");
 
-               // delete command;
+                // delete command;
                 shutdownReceived = true;
                 delete msg;
                 break;
@@ -409,7 +408,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 printNatVector();
                 EV << " address added: LOCAL=" << ind->getLocalAddr() << ", remote=" << ind->getRemoteAddr() << " assoc=" << assocId << "\n";
                 if (natVector.size() > 0) {
-                    for (auto & elem : natVector) {
+                    for (auto& elem : natVector) {
                         if ((elem)->peer1Assoc == assocId) {
                             EV << "found entry for assoc1 = " << assocId << "  Peer1 = " << (elem)->peer1 << "  peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2=" << (elem)->peer2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << "\n";
                             if ((elem)->multi && (elem)->peer1Address2.isUnspecified()) {
@@ -454,7 +453,6 @@ void SctpNatServer::handleMessage(cMessage *msg)
                     info->peer1 = 0;
                     info->peer1Assoc = assocId;
                     EV << info->peer1 << " and assoc " << assocId << "\n";
-                    ;
                     info->multi = 1;
                     info->peer1Address1 = L3Address();
                     info->peer1Address2 = ind->getRemoteAddr();
@@ -513,7 +511,7 @@ void SctpNatServer::handleTimer(cMessage *msg)
 
 void SctpNatServer::printNatVector(void)
 {
-    for (auto & elem : natVector) {
+    for (auto& elem : natVector) {
         EV << "Peer1: " << (elem)->peer1 << " Assoc: " << (elem)->peer1Assoc << " Address1: " << (elem)->peer1Address1 << " Address2: " << (elem)->peer1Address2 << "Port: " << (elem)->peer1Port << endl;
         EV << "Peer2: " << (elem)->peer2 << " Assoc: " << (elem)->peer2Assoc << " Address1: " << (elem)->peer2Address1 << " Address2: " << (elem)->peer2Address2 << "Port: " << (elem)->peer2Port << endl;
     }

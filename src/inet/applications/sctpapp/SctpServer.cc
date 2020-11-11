@@ -445,7 +445,7 @@ void SctpServer::handleMessage(cMessage *msg)
             case SCTP_I_CLOSED: {
                 Message *message = check_and_cast<Message *>(msg);
                 id = message->getTag<SocketInd>()->getSocketId();
-                EV_INFO << "server: SCTP_I_CLOSED for assoc "  << id << endl;
+                EV_INFO << "server: SCTP_I_CLOSED for assoc " << id << endl;
                 ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
                 i->second.stop = simTime();
                 i->second.lifeTime = i->second.stop - i->second.start;
@@ -521,7 +521,7 @@ void SctpServer::finish()
 {
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    for (auto & elem : serverAssocStatMap) {
+    for (auto& elem : serverAssocStatMap) {
         EV_DETAIL << getFullPath() << " Assoc: " << elem.first << "\n";
         EV_DETAIL << "\tstart time: " << elem.second.start << "\n";
         EV_DETAIL << "\tstop time: " << elem.second.stop << "\n";
@@ -538,10 +538,10 @@ void SctpServer::finish()
 
 SctpServer::~SctpServer()
 {
-    for (auto & elem : bytesPerAssoc)
+    for (auto& elem : bytesPerAssoc)
         delete elem.second;
 
-    for (auto & elem : endToEndDelay)
+    for (auto& elem : endToEndDelay)
         delete elem.second;
 
     bytesPerAssoc.clear();

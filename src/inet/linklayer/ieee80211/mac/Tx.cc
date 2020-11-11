@@ -77,7 +77,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         fcsBytes->copyToBuffer(buffer, bufferLength);
         auto fcs = ethernetCRC(buffer, bufferLength);
         updatedTrailer->setFcs(fcs);
-        delete [] buffer;
+        delete[] buffer;
     }
     packet->insertAtBack(updatedTrailer);
     this->frame = packet->dup();

@@ -33,12 +33,13 @@ class INET_API TracingObstacleLossOsgVisualizer : public TracingObstacleLossVisu
 #ifdef WITH_OSG
 
   protected:
-    class INET_API ObstacleLossOsgVisualization : public ObstacleLossVisualization {
+    class INET_API ObstacleLossOsgVisualization : public ObstacleLossVisualization
+    {
       public:
         osg::Group *node = nullptr;
 
       public:
-        ObstacleLossOsgVisualization(osg::Group *node) : node(node) { }
+        ObstacleLossOsgVisualization(osg::Group *node) : node(node) {}
     };
 
   protected:
@@ -59,7 +60,7 @@ class INET_API TracingObstacleLossOsgVisualizer : public TracingObstacleLossVisu
     virtual void initialize(int stage) override {}
 
     virtual const ObstacleLossVisualization *createObstacleLossVisualization(const physicallayer::ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const override { return nullptr; }
-    virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override { }
+    virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override {}
 
 #endif // ifdef WITH_OSG
 };

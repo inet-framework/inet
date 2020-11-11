@@ -39,7 +39,7 @@ namespace eigrp {
 /**
  * Class represents one entry in EIGRP Neighbor Table.
  */
-template<typename IPAddress>
+template <typename IPAddress>
 class EigrpNeighbor : public cObject
 {
   protected:
@@ -71,7 +71,7 @@ class EigrpNeighbor : public cObject
      * Sets timer for a neighbor
      */
     void setHoldTimer(EigrpTimer *holdt) { ASSERT(this->holdt == NULL); this->holdt = holdt; }
-    void setNeighborId(int neighborId) {  this->neighborId = neighborId; }
+    void setNeighborId(int neighborId) { this->neighborId = neighborId; }
     void setSeqNumber(int seqNumber) { this->seqNumber = seqNumber; }
     void setAck(uint32_t waitForAck) { this->waitForAck = waitForAck; }
     void setRoutesForDeletion(bool routesForDeletion) { this->routesForDeletion = routesForDeletion; }
@@ -95,3 +95,4 @@ class EigrpNeighbor : public cObject
 } //eigrp
 } //inet
 #endif /* EIGRPNEIGHBORTABLE_H_ */
+

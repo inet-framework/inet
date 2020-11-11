@@ -48,7 +48,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
         std::vector<Ipv4MulticastRoute *> staticMulticastRoutes;
 
       public:
-        Node(cModule *module) : NetworkConfiguratorBase::Node(module) { }
+        Node(cModule *module) : NetworkConfiguratorBase::Node(module) {}
         ~Node() {
             for (size_t i = 0; i < staticRoutes.size(); i++) delete staticRoutes[i];
             for (size_t i = 0; i < staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];

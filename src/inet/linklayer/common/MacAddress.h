@@ -150,12 +150,12 @@ class INET_API MacAddress
     /**
      * Returns true if this is a multicast logical address (first byte's lsb is 1).
      */
-    bool isMulticast() const  { return getAddressByte(0) & 0x01; };
+    bool isMulticast() const { return getAddressByte(0) & 0x01; };
 
     /**
      * Returns true if this is a local address (first byte's second less significant bit is 1).
      */
-    bool isLocal() const  { return getAddressByte(0) & 0x02; };
+    bool isLocal() const { return getAddressByte(0) & 0x02; };
 
     /**
      * Returns true if all address bytes are zero.

@@ -43,7 +43,7 @@ static bool isBpdu(Packet *packet)
         const auto& ethernetHeader = packet->peekAtFront<EthernetMacHeader>();
         if (isIeee8023Header(*ethernetHeader)) {
             const auto& llcHeader = packet->peekDataAt<Ieee8022LlcHeader>(ethernetHeader->getChunkLength());
-            return (llcHeader->getSsap() == 0x42 && llcHeader->getDsap() == 0x42 && llcHeader->getControl() == 3);
+            return llcHeader->getSsap() == 0x42 && llcHeader->getDsap() == 0x42 && llcHeader->getControl() == 3;
         }
         else
             return false;
@@ -100,9 +100,9 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
     updatePeerAddress(incomingInterface, sourceAddress);
     // BPDU Handling
     if (isStpAware
-            && (destinationAddress == MacAddress::STP_MULTICAST_ADDRESS || destinationAddress == bridgeAddress)
-            && incomingInterfaceData->getRole() != Ieee8021dInterfaceData::DISABLED
-            && isBpdu(incomingPacket))
+        && (destinationAddress == MacAddress::STP_MULTICAST_ADDRESS || destinationAddress == bridgeAddress)
+        && incomingInterfaceData->getRole() != Ieee8021dInterfaceData::DISABLED
+        && isBpdu(incomingPacket))
     {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         sendUp(incomingPacket);    // deliver to the STP/RSTP module

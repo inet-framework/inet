@@ -27,18 +27,18 @@ namespace inet {
 
 class INET_API Tun : public MacProtocolBase
 {
-    protected:
-        std::vector<int> socketIds;
+  protected:
+    std::vector<int> socketIds;
 
-    protected:
-        virtual void configureNetworkInterface() override;
+  protected:
+    virtual void configureNetworkInterface() override;
 
-    public:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
-        virtual void handleUpperMessage(cMessage *message) override;
-        virtual void handleUpperPacket(Packet *packet) override;
-        virtual void handleUpperCommand(cMessage *message) override;
+  public:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleUpperMessage(cMessage *message) override;
+    virtual void handleUpperPacket(Packet *packet) override;
+    virtual void handleUpperCommand(cMessage *message) override;
 };
 
 } // namespace inet

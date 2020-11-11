@@ -29,7 +29,7 @@ namespace inet {
  */
 class INET_API BytesChunk : public Chunk
 {
-  friend class Chunk;
+    friend class Chunk;
 
   protected:
     /**
@@ -56,7 +56,7 @@ class INET_API BytesChunk : public Chunk
     BytesChunk();
     BytesChunk(const BytesChunk& other) = default;
     BytesChunk(const std::vector<uint8_t>& bytes);
-    BytesChunk(const uint8_t *buffer, size_t bufLen) : Chunk(), bytes(buffer, buffer + bufLen) { }
+    BytesChunk(const uint8_t *buffer, size_t bufLen) : Chunk(), bytes(buffer, buffer + bufLen) {}
 
     virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return makeShared<BytesChunk>(*this); }

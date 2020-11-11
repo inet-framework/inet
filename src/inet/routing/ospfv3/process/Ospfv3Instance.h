@@ -25,35 +25,35 @@ class Ospfv3Area;
 class INET_API Ospfv3Instance : public cObject
 {
   public:
-    Ospfv3Instance(int instanceId, Ospfv3Process* parentProcess, int addressFamily);
+    Ospfv3Instance(int instanceId, Ospfv3Process *parentProcess, int addressFamily);
     virtual ~Ospfv3Instance();
     int getInstanceID() { return this->instanceID; }
     int getAddressFamily() { return this->addressFamily; }
-    Ospfv3Process* getProcess() const { return this->containingProcess; }
+    Ospfv3Process *getProcess() const { return this->containingProcess; }
     void init();
     bool hasArea(Ipv4Address);
-    void addArea(Ospfv3Area*);
-    Ospfv3Area* getAreaById(Ipv4Address areaId);
-    Ospfv3Area* getArea(int i) { return this->areas.at(i); }
+    void addArea(Ospfv3Area *);
+    Ospfv3Area *getAreaById(Ipv4Address areaId);
+    Ospfv3Area *getArea(int i) { return this->areas.at(i); }
     void debugDump();
     Ipv4Address getNewInterAreaPrefixLinkStateID();
     void subtractInterAreaPrefixLinkStateID();
-    void processPacket(Packet* pk);
+    void processPacket(Packet *pk);
     int getUniqueId() { return ospfv3IfIndex++; }
     int getAreaCount() { return this->areas.size(); }
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     std::string detailedInfo() const;
 
   public:
-    IInterfaceTable* ift = nullptr;
+    IInterfaceTable *ift = nullptr;
 
   private:
     int addressFamily;
     int instanceID;
-    Ospfv3Process* containingProcess;
-    std::vector<Ospfv3Area* > areas; //list of areas in this instance
-    cModule* containingModule=nullptr;
-    std::map<Ipv4Address , Ospfv3Area*> areasById; //mapping the area id to area
+    Ospfv3Process *containingProcess;
+    std::vector<Ospfv3Area *> areas; //list of areas in this instance
+    cModule *containingModule = nullptr;
+    std::map<Ipv4Address, Ospfv3Area *> areasById; //mapping the area id to area
     int ospfv3IfIndex = 0; //unique number for interfaces
     Ipv4Address interAreaPrefixLsID = Ipv4Address::UNSPECIFIED_ADDRESS;
 };

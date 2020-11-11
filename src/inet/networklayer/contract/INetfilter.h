@@ -54,7 +54,7 @@ class INET_API INetfilter
             STOLEN  ///< doesn't allow datagram to pass to next hook, but won't be deleted
         };
 
-        virtual ~IHook() {};
+        virtual ~IHook() {}
 
         /**
          * This is the first hook called by the network protocol before it routes
@@ -119,10 +119,12 @@ class INET_API INetfilter
     virtual void reinjectQueuedDatagram(const Packet *datagram) = 0;
 };
 
-class INET_API NetfilterBase : public INetfilter {
+class INET_API NetfilterBase : public INetfilter
+{
   public:
-    class INET_API HookBase : public INetfilter::IHook {
-      friend class NetfilterBase;
+    class INET_API HookBase : public INetfilter::IHook
+    {
+        friend class NetfilterBase;
 
       protected:
         std::vector<INetfilter *> netfilters;

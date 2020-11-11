@@ -187,7 +187,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
     if (finish) {
         unsigned int maxId = 0;
-        for (auto & elem : currentTalkspurt.packets)
+        for (auto& elem : currentTalkspurt.packets)
             maxId = std::max(maxId, (elem).packetID);
         channelLoss = maxId + 1 - currentTalkspurt.packets.size();
     }
@@ -210,7 +210,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
     // compute channelLoss, playoutLoss and tailDropLoss, needed for MOS and statistics
     PacketsList playoutQueue;
-    for (auto & elem : currentTalkspurt.packets) {
+    for (auto& elem : currentTalkspurt.packets) {
         elem.playoutTime = (firstPlayoutTime + ((int)elem.packetID - (int)firstPacketId) * currentTalkspurt.voiceDuration);
 
         lastLateness = elem.arrivalTime - elem.playoutTime;    // >0: packet is too late (missed its playout time)

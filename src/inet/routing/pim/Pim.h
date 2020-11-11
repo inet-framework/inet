@@ -32,7 +32,8 @@ namespace inet {
 class INET_API Pim : public RoutingProtocolBase, protected cListener
 {
   public:
-    class CrcInsertion : public NetfilterBase::HookBase {
+    class CrcInsertion : public NetfilterBase::HookBase
+    {
       public:
         virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
         virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
@@ -40,7 +41,6 @@ class INET_API Pim : public RoutingProtocolBase, protected cListener
         virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
         virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
     };
-
 
   protected:
     // parameters

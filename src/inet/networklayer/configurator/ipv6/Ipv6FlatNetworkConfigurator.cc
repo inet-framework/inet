@@ -265,7 +265,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
 
             // traverse through address of each node
             // add to route table
-            for (auto & destPrefixe : destPrefixes) {
+            for (auto& destPrefixe : destPrefixes) {
                 rt->addStaticRoute(destPrefixe->prefix, destPrefixe->prefixLength,
                         localIf->getInterfaceId(), nextHopLinkLocalAddr);
             }

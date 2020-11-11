@@ -32,9 +32,9 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-  //  virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+    //  virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
-   // virtual cPacket* deserialize(const Buffer &b, Context& context) override;
+    // virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
   public:
     SctpHeaderSerializer(const char *name = nullptr) : FieldsChunkSerializer() {}
@@ -45,12 +45,12 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
      * the frame over a raw socket.)
      * Returns the length of data written into buffer.
      */
-   // int32_t serialize(const SctpHeader *msg, uint8_t *buf, uint32_t bufsize);
+    // int32_t serialize(const SctpHeader *msg, uint8_t *buf, uint32_t bufsize);
 
     /**
      * Puts a packet sniffed from the wire into an SCTPMessage.
      */
-  //  void parse(const uint8_t *buf, uint32_t bufsize, SctpHeader *dest);
+    //  void parse(const uint8_t *buf, uint32_t bufsize, SctpHeader *dest);
 
     static uint32_t checksum(const uint8_t *buf, uint32_t len);
     static void hmacSha1(const uint8_t *buf, uint32_t buflen, const uint8_t *key, uint32_t keylen, uint8_t *digest);

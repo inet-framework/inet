@@ -80,7 +80,7 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
     // its sender (compared to that, transmission delay is negligible). Use this value
     // to update the TTL of the message. Dump it if it is dead.
     //m->setAppTtl(m->getAppTtl().dbl() - oneHopLatency);
-    if (    /*(m->getAppTtl() <= 0) || */ (messageKnown(macHeader->getId()))) {
+    if (/*(m->getAppTtl() <= 0) || */ (messageKnown(macHeader->getId()))) {
         // we got this message already, ignore it.
         EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleLowerMsg(): Dead or Known message ID=" << macHeader->getId() << " from node "
            << macSrcAddr << " TTL = " << macHeader->getAppTtl() << endl;
@@ -138,7 +138,7 @@ void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
                 // => insert it with delay = TTL. So when the copy will be popped out of the
                 // queue, it will be considered as dead and discarded.
                 auto packetCopy = packet->dup();
-                auto macHeaderCopy = packetCopy->peekAtFront<ProbabilisticBroadcastHeader>();;
+                auto macHeaderCopy = packetCopy->peekAtFront<ProbabilisticBroadcastHeader>();
                 // control info is not duplicated with the message, so we have to re-create one here.
                 setDownControlInfo(packetCopy, MacAddress::BROADCAST_ADDRESS);
                 // it the copy that is re-inserted into the queue so update the container accordingly

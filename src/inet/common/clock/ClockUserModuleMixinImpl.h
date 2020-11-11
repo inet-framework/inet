@@ -26,7 +26,7 @@ namespace inet {
 
 #ifdef WITH_CLOCK_SUPPORT
 
-template<typename T>
+template <typename T>
 IClock *ClockUserModuleMixin<T>::findClockModule() const {
     if (T::hasPar("clockModule")) {
         const char *clockModulePath = T::par("clockModule");
@@ -43,7 +43,7 @@ IClock *ClockUserModuleMixin<T>::findClockModule() const {
         return nullptr;
 }
 
-template<typename T>
+template <typename T>
 ClockUserModuleMixin<T>::~ClockUserModuleMixin() {
 #ifndef NDEBUG
     if (clock != nullptr && !usedClockApi)
@@ -53,7 +53,7 @@ ClockUserModuleMixin<T>::~ClockUserModuleMixin() {
 #endif
 }
 
-template<typename T>
+template <typename T>
 void ClockUserModuleMixin<T>::initialize(int stage) {
     T::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -66,7 +66,7 @@ void ClockUserModuleMixin<T>::initialize(int stage) {
     }
 }
 
-template<typename T>
+template <typename T>
 void ClockUserModuleMixin<T>::scheduleClockEventAt(clocktime_t t, ClockEvent *msg) {
 #ifndef NDEBUG
     usedClockApi = true;
@@ -77,7 +77,7 @@ void ClockUserModuleMixin<T>::scheduleClockEventAt(clocktime_t t, ClockEvent *ms
         T::scheduleAt(t.asSimTime(), msg);
 }
 
-template<typename T>
+template <typename T>
 void ClockUserModuleMixin<T>::scheduleClockEventAfter(clocktime_t t, ClockEvent *msg) {
 #ifndef NDEBUG
     usedClockApi = true;
@@ -88,7 +88,7 @@ void ClockUserModuleMixin<T>::scheduleClockEventAfter(clocktime_t t, ClockEvent 
         T::scheduleAfter(t.asSimTime(), msg);
 }
 
-template<typename T>
+template <typename T>
 cMessage *ClockUserModuleMixin<T>::cancelClockEvent(ClockEvent *msg) {
 #ifndef NDEBUG
     usedClockApi = true;
@@ -99,7 +99,7 @@ cMessage *ClockUserModuleMixin<T>::cancelClockEvent(ClockEvent *msg) {
         return T::cancelEvent(msg);
 }
 
-template<typename T>
+template <typename T>
 void ClockUserModuleMixin<T>::cancelAndDeleteClockEvent(ClockEvent *msg) {
 #ifndef NDEBUG
     usedClockApi = true;
@@ -110,7 +110,7 @@ void ClockUserModuleMixin<T>::cancelAndDeleteClockEvent(ClockEvent *msg) {
         T::cancelAndDelete(msg);
 }
 
-template<typename T>
+template <typename T>
 clocktime_t ClockUserModuleMixin<T>::getClockTime() const {
 #ifndef NDEBUG
     usedClockApi = true;
@@ -121,7 +121,7 @@ clocktime_t ClockUserModuleMixin<T>::getClockTime() const {
         return ClockTime::from(simTime());
 }
 
-template<typename T>
+template <typename T>
 clocktime_t ClockUserModuleMixin<T>::getArrivalClockTime(ClockEvent *msg) const {
 #ifndef NDEBUG
     usedClockApi = true;
@@ -132,7 +132,7 @@ clocktime_t ClockUserModuleMixin<T>::getArrivalClockTime(ClockEvent *msg) const 
         return ClockTime::from(msg->getArrivalTime());
 }
 
-template<typename T>
+template <typename T>
 void ClockUserModuleMixin<T>::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");

@@ -115,8 +115,8 @@ void InfoVisualizerBase::addInfoVisualizations()
     auto simulation = getSimulation();
     for (int id = 0; id < simulation->getLastComponentId(); id++) {
         auto component = simulation->getComponent(id);
-        if (component != nullptr && component->isModule() && modules.matches(static_cast<cModule*>(component))) {
-            auto infoVisualization = createInfoVisualization(static_cast<cModule*>(component));
+        if (component != nullptr && component->isModule() && modules.matches(static_cast<cModule *>(component))) {
+            auto infoVisualization = createInfoVisualization(static_cast<cModule *>(component));
             addInfoVisualization(infoVisualization);
         }
     }
@@ -130,7 +130,7 @@ void InfoVisualizerBase::removeAllInfoVisualizations()
     }
 }
 
-const char* InfoVisualizerBase::getInfoVisualizationText(cModule *module) const
+const char *InfoVisualizerBase::getInfoVisualizationText(cModule *module) const
 {
     DirectiveResolver directiveResolver(module);
     return format.formatString(&directiveResolver);

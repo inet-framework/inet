@@ -63,7 +63,7 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
         return 3;
     else {
         auto dataHeaderToTransmit = dynamicPtrCast<const Ieee80211DataHeader>(macHeader);
-        OriginatorBlockAckAgreement* agreement = nullptr;
+        OriginatorBlockAckAgreement *agreement = nullptr;
         if (context->getQoSContext()->blockAckAgreementHandler)
             agreement = context->getQoSContext()->blockAckAgreementHandler->getAgreement(dataHeaderToTransmit->getReceiverAddress(), dataHeaderToTransmit->getTid());
         auto ackPolicy = context->getQoSContext()->ackPolicy->computeAckPolicy(frameToTransmit, dataHeaderToTransmit, agreement);
@@ -89,3 +89,4 @@ bool TxOpFs::isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceC
 
 } // namespace ieee80211
 } // namespace inet
+

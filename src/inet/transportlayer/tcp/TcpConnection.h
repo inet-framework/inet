@@ -154,8 +154,8 @@ class INET_API TcpStateVariables : public cObject
     bool fork;    // if passive and in LISTEN: whether to fork on an incoming connection
 
     uint32_t snd_mss;    // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
-                       // This will be set to the minimum of the local smss parameter and the value specified in the
-                       // MSS option received during connection setup.
+                         // This will be set to the minimum of the local smss parameter and the value specified in the
+                         // MSS option received during connection setup.
 
     // send sequence number variables (see RFC 793, "3.2. Terminology")
     uint32_t snd_una;    // send unacknowledged
@@ -210,7 +210,7 @@ class INET_API TcpStateVariables : public cObject
     // WINDOW_SCALE related variables
     bool ws_support;    // set if the host supports Window Scale (header option) (RFC 1322)
     bool ws_enabled;    // set if the connection uses Window Scale (header option)
-    int  ws_manual_scale; // the value of scale parameter if it was set manually (-1 otherwise)
+    int ws_manual_scale; // the value of scale parameter if it was set manually (-1 otherwise)
     bool snd_ws;    // set if initial WINDOW_SCALE has been sent
     bool rcv_ws;    // set if initial WINDOW_SCALE has been received
     uint rcv_wnd_scale;    // RFC 1323, page 31: "Receive window scale power"

@@ -65,7 +65,6 @@ QosAckHandler::Status QosAckHandler::getMgmtOrNonQoSAckStatus(const Ptr<const Ie
         return it->second;
 }
 
-
 QosAckHandler::Status QosAckHandler::getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header)
 {
     auto id = std::make_pair(header->getReceiverAddress(), std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber())));
@@ -203,7 +202,6 @@ void QosAckHandler::processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckRe
         throw cRuntimeError("Unknown block ack request");
 }
 
-
 void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (header->getType() == ST_DATA_WITH_QOS) {
@@ -223,10 +221,10 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
 
 void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    for (auto &ackStatus : ackStatuses) {
+    for (auto& ackStatus : ackStatuses) {
         auto tid = ackStatus.first.second.first;
         auto seqCtrlField = ackStatus.first.second.second;
-        auto &status = ackStatus.second;
+        auto& status = ackStatus.second;
         if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
             if (basicBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = basicBlockAckReq->getStartingSequenceNumber();
@@ -293,15 +291,15 @@ void QosAckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader
 std::string QosAckHandler::getStatusString(Status status)
 {
     switch (status) {
-        case Status::FRAME_NOT_YET_TRANSMITTED : return "FRAME_NOT_YET_TRANSMITTED";
-        case Status::NO_ACK_REQUIRED : return "NO_ACK_REQUIRED";
-        case Status::BLOCK_ACK_NOT_YET_REQUESTED : return "BLOCK_ACK_NOT_YET_REQUESTED";
-        case Status::WAITING_FOR_NORMAL_ACK : return "WAITING_FOR_NORMAL_ACK";
-        case Status::NORMAL_ACK_NOT_ARRIVED : return "NORMAL_ACK_NOT_ARRIVED";
-        case Status::BLOCK_ACK_ARRIVED_UNACKED : return "BLOCK_ACK_ARRIVED_UNACKED";
-        case Status::BLOCK_ACK_ARRIVED_ACKED  : return "BLOCK_ACK_ARRIVED_ACKED";
-        case Status::WAITING_FOR_BLOCK_ACK  : return "WAITING_FOR_BLOCK_ACK";
-        case Status::NORMAL_ACK_ARRIVED  : return "NORMAL_ACK_ARRIVED";
+        case Status::FRAME_NOT_YET_TRANSMITTED: return "FRAME_NOT_YET_TRANSMITTED";
+        case Status::NO_ACK_REQUIRED: return "NO_ACK_REQUIRED";
+        case Status::BLOCK_ACK_NOT_YET_REQUESTED: return "BLOCK_ACK_NOT_YET_REQUESTED";
+        case Status::WAITING_FOR_NORMAL_ACK: return "WAITING_FOR_NORMAL_ACK";
+        case Status::NORMAL_ACK_NOT_ARRIVED: return "NORMAL_ACK_NOT_ARRIVED";
+        case Status::BLOCK_ACK_ARRIVED_UNACKED: return "BLOCK_ACK_ARRIVED_UNACKED";
+        case Status::BLOCK_ACK_ARRIVED_ACKED: return "BLOCK_ACK_ARRIVED_ACKED";
+        case Status::WAITING_FOR_BLOCK_ACK: return "WAITING_FOR_BLOCK_ACK";
+        case Status::NORMAL_ACK_ARRIVED: return "NORMAL_ACK_ARRIVED";
         default: throw cRuntimeError("Unknown status");
     }
 }
@@ -315,6 +313,6 @@ void QosAckHandler::printAckStatuses()
     std::cout << "=========================================" << std::endl;
 }
 
-
 } /* namespace ieee80211 */
 } /* namespace inet */
+

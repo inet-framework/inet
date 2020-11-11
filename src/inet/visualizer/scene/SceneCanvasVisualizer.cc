@@ -108,7 +108,7 @@ void SceneCanvasVisualizer::refreshAxis(double axisLength)
     zLabel->setPosition(canvasProjection->computeCanvasPoint(Coord(0, 0, axisLength)));
 }
 
-void SceneCanvasVisualizer::handleParameterChange(const char* name)
+void SceneCanvasVisualizer::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
     if (name && !strcmp(name, "viewAngle")) {
@@ -130,7 +130,7 @@ void SceneCanvasVisualizer::handleParameterChange(const char* name)
         refreshAxis(axisLength);
 }
 
-RotationMatrix SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool& invertY)
+RotationMatrix SceneCanvasVisualizer::parseViewAngle(const char *viewAngle, bool& invertY)
 {
     double a, b, c;
     if (*viewAngle == 'x' || *viewAngle == 'y' || *viewAngle == 'z') {
@@ -174,7 +174,7 @@ RotationMatrix SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool
             matrix[2][i] = v.z;
         }
         // NOTE: the rotation matrix cannot contain flipping, so the following code flips the resulting Y axis if needed, because the OMNeT++ 2D canvas also flips Y axis while drawing
-        double determinant = matrix[0][0] * ((matrix[1][1] * matrix[2][2]) -(matrix[2][1] * matrix[1][2])) -matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[2][0] * matrix[1][2]) + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[2][0] * matrix[1][1]);
+        double determinant = matrix[0][0] * ((matrix[1][1] * matrix[2][2]) - (matrix[2][1] * matrix[1][2])) - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[2][0] * matrix[1][2]) + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[2][0] * matrix[1][1]);
         if (determinant == -1) {
             matrix[1][0] *= -1;
             matrix[1][1] *= -1;
@@ -212,7 +212,7 @@ RotationMatrix SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool
         throw cRuntimeError("Invalid viewAngle parameter value: '%s'", viewAngle);
 }
 
-cFigure::Point SceneCanvasVisualizer::parse2D(const char* text, bool invertY)
+cFigure::Point SceneCanvasVisualizer::parse2D(const char *text, bool invertY)
 {
     double x, y;
     if (sscanf(text, "%lf %lf", &x, &y) != 2)
@@ -222,17 +222,16 @@ cFigure::Point SceneCanvasVisualizer::parse2D(const char* text, bool invertY)
 
 void SceneCanvasVisualizer::displayDescription(const char *descriptionFigurePath)
 {
-    cFigure* descriptionFigure = visualizationTargetModule->getCanvas()->getFigureByPath(descriptionFigurePath);
+    cFigure *descriptionFigure = visualizationTargetModule->getCanvas()->getFigureByPath(descriptionFigurePath);
     if (!descriptionFigure)
         throw cRuntimeError("Figure \"%s\" not found", descriptionFigurePath);
-    auto descriptionTextFigure = check_and_cast<cAbstractTextFigure*>(descriptionFigure);
+    auto descriptionTextFigure = check_and_cast<cAbstractTextFigure *>(descriptionFigure);
 
     auto config = getEnvir()->getConfigEx();
     const char *activeConfig = config->getActiveConfigName();
     std::string description = std::string(activeConfig) + ": " + config->getConfigDescription(activeConfig);
     descriptionTextFigure->setText(description.c_str());
 }
-
 
 } // namespace visualizer
 

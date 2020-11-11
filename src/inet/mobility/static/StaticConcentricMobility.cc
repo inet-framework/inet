@@ -24,7 +24,6 @@ namespace inet {
 
 Define_Module(StaticConcentricMobility);
 
-
 void StaticConcentricMobility::setInitialPosition()
 {
     unsigned int numHosts = par("numHosts");
@@ -39,37 +38,37 @@ void StaticConcentricMobility::setInitialPosition()
     unsigned int myCircle = 0;
     unsigned int nodesOnInnerCircles = 0;
 
-    for(unsigned int i = 0; i < numHosts; i++) {
-        if(i - totalNodesOnInnerCircles >= nodesOnThisCircle) {
+    for (unsigned int i = 0; i < numHosts; i++) {
+        if (i - totalNodesOnInnerCircles >= nodesOnThisCircle) {
             // start new circle
             totalCircles++;
             totalNodesOnInnerCircles += nodesOnThisCircle;
-            nodesOnThisCircle = (int)(2*M_PI*totalCircles);
+            nodesOnThisCircle = (int)(2 * M_PI * totalCircles);
         }
 
-        if(i == index) {
+        if (i == index) {
             myCircle = totalCircles;
             nodesOnInnerCircles = totalNodesOnInnerCircles;
         }
     }
 
-    lastPosition.x = distance*totalCircles;
-    lastPosition.y = distance*totalCircles;
+    lastPosition.x = distance * totalCircles;
+    lastPosition.y = distance * totalCircles;
 
-    if(constraintAreaMin.x > -INFINITY) {
+    if (constraintAreaMin.x > -INFINITY) {
         lastPosition.x += constraintAreaMin.x;
     }
 
-    if(constraintAreaMin.y > -INFINITY) {
+    if (constraintAreaMin.y > -INFINITY) {
         lastPosition.y += constraintAreaMin.y;
     }
 
-    if(index > 0) {
-        double radius = distance*myCircle;
-        double angularStep = 2.0*M_PI/(int)(2*M_PI*myCircle);
-        double angle = angularStep*(index-nodesOnInnerCircles);
-        lastPosition.x += radius*cos(angle);
-        lastPosition.y += radius*sin(angle);
+    if (index > 0) {
+        double radius = distance * myCircle;
+        double angularStep = 2.0 * M_PI / (int)(2 * M_PI * myCircle);
+        double angle = angularStep * (index - nodesOnInnerCircles);
+        lastPosition.x += radius * cos(angle);
+        lastPosition.y += radius * sin(angle);
     }
 
     lastPosition.z = par("initialZ");

@@ -40,14 +40,12 @@ BvhObjectCache::~BvhObjectCache()
 
 void BvhObjectCache::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
         leafCapacity = par("leafCapacity");
         axisOrder = par("axisOrder");
     }
-    else if (stage == INITSTAGE_PHYSICAL_OBJECT_CACHE)
-    {
+    else if (stage == INITSTAGE_PHYSICAL_OBJECT_CACHE) {
         for (int i = 0; i < physicalEnvironment->getNumObjects(); i++)
             insertObject(physicalEnvironment->getObject(i));
     }

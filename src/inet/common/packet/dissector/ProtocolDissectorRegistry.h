@@ -23,7 +23,7 @@
 
 namespace inet {
 
-#define Register_Protocol_Dissector(PROTOCOL, CLASSNAME) EXECUTE_ON_STARTUP(ProtocolDissectorRegistry::globalRegistry.registerProtocolDissector(PROTOCOL, new CLASSNAME()));
+#define Register_Protocol_Dissector(PROTOCOL, CLASSNAME)    EXECUTE_ON_STARTUP(ProtocolDissectorRegistry::globalRegistry.registerProtocolDissector(PROTOCOL, new CLASSNAME()));
 
 class INET_API ProtocolDissectorRegistry
 {
@@ -36,10 +36,10 @@ class INET_API ProtocolDissectorRegistry
   public:
     ~ProtocolDissectorRegistry();
 
-    void registerProtocolDissector(const Protocol* protocol, const ProtocolDissector *dissector);
+    void registerProtocolDissector(const Protocol *protocol, const ProtocolDissector *dissector);
 
-    const ProtocolDissector *findProtocolDissector(const Protocol* protocol) const;
-    const ProtocolDissector *getProtocolDissector(const Protocol* protocol) const;
+    const ProtocolDissector *findProtocolDissector(const Protocol *protocol) const;
+    const ProtocolDissector *getProtocolDissector(const Protocol *protocol) const;
 };
 
 } // namespace

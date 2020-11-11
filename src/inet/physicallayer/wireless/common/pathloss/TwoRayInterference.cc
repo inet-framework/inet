@@ -29,9 +29,11 @@ void TwoRayInterference::initialize(int stage)
         const std::string polarization_str = par("polarization");
         if (polarization_str == "horizontal") {
             polarization = 'h';
-        } else if (polarization_str == "vertical") {
+        }
+        else if (polarization_str == "vertical") {
             polarization = 'v';
-        } else {
+        }
+        else {
             throw cRuntimeError("Invalid antenna polarization %s", polarization_str.c_str());
         }
     }
@@ -45,7 +47,7 @@ std::ostream& TwoRayInterference::printToStream(std::ostream& os, int level, int
     return os;
 }
 
-double TwoRayInterference::computePathLoss(const ITransmission* transmission, const IArrival* arrival) const
+double TwoRayInterference::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
     auto radioMedium = transmission->getMedium();
     auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
@@ -112,8 +114,7 @@ double TwoRayInterference::reflectionCoefficient(double cos_theta, double sin_th
     double Gamma = 0.0;
     // sqrt_term is named "z" by Jakes (eq 2.1-3)
     const double sqrt_term = sqrt(epsilon_r - squared(cos_theta));
-    switch (polarization)
-    {
+    switch (polarization) {
         case 'h':
             // equation 4.25 in Rappaport (Gamma orthogonal)
             Gamma = (sin_theta - sqrt_term) / (sin_theta + sqrt_term);
@@ -130,3 +131,4 @@ double TwoRayInterference::reflectionCoefficient(double cos_theta, double sin_th
 
 } // namespace physicallayer
 } // namespace artery
+

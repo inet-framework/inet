@@ -42,7 +42,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     rad heading;
     rad elevation;
     BorderPolicy borderPolicy;
-    std::stack<long> loopVars;    // for <repeat>
+    std::stack<long> loopVars; // for <repeat>
     double maxSpeed;
 
   protected:

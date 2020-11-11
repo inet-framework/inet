@@ -180,9 +180,9 @@ double rdHistogram::draw()
             else
                 return n;
         }
-        cumcount += bin.count;    // Keep the running count for the elements
+        cumcount += bin.count; // Keep the running count for the elements
     }
-    return -1.0;    // Default return in case something weird happens
+    return -1.0; // Default return in case something weird happens
 }
 
 void rdHistogram::__parseBinString(std::string binstr)
@@ -193,7 +193,7 @@ void rdHistogram::__parseBinString(std::string binstr)
     cStringTokenizer tokenizer = cStringTokenizer(binstr.c_str(), ";");
     std::string curtuple, countstr, sumstr;
     std::vector<std::string> res = tokenizer.asVector();
-    for (auto & re : res) {
+    for (auto& re : res) {
         curtuple = (re);
         curtuple = trimLeft(curtuple, "(");
         curtuple = trimRight(curtuple, ")");
@@ -212,10 +212,10 @@ void rdHistogram::__parseBinString(std::string binstr)
 void rdHistogram::__normalizeBins()
 {
     double sum = 0;
-    for (auto & elem : m_bins)
+    for (auto& elem : m_bins)
         sum += elem.sum;
     if (sum != 0)
-        for (auto & elem : m_bins)
+        for (auto& elem : m_bins)
             elem.sum = elem.sum / sum;
 
 }

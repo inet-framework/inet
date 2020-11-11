@@ -73,7 +73,7 @@ class INET_API OperationalMixin : public T, public ILifecycle
 
     virtual void handleActiveOperationTimeout(cMessage *message);
 
-    /// @{ utility functions
+    ///@{ utility functions
     virtual bool isUp() const { return operationalState != NOT_OPERATING /* && operationalState != OPERATION_SUSPENDED */; }
     virtual bool isDown() const { return operationalState == NOT_OPERATING /* || operationalState == OPERATION_SUSPENDED */; }
     virtual void setOperationalState(State newState);

@@ -42,14 +42,14 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
             // sequence number shall be passed up to the next MAC process.
             if (receiveBuffer->isFull()) {
                 passedUp(agreement, receiveBuffer, earliestSequenceNumber);
-                return ReorderBuffer({std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu))});
+                return ReorderBuffer({ std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu)) });
             }
             // If, after an MPDU is received, the receive buffer is not full, but the sequence number of the complete MSDU or
             // A-MSDU in the buffer with the lowest sequence number is equal to the NextExpectedSequenceNumber for
             // that Block Ack agreement, then the MPDU shall be passed up to the next MAC process.
             else if (earliestSequenceNumber == receiveBuffer->getNextExpectedSequenceNumber()) {
                 passedUp(agreement, receiveBuffer, earliestSequenceNumber);
-                return ReorderBuffer({std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu))});
+                return ReorderBuffer({ std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu)) });
             }
         }
     }
@@ -96,7 +96,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
         // NextExpectedSequenceNumber for that Block Ack agreement, then the NextExpectedSequenceNumber for
         // that Block Ack agreement is set to the sequence number of the BlockAckReq frame.
         int numOfMsdusToPassUp = completePrecedingMpdus.size() + consecutiveCompleteFollowingMpdus.size();
-        if (numOfMsdusToPassUp == 0  && receiveBuffer->getNextExpectedSequenceNumber() < startingSequenceNumber)
+        if (numOfMsdusToPassUp == 0 && receiveBuffer->getNextExpectedSequenceNumber() < startingSequenceNumber)
             receiveBuffer->setNextExpectedSequenceNumber(startingSequenceNumber);
         // The recipient shall then release any buffers held by preceding MPDUs.
         releaseReceiveBuffer(agreement, receiveBuffer, completePrecedingMpdus);
@@ -178,7 +178,7 @@ bool BlockAckReordering::isComplete(const std::vector<Packet *>& fragments)
     return largestFragmentNumber != -1 && largestFragmentNumber + 1 == (int)fragNums.size();
 }
 
-ReceiveBuffer* BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement)
+ReceiveBuffer *BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement)
 {
     SequenceNumber startingSequenceNumber = agreement->getStartingSequenceNumber();
     int bufferSize = agreement->getBufferSize();
@@ -254,3 +254,4 @@ BlockAckReordering::~BlockAckReordering()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

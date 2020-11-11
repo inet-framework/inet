@@ -53,7 +53,8 @@ const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 class INET_API Udp : public TransportProtocolBase
 {
   public:
-    class CrcInsertion : public NetfilterBase::HookBase {
+    class CrcInsertion : public NetfilterBase::HookBase
+    {
       public:
         virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
         virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
@@ -70,7 +71,7 @@ class INET_API Udp : public TransportProtocolBase
     struct MulticastMembership
     {
         L3Address multicastAddress;
-        int interfaceId = -1;    // -1 = all
+        int interfaceId = -1; // -1 = all
         UdpSourceFilterMode filterMode = static_cast<UdpSourceFilterMode>(0);
         std::vector<L3Address> sourceList;
 
@@ -109,7 +110,7 @@ class INET_API Udp : public TransportProtocolBase
 
     friend std::ostream& operator<<(std::ostream& os, const Udp::SockDesc& sd);
 
-    typedef std::list<SockDesc *> SockDescList;    // might contain duplicated local addresses if their reuseAddr flag is set
+    typedef std::list<SockDesc *> SockDescList; // might contain duplicated local addresses if their reuseAddr flag is set
     typedef std::map<int, SockDesc *> SocketsByIdMap;
     typedef std::map<int, SockDescList> SocketsByPortMap;
 

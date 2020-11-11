@@ -29,7 +29,7 @@ namespace inet {
 class INET_API IRoutingTable
 {
   public:
-    virtual ~IRoutingTable() {};
+    virtual ~IRoutingTable() {}
 
     /** @name Miscellaneous functions */
     //@{

@@ -4,8 +4,7 @@
 namespace inet {
 namespace ospfv3 {
 
-enum Ospfv3Timers
-{
+enum Ospfv3Timers {
     INIT_PROCESS = 0,
     HELLO_TIMER = 1,
     WAIT_TIMER = 2,

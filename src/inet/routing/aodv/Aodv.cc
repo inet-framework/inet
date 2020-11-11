@@ -114,7 +114,7 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
         else if (msg == blacklistTimer)
             handleBlackListTimer();
         else if (msg->getKind() == KIND_DELAYEDSEND) {
-            auto timer = check_and_cast<PacketHolderMessage*>(msg);
+            auto timer = check_and_cast<PacketHolderMessage *>(msg);
             socket.send(timer->dropOwnedPacket());
             delete timer;
         }
@@ -779,7 +779,6 @@ void Aodv::socketClosed(UdpSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-
 void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive)
 {
     EV_INFO << "AODV Route Request arrived with source addr: " << sourceAddr << " originator addr: " << rreq->getOriginatorAddr()
@@ -932,8 +931,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         }
 
         // we respond to the RREQ, if the D (destination only) flag is not set
-        if(!rreq->getDestOnlyFlag())
-        {
+        if (!rreq->getDestOnlyFlag()) {
             // create RREP
             auto rrep = createRREP(rreq, destRoute, reverseRoute, sourceAddr);
 
@@ -1252,7 +1250,7 @@ void Aodv::clearState()
 {
     rerrCount = rreqCount = rreqId = sequenceNum = 0;
     addressToRreqRetries.clear();
-    for (auto & elem : waitForRREPTimers)
+    for (auto& elem : waitForRREPTimers)
         cancelAndDelete(elem.second);
 
     // FIXME: Drop the queued datagrams.

@@ -36,7 +36,8 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API InterfaceOsgVisualization : public InterfaceVisualization {
+    class INET_API InterfaceOsgVisualization : public InterfaceVisualization
+    {
       public:
         NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Node *node = nullptr;
@@ -62,7 +63,7 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, NetworkInterface *networkInterface) override { return nullptr; }
-    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) override { }
+    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) override {}
 
 #endif // ifdef WITH_OSG
 };

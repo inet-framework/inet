@@ -211,21 +211,21 @@ void OperationalMixin<T>::refreshDisplay() const
 {
     auto& displayString = T::getDisplayString();
     switch (operationalState) {
-    case STARTING_OPERATION:
-        displayString.setTagArg("i2", 0, "status/up");
-        break;
-    case OPERATING:
-        displayString.removeTag("i2");
-        break;
-    case STOPPING_OPERATION:
-    case CRASHING_OPERATION:
-        displayString.setTagArg("i2", 0, "status/down");
-        break;
-    case NOT_OPERATING:
-        displayString.setTagArg("i2", 0, "status/cross");
-        break;
-    default:
-        break;
+        case STARTING_OPERATION:
+            displayString.setTagArg("i2", 0, "status/up");
+            break;
+        case OPERATING:
+            displayString.removeTag("i2");
+            break;
+        case STOPPING_OPERATION:
+        case CRASHING_OPERATION:
+            displayString.setTagArg("i2", 0, "status/down");
+            break;
+        case NOT_OPERATING:
+            displayString.setTagArg("i2", 0, "status/cross");
+            break;
+        default:
+            break;
     }
 }
 

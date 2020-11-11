@@ -27,7 +27,7 @@ ShortBitVector::ShortBitVector()
     bits = 0;
 }
 
-ShortBitVector::ShortBitVector(const char* bitString)
+ShortBitVector::ShortBitVector(const char *bitString)
 {
     size = 0;
     bits = 0;

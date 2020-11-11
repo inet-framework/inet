@@ -63,26 +63,26 @@ namespace inet {
 Define_Module(MoBanCoordinator);
 
 MoBanCoordinator::MoBanCoordinator() :
-        speed(0),
-        maxSpeed(0),
-        logfile(nullptr),
-        numPostures(0),
-        currentPosture(nullptr),
-        useMobilityPattern(false),
-        mobilityPattern(nullptr),
-        patternLength(0),
-        currentPattern(-1),
-        markovMatrix(nullptr),
-        postureSelStrategy(MoBanCoordinator::posture_sel_type(-1)),
-        transitions(nullptr)
+    speed(0),
+    maxSpeed(0),
+    logfile(nullptr),
+    numPostures(0),
+    currentPosture(nullptr),
+    useMobilityPattern(false),
+    mobilityPattern(nullptr),
+    patternLength(0),
+    currentPattern(-1),
+    markovMatrix(nullptr),
+    postureSelStrategy(MoBanCoordinator::posture_sel_type(-1)),
+    transitions(nullptr)
 {
 }
 
 MoBanCoordinator::~MoBanCoordinator()
 {
     delete transitions;
-    delete [] mobilityPattern;
-    for (auto & elem : postureList)
+    delete[] mobilityPattern;
+    for (auto& elem : postureList)
         delete elem;
 }
 
@@ -111,7 +111,6 @@ void MoBanCoordinator::initialize(int stage)
             if (!readMobilityPatternFile())
                 throw cRuntimeError("MoBAN Coordinator: error in reading the input mobility pattern file");
 
-
         lastPosition = selectDestination();
         publishToNodes();
         computeMaxSpeed();
@@ -120,7 +119,7 @@ void MoBanCoordinator::initialize(int stage)
 
 void MoBanCoordinator::setInitialPosition()
 {
-//    lastPosition = selectDestination();
+    // lastPosition = selectDestination();
 }
 
 /**
@@ -184,7 +183,7 @@ void MoBanCoordinator::setTargetPosition()
 
 void MoBanCoordinator::refreshDisplay() const
 {
-    //show posture name in the graphical interface
+    // show posture name in the graphical interface
     char dis_str[100];
     sprintf(dis_str, "%s until %f", currentPosture->getPostureName(), nextChange.dbl());
     getDisplayString().setTagArg("t", 0, dis_str);
@@ -204,7 +203,7 @@ void MoBanCoordinator::selectPosture()
     int postureID = 0;
 
     if (postureSelStrategy == UNIFORM_RANDOM) {
-        postureID = floor(uniform(0, numPostures));    // uniformly random posture selection
+        postureID = floor(uniform(0, numPostures)); // uniformly random posture selection
         currentPosture = postureList[postureID];
         return;
     }
@@ -215,7 +214,7 @@ void MoBanCoordinator::selectPosture()
     /* Using transition matrix to select the next posture */
     double randomValue = uniform(0, 1);
     double comp = 0;
-    int currentP = currentPosture->getPostureID();    // it determines the column in the matrix
+    int currentP = currentPosture->getPostureID(); // it determines the column in the matrix
 
     for (int i = 0; i < static_cast<int>(numPostures); ++i) {
         comp += markovMatrix[i][currentP];
@@ -246,7 +245,7 @@ Coord MoBanCoordinator::selectDestination()
 {
     Coord res;
     res = getRandomPosition();
-    res.z = lastPosition.z;    // the z value remain the same
+    res.z = lastPosition.z; // the z value remain the same
 
     // check if it is okay using CoverRadius
     while (!isInsideWorld(res)) {
@@ -460,7 +459,7 @@ bool MoBanCoordinator::readConfigurationFile()
     cXMLElementList tagList;
     cXMLElement *tempTag;
     const char *str;
-    std::string sstr;    // for easier comparison
+    std::string sstr; // for easier comparison
 
     /* Reading the initial posture if it is given*/
     int postureID;
@@ -517,7 +516,7 @@ bool MoBanCoordinator::readConfigurationFile()
     tagList = xmlConfig->getElementsByTagName("markovMatrices");
 
     if (tagList.empty()) {
-        postureSelStrategy = UNIFORM_RANDOM;    // no posture selection strategy is required. uniform random is applied
+        postureSelStrategy = UNIFORM_RANDOM; // no posture selection strategy is required. uniform random is applied
         EV_DEBUG << "Posture Selection strategy: UNIFORM_RANDOM " << endl;
         return true;
     }
@@ -528,7 +527,7 @@ bool MoBanCoordinator::readConfigurationFile()
     matrixList = tempTag->getElementsByTagName("MarkovMatrix");
 
     if (tagList.empty()) {
-        postureSelStrategy = UNIFORM_RANDOM;    // no posture selection strategy is required. uniform random is applied
+        postureSelStrategy = UNIFORM_RANDOM; // no posture selection strategy is required. uniform random is applied
         EV_DEBUG << "Posture Selection strategy: UNIFORM_RANDOM " << endl;
         return true;
     }
@@ -540,7 +539,7 @@ bool MoBanCoordinator::readConfigurationFile()
     for (unsigned int i = 0; i < numPostures; ++i)
         matrix[i] = new double[numPostures];
 
-    bool setDefault = false;    // variable to remember if the default matrix is defined.
+    bool setDefault = false; // variable to remember if the default matrix is defined.
     cXMLElementList::const_iterator matrixTag;
     for (matrixTag = matrixList.begin(); matrixTag != matrixList.end(); matrixTag++) {
         cXMLElementList rowList;
@@ -601,8 +600,8 @@ bool MoBanCoordinator::readConfigurationFile()
         }
     }
     for (unsigned int i = 0; i < numPostures; ++i)
-        delete [] matrix[i];
-    delete [] matrix;
+        delete[] matrix[i];
+    delete[] matrix;
 
     /* Reading the Area types, if there are any. */
     tagList = xmlConfig->getElementsByTagName("areaTypes");
@@ -742,19 +741,15 @@ void MoBanCoordinator::collectLocalModules(cModule *module)
 
 void MoBanCoordinator::computeMaxSpeed()
 {
-    if (useMobilityPattern)
-    {
-        for (int i = 0; i < patternLength; i++)
-        {
+    if (useMobilityPattern) {
+        for (int i = 0; i < patternLength; i++) {
             double patSpeed = mobilityPattern[i].speed;
             if (maxSpeed < patSpeed)
                 maxSpeed = patSpeed;
         }
     }
-    else
-    {
-        for (auto & elem : postureList)
-        {
+    else {
+        for (auto& elem : postureList) {
             double postureMaxSpeed = elem->getMaxSpeed();
             if (maxSpeed < postureMaxSpeed)
                 maxSpeed = postureMaxSpeed;

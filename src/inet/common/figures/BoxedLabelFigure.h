@@ -40,7 +40,7 @@ class INET_API BoxedLabelFigure : public cGroupFigure
 
     void setTags(const char *tags);
     void setTooltip(const char *tooltip);
-    void setAssociatedObject(cObject * object);
+    void setAssociatedObject(cObject *object);
 
     const cFigure::Rectangle& getBounds() const;
 

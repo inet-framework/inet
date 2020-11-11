@@ -59,9 +59,9 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     IL3AddressType *addressType = nullptr;
     IInterfaceTable *interfaceTable = nullptr;
     const char *outputInterface = nullptr;
-    IRoutingTable *routingTable = nullptr;    // TODO: delete when necessary functions are moved to interface table
+    IRoutingTable *routingTable = nullptr; // TODO: delete when necessary functions are moved to interface table
     INetfilter *networkProtocol = nullptr;
-    static PositionTable globalPositionTable;    // KLUDGE: implement position registry protocol
+    static PositionTable globalPositionTable; // KLUDGE: implement position registry protocol
 
     // packet size
     int positionByteLength = -1;

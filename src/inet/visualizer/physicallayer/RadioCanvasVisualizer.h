@@ -31,7 +31,8 @@ namespace visualizer {
 class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
 {
   protected:
-    class INET_API RadioCanvasVisualization : public RadioVisualization {
+    class INET_API RadioCanvasVisualization : public RadioVisualization
+    {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         IndexedImageFigure *radioModeFigure = nullptr;

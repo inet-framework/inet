@@ -38,7 +38,8 @@ void SctpAssociation::increaseOutstandingBytes(SctpDataVariables *chunk,
     auto associter = sendStreams.find(chunk->sid);
     if (associter != sendStreams.end()) {
         stream = associter->second;
-    } else {
+    }
+    else {
         throw cRuntimeError("Stream with id %d not found", chunk->sid);
     }
     stream->setBytesInFlight(stream->getBytesInFlight() + chunk->booksize);
@@ -62,10 +63,10 @@ void SctpAssociation::storePacket(SctpPathVariables *pathVar,
     for (uint16_t i = 0; i < sctpMsg->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = sctpMsg->getSctpChunks(i);
         if (chunkPtr->getSctpChunkType() == DATA) {
-            const SctpDataChunk* dataChunk = check_and_cast<const SctpDataChunk*>(chunkPtr);
-            if(dataChunk != nullptr) {
+            const SctpDataChunk *dataChunk = check_and_cast<const SctpDataChunk *>(chunkPtr);
+            if (dataChunk != nullptr) {
                 const uint32_t tsn = dataChunk->getTsn();
-                SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+                SctpDataVariables *chunk = retransmissionQ->payloadQueue.find(tsn)->second;
                 assert(chunk != nullptr);
                 decreaseOutstandingBytes(chunk);
                 chunk->queuedOnPath->queuedBytes -= chunk->booksize;
@@ -80,9 +81,9 @@ void SctpAssociation::storePacket(SctpPathVariables *pathVar,
     state->packetBytes = packetBytes;
     state->authAdded = authAdded;
     EV_INFO << "storePacket: path=" << pathVar->remoteAddress
-              << " state->packetBytes=" << state->packetBytes
-              << " osb=" << pathVar->outstandingBytes << " -> "
-              << pathVar->outstandingBytes - state->packetBytes << endl;
+            << " state->packetBytes=" << state->packetBytes
+            << " osb=" << pathVar->outstandingBytes << " -> "
+            << pathVar->outstandingBytes - state->packetBytes << endl;
     if (state->osbWithHeader)
         qCounter.roomSumSendStreams += state->packetBytes;
     else
@@ -113,10 +114,10 @@ void SctpAssociation::loadPacket(SctpPathVariables *pathVar,
     for (uint16_t i = 0; i < (*sctpMsg)->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = (*sctpMsg)->getSctpChunks(i);
         if (chunkPtr->getSctpChunkType() == 0) {
-            const SctpDataChunk* dataChunk = check_and_cast<const SctpDataChunk*>(chunkPtr);
-            if(dataChunk != nullptr) {
+            const SctpDataChunk *dataChunk = check_and_cast<const SctpDataChunk *>(chunkPtr);
+            if (dataChunk != nullptr) {
                 const uint32_t tsn = dataChunk->getTsn();
-                SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+                SctpDataVariables *chunk = retransmissionQ->payloadQueue.find(tsn)->second;
                 assert(chunk != nullptr);
                 chunk->queuedOnPath = pathVar;
                 chunk->queuedOnPath->queuedBytes += chunk->booksize;
@@ -131,7 +132,7 @@ void SctpAssociation::loadPacket(SctpPathVariables *pathVar,
 std::vector<SctpPathVariables *> SctpAssociation::getSortedPathMap()
 {
     std::vector<SctpPathVariables *> sortedPaths;
-    for (auto & elem : sctpPathMap) {
+    for (auto& elem : sctpPathMap) {
         SctpPathVariables *path = elem.second;
         sortedPaths.insert(sortedPaths.end(), path);
     }
@@ -243,7 +244,7 @@ SctpPathVariables *SctpAssociation::choosePathForRetransmission()
     uint32_t max = 0;
     SctpPathVariables *temp = nullptr;
 
-    for (auto & elem : sctpPathMap) {
+    for (auto& elem : sctpPathMap) {
         SctpPathVariables *path = elem.second;
         CounterMap::const_iterator tq = qCounter.roomTransQ.find(path->remoteAddress);
         if ((tq != qCounter.roomTransQ.end()) && (tq->second > max)) {
@@ -291,8 +292,7 @@ void SctpAssociation::sendOnAllPaths(SctpPathVariables *firstPath)
         }
         EV << endl;
 
-        for (auto path : sortedPaths)
-        {
+        for (auto path : sortedPaths) {
             if (path != firstPath) {
                 sendOnPath(path);
                 path->sendAllRandomizer = RNGCONTEXT uniform(0, (1 << 31));
@@ -301,8 +301,7 @@ void SctpAssociation::sendOnAllPaths(SctpPathVariables *firstPath)
         if ((state->strictCwndBooking) &&
             (sctpPathMap.size() > 1))    // T.D. 08.02.2010: strict behaviour only for more than 1 paths!
         {    // T.D. 14.01.2010: Second pass for "Strict Cwnd Booking" option.
-            for (auto path : sortedPaths)
-            {
+            for (auto path : sortedPaths) {
                 sendOnPath(path, false);
             }
         }
@@ -314,7 +313,7 @@ void SctpAssociation::sendOnAllPaths(SctpPathVariables *firstPath)
         }
 
         // ------ ... then, try sending on all other paths --------------------
-        for (auto & elem : sctpPathMap) {
+        for (auto& elem : sctpPathMap) {
             SctpPathVariables *path = elem.second;
             if (path != firstPath) {
                 sendOnPath(path);
@@ -325,7 +324,7 @@ void SctpAssociation::sendOnAllPaths(SctpPathVariables *firstPath)
             sendOnPath(firstPath, false);
 
             // ------ Then, try sending on all other paths ---------------------------
-            for (auto & elem : sctpPathMap) {
+            for (auto& elem : sctpPathMap) {
                 SctpPathVariables *path = elem.second;
                 if (path != firstPath) {
                     sendOnPath(path, false);
@@ -349,7 +348,7 @@ void SctpAssociation::chunkReschedulingControl(SctpPathVariables *path)
     double totalBandwidth = 0.0;
     unsigned int totalOutstandingBytes = 0;
     unsigned int totalQueuedBytes = 0;
-    for (auto & elem : sctpPathMap) {
+    for (auto& elem : sctpPathMap) {
         const SctpPathVariables *myPath = elem.second;
         totalQueuedBytes += myPath->queuedBytes;
         totalOutstandingBytes += myPath->outstandingBytes;
@@ -530,8 +529,7 @@ void SctpAssociation::sendSACKviaSelectedPath(const Ptr<SctpHeader>& sctpMsg)
 
             // Solution is now to make a round-robin selection among paths,
             // taking the path with the longest time passed since last SACK.
-            for (auto path : state->lastDataSourceList)
-            {
+            for (auto path : state->lastDataSourceList) {
                 if (path->lastSACKSent < sackPath->lastSACKSent) {
                     sackPath = path;
                 }
@@ -540,8 +538,7 @@ void SctpAssociation::sendSACKviaSelectedPath(const Ptr<SctpHeader>& sctpMsg)
         else if (state->cmtSackPath == SctpStateVariables::CSP_SmallestSRTT) {
             /* Instead of RR among last DATA paths, send SACK on
                the DATA path having the smallest SRTT. */
-            for (auto path : state->lastDataSourceList)
-            {
+            for (auto path : state->lastDataSourceList) {
                 if (path->srtt < sackPath->srtt) {
                     sackPath = path;
                 }
@@ -777,12 +774,12 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
             EV_DETAIL << "No DATA chunk available!" << endl;
             if (!sackOnly) {    // SACK?, no data to send
                 EV_DETAIL << "No SACK to send either" << endl;
-               /* if (state->sctpMsg) {
-                    EV_DETAIL << "packet was stored -> load packet" << endl;
-                    loadPacket(path, &sctpMsg, &chunksAdded, &dataChunksAdded, &authAdded);
-                    Packet *pkt = new Packet("DATA");
-                    sendToIP(pkt, sctpMsg, path->remoteAddress);
-                }*/
+                /* if (state->sctpMsg) {
+                     EV_DETAIL << "packet was stored -> load packet" << endl;
+                     loadPacket(path, &sctpMsg, &chunksAdded, &dataChunksAdded, &authAdded);
+                     Packet *pkt = new Packet("DATA");
+                     sendToIP(pkt, sctpMsg, path->remoteAddress);
+                 }*/
                 return;
             }
             else {
@@ -1001,7 +998,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
 
                                 // TD 17.02.2015: There is data to send (on current path) -> create new message structure!
                                 sctpMsg = makeShared<SctpHeader>();
-                             //   sctpMsg = makeShared<SctpHeader>();
+                                //   sctpMsg = makeShared<SctpHeader>();
                                 sctpMsg->setChunkLength(B(SCTP_COMMON_HEADER));
                                 headerCreated = true;
                                 sackAdded = false;
@@ -1135,7 +1132,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                                     sctpMsg = nullptr;
                                     if (datMsg != nullptr) {
                                         sctpMsg = makeShared<SctpHeader>();
-                                      //  sctpMsg = makeShared<SctpHeader>();
+                                        //  sctpMsg = makeShared<SctpHeader>();
                                         sctpMsg->setChunkLength(B(SCTP_COMMON_HEADER));
                                         headerCreated = true;
                                         sackAdded = false;
@@ -1417,7 +1414,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                             size_t len = sctpMsg->getSctpChunksArraySize() - 1;
                             SctpChunk *chunk = (SctpChunk *)sctpMsg->getSctpChunks(len);
                             SctpDataChunk *pkt = check_and_cast<SctpDataChunk *>(chunk);
-                          //  SctpDataChunk *pkt = check_and_cast<SctpDataChunk *>(sctpMsg->getSctpChunks(sctpMsg->getSctpChunksArraySize() - 1));
+                            //  SctpDataChunk *pkt = check_and_cast<SctpDataChunk *>(sctpMsg->getSctpChunks(sctpMsg->getSctpChunksArraySize() - 1));
                             pkt->setIBit(sctpMain->sackNow);
                             sctpMsg->setSctpChunks(sctpMsg->getSctpChunksArraySize() - 1, pkt);
                         }
@@ -1464,7 +1461,8 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                 sendToIP(pkt, sctpMsg, path->remoteAddress);
                 sctpMsg = nullptr;
                 return;
-            } else {
+            }
+            else {
                 packetFull = true;    // Leave inner while loop
                 sctpMsg = nullptr;
             }
@@ -1489,7 +1487,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
 uint32_t SctpAssociation::getAllTransQ()
 {
     uint32_t sum = 0;
-    for (auto & elem : qCounter.roomTransQ) {
+    for (auto& elem : qCounter.roomTransQ) {
         sum += elem.second;
     }
     return sum;

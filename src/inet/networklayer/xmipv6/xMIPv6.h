@@ -95,7 +95,7 @@ class INET_API xMIPv6 : public cSimpleModule
     {
       public:
         cMessage *timer;    // pointer to the scheduled timer message
-        virtual ~TimerIfEntry() {};    // to make it a polymorphic base class
+        virtual ~TimerIfEntry() {}    // to make it a polymorphic base class
 
         Ipv6Address dest;    // the address (HA or CN(s) for which the message is sent
         simtime_t ackTimeout;    // timeout for the Ack

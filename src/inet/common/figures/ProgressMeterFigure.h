@@ -46,7 +46,7 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
 
   public:
     ProgressMeterFigure(const char *name = nullptr);
-    virtual ~ProgressMeterFigure() {};
+    virtual ~ProgressMeterFigure() {}
 
     virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override;

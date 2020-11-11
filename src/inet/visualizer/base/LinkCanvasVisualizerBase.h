@@ -29,14 +29,15 @@ namespace visualizer {
 class INET_API LinkCanvasVisualizerBase : public LinkVisualizerBase
 {
   protected:
-    class INET_API LinkCanvasVisualization : public LinkVisualization {
+    class INET_API LinkCanvasVisualization : public LinkVisualization
+    {
       public:
         LabeledLineFigure *figure = nullptr;
 
       public:
         LinkCanvasVisualization(LabeledLineFigure *figure, int sourceModuleId, int destinationModuleId);
         virtual ~LinkCanvasVisualization();
-     };
+    };
 
   protected:
     double zIndex = NaN;

@@ -25,10 +25,10 @@ namespace ieee80211 {
 
 class INET_API ISequenceNumberAssignment
 {
-    public:
-        virtual ~ISequenceNumberAssignment() { }
+  public:
+    virtual ~ISequenceNumberAssignment() {}
 
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) = 0;
+    virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) = 0;
 };
 
 } // namespace ieee80211

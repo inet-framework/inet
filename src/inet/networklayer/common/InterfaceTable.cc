@@ -85,7 +85,7 @@ void InterfaceTable::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 
     if (par("displayAddresses")) {
-        for (auto & elem : idToInterface) {
+        for (auto& elem : idToInterface) {
             NetworkInterface *ie = elem;
             if (ie)
                 updateLinkDisplayString(ie);
@@ -106,7 +106,7 @@ void InterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cOb
     printSignalBanner(signalID, obj, details);
 }
 
-//---
+// ---
 
 cModule *InterfaceTable::getHostModule() const
 {
@@ -123,7 +123,7 @@ NetworkInterface *InterfaceTable::findInterfaceByAddress(const L3Address& addres
 {
     if (!address.isUnspecified()) {
         L3Address::AddressType addrType = address.getType();
-        for (auto & elem : idToInterface) {
+        for (auto& elem : idToInterface) {
             NetworkInterface *ie = elem;
             if (ie) {
 #ifdef WITH_NEXTHOP
@@ -181,7 +181,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
     switch (address.getType()) {
 #ifdef WITH_IPv4
         case L3Address::IPv4:
-            for (auto & elem : idToInterface) {
+            for (auto& elem : idToInterface) {
                 NetworkInterface *ie = elem;
                 if (ie) {
                     if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>()) {
@@ -197,7 +197,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::IPv6:
-            for (auto & elem : idToInterface) {
+            for (auto& elem : idToInterface) {
                 NetworkInterface *ie = elem;
                 if (ie) {
                     if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
@@ -242,7 +242,7 @@ int InterfaceTable::getNumInterfaces() const
 
 NetworkInterface *InterfaceTable::getInterface(int pos) const
 {
-    int n = getNumInterfaces();    // also fills tmpInterfaceList
+    int n = getNumInterfaces(); // also fills tmpInterfaceList
     if (pos < 0 || pos >= n)
         throw cRuntimeError("getInterface(): interface index %d out of range 0..%d", pos, n - 1);
 
@@ -322,7 +322,7 @@ void InterfaceTable::discoverConnectingGates(NetworkInterface *entry)
     //
 
     // find gates connected to host / network layer
-    cGate *nwlayerInGate = nullptr, *nwlayerOutGate = nullptr;    // ifIn[] and ifOut[] gates in the network layer
+    cGate *nwlayerInGate = nullptr, *nwlayerOutGate = nullptr; // ifIn[] and ifOut[] gates in the network layer
     for (GateIterator i(ifmod); !i.end(); i++) {
         cGate *g = *i;
         if (!g)
@@ -334,7 +334,7 @@ void InterfaceTable::discoverConnectingGates(NetworkInterface *entry)
         if (g->getType() == cGate::INPUT && g->getPreviousGate() && g->getPreviousGate()->getOwnerModule() == host)
             entry->setNodeInputGateId(g->getPreviousGate()->getId());
 
-        //TODO revise next code:
+        // TODO revise next code:
         // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
         if (g->getType() == cGate::OUTPUT && g->getNextGate() && g->getNextGate()->isName("ifIn")) // connected to ifIn in networkLayer?
             nwlayerInGate = g->getNextGate();
@@ -347,15 +347,15 @@ void InterfaceTable::discoverConnectingGates(NetworkInterface *entry)
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
 
-    //TODO revise next code:
-    if (nwlayerInGate || nwlayerOutGate) {    // connected to a network layer (i.e. to another module's ifIn/ifOut gates)
+    // TODO revise next code:
+    if (nwlayerInGate || nwlayerOutGate) { // connected to a network layer (i.e. to another module's ifIn/ifOut gates)
         if (!nwlayerInGate || !nwlayerOutGate)
             throw cRuntimeError("addInterface(): interface module '%s' is connected only to an 'ifOut' or an 'ifIn' gate, must connect to either both or neither", ifmod->getFullPath().c_str());
         if (nwlayerInGate->getOwnerModule() != nwlayerOutGate->getOwnerModule())
             throw cRuntimeError("addInterface(): interface module '%s' is connected to 'ifOut' and 'ifIn' gates in different modules", ifmod->getFullPath().c_str());
         if (nwlayerInGate->getIndex() != nwlayerOutGate->getIndex()) // if both are scalar, that's OK too (index==0)
             throw cRuntimeError("addInterface(): gate index mismatch: interface module '%s' is connected to different indices in 'ifOut[']/'ifIn[]' gates of the network layer module", ifmod->getFullPath().c_str());
-        //entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
+        // entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
     }
 }
 
@@ -365,7 +365,7 @@ void InterfaceTable::deleteInterface(NetworkInterface *entry)
     if (entry != getInterfaceById(id))
         throw cRuntimeError("deleteInterface(): interface '%s' not found in interface table", entry->getInterfaceName());
 
-    emit(interfaceDeletedSignal, entry);    // actually, only going to be deleted
+    emit(interfaceDeletedSignal, entry); // actually, only going to be deleted
 
     idToInterface[id - INTERFACEIDS_START] = nullptr;
     delete entry;
@@ -398,7 +398,7 @@ void InterfaceTable::updateLinkDisplayString(NetworkInterface *entry) const
         buf << entry->getFullName() << "\n";
 #ifdef WITH_IPv4
         auto ipv4Data = entry->findProtocolData<Ipv4InterfaceData>();
-        if (ipv4Data && !(ipv4Data->getIPAddress().isUnspecified()) ) {
+        if (ipv4Data && !(ipv4Data->getIPAddress().isUnspecified())) {
             buf << ipv4Data->getIPAddress().str() << "/" << ipv4Data->getNetmask().getNetmaskLength() << "\n";
         }
 #endif // ifdef WITH_IPv4

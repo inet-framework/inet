@@ -56,7 +56,7 @@ std::string TcpSackRexmitQueue::detailedInfo() const
 
     uint j = 1;
 
-    for (const auto & elem : rexmitQueue) {
+    for (const auto& elem : rexmitQueue) {
         out << j << ". region: [" << elem.beginSeqNum << ".." << elem.endSeqNum
             << ") \t sacked=" << elem.sacked << "\t rexmitted=" << elem.rexmitted
             << endl;
@@ -171,7 +171,7 @@ bool TcpSackRexmitQueue::checkQueue() const
     uint32_t b = begin;
     bool f = true;
 
-    for (const auto & elem : rexmitQueue) {
+    for (const auto& elem : rexmitQueue) {
         f = f && (b == elem.beginSeqNum);
         f = f && seqLess(elem.beginSeqNum, elem.endSeqNum);
         b = elem.endSeqNum;
@@ -301,13 +301,13 @@ uint32_t TcpSackRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32
 
 void TcpSackRexmitQueue::resetSackedBit()
 {
-    for (auto & elem : rexmitQueue)
+    for (auto& elem : rexmitQueue)
         elem.sacked = false; // reset sacked bit
 }
 
 void TcpSackRexmitQueue::resetRexmittedBit()
 {
-    for (auto & elem : rexmitQueue)
+    for (auto& elem : rexmitQueue)
         elem.rexmitted = false; // reset rexmitted bit
 }
 
@@ -315,7 +315,7 @@ uint32_t TcpSackRexmitQueue::getTotalAmountOfSackedBytes() const
 {
     uint32_t bytes = 0;
 
-    for (const auto & elem : rexmitQueue) {
+    for (const auto& elem : rexmitQueue) {
         if (elem.sacked)
             bytes += (elem.endSeqNum - elem.beginSeqNum);
     }

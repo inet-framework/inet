@@ -111,7 +111,8 @@ uint32_t SctpReceiveStream::enqueueNewDataChunk(SctpDataVariables *dchunk)
             if (deliveryQ->checkAndInsertChunk(dchunk->tsn, dchunk)) {
                 delivery = 2;
             }
-        } else {
+        }
+        else {
             if (unorderedQ->checkAndInsertChunk(dchunk->tsn, dchunk)) {
                 delivery = 3;
             }
@@ -163,7 +164,6 @@ int32_t SctpReceiveStream::getExpectedStreamSeqNum() {
 void SctpReceiveStream::setExpectedStreamSeqNum(int32_t seqNum) {
     expectedStreamSeqNum = seqNum;
 }
-
 
 } // namespace sctp
 

@@ -36,3 +36,4 @@ const Ptr<Chunk> EmptyChunkSerializer::deserialize(MemoryInputStream& stream, co
 }
 
 } // namespace
+

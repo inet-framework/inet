@@ -31,8 +31,8 @@ namespace inet {
  */
 class INET_API SliceChunk : public Chunk
 {
-  friend class Chunk;
-  friend class SliceChunkDescriptor;
+    friend class Chunk;
+    friend class SliceChunkDescriptor;
 
   protected:
     /**

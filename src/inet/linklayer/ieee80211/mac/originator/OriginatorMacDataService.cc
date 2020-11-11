@@ -28,7 +28,7 @@ Define_Module(OriginatorMacDataService);
 void OriginatorMacDataService::initialize()
 {
     sequenceNumberAssigment = new NonQoSSequenceNumberAssignment();
-    fragmentationPolicy = check_and_cast<IFragmentationPolicy*>(getSubmodule("fragmentationPolicy"));
+    fragmentationPolicy = check_and_cast<IFragmentationPolicy *>(getSubmodule("fragmentationPolicy"));
     fragmentation = new Fragmentation();
 }
 
@@ -68,7 +68,7 @@ std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queuein
         if (fragmentationPolicy)
             fragments = fragmentIfNeeded(packet);
         if (!fragments)
-            fragments = new std::vector<Packet *>({packet});
+            fragments = new std::vector<Packet *>({ packet });
         // if (mpduEncryptionAndIntegrity)
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)
@@ -83,6 +83,6 @@ OriginatorMacDataService::~OriginatorMacDataService()
     delete fragmentation;
 }
 
-
 } /* namespace ieee80211 */
 } /* namespace inet */
+

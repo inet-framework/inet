@@ -334,8 +334,7 @@ void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
         updateRxSignals(signal, endRxTime);
         changeReceptionState(RECEIVING_STATE);
     }
-    else if (!signal->isUpdate() && receiveState == RECEIVING_STATE && endRxTimer->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
-    {
+    else if (!signal->isUpdate() && receiveState == RECEIVING_STATE && endRxTimer->getArrivalTime() - simTime() < curEtherDescr->halfBitTime) {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
         // BEFORE "end of previous frame" event (endRxMsg) -- same simulation time,
@@ -661,7 +660,7 @@ void EthernetCsmaMac::handleRetransmission()
 
     int backoffRange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0, backoffRange - 1);
-    EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange -1 << "]" << endl;
+    EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange - 1 << "]" << endl;
 
     scheduleAfter(slotNumber * curEtherDescr->slotTime, endBackoffTimer);
     changeTransmissionState(BACKOFF_STATE);
@@ -845,8 +844,7 @@ void EthernetCsmaMac::fillIFGIfInBurst()
         && (framesSentInBurst > 0)
         && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
         && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + calculatePaddedFrameLength(currentTxFrame)
-            <= curEtherDescr->maxBytesInBurst)
-        )
+            <= curEtherDescr->maxBytesInBurst))
     {
         EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
         gap->setBitrate(curEtherDescr->txrate);
@@ -907,7 +905,7 @@ void EthernetCsmaMac::updateRxSignals(EthernetSignalBase *signal, simtime_t endR
     if (!found)
         rxSignals.push_back(RxSignal(signalTransmissionId, signal, endRxTime));
 
-    if (endRxTimer->getArrivalTime() != maxEndRxTime || endRxTime == maxEndRxTime ) {
+    if (endRxTimer->getArrivalTime() != maxEndRxTime || endRxTime == maxEndRxTime) {
         rescheduleAt(maxEndRxTime, endRxTimer);
     }
 }

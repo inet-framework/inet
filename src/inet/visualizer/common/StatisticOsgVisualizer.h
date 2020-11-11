@@ -36,7 +36,8 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class StatisticOsgVisualization : public StatisticVisualization {
+    class StatisticOsgVisualization : public StatisticVisualization
+    {
       public:
         NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Node *node = nullptr;
@@ -61,7 +62,7 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override { return nullptr;}
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override { return nullptr; }
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override {}
 
 #endif // ifdef WITH_OSG

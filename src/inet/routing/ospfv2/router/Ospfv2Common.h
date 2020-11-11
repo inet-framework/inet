@@ -288,7 +288,6 @@ inline char hexCharToByte(char hex)
         default:
             break;
     }
-    ;
     return 0;
 }
 

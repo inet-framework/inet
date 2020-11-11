@@ -44,8 +44,8 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     class ArpCacheEntry
     {
       public:
-        GlobalArp *owner = nullptr;    // owner module of this cache entry
-        const NetworkInterface *networkInterface = nullptr;    // NIC to send the packet to
+        GlobalArp *owner = nullptr; // owner module of this cache entry
+        const NetworkInterface *networkInterface = nullptr; // NIC to send the packet to
     };
 
   protected:
@@ -69,7 +69,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     //@{
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
     virtual MacAddress resolveL3Address(const L3Address& address, const NetworkInterface *networkInterface) override;
-    // @}
+    //@}
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 

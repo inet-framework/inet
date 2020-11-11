@@ -244,7 +244,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 case 3: flag = IP_TIMESTAMP_SENDER_INIT_ADDRESS; bytes = 8; break;
                 default: break;
             }
-            if (flag != static_cast<TimestampFlag>(-1) && length > 4 && bytes && ((length-4) % bytes) == 0 && pointer >= 5 && ((pointer-5) % bytes) == 0) {
+            if (flag != static_cast<TimestampFlag>(-1) && length > 4 && bytes && ((length - 4) % bytes) == 0 && pointer >= 5 && ((pointer - 5) % bytes) == 0) {
                 auto *option = new Ipv4OptionTimestamp();
                 option->setType(type);
                 option->setLength(length);
@@ -253,7 +253,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 option->setRecordTimestampArraySize((length - 4) / bytes);
                 if (bytes == 8)
                     option->setRecordAddressArraySize((length - 4) / bytes);
-                option->setNextIdx((pointer-5) / bytes);
+                option->setNextIdx((pointer - 5) / bytes);
                 for (unsigned int count = 0; count < option->getRecordAddressArraySize(); count++) {
                     if (bytes == 8)
                         option->setRecordAddress(count, stream.readIpv4Address());
@@ -274,7 +274,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 option->setType(type);
                 option->setLength(length);
                 option->setRecordAddressArraySize((length - 3) / 4);
-                option->setNextAddressIdx((pointer-4) / 4);
+                option->setNextAddressIdx((pointer - 4) / 4);
                 for (unsigned int count = 0; count < option->getRecordAddressArraySize(); count++) {
                     option->setRecordAddress(count, stream.readIpv4Address());
                 }
@@ -309,7 +309,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
     if (length > 2)
         option->setBytesArraySize(length - 2);
     for (unsigned int i = 2; i < length; i++)
-        option->setBytes(i-2, stream.readByte());
+        option->setBytes(i - 2, stream.readByte());
     return option;
 }
 

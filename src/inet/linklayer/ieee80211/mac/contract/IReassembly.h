@@ -32,22 +32,22 @@ class Ieee80211DataOrMgmtHeader;
  */
 class INET_API IReassembly
 {
-    public:
-        virtual ~IReassembly() { }
+  public:
+    virtual ~IReassembly() {}
 
-        /**
-         * Add a fragment to the reassembly buffer. If the new fragment completes a frame,
-         * then the reassembled frame is returned (and fragments are removed from the buffer),
-         * otherwise the function returns nullptr.
-         */
-        virtual Packet *addFragment(Packet *frame) = 0;
+    /**
+     * Add a fragment to the reassembly buffer. If the new fragment completes a frame,
+     * then the reassembled frame is returned (and fragments are removed from the buffer),
+     * otherwise the function returns nullptr.
+     */
+    virtual Packet *addFragment(Packet *frame) = 0;
 
-        /**
-         * Discard fragments from the reassembly buffer. Frames are identified by the transmitter
-         * address, the TID, and the sequence number range [startSeqNumber, endSeqNumber[.
-         * Set tid=-1 for non-QoS frames.
-         */
-        virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
+    /**
+     * Discard fragments from the reassembly buffer. Frames are identified by the transmitter
+     * address, the TID, and the sequence number range [startSeqNumber, endSeqNumber[.
+     * Set tid=-1 for non-QoS frames.
+     */
+    virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
 };
 
 } // namespace ieee80211

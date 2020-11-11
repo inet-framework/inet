@@ -63,7 +63,7 @@ EroVector routeToEro(const Ipv4AddressVector& rro)
 {
     EroVector ero;
 
-    for (auto & elem : rro) {
+    for (auto& elem : rro) {
         EroObj hop;
         hop.L = false;
         hop.node = elem;
@@ -100,7 +100,7 @@ int find(const EroVector& ERO, Ipv4Address node)
 
 bool find(std::vector<int>& vec, int value)
 {
-    for (auto & elem : vec)
+    for (auto& elem : vec)
         if (elem == value)
             return true;
 
@@ -109,7 +109,7 @@ bool find(std::vector<int>& vec, int value)
 
 bool find(const Ipv4AddressVector& vec, Ipv4Address addr)
 {
-    for (auto & elem : vec)
+    for (auto& elem : vec)
         if (elem == addr)
             return true;
 
@@ -118,7 +118,7 @@ bool find(const Ipv4AddressVector& vec, Ipv4Address addr)
 
 void append(std::vector<int>& dest, const std::vector<int>& src)
 {
-    for (auto & elem : src)
+    for (auto& elem : src)
         dest.push_back(elem);
 }
 

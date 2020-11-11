@@ -29,16 +29,16 @@ namespace inet {
 struct nat_message
 {
 
-    uint16_t      multi;
-    uint16_t      reserved = 0;
-    uint16_t      peer1;
-    uint16_t      peer2;
-    uint16_t      portPeer1;
-    uint16_t      portPeer2;
-    uint16_t      numAddrPeer1;
-    uint16_t      numAddrPeer2;
-    uint32_t    peer1Addresses[0];
-    uint32_t    peer2Addresses[0];
+    uint16_t multi;
+    uint16_t reserved = 0;
+    uint16_t peer1;
+    uint16_t peer2;
+    uint16_t portPeer1;
+    uint16_t portPeer2;
+    uint16_t numAddrPeer1;
+    uint16_t numAddrPeer2;
+    uint32_t peer1Addresses[0];
+    uint32_t peer2Addresses[0];
 };
 
 /**
@@ -115,7 +115,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     void finish() override;
     void handleTimer(cMessage *msg);
     /*void setAssociation(SctpAssociation *_assoc) {
-       assoc = _assoc;};*/
+       assoc = _assoc; };*/
     void generateAndSend();
     void connect(L3Address connectAddress, int32_t connectPort);
     void connectx(AddressVector connectAddressList, int32_t connectPort);
@@ -145,7 +145,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) override;
     //@}
     void msgAbandonedArrived(SctpSocket *socket) override;
-    //void setAssociation(SctpAssociation *_assoc) {assoc = _assoc;};
+    //void setAssociation(SctpAssociation *_assoc) {assoc = _assoc; }
 
     void setPrimaryPath();
     void sendStreamResetNotification();

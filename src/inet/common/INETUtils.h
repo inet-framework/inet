@@ -77,7 +77,7 @@ INET_API std::string vstringf(const char *fmt, va_list& args);
 /**
  * Rounding up to the nearest multiple of a number.
  */
-inline int roundUp(int numToRound, int multiple) { return ((numToRound + multiple -1) / multiple) * multiple; }
+inline int roundUp(int numToRound, int multiple) { return ((numToRound + multiple - 1) / multiple) * multiple; }
 
 /**
  * Like cObjectFactory::createOneIfClassIsKnown(), except it starts searching for the class in the given namespace
@@ -93,9 +93,9 @@ INET_API cObject *createOne(const char *className, const char *defaultNamespace 
  * Duplicate a packet together with its control info. (cPacket's dup() ignores the control info,
  * it will be nullptr in the returned copy).
  */
-template<typename T>
+template <typename T>
 T *dupPacketAndControlInfo(T *packet) {
-    T *copy  = packet->dup();
+    T *copy = packet->dup();
     if (cObject *ctrl = packet->getControlInfo())
         copy->setControlInfo(ctrl->dup());
     return copy;

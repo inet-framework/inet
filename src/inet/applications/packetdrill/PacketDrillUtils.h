@@ -32,21 +32,22 @@ namespace inet {
 /* For tables mapping symbolic strace strings to the corresponding
  * integer values.
  */
-struct int_symbol {
+struct int_symbol
+{
     int64_t value;
     const char *name;
 };
 
 #ifndef IPPROTO_SCTP
-#define IPPROTO_SCTP 132
+#define IPPROTO_SCTP    132
 #endif
 
 /* On Windows we don't have these macros defined (values copyed from fcntl.h) */
 #ifndef F_GETFL
-#define F_GETFL 3
+#define F_GETFL                                                      3
 #endif
 #ifndef F_SETFL
-#define F_SETFL 4
+#define F_SETFL                                                      4
 #endif
 
 /* TCP option numbers and lengths. */
@@ -183,7 +184,8 @@ enum direction_t {
 };
 
 /* A --name=value option in a script */
-struct option_list {
+struct option_list
+{
     char *name;
     char *value;
     struct option_list *next;
@@ -194,11 +196,11 @@ struct option_list {
 
 
 /* The errno-related info from strace to summarize a system call error */
-struct errno_spec {
+struct errno_spec
+{
     const char *errno_macro;    /* errno symbol (C macro name) */
     const char *strerror;       /* strerror translation of errno */
 };
-
 
 /* Return a pointer to a table of platform-specific string->int mappings. */
 struct int_symbol *platform_symbols(void);
@@ -265,7 +267,7 @@ enum expression_t {
 /* Flavors of IP versions we support. */
 enum ip_version_t {
     /* Native IPv4, with AF_INET sockets and IPv4 addresses. */
-    IP_VERSION_4        = 0,
+    IP_VERSION_4 = 0,
 
     /* IPv4-Mapped IPv6 addresses: (see RFC 4291 sec. 2.5.5.2) we
      * use AF_INET6 sockets but all connect(), bind(), and
@@ -273,14 +275,14 @@ enum ip_version_t {
      * address space. So all interface addresses and packets on
      * the wire are IPv4.
      */
-    IP_VERSION_4_MAPPED_6   = 1,
+    IP_VERSION_4_MAPPED_6 = 1,
 
     /* Native IPv6, with AF_INET6 sockets and IPv6 addresses. */
-    IP_VERSION_6        = 2,
+    IP_VERSION_6 = 2,
 };
 
 enum status_t {
-    STATUS_OK  = 0,
+    STATUS_OK = 0,
     STATUS_ERR = -1,
     STATUS_WARN = -2,    /* a non-fatal error or warning */
 };
@@ -292,7 +294,8 @@ class PacketDrillStruct;
 class PacketDrillOption;
 
 /* A system call and its expected result. */
-struct syscall_spec {
+struct syscall_spec
+{
     const char *name;            /* name of system call */
     cQueue *arguments;           /* arguments to system call */
     PacketDrillExpression *result;        /* expected result from call */
@@ -302,7 +305,8 @@ struct syscall_spec {
 };
 
 /* A shell command line to execute using system(3) */
-struct command_spec {
+struct command_spec
+{
     const char *command_line;    /* executed with /bin/sh */
 };
 
@@ -331,19 +335,22 @@ void parse_and_finalize_config(inet::Invocation *invocation);
 namespace inet {
 
 /* Top-level info about the invocation of a test script */
-struct Invocation {
+struct Invocation
+{
     PacketDrillConfig *config;    /* run-time configuration */
     PacketDrillScript *script;    /* parse tree of the script to run */
 };
 
 /* Two expressions combined via a binary operator */
-struct binary_expression {
+struct binary_expression
+{
     char *op;    /* binary operator */
     PacketDrillExpression *lhs;    /* left hand side expression */
     PacketDrillExpression *rhs;    /* right hand side expression */
 };
 
-struct sctp_rtoinfo_expr {
+struct sctp_rtoinfo_expr
+{
     PacketDrillExpression *srto_assoc_id;
     PacketDrillExpression *srto_initial;
     PacketDrillExpression *srto_max;
@@ -351,22 +358,24 @@ struct sctp_rtoinfo_expr {
 };
 
 /* Parse tree for a sctp_initmsg struct in a [gs]etsockopt syscall. */
-struct sctp_initmsg_expr {
+struct sctp_initmsg_expr
+{
     PacketDrillExpression *sinit_num_ostreams;
     PacketDrillExpression *sinit_max_instreams;
     PacketDrillExpression *sinit_max_attempts;
     PacketDrillExpression *sinit_max_init_timeo;
 };
 
-
 /* Parse tree for a sctp_assoc_value struct in a [gs]etsockopt syscall. */
-struct sctp_assoc_value_expr {
+struct sctp_assoc_value_expr
+{
     PacketDrillExpression *assoc_id;
     PacketDrillExpression *assoc_value;
 };
 
 /* Parse tree for sctp_assocparams struct in [gs]etsockopt syscall. */
-struct sctp_assocparams_expr {
+struct sctp_assocparams_expr
+{
     PacketDrillExpression *sasoc_assoc_id;
     PacketDrillExpression *sasoc_asocmaxrxt;
     PacketDrillExpression *sasoc_number_peer_destinations;
@@ -376,14 +385,16 @@ struct sctp_assocparams_expr {
 };
 
 /* Parse tree for a sctp_sack_info struct in a [gs]etsockopt syscall. */
-struct sctp_sack_info_expr {
+struct sctp_sack_info_expr
+{
     PacketDrillExpression *sack_assoc_id;
     PacketDrillExpression *sack_delay;
     PacketDrillExpression *sack_freq;
 };
 
 /* Parse tree for a sctp_paddrparams struct in a [gs]etsockopt syscall. */
-struct sctp_paddrparams_expr {
+struct sctp_paddrparams_expr
+{
     PacketDrillExpression *spp_assoc_id;
     PacketDrillExpression *spp_address;
     PacketDrillExpression *spp_hbinterval;
@@ -395,7 +406,8 @@ struct sctp_paddrparams_expr {
 };
 
 /* Parse tree for sctp_sndrcvinfo in sctp_recvmsg syscall. */
-struct sctp_sndrcvinfo_expr {
+struct sctp_sndrcvinfo_expr
+{
     PacketDrillExpression *sinfo_stream;
     PacketDrillExpression *sinfo_ssn;
     PacketDrillExpression *sinfo_flags;
@@ -407,7 +419,8 @@ struct sctp_sndrcvinfo_expr {
     PacketDrillExpression *sinfo_assoc_id;
 };
 
-struct sctp_reset_streams_expr {
+struct sctp_reset_streams_expr
+{
     PacketDrillExpression *srs_assoc_id;
     PacketDrillExpression *srs_flags;
     PacketDrillExpression *srs_number_streams;
@@ -415,7 +428,8 @@ struct sctp_reset_streams_expr {
 };
 
 /* Parse tree for a sctp_status struct in a [gs]etsockopt syscall. */
-struct sctp_status_expr {
+struct sctp_status_expr
+{
     PacketDrillExpression *sstat_assoc_id;
     PacketDrillExpression *sstat_state;
     PacketDrillExpression *sstat_rwnd;
@@ -428,7 +442,8 @@ struct sctp_status_expr {
 };
 
 /* Parse tree for sctp_add_stream struct for setsockopt. */
-struct sctp_add_streams_expr {
+struct sctp_add_streams_expr
+{
     PacketDrillExpression *sas_assoc_id;
     PacketDrillExpression *sas_instrms;
     PacketDrillExpression *sas_outstrms;
@@ -436,325 +451,323 @@ struct sctp_add_streams_expr {
 
 class INET_API PacketDrillConfig
 {
-    public:
-        PacketDrillConfig();
-        ~PacketDrillConfig();
+  public:
+    PacketDrillConfig();
+    ~PacketDrillConfig();
 
-    private:
-        enum ip_version_t ip_version;    /* v4, v4-mapped-v6, v6 */
-        int socketDomain;    /* AF_INET or AF_INET6 */
-        int wireProtocol;    /* AF_INET or AF_INET6 */
+  private:
+    enum ip_version_t ip_version;    /* v4, v4-mapped-v6, v6 */
+    int socketDomain;    /* AF_INET or AF_INET6 */
+    int wireProtocol;    /* AF_INET or AF_INET6 */
 
-        int tolerance_usecs;    /* tolerance for time divergence */
-        int mtu;    /* MTU of tun device */
-        char *scriptPath;    /* pathname of script file */
+    int tolerance_usecs;    /* tolerance for time divergence */
+    int mtu;    /* MTU of tun device */
+    char *scriptPath;    /* pathname of script file */
 
-    public:
-        const char* getScriptPath() const { return scriptPath; };
-        void setScriptPath(const char* sPath) { scriptPath = (char*)sPath; };
-        int getWireProtocol() const { return wireProtocol; };
-        int getSocketDomain() const { return socketDomain; };
-        int getToleranceUsecs() const { return tolerance_usecs; };
-        void parseScriptOptions(cQueue *options);
+  public:
+    const char *getScriptPath() const { return scriptPath; };
+    void setScriptPath(const char *sPath) { scriptPath = (char *)sPath; }
+    int getWireProtocol() const { return wireProtocol; };
+    int getSocketDomain() const { return socketDomain; };
+    int getToleranceUsecs() const { return tolerance_usecs; };
+    void parseScriptOptions(cQueue *options);
 };
-
 
 class INET_API PacketDrillPacket
 {
-    public:
-        PacketDrillPacket();
-        ~PacketDrillPacket();
+  public:
+    PacketDrillPacket();
+    ~PacketDrillPacket();
 
-    private:
-        Packet* inetPacket;
-        enum direction_t direction; /* direction packet is traveling */
+  private:
+    Packet *inetPacket;
+    enum direction_t direction; /* direction packet is traveling */
 
-    public:
-        enum direction_t getDirection() const { return direction; };
-        void setDirection(enum direction_t dir) { direction = dir; };
-        Packet* getInetPacket() { return inetPacket; };
-        void setInetPacket(Packet *pkt) { inetPacket = pkt->dup(); delete pkt;};
+  public:
+    enum direction_t getDirection() const { return direction; };
+    void setDirection(enum direction_t dir) { direction = dir; }
+    Packet *getInetPacket() { return inetPacket; };
+    void setInetPacket(Packet *pkt) { inetPacket = pkt->dup(); delete pkt; }
 };
 
 class INET_API PacketDrillEvent : public cObject
 {
-    public:
-        PacketDrillEvent(enum event_t type_);
-        ~PacketDrillEvent();
+  public:
+    PacketDrillEvent(enum event_t type_);
+    ~PacketDrillEvent();
 
-    private:
-        int lineNumber;    /* location in test script file */
-        int eventNumber;
-        simtime_t eventTime;    /* event time in microseconds */
-        simtime_t eventTimeEnd;    /* event time range end (or NO_TIME_RANGE) */
-        simtime_t eventOffset;    /* relative event time offset from script start (or NO_TIME_RANGE) */
-        enum eventTime_t timeType;    /* type of time */
-        enum event_t type;    /* type of the event */
-        union {
-            PacketDrillPacket *packet;
-            struct syscall_spec *syscall;
-            struct command_spec *command;
-        } eventKind;    /* pointer to the event */
+  private:
+    int lineNumber;    /* location in test script file */
+    int eventNumber;
+    simtime_t eventTime;    /* event time in microseconds */
+    simtime_t eventTimeEnd;    /* event time range end (or NO_TIME_RANGE) */
+    simtime_t eventOffset;    /* relative event time offset from script start (or NO_TIME_RANGE) */
+    enum eventTime_t timeType;    /* type of time */
+    enum event_t type;    /* type of the event */
+    union
+    {
+        PacketDrillPacket *packet;
+        struct syscall_spec *syscall;
+        struct command_spec *command;
+    } eventKind;    /* pointer to the event */
 
-    public:
-        void setLineNumber(int number) { lineNumber = number; };
-        int getLineNumber() const { return lineNumber; };
-        void setEventNumber(int number) { eventNumber = number; };
-        int getEventNumber() const { return eventNumber; };
-        void setEventTime(int64_t usecs) { eventTime = SimTime(usecs, SIMTIME_US); };
-        void setEventTime(simtime_t time) { eventTime = time; };
-        simtime_t getEventTime() const { return eventTime; };
-        void setEventTimeEnd(int64_t usecs) { eventTimeEnd = SimTime(usecs, SIMTIME_US); };
-        void setEventTimeEnd(simtime_t time) { eventTimeEnd = time; };
-        simtime_t getEventTimeEnd() const { return eventTimeEnd; };
-        void setEventOffset(int64_t usecs) { eventOffset = SimTime(usecs, SIMTIME_US); };
-        void setEventOffset(simtime_t time) { eventOffset = time; };
-        simtime_t getEventOffset() const { return eventOffset; };
-        void setTimeType(enum eventTime_t ttype) { timeType = ttype; };
-        enum eventTime_t getTimeType() const { return timeType; };
-        void setType(enum event_t tt) { type = tt; };
-        enum event_t getType() const { return type; };
-        PacketDrillPacket* getPacket() { return eventKind.packet; };
-        void setPacket(PacketDrillPacket* packet) { eventKind.packet = packet; };
-        void setSyscall(struct syscall_spec *syscall) { eventKind.syscall = syscall; };
-        struct syscall_spec *getSyscall() { return eventKind.syscall; };
-        void setCommand(struct command_spec *command) { eventKind.command = command; };
-        struct command_spec *getCommand() { return eventKind.command; };
+  public:
+    void setLineNumber(int number) { lineNumber = number; }
+    int getLineNumber() const { return lineNumber; };
+    void setEventNumber(int number) { eventNumber = number; }
+    int getEventNumber() const { return eventNumber; };
+    void setEventTime(int64_t usecs) { eventTime = SimTime(usecs, SIMTIME_US); }
+    void setEventTime(simtime_t time) { eventTime = time; }
+    simtime_t getEventTime() const { return eventTime; };
+    void setEventTimeEnd(int64_t usecs) { eventTimeEnd = SimTime(usecs, SIMTIME_US); }
+    void setEventTimeEnd(simtime_t time) { eventTimeEnd = time; }
+    simtime_t getEventTimeEnd() const { return eventTimeEnd; };
+    void setEventOffset(int64_t usecs) { eventOffset = SimTime(usecs, SIMTIME_US); }
+    void setEventOffset(simtime_t time) { eventOffset = time; }
+    simtime_t getEventOffset() const { return eventOffset; };
+    void setTimeType(enum eventTime_t ttype) { timeType = ttype; }
+    enum eventTime_t getTimeType() const { return timeType; };
+    void setType(enum event_t tt) { type = tt; }
+    enum event_t getType() const { return type; };
+    PacketDrillPacket *getPacket() { return eventKind.packet; };
+    void setPacket(PacketDrillPacket *packet) { eventKind.packet = packet; }
+    void setSyscall(struct syscall_spec *syscall) { eventKind.syscall = syscall; }
+    struct syscall_spec *getSyscall() { return eventKind.syscall; };
+    void setCommand(struct command_spec *command) { eventKind.command = command; }
+    struct command_spec *getCommand() { return eventKind.command; };
 };
-
 
 class INET_API PacketDrillExpression : public cObject
 {
-    public:
-        PacketDrillExpression(enum expression_t type_);
-        ~PacketDrillExpression();
+  public:
+    PacketDrillExpression(enum expression_t type_);
+    ~PacketDrillExpression();
 
-    private:
-        enum expression_t type;
-        union {
-            int64_t num;
-            char *string;
-            struct binary_expression *binary;
-            struct sctp_rtoinfo_expr *sctp_rtoinfo;
-            struct sctp_initmsg_expr *sctp_initmsg;
-            struct sctp_assoc_value_expr *sctp_assoc_value;
-            struct sctp_assocparams_expr *sctp_assocparams;
-            struct sctp_sack_info_expr *sctp_sack_info;
-            struct sctp_paddrparams_expr *sctp_paddr_params;
-            struct sctp_sndrcvinfo_expr *sctp_sndrcvinfo;
-            struct sctp_reset_streams_expr *sctp_resetstreams;
-            struct sctp_add_streams_expr *sctp_addstreams;
-            struct sctp_status_expr *sctp_status;
-            L3Address *ip_address;
-        } value;
-        cQueue *list;
-        const char *format; /* the printf format for printing the value */
+  private:
+    enum expression_t type;
+    union
+    {
+        int64_t num;
+        char *string;
+        struct binary_expression *binary;
+        struct sctp_rtoinfo_expr *sctp_rtoinfo;
+        struct sctp_initmsg_expr *sctp_initmsg;
+        struct sctp_assoc_value_expr *sctp_assoc_value;
+        struct sctp_assocparams_expr *sctp_assocparams;
+        struct sctp_sack_info_expr *sctp_sack_info;
+        struct sctp_paddrparams_expr *sctp_paddr_params;
+        struct sctp_sndrcvinfo_expr *sctp_sndrcvinfo;
+        struct sctp_reset_streams_expr *sctp_resetstreams;
+        struct sctp_add_streams_expr *sctp_addstreams;
+        struct sctp_status_expr *sctp_status;
+        L3Address *ip_address;
+    } value;
+    cQueue *list;
+    const char *format; /* the printf format for printing the value */
 
-    public:
-        void setType(enum expression_t t) { type = t; };
-        enum expression_t getType() const { return type; };
-        void setNum(int64_t n) { value.num = n; };
-        int64_t getNum() const { return value.num; };
-        void setString(char* str) { value.string = str; };
-        const char* getString() const { return value.string; };
-        void setFormat(const char* format_) { format = format_; };
-        const char* getFormat() const { return format; };
-        cQueue* getList() { return list; };
-        void setList(cQueue* queue) { list = queue; };
-        struct binary_expression* getBinary() { return value.binary; };
-        void setBinary(struct binary_expression* bin) { value.binary = bin; };
-        void setRtoinfo(struct sctp_rtoinfo_expr *exp) { value.sctp_rtoinfo = exp; };
-        struct sctp_rtoinfo_expr *getRtoinfo() { return value.sctp_rtoinfo; };
-        void setInitmsg(struct sctp_initmsg_expr *exp) { value.sctp_initmsg = exp; };
-        struct sctp_initmsg_expr *getInitmsg() { return value.sctp_initmsg; };
-        void setAssocParams(struct sctp_assocparams_expr *exp) { value.sctp_assocparams = exp; };
-        struct sctp_assocparams_expr *getAssocParams() { return value.sctp_assocparams; };
-        void setAssocval(struct sctp_assoc_value_expr *exp) { value.sctp_assoc_value = exp; };
-        struct sctp_assoc_value_expr *getAssocval() { return value.sctp_assoc_value; };
-        void setSackinfo(struct sctp_sack_info_expr *exp) { value.sctp_sack_info = exp; };
-        struct sctp_sack_info_expr *getSackinfo() { return value.sctp_sack_info; };
-        void setPaddrParams(struct sctp_paddrparams_expr *exp) {value.sctp_paddr_params = exp; };
-        struct sctp_paddrparams_expr *getPaddrParams() { return value.sctp_paddr_params; };
-        void setSndRcvInfo(struct sctp_sndrcvinfo_expr *exp) {value.sctp_sndrcvinfo = exp; };
-        struct sctp_sndrcvinfo_expr *getSndRcvInfo() { return value.sctp_sndrcvinfo; };
-        void setResetStreams(struct sctp_reset_streams_expr *exp) {value.sctp_resetstreams = exp; };
-        struct sctp_reset_streams_expr *getResetStreams() { return value.sctp_resetstreams; };
-        void setIp(L3Address *exp) {value.ip_address = exp; };
-        void setStatus(struct sctp_status_expr *exp) {value.sctp_status = exp; };
-        struct sctp_status_expr *getStatus() { return value.sctp_status; };
-        void setAddStreams(struct sctp_add_streams_expr *exp) {value.sctp_addstreams = exp; };
-        struct sctp_add_streams_expr *getAddStreams() { return value.sctp_addstreams; };
+  public:
+    void setType(enum expression_t t) { type = t; }
+    enum expression_t getType() const { return type; };
+    void setNum(int64_t n) { value.num = n; }
+    int64_t getNum() const { return value.num; };
+    void setString(char *str) { value.string = str; }
+    const char *getString() const { return value.string; };
+    void setFormat(const char *format_) { format = format_; }
+    const char *getFormat() const { return format; };
+    cQueue *getList() { return list; };
+    void setList(cQueue *queue) { list = queue; }
+    struct binary_expression *getBinary() { return value.binary; };
+    void setBinary(struct binary_expression *bin) { value.binary = bin; }
+    void setRtoinfo(struct sctp_rtoinfo_expr *exp) { value.sctp_rtoinfo = exp; }
+    struct sctp_rtoinfo_expr *getRtoinfo() { return value.sctp_rtoinfo; };
+    void setInitmsg(struct sctp_initmsg_expr *exp) { value.sctp_initmsg = exp; }
+    struct sctp_initmsg_expr *getInitmsg() { return value.sctp_initmsg; };
+    void setAssocParams(struct sctp_assocparams_expr *exp) { value.sctp_assocparams = exp; }
+    struct sctp_assocparams_expr *getAssocParams() { return value.sctp_assocparams; };
+    void setAssocval(struct sctp_assoc_value_expr *exp) { value.sctp_assoc_value = exp; }
+    struct sctp_assoc_value_expr *getAssocval() { return value.sctp_assoc_value; };
+    void setSackinfo(struct sctp_sack_info_expr *exp) { value.sctp_sack_info = exp; }
+    struct sctp_sack_info_expr *getSackinfo() { return value.sctp_sack_info; };
+    void setPaddrParams(struct sctp_paddrparams_expr *exp) { value.sctp_paddr_params = exp; }
+    struct sctp_paddrparams_expr *getPaddrParams() { return value.sctp_paddr_params; };
+    void setSndRcvInfo(struct sctp_sndrcvinfo_expr *exp) { value.sctp_sndrcvinfo = exp; }
+    struct sctp_sndrcvinfo_expr *getSndRcvInfo() { return value.sctp_sndrcvinfo; };
+    void setResetStreams(struct sctp_reset_streams_expr *exp) { value.sctp_resetstreams = exp; }
+    struct sctp_reset_streams_expr *getResetStreams() { return value.sctp_resetstreams; };
+    void setIp(L3Address *exp) { value.ip_address = exp; }
+    void setStatus(struct sctp_status_expr *exp) { value.sctp_status = exp; }
+    struct sctp_status_expr *getStatus() { return value.sctp_status; };
+    void setAddStreams(struct sctp_add_streams_expr *exp) { value.sctp_addstreams = exp; }
+    struct sctp_add_streams_expr *getAddStreams() { return value.sctp_addstreams; };
 
-
-        int unescapeCstringExpression(const char *input_string, char **error);
-        int getS32(int32_t *value, char **error);
-        int getU16(uint16_t *value, char **error);
-        int getU32(uint32_t *value, char **error);
-        int symbolToInt(const char *input_symbol, int64_t *output_integer, char **error);
-        bool lookupIntSymbol(const char *input_symbol, int64_t *output_integer, struct int_symbol *symbols);
+    int unescapeCstringExpression(const char *input_string, char **error);
+    int getS32(int32_t *value, char **error);
+    int getU16(uint16_t *value, char **error);
+    int getU32(uint32_t *value, char **error);
+    int symbolToInt(const char *input_symbol, int64_t *output_integer, char **error);
+    bool lookupIntSymbol(const char *input_symbol, int64_t *output_integer, struct int_symbol *symbols);
 };
-
 
 class INET_API PacketDrillScript
 {
-    public:
-        PacketDrillScript(const char* file);
-        ~PacketDrillScript();
+  public:
+    PacketDrillScript(const char *file);
+    ~PacketDrillScript();
 
-    private:
-        cQueue *optionList;
-        cQueue *eventList;
-        char *buffer;
-        int length;
-        const char *scriptPath;
+  private:
+    cQueue *optionList;
+    cQueue *eventList;
+    char *buffer;
+    int length;
+    const char *scriptPath;
 
-    public:
-        void readScript();
-        int parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer);
+  public:
+    void readScript();
+    int parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer);
 
-        char *getBuffer() { return buffer; }
-        int getLength() const { return length; }
-        const char *getScriptPath() { return scriptPath; }
-        cQueue *getEventList() { return eventList; }
-        cQueue *getOptionList() { return optionList; }
-        void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); }
-        void addOption(PacketDrillOption *opt) { optionList->insert((cObject *)opt); }  //FIXME Why needed the cast to cObject?
+    char *getBuffer() { return buffer; }
+    int getLength() const { return length; }
+    const char *getScriptPath() { return scriptPath; }
+    cQueue *getEventList() { return eventList; }
+    cQueue *getOptionList() { return optionList; }
+    void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); }
+    void addOption(PacketDrillOption *opt) { optionList->insert((cObject *)opt); }  //FIXME Why needed the cast to cObject?
 };
 
-class INET_API PacketDrillStruct: public cObject
+class INET_API PacketDrillStruct : public cObject
 {
-    public:
-        PacketDrillStruct();
-        PacketDrillStruct(int64_t v1, int64_t v2);
-        PacketDrillStruct(int64_t v1, int64_t v2, int32_t v3, int32_t v4, cQueue *streams);
+  public:
+    PacketDrillStruct();
+    PacketDrillStruct(int64_t v1, int64_t v2);
+    PacketDrillStruct(int64_t v1, int64_t v2, int32_t v3, int32_t v4, cQueue *streams);
 
-        int64_t getValue1() const { return value1; };
-        void setValue1(uint64_t value) { value1 = value; };
-        int64_t getValue2() const { return value2; };
-        void setValue2(uint64_t value) { value2 = value; };
-        int32_t getValue3() const { return value3; }
-        int32_t getValue4() const { return value4; }
-        cQueue *getStreams() { return streamNumbers; };
-        virtual PacketDrillStruct *dup() const { return new PacketDrillStruct(*this); };
+    int64_t getValue1() const { return value1; };
+    void setValue1(uint64_t value) { value1 = value; }
+    int64_t getValue2() const { return value2; };
+    void setValue2(uint64_t value) { value2 = value; }
+    int32_t getValue3() const { return value3; }
+    int32_t getValue4() const { return value4; }
+    cQueue *getStreams() { return streamNumbers; };
+    virtual PacketDrillStruct *dup() const { return new PacketDrillStruct(*this); }
 
-    private:
-        int64_t value1;
-        int64_t value2;
-        int32_t value3;
-        int32_t value4;
-        cQueue *streamNumbers = nullptr;
+  private:
+    int64_t value1;
+    int64_t value2;
+    int32_t value3;
+    int32_t value4;
+    cQueue *streamNumbers = nullptr;
 };
 
-class INET_API PacketDrillOption: public cObject
+class INET_API PacketDrillOption : public cObject
 {
-    public:
-        PacketDrillOption(char *name, char *value);
+  public:
+    PacketDrillOption(char *name, char *value);
 
-        const char *getName() const { return name; }
-        void setName(char *name_) { free(name); name = strdup(name_); }
-        const char *getValue() const { return value; }
-        void setValue(char *value_) { free(value); value = strdup(value_); }
+    const char *getName() const { return name; }
+    void setName(char *name_) { free(name); name = strdup(name_); }
+    const char *getValue() const { return value; }
+    void setValue(char *value_) { free(value); value = strdup(value_); }
 
-    private:
-        char *name;
-        char *value;
+  private:
+    char *name;
+    char *value;
 };
 
 typedef std::vector<uint8_t> ByteVector;
 
-class INET_API PacketDrillBytes: public cObject
+class INET_API PacketDrillBytes : public cObject
 {
-    public:
-        PacketDrillBytes();
-        PacketDrillBytes(uint8_t byte);
+  public:
+    PacketDrillBytes();
+    PacketDrillBytes(uint8_t byte);
 
-        void appendByte(uint8_t byte);
-        uint32_t getListLength() const { return listLength; };
-        ByteVector* getByteList() { return &byteList; };
+    void appendByte(uint8_t byte);
+    uint32_t getListLength() const { return listLength; };
+    ByteVector *getByteList() { return &byteList; };
 
-    private:
-        std::vector<uint8_t> byteList;
-        uint32_t listLength;
+  private:
+    std::vector<uint8_t> byteList;
+    uint32_t listLength;
 };
 
 class INET_API PacketDrillTcpOption : public cObject
 {
-    public:
-        PacketDrillTcpOption(uint16_t kind_, uint16_t length_);
+  public:
+    PacketDrillTcpOption(uint16_t kind_, uint16_t length_);
 
-    private:
-        uint16_t kind;
-        uint16_t length;
-        uint16_t mss; /* in network order */
-        struct
-        {
-                uint32_t val; /* in network order */
-                uint32_t ecr; /* in network order */
-        } timeStamp;
-        cQueue *blockList;
-        uint8_t windowScale;
-        uint16_t blockCount;
+  private:
+    uint16_t kind;
+    uint16_t length;
+    uint16_t mss; /* in network order */
+    struct
+    {
+        uint32_t val; /* in network order */
+        uint32_t ecr; /* in network order */
+    } timeStamp;
+    cQueue *blockList;
+    uint8_t windowScale;
+    uint16_t blockCount;
 
-    public:
-        uint16_t getKind() { return kind; };
-        uint16_t getLength() { return length; };
-        void setLength(uint16_t len) {length = len;};
-        uint16_t getMss() { return mss; };
-        void setMss(uint16_t mss_) { mss = mss_; };
-        uint16_t getWindowScale() { return windowScale; };
-        void setWindowScale(uint16_t ws_) { windowScale = ws_; };
-        uint32_t getVal() { return timeStamp.val; };
-        void setVal(uint32_t val_) { timeStamp.val = val_; };
-        uint32_t getEcr() { return timeStamp.ecr; };
-        void setEcr(uint32_t ecr_) { timeStamp.ecr = ecr_; };
-        cQueue *getBlockList() { return blockList; };
-        void setBlockList(cQueue *bList) { blockList = bList; };
-        uint16_t getBlockCount() { return blockCount; };
-        void increaseBlockCount() { blockCount++; };
+  public:
+    uint16_t getKind() { return kind; };
+    uint16_t getLength() { return length; };
+    void setLength(uint16_t len) { length = len; }
+    uint16_t getMss() { return mss; };
+    void setMss(uint16_t mss_) { mss = mss_; }
+    uint16_t getWindowScale() { return windowScale; };
+    void setWindowScale(uint16_t ws_) { windowScale = ws_; }
+    uint32_t getVal() { return timeStamp.val; };
+    void setVal(uint32_t val_) { timeStamp.val = val_; }
+    uint32_t getEcr() { return timeStamp.ecr; };
+    void setEcr(uint32_t ecr_) { timeStamp.ecr = ecr_; }
+    cQueue *getBlockList() { return blockList; };
+    void setBlockList(cQueue *bList) { blockList = bList; }
+    uint16_t getBlockCount() { return blockCount; };
+    void increaseBlockCount() { blockCount++; };
 };
 
 class INET_API PacketDrillSctpChunk : public cObject
 {
-    public:
-        PacketDrillSctpChunk(uint8_t type_, sctp::SctpChunk *sctpChunk);
+  public:
+    PacketDrillSctpChunk(uint8_t type_, sctp::SctpChunk *sctpChunk);
 
-    private:
-        uint8_t type;
-        sctp::SctpChunk *chunk;
+  private:
+    uint8_t type;
+    sctp::SctpChunk *chunk;
 
-    public:
-        uint8_t getType() { return type; };
-        sctp::SctpChunk *getChunk() { return chunk; };
+  public:
+    uint8_t getType() { return type; };
+    sctp::SctpChunk *getChunk() { return chunk; };
 };
 
 class INET_API PacketDrillSctpParameter : public cObject
 {
-    public:
-        PacketDrillSctpParameter(uint16_t type_, int16_t len_, void* content_);
-        ~PacketDrillSctpParameter();
+  public:
+    PacketDrillSctpParameter(uint16_t type_, int16_t len_, void *content_);
+    ~PacketDrillSctpParameter();
 
-    private:
-        int32_t parameterValue;
-        cQueue* parameterList;
-        int16_t parameterLength;
-        ByteVector *bytearray;
-        uint32_t flags;
-        uint16_t type;
-        void *content;
+  private:
+    int32_t parameterValue;
+    cQueue *parameterList;
+    int16_t parameterLength;
+    ByteVector *bytearray;
+    uint32_t flags;
+    uint16_t type;
+    void *content;
 
-    public:
-        int32_t getValue() const { return parameterValue; };
-        cQueue* getList() { return parameterList; };
-        uint32_t getFlags() const { return flags; };
-        void setFlags(uint32_t flgs_) { flags = flgs_; };
-        int16_t getLength() const { return parameterLength; };
-        uint16_t getType() const { return type; };
-        ByteVector *getByteList() { return bytearray; };
-        void setByteArrayPointer(ByteVector *ptr) { bytearray = ptr; };
-        void *getContent() { return content; };
+  public:
+    int32_t getValue() const { return parameterValue; };
+    cQueue *getList() { return parameterList; };
+    uint32_t getFlags() const { return flags; };
+    void setFlags(uint32_t flgs_) { flags = flgs_; }
+    int16_t getLength() const { return parameterLength; };
+    uint16_t getType() const { return type; };
+    ByteVector *getByteList() { return bytearray; };
+    void setByteArrayPointer(ByteVector *ptr) { bytearray = ptr; }
+    void *getContent() { return content; };
 };
 
-}
+} // namespace inet
 
 #endif
 

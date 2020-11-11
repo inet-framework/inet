@@ -32,8 +32,8 @@ void BasicMsduAggregationPolicy::initialize()
 
 bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragate, int aMsduLength)
 {
-    return ((subframeNumThreshold == -1 || subframeNumThreshold <= numOfFramesToAggragate) &&
-            (aggregationLengthThreshold == -1 || aggregationLengthThreshold <= aMsduLength));
+    return (subframeNumThreshold == -1 || subframeNumThreshold <= numOfFramesToAggragate) &&
+           (aggregationLengthThreshold == -1 || aggregationLengthThreshold <= aMsduLength);
 }
 
 bool BasicMsduAggregationPolicy::isEligible(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, const Ptr<const Ieee80211MacTrailer>& trailer, const Ptr<const Ieee80211DataHeader>& testHeader, b aMsduLength)
@@ -73,8 +73,7 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
     b aMsduLength = b(0);
     Ptr<const Ieee80211DataHeader> firstHeader = nullptr;
     auto frames = new std::vector<Packet *>();
-    for (int i = 0; i < queue->getNumPackets(); i++)
-    {
+    for (int i = 0; i < queue->getNumPackets(); i++) {
         auto dataPacket = queue->getPacket(i);
         const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
         if (dataHeader == nullptr)

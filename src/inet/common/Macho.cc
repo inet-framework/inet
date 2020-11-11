@@ -54,19 +54,19 @@ _EmptyBox _EmptyBox::theEmptyBox;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper functions for box creation
-template<>
+template <>
 void *Macho::_createBox<_EmptyBox>(void *& place)
 {
     return &_EmptyBox::theEmptyBox;
 }
 
-template<>
+template <>
 void Macho::_deleteBox<_EmptyBox>(void *& box, void *& place)
 {
 }
 
 #ifdef MACHO_SNAPSHOTS
-template<>
+template <>
 void *Macho::_cloneBox<_EmptyBox>(void *other)
 {
     return &_EmptyBox::theEmptyBox;
@@ -383,8 +383,7 @@ void _MachineBase::rattleOn()
 
             assert("Init may only transition to proper substates" &&
                     (!myPendingState ||
-                     (myPendingState->isChild(*myCurrentState) && (myCurrentState != myPendingState)))
-                    );
+                     (myPendingState->isChild(*myCurrentState) && (myCurrentState != myPendingState))));
 
 #ifndef NDEBUG
             // Clear dummy event if need be

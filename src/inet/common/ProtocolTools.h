@@ -37,7 +37,7 @@ const Ptr<T> removeProtocolHeader(Packet *packet)
     return packet->removeAtFront<T>();
 }
 
-};
+} // namespace inet
 
 #endif
 

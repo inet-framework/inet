@@ -26,11 +26,11 @@ namespace ieee80211 {
 
 class INET_API IOriginatorBlockAckProcedure
 {
-    public:
-        virtual ~IOriginatorBlockAckProcedure() { }
+  public:
+    virtual ~IOriginatorBlockAckProcedure() {}
 
-        virtual const Ptr<Ieee80211BlockAckReq> buildCompressedBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, SequenceNumber startingSequenceNumber) const = 0;
-        virtual const Ptr<Ieee80211BlockAckReq> buildBasicBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, SequenceNumber startingSequenceNumber) const = 0;
+    virtual const Ptr<Ieee80211BlockAckReq> buildCompressedBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, SequenceNumber startingSequenceNumber) const = 0;
+    virtual const Ptr<Ieee80211BlockAckReq> buildBasicBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, SequenceNumber startingSequenceNumber) const = 0;
 };
 
 } // namespace ieee80211

@@ -129,8 +129,7 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = c->sample_rate;
 
-    int ret = avcodec_fill_audio_frame(frame,    /*channels*/ 1, c->sample_fmt,
-                (const uint8_t *)(decBuf), pktBytes, 1);
+    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, c->sample_fmt, (const uint8_t *)(decBuf), pktBytes, 1);
     if (ret < 0)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
 
@@ -165,7 +164,6 @@ bool AudioOutFile::close()
     /* close each codec */
     if (audio_st)
         avcodec_close(audio_st->codec);
-
 
     if (!(oc->oformat->flags & AVFMT_NOFILE)) {
         /* close the output file */

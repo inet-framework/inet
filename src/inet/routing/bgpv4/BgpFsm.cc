@@ -410,7 +410,7 @@ void Established::entry()
         auto IPRoutingTable = session.getIPRoutingTable();
         for (int i = 0; i < IPRoutingTable->getNumRoutes(); i++) {
             const Ipv4Route *rtEntry = IPRoutingTable->getRoute(i);
-            if(session.isRouteExcluded(*rtEntry))
+            if (session.isRouteExcluded(*rtEntry))
                 continue;
             BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
             BGPEntry->addAS(session._info.ASValue);
@@ -419,7 +419,7 @@ void Established::entry()
         }
     }
 
-    for (auto & elem : session.getBGPRoutingTable())
+    for (auto& elem : session.getBGPRoutingTable())
         session.updateSendProcess(elem);
 
     //when all EGP Sessions are in established state, start IGP Session(s)

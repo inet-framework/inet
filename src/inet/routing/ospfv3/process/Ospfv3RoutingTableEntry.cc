@@ -1,29 +1,28 @@
-
 #include "inet/routing/ospfv3/process/Ospfv3RoutingTableEntry.h"
 
 namespace inet {
 namespace ospfv3 {
 
 Ospfv3RoutingTableEntry::Ospfv3RoutingTableEntry(IInterfaceTable *ift, Ipv6Address destPrefix, int prefixLength, SourceType sourceType) :
-        Ipv6Route(destPrefix, prefixLength, sourceType),
-        ift(ift),
-        area(BACKBONE_AREAID),
-        pathType(Ospfv3RoutingTableEntry::INTRAAREA)
+    Ipv6Route(destPrefix, prefixLength, sourceType),
+    ift(ift),
+    area(BACKBONE_AREAID),
+    pathType(Ospfv3RoutingTableEntry::INTRAAREA)
 {
     this->setPrefixLength(prefixLength);
     this->setSourceType(IRoute::OSPF);
 }
 
 Ospfv3RoutingTableEntry::Ospfv3RoutingTableEntry(const Ospfv3RoutingTableEntry& entry, Ipv6Address destPrefix, int prefixLength, SourceType sourceType) :
-        Ipv6Route(destPrefix, prefixLength, sourceType),
-        destinationType(entry.destinationType),
-        optionalCapabilities(entry.optionalCapabilities),
-        area(entry.area),
-        pathType(entry.pathType),
-        cost(entry.cost),
-        type2Cost(entry.type2Cost),
-        linkStateOrigin(entry.linkStateOrigin),
-        nextHops(entry.nextHops)
+    Ipv6Route(destPrefix, prefixLength, sourceType),
+    destinationType(entry.destinationType),
+    optionalCapabilities(entry.optionalCapabilities),
+    area(entry.area),
+    pathType(entry.pathType),
+    cost(entry.cost),
+    type2Cost(entry.type2Cost),
+    linkStateOrigin(entry.linkStateOrigin),
+    nextHops(entry.nextHops)
 {
     this->setDestination(entry.getDestinationAsGeneric());
     this->setPrefixLength(prefixLength);
@@ -150,48 +149,45 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3RoutingTableEntry& entry
     out << ", iface: " << entry.getInterface()->getNedTypeName();
     out << ", Cost: " << entry.getCost()
         << ", Type2Cost: " << entry.getType2Cost()
-        << ", Origin: [";// << entry.getLinkStateOrigin()->getHeader().getLinkStateID()
-
-
+        << ", Origin: ["; // << entry.getLinkStateOrigin()->getHeader().getLinkStateID()
 
     Ospfv3LsaHeader lsaHeader = entry.getLinkStateOrigin()->getHeader();
-        out << "LSAHeader: age=" << lsaHeader.getLsaAge()
-            << ", type=";
-       switch (lsaHeader.getLsaType()) {
-           case ROUTER_LSA:
-               out << "RouterLSA";
-               break;
+    out << "LSAHeader: age=" << lsaHeader.getLsaAge()
+        << ", type=";
+    switch (lsaHeader.getLsaType()) {
+        case ROUTER_LSA:
+            out << "RouterLSA";
+            break;
 
-           case NETWORK_LSA:
-               out << "NetworkLSA";
-               break;
+        case NETWORK_LSA:
+            out << "NetworkLSA";
+            break;
 
-           case INTER_AREA_PREFIX_LSA:
-               out << "InterAreaPrefixLSA_Networks";
-               break;
+        case INTER_AREA_PREFIX_LSA:
+            out << "InterAreaPrefixLSA_Networks";
+            break;
 
-           case INTER_AREA_ROUTER_LSA:
-               out << "InterAreaRouterLSA_ASBoundaryRouters";
-               break;
+        case INTER_AREA_ROUTER_LSA:
+            out << "InterAreaRouterLSA_ASBoundaryRouters";
+            break;
 
-           case AS_EXTERNAL_LSA:
-               out << "ASExternalLSA";
-               break;
+        case AS_EXTERNAL_LSA:
+            out << "ASExternalLSA";
+            break;
 
-           default:
-               out << "Unknown";
-               break;
-       }
-       out << ", LSID=" << lsaHeader.getLinkStateID().str(false)
-            << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
-            << ", seqNumber=" << lsaHeader.getLsaSequenceNumber()
-            << endl
-       << "], NextHops: ";
-
+        default:
+            out << "Unknown";
+            break;
+    }
+    out << ", LSID=" << lsaHeader.getLinkStateID().str(false)
+        << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
+        << ", seqNumber=" << lsaHeader.getLsaSequenceNumber()
+        << endl
+        << "], NextHops: ";
 
     unsigned int hopCount = entry.getNextHopCount();
     for (unsigned int i = 0; i < hopCount; i++) {
-        out << entry.getNextHop(i).hopAddress << "/" << entry.getNextHop(i).advertisingRouter << "/" <<  entry.getNextHop(i).ifIndex << "  ";
+        out << entry.getNextHop(i).hopAddress << "/" << entry.getNextHop(i).advertisingRouter << "/" << entry.getNextHop(i).ifIndex << "  ";
     }
 
     return out;
@@ -200,10 +196,10 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3RoutingTableEntry& entry
 //-----------------------------------------------------------------------------------------------------------
 
 Ospfv3Ipv4RoutingTableEntry::Ospfv3Ipv4RoutingTableEntry(IInterfaceTable *ift, Ipv4Address destPrefix, int prefixLength, SourceType sourceType) :
-        //Ipv6Route(destPrefix, prefixLength, sourceType),
-        ift(ift),
-        area(BACKBONE_AREAID),
-        pathType(Ospfv3Ipv4RoutingTableEntry::INTRAAREA)
+    //Ipv6Route(destPrefix, prefixLength, sourceType),
+    ift(ift),
+    area(BACKBONE_AREAID),
+    pathType(Ospfv3Ipv4RoutingTableEntry::INTRAAREA)
 {
     this->setDestination(destPrefix);
     this->setPrefixLength(prefixLength);
@@ -211,15 +207,15 @@ Ospfv3Ipv4RoutingTableEntry::Ospfv3Ipv4RoutingTableEntry(IInterfaceTable *ift, I
 }
 
 Ospfv3Ipv4RoutingTableEntry::Ospfv3Ipv4RoutingTableEntry(const Ospfv3Ipv4RoutingTableEntry& entry, Ipv4Address destPrefix, int prefixLength, SourceType sourceType) :
-        //Ipv6Route(destPrefix, prefixLength, sourceType),
-        destinationType(entry.destinationType),
-        optionalCapabilities(entry.optionalCapabilities),
-        area(entry.area),
-        pathType(entry.pathType),
-        cost(entry.cost),
-        type2Cost(entry.type2Cost),
-        linkStateOrigin(entry.linkStateOrigin),
-        nextHops(entry.nextHops)
+    //Ipv6Route(destPrefix, prefixLength, sourceType),
+    destinationType(entry.destinationType),
+    optionalCapabilities(entry.optionalCapabilities),
+    area(entry.area),
+    pathType(entry.pathType),
+    cost(entry.cost),
+    type2Cost(entry.type2Cost),
+    linkStateOrigin(entry.linkStateOrigin),
+    nextHops(entry.nextHops)
 {
     this->setDestination(entry.getDestinationAsGeneric());
     this->setPrefixLength(prefixLength);
@@ -346,45 +342,45 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
     out << ", iface: " << entry.getInterface()->getNedTypeName();
     out << ", Cost: " << entry.getCost()
         << ", Type2Cost: " << entry.getType2Cost()
-        << ", Origin: [";// << entry.getLinkStateOrigin()->getHeader().getLinkStateID()
+        << ", Origin: ["; // << entry.getLinkStateOrigin()->getHeader().getLinkStateID()
 
     Ospfv3LsaHeader lsaHeader = entry.getLinkStateOrigin()->getHeader();
-        out << "LSAHeader: age=" << lsaHeader.getLsaAge()
-            << ", type=";
-       switch (lsaHeader.getLsaType()) {
-           case ROUTER_LSA:
-               out << "RouterLSA";
-               break;
+    out << "LSAHeader: age=" << lsaHeader.getLsaAge()
+        << ", type=";
+    switch (lsaHeader.getLsaType()) {
+        case ROUTER_LSA:
+            out << "RouterLSA";
+            break;
 
-           case NETWORK_LSA:
-               out << "NetworkLSA";
-               break;
+        case NETWORK_LSA:
+            out << "NetworkLSA";
+            break;
 
-           case INTER_AREA_PREFIX_LSA:
-               out << "InterAreaPrefixLSA_Networks";
-               break;
+        case INTER_AREA_PREFIX_LSA:
+            out << "InterAreaPrefixLSA_Networks";
+            break;
 
-           case INTER_AREA_ROUTER_LSA:
-               out << "InterAreaRouterLSA_ASBoundaryRouters";
-               break;
+        case INTER_AREA_ROUTER_LSA:
+            out << "InterAreaRouterLSA_ASBoundaryRouters";
+            break;
 
-           case AS_EXTERNAL_LSA:
-               out << "ASExternalLSA";
-               break;
+        case AS_EXTERNAL_LSA:
+            out << "ASExternalLSA";
+            break;
 
-           default:
-               out << "Unknown";
-               break;
-       }
-       out << ", LSID=" << lsaHeader.getLinkStateID().str(false)
-            << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
-            << ", seqNumber=" << lsaHeader.getLsaSequenceNumber()
-            << endl
-       << "], NextHops: ";
+        default:
+            out << "Unknown";
+            break;
+    }
+    out << ", LSID=" << lsaHeader.getLinkStateID().str(false)
+        << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
+        << ", seqNumber=" << lsaHeader.getLsaSequenceNumber()
+        << endl
+        << "], NextHops: ";
 
     unsigned int hopCount = entry.getNextHopCount();
     for (unsigned int i = 0; i < hopCount; i++) {
-        out << entry.getNextHop(i).hopAddress << "/" << entry.getNextHop(i).advertisingRouter << "/" <<  entry.getNextHop(i).ifIndex << "  ";
+        out << entry.getNextHop(i).hopAddress << "/" << entry.getNextHop(i).advertisingRouter << "/" << entry.getNextHop(i).ifIndex << "  ";
     }
 
     return out;

@@ -38,30 +38,30 @@ class Ieee80211MacHeader;
  */
 class INET_API IContention
 {
-    public:
-        static simsignal_t backoffPeriodGeneratedSignal;
-        static simsignal_t backoffStartedSignal;
-        static simsignal_t backoffStoppedSignal;
-        static simsignal_t channelAccessGrantedSignal;
+  public:
+    static simsignal_t backoffPeriodGeneratedSignal;
+    static simsignal_t backoffStartedSignal;
+    static simsignal_t backoffStoppedSignal;
+    static simsignal_t channelAccessGrantedSignal;
 
-    public:
-        class ICallback
-        {
-            public:
-                ~ICallback() { }
+  public:
+    class ICallback
+    {
+      public:
+        ~ICallback() {}
 
-                virtual void expectedChannelAccess(simtime_t time) = 0;
-                virtual void channelAccessGranted() = 0;
-        };
+        virtual void expectedChannelAccess(simtime_t time) = 0;
+        virtual void channelAccessGranted() = 0;
+    };
 
-        virtual ~IContention() { }
+    virtual ~IContention() {}
 
-        virtual void startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_t slotTime, ICallback *callback) = 0;
-        virtual bool isContentionInProgress() = 0;
+    virtual void startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_t slotTime, ICallback *callback) = 0;
+    virtual bool isContentionInProgress() = 0;
 
-        // notifications
-        virtual void mediumStateChanged(bool mediumFree) = 0;
-        virtual void corruptedFrameReceived() = 0;
+    // notifications
+    virtual void mediumStateChanged(bool mediumFree) = 0;
+    virtual void corruptedFrameReceived() = 0;
 };
 
 } // namespace ieee80211

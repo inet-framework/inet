@@ -68,7 +68,7 @@ double DimensionalSnir::computeMax() const
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_DEBUG << "Reception power begin " << endl;
-    EV_DEBUG <<* dimensionalReception->getPower() << endl;
+    EV_DEBUG << *dimensionalReception->getPower() << endl;
     EV_DEBUG << "Reception power end" << endl;
     auto noisePower = dimensionalNoise->getPower();
     auto receptionPower = dimensionalReception->getPower();

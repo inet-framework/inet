@@ -46,7 +46,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
     }
 
     uint n = option.getSackItemArraySize();
-    ASSERT(option.getLength() == 2 + n*8);
+    ASSERT(option.getLength() == 2 + n * 8);
 
     if (!state->sack_enabled) {
         EV_ERROR << "ERROR: " << n << " SACK(s) received, but sack_enabled is set to false\n";
@@ -254,8 +254,7 @@ bool TcpConnection::nextSeg(uint32_t& seqNum)
     // Note: state->highRxt == RFC.HighRxt + 1
     for (uint32_t s2 = state->highRxt;
          seqLess(s2, state->snd_max) && seqLess(s2, highestSackedSeqNum);
-         s2 += shift
-         )
+         s2 += shift)
     {
         rexmitQueue->checkSackBlock(s2, shift, sacked, rexmitted);
 
@@ -318,8 +317,7 @@ bool TcpConnection::nextSeg(uint32_t& seqNum)
     {
         for (uint32_t s3 = state->highRxt;
              seqLess(s3, state->snd_max) && seqLess(s3, highestSackedSeqNum);
-             s3 += shift
-             )
+             s3 += shift)
         {
             rexmitQueue->checkSackBlock(s3, shift, sacked, rexmitted);
 
@@ -386,7 +384,7 @@ uint32_t TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 
     uint32_t sentSeqNum = seqNum + sentBytes;
 
-    if(state->send_fin && sentSeqNum == state->snd_fin_seq)
+    if (state->send_fin && sentSeqNum == state->snd_fin_seq)
         sentSeqNum = sentSeqNum + 1;
 
     ASSERT(seqLE(state->snd_nxt, sentSeqNum));

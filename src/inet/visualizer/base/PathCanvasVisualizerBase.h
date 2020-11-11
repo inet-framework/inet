@@ -29,7 +29,8 @@ namespace visualizer {
 class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
 {
   protected:
-    class INET_API PathCanvasVisualization : public PathVisualization {
+    class INET_API PathCanvasVisualization : public PathVisualization
+    {
       public:
         LabeledPolylineFigure *figure = nullptr;
 

@@ -113,7 +113,7 @@ int LinearGaugeFigure::getLabelOffset() const
 
 void LinearGaugeFigure::setLabelOffset(int offset)
 {
-    if(labelOffset != offset) {
+    if (labelOffset != offset) {
         labelOffset = offset;
         labelFigure->setPosition(Point(getBounds().getCenter().x, getBounds().y + getBounds().height + labelOffset));
     }
@@ -209,7 +209,7 @@ void LinearGaugeFigure::parse(cProperty *property)
     if ((s = property->getValue(PKEY_LABEL)) != nullptr)
         setLabel(s);
     if ((s = property->getValue(PKEY_LABEL_OFFSET)) != nullptr)
-            setLabelOffset(atoi(s));
+        setLabelOffset(atoi(s));
     if ((s = property->getValue(PKEY_LABEL_FONT)) != nullptr)
         setLabelFont(parseFont(s));
     if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)

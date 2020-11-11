@@ -27,10 +27,10 @@ class Ieee80211DataOrMgmtHeader;
 
 class INET_API IDefragmentation
 {
-    public:
-        virtual ~IDefragmentation() { }
+  public:
+    virtual ~IDefragmentation() {}
 
-        virtual Packet *defragmentFrames(std::vector<Packet *> *fragmentFrames) = 0;
+    virtual Packet *defragmentFrames(std::vector<Packet *> *fragmentFrames) = 0;
 };
 
 } // namespace ieee80211

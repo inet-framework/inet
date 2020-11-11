@@ -41,7 +41,7 @@ class INET_API GeoCoord
     /*@}*/
 
   public:
-    GeoCoord(deg latitude, deg longitude, m altitude) : latitude(latitude), longitude(longitude), altitude(altitude) { }
+    GeoCoord(deg latitude, deg longitude, m altitude) : latitude(latitude), longitude(longitude), altitude(altitude) {}
 };
 
 class INET_API IGeographicCoordinateSystem

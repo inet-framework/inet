@@ -63,7 +63,7 @@ unsigned int TcpLwipSendQueue::getBytesForTcpLayer(void *bufferP, unsigned int b
         return 0;
 
     const auto& bytesChunk = dataBuffer.peek<BytesChunk>(B(length));
-    return bytesChunk->copyToBuffer(static_cast<uint8_t*>(bufferP), length);
+    return bytesChunk->copyToBuffer(static_cast<uint8_t *>(bufferP), length);
 }
 
 void TcpLwipSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
@@ -80,7 +80,7 @@ Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned 
 {
     ASSERT(tcpDataP);
 
-    const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
+    const auto& bytes = makeShared<BytesChunk>((const uint8_t *)tcpDataP, tcpLengthP);
     auto packet = new Packet(nullptr, bytes);
     auto tcpHdr = packet->removeAtFront<TcpHeader>();
     int64_t numBytes = packet->getByteLength();

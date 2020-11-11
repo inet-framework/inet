@@ -42,6 +42,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
         GridNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IWirelessSignal *signal) :
             radioMedium(radioMedium), transmitter(transmitter), signal(signal) {}
     };
+
   protected:
     SpatialGrid *grid;
     Radios radios;

@@ -107,14 +107,14 @@ void EtherTrafGen::handleStartOperation(LifecycleOperation *operation)
 void EtherTrafGen::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
-    llcSocket.close();     //TODO return false and waiting socket close
+    llcSocket.close(); // TODO return false and waiting socket close
 }
 
 void EtherTrafGen::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
-    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
-        llcSocket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+    if (operation->getRootModule() != getContainingNode(this)) // closes socket when the application crashed only
+        llcSocket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 bool EtherTrafGen::isGenerator()

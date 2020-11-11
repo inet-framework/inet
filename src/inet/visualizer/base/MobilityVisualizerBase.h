@@ -30,13 +30,15 @@ namespace visualizer {
 class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API MobilityVisualization {
+    class INET_API MobilityVisualization
+    {
       public:
         IMobility *mobility = nullptr;
 
       public:
         MobilityVisualization(IMobility *mobility);
     };
+
   protected:
     /** @name Parameters */
     //@{

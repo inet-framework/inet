@@ -29,7 +29,8 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API PathOsgVisualization : public PathVisualization {
+    class INET_API PathOsgVisualization : public PathVisualization
+    {
       public:
         osg::Node *node = nullptr;
 

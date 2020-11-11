@@ -100,7 +100,7 @@ class INET_API BindingUpdateList : public cSimpleModule
         // this state information is used for CN bindings
         MobilityState state;
 
-        virtual ~BindingUpdateListEntry() {};
+        virtual ~BindingUpdateListEntry() {}
     };
 
     friend std::ostream& operator<<(std::ostream& os, const BindingUpdateListEntry& bul);

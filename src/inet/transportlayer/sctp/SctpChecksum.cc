@@ -26,7 +26,7 @@
 namespace inet {
 namespace sctp {
 
-#define CRC32C(c, d)     (c = (c >> 8) ^ crc_c[(c ^ (d)) & 0xFF])
+#define CRC32C(c, d)    (c = (c >> 8) ^ crc_c[(c ^ (d)) & 0xFF])
 
 static uint32_t crc_c[256] = {
     0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
@@ -117,3 +117,4 @@ uint32_t SctpChecksum::checksum(const void *addr, unsigned int len)
 
 } // namespace sctp
 } // namespace inet
+

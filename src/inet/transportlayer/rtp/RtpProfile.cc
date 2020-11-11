@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/RtpProfile.h"
 
 #include <string.h>
@@ -55,7 +54,7 @@ void RtpProfile::initialize()
 
 RtpProfile::~RtpProfile()
 {
-    for (auto & elem : _ssrcGates)
+    for (auto& elem : _ssrcGates)
         delete elem.second;
 }
 

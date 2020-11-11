@@ -173,7 +173,6 @@ int Ted::assignIndex(std::vector<vertex_t>& vertices, Ipv4Address nodeAddr)
         if (vertices[i].node == nodeAddr)
             return i;
 
-
     // if not found, create
     vertex_t newVertex;
     newVertex.node = nodeAddr;
@@ -287,7 +286,7 @@ void Ted::rebuildRoutingTable()
 
     // insert local peers
 
-    for (auto & elem : interfaceAddrs) {
+    for (auto& elem : interfaceAddrs) {
         Ipv4Route *entry = new Ipv4Route;
 
         entry->setDestination(getPeerByLocalAddress(elem));
@@ -306,7 +305,7 @@ void Ted::rebuildRoutingTable()
 
 Ipv4Address Ted::getInterfaceAddrByPeerAddress(Ipv4Address peerIP)
 {
-    for (auto & elem : ted)
+    for (auto& elem : ted)
         if (elem.linkid == peerIP && elem.advrouter == routerId)
             return elem.local;
 
@@ -316,7 +315,7 @@ Ipv4Address Ted::getInterfaceAddrByPeerAddress(Ipv4Address peerIP)
 Ipv4Address Ted::peerRemoteInterface(Ipv4Address peerIP)
 {
     ASSERT(isLocalPeer(peerIP));
-    for (auto & elem : ted)
+    for (auto& elem : ted)
         if (elem.linkid == peerIP && elem.advrouter == routerId)
             return elem.remote;
 
@@ -325,7 +324,7 @@ Ipv4Address Ted::peerRemoteInterface(Ipv4Address peerIP)
 
 bool Ted::isLocalPeer(Ipv4Address inetAddr)
 {
-    for (auto & elem : ted)
+    for (auto& elem : ted)
         if (elem.linkid == inetAddr && elem.advrouter == routerId)
             return true;
 
@@ -340,7 +339,7 @@ std::vector<Ted::vertex_t> Ted::calculateShortestPaths(const TeLinkStateInfoVect
 
     // select edges that have enough bandwidth left, and store them into edges[].
     // meanwhile, collect vertices in vectices[].
-    for (auto & elem : topology) {
+    for (auto& elem : topology) {
         if (!elem.state)
             continue;
 
@@ -363,7 +362,7 @@ std::vector<Ted::vertex_t> Ted::calculateShortestPaths(const TeLinkStateInfoVect
     for (unsigned int i = 1; i < vertices.size(); i++) {
         bool mod = false;
 
-        for (auto & edge : edges) {
+        for (auto& edge : edges) {
             int src = edge.src;
             int dest = edge.dest;
 
@@ -393,7 +392,7 @@ bool Ted::checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match)
 {
     match = nullptr;
 
-    for (auto & elem : ted) {
+    for (auto& elem : ted) {
         if (elem.sourceId == link.sourceId && elem.messageId == link.messageId && elem.timestamp == link.timestamp) {
             // we've already seen this message, ignore it
             return false;
@@ -440,7 +439,7 @@ unsigned int Ted::linkIndex(Ipv4Address advrouter, Ipv4Address linkid)
 
 bool Ted::isLocalAddress(Ipv4Address addr)
 {
-    for (auto & elem : interfaceAddrs)
+    for (auto& elem : interfaceAddrs)
         if (elem == addr)
             return true;
 
@@ -462,7 +461,7 @@ Ipv4AddressVector Ted::getLocalAddress()
 
 Ipv4Address Ted::primaryAddress(Ipv4Address localInf)    // only used in RsvpTe::processHelloMsg
 {
-    for (auto & elem : ted) {
+    for (auto& elem : ted) {
         if (elem.local == localInf)
             return elem.advrouter;
 

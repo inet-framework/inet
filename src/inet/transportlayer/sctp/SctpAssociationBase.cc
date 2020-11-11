@@ -540,9 +540,9 @@ bool SctpStateVariables::findMatch(uint16_t num)
     return false;
 }
 
-SctpStateVariables::RequestData* SctpStateVariables::findTypeInRequests(uint16_t type)
+SctpStateVariables::RequestData *SctpStateVariables::findTypeInRequests(uint16_t type)
 {
-    for (auto & elem : requests) {
+    for (auto& elem : requests) {
         if (elem.second.type == type) {
             return &(elem.second);
         }
@@ -553,7 +553,7 @@ SctpStateVariables::RequestData* SctpStateVariables::findTypeInRequests(uint16_t
 uint16_t SctpStateVariables::getNumRequestsNotPerformed()
 {
     uint16_t count = 0;
-    for (auto & elem : requests) {
+    for (auto& elem : requests) {
         if (elem.second.result != PERFORMED && elem.second.result != DEFERRED) {
             count++;
         }
@@ -991,7 +991,7 @@ bool SctpAssociation::processSctpMessage(SctpHeader *sctpmsg,
 
     if (fsm->getState() == SCTP_S_ESTABLISHED) {
         bool found = false;
-        for (auto & elem : state->localAddresses) {
+        for (auto& elem : state->localAddresses) {
             if ((elem) == msgDestAddr) {
                 found = true;
                 break;
@@ -1078,7 +1078,7 @@ SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32_t commandCode)
     }
 }
 
-bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpCommand)
+bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq *sctpCommand)
 {
     printAssocBrief();
 
@@ -1181,7 +1181,7 @@ bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpComma
             throw cRuntimeError("Wrong event code");
     }
 
-   // delete sctpCommand;
+    // delete sctpCommand;
     // then state transitions
     return performStateTransition(event);
 }
@@ -1269,7 +1269,7 @@ bool SctpAssociation::performStateTransition(const SctpEventCode& event)
 
                 case SCTP_E_RCV_COOKIE_ACK:
                     FSM_Goto((*fsm), SCTP_S_ESTABLISHED);
-                   // sendEstabIndicationToApp();
+                    // sendEstabIndicationToApp();
                     break;
 
                 default:
@@ -1623,13 +1623,13 @@ void SctpAssociation::stateEntered(int32_t status)
                 state->cmtCCVariant = SctpStateVariables::CCCV_CMT;
                 state->allowCMT = true;
             }
-            else if(strcmp(sctpMain->par("cmtCCVariant").stringValue(), "lia") == 0){
-               state->cmtCCVariant = SctpStateVariables::CCCV_CMT_LIA;
-               state->allowCMT     = true;
+            else if (strcmp(sctpMain->par("cmtCCVariant").stringValue(), "lia") == 0) {
+                state->cmtCCVariant = SctpStateVariables::CCCV_CMT_LIA;
+                state->allowCMT = true;
             }
-            else if(strcmp(sctpMain->par("cmtCCVariant").stringValue(), "olia") == 0){
-               state->cmtCCVariant = SctpStateVariables::CCCV_CMT_OLIA;
-               state->allowCMT     = true;
+            else if (strcmp(sctpMain->par("cmtCCVariant").stringValue(), "olia") == 0) {
+                state->cmtCCVariant = SctpStateVariables::CCCV_CMT_OLIA;
+                state->allowCMT = true;
             }
             else if ((strcmp(cmtCCVariantPar, "cmtrp") == 0) ||
                      (strcmp(cmtCCVariantPar, "cmtrpv1") == 0))
@@ -1746,9 +1746,10 @@ void SctpAssociation::stateEntered(int32_t status)
             state->sendQueueLimit = sctpMain->par("sendQueueLimit");
             EV_INFO << "stateEntered: Established socketId= " << assocId << endl;
             if (isToBeAccepted()) {
-            EV_INFO << "Listening socket can accept now\n";
+                EV_INFO << "Listening socket can accept now\n";
                 sendAvailableIndicationToApp();
-            } else {
+            }
+            else {
                 sendEstabIndicationToApp();
             }
             if (sctpMain->hasPar("addIP")) {

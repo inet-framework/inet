@@ -48,7 +48,7 @@ class INET_API LineSegment : public GeometricObjectBase
     virtual bool isNil() const override { return this == &NIL; }
     virtual bool isUnspecified() const override { return point1.isUnspecified() || point2.isUnspecified(); }
 
-    bool computeIntersection(const LineSegment &lineSegment, Coord &intersection1, Coord &intersection2);
+    bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2);
 };
 
 } // namespace inet

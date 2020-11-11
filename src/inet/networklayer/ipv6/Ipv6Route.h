@@ -119,7 +119,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     virtual void setNextHop(const L3Address& nextHop) override { if (_nextHop != nextHop.toIpv6()) { _nextHop = nextHop.toIpv6(); changed(F_NEXTHOP); } }
     virtual void setSource(cObject *source) override { if (_source != source) { _source = source; changed(F_SOURCE); } }
     virtual void setSourceType(SourceType type) override { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
-    const char* getSourceTypeAbbreviation() const;
+    const char *getSourceTypeAbbreviation() const;
     virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); }    //TODO rename Ipv6 method
     virtual L3Address getNextHopAsGeneric() const override { return getNextHop(); }
     virtual NetworkInterface *getInterface() const override { return _interfacePtr; }

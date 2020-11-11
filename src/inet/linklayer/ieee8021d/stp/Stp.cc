@@ -66,7 +66,7 @@ void Stp::initPortTable()
 void Stp::handleMessageWhenUp(cMessage *msg)
 {
     if (!msg->isSelfMessage()) {
-        Packet *packet = check_and_cast<Packet*>(msg);
+        Packet *packet = check_and_cast<Packet *>(msg);
         const auto& bpdu = packet->peekAtFront<BpduBase>();
 
         switch (bpdu->getBpduType()) {
@@ -116,7 +116,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
             macTable->setAgingTime(currentFwdDelay);
 
             // config BPDU with TC flag
-            for (auto & elem : desPorts)
+            for (auto& elem : desPorts)
                 generateBPDU(elem, MacAddress::STP_MULTICAST_ADDRESS, true, false);
         }
         else {
@@ -125,7 +125,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
             EV_INFO << "Sending BPDUs on all designated ports." << endl;
 
             // BPDUs are sent on all designated ports
-            for (auto & elem : desPorts)
+            for (auto& elem : desPorts)
                 generateBPDU(elem);
         }
     }

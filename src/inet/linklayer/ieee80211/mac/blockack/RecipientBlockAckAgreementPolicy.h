@@ -26,24 +26,24 @@ namespace ieee80211 {
 
 class INET_API RecipientBlockAckAgreementPolicy : public cSimpleModule, public IRecipientBlockAckAgreementPolicy
 {
-    protected:
-        int maximumAllowedBufferSize = -1;
-        bool isAMsduSupported = false;
-        bool isDelayedBlockAckPolicySupported = false;
-        simtime_t blockAckTimeoutValue = -1;
+  protected:
+    int maximumAllowedBufferSize = -1;
+    bool isAMsduSupported = false;
+    bool isDelayedBlockAckPolicySupported = false;
+    simtime_t blockAckTimeoutValue = -1;
 
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
-    public:
-        virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) override;
-        virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override;
+  public:
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) override;
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override;
 
-        virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
-        virtual bool aMsduSupported() const override { return isAMsduSupported; }
-        virtual bool delayedBlockAckPolicySupported() const override { return isDelayedBlockAckPolicySupported; }
-        virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
+    virtual bool aMsduSupported() const override { return isAMsduSupported; }
+    virtual bool delayedBlockAckPolicySupported() const override { return isDelayedBlockAckPolicySupported; }
+    virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
 };
 
 } /* namespace ieee80211 */

@@ -172,8 +172,7 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         throw cRuntimeError("READ without ACCEPT");
     delete msg;
     Packet *dataMsg;
-    while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)
-    {
+    while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->addTag<SocketInd>()->setSocketId(socketId);
         sendToApp(dataMsg);

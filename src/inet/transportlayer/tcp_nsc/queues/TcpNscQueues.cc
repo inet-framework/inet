@@ -63,7 +63,7 @@ int TcpNscSendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) const
         return 0;
 
     const auto& bytesChunk = dataBuffer.peek<BytesChunk>(B(length));
-    return bytesChunk->copyToBuffer(static_cast<uint8_t*>(bufferP), length);
+    return bytesChunk->copyToBuffer(static_cast<uint8_t *>(bufferP), length);
 }
 
 void TcpNscSendQueue::dequeueTcpLayerMsg(int msgLengthP)
@@ -80,7 +80,7 @@ Packet *TcpNscSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLen
 {
     ASSERT(tcpDataP);
 
-    const auto& bytes = makeShared<BytesChunk>(static_cast<const uint8_t*>(tcpDataP), tcpLengthP);
+    const auto& bytes = makeShared<BytesChunk>(static_cast<const uint8_t *>(tcpDataP), tcpLengthP);
     auto packet = new Packet(nullptr, bytes);
     const auto& tcpHdr = packet->popAtFront<TcpHeader>();
     packet->trimFront();

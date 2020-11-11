@@ -59,7 +59,7 @@ void TcpServerListener::handleMessageWhenUp(cMessage *msg)
     if (serverSocket.belongsToSocket(msg))
         serverSocket.processMessage(msg);
     else
-         throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
+        throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
 }
 
 void TcpServerListener::finish()

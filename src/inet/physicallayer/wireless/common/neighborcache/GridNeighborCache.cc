@@ -85,7 +85,7 @@ void GridNeighborCache::fillCubeVector()
 {
     delete grid;
     grid = new SpatialGrid(cellSize, constraintAreaMin, constraintAreaMax);
-    for (auto & elem : radios) {
+    for (auto& elem : radios) {
         const IRadio *radio = elem;
         Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
         grid->insertPoint(check_and_cast<const cObject *>(radio), radioPos);
@@ -102,15 +102,14 @@ void GridNeighborCache::addRadio(const IRadio *radio)
     Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
     Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
     // If the constraintArea changed we must rebuild the grid
-    if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
-    {
+    if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax) {
         constraintAreaMin = newConstraintAreaMin;
         constraintAreaMax = newConstraintAreaMax;
         if (initialized())
             fillCubeVector();
     }
-    else if(initialized())
-        grid->insertPoint(check_and_cast<const cObject *>(radio),radioPos);
+    else if (initialized())
+        grid->insertPoint(check_and_cast<const cObject *>(radio), radioPos);
 }
 
 void GridNeighborCache::removeRadio(const IRadio *radio)
@@ -120,8 +119,7 @@ void GridNeighborCache::removeRadio(const IRadio *radio)
         radios.erase(it);
         Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
         Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
-        if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
-        {
+        if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax) {
             constraintAreaMin = newConstraintAreaMin;
             constraintAreaMax = newConstraintAreaMax;
         }

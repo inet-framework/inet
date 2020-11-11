@@ -31,7 +31,8 @@ class INET_API Ieee80211OsgVisualizer : public Ieee80211VisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API Ieee80211OsgVisualization : public Ieee80211Visualization {
+    class INET_API Ieee80211OsgVisualization : public Ieee80211Visualization
+    {
       public:
         NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Node *node = nullptr;

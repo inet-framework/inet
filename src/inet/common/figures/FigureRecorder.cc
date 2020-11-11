@@ -53,5 +53,5 @@ void FigureRecorder::collect(simtime_t_cref t, double value, cObject *details)
     indicatorFigure->setValue(series, t, value);
 }
 
-}    // namespace inet
+} // namespace inet
 

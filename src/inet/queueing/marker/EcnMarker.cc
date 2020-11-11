@@ -100,5 +100,5 @@ IpEcnCode EcnMarker::getEcn(const Packet *packet)
 }
 
 } // namespace queueing
-} //namespace inet
+} // namespace inet
 

@@ -237,7 +237,7 @@ void BerParseFile::parseFile(const char *filename)
         std::string::size_type pos2 = subline.find("Mb");
         BerList *berlist;
         std::string substr = subline.substr(pos1 + 4, pos2 - (pos1 + 4));
-//                int speed = std::atof (subline.substr(pos1+4,pos2).c_str());
+        // int speed = std::atof (subline.substr(pos1+4,pos2).c_str());
 
         int position = -1;
         if (phyOpMode == 'b') {

@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_SDES_H
 #define __INET_SDES_H
 

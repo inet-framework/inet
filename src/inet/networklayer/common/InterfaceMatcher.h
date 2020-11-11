@@ -50,7 +50,7 @@ class INET_API InterfaceMatcher
     {
       private:
         bool matchesany;
-        std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
+        std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
 
       public:
         Matcher(const char *pattern);

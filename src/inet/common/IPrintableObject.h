@@ -56,28 +56,41 @@ class INET_API IPrintableObject
     }
 
     virtual std::string printToString(int level, int evFlags = 0) const {
-        std::stringstream s; printToStream(s, level, evFlags); return s.str();
+        std::stringstream s;
+        printToStream(s, level, evFlags);
+        return s.str();
     }
 
     virtual std::string getInfoStringRepresentation(int evFlags = 0) const {
-        std::stringstream s; printToStream(s, PRINT_LEVEL_INFO, evFlags); return s.str();
+        std::stringstream s;
+        printToStream(s, PRINT_LEVEL_INFO, evFlags);
+        return s.str();
     }
 
     virtual std::string getDetailStringRepresentation(int evFlags = 0) const {
-        std::stringstream s; printToStream(s, PRINT_LEVEL_DETAIL, evFlags); return s.str();
+        std::stringstream s;
+        printToStream(s, PRINT_LEVEL_DETAIL, evFlags);
+        return s.str();
     }
 
     virtual std::string getDebugStringRepresentation(int evFlags = 0) const {
-        std::stringstream s; printToStream(s, PRINT_LEVEL_DEBUG, evFlags); return s.str();
+        std::stringstream s;
+        printToStream(s, PRINT_LEVEL_DEBUG, evFlags);
+        return s.str();
     }
 
     virtual std::string getTraceStringRepresentation(int evFlags = 0) const {
-        std::stringstream s; printToStream(s, PRINT_LEVEL_TRACE, evFlags); return s.str();
+        std::stringstream s;
+        printToStream(s, PRINT_LEVEL_TRACE, evFlags);
+        return s.str();
     }
 
     virtual std::string getCompleteStringRepresentation(int evFlags = 0) const {
-        std::stringstream s; printToStream(s, PRINT_LEVEL_COMPLETE, evFlags); return s.str();
+        std::stringstream s;
+        printToStream(s, PRINT_LEVEL_COMPLETE, evFlags);
+        return s.str();
     }
+
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
@@ -107,18 +120,18 @@ inline std::string printFieldToString(const IPrintableObject *object, int level,
 }
 
 template <typename, typename = void>
-struct has_print_to_string : std::false_type { };
+struct has_print_to_string : std::false_type {};
 
 template <typename T>
 struct has_print_to_string<T, inet::void_t<decltype(std::declval<T>().printToString())>>
-    : std::true_type { };
+    : std::true_type {};
 
 template <typename, typename = void>
-struct has_str : std::false_type { };
+struct has_str : std::false_type {};
 
 template <typename T>
 struct has_str<T, inet::void_t<decltype(std::declval<T>().str())>>
-    : std::true_type { };
+    : std::true_type {};
 
 template <typename T>
 std::enable_if_t<has_print_to_string<T>::value, std::string> printToStringIfPossible(T *object, int evFlags)

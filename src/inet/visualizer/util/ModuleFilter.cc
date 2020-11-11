@@ -21,7 +21,7 @@ namespace inet {
 
 namespace visualizer {
 
-void ModuleFilter::setPattern(const char* pattern)
+void ModuleFilter::setPattern(const char *pattern)
 {
     matchExpression.setPattern(pattern, true, true, true);
 }
@@ -36,3 +36,4 @@ bool ModuleFilter::matches(const cModule *module) const
 } // namespace visualizer
 
 } // namespace inet
+

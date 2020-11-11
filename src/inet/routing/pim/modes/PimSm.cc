@@ -45,9 +45,9 @@ simsignal_t PimSm::rcvdAssertPkSignal       = registerSignal("rcvdAssertPk");
 
 PimSm::~PimSm()
 {
-    for (auto & elem : gRoutes)
+    for (auto& elem : gRoutes)
         delete elem.second;
-    for (auto & elem : sgRoutes)
+    for (auto& elem : sgRoutes)
         delete elem.second;
     // XXX rt contains references to the deleted route entries
 }
@@ -579,7 +579,7 @@ void PimSm::processRegisterPacket(Packet *pk)
             if (!routeSG->isFlagSet(Route::SPT_BIT)) {    // only if isn't build SPT between RP and registering DR
                 // decapsulate and forward the inner packet to inherited_olist(S,G,rpt)
                 // XXX we are forwarding on inherited_olist(*,G)
-                for (auto & elem : routeG->downstreamInterfaces) {
+                for (auto& elem : routeG->downstreamInterfaces) {
                     DownstreamInterface *downstream = elem;
                     if (downstream->isInInheritedOlist())
                         forwardMulticastData(pk->dup(), downstream->getInterfaceId());
@@ -775,7 +775,7 @@ void PimSm::processAssertSG(PimsmInterface *interface, const AssertMetric& recei
             interface->winnerMetric = receivedMetric;
             restartTimer(interface->assertTimer, assertTime);
         }
-        else if (isInferiorAssert    /* or AssertCancel */ && receivedMetric.address == interface->winnerMetric.address) {
+        else if (isInferiorAssert /* or AssertCancel */ && receivedMetric.address == interface->winnerMetric.address) {
             // We receive an assert from the current assert winner that is
             // worse than our own metric for this group (typically, because
             // the winner's metric became worse or because it is an assert
@@ -864,7 +864,7 @@ void PimSm::processAssertG(PimsmInterface *interface, const AssertMetric& receiv
             interface->winnerMetric = receivedMetric;
             restartTimer(interface->assertTimer, assertTime);
         }
-        else if (isInferiorAssert    /*or AssertCancel*/ && receivedMetric.address == interface->winnerMetric.address) {
+        else if (isInferiorAssert /*or AssertCancel*/ && receivedMetric.address == interface->winnerMetric.address) {
             // We receive an assert from the current assert winner that is
             // worse than our own metric for this group (typically because
             // the winner's metric became worse or is now an assert cancel).
@@ -1086,7 +1086,7 @@ void PimSm::restartExpiryTimer(Route *route, NetworkInterface *originIntf, int h
         for (unsigned i = 0; i < route->downstreamInterfaces.size(); i++) {    // if exist ET and for given interface
             DownstreamInterface *downstream = route->downstreamInterfaces[i];
             if (downstream->expiryTimer && (downstream->getInterfaceId() == originIntf->getInterfaceId())) {
-                EV <<    /*timer->getStateType() << " , " <<*/ route->group << " , " << route->source << ", int: " << downstream->ie->getInterfaceName() << endl;
+                EV << /*timer->getStateType() << " , " <<*/ route->group << " , " << route->source << ", int: " << downstream->ie->getInterfaceName() << endl;
                 restartTimer(downstream->expiryTimer, holdTime);
                 break;
             }
@@ -1248,7 +1248,6 @@ void PimSm::multicastPacketForwarded(Packet *pk)
         return;
 
     // send Register message to RP
-
 
     if (routeSG->registerState == Route::RS_JOIN) {
         // refresh KAT timer
@@ -1575,7 +1574,7 @@ void PimSm::updateJoinDesired(Route *route)
     if (route->type == RP)
         newValue = !route->isImmediateOlistNull();
     if (route->type == G)
-        newValue = !route->isImmediateOlistNull()    /* || JoinDesired(*,*,RP(G)) AND AssertWinner(*,G,RPF_interface(RP(G))) != nullptr */;
+        newValue = !route->isImmediateOlistNull() /* || JoinDesired(*,*,RP(G)) AND AssertWinner(*,G,RPF_interface(RP(G))) != nullptr */;
     else if (route->type == SG)
         newValue = !route->isImmediateOlistNull() || (route->keepAliveTimer && !route->isInheritedOlistNull());
 
@@ -1587,7 +1586,7 @@ void PimSm::updateJoinDesired(Route *route)
             // TODO
         }
         else if (route->type == G) {
-            for (auto & elem : sgRoutes) {
+            for (auto& elem : sgRoutes) {
                 if (elem.second->gRoute == route)
                     updateJoinDesired(elem.second);
             }
@@ -1608,7 +1607,6 @@ void PimSm::updateDesignatedRouterAddress(NetworkInterface *ie)
     for (int i = 0; i < numNeighbors && eachNeighborHasPriority; i++)
         if (pimNbt->getNeighbor(interfaceId, i))
             eachNeighborHasPriority = false;
-
 
     Ipv4Address drAddress = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
     int drPriority = this->designatedRouterPriority;
@@ -1709,7 +1707,7 @@ bool PimSm::deleteMulticastRoute(Route *route)
 
         // unlink
         if (route->type == G) {
-            for (auto & elem : sgRoutes)
+            for (auto& elem : sgRoutes)
                 if (elem.second->gRoute == route)
                     elem.second->gRoute = nullptr;
 
@@ -1738,11 +1736,11 @@ void PimSm::clearRoutes()
     }
 
     // clear local tables
-    for (auto & elem : gRoutes)
+    for (auto& elem : gRoutes)
         delete elem.second;
     gRoutes.clear();
 
-    for (auto & elem : sgRoutes)
+    for (auto& elem : sgRoutes)
         delete elem.second;
     sgRoutes.clear();
 }
@@ -1787,7 +1785,7 @@ PimSm::Route *PimSm::addNewRouteG(Ipv4Address group, int flags)
     rt->addMulticastRoute(createIpv4Route(newRouteG));
 
     // set (*,G) route in (S,G) and (S,G,rpt) routes
-    for (auto & elem : sgRoutes) {
+    for (auto& elem : sgRoutes) {
         if (elem.first.group == group) {
             Route *sgRoute = elem.second;
             sgRoute->gRoute = newRouteG;
@@ -1933,7 +1931,7 @@ PimSm::Route::~Route()
     owner->cancelAndDelete(registerStopTimer);
     owner->cancelAndDelete(joinTimer);
     delete upstreamInterface;
-    for (auto & elem : downstreamInterfaces)
+    for (auto& elem : downstreamInterfaces)
         delete elem;
 }
 
@@ -1961,7 +1959,7 @@ void PimSm::Route::startJoinTimer(double joinPrunePeriod)
 
 PimSm::DownstreamInterface *PimSm::Route::findDownstreamInterfaceByInterfaceId(int interfaceId)
 {
-    for (auto & elem : downstreamInterfaces) {
+    for (auto& elem : downstreamInterfaces) {
         DownstreamInterface *downstream = elem;
         if (downstream->getInterfaceId() == interfaceId)
             return downstream;
@@ -1989,7 +1987,7 @@ int PimSm::Route::findDownstreamInterface(NetworkInterface *ie)
 
 bool PimSm::Route::isImmediateOlistNull()
 {
-    for (auto & elem : downstreamInterfaces)
+    for (auto& elem : downstreamInterfaces)
         if (elem->isInImmediateOlist())
             return false;
 
@@ -1998,7 +1996,7 @@ bool PimSm::Route::isImmediateOlistNull()
 
 bool PimSm::Route::isInheritedOlistNull()
 {
-    for (auto & elem : downstreamInterfaces)
+    for (auto& elem : downstreamInterfaces)
         if (elem->isInInheritedOlist())
             return false;
 

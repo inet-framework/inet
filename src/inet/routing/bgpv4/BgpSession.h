@@ -31,41 +31,41 @@ namespace bgp {
 
 class INET_API BgpSession : public cObject
 {
-private:
-  SessionInfo _info;
-  BgpRouter& bgpRouter;
+  private:
+    SessionInfo _info;
+    BgpRouter& bgpRouter;
 
-  // Timers
-  simtime_t _StartEventTime;
-  cMessage *_ptrStartEvent = nullptr;
-  unsigned int _connectRetryCounter = 0;
-  simtime_t _connectRetryTime = BGP_RETRY_TIME;
-  cMessage *_ptrConnectRetryTimer = nullptr;
-  simtime_t _holdTime = BGP_HOLD_TIME;
-  cMessage *_ptrHoldTimer = nullptr;
-  simtime_t _keepAliveTime = BGP_KEEP_ALIVE;
-  cMessage *_ptrKeepAliveTimer = nullptr;
+    // Timers
+    simtime_t _StartEventTime;
+    cMessage *_ptrStartEvent = nullptr;
+    unsigned int _connectRetryCounter = 0;
+    simtime_t _connectRetryTime = BGP_RETRY_TIME;
+    cMessage *_ptrConnectRetryTimer = nullptr;
+    simtime_t _holdTime = BGP_HOLD_TIME;
+    cMessage *_ptrHoldTimer = nullptr;
+    simtime_t _keepAliveTime = BGP_KEEP_ALIVE;
+    cMessage *_ptrKeepAliveTimer = nullptr;
 
-  // Statistics
-  unsigned int _openMsgSent = 0;
-  unsigned int _openMsgRcv = 0;
-  unsigned int _updateMsgSent = 0;
-  unsigned int _updateMsgRcv = 0;
-  unsigned int _notificationMsgSent = 0;
-  unsigned int _notificationMsgRcv = 0;
-  unsigned int _keepAliveMsgSent = 0;
-  unsigned int _keepAliveMsgRcv = 0;
+    // Statistics
+    unsigned int _openMsgSent = 0;
+    unsigned int _openMsgRcv = 0;
+    unsigned int _updateMsgSent = 0;
+    unsigned int _updateMsgRcv = 0;
+    unsigned int _notificationMsgSent = 0;
+    unsigned int _notificationMsgRcv = 0;
+    unsigned int _keepAliveMsgSent = 0;
+    unsigned int _keepAliveMsgRcv = 0;
 
-  // FINAL STATE MACHINE
-  fsm::TopState::Box *_box;
-  Macho::Machine<fsm::TopState> *_fsm;
+    // FINAL STATE MACHINE
+    fsm::TopState::Box *_box;
+    Macho::Machine<fsm::TopState> *_fsm;
 
-  friend struct fsm::Idle;
-  friend struct fsm::Connect;
-  friend struct fsm::Active;
-  friend struct fsm::OpenSent;
-  friend struct fsm::OpenConfirm;
-  friend struct fsm::Established;
+    friend struct fsm::Idle;
+    friend struct fsm::Connect;
+    friend struct fsm::Active;
+    friend struct fsm::OpenSent;
+    friend struct fsm::OpenConfirm;
+    friend struct fsm::Established;
 
   public:
     BgpSession(BgpRouter& bgpRouter);
@@ -77,7 +77,7 @@ private:
     void restartsConnectRetryTimer(bool start = true);
 
     void sendOpenMessage();
-    void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri &NLRI);
+    void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri& NLRI);
     void sendNotificationMessage();
     void sendKeepAliveMessage();
 
@@ -116,7 +116,7 @@ private:
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() const { return bgpRouter.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() const { return *_fsm; }
     void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
-    bool isRouteExcluded(const Ipv4Route &rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
+    bool isRouteExcluded(const Ipv4Route& rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
 };
 
 std::ostream& operator<<(std::ostream& out, const BgpSession& entry);

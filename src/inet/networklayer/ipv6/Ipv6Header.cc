@@ -29,12 +29,12 @@ std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader *eh)
 Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByTypeForUpdate(IpProtocolId extensionType, int index)
 {
     handleChange();
-    return const_cast<Ipv6ExtensionHeader *>(const_cast<Ipv6Header*>(this)->findExtensionHeaderByType(extensionType, index));
+    return const_cast<Ipv6ExtensionHeader *>(const_cast<Ipv6Header *>(this)->findExtensionHeaderByType(extensionType, index));
 }
 
 const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IpProtocolId extensionType, int index) const
 {
-    for (size_t i=0; i < extensionHeader_arraysize; i++)
+    for (size_t i = 0; i < extensionHeader_arraysize; i++)
         if (extensionHeader[i]->getExtensionType() == extensionType) {
             if (index == 0)
                 return extensionHeader[i];
@@ -117,7 +117,7 @@ B Ipv6Header::calculateUnfragmentableHeaderByteLength() const
 {
     size_t firstFragmentableExtensionIndex = 0;
     for (size_t i = extensionHeader_arraysize; i > 0; i--) {
-        int type = extensionHeader[i-1]->getExtensionType();
+        int type = extensionHeader[i - 1]->getExtensionType();
         if (type == IP_PROT_IPv6EXT_ROUTING || type == IP_PROT_IPv6EXT_HOP) {
             firstFragmentableExtensionIndex = i;
             break;

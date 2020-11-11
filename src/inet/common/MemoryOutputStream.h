@@ -35,7 +35,8 @@ using namespace units::values;
 // TODO: allow arbitrary mixed bit/byte writes
 // TODO: add parameter checks
 // TODO: review efficiency
-class INET_API MemoryOutputStream {
+class INET_API MemoryOutputStream
+{
   protected:
     /**
      * This vector contains the bits that were written to this stream so far.
@@ -346,7 +347,7 @@ class INET_API MemoryOutputStream {
     void writeNBitsOfUint64Be(uint64_t value, uint8_t n) {
         if (n == 0 || n > 64)
             throw cRuntimeError("Can not write 0 bit or more than 64 bits.");
-        uint64_t mul = 1 << (n-1);
+        uint64_t mul = 1 << (n - 1);
         for (int i = 0; i < n; ++i) {
             writeBit((value & mul) != 0);
             mul >>= 1;

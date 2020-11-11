@@ -158,7 +158,7 @@ void RsvpTe::readTrafficFromXML(const cXMLElement *traffic)
     ASSERT(!strcmp(traffic->getTagName(), "sessions"));
     checkTags(traffic, "session");
     cXMLElementList list = traffic->getChildrenByTagName("session");
-    for (auto & elem : list)
+    for (auto& elem : list)
         readTrafficSessionFromXML(elem);
 }
 
@@ -231,7 +231,6 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
         checkTags(path, "sender lspid bandwidth max_delay route permanent owner color");
 
         int lspid = getParameterIntValue(path, "lspid");
-        ;
 
         std::vector<traffic_path_t>::iterator pit;
 
@@ -431,7 +430,7 @@ void RsvpTe::processHELLO_TIMEOUT(HelloTimeoutMsg *msg)
 
     // send PATH_ERROR for existing paths
 
-    for (auto & elem : PSBList) {
+    for (auto& elem : PSBList) {
         if (elem.OutInterface == tedmod->ted[index].local)
             sendPathErrorMessage(&(elem), PATH_ERR_NEXTHOP_FAILED);
     }
@@ -535,7 +534,7 @@ bool RsvpTe::doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, 
 
     double sharedBW = 0.0;
 
-    for (auto & elem : RSBList) {
+    for (auto& elem : RSBList) {
         if ((elem.Session_Object == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
             sharedBW = elem.Flowspec_Object.req_bandwidth;
     }
@@ -592,11 +591,11 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle)
 
     Ipv4AddressVector phops;
 
-    for (auto & elem : PSBList) {
+    for (auto& elem : PSBList) {
         if (elem.OutInterface != rsbEle->OI)
             continue;
 
-        for (auto & _i : rsbEle->FlowDescriptor) {
+        for (auto& _i : rsbEle->FlowDescriptor) {
             if ((FilterSpecObj&)elem.Sender_Template_Object != _i.Filter_Spec_Object)
                 continue;
 
@@ -607,7 +606,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle)
                 phops.push_back(elem.Previous_Hop_Address);
         }
 
-        for (auto & phop : phops)
+        for (auto& phop : phops)
             refreshResv(rsbEle, phop);
     }
 }
@@ -628,7 +627,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
     hop.Next_Hop_Address = PHOP;
     msg->setHop(hop);
 
-    for (auto & elem : PSBList) {
+    for (auto& elem : PSBList) {
         if (elem.Previous_Hop_Address != PHOP)
             continue;
 
@@ -659,7 +658,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
     msg->setFlowDescriptor(flows);
 
     int fd_length = 0;
-    for (auto & flow : flows)
+    for (auto& flow : flows)
         fd_length += 28 + (flow.RRO.size() * 4);
 
     int length = 34 + fd_length;
@@ -679,7 +678,7 @@ void RsvpTe::preempt(Ipv4Address OI, int priority, double bandwidth)
 
     unsigned int index = tedmod->linkIndex(OI);
 
-    for (auto & elem : RSBList) {
+    for (auto& elem : RSBList) {
         if (elem.OI != OI)
             continue;
 
@@ -899,7 +898,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
         }
 
         // schedule commit of merging backups too...
-        for (auto & elem : RSBList) {
+        for (auto& elem : RSBList) {
             if (elem.OI == Ipv4Address(lspid))
                 scheduleCommitTimer(&elem);
         }
@@ -927,7 +926,7 @@ RsvpTe::ResvStateBlock *RsvpTe::createRSB(const Ptr<const RsvpResvMsg>& msg)
 
     ASSERT(rsbEle.inLabelVector.size() == rsbEle.FlowDescriptor.size());
 
-    for (auto & elem : msg->getFlowDescriptor()) {
+    for (auto& elem : msg->getFlowDescriptor()) {
         FlowDescriptor_t flow = elem;
         rsbEle.FlowDescriptor.push_back(flow);
         rsbEle.inLabelVector.push_back(-1);
@@ -945,7 +944,7 @@ void RsvpTe::updateRSB(ResvStateBlock *rsb, const RsvpResvMsg *msg)
 {
     ASSERT(rsb);
 
-    for (auto & elem : msg->getFlowDescriptor()) {
+    for (auto& elem : msg->getFlowDescriptor()) {
         FlowDescriptor_t flow = elem;
 
         unsigned int m;
@@ -1573,7 +1572,7 @@ void RsvpTe::processResvMsg(Packet *pk)
     // find matching RSB *******************************************************
 
     ResvStateBlock *rsb = nullptr;
-    for (auto & elem : RSBList) {
+    for (auto& elem : RSBList) {
         if (!(msg->isInSession(&elem.Session_Object)))
             continue;
 
@@ -1617,7 +1616,7 @@ void RsvpTe::recoveryEvent(Ipv4Address peer)
         tedmod->rebuildRoutingTable();
 
     // refresh all paths towards this neighbour
-    for (auto & elem : PSBList) {
+    for (auto& elem : PSBList) {
         if (elem.OutInterface != tedmod->ted[index].local)
             continue;
 
@@ -1783,7 +1782,7 @@ void RsvpTe::delSession(const cXMLElement& node)
         if (paths) {
             remove = false;
 
-            for (auto & elem : pathList) {
+            for (auto& elem : pathList) {
                 if (it->sender.Lsp_Id == getParameterIntValue(elem, "lspid")) {
                     // remove path from session
                     remove = true;
@@ -1924,7 +1923,7 @@ void RsvpTe::scheduleCommitTimer(ResvStateBlock *rsbEle)
 
 RsvpTe::ResvStateBlock *RsvpTe::findRSB(const SessionObj& session, const SenderTemplateObj& sender, unsigned int& index)
 {
-    for (auto & elem : RSBList) {
+    for (auto& elem : RSBList) {
         if (elem.Session_Object != session)
             continue;
 
@@ -1943,7 +1942,7 @@ RsvpTe::ResvStateBlock *RsvpTe::findRSB(const SessionObj& session, const SenderT
 
 RsvpTe::PathStateBlock *RsvpTe::findPSB(const SessionObj& session, const SenderTemplateObj& sender)
 {
-    for (auto & elem : PSBList) {
+    for (auto& elem : PSBList) {
         if ((elem.Session_Object == session) && (elem.Sender_Template_Object == sender))
             return &(elem);
     }
@@ -1952,7 +1951,7 @@ RsvpTe::PathStateBlock *RsvpTe::findPSB(const SessionObj& session, const SenderT
 
 RsvpTe::PathStateBlock *RsvpTe::findPsbById(int id)
 {
-    for (auto & elem : PSBList) {
+    for (auto& elem : PSBList) {
         if (elem.id == id)
             return &elem;
     }
@@ -1962,7 +1961,7 @@ RsvpTe::PathStateBlock *RsvpTe::findPsbById(int id)
 
 RsvpTe::ResvStateBlock *RsvpTe::findRsbById(int id)
 {
-    for (auto & elem : RSBList) {
+    for (auto& elem : RSBList) {
         if (elem.id == id)
             return &elem;
     }
@@ -1972,7 +1971,7 @@ RsvpTe::ResvStateBlock *RsvpTe::findRsbById(int id)
 
 RsvpTe::HelloState *RsvpTe::findHello(Ipv4Address peer)
 {
-    for (auto & elem : HelloList) {
+    for (auto& elem : HelloList) {
         if (elem.peer == peer)
             return &(elem);
     }
@@ -2040,7 +2039,7 @@ void RsvpTe::print(const RsvpPathMsg *p)
 void RsvpTe::print(const RsvpResvMsg *r)
 {
     EV_INFO << "RESV_MESSAGE: " << endl;
-    for (auto & elem : r->getFlowDescriptor()) {
+    for (auto& elem : r->getFlowDescriptor()) {
         EV_INFO << " lspid " << elem.Filter_Spec_Object.Lsp_Id
                 << " label " << elem.label << endl;
     }

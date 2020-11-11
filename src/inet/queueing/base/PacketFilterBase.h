@@ -45,7 +45,7 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void processPacket(Packet *packet) { }
+    virtual void processPacket(Packet *packet) {}
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming(Packet *packet);

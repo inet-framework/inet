@@ -30,7 +30,8 @@ namespace visualizer {
 class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
 {
   protected:
-    class StatisticCanvasVisualization : public StatisticVisualization {
+    class StatisticCanvasVisualization : public StatisticVisualization
+    {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         cFigure *figure = nullptr;

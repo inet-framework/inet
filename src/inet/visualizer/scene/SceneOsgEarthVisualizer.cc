@@ -66,7 +66,7 @@ void SceneOsgEarthVisualizer::initialize(int stage)
 void SceneOsgEarthVisualizer::initializeScene()
 {
     SceneOsgVisualizerBase::initializeScene();
-    const char* mapFileString = par("mapFile");
+    const char *mapFileString = par("mapFile");
     auto mapScene = osgDB::readNodeFile(mapFileString);
     if (mapScene == nullptr)
         throw cRuntimeError("Could not read earth map file '%s'", mapFileString);

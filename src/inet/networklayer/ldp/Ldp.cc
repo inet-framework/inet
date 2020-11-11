@@ -92,7 +92,7 @@ Ldp::Ldp()
 
 Ldp::~Ldp()
 {
-    for (auto & elem : myPeers)
+    for (auto& elem : myPeers)
         cancelAndDelete(elem.timeout);
 
     cancelAndDelete(sendHelloMsg);
@@ -244,7 +244,7 @@ void Ldp::handleStartOperation(LifecycleOperation *operation)
 
 void Ldp::handleStopOperation(LifecycleOperation *operation)
 {
-    for (auto & elem : myPeers)
+    for (auto& elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
@@ -259,7 +259,7 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
 
 void Ldp::handleCrashOperation(LifecycleOperation *operation)
 {
-    for (auto & elem : myPeers)
+    for (auto& elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
@@ -430,10 +430,10 @@ void Ldp::rebuildFecList()
     if (oldList.size() > 0) {
         EV_INFO << "there are " << oldList.size() << " deprecated FECs, removing them" << endl;
 
-        for (auto & elem : oldList) {
+        for (auto& elem : oldList) {
             EV_DETAIL << "removing FEC= " << elem << endl;
 
-            for (auto & _dit : fecDown) {
+            for (auto& _dit : fecDown) {
                 if (_dit.fecid != elem.fecid)
                     continue;
 
@@ -442,7 +442,7 @@ void Ldp::rebuildFecList()
                 sendMapping(LABEL_RELEASE, _dit.peer, _dit.label, elem.addr, elem.length);
             }
 
-            for (auto & _uit : fecUp) {
+            for (auto& _uit : fecUp) {
                 if (_uit.fecid != elem.fecid)
                     continue;
 
@@ -464,7 +464,7 @@ void Ldp::rebuildFecList()
 
 void Ldp::updateFecList(Ipv4Address nextHop)
 {
-    for (auto & elem : fecList) {
+    for (auto& elem : fecList) {
         if (elem.nextHop != nextHop)
             continue;
 
@@ -866,7 +866,7 @@ std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
 Ldp::FecBindVector::iterator Ldp::findFecEntry(FecBindVector& fecs, int fecid, Ipv4Address peer)
 {
     auto it = fecs.begin();
-    for (; it != fecs.end(); it++) {
+    for ( ; it != fecs.end(); it++) {
         if ((it->fecid == fecid) && (it->peer == peer))
             break;
     }
@@ -954,7 +954,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
                     if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
                         auto pk = new Packet(0, ldpPacket);
-                        scheduleAfter(1.0    /* XXX FIXME */, pk);
+                        scheduleAfter(1.0 /* XXX FIXME */, pk);
                         return;
                     }
                     else {
@@ -1246,7 +1246,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
             return false;
     }
     else if (protocol == IP_PROT_TCP) {
-    // ...and session)
+        // ...and session)
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength());
         if (tcpHeader->getDestPort() == LDP_PORT || tcpHeader->getSrcPort() == LDP_PORT)
             return false;
@@ -1254,7 +1254,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
 
     // regular traffic, classify, label etc.
 
-    for (auto & elem : fecList) {
+    for (auto& elem : fecList) {
         if (!destAddr.prefixMatches(elem.addr, elem.length))
             continue;
 

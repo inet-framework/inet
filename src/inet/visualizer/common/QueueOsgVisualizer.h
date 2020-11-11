@@ -32,7 +32,8 @@ class INET_API QueueOsgVisualizer : public QueueVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API QueueOsgVisualization : public QueueVisualization {
+    class INET_API QueueOsgVisualization : public QueueVisualization
+    {
       public:
         NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Geode *node = nullptr;
@@ -57,7 +58,7 @@ class INET_API QueueOsgVisualizer : public QueueVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const override { return nullptr; }
-    virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override { }
+    virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override {}
 
 #endif // ifdef WITH_OSG
 };

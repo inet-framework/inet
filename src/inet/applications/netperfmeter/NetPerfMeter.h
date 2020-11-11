@@ -59,9 +59,9 @@ class INET_API NetPerfMeter : public cSimpleModule
     virtual void refreshDisplay() const override;
 
     void establishConnection();
-    void successfullyEstablishedConnection(cMessage* msg, const unsigned int queueSize);
+    void successfullyEstablishedConnection(cMessage *msg, const unsigned int queueSize);
     void teardownConnection(const bool stopTimeReached = false);
-    void receiveMessage(cMessage* msg);
+    void receiveMessage(cMessage *msg);
     void resetStatistics();
     void writeStatistics();
 
@@ -96,15 +96,15 @@ class INET_API NetPerfMeter : public cSimpleModule
     simtime_t StartTime;
     simtime_t ResetTime;
     simtime_t StopTime;
-    cMessage* ConnectTimer = nullptr;
-    cMessage* StartTimer = nullptr;
-    cMessage* StopTimer = nullptr;
-    cMessage* ResetTimer = nullptr;
-    cMessage* OffTimer = nullptr;
-    cMessage* OnTimer = nullptr;
+    cMessage *ConnectTimer = nullptr;
+    cMessage *StartTimer = nullptr;
+    cMessage *StopTimer = nullptr;
+    cMessage *ResetTimer = nullptr;
+    cMessage *OffTimer = nullptr;
+    cMessage *OnTimer = nullptr;
     unsigned int OnOffCycleCounter = 0;
     int MaxOnOffCycles = 0;
-    std::vector<NetPerfMeterTransmitTimer*> TransmitTimerVector;
+    std::vector<NetPerfMeterTransmitTimer *> TransmitTimerVector;
 
     unsigned int RequestedOutboundStreams = 0;
     unsigned int MaxInboundStreams = 0;
@@ -114,16 +114,17 @@ class INET_API NetPerfMeter : public cSimpleModule
     std::vector<cDynamicExpression> FrameSizeExpressionVector;
 
     // ====== Sockets and Connection Information =============================
-    SctpSocket* SocketSCTP = nullptr;
-    SctpSocket* IncomingSocketSCTP = nullptr;
-    TcpSocket* SocketTCP = nullptr;
-    TcpSocket* IncomingSocketTCP = nullptr;
-    UdpSocket * SocketUDP = nullptr;
+    SctpSocket *SocketSCTP = nullptr;
+    SctpSocket *IncomingSocketSCTP = nullptr;
+    TcpSocket *SocketTCP = nullptr;
+    TcpSocket *IncomingSocketTCP = nullptr;
+    UdpSocket *SocketUDP = nullptr;
     int ConnectionID = 0;
     L3Address PrimaryPath;
 
     // ====== Trace File Handling ============================================
-    struct TraceEntry {
+    struct TraceEntry
+    {
         double InterFrameDelay;
         unsigned int FrameSize;
         unsigned int StreamID;
@@ -143,7 +144,8 @@ class INET_API NetPerfMeter : public cSimpleModule
     simtime_t StatisticsStartTime; // Absolute start time of statistics recording
 
   private:
-    class SenderStatistics {
+    class SenderStatistics
+    {
       public:
         SenderStatistics() { reset(); }
 
@@ -153,7 +155,8 @@ class INET_API NetPerfMeter : public cSimpleModule
         unsigned long long SentMessages;
     };
 
-    class ReceiverStatistics {
+    class ReceiverStatistics
+    {
       public:
         ReceiverStatistics() {
             ReceivedDelayHistogram.setName("Received Message Delay");
@@ -171,19 +174,19 @@ class INET_API NetPerfMeter : public cSimpleModule
         cHistogram ReceivedDelayHistogram;
     };
 
-    std::map<unsigned int, SenderStatistics*> SenderStatisticsMap;
-    std::map<unsigned int, ReceiverStatistics*> ReceiverStatisticsMap;
+    std::map<unsigned int, SenderStatistics *> SenderStatisticsMap;
+    std::map<unsigned int, ReceiverStatistics *> ReceiverStatisticsMap;
 
-    inline SenderStatistics* getSenderStatistics(const unsigned int streamID) {
-        std::map<unsigned int, SenderStatistics*>::iterator found = SenderStatisticsMap.find(streamID);
+    inline SenderStatistics *getSenderStatistics(const unsigned int streamID) {
+        std::map<unsigned int, SenderStatistics *>::iterator found = SenderStatisticsMap.find(streamID);
         assert(found != SenderStatisticsMap.end());
-        return (found->second);
+        return found->second;
     }
 
-    inline ReceiverStatistics* getReceiverStatistics(const unsigned int streamID) {
-        std::map<unsigned int, ReceiverStatistics*>::iterator found = ReceiverStatisticsMap.find(streamID);
+    inline ReceiverStatistics *getReceiverStatistics(const unsigned int streamID) {
+        std::map<unsigned int, ReceiverStatistics *>::iterator found = ReceiverStatisticsMap.find(streamID);
         assert(found != ReceiverStatisticsMap.end());
-        return (found->second);
+        return found->second;
     }
 
     double getFrameRate(const unsigned int streamID);
@@ -191,18 +194,16 @@ class INET_API NetPerfMeter : public cSimpleModule
     void startSending();
     void stopSending();
     void sendDataOfTraceFile(const unsigned long long bytesAvailableInQueue);
-    void sendDataOfSaturatedStreams(
-            const unsigned long long bytesAvailableInQueue,
+    void sendDataOfSaturatedStreams(const unsigned long long bytesAvailableInQueue,
             const Ptr<const SctpSendQueueAbatedReq>& sendQueueAbatedIndication);
 
-    void sendDataOfNonSaturatedStreams( const unsigned long long bytesAvailableInQueue, const unsigned int streamID);
+    void sendDataOfNonSaturatedStreams(const unsigned long long bytesAvailableInQueue, const unsigned int streamID);
     unsigned long transmitFrame(const unsigned int frameSize, const unsigned int streamID);
-    static opp_string format(const char* formatString, ...);
-    static void parseExpressionVector(
-            std::vector<cDynamicExpression>& expressionVector,
-            const char* string, const char* delimiters = NULL);
+    static opp_string format(const char *formatString, ...);
+    static void parseExpressionVector(std::vector<cDynamicExpression>& expressionVector,
+            const char *string, const char *delimiters = NULL);
     void createAndBindSocket();
-    void handleTimer(cMessage* msg);
+    void handleTimer(cMessage *msg);
 };
 
 } // namespace inet

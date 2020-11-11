@@ -180,8 +180,8 @@ void StreamThroughTransmitter::scheduleBufferUnderrunTimer()
     cancelEvent(bufferUnderrunTimer);
     if (lastInputDatarate < txDatarate) {
         // Underrun occurs when the following two values become equal:
-        //   inputProgressPosition = lastInputProgressPosition + inputDatarate * (simTime() - lastInputProgressTime)
-        //   txProgressPosition = lastTxProgressPosition + txDatarate * (simTime() - lastTxProgressTime)
+        // inputProgressPosition = lastInputProgressPosition + inputDatarate * (simTime() - lastInputProgressTime)
+        // txProgressPosition = lastTxProgressPosition + txDatarate * (simTime() - lastTxProgressTime)
         simtime_t bufferUnderrunTime = s((-lastInputProgressPosition + lastInputDatarate * s(lastInputProgressTime.dbl()) + lastTxProgressPosition - txDatarate * s(lastTxProgressTime.dbl())) / (lastInputDatarate - txDatarate)).get();
         EV_INFO << "Scheduling buffer underrun timer" << EV_FIELD(at, bufferUnderrunTime.ustr()) << EV_ENDL;
         scheduleAt(bufferUnderrunTime, bufferUnderrunTimer);

@@ -267,19 +267,19 @@ void TcpSocket::renewSocket()
 bool TcpSocket::isOpen() const
 {
     switch (sockstate) {
-    case BOUND:
-    case LISTENING:
-    case CONNECTING:
-    case CONNECTED:
-    case PEER_CLOSED:
-    case LOCALLY_CLOSED:
-    case SOCKERROR: //TODO check SOCKERROR is opened or is closed socket
-        return true;
-    case NOT_BOUND:
-    case CLOSED:
-        return false;
-    default:
-        throw cRuntimeError("invalid TcpSocket state: %d", sockstate);
+        case BOUND:
+        case LISTENING:
+        case CONNECTING:
+        case CONNECTED:
+        case PEER_CLOSED:
+        case LOCALLY_CLOSED:
+        case SOCKERROR: //TODO check SOCKERROR is opened or is closed socket
+            return true;
+        case NOT_BOUND:
+        case CLOSED:
+            return false;
+        default:
+            throw cRuntimeError("invalid TcpSocket state: %d", sockstate);
     }
 }
 
@@ -299,14 +299,14 @@ void TcpSocket::processMessage(cMessage *msg)
     switch (msg->getKind()) {
         case TCP_I_DATA:
             if (cb)
-                cb->socketDataArrived(this, check_and_cast<Packet*>(msg), false);
+                cb->socketDataArrived(this, check_and_cast<Packet *>(msg), false);
             else
                 delete msg;
             break;
 
         case TCP_I_URGENT_DATA:
             if (cb)
-                cb->socketDataArrived(this, check_and_cast<Packet*>(msg), true);
+                cb->socketDataArrived(this, check_and_cast<Packet *>(msg), true);
             else
                 delete msg;
             break;
@@ -368,8 +368,7 @@ void TcpSocket::processMessage(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("TcpSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
-                msg->getKind());
+            throw cRuntimeError("TcpSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->getKind());
     }
 }
 

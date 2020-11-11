@@ -81,14 +81,15 @@ class INET_API PimSm : public PimBase, protected cListener
         bool pimInclude() const
         {
             return localReceiverInclude() &&
-                   ((    /*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
+                   ((/*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
         }
 
         bool pimExclude() const
         {
             return localReceiverExclude() &&
-                   ((    /*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
+                   ((/*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
         }
+
     };
 
     // upstream interface is toward the RP or toward the source

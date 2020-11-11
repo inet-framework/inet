@@ -166,7 +166,7 @@ void Tcp::handleLowerPacket(Packet *packet)
         // process segment
         TcpConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
         if (conn) {
-            TcpStateVariables* state = conn->getState();
+            TcpStateVariables *state = conn->getState();
             if (state && state->ect) {
                 // This may be true only in receiver side. According to RFC 3168, page 20:
                 // pure acknowledgement packets (e.g., packets that do not contain
@@ -182,7 +182,7 @@ void Tcp::handleLowerPacket(Packet *packet)
             segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
         }
     }
-    else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
+    else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
         EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to Tcp???
         delete packet;
     }
@@ -390,7 +390,7 @@ void Tcp::handleCrashOperation(LifecycleOperation *operation)
 
 void Tcp::reset()
 {
-    for (auto & elem : tcpAppConnMap)
+    for (auto& elem : tcpAppConnMap)
         elem.second->deleteModule();
     tcpAppConnMap.clear();
     tcpConnMap.clear();
@@ -428,7 +428,7 @@ bool Tcp::checkCrc(Packet *tcpSegment)
             Chunk::serialize(stream, pseudoHeader);
             Chunk::serialize(stream, tcpSegment->peekData());
             uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-            return (crc == 0);
+            return crc == 0;
         }
         case CRC_DECLARED_CORRECT:
             return true;
@@ -455,7 +455,7 @@ void Tcp::refreshDisplay() const
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (auto & elem : tcpAppConnMap) {
+    for (auto& elem : tcpAppConnMap) {
         int state = (elem).second->getFsmState();
 
         switch (state) {
@@ -542,7 +542,7 @@ void Tcp::refreshDisplay() const
 
 std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
 {
-    os << "locSocket=" << sp.localAddr << ":"<< sp.localPort << " "
+    os << "locSocket=" << sp.localAddr << ":" << sp.localPort << " "
        << "remSocket=" << sp.remoteAddr << ":" << sp.remotePort;
     return os;
 }
@@ -558,5 +558,4 @@ std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
 
 } // namespace tcp
 } // namespace inet
-
 

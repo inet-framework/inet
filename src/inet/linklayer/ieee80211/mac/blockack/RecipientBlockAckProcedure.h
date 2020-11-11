@@ -28,16 +28,16 @@ namespace ieee80211 {
  */
 class INET_API RecipientBlockAckProcedure : public IRecipientBlockAckProcedure
 {
-    protected:
-        int numReceivedBlockAckReq = 0;
-        int numSentBlockAck = 0;
+  protected:
+    int numReceivedBlockAckReq = 0;
+    int numSentBlockAck = 0;
 
-    protected:
-        virtual const Ptr<Ieee80211BlockAck> buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement);
+  protected:
+    virtual const Ptr<Ieee80211BlockAck> buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement);
 
-    public:
-        virtual void processReceivedBlockAckReq(Packet *blockAckPacket, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback) override;
-        virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) override;
+  public:
+    virtual void processReceivedBlockAckReq(Packet *blockAckPacket, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, IProcedureCallback *callback) override;
+    virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) override;
 };
 
 } /* namespace ieee80211 */

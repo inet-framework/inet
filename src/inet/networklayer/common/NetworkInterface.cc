@@ -45,7 +45,7 @@ namespace inet {
 Register_Abstract_Class(NetworkInterfaceChangeDetails);
 Define_Module(NetworkInterface);
 
-std::ostream& operator <<(std::ostream& o, NetworkInterface::State s)
+std::ostream& operator<<(std::ostream& o, NetworkInterface::State s)
 {
     switch (s) {
         case NetworkInterface::UP: o << "UP"; break;
@@ -85,10 +85,10 @@ void NetworkInterface::clearProtocolDataSet()
     std::vector<int> ids;
     int n = protocolDataSet.getNumTags();
     ids.reserve(n);
-    for (int i=0; i < n; i++)
+    for (int i = 0; i < n; i++)
         ids[i] = static_cast<const InterfaceProtocolData *>(protocolDataSet.getTag(i))->id;
     protocolDataSet.clearTags();
-    for (int i=0; i < n; i++)
+    for (int i = 0; i < n; i++)
         changed(interfaceConfigChangedSignal, ids[i]);
 }
 
@@ -290,7 +290,7 @@ std::string NetworkInterface::str() const
         out << "n/a";
     else
         out << getMacAddress();
-    for (int i=0; i<protocolDataSet.getNumTags(); i++)
+    for (int i = 0; i < protocolDataSet.getNumTags(); i++)
         out << " " << protocolDataSet.getTag(i)->str();
 
     return out.str();
@@ -429,7 +429,7 @@ void NetworkInterface::joinMulticastGroup(const L3Address& address)
 static void toIpv4AddressVector(const std::vector<L3Address>& addresses, std::vector<Ipv4Address>& result)
 {
     result.reserve(addresses.size());
-    for (auto & addresse : addresses)
+    for (auto& addresse : addresses)
         result.push_back(addresse.toIpv4());
 }
 
@@ -488,8 +488,7 @@ Ipv4Address NetworkInterface::getIpv4Netmask() const {
 
 void NetworkInterface::setState(State s)
 {
-    if (state != s)
-    {
+    if (state != s) {
         state = s;
         // TODO: carrier and UP/DOWN state is independent
         if (state == DOWN)
@@ -500,8 +499,7 @@ void NetworkInterface::setState(State s)
 
 void NetworkInterface::setCarrier(bool b)
 {
-    if (carrier != b)
-    {
+    if (carrier != b) {
         carrier = b;
         stateChanged(F_CARRIER);
     }

@@ -38,8 +38,7 @@ SctpQueue::SctpQueue(SctpAssociation *assoc_)
 
 SctpQueue::~SctpQueue()
 {
-    for (auto & elem : payloadQueue)
-    {
+    for (auto& elem : payloadQueue) {
         SctpDataVariables *chunk = elem.second;
         delete chunk->userData;
     }
@@ -88,8 +87,7 @@ SctpDataVariables *SctpQueue::getAndExtractChunk(const uint32_t tsn)
 void SctpQueue::printQueue() const
 {
     EV_DEBUG << "Queue contents:\n";
-    for (const auto & elem : payloadQueue)
-    {
+    for (const auto& elem : payloadQueue) {
         const uint32_t key = elem.first;
         const SctpDataVariables *chunk = elem.second;
         EV_DEBUG << key << ":\t"
@@ -177,8 +175,7 @@ bool SctpQueue::deleteMsg(const uint32_t tsn)
 int32_t SctpQueue::getNumBytes() const
 {
     int32_t qb = 0;
-    for (const auto & elem : payloadQueue)
-    {
+    for (const auto& elem : payloadQueue) {
         qb += (elem.second->len / 8);
     }
     return qb;
@@ -213,8 +210,7 @@ void SctpQueue::findEarliestOutstandingTsnsForPath(const L3Address& remoteAddres
     bool findEarliestOutstandingTsn = true;
     bool findRTXEarliestOutstandingTsn = true;
 
-    for (const auto & elem : payloadQueue)
-    {
+    for (const auto& elem : payloadQueue) {
         const SctpDataVariables *chunk = elem.second;
         if (chunk->getLastDestination() == remoteAddress) {
             // ====== Find earliest outstanding TSNs ===========================

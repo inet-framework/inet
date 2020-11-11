@@ -63,7 +63,7 @@ namespace inet {
 class MoBanLocal;
 
 /**
-   *\page mobancpp MoBAN C++ reference
+ *\page mobancpp MoBAN C++ reference
  * This is the C++ implementation reference for MoBAN, which is a configurable mobility model for wireless Body Area Networks. MoBanCoordinator and MoBanLocal
  * classes describe the behavior of the Coordinator module and local mobility module of the MoBAN, respectively. There are two more classes which are used in the
  * coordinator module.
@@ -158,8 +158,8 @@ class INET_API MoBanCoordinator : public LineSegmentsMobilityBase
 
     /** @brief Possible (supported) strategies for posture selection. */
     enum posture_sel_type {
-        UNIFORM_RANDOM = 0,    // uniform random posture selection. No correlation is applied.
-        MARKOV_BASE    // Either a Markov model matrix or a steady state vector is given for space-time domains
+        UNIFORM_RANDOM = 0, // uniform random posture selection. No correlation is applied.
+        MARKOV_BASE // Either a Markov model matrix or a steady state vector is given for space-time domains
     };
 
     /** @brief The requested strategy for posture selection. To be given through configuration file. */

@@ -21,8 +21,8 @@ namespace inet {
 namespace physicallayer {
 
 Ieee80211VhtInterleaving::Ieee80211VhtInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth) :
-        numberOfCodedBitsPerSpatialStreams(numberOfCodedBitsPerSpatialStreams),
-        bandwidth(bandwidth)
+    numberOfCodedBitsPerSpatialStreams(numberOfCodedBitsPerSpatialStreams),
+    bandwidth(bandwidth)
 {
 }
 

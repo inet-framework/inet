@@ -96,7 +96,7 @@ class INET_API PacketDissector
         std::deque<Ptr<const Chunk>> chunks;
 
       public:
-        ProtocolDataUnit(int level, const Protocol* protocol);
+        ProtocolDataUnit(int level, const Protocol *protocol);
 
         int getLevel() const { return level; }
         bool isCorrect() const { return isCorrect_; }
@@ -120,9 +120,9 @@ class INET_API PacketDissector
         const Ptr<const Chunk> getContent() { return content; }
 
         virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
-        virtual void startProtocolDataUnit(const Protocol *protocol) override { }
-        virtual void endProtocolDataUnit(const Protocol *protocol) override { }
-        virtual void markIncorrect() override { }
+        virtual void startProtocolDataUnit(const Protocol *protocol) override {}
+        virtual void endProtocolDataUnit(const Protocol *protocol) override {}
+        virtual void markIncorrect() override {}
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
