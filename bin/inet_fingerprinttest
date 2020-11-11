@@ -339,6 +339,7 @@ class SimulationTestCase(unittest.TestCase):
                 errorMsg += "\n" + err
                 if re.search("CPU time limit reached", err):
                     result.cpuTimeLimitReached = True
+                    result.exitcode = 1
                 m = re.search(r"at t=([0-9]*(\.[0-9]+)?)s, event #([0-9]+)", err)
                 if m:
                     result.simulatedTime = float(m.group(1))
