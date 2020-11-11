@@ -34,7 +34,7 @@ Ipv6FragBuf::Ipv6FragBuf()
 
 Ipv6FragBuf::~Ipv6FragBuf()
 {
-    for (auto & elem : bufs) {
+    for (auto& elem : bufs) {
         delete elem.second.packet;
     }
 }
@@ -66,7 +66,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
         buf = &(i->second);
     }
 
-    int fragmentLength = pk->getByteLength() - B(ipv6Header->getChunkLength()).get(); //datagram->calculateFragmentLength();
+    int fragmentLength = pk->getByteLength() - B(ipv6Header->getChunkLength()).get(); // datagram->calculateFragmentLength();
     unsigned short offset = fh->getFragmentOffset();
     bool moreFragments = fh->getMoreFragments();
 
@@ -78,7 +78,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
     // source of the fragment, pointing to the Payload Length field of
     // the fragment packet.
     if (moreFragments && (fragmentLength % 8) != 0) {
-        icmpModule->sendErrorMessage(pk, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD);    // TODO set pointer
+        icmpModule->sendErrorMessage(pk, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD); // TODO set pointer
         return nullptr;
     }
 
@@ -90,7 +90,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
     // the fragment, pointing to the Fragment Offset field of the
     // fragment packet.
     if (offset + fragmentLength > 65535) {
-        icmpModule->sendErrorMessage(pk, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD);    // TODO set pointer
+        icmpModule->sendErrorMessage(pk, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD); // TODO set pointer
         return nullptr;
     }
 
@@ -155,7 +155,7 @@ void Ipv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
 
     ASSERT(icmpModule);
 
-    for (auto i = bufs.begin(); i != bufs.end(); ) {
+    for (auto i = bufs.begin(); i != bufs.end();) {
         // if too old, remove it
         DatagramBuffer& buf = i->second;
         if (buf.createdAt < lastupdate) {

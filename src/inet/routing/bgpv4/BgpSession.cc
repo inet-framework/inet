@@ -63,7 +63,7 @@ void BgpSession::setTimers(simtime_t *delayTab)
     if (_info.sessionType == IGP) {
         _StartEventTime = delayTab[3];
         // if this BGP router does not establish any EGP connection, then start this IGP session
-        if(bgpRouter.getNumEgpSessions() == 0) {
+        if (bgpRouter.getNumEgpSessions() == 0) {
             _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
             bgpRouter.getScheduleAt(simTime() + _StartEventTime, _ptrStartEvent);
             _ptrStartEvent->setContextPointer(this);
@@ -92,7 +92,7 @@ void BgpSession::startConnection()
     if (_info.sessionType == IGP) {
         if (simTime() > _StartEventTime)
             _StartEventTime = simTime();
-        if(!_ptrStartEvent->isScheduled())
+        if (!_ptrStartEvent->isScheduled())
             bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
     }
@@ -127,9 +127,9 @@ void BgpSession::sendOpenMessage()
     openMsg->setHoldTime(_holdTime);
     openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIpv4());
 
-    EV_INFO << "Sending BGP Open message to " << _info.peerAddr.str(false) <<
-            " on interface " << _info.linkIntf->getInterfaceName() <<
-            "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
+    EV_INFO << "Sending BGP Open message to " << _info.peerAddr.str(false)
+            << " on interface " << _info.linkIntf->getInterfaceName()
+            << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
     bgpRouter.printOpenMessage(*openMsg);
 
     Packet *pk = new Packet("BgpOpen");
@@ -139,7 +139,7 @@ void BgpSession::sendOpenMessage()
     _openMsgSent++;
 }
 
-void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes*> &content, BgpUpdateNlri &NLRI)
+void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri& NLRI)
 {
     const auto& updateMsg = makeShared<BgpUpdateMessage>();
 
@@ -156,12 +156,12 @@ void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes*> &conten
 
     updateMsg->setNLRIArraySize(1);
     updateMsg->setNLRI(0, NLRI);
-    updateMsg->addChunkLength(B(1 + (NLRI.length +7)/8));
+    updateMsg->addChunkLength(B(1 + (NLRI.length + 7) / 8));
     updateMsg->setTotalLength(B(updateMsg->getChunkLength()).get());
 
-    EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str(false) <<
-            " on interface " << _info.linkIntf->getInterfaceName() <<
-            "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
+    EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str(false)
+            << " on interface " << _info.linkIntf->getInterfaceName()
+            << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
     bgpRouter.printUpdateMessage(*updateMsg);
 
     Packet *pk = new Packet("BgpUpdate");
@@ -175,26 +175,26 @@ void BgpSession::sendNotificationMessage()
 {
     // TODO
 
-    // const auto& updateMsg = makeShared<BgpNotificationMessage>();
+//    const auto& updateMsg = makeShared<BgpNotificationMessage>();
 
-//    EV_INFO << "Sending BGP Notification message to " << _info.peerAddr.str(false) <<
-//            " on interface " << _info.linkIntf->getInterfaceName() <<
-//            "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
+//    EV_INFO << "Sending BGP Notification message to " << _info.peerAddr.str(false)
+//            << " on interface " << _info.linkIntf->getInterfaceName()
+//            << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
 
-    //Packet *pk = new Packet("BgpNotification");
-    //pk->insertAtFront(updateMsg);
+//    Packet *pk = new Packet("BgpNotification");
+//    pk->insertAtFront(updateMsg);
 
-    //_info.socket->send(pk);
-    //_notificationMsgSent++;
+//    _info.socket->send(pk);
+//    _notificationMsgSent++;
 }
 
 void BgpSession::sendKeepAliveMessage()
 {
-    const auto &keepAliveMsg = makeShared<BgpKeepAliveMessage>();
+    const auto& keepAliveMsg = makeShared<BgpKeepAliveMessage>();
 
-    EV_INFO << "Sending BGP Keep-alive message to " << _info.peerAddr.str(false) <<
-            " on interface " << _info.linkIntf->getInterfaceName() <<
-            "[" << _info.linkIntf->getInterfaceId() << "] \n";
+    EV_INFO << "Sending BGP Keep-alive message to " << _info.peerAddr.str(false)
+            << " on interface " << _info.linkIntf->getInterfaceName()
+            << "[" << _info.linkIntf->getInterfaceId() << "] \n";
     bgpRouter.printKeepAliveMessage(*keepAliveMsg);
 
     Packet *pk = new Packet("BgpKeepAlive");
@@ -216,11 +216,11 @@ void BgpSession::getStatistics(unsigned int *statTab)
 
 const std::string BgpSession::getTypeString(BgpSessionType sessionType)
 {
-    if(sessionType == IGP)
+    if (sessionType == IGP)
         return "IGP";
-    else if(sessionType == EGP)
+    else if (sessionType == EGP)
         return "EGP";
-    else if(sessionType == INCOMPLETE)
+    else if (sessionType == INCOMPLETE)
         return "INCOMPLETE";
 
     return "Unknown";
@@ -229,15 +229,15 @@ const std::string BgpSession::getTypeString(BgpSessionType sessionType)
 std::ostream& operator<<(std::ostream& out, const BgpSession& entry)
 {
     out << "sessionId: " << entry.getSessionID() << " "
-            << "sessionType: " << entry.getTypeString(entry.getType()) << " "
-            << "established: " << (entry.isEstablished() == true ? "true" : "false") << " "
-            << "state: " << entry.getFSM().currentState().name() << " "
-            << "peer: " << entry.getPeerAddr().str(false) << " "
-            << "nextHopSelf: " << (entry.getNextHopSelf() == true ? "true" : "false") << " "
-            << "startEventTime: " << entry.getStartEventTime() << " "
-            << "connectionRetryTime: " << entry.getConnectionRetryTime() << " "
-            << "holdTime: " << entry.getHoldTime() << " "
-            << "keepAliveTime: " << entry.getKeepAliveTime();
+        << "sessionType: " << entry.getTypeString(entry.getType()) << " "
+        << "established: " << (entry.isEstablished() == true ? "true" : "false") << " "
+        << "state: " << entry.getFSM().currentState().name() << " "
+        << "peer: " << entry.getPeerAddr().str(false) << " "
+        << "nextHopSelf: " << (entry.getNextHopSelf() == true ? "true" : "false") << " "
+        << "startEventTime: " << entry.getStartEventTime() << " "
+        << "connectionRetryTime: " << entry.getConnectionRetryTime() << " "
+        << "holdTime: " << entry.getHoldTime() << " "
+        << "keepAliveTime: " << entry.getKeepAliveTime();
 
     return out;
 }

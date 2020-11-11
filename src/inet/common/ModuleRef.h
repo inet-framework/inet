@@ -31,7 +31,7 @@ namespace inet {
  *
  * TODO: follow connection
  */
-template <typename T>
+template<typename T>
 class INET_API ModuleRef
 {
   private:

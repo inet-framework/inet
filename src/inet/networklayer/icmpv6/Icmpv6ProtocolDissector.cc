@@ -21,7 +21,6 @@
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
-
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::icmpv6, Icmpv6ProtocolDissector);
@@ -36,7 +35,7 @@ void Icmpv6ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, 
     callback.visitChunk(header, &Protocol::icmpv6);
     if (header->getType() < 128) {
         // ICMPv6 ERROR
-        //TODO packet contains a complete Ipv6Header and the first 8 bytes of transport header (or ICMPv6). (protocol specified in Ipv6Header.)
+        // TODO packet contains a complete Ipv6Header and the first 8 bytes of transport header (or ICMPv6). (protocol specified in Ipv6Header.)
         callback.dissectPacket(packet, nullptr);
     }
     else {

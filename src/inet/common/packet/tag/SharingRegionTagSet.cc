@@ -101,7 +101,7 @@ const Ptr<TagBase> SharingRegionTagSet::removeTag(int index)
     return constPtrCast<TagBase>(tag);
 }
 
-void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const TagBase>&)> f) const
+void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<void(b, b, const Ptr<const TagBase>&)> f) const
 {
     if (regionTags != nullptr) {
         b startOffset = offset;
@@ -128,7 +128,7 @@ void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<void (b, 
     }
 }
 
-void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<TagBase>&)> f)
+void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<TagBase>&)> f)
 {
     if (regionTags != nullptr) {
         prepareTagsVectorForUpdate();
@@ -248,7 +248,7 @@ void SharingRegionTagSet::moveTags(b offset, b length, b shift)
     }
 }
 
-void SharingRegionTagSet::splitTags(b offset, std::function<bool (const TagBase *)> f)
+void SharingRegionTagSet::splitTags(b offset, std::function<bool(const TagBase *)> f)
 {
     if (regionTags != nullptr) {
         std::vector<RegionTag<TagBase>> insertedRegionTags;

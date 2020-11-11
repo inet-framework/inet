@@ -86,7 +86,7 @@ namespace inet {
  */
 class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedObject, public IRegionTaggedObject
 {
-  friend class PacketDescriptor;
+    friend class PacketDescriptor;
 
   protected:
     /**
@@ -334,7 +334,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * to the current representation. The flags parameter is a combination of
      * Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
@@ -348,7 +348,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * as an immutable chunk in the requested representation. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peekAtBack(b length, int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
@@ -363,7 +363,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * the value returned by getDataLength(). The flags parameter is a combination
      * of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peekData(int flags = 0) const {
         return peekDataAt<T>(b(0), getDataLength(), flags);
     }
@@ -374,7 +374,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * the value returned by getTotalLength(). The flags parameter is a combination
      * of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peekAll(int flags = 0) const {
         return peekAt<T>(b(0), getTotalLength(), flags);
     }
@@ -385,7 +385,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * result is chosen according to the current representation. The flags
      * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
@@ -399,7 +399,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * of the result is chosen according to the current representation. The
      * flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
@@ -442,7 +442,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * to the current representation. The flags parameter is a combination of
      * Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> popAtFront(b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekAtFront<T>(length, flags);
@@ -459,7 +459,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * the back offset with the length of the returned chunk. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> popAtBack(b length, int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekAtBack<T>(length, flags);
@@ -479,18 +479,18 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * the length is unspecified, then the length of the result is chosen
      * according to the current representation.
      */
-    template <typename T>
+    template<typename T>
     bool hasAtFront(b length = b(-1)) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-        return content->has<T>(frontIterator, length == b(-1) ? -dataLength: length);
+        return content->has<T>(frontIterator, length == b(-1) ? -dataLength : length);
     }
 
     /**
      * Returns true if the designated part at the end of the data part of the
      * packet is completely available in the requested representation.
      */
-    template <typename T>
+    template<typename T>
     bool hasAtBack(b length) const {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         return content->has<T>(backIterator, length);
@@ -500,7 +500,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * Returns true if the whole data part of the packet is completely available
      * in the requested representation.
      */
-    template <typename T>
+    template<typename T>
     bool hasData() const {
         return content->has<T>(frontIterator, getDataLength());
     }
@@ -509,7 +509,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * Returns true if the whole content of the packet is completely available
      * in the requested representation.
      */
-    template <typename T>
+    template<typename T>
     bool hasAll() const {
         return content->has<T>(Chunk::ForwardIterator(b(0)), getTotalLength());
     }
@@ -519,7 +519,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * requested representation. If the length is unspecified, then the length
      * of the result is chosen according to the current representation.
      */
-    template <typename T>
+    template<typename T>
     bool hasDataAt(b offset, b length = b(-1)) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
@@ -532,7 +532,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * in the requested representation. If the length is unspecified, then the
      * length of the result is chosen according to the current representation.
      */
-    template <typename T>
+    template<typename T>
     bool hasAt(b offset, b length = b(-1)) const {
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
@@ -675,7 +675,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * not affected. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> removeAtFront(b length = b(-1), int flags = 0) {
         const auto& chunk = peekAtFront<T>(length, flags);
         eraseAtFront(chunk->getChunkLength());
@@ -688,7 +688,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> removeAtBack(b length, int flags = 0) {
         const auto& chunk = peekAtBack<T>(length, flags);
         eraseAtBack(chunk->getChunkLength());
@@ -700,7 +700,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * the requested representation. The front and back offsets are not affected.
      * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> removeData(int flags = 0) {
         const auto& chunk = peekData<T>(flags);
         eraseData();
@@ -712,7 +712,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * the requested representation. Resets both front and back offsets to zero.
      * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> removeAll(int flags = 0) {
         const auto& chunk = peekAll<T>(flags);
         eraseAll();
@@ -725,7 +725,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * back offsets are not affected. The flags parameter is a combination of
      * Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> removeDataAt(b offset, b length = b(-1), int flags = 0) {
         const auto& chunk = peekDataAt<T>(offset, length, flags);
         eraseDataAt(offset, chunk->getChunkLength());
@@ -738,7 +738,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * updated according to the offset and length parameters. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> removeAt(b offset, b length = b(-1), int flags = 0) {
         const auto& chunk = peekAt<T>(offset, length, flags);
         eraseAt(offset, chunk->getChunkLength());
@@ -824,7 +824,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         return replaceAt<T>(chunk, getFrontOffset(), length, flags);
@@ -837,7 +837,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * immutable. The front and back offsets are not affected. The flags
      * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> replaceAtBack(const Ptr<const Chunk>& chunk, b length, int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         return replaceAt<T>(chunk, getBackOffset() - length, length, flags);
@@ -850,7 +850,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * are not affected. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> replaceData(const Ptr<const Chunk>& chunk, int flags = 0) {
         return replaceAt<T>(chunk, getFrontOffset(), getDataLength(), flags);
     }
@@ -862,7 +862,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * and back offsets to zero. The flags parameter is a combination of
      * Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> replaceAll(const Ptr<const Chunk>& chunk, int flags = 0) {
         return replaceAt(chunk, b(0), getTotalLength(), flags);
     }
@@ -873,7 +873,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * requested representation. The front and back offsets are not affected.
      * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
@@ -889,7 +889,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      *
      * TODO: current limitation: the new chunk must be the same size as the old one
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
@@ -933,7 +933,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAtFront(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+    void updateAtFront(std::function<void(const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
         updateAtFront<Chunk>(f, length, flags);
     }
 
@@ -945,7 +945,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAtBack(std::function<void (const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+    void updateAtBack(std::function<void(const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
         updateAtBack<Chunk>(f, length, flags);
     }
 
@@ -955,7 +955,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * packet. The front and back offsets are not affected. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      */
-    void updateData(std::function<void (const Ptr<Chunk>&)> f, int flags = 0) {
+    void updateData(std::function<void(const Ptr<Chunk>&)> f, int flags = 0) {
         updateData<Chunk>(f, flags);
     }
 
@@ -965,7 +965,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAll(std::function<void (const Ptr<Chunk>&)> f, int flags = 0) {
+    void updateAll(std::function<void(const Ptr<Chunk>&)> f, int flags = 0) {
         updateAll<Chunk>(f, flags);
     }
 
@@ -977,7 +977,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * not affected. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      */
-    void updateDataAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+    void updateDataAt(std::function<void(const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
         updateDataAt<Chunk>(f, offset, length, flags);
     }
 
@@ -989,7 +989,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * updated according to the offset and length parameters. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      */
-    void updateAt(std::function<void (const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+    void updateAt(std::function<void(const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
         updateAt<Chunk>(f, offset, length, flags);
     }
 
@@ -1002,8 +1002,8 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * are not affected. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      */
-    template <typename T>
-    void updateAtFront(std::function<void (const Ptr<T>&)> f, b length = b(-1), int flags = 0) {
+    template<typename T>
+    void updateAtFront(std::function<void(const Ptr<T>&)> f, b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getFrontOffset(), length, flags);
     }
@@ -1015,8 +1015,8 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * not affected. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      */
-    template <typename T>
-    void updateAtBack(std::function<void (const Ptr<T>&)> f, b length, int flags = 0) {
+    template<typename T>
+    void updateAtBack(std::function<void(const Ptr<T>&)> f, b length, int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getBackOffset() - length, length, flags);
     }
@@ -1027,8 +1027,8 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
-    void updateData(std::function<void (const Ptr<T>&)> f, int flags = 0) {
+    template<typename T>
+    void updateData(std::function<void(const Ptr<T>&)> f, int flags = 0) {
         updateAt<T>(f, getFrontOffset(), getDataLength(), flags);
     }
 
@@ -1038,8 +1038,8 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * The front and back offsets are not affected. The flags parameter is a
      * combination of Chunk::PeekFlag enumeration members.
      */
-    template <typename T>
-    void updateAll(std::function<void (const Ptr<T>&)> f, int flags = 0) {
+    template<typename T>
+    void updateAll(std::function<void(const Ptr<T>&)> f, int flags = 0) {
         updateAt<T>(f, b(0), totalLength, flags);
     }
 
@@ -1051,8 +1051,8 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * not affected. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      */
-    template <typename T>
-    void updateDataAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+    template<typename T>
+    void updateDataAt(std::function<void(const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getFrontOffset() + offset, length, flags);
@@ -1068,8 +1068,8 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      *
      * TODO: current limitation: the chunk size cannot be changed
      */
-    template <typename T>
-    void updateAt(std::function<void (const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+    template<typename T>
+    void updateAt(std::function<void(const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
@@ -1265,6 +1265,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     template<typename T> const Ptr<T> removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
+
     //@}
 
     /** @name Region tagging functions */
@@ -1319,14 +1320,14 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const {
+    template<typename T> void mapAllRegionTags(b offset, b length, std::function<void(b, b, const Ptr<const T>&)> f) const {
         return regionTags.mapAllTags<const T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllRegionTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f) {
+    template<typename T> void mapAllRegionTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f) {
         return regionTags.mapAllTagsForUpdate<T>(offset, length == b(-1) ? getTotalLength() - offset : length, f);
     }
 
@@ -1368,21 +1369,21 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     /**
      * Removes the region tag for the provided type and range, or throws an exception if no such region tag is found.
      */
-    template <typename T> const Ptr<T> removeRegionTag(b offset, b length) {
+    template<typename T> const Ptr<T> removeRegionTag(b offset, b length) {
         return regionTags.removeTag<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Removes the region tag for the provided type and range if present, or returns nullptr if no such region tag is found.
      */
-    template <typename T> const Ptr<T> removeRegionTagIfPresent(b offset, b length) {
+    template<typename T> const Ptr<T> removeRegionTagIfPresent(b offset, b length) {
         return regionTags.removeTagIfPresent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
 
     /**
      * Removes and returns all region tags for the provided type and range.
      */
-    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> removeRegionTagsWherePresent(b offset, b length) {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> removeRegionTagsWherePresent(b offset, b length) {
         return regionTags.removeTagsWherePresent<T>(offset, length == b(-1) ? getTotalLength() - offset : length);
     }
     //@}

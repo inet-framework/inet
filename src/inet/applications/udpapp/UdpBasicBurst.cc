@@ -297,7 +297,7 @@ void UdpBasicBurst::generateBurst()
         throw cRuntimeError("The sendInterval parameter must be bigger than 0");
     nextPkt += sendInterval;
 
-    if (activeBurst && nextBurst <= now) {    // new burst
+    if (activeBurst && nextBurst <= now) { // new burst
         double burstDuration = *burstDurationPar;
         if (burstDuration < 0.0)
             throw cRuntimeError("The burstDuration parameter mustn't be smaller than 0");
@@ -320,7 +320,7 @@ void UdpBasicBurst::generateBurst()
         destAddr = chooseDestAddr();
 
     Packet *payload = createPacket();
-    if(dontFragment)
+    if (dontFragment)
         payload->addTag<FragmentationReq>()->setDontFragment(true);
     payload->setTimestamp();
     emit(packetSentSignal, payload);
@@ -370,8 +370,8 @@ void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
-        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+    if (operation->getRootModule() != getContainingNode(this)) // closes socket when the application crashed only
+        socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

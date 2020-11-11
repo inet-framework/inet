@@ -35,11 +35,10 @@ class INET_API Ieee8021dRelay : public MacRelayUnitBase
 
     typedef std::pair<MacAddress, MacAddress> MacAddressPair;
 
-    struct Comp
-    {
-        bool operator() (const MacAddressPair& first, const MacAddressPair& second) const
+    struct Comp {
+        bool operator()(const MacAddressPair& first, const MacAddressPair& second) const
         {
-            return (first.first < second.first && first.second < second.first);
+            return first.first < second.first && first.second < second.first;
         }
     };
 

@@ -22,7 +22,7 @@
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>    // htonl, ntohl, ...
+#include <netinet/in.h> // htonl, ntohl, ...
 #endif // if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
 namespace inet {
@@ -44,7 +44,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     tcp.th_dport = htons(tcpHeader->getDestPort());
     tcp.th_seq = htonl(tcpHeader->getSequenceNo());
     tcp.th_ack = htonl(tcpHeader->getAckNo());
-    tcp.th_x2 = 0;     // unused
+    tcp.th_x2 = 0; // unused
 
     // set flags
     unsigned char flags = 0;
@@ -91,7 +91,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpOption *option) const
 {
     TcpOptionNumbers kind = option->getKind();
-    unsigned short length = option->getLength();    // length >= 1
+    unsigned short length = option->getLength(); // length >= 1
 
     stream.writeByte(kind);
     if (length > 1)
@@ -107,12 +107,12 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
     }
 
     switch (kind) {
-        case TCPOPTION_END_OF_OPTION_LIST:    // EOL
+        case TCPOPTION_END_OF_OPTION_LIST: // EOL
             check_and_cast<const TcpOptionEnd *>(option);
             ASSERT(length == 1);
             break;
 
-        case TCPOPTION_NO_OPERATION:    // NOP
+        case TCPOPTION_NO_OPERATION: // NOP
             check_and_cast<const TcpOptionNop *>(option);
             ASSERT(length == 1);
             break;
@@ -132,7 +132,8 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
         }
 
         case TCPOPTION_SACK_PERMITTED: {
-            auto *opt = check_and_cast<const TcpOptionSackPermitted *>(option); (void)opt; // UNUSED
+            auto *opt = check_and_cast<const TcpOptionSackPermitted *>(option);
+            (void)opt; // UNUSED
             ASSERT(length == 2);
             break;
         }
@@ -160,7 +161,7 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
             throw cRuntimeError("Unknown TCPOption kind=%d (not in a TCPOptionUnknown option)", kind);
             break;
         }
-    }    // switch
+    } // switch
 }
 
 const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -212,10 +213,10 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
     unsigned char length = 0;
 
     switch (kind) {
-        case TCPOPTION_END_OF_OPTION_LIST:    // EOL
+        case TCPOPTION_END_OF_OPTION_LIST: // EOL
             return new TcpOptionEnd();
 
-        case TCPOPTION_NO_OPERATION:    // NOP
+        case TCPOPTION_NO_OPERATION: // NOP
             return new TcpOptionNop();
 
         case TCPOPTION_MAXIMUM_SEGMENT_SIZE:
@@ -278,7 +279,7 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
         default:
             length = stream.readByte();
             break;
-    }    // switch
+    } // switch
 
     auto *option = new TcpOptionUnknown();
     option->setKind(kind);
@@ -286,7 +287,7 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
     if (length > 2)
         option->setBytesArraySize(length - 2);
     for (unsigned int i = 2; i < length; i++)
-        option->setBytes(i-2, stream.readByte());
+        option->setBytes(i - 2, stream.readByte());
     return option;
 }
 

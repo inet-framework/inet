@@ -25,26 +25,26 @@ namespace inet {
 
 class INET_API Box : public GeometricObjectBase
 {
-    public:
-        static const Box NIL;
+  public:
+    static const Box NIL;
 
-    protected:
-        Coord min;
-        Coord max;
+  protected:
+    Coord min;
+    Coord max;
 
-    public:
-        Box(const Coord& min, const Coord& max);
+  public:
+    Box(const Coord& min, const Coord& max);
 
-        static Box computeBoundingBox(const std::vector<Coord>& points);
+    static Box computeBoundingBox(const std::vector<Coord>& points);
 
-        const Coord& getMin() const { return min; }
-        const Coord& getMax() const { return max; }
+    const Coord& getMin() const { return min; }
+    const Coord& getMax() const { return max; }
 
-        Coord getSize() const { return max - min; }
-        Coord getCenter() const { return (min + max) / 2; }
+    Coord getSize() const { return max - min; }
+    Coord getCenter() const { return (min + max) / 2; }
 
-        virtual bool isNil() const override { return this == &NIL; }
-        virtual bool isUnspecified() const override { return min.isUnspecified() || max.isUnspecified(); }
+    virtual bool isNil() const override { return this == &NIL; }
+    virtual bool isUnspecified() const override { return min.isUnspecified() || max.isUnspecified(); }
 };
 } /* namespace inet */
 

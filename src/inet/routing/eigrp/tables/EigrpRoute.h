@@ -60,7 +60,7 @@ class EigrpRoute : public cObject
     int referenceCounter;               /**< Counts amount of references to this object. */
 
   public:
-    EigrpRoute(const IPAddress& address,const IPAddress& mask);
+    EigrpRoute(const IPAddress& address, const IPAddress& mask);
     virtual ~EigrpRoute();
 
     bool operator==(const EigrpRoute<IPAddress>& route) const
@@ -68,11 +68,11 @@ class EigrpRoute : public cObject
         return routeId == route.getRouteId();
     }
 
-    int decrementRefCnt() {return --referenceCounter; }
+    int decrementRefCnt() { return --referenceCounter; }
     void incrementRefCnt() { ++referenceCounter; }
-    int getRefCnt() {return referenceCounter; }
+    int getRefCnt() { return referenceCounter; }
 
-    int getRouteId() const {return routeId; }
+    int getRouteId() const { return routeId; }
     void setRouteId(int routeId) { this->routeId = routeId; }
 
     uint64_t getFd() const { return fd; }
@@ -84,7 +84,7 @@ class EigrpRoute : public cObject
     uint64_t getDij() const { return Dij; }
     void setDij(uint64_t Dij) { this->Dij = Dij; }
 
-    int getQueryOrigin() const {return queryOrigin; }
+    int getQueryOrigin() const { return queryOrigin; }
     void setQueryOrigin(int queryOrigin) { this->queryOrigin = queryOrigin; }
 
     int getReplyStatusSum() const { return replyStatusTable.size(); }
@@ -101,10 +101,10 @@ class EigrpRoute : public cObject
     bool isActive() const { return replyStatusTable.size() > 0; }
 
     EigrpRouteSource<IPAddress> *getSuccessor() const { return this->successor; }
-    void setSuccessor(EigrpRouteSource<IPAddress> * successor) { this->successor = successor; }
+    void setSuccessor(EigrpRouteSource<IPAddress> *successor) { this->successor = successor; }
 
     void setNumSucc(int numSuccessors) { this->numSuccessors = numSuccessors; }
-    int getNumSucc() const {return numSuccessors; }
+    int getNumSucc() const { return numSuccessors; }
 
     void setUnreachable() { Dij = eigrp::EigrpMetricHelper::METRIC_INF; rd.delay = eigrp::EigrpMetricHelper::DELAY_INF; rd.bandwidth = eigrp::EigrpMetricHelper::BANDWIDTH_INF; }
 
@@ -112,7 +112,7 @@ class EigrpRoute : public cObject
     void setUpdateSent(bool updateSent) { this->updateSent = updateSent; }
 
     void setNumSentMsgs(int num) { this->numOfMsgsSent = num; }
-    int getNumSentMsgs() const {return numOfMsgsSent; }
+    int getNumSentMsgs() const { return numOfMsgsSent; }
 };
 
 /**
@@ -214,8 +214,6 @@ class EigrpRouteSource : public cObject
     void setSummary(bool summary) { this->summary = summary; }
 };
 
-
-
 template class EigrpRouteSource<Ipv4Address>;
 
 template<typename IPAddress>
@@ -242,7 +240,7 @@ EigrpRouteSource<IPAddress>::~EigrpRouteSource()
 }
 
 template<typename IPAddress>
-EigrpRoute<IPAddress>::EigrpRoute(const IPAddress& address,const IPAddress& mask) :
+EigrpRoute<IPAddress>::EigrpRoute(const IPAddress& address, const IPAddress& mask) :
     routeId(0), routeAddress(address), routeMask(mask)
 {
     fd = Dij = eigrp::EigrpMetricHelper::METRIC_INF;
@@ -282,12 +280,13 @@ bool EigrpRoute<IPAddress>::unsetReplyStatus(int neighborId)
 {
     std::vector<int>::iterator it;
 
-    if ((it = std::find(replyStatusTable.begin(), replyStatusTable.end(), neighborId)) != replyStatusTable.end())
-    {
+    if ((it = std::find(replyStatusTable.begin(), replyStatusTable.end(), neighborId)) != replyStatusTable.end()) {
         replyStatusTable.erase(it);
         return true;
     }
     return false;
-} //eigrp
-} //inet
+} // eigrp
+
+} // inet
 #endif /* EIGRPROUTE_H_ */
+

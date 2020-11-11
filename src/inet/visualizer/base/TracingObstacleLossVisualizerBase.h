@@ -34,8 +34,8 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
         mutable AnimationPosition obstacleLossAnimationPosition;
 
       public:
-        ObstacleLossVisualization() { }
-        virtual ~ObstacleLossVisualization() { }
+        ObstacleLossVisualization() {}
+        virtual ~ObstacleLossVisualization() {}
     };
 
   protected:

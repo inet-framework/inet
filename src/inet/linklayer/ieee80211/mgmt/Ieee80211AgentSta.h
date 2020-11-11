@@ -35,7 +35,7 @@ namespace ieee80211 {
  * See corresponding NED file for a detailed description.
  *
  */
-class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener       //TODO add ILifecycle
+class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener // TODO add ILifecycle
 {
   protected:
     NetworkInterface *myIface = nullptr;
@@ -50,7 +50,7 @@ class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener       
 
     std::string defaultSsid;
 
-    //Statistics:
+    // Statistics:
     static simsignal_t sentRequestSignal;
     static simsignal_t acceptConfirmSignal;
     static simsignal_t dropConfirmSignal;

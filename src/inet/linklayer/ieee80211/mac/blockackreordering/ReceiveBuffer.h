@@ -27,33 +27,33 @@ namespace ieee80211 {
 
 class INET_API ReceiveBuffer
 {
-    public:
-        typedef std::vector<Packet *> Fragments;
-        typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
+  public:
+    typedef std::vector<Packet *> Fragments;
+    typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
 
-    protected:
-        ReorderBuffer buffer;
-        // For each Block Ack agreement, the recipient maintains a MAC variable NextExpectedSequenceNumber. The
-        // NextExpectedSequenceNumber is initialized to to the value of the Starting Block Ack Starting Sequence
-        // Control field of the ADDBA Request frame of the accepted Block Ack agreement. (IEEE 802.11­-11/0381r0)
-        int bufferSize = -1;
-        int length = 0;
-        SequenceNumber nextExpectedSequenceNumber = -1;
+  protected:
+    ReorderBuffer buffer;
+    // For each Block Ack agreement, the recipient maintains a MAC variable NextExpectedSequenceNumber. The
+    // NextExpectedSequenceNumber is initialized to to the value of the Starting Block Ack Starting Sequence
+    // Control field of the ADDBA Request frame of the accepted Block Ack agreement. (IEEE 802.11­-11/0381r0)
+    int bufferSize = -1;
+    int length = 0;
+    SequenceNumber nextExpectedSequenceNumber = -1;
 
-    public:
-        ReceiveBuffer(int bufferSize, SequenceNumber nextExpectedSequenceNumber);
-        virtual ~ReceiveBuffer();
+  public:
+    ReceiveBuffer(int bufferSize, SequenceNumber nextExpectedSequenceNumber);
+    virtual ~ReceiveBuffer();
 
-        bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
-        void dropFramesUntil(SequenceNumber sequenceNumber);
-        void removeFrame(SequenceNumber sequenceNumber);
+    bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
+    void dropFramesUntil(SequenceNumber sequenceNumber);
+    void removeFrame(SequenceNumber sequenceNumber);
 
-        const ReorderBuffer& getBuffer() { return buffer; }
-        int getLength() { return length; }
-        int getBufferSize() { return bufferSize; }
-        SequenceNumber getNextExpectedSequenceNumber() { return nextExpectedSequenceNumber; }
-        void setNextExpectedSequenceNumber(SequenceNumber nextExpectedSequenceNumber) { this->nextExpectedSequenceNumber = nextExpectedSequenceNumber; }
-        bool isFull() { ASSERT(length <= bufferSize); return length == bufferSize; }
+    const ReorderBuffer& getBuffer() { return buffer; }
+    int getLength() { return length; }
+    int getBufferSize() { return bufferSize; }
+    SequenceNumber getNextExpectedSequenceNumber() { return nextExpectedSequenceNumber; }
+    void setNextExpectedSequenceNumber(SequenceNumber nextExpectedSequenceNumber) { this->nextExpectedSequenceNumber = nextExpectedSequenceNumber; }
+    bool isFull() { ASSERT(length <= bufferSize); return length == bufferSize; }
 };
 
 } /* namespace ieee80211 */

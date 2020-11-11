@@ -22,7 +22,7 @@
 namespace inet {
 namespace queueing {
 
-Packet *CPacketDropperFunction::selectPacket(IPacketCollection* collection) const
+Packet *CPacketDropperFunction::selectPacket(IPacketCollection *collection) const
 {
     return packetDropperFunction(collection);
 }

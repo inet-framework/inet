@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfile.h"
 
 namespace inet {

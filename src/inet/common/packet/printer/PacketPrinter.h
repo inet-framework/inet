@@ -31,8 +31,7 @@ namespace inet {
 class INET_API PacketPrinter : public cMessagePrinter
 {
   protected:
-    class INET_API Context
-    {
+    class INET_API Context {
       public:
         int infoLevel = -1;
         bool isCorrect = true;
@@ -50,7 +49,7 @@ class INET_API PacketPrinter : public cMessagePrinter
         const int numPacket;
 
       public:
-        DirectiveResolver(const Context& context, const int numPacket) : context(context), numPacket(numPacket) { }
+        DirectiveResolver(const Context& context, const int numPacket) : context(context), numPacket(numPacket) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

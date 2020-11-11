@@ -66,7 +66,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
             // cuboid
             const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
             if (cuboid) {
-                std::vector<std::vector<Coord> > faces;
+                std::vector<std::vector<Coord>> faces;
                 cuboid->computeVisibleFaces(faces, rotation, canvasProjection->getRotation());
                 computeFacePoints(object, faces, rotation);
             }
@@ -95,14 +95,14 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
             // prism
             const Prism *prism = dynamic_cast<const Prism *>(shape);
             if (prism) {
-                std::vector<std::vector<Coord> > faces;
+                std::vector<std::vector<Coord>> faces;
                 prism->computeVisibleFaces(faces, rotation, canvasProjection->getRotation());
                 computeFacePoints(object, faces, rotation);
             }
             // polyhedron
             const Polyhedron *polyhedron = dynamic_cast<const Polyhedron *>(shape);
             if (polyhedron) {
-                std::vector<std::vector<Coord> > faces;
+                std::vector<std::vector<Coord>> faces;
                 polyhedron->computeVisibleFaces(faces, rotation, canvasProjection->getRotation());
                 computeFacePoints(object, faces, rotation);
             }
@@ -119,15 +119,13 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
     }
 }
 
-void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObject *object, std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation) const
+void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObject *object, std::vector<std::vector<Coord>>& faces, const RotationMatrix& rotation) const
 {
     const Coord& position = object->getPosition();
-    for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)
-    {
+    for (std::vector<std::vector<Coord>>::const_iterator it = faces.begin(); it != faces.end(); it++) {
         std::vector<cFigure::Point> canvasPoints;
         const std::vector<Coord>& facePoints = *it;
-        for (const auto & facePoint : facePoints)
-        {
+        for (const auto& facePoint : facePoints) {
             cFigure::Point canvPoint = canvasProjection->computeCanvasPoint(rotation.rotateVector(facePoint) + position);
             canvasPoints.push_back(canvPoint);
         }

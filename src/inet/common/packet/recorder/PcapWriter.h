@@ -38,9 +38,9 @@ class INET_API PcapWriter : public IPcapWriter
 {
   protected:
     std::string fileName;
-    FILE *dumpfile = nullptr;    // pcap file
-    unsigned int snaplen = 0;    // max. length of packets in pcap file
-    PcapLinkType network = LINKTYPE_INVALID;    // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html
+    FILE *dumpfile = nullptr; // pcap file
+    unsigned int snaplen = 0; // max. length of packets in pcap file
+    PcapLinkType network = LINKTYPE_INVALID; // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html
     bool flush = false;
     bool needHeader = true;
 
@@ -84,7 +84,7 @@ class INET_API PcapWriter : public IPcapWriter
     /**
      * Force flushing of pcap dump.
      */
-    void setFlush(bool flush) override { this->flush = flush; };
+    void setFlush(bool flush) override { this->flush = flush; }
 };
 
 } // namespace inet

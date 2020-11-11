@@ -33,33 +33,33 @@ namespace ieee80211 {
 
 class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, public cSimpleModule
 {
-    protected:
-        // Figure 5-1—MAC data plane architecture
-        // MsduRateLimiting *msduRateLimiting = nullptr;
-        ISequenceNumberAssignment *sequenceNumberAssigment = nullptr;
-        // MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
-        // MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
-        // MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
-        IFragmentationPolicy *fragmentationPolicy = nullptr;
-        IFragmentation *fragmentation = nullptr;
-        IMsduAggregationPolicy *aMsduAggregationPolicy = nullptr;
-        IMsduAggregation *aMsduAggregation = nullptr;
-        // PsDeferQueueing *psDeferQueueing = nullptr;
-        IMpduAggregationPolicy *aMpduAggregationPolicy = nullptr;
-        IMpduAggregation *aMpduAggregation = nullptr;
+  protected:
+    // Figure 5-1—MAC data plane architecture
+//    MsduRateLimiting *msduRateLimiting = nullptr;
+    ISequenceNumberAssignment *sequenceNumberAssigment = nullptr;
+//    MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
+//    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
+//    MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
+    IFragmentationPolicy *fragmentationPolicy = nullptr;
+    IFragmentation *fragmentation = nullptr;
+    IMsduAggregationPolicy *aMsduAggregationPolicy = nullptr;
+    IMsduAggregation *aMsduAggregation = nullptr;
+//    PsDeferQueueing *psDeferQueueing = nullptr;
+    IMpduAggregationPolicy *aMpduAggregationPolicy = nullptr;
+    IMpduAggregation *aMpduAggregation = nullptr;
 
-    protected:
-        virtual void initialize() override;
+  protected:
+    virtual void initialize() override;
 
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
-        virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
-        virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue);
-        virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
+    virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
+    virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
+    virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue);
+    virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 
-    public:
-        virtual ~OriginatorQosMacDataService();
+  public:
+    virtual ~OriginatorQosMacDataService();
 
-        virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
+    virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
 };
 
 } /* namespace ieee80211 */

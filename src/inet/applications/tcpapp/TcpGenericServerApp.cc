@@ -40,7 +40,7 @@ void TcpGenericServerApp::initialize(int stage)
         delay = par("replyDelay");
         maxMsgDelay = 0;
 
-        //statistics
+        // statistics
         msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
 
         WATCH(msgsRcvd);
@@ -108,7 +108,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *packet = check_and_cast<Packet *>(msg);
         int connId = packet->getTag<SocketInd>()->getSocketId();
-        ChunkQueue &queue = socketQueue[connId];
+        ChunkQueue& queue = socketQueue[connId];
         auto chunk = packet->peekDataAt(B(0), packet->getTotalLength());
         queue.push(chunk);
         emit(packetReceivedSignal, packet);

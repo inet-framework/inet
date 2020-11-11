@@ -50,7 +50,7 @@ void Loopback::initialize(int stage)
 
 void Loopback::configureNetworkInterface()
 {
-//    // generate a link-layer address to be used as interface token for IPv6
+    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
@@ -80,7 +80,7 @@ void Loopback::refreshDisplay() const
 {
     MacProtocolBase::refreshDisplay();
 
-    /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
+    /* TODO find solution for displaying IPv4 address without dependence on IPv4 or IPv6
             Ipv4Address addr = networkInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
      */
@@ -91,3 +91,4 @@ void Loopback::refreshDisplay() const
 }
 
 } // namespace inet
+

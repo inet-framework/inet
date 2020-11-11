@@ -16,7 +16,6 @@
 #ifndef __INET_RTPPACKETSERIALIZER_H
 #define __INET_RTPPACKETSERIALIZER_H
 
-
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
@@ -37,7 +36,6 @@ class INET_API RtpPacketSerializer : public FieldsChunkSerializer
 
 } // namespace rtp
 } // namespace inet
-
 
 #endif
 

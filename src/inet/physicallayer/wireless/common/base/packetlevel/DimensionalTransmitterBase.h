@@ -42,7 +42,7 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
 
       public:
         GainEntry(const IInterpolator<T, double> *interpolator, const char where, double length, T offset, double gain) :
-            interpolator(interpolator), where(where), length(length), offset(offset), gain(gain) { }
+            interpolator(interpolator), where(where), length(length), offset(offset), gain(gain) {}
     };
 
   protected:

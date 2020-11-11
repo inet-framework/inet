@@ -32,14 +32,14 @@ class INET_API ModulePathAddressType : public IL3AddressType
     ModulePathAddressType() {}
     virtual ~ModulePathAddressType() {}
 
-    virtual int getAddressBitLength() const override { return 64; }     // change to your choice
-    virtual int getMaxPrefixLength() const override { return 0; }    // TODO: support address prefixes
+    virtual int getAddressBitLength() const override { return 64; } // change to your choice
+    virtual int getMaxPrefixLength() const override { return 0; } // TODO: support address prefixes
     virtual L3Address getUnspecifiedAddress() const override { return ModulePathAddress(); }
     virtual L3Address getBroadcastAddress() const override { return ModulePathAddress(-1); }
-    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return ModulePathAddress(-109); }    // TODO: constant
-    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ModulePathAddress(-9); }    // TODO: constant
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return ModulePathAddress(-109); } // TODO: constant
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ModulePathAddress(-9); } // TODO: constant
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::nextHopForwarding; }
-    virtual L3Address getLinkLocalAddress(const NetworkInterface *ie) const override { return ModulePathAddress(); }    // TODO constant
+    virtual L3Address getLinkLocalAddress(const NetworkInterface *ie) const override { return ModulePathAddress(); } // TODO constant
 };
 
 } // namespace inet

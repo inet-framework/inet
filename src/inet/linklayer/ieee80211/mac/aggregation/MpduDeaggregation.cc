@@ -28,8 +28,7 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     int paddingLength = 0;
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
-    while (aggregatedFrame->getDataLength() > b(0))
-    {
+    while (aggregatedFrame->getDataLength() > b(0)) {
         aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
         const auto& mpduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MpduSubframeHeader>();
         const auto& mpdu = aggregatedFrame->peekDataAt(b(0), B(mpduSubframeHeader->getLength()));

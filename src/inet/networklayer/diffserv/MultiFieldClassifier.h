@@ -38,8 +38,7 @@ namespace inet {
 class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
 {
   protected:
-    class INET_API PacketDissectorCallback : public PacketDissector::ICallback
-    {
+    class INET_API PacketDissectorCallback : public PacketDissector::ICallback {
       protected:
         bool dissect = true;
         bool matchesL3 = false;

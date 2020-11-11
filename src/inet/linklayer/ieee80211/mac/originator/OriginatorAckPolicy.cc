@@ -26,7 +26,7 @@ void OriginatorAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
         ackTimeout = par("ackTimeout");
     }
 }
@@ -53,3 +53,4 @@ simtime_t OriginatorAckPolicy::getAckTimeout(Packet *packet, const Ptr<const Iee
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

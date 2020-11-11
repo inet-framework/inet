@@ -114,7 +114,7 @@ void TunnelApp::socketDataArrived(UdpSocket *socket, Packet *packet)
         tunSocket.send(packet);
     }
     else
-        throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;
+        throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());
 }
 
 void TunnelApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
@@ -124,7 +124,7 @@ void TunnelApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void TunnelApp::socketClosed(UdpSocket *socket)
 {
-    //TODO processing socket closed at stopOperation
+    // TODO processing socket closed at stopOperation
 }
 
 // Ipv4Socket::ICallback
@@ -136,12 +136,12 @@ void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
         tunSocket.send(packet);
     }
     else
-        throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;
+        throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());
 }
 
 void TunnelApp::socketClosed(Ipv4Socket *socket)
 {
-    //TODO processing socket closed at stopOperation
+    // TODO processing socket closed at stopOperation
 }
 
 // TunSocket::ICallback
@@ -159,7 +159,7 @@ void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
         clientSocket.send(packet);
     }
     else
-        throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
+        throw cRuntimeError("Unknown protocol: %s", protocol->getName());
 }
 
 void TunnelApp::handleStopOperation(LifecycleOperation *operation)

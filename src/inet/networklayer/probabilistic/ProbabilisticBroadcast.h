@@ -80,13 +80,12 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     /** @brief Store messages in a structure so that we can keep some
      *         information needed by the protocol
      **/
-    typedef struct tMsgDesc
-    {
+    typedef struct tMsgDesc {
         Packet *pkt;
-        int nbBcast;    // number of times the present node has passed the
-                        // message through a broadcast attempt.
-        bool initialSend;    // true if message to be sent for first
-                             // time by its creator.
+        int nbBcast; // number of times the present node has passed the
+                     // message through a broadcast attempt.
+        bool initialSend; // true if message to be sent for first
+                          // time by its creator.
     } tMsgDesc;
 
     typedef std::set<unsigned int> MsgIdSet;
@@ -160,9 +159,9 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     virtual void setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr);
 
     // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStartOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {} // TODO implementation
 
     /**
      * @brief Period (in sim time) between two broadcast attempts.
@@ -229,7 +228,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     MsgIdSet debugMsgIdSet;
 
     // variables for statistics
-    long nbDataPacketsReceived;    // total number of received packets from lower layer
+    long nbDataPacketsReceived; // total number of received packets from lower layer
     long nbDataPacketsSent;
     long nbHops;
     int debugNbMessageKnown;

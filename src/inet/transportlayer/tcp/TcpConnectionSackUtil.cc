@@ -20,7 +20,7 @@
 
 #include <string.h>
 
-#include <algorithm>    // min,max
+#include <algorithm> // min,max
 
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -46,7 +46,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
     }
 
     uint n = option.getSackItemArraySize();
-    ASSERT(option.getLength() == 2 + n*8);
+    ASSERT(option.getLength() == 2 + n * 8);
 
     if (!state->sack_enabled) {
         EV_ERROR << "ERROR: " << n << " SACK(s) received, but sack_enabled is set to false\n";
@@ -60,7 +60,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
         return false;
     }
 
-    if (n > 0) {    // sacks present?
+    if (n > 0) { // sacks present?
         EV_INFO << n << " SACK(s) received:\n";
         for (uint i = 0; i < n; i++) {
             Sack tmp;
@@ -119,12 +119,12 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
         }
-        state->rcv_sacks += n;    // total counter, no current number
+        state->rcv_sacks += n; // total counter, no current number
 
         emit(rcvSacksSignal, state->rcv_sacks);
 
         // update scoreboard
-        state->sackedBytes_old = state->sackedBytes;    // needed for RFC 3042 to check if last dupAck contained new sack information
+        state->sackedBytes_old = state->sackedBytes; // needed for RFC 3042 to check if last dupAck contained new sack information
         state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
 
         emit(sackedBytesSignal, state->sackedBytes);
@@ -142,7 +142,7 @@ bool TcpConnection::isLost(uint32_t seqNum)
     // 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
     // than 'SeqNum' have been SACKed.  Otherwise, the routine returns
     // false."
-    ASSERT(seqGE(seqNum, state->snd_una));    // HighAck = snd_una
+    ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una
 
     bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh
                    || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (state->dupthresh * state->snd_mss));
@@ -175,9 +175,9 @@ void TcpConnection::setPipe()
 
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     state->pipe = 0;
-    uint32_t length = 0;    // required for rexmitQueue->checkSackBlock()
-    bool sacked;    // required for rexmitQueue->checkSackBlock()
-    bool rexmitted;    // required for rexmitQueue->checkSackBlock()
+    uint32_t length = 0; // required for rexmitQueue->checkSackBlock()
+    bool sacked; // required for rexmitQueue->checkSackBlock()
+    bool rexmitted; // required for rexmitQueue->checkSackBlock()
 
     // RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
     // and MUST set the "pipe" variable to an estimate of the number of
@@ -231,8 +231,8 @@ bool TcpConnection::nextSeg(uint32_t& seqNum)
     state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     uint32_t highestSackedSeqNum = rexmitQueue->getHighestSackedSeqNum();
     uint32_t shift = state->snd_mss;
-    bool sacked = false;    // required for rexmitQueue->checkSackBlock()
-    bool rexmitted = false;    // required for rexmitQueue->checkSackBlock()
+    bool sacked = false; // required for rexmitQueue->checkSackBlock()
+    bool rexmitted = false; // required for rexmitQueue->checkSackBlock()
 
     seqNum = 0;
 
@@ -254,19 +254,18 @@ bool TcpConnection::nextSeg(uint32_t& seqNum)
     // Note: state->highRxt == RFC.HighRxt + 1
     for (uint32_t s2 = state->highRxt;
          seqLess(s2, state->snd_max) && seqLess(s2, highestSackedSeqNum);
-         s2 += shift
-         )
+         s2 += shift)
     {
         rexmitQueue->checkSackBlock(s2, shift, sacked, rexmitted);
 
         if (!sacked) {
-            if (isLost(s2)) {    // 1.a and 1.b are true, see above "for" statement
+            if (isLost(s2)) { // 1.a and 1.b are true, see above "for" statement
                 seqNum = s2;
 
                 return true;
             }
 
-            break;    // !isLost(x) --> !isLost(x + d)
+            break; // !isLost(x) --> !isLost(x + d)
         }
     }
 
@@ -283,7 +282,7 @@ bool TcpConnection::nextSeg(uint32_t& seqNum)
         uint32_t effectiveWin = maxWindow - state->pipe;
 
         if (buffered > 0 && effectiveWin >= state->snd_mss) {
-            seqNum = state->snd_max;    // HighData = snd_max
+            seqNum = state->snd_max; // HighData = snd_max
 
             return true;
         }
@@ -318,8 +317,7 @@ bool TcpConnection::nextSeg(uint32_t& seqNum)
     {
         for (uint32_t s3 = state->highRxt;
              seqLess(s3, state->snd_max) && seqLess(s3, highestSackedSeqNum);
-             s3 += shift
-             )
+             s3 += shift)
         {
             rexmitQueue->checkSackBlock(s3, shift, sacked, rexmitted);
 
@@ -351,7 +349,7 @@ void TcpConnection::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
     // segments as follows:
     // (...)
     // (C.5) If cwnd - pipe >= 1 SMSS, return to (C.1)"
-    while (((int)congestionWindow - (int)state->pipe) >= (int)state->snd_mss) {    // Note: Typecast needed to avoid prohibited transmissions
+    while (((int)congestionWindow - (int)state->pipe) >= (int)state->snd_mss) { // Note: Typecast needed to avoid prohibited transmissions
         // RFC 3517 pages 7 and 8: "(C.1) The scoreboard MUST be queried via NextSeg () for the
         // sequence number range of the next segment to transmit (if any),
         // and the given segment sent.  If NextSeg () returns failure (no
@@ -386,7 +384,7 @@ uint32_t TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 
     uint32_t sentSeqNum = seqNum + sentBytes;
 
-    if(state->send_fin && sentSeqNum == state->snd_fin_seq)
+    if (state->send_fin && sentSeqNum == state->snd_fin_seq)
         sentSeqNum = sentSeqNum + 1;
 
     ASSERT(seqLE(state->snd_nxt, sentSeqNum));
@@ -394,7 +392,7 @@ uint32_t TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
     // RFC 3517 page 8: "(C.2) If any of the data octets sent in (C.1) are below HighData,
     // HighRxt MUST be set to the highest sequence number of the
     // retransmitted segment."
-    if (seqLess(seqNum, state->snd_max)) {    // HighData = snd_max
+    if (seqLess(seqNum, state->snd_max)) { // HighData = snd_max
         state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
     }
 
@@ -445,7 +443,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
 {
     B options_len = B(0);
     B used_options_len = tcpHeader->getHeaderOptionArrayLength();
-    bool dsack_inserted = false;    // set if dsack is subsets of a bigger sack block recently reported
+    bool dsack_inserted = false; // set if dsack is subsets of a bigger sack block recently reported
 
     uint32_t start = state->start_seqno;
     uint32_t end = state->end_seqno;
@@ -471,7 +469,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
     if (used_options_len > TCP_OPTIONS_MAX_SIZE - TCP_OPTION_SACK_MIN_SIZE) {
         EV_ERROR << "ERROR: Failed to addSacks - at least 10 free bytes needed for SACK - used_options_len=" << used_options_len << endl;
 
-        //reset flags:
+        // reset flags:
         state->snd_sack = false;
         state->snd_dsack = false;
         state->start_seqno = 0;
@@ -480,7 +478,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
     }
 
     if (start != end) {
-        if (state->snd_dsack) {    // SequenceNo < rcv_nxt
+        if (state->snd_dsack) { // SequenceNo < rcv_nxt
             // RFC 2883, page 3:
             // "(3) The left edge of the D-SACK block specifies the first sequence
             // number of the duplicate contiguous sequence, and the right edge of
@@ -543,7 +541,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
         if (dsack_inserted)
             it++;
 
-        for ( ; it != state->sacks_array.end(); it++) {
+        for (; it != state->sacks_array.end(); it++) {
             ASSERT(!it->empty());
 
             auto it2 = it;
@@ -561,7 +559,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
 
     uint n = state->sacks_array.size();
 
-    uint maxnode = ((B(TCP_OPTIONS_MAX_SIZE - used_options_len).get()) - 2) / 8;    // 2: option header, 8: size of one sack entry
+    uint maxnode = ((B(TCP_OPTIONS_MAX_SIZE - used_options_len).get()) - 2) / 8; // 2: option header, 8: size of one sack entry
 
     if (n > maxnode)
         n = maxnode;
@@ -608,9 +606,9 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
     }
 
     // independent of "n" we always need 2 padding bytes (NOP) to make: (used_options_len % 4 == 0)
-    options_len = used_options_len + TCP_OPTION_SACK_ENTRY_SIZE * n + TCP_OPTION_HEAD_SIZE;    // 8 bytes for each SACK (n) + 2 bytes for kind&length
+    options_len = used_options_len + TCP_OPTION_SACK_ENTRY_SIZE * n + TCP_OPTION_HEAD_SIZE; // 8 bytes for each SACK (n) + 2 bytes for kind&length
 
-    ASSERT(options_len <= TCP_OPTIONS_MAX_SIZE);    // Options length allowed? - maximum: 40 Bytes
+    ASSERT(options_len <= TCP_OPTIONS_MAX_SIZE); // Options length allowed? - maximum: 40 Bytes
 
     tcpHeader->insertHeaderOption(option);
     tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpHeader->getHeaderOptionArrayLength());
@@ -630,7 +628,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
                 EV_INFO << " (D-SACK)";
             else if (seqLE(option->getSackItem(t).getEnd(), state->rcv_nxt)) {
                 EV_INFO << " (received segment filled out a gap)";
-                state->snd_dsack = true;    // Note: Set snd_dsack to delete first sack from sacks_array
+                state->snd_dsack = true; // Note: Set snd_dsack to delete first sack from sacks_array
             }
         }
 

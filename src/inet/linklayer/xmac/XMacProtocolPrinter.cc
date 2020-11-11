@@ -30,7 +30,7 @@ void XMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
     if (auto header = dynamicPtrCast<const XMacHeaderBase>(chunk)) {
         context.sourceColumn << header->getSrcAddr();
         context.destinationColumn << header->getDestAddr();
-        context.infoColumn << "XMAC type:" << header->getType() << " " << header;        //TODO
+        context.infoColumn << "XMAC type:" << header->getType() << " " << header; // TODO
     }
     else
         context.infoColumn << "(XMAC) " << chunk;

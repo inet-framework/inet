@@ -50,8 +50,8 @@ class INET_API Int128
     friend bool operator&&(const Int128&, const Int128&);
 
 #ifdef __GNUC__
-    //   friend Int128 operator <? (const Int128&, const Int128&);
-    //   friend Int128 operator >? (const Int128&, const Int128&);
+//    friend Int128 operator <? (const Int128&, const Int128&);
+//    friend Int128 operator >? (const Int128&, const Int128&);
 #endif // ifdef __GNUC__
 
   public:
@@ -269,7 +269,7 @@ inline bool operator!=(const Int128& a, const Int128& b)
 
 // MISC
 
-//typedef Int128 __int128;
+// typedef Int128 __int128;
 
 } // namespace inet
 

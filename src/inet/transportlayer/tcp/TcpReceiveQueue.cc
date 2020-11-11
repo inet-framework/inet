@@ -64,7 +64,7 @@ uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *tcpSegment, const Ptr<c
 #ifndef NDEBUG
     if (!reorderBuffer.isEmpty()) {
         uint32_t ob = offsetToSeq(reorderBuffer.getRegionStartOffset(0));
-        uint32_t oe = offsetToSeq(reorderBuffer.getRegionEndOffset(reorderBuffer.getNumRegions()-1));
+        uint32_t oe = offsetToSeq(reorderBuffer.getRegionEndOffset(reorderBuffer.getNumRegions() - 1));
         uint32_t nb = seq;
         uint32_t ne = seq + tcpPayloadLength.get();
         uint32_t minb = seqMin(ob, nb);

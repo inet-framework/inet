@@ -34,79 +34,79 @@ Register_Serializer(PimRegisterStop, PimPacketSerializer);
 
 namespace {
 
-//TODO: EncodedAddress serializers/deserializers currently allow only IPv4 addresses with native encoding
+// TODO: EncodedAddress serializers/deserializers currently allow only IPv4 addresses with native encoding
 
 void serializeEncodedUnicastAddress(MemoryOutputStream& stream, const EncodedUnicastAddress& addr)
 {
-    stream.writeByte(1);    // Address Family: '1' represents the IPv4 address family
-    stream.writeByte(0);    // Encoding Type: '0' represents the native encoding of the Address Family.
+    stream.writeByte(1); // Address Family: '1' represents the IPv4 address family
+    stream.writeByte(0); // Encoding Type: '0' represents the native encoding of the Address Family.
     stream.writeIpv4Address(addr.unicastAddress.toIpv4());
 }
 
 void serializeEncodedGroupAddress(MemoryOutputStream& stream, const EncodedGroupAddress& addr)
 {
     // Encoded-Group Address:
-    stream.writeByte(1);    // Address Family: '1' represents the IPv4 address family
-    stream.writeByte(0);    // Encoding Type: '0' represents the native encoding of the Address Family.
+    stream.writeByte(1); // Address Family: '1' represents the IPv4 address family
+    stream.writeByte(0); // Encoding Type: '0' represents the native encoding of the Address Family.
     stream.writeBit(addr.B);
-    stream.writeNBitsOfUint64Be(addr.reserved, 6);    // Reserved
+    stream.writeNBitsOfUint64Be(addr.reserved, 6); // Reserved
     stream.writeBit(addr.Z); // FIXME: Admin Scope [Z]one: indicates the group range is an admin scope zone.
-    stream.writeByte(addr.maskLength);   // Mask Length: 32 for IPv4 native encoding
+    stream.writeByte(addr.maskLength); // Mask Length: 32 for IPv4 native encoding
     stream.writeIpv4Address(addr.groupAddress.toIpv4());
 }
 
 void serializeEncodedSourceAddress(MemoryOutputStream& stream, const EncodedSourceAddress& addr)
 {
-    stream.writeByte(1);    // Address Family: '1' represents the IPv4 address family
-    stream.writeByte(0);    // Encoding Type: '0' represents the native encoding of the Address Family.
-    stream.writeNBitsOfUint64Be(addr.reserved, 5);  // Reserved
+    stream.writeByte(1); // Address Family: '1' represents the IPv4 address family
+    stream.writeByte(0); // Encoding Type: '0' represents the native encoding of the Address Family.
+    stream.writeNBitsOfUint64Be(addr.reserved, 5); // Reserved
     stream.writeBit(addr.S);
     stream.writeBit(addr.W);
     stream.writeBit(addr.R);
-    stream.writeByte(addr.maskLength);   // Mask Length: 32 for IPv4 native encoding
+    stream.writeByte(addr.maskLength); // Mask Length: 32 for IPv4 native encoding
     stream.writeIpv4Address(addr.sourceAddress.toIpv4());
 }
 
-void deserializeEncodedUnicastAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket , EncodedUnicastAddress& addr)
+void deserializeEncodedUnicastAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedUnicastAddress& addr)
 {
     // Encoded-Unicast Address
-    uint8_t addressFamily = stream.readByte();  // Address Family: '1' represents the IPv4 address family
-    uint8_t encodingType = stream.readByte();  // Encoding Type: '0' represents the native encoding of the Address Family.
+    uint8_t addressFamily = stream.readByte(); // Address Family: '1' represents the IPv4 address family
+    uint8_t encodingType = stream.readByte(); // Encoding Type: '0' represents the native encoding of the Address Family.
     if (addressFamily != 1 || encodingType != 0)
         pimPacket->markIncorrect();
     addr.unicastAddress = stream.readIpv4Address();
 }
 
-void deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket , EncodedGroupAddress& addr)
+void deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedGroupAddress& addr)
 {
     // Encoded-Group Address:
-    uint8_t addressFamily = stream.readByte();  // Address Family: '1' represents the IPv4 address family
-    uint8_t encodingType = stream.readByte();  // Encoding Type: '0' represents the native encoding of the Address Family.
+    uint8_t addressFamily = stream.readByte(); // Address Family: '1' represents the IPv4 address family
+    uint8_t encodingType = stream.readByte(); // Encoding Type: '0' represents the native encoding of the Address Family.
     addr.B = stream.readBit();
     addr.reserved = stream.readNBitsToUint64Be(6); // Reserved
-    addr.Z = stream.readBit();   // FIXME: Admin Scope [Z]one: indicates the group range is an admin scope zone.
-    addr.maskLength = stream.readByte();  // Mask Length: 32 for IPv4 native encoding
+    addr.Z = stream.readBit(); // FIXME: Admin Scope [Z]one: indicates the group range is an admin scope zone.
+    addr.maskLength = stream.readByte(); // Mask Length: 32 for IPv4 native encoding
     if (addressFamily != 1 || encodingType != 0 || addr.maskLength != 32)
         pimPacket->markIncorrect();
     addr.groupAddress = stream.readIpv4Address();
 }
 
-void deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket , EncodedSourceAddress& addr)
+void deserializeEncodedSourceAddress(MemoryInputStream& stream, const Ptr<PimPacket> pimPacket, EncodedSourceAddress& addr)
 {
     // Encoded-Source Address
-    uint8_t addressFamily = stream.readByte();  // Address Family: '1' represents the IPv4 address family
-    uint8_t encodingType = stream.readByte();  // Encoding Type: '0' represents the native encoding of the Address Family.
-    addr.reserved = stream.readNBitsToUint64Be(5);  // Reserved
+    uint8_t addressFamily = stream.readByte(); // Address Family: '1' represents the IPv4 address family
+    uint8_t encodingType = stream.readByte(); // Encoding Type: '0' represents the native encoding of the Address Family.
+    addr.reserved = stream.readNBitsToUint64Be(5); // Reserved
     addr.S = stream.readBit();
     addr.W = stream.readBit();
     addr.R = stream.readBit();
-    addr.maskLength = stream.readByte();  // Mask Length: 32 for IPv4 native encoding
+    addr.maskLength = stream.readByte(); // Mask Length: 32 for IPv4 native encoding
     if (addressFamily != 1 || encodingType != 0 || addr.maskLength != 32)
         pimPacket->markIncorrect();
     addr.sourceAddress = stream.readIpv4Address();
 }
 
-}
+} // namespace
 
 void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -124,28 +124,28 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                 stream.writeUint16Be(pimHello->getOptions(i)->getType()); // type
                 switch (pimHello->getOptions(i)->getType()) {
                     case Holdtime: {
-                        const HoldtimeOption* holdtimeOption = static_cast<const HoldtimeOption*>(pimHello->getOptions(i));
-                        stream.writeUint16Be(2);    // length
+                        const HoldtimeOption *holdtimeOption = static_cast<const HoldtimeOption *>(pimHello->getOptions(i));
+                        stream.writeUint16Be(2); // length
                         stream.writeUint16Be(holdtimeOption->getHoldTime());
                         break;
                     }
                     case LANPruneDelay: {
-                        const LanPruneDelayOption* lanPruneDelayOption = static_cast<const LanPruneDelayOption*>(pimHello->getOptions(i));
-                        stream.writeUint16Be(4);    // length
+                        const LanPruneDelayOption *lanPruneDelayOption = static_cast<const LanPruneDelayOption *>(pimHello->getOptions(i));
+                        stream.writeUint16Be(4); // length
                         stream.writeBit(0); // FIXME: T bit missing
                         stream.writeNBitsOfUint64Be(lanPruneDelayOption->getPropagationDelay(), 15);
                         stream.writeUint16Be(lanPruneDelayOption->getOverrideInterval());
                         break;
                     }
                     case DRPriority: {
-                        const DrPriorityOption* drPriorityOption = static_cast<const DrPriorityOption*>(pimHello->getOptions(i));
-                        stream.writeUint16Be(4);    // length
+                        const DrPriorityOption *drPriorityOption = static_cast<const DrPriorityOption *>(pimHello->getOptions(i));
+                        stream.writeUint16Be(4); // length
                         stream.writeUint32Be(drPriorityOption->getPriority());
                         break;
                     }
                     case GenerationID: {
-                        const GenerationIdOption* generationIdOption = static_cast<const GenerationIdOption*>(pimHello->getOptions(i));
-                        stream.writeUint16Be(4);    // length
+                        const GenerationIdOption *generationIdOption = static_cast<const GenerationIdOption *>(pimHello->getOptions(i));
+                        stream.writeUint16Be(4); // length
                         stream.writeUint32Be(generationIdOption->getGenerationID());
                         break;
                     }
@@ -261,7 +261,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
                     }
                     case LANPruneDelay: {
                         uint16_t size = stream.readUint16Be();
-                        bool T = stream.readBit();   // T bit
+                        bool T = stream.readBit(); // T bit
                         if (size != 4 || T)
                             pimHello->markIncorrect();
                         pimHello->setOptionsArraySize(++i);
@@ -342,7 +342,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimJoinPrune->setCrcMode(pimPacket->getCrcMode());
             deserializeEncodedUnicastAddress(stream, pimJoinPrune, pimJoinPrune->getUpstreamNeighborAddressForUpdate());
             length += ENCODED_UNICODE_ADDRESS_LENGTH;
-            pimJoinPrune->setReserved2(stream.readByte());  // Reserved
+            pimJoinPrune->setReserved2(stream.readByte()); // Reserved
             pimJoinPrune->setJoinPruneGroupsArraySize(stream.readByte());
             pimJoinPrune->setHoldTime(stream.readUint16Be());
             length += B(4);
@@ -397,7 +397,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             length += ENCODED_UNICODE_ADDRESS_LENGTH;
             deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getOriginatorAddressForUpdate());
             length += ENCODED_UNICODE_ADDRESS_LENGTH;
-            stream.readBit();   // R: The Rendezvous Point Tree bit.  Set to 0 for PIM-DM.  Ignored upon receipt.
+            stream.readBit(); // R: The Rendezvous Point Tree bit.  Set to 0 for PIM-DM.  Ignored upon receipt.
             pimStateRefresh->setMetricPreference(stream.readNBitsToUint64Be(31));
             pimStateRefresh->setMetric(stream.readUint32Be());
             pimStateRefresh->setMaskLen(stream.readByte());
@@ -416,21 +416,4 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
 }
 
 } // namespace inet
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

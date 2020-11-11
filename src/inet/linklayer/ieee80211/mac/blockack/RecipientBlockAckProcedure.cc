@@ -27,7 +27,7 @@ namespace ieee80211 {
 // STA shall transmit a BlockAck frame after a SIFS period, without regard to the busy/idle state of the medium.
 // The rules that specify the contents of this BlockAck frame are defined in 9.21.
 //
-void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPacketReq, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback)
+void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPacketReq, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, IProcedureCallback *callback)
 {
     numReceivedBlockAckReq++;
     if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
@@ -63,7 +63,7 @@ const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr
         auto blockAck = makeShared<Ieee80211BasicBlockAck>();
         auto startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();
         for (int i = 0; i < 64; i++) {
-            BitVector &bitmap = blockAck->getBlockAckBitmapForUpdate(i);
+            BitVector& bitmap = blockAck->getBlockAckBitmapForUpdate(i);
             for (FragmentNumber fragNum = 0; fragNum < 16; fragNum++) {
                 bool ackState = agreement->getBlockAckRecord()->getAckState(startingSequenceNumber + i, fragNum);
                 bitmap.setBit(fragNum, ackState);
@@ -79,6 +79,6 @@ const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr
         throw cRuntimeError("Unsupported Block Ack Request");
 }
 
-
 } /* namespace ieee80211 */
 } /* namespace inet */
+

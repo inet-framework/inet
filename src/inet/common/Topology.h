@@ -52,11 +52,11 @@ namespace inet {
  * @see Topology::Node, Topology::Link, Topology::LinkIn, Topology::LinkOut
  */
 
-//TODO doucument: graph may be modified by hand; graph nodes/links may or may not correspond to modules/gates
-//TODO add notes: manually added nodes/links may not have cModule*/cGate* pointers (getModule() etc may be nullptr)
-//TODO make more methods virtual
-//TODO inconsistency: Node takes cModule* in ctor, but Link's srcGate/destGate are set in addLink()!!!
-//TODO weight: how to compute automatically from link datarate?
+// TODO doucument: graph may be modified by hand; graph nodes/links may or may not correspond to modules/gates
+// TODO add notes: manually added nodes/links may not have cModule*/cGate* pointers (getModule() etc may be nullptr)
+// TODO make more methods virtual
+// TODO inconsistency: Node takes cModule* in ctor, but Link's srcGate/destGate are set in addLink()!!!
+// TODO weight: how to compute automatically from link datarate?
 
 class INET_API Topology : public cOwnedObject
 {
@@ -68,8 +68,7 @@ class INET_API Topology : public cOwnedObject
     /**
      * Supporting class for Topology, represents a node in the graph.
      */
-    class INET_API Node
-    {
+    class INET_API Node {
         friend class Topology;
 
       protected:
@@ -98,6 +97,7 @@ class INET_API Topology : public cOwnedObject
             dist = INFINITY;
             outPath = nullptr;
         }
+
         virtual ~Node() {}
 
         /** @name Node attributes: weight, enabled state, correspondence to modules. */
@@ -209,15 +209,14 @@ class INET_API Topology : public cOwnedObject
          * target node. (There may be several paths with the same
          * length.)
          */
-        LinkOut *getPath(int) const { return (LinkOut *)outPath; }      //FIXME check_and_cast?
+        LinkOut *getPath(int) const { return (LinkOut *)outPath; } // FIXME check_and_cast?
         //@}
     };
 
     /**
      * Supporting class for Topology, represents a link in the graph.
      */
-    class INET_API Link
-    {
+    class INET_API Link {
         friend class Topology;
 
       protected:
@@ -274,8 +273,7 @@ class INET_API Topology : public cOwnedObject
      * LinkIn and LinkOut provide convenience functions that return the
      * 'local' and 'remote' end of the connection when traversing the topology.
      */
-    class INET_API LinkIn : public Link
-    {
+    class INET_API LinkIn : public Link {
       public:
         /**
          * Returns the node at the remote end of this connection.
@@ -316,8 +314,7 @@ class INET_API Topology : public cOwnedObject
      * LinkIn and LinkOut provide convenience functions that return the
      * 'local' and 'remote' end of the connection when traversing the topology.
      */
-    class INET_API LinkOut : public Link
-    {
+    class INET_API LinkOut : public Link {
       public:
         /**
          * Returns the node at the remote end of this connection.
@@ -355,8 +352,7 @@ class INET_API Topology : public cOwnedObject
      * Redefine the matches() method to return whether the given module
      * should be included in the extracted topology or not.
      */
-    class INET_API Predicate
-    {
+    class INET_API Predicate {
       public:
         virtual ~Predicate() {}
         virtual bool matches(cModule *module) = 0;

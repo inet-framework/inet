@@ -77,19 +77,18 @@ void ReceptionMinSignalPowerFilter::receiveSignal(cResultFilter *prev, simtime_t
         W minReceptionPower = reception->computeMinPower(reception->getStartTime(), reception->getEndTime());
         fire(this, t, minReceptionPower.get(), details);
     }
-#endif  // WITH_RADIO
+#endif // WITH_RADIO
 }
 
 Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
 
 void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto packet = dynamic_cast<Packet*>(object)) {
+    if (auto packet = dynamic_cast<Packet *>(object)) {
         if (auto applicationPacket = dynamicPtrCast<const ApplicationPacket>(packet->peekAtFront()))
             fire(this, t, (intval_t)applicationPacket->getSequenceNumber(), details);
     }
 }
-
 
 Register_ResultFilter("mobilityPos", MobilityPosFilter);
 
@@ -207,13 +206,14 @@ Register_ResultFilter("liveThroughput", LiveThroughputFilter);
 class TimerEvent : public cEvent
 {
   protected:
-     LiveThroughputFilter *target;
+    LiveThroughputFilter *target;
+
   public:
     TimerEvent(const char *name, LiveThroughputFilter *target) : cEvent(name), target(target) {}
-    ~TimerEvent() {target->timerDeleted();}
-    virtual cEvent *dup() const override {copyNotSupported(); return nullptr;}
-    virtual cObject *getTargetObject() const override {return target;}
-    virtual void execute() override {target->timerExpired();}
+    ~TimerEvent() { target->timerDeleted(); }
+    virtual cEvent *dup() const override { copyNotSupported(); return nullptr; }
+    virtual cObject *getTargetObject() const override { return target; }
+    virtual void execute() override { target->timerExpired(); }
 };
 
 void LiveThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
@@ -266,7 +266,6 @@ void LiveThroughputFilter::finish(cComponent *component, simsignal_t signalID)
     }
 }
 
-
 Register_ResultFilter("elapsedTime", ElapsedTimeFilter);
 
 ElapsedTimeFilter::ElapsedTimeFilter()
@@ -287,7 +286,7 @@ void PacketDropReasonFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t
 }
 
 // TODO: replace these filters with a single filter that supports parameters when it becomes available in omnetpp
-#define Register_PacketDropReason_ResultFilter(NAME, CLASS, REASON) class CLASS : public PacketDropReasonFilter { public: CLASS() { reason = REASON; } }; Register_ResultFilter(NAME, CLASS);
+#define Register_PacketDropReason_ResultFilter(NAME, CLASS, REASON)    class CLASS : public PacketDropReasonFilter { public: CLASS() { reason = REASON; } }; Register_ResultFilter(NAME, CLASS);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsUndefined", UndefinedPacketDropReasonFilter, -1);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsAddressResolutionFailed", AddressResolutionFailedPacketDropReasonFilter, ADDRESS_RESOLUTION_FAILED);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsForwardingDisabled", ForwardingDisabledPacketDropReasonFilter, FORWARDING_DISABLED);
@@ -316,9 +315,8 @@ void MinimumSnirFromSnirIndFilter::receiveSignal(cResultFilter *prev, simtime_t_
         if (tag)
             fire(this, t, tag->getMinimumSnir(), details);
     }
-#endif  // WITH_RADIO
+#endif // WITH_RADIO
 }
-
 
 Register_ResultFilter("packetErrorRate", PacketErrorRateFromErrorRateIndFilter);
 
@@ -328,11 +326,10 @@ void PacketErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
     if (auto pk = dynamic_cast<Packet *>(object)) {
         const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
-            fire(this, t, tag->getPacketErrorRate(), details);  //TODO isNaN?
+            fire(this, t, tag->getPacketErrorRate(), details); // TODO isNaN?
     }
-#endif  // WITH_RADIO
+#endif // WITH_RADIO
 }
-
 
 Register_ResultFilter("bitErrorRate", BitErrorRateFromErrorRateIndFilter);
 
@@ -342,11 +339,10 @@ void BitErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, simt
     if (auto pk = dynamic_cast<Packet *>(object)) {
         const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
-            fire(this, t, tag->getBitErrorRate(), details);  //TODO isNaN?
+            fire(this, t, tag->getBitErrorRate(), details); // TODO isNaN?
     }
-#endif  // WITH_RADIO
+#endif // WITH_RADIO
 }
-
 
 Register_ResultFilter("symbolErrorRate", SymbolErrorRateFromErrorRateIndFilter);
 
@@ -356,9 +352,9 @@ void SymbolErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
     if (auto pk = dynamic_cast<Packet *>(object)) {
         const auto& tag = pk->findTag<ErrorRateInd>();
         if (tag)
-            fire(this, t, tag->getSymbolErrorRate(), details);  //TODO isNaN?
+            fire(this, t, tag->getSymbolErrorRate(), details); // TODO isNaN?
     }
-#endif  // WITH_RADIO
+#endif // WITH_RADIO
 }
 
 Register_ResultFilter("localSignal", LocalSignalFilter);

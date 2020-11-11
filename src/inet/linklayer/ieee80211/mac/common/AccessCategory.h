@@ -26,8 +26,7 @@ namespace ieee80211 {
 /**
  * IEEE 802.11e QoS (EDCA) access categories.
  */
-enum AccessCategory
-{
+enum AccessCategory {
     AC_BK = 0,
     AC_BE = 1,
     AC_VI = 2,
@@ -37,11 +36,11 @@ enum AccessCategory
 
 inline std::string printAccessCategory(AccessCategory ac)
 {
-    switch(ac) {
-        case AC_BK : return "Background";
-        case AC_BE : return "Best effort";
-        case AC_VI : return "Video";
-        case AC_VO : return "Voice";
+    switch (ac) {
+        case AC_BK: return "Background";
+        case AC_BE: return "Best effort";
+        case AC_VI: return "Video";
+        case AC_VO: return "Voice";
         default: throw cRuntimeError("Unknown access category");
     }
 }

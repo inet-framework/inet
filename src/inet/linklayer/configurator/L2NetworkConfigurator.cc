@@ -71,13 +71,13 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
         cModule *ifTable = node->module->getSubmodule("interfaceTable");
 
         // EthernetHost has no InterfaceTable
-        if (ifTable) //todo:
+        if (ifTable) // todo:
             node->interfaceTable = dynamic_cast<IInterfaceTable *>(ifTable);
     }
 
     // extract links and interfaces
     std::set<NetworkInterface *> interfacesSeen;
-    std::queue<Node *> Q;    // unvisited nodes in the graph
+    std::queue<Node *> Q; // unvisited nodes in the graph
 
     rootNode = (Node *)topology.getNode(0);
     Q.push(rootNode);
@@ -117,15 +117,15 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
     std::set<NetworkInterface *> matchedBefore;
     cXMLElementList interfaceElements = configuration->getChildrenByTagName("interface");
 
-    for (auto & interfaceElements_i : interfaceElements) {
+    for (auto& interfaceElements_i : interfaceElements) {
         std::set<NetworkInterface *> interfacesSeen;
         cXMLElement *interfaceElement = interfaceElements_i;
 
-        const char *hostAttr = interfaceElement->getAttribute("hosts");    // "host* router[0..3]"
-        const char *interfaceAttr = interfaceElement->getAttribute("names");    // i.e. interface names, like "eth* ppp0"
-        const char *towardsAttr = interfaceElement->getAttribute("towards");    // neighbor host names, like "ap switch"
-        const char *amongAttr = interfaceElement->getAttribute("among");    // neighbor host names, like "host[*] router1"
-        const char *portsAttr = interfaceElement->getAttribute("ports");    // switch gate indices, like "0 1 2"
+        const char *hostAttr = interfaceElement->getAttribute("hosts"); // "host* router[0..3]"
+        const char *interfaceAttr = interfaceElement->getAttribute("names"); // i.e. interface names, like "eth* ppp0"
+        const char *towardsAttr = interfaceElement->getAttribute("towards"); // neighbor host names, like "ap switch"
+        const char *amongAttr = interfaceElement->getAttribute("among"); // neighbor host names, like "host[*] router1"
+        const char *portsAttr = interfaceElement->getAttribute("ports"); // switch gate indices, like "0 1 2"
 
         // Begin RSTP properties, for more information see RSTP module
         const char *cost = interfaceElement->getAttribute("cost");
@@ -133,7 +133,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
         const char *edge = interfaceElement->getAttribute("edge");
         // End RSTP properties
 
-        if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
+        if (amongAttr && *amongAttr) { // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
                 throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s",
                         interfaceElement->getSourceLocation());
@@ -187,7 +187,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
                             if (isNotEmpty(priority))
                                 currentNode->interfaceInfos[i]->portData.priority = atoi(priority);
 
-                            //edge
+                            // edge
                             if (isNotEmpty(edge))
                                 currentNode->interfaceInfos[i]->portData.edge = strcmp(edge, "true") ? false : true;
                             EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getInterfaceName() << endl;
@@ -231,7 +231,6 @@ Topology::LinkOut *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
             return node->getLinkOut(i);
 
-
     return nullptr;
 }
 
@@ -265,7 +264,7 @@ void L2NetworkConfigurator::configureInterface(NetworkInterface *networkInterfac
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->module == networkNodeModule) {
-            for (auto & elem : node->interfaceInfos) {
+            for (auto& elem : node->interfaceInfos) {
                 InterfaceInfo *interfaceInfo = elem;
                 if (interfaceInfo->networkInterface == networkInterface)
                     return configureInterface(interfaceInfo);
@@ -286,7 +285,7 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 
 L2NetworkConfigurator::Matcher::~Matcher()
 {
-    for (auto & elem : matchers)
+    for (auto& elem : matchers)
         delete elem;
 }
 
@@ -308,10 +307,9 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
     if (matchesany)
         return true;
 
-    for (auto & elem : matchers)
+    for (auto& elem : matchers)
         if (elem->matches(s))
             return true;
-
 
     return false;
 }

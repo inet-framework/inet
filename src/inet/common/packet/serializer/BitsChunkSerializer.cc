@@ -27,7 +27,7 @@ Register_Serializer(BitsChunk, BitsChunkSerializer);
 void BitsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
-    b serializedLength = length == b(-1) ? bitsChunk->getChunkLength() - offset: length;
+    b serializedLength = length == b(-1) ? bitsChunk->getChunkLength() - offset : length;
     stream.writeBits(bitsChunk->getBits(), offset, serializedLength);
     ChunkSerializer::totalSerializedLength += serializedLength;
 }
@@ -44,3 +44,4 @@ const Ptr<Chunk> BitsChunkSerializer::deserialize(MemoryInputStream& stream, con
 }
 
 } // namespace
+

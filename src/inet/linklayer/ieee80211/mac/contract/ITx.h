@@ -30,21 +30,20 @@ namespace ieee80211 {
  */
 class INET_API ITx
 {
-    public:
-        class INET_API ICallback
-        {
-            public:
-                virtual ~ICallback() { }
+  public:
+    class INET_API ICallback {
+      public:
+        virtual ~ICallback() {}
 
-                virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
-        };
+        virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+    };
 
-    public:
-        virtual ~ITx() { }
+  public:
+    virtual ~ITx() {}
 
-        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
-        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
-        virtual void radioTransmissionFinished() = 0;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
+    virtual void radioTransmissionFinished() = 0;
 };
 
 } // namespace ieee80211

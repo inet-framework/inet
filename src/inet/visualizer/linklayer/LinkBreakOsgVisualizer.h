@@ -52,7 +52,7 @@ class INET_API LinkBreakOsgVisualizer : public LinkBreakVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual const LinkBreakVisualization *createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const override { return nullptr; }
-    virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const override { }
+    virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const override {}
 
 #endif // ifdef WITH_OSG
 };

@@ -28,11 +28,11 @@ namespace ieee80211 {
 
 class INET_API ICtsProcedure
 {
-    public:
-        virtual ~ICtsProcedure() { }
+  public:
+    virtual ~ICtsProcedure() {}
 
-        virtual void processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) = 0;
-        virtual void processTransmittedCts(const Ptr<const Ieee80211CtsFrame>& ctsFrame) = 0;
+    virtual void processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) = 0;
+    virtual void processTransmittedCts(const Ptr<const Ieee80211CtsFrame>& ctsFrame) = 0;
 };
 
 } // namespace ieee80211

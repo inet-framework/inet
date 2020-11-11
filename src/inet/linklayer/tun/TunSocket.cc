@@ -48,7 +48,7 @@ void TunSocket::processMessage(cMessage *msg)
     switch (msg->getKind()) {
         case TUN_I_DATA:
             if (callback)
-                callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+                callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
             else
                 delete msg;
             break;
@@ -59,8 +59,7 @@ void TunSocket::processMessage(cMessage *msg)
             delete msg;
             break;
         default:
-            throw cRuntimeError("TunSocket: invalid msg kind %d, one of the TUN_I_xxx constants expected",
-                msg->getKind());
+            throw cRuntimeError("TunSocket: invalid msg kind %d, one of the TUN_I_xxx constants expected", msg->getKind());
     }
 }
 

@@ -86,3 +86,4 @@ Packet *PacketReceiverBase::decodePacket(Signal *signal) const
 }
 
 } // namespace inet
+

@@ -57,7 +57,7 @@ class INET_API RadioOsgVisualizer : public RadioVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual RadioVisualization *createRadioVisualization(const physicallayer::IRadio *radio) const override { return nullptr; }
-    virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override { }
+    virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override {}
 
 #endif // ifdef WITH_OSG
 };

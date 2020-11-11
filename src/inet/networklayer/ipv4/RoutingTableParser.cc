@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-//  Cleanup and rewrite: Andras Varga, 2004
+// Cleanup and rewrite: Andras Varga, 2004
 
 #include "inet/networklayer/ipv4/RoutingTableParser.h"
 
@@ -34,16 +34,16 @@ namespace inet {
 //
 // Constants
 //
-const int MAX_FILESIZE = 10000;    // TBD lift hardcoded limit
+const int MAX_FILESIZE = 10000; // TODO lift hardcoded limit
 const int MAX_ENTRY_STRING_SIZE = 500;
 
 //
 // Tokens that mark the route file.
 //
 const char *IFCONFIG_START_TOKEN = "ifconfig:",
-*IFCONFIG_END_TOKEN = "ifconfigend.",
-*ROUTE_START_TOKEN = "route:",
-*ROUTE_END_TOKEN = "routeend.";
+           *IFCONFIG_END_TOKEN = "ifconfigend.",
+           *ROUTE_START_TOKEN = "route:",
+           *ROUTE_END_TOKEN = "routeend.";
 
 int RoutingTableParser::streq(const char *str1, const char *str2)
 {
@@ -61,7 +61,7 @@ int RoutingTableParser::strcpyword(char *dest, const char *src)
 
 void RoutingTableParser::skipBlanks(char *str, int& charptr)
 {
-    for ( ; isspace(str[charptr]); charptr++)
+    for (; isspace(str[charptr]); charptr++)
         ;
 }
 
@@ -81,7 +81,7 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
     for (charpointer = 0; (c = getc(fp)) != EOF; charpointer++)
         file[charpointer] = c;
 
-    for ( ; charpointer < MAX_FILESIZE; charpointer++)
+    for (; charpointer < MAX_FILESIZE; charpointer++)
         file[charpointer] = '\0';
 
     fclose(fp);
@@ -98,7 +98,7 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
                 ifconfigFile = createFilteredFile(file,
                             charpointer,
                             IFCONFIG_END_TOKEN);
-                //PRINTF("Filtered File 1 created:\n%s\n", ifconfigFile);
+//                PRINTF("Filtered File 1 created:\n%s\n", ifconfigFile);
             }
 
             // copy into route filtered chararray
@@ -106,7 +106,7 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
                 routeFile = createFilteredFile(file,
                             charpointer,
                             ROUTE_END_TOKEN);
-                //PRINTF("Filtered File 2 created:\n%s\n", routeFile);
+//                PRINTF("Filtered File 2 created:\n%s\n", routeFile);
             }
         }
     }
@@ -346,10 +346,10 @@ void RoutingTableParser::parseRouting(char *routeFile)
         // parse flag-String to set flags
         for (int i = 0; str[i]; i++) {
             if (str[i] == 'H') {
-                // e->setType(Ipv4Route::DIRECT);
+//                e->setType(Ipv4Route::DIRECT);
             }
             else if (str[i] == 'G') {
-                // e->setType(Ipv4Route::REMOTE);
+//                e->setType(Ipv4Route::REMOTE);
             }
             else {
                 throw cRuntimeError("Syntax error in routing file: 4th column should be `G' or `H' not `%s'", str);
@@ -380,7 +380,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         // add entry
         rt->addRoute(e);
     }
-    delete [] str;
+    delete[] str;
 }
 
 } // namespace inet

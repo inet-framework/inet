@@ -116,7 +116,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     // The remaining are all data field symbols
     for (unsigned int i = 1; i < symbols->size(); i++) {
         Ieee80211OfdmSymbol *corruptedOFDMSymbol = corruptOFDMSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i)), dataSER,
-                    dataFieldConstellationSize, constellationForDataField);
+                dataFieldConstellationSize, constellationForDataField);
         corruptedSymbols->push_back(corruptedOFDMSymbol);
     }
     return new Ieee80211OfdmReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), corruptedSymbols);

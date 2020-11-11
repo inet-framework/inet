@@ -31,8 +31,7 @@ class INET_API IRadioSignal
     /**
      * This enumeration specifies a part of a radio signal.
      */
-    enum SignalPart
-    {
+    enum SignalPart {
         SIGNAL_PART_NONE = -1,
         SIGNAL_PART_WHOLE,
         SIGNAL_PART_PREAMBLE,

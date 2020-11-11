@@ -27,7 +27,7 @@ namespace inet {
  */
 class INET_API EmptyChunk : public Chunk
 {
-  friend class Chunk;
+    friend class Chunk;
 
   public:
     static const Ptr<EmptyChunk> singleton;

@@ -45,8 +45,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
      * It implements a unique identifier for an arbitrary RREQ message
      * in the network. See: rreqsArrivalTime.
      */
-    class RreqIdentifier
-    {
+    class RreqIdentifier {
       public:
         L3Address originatorAddr;
         unsigned int rreqID;
@@ -57,9 +56,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
         }
     };
 
-    class RreqIdentifierCompare
-    {
-    public:
+    class RreqIdentifierCompare {
+      public:
         bool operator()(const RreqIdentifier& lhs, const RreqIdentifier& rhs) const
         {
             if (lhs.originatorAddr < rhs.originatorAddr)
@@ -72,7 +70,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     };
 
     // context
-    IL3AddressType *addressType = nullptr;    // to support both Ipv4 and v6 addresses.
+    IL3AddressType *addressType = nullptr; // to support both Ipv4 and v6 addresses.
 
     // environment
     cModule *host = nullptr;
@@ -114,29 +112,29 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     simtime_t pathDiscoveryTime;
 
     // state
-    unsigned int rreqId = 0;    // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
-    unsigned int sequenceNum = 0;    // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
-    std::map<L3Address, WaitForRrep *> waitForRREPTimers;    // timeout for Route Replies
-    std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime;    // maps RREQ id to its arriving time
-    L3Address failedNextHop;    // next hop to the destination who failed to send us RREP-ACK
-    std::map<L3Address, simtime_t> blacklist;    // we don't accept RREQs from blacklisted nodes
-    unsigned int rerrCount = 0;    // num of originated RERR in the last second
-    unsigned int rreqCount = 0;    // num of originated RREQ in the last second
-    simtime_t lastBroadcastTime;    // the last time when any control packet was broadcasted
-    std::map<L3Address, unsigned int> addressToRreqRetries;    // number of re-discovery attempts per address
+    unsigned int rreqId = 0; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
+    unsigned int sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
+    std::map<L3Address, WaitForRrep *> waitForRREPTimers; // timeout for Route Replies
+    std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
+    L3Address failedNextHop; // next hop to the destination who failed to send us RREP-ACK
+    std::map<L3Address, simtime_t> blacklist; // we don't accept RREQs from blacklisted nodes
+    unsigned int rerrCount = 0; // num of originated RERR in the last second
+    unsigned int rreqCount = 0; // num of originated RREQ in the last second
+    simtime_t lastBroadcastTime; // the last time when any control packet was broadcasted
+    std::map<L3Address, unsigned int> addressToRreqRetries; // number of re-discovery attempts per address
 
     // self messages
-    cMessage *helloMsgTimer = nullptr;    // timer to send hello messages (only if the feature is enabled)
-    cMessage *expungeTimer = nullptr;    // timer to clean the routing table out
-    cMessage *counterTimer = nullptr;    // timer to set rrerCount = rreqCount = 0 in each second
-    cMessage *rrepAckTimer = nullptr;    // timer to wait for RREP-ACKs (RREP-ACK timeout)
-    cMessage *blacklistTimer = nullptr;    // timer to clean the blacklist out
+    cMessage *helloMsgTimer = nullptr; // timer to send hello messages (only if the feature is enabled)
+    cMessage *expungeTimer = nullptr; // timer to clean the routing table out
+    cMessage *counterTimer = nullptr; // timer to set rrerCount = rreqCount = 0 in each second
+    cMessage *rrepAckTimer = nullptr; // timer to wait for RREP-ACKs (RREP-ACK timeout)
+    cMessage *blacklistTimer = nullptr; // timer to clean the blacklist out
 
     // lifecycle
-    simtime_t rebootTime;    // the last time when the node rebooted
+    simtime_t rebootTime; // the last time when the node rebooted
 
     // internal
-    std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
+    std::multimap<L3Address, Packet *> targetAddressToDelayedPackets; // queue for the datagrams we have no route for
 
   protected:
     void handleMessageWhenUp(cMessage *msg) override;

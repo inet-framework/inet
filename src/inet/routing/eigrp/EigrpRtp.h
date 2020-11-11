@@ -34,21 +34,21 @@
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 #include "inet/routing/eigrp/tables/EigrpNeighborTable.h"
 namespace inet {
-namespace eigrp{
+namespace eigrp {
 class EigrpRtp;
 
 /**
  * Queue for storing requests for message sending.
  */
-class EigrpRequestQueue: public cObject
+class EigrpRequestQueue : public cObject
 {
   private:
     typedef std::list<EigrpMsgReq *> MessageQueue;
 
-    MessageQueue reqQueue;          /**< Queue with requests waiting for sending (rel/unrel) */
+    MessageQueue reqQueue; /**< Queue with requests waiting for sending (rel/unrel) */
 
     // Only for debugging
-    //friend class EigrpRtp;
+//    friend class EigrpRtp;
 
   public:
     virtual ~EigrpRequestQueue();
@@ -69,11 +69,10 @@ class EigrpRequestQueue: public cObject
 /**
  * Class represents Reliable Transport Protocol for reliable transmission of EIGRP messages.
  */
-template <typename IPAddress>
+template<typename IPAddress>
 class EigrpRtpT : public cSimpleModule
 {
-    struct NeighborInfo
-    {
+    struct NeighborInfo {
         int neighborId;
         int neighborIfaceId;
         uint32_t lastSeqNum;
@@ -83,12 +82,12 @@ class EigrpRtpT : public cSimpleModule
 
     const char *RTP_OUTPUT_GW;
 
-    uint32_t seqNumber;             /**< Sequence number for reliable transport of messages */
+    uint32_t seqNumber; /**< Sequence number for reliable transport of messages */
 
     EigrpRequestQueue *requestQ;
 
     EigrpInterfaceTable *eigrpIft;
-    EigrpNeighborTable<IPAddress> *eigrpNt; //TODO - verify! Should I use EigrpIpv4NeighborTable?
+    EigrpNeighborTable<IPAddress> *eigrpNt; // TODO - verify! Should I use EigrpIpv4NeighborTable?
 
     /**
      * Process request for message sending.
@@ -141,24 +140,26 @@ class EigrpRtpT : public cSimpleModule
   public:
     EigrpRtpT();
     virtual ~EigrpRtpT();
-
 };
 
 class EigrpRtp : public EigrpRtpT<Ipv4Address>
 {
-//container class for IPv4RTP, must exist because of Define_Module()
-public:
-    virtual ~EigrpRtp() {};
+// container class for IPv4RTP, must exist because of Define_Module()
+
+  public:
+    virtual ~EigrpRtp() {}
 };
 
 #ifndef DISABLE_EIGRP_IPV6
 class EigrpRtp6 : public EigrpRtpT<Ipv6Address>
 {
-//container class for IPv6RTP, must exist because of Define_Module()
-public:
-    virtual ~EigrpRtp6() {};
+// container class for IPv6RTP, must exist because of Define_Module()
+
+  public:
+    virtual ~EigrpRtp6() {}
 };
 #endif /* DISABLE_EIGRP_IPV6 */
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif
+

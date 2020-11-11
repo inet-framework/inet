@@ -33,8 +33,8 @@ namespace inet {
 class INET_API NextHopInterfaceData : public InterfaceProtocolData
 {
   protected:
-    L3Address inetAddr;    ///< address of interface
-    int metric;    ///< link "cost"; see e.g. MS KB article Q299540  //TODO needed???
+    L3Address inetAddr; ///< address of interface
+    int metric; ///< link "cost"; see e.g. MS KB article Q299540  //TODO needed???
 
   public:
     // field ids for change notifications

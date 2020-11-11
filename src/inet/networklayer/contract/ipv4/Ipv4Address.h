@@ -83,35 +83,35 @@ class INET_API Ipv4Address
      * 255.255.255.255/32  Limited Broadcast          RFC 919, Section 7; RFC 922, Section 7
      */
     enum AddressCategory {
-        UNSPECIFIED,    // 0.0.0.0
-        THIS_NETWORK,    // 0.0.0.0/8
-        LOOPBACK,    // 127.0.0.0/8
-        MULTICAST,    // 224.0.0.0/4
-        BROADCAST,    // 255.255.255.255/32
-        IETF,    // 192.0.0.0/24
-        TEST_NET,    // 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24
-        IPv6_TO_IPv4_RELAY,    // 192.88.99.0/24
-        BENCHMARK,    // 198.18.0.0/15
-        RESERVED,    // 240.0.0.0/4
-        LINKLOCAL,    // 169.254.0.0/16
-        PRIVATE_NETWORK,    // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+        UNSPECIFIED, // 0.0.0.0
+        THIS_NETWORK, // 0.0.0.0/8
+        LOOPBACK, // 127.0.0.0/8
+        MULTICAST, // 224.0.0.0/4
+        BROADCAST, // 255.255.255.255/32
+        IETF, // 192.0.0.0/24
+        TEST_NET, // 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24
+        IPv6_TO_IPv4_RELAY, // 192.88.99.0/24
+        BENCHMARK, // 198.18.0.0/15
+        RESERVED, // 240.0.0.0/4
+        LINKLOCAL, // 169.254.0.0/16
+        PRIVATE_NETWORK, // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
         GLOBAL
     };
 
     /** @name Predefined addresses */
     //@{
-    static const Ipv4Address UNSPECIFIED_ADDRESS;    ///< 0.0.0.0
-    static const Ipv4Address LOOPBACK_ADDRESS;    ///< 127.0.0.1
-    static const Ipv4Address LOOPBACK_NETMASK;    ///< 255.0.0.0
-    static const Ipv4Address ALLONES_ADDRESS;    ///< 255.255.255.255
+    static const Ipv4Address UNSPECIFIED_ADDRESS; ///< 0.0.0.0
+    static const Ipv4Address LOOPBACK_ADDRESS; ///< 127.0.0.1
+    static const Ipv4Address LOOPBACK_NETMASK; ///< 255.0.0.0
+    static const Ipv4Address ALLONES_ADDRESS; ///< 255.255.255.255
 
-    static const Ipv4Address ALL_HOSTS_MCAST;    ///< 224.0.0.1 All hosts on a subnet
-    static const Ipv4Address ALL_ROUTERS_MCAST;    ///< 224.0.0.2 All routers on a subnet
-    static const Ipv4Address ALL_DVMRP_ROUTERS_MCAST;    ///< 224.0.0.4 All DVMRP routers
-    static const Ipv4Address ALL_OSPF_ROUTERS_MCAST;    ///< 224.0.0.5 All OSPF routers (DR Others)
-    static const Ipv4Address ALL_OSPF_DESIGNATED_ROUTERS_MCAST;    ///< 224.0.0.6 All OSPF Designated Routers
-    static const Ipv4Address ALL_IGMPV3_ROUTERS_MCAST;    ///< 224.0.0.22 All IGMPv3 routers
-    static const Ipv4Address LL_MANET_ROUTERS;    ///< 224.0.0.109 Manet all designated routers
+    static const Ipv4Address ALL_HOSTS_MCAST; ///< 224.0.0.1 All hosts on a subnet
+    static const Ipv4Address ALL_ROUTERS_MCAST; ///< 224.0.0.2 All routers on a subnet
+    static const Ipv4Address ALL_DVMRP_ROUTERS_MCAST; ///< 224.0.0.4 All DVMRP routers
+    static const Ipv4Address ALL_OSPF_ROUTERS_MCAST; ///< 224.0.0.5 All OSPF routers (DR Others)
+    static const Ipv4Address ALL_OSPF_DESIGNATED_ROUTERS_MCAST; ///< 224.0.0.6 All OSPF Designated Routers
+    static const Ipv4Address ALL_IGMPV3_ROUTERS_MCAST; ///< 224.0.0.22 All IGMPv3 routers
+    static const Ipv4Address LL_MANET_ROUTERS; ///< 224.0.0.109 Manet all designated routers
     static const Ipv4Address ALL_RIP_ROUTERS_MCAST;
     //@}
 

@@ -28,8 +28,7 @@ namespace inet {
 class INET_API ExtLowerUdp : public cSimpleModule, public ILifecycle, public RealTimeScheduler::ICallback
 {
   protected:
-    class Socket
-    {
+    class Socket {
       public:
         int socketId = -1;
         int fd = -1;

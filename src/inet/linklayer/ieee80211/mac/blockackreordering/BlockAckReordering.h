@@ -32,30 +32,30 @@ class RecipientBlockAckAgreement;
 //
 class INET_API BlockAckReordering
 {
-    public:
-        typedef std::vector<Packet *> Fragments;
-        typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
+  public:
+    typedef std::vector<Packet *> Fragments;
+    typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
 
-    protected:
-        std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
+  protected:
+    std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
 
-    protected:
-        ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber);
-        ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber);
+  protected:
+    ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber);
+    ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber);
 
-        std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
-        bool isComplete(const Fragments& fragments);
-        void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumber sequenceNumber);
-        void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
-        ReceiveBuffer* createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
-        bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer &reorderBuffer, SequenceNumber seqNum);
+    std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
+    bool isComplete(const Fragments& fragments);
+    void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumber sequenceNumber);
+    void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
+    ReceiveBuffer *createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
+    bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumber seqNum);
 
-    public:
-        virtual ~BlockAckReordering();
+  public:
+    virtual ~BlockAckReordering();
 
-        void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
-        ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
-        ReorderBuffer processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
+    void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
+    ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
+    ReorderBuffer processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
 
 } /* namespace ieee80211 */

@@ -27,7 +27,7 @@ Register_Protocol_Dissector(&Protocol::sctp, SctpProtocolDissector);
 
 void SctpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    //TODO
+    // TODO
     callback.startProtocolDataUnit(&Protocol::sctp);
     auto header = packet->popAtFront<SctpHeader>();
     callback.visitChunk(header, &Protocol::sctp);

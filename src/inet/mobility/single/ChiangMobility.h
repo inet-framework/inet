@@ -31,10 +31,10 @@ namespace inet {
 class INET_API ChiangMobility : public LineSegmentsMobilityBase
 {
   protected:
-    double speed;    ///< speed of the host
-    double stateTransitionUpdateInterval;    ///< how often to calculate the new state
-    int xState;    ///< 0 = negative direction, 1 = no move, 2 = positive direction
-    int yState;    ///< 0 = negative direction, 1 = no move, 2 = positive direction
+    double speed; ///< speed of the host
+    double stateTransitionUpdateInterval; ///< how often to calculate the new state
+    int xState; ///< 0 = negative direction, 1 = no move, 2 = positive direction
+    int yState; ///< 0 = negative direction, 1 = no move, 2 = positive direction
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

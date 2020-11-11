@@ -49,7 +49,7 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
         const NetworkInterface *networkInterface = nullptr;
 
       public:
-        DirectiveResolver(const NetworkInterface *networkInterface) : networkInterface(networkInterface) { }
+        DirectiveResolver(const NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

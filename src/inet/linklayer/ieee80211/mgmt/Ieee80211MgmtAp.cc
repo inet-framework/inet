@@ -59,14 +59,14 @@ void Ieee80211MgmtAp::initialize(int stage)
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps != 2 && numAuthSteps != 4)
             throw cRuntimeError("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
-        channelNumber = -1;    // value will arrive from physical layer in receiveChangeNotification()
+        channelNumber = -1; // value will arrive from physical layer in receiveChangeNotification()
         WATCH(ssid);
         WATCH(channelNumber);
         WATCH(beaconInterval);
         WATCH(numAuthSteps);
         WATCH_MAP(staList);
 
-        //TBD fill in supportedRates
+        // TODO fill in supportedRates
 
         // subscribe for notifications
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -139,7 +139,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     StaInfo *sta = lookupSenderSTA(header);
     if (!sta) {
         MacAddress staAddress = header->getTransmitterAddress();
-        sta = &staList[staAddress];    // this implicitly creates a new entry
+        sta = &staList[staAddress]; // this implicitly creates a new entry
         sta->address = staAddress;
         mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
@@ -167,7 +167,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
         delete packet;
-        sta->authSeqExpected = 1;    // go back to start square
+        sta->authSeqExpected = 1; // go back to start square
         return;
     }
 
@@ -190,7 +190,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     if (isLast) {
         if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED)
             sendDisAssocNotification(sta->address);
-        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED;    // XXX only when ACK of this frame arrives
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // XXX only when ACK of this frame arrives
         EV << "STA authenticated\n";
     }
     else {
@@ -235,12 +235,12 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     // mark STA as associated
     if (mib->bssAccessPointData.stations[sta->address] != Ieee80211Mib::ASSOCIATED)
         sendAssocNotification(sta->address);
-    mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
+    mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED; // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
     const auto& body = makeShared<Ieee80211AssociationResponseFrame>();
     body->setStatusCode(SC_SUCCESSFUL);
-    body->setAid(0);    //XXX
+    body->setAid(0); // XXX
     body->setSupportedRates(supportedRates);
     body->setChunkLength(B(2 + 2 + 2 + body->getSupportedRates().numRates + 2));
     sendManagementFrame("AssocResp-OK", body, ST_ASSOCIATIONRESPONSE, sta->address);
@@ -269,12 +269,12 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     delete packet;
 
     // mark STA as associated
-    mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
+    mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED; // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
     const auto& body = makeShared<Ieee80211ReassociationResponseFrame>();
     body->setStatusCode(SC_SUCCESSFUL);
-    body->setAid(0);    //XXX
+    body->setAid(0); // XXX
     body->setSupportedRates(supportedRates);
     body->setChunkLength(B(2 + (2 + ssid.length()) + (2 + supportedRates.numRates) + 6));
     sendManagementFrame("ReassocResp-OK", body, ST_REASSOCIATIONRESPONSE, sta->address);

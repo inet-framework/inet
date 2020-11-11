@@ -43,7 +43,7 @@ TlvOptionBase *TlvOptions::dropTlvOption(TlvOptionBase *option)
 
 void TlvOptions::deleteOptionByType(int type, bool firstOnly)
 {
-    for (size_t i = 0; i < tlvOption_arraysize; ) {
+    for (size_t i = 0; i < tlvOption_arraysize;) {
         if (tlvOption[i] && tlvOption[i]->getType() == type) {
             dropTlvOption(i);
             eraseTlvOption(i);
@@ -64,3 +64,4 @@ int TlvOptions::findByType(short int type, int firstPos) const
 }
 
 } // namespace inet
+

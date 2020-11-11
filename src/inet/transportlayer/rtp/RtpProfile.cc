@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/RtpProfile.h"
 
 #include <string.h>
@@ -55,7 +54,7 @@ void RtpProfile::initialize()
 
 RtpProfile::~RtpProfile()
 {
-    for (auto & elem : _ssrcGates)
+    for (auto& elem : _ssrcGates)
         delete elem.second;
 }
 
@@ -160,7 +159,7 @@ void RtpProfile::createSenderModule(RtpInnerPacket *rinp)
     char moduleName[100];
 
     EV_INFO << "ProfileName: " << _profileName << " payloadType: " << payloadType << endl;
-    const char *pkgPrefix = "inet.transportlayer.rtp.";    //FIXME hardcoded string
+    const char *pkgPrefix = "inet.transportlayer.rtp."; // FIXME hardcoded string
     sprintf(moduleName, "%sRtp%sPayload%iSender", pkgPrefix, _profileName, payloadType);
 
     cModuleType *moduleType = cModuleType::find(moduleName);
@@ -220,7 +219,7 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
     if (!ssrcGate) {
         ssrcGate = newSSRCGate(ssrc);
         char payloadReceiverName[100];
-        const char *pkgPrefix = "inet.transportlayer.rtp.";    //FIXME hardcoded string
+        const char *pkgPrefix = "inet.transportlayer.rtp."; // FIXME hardcoded string
         sprintf(payloadReceiverName, "%sRtp%sPayload%iReceiver",
                 pkgPrefix, _profileName, rtpHeader->getPayloadType());
 

@@ -35,7 +35,7 @@ INetfilter::IHook::Result SctpUdpHook::datagramPreRoutingHook(Packet *packet)
 {
     EV_INFO << "SctpUdpHook::datagramPreRoutingHook\n";
     EV_INFO << "Packet: " << packet << endl;
- //   auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+//    auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     EV_INFO << "Protocol is " << networkHeader->getProtocol()->getId() << endl;
     if (networkHeader->getProtocol() == &Protocol::udp) {
@@ -53,12 +53,13 @@ INetfilter::IHook::Result SctpUdpHook::datagramPreRoutingHook(Packet *packet)
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::sctp);
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
         EV_INFO << "Packet mit Network: " << packet << endl;
-    } else {
+    }
+    else {
         EV_INFO << "Protocol is " << networkHeader->getProtocol()->getId() << endl;
     }
     return ACCEPT;
 }
 
-}   // namespace sctp
-}   // namespace inet
+} // namespace sctp
+} // namespace inet
 

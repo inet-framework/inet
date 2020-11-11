@@ -34,7 +34,7 @@ namespace inet {
 class INET_API L2NetworkConfigurator : public cSimpleModule
 {
   public:
-    L2NetworkConfigurator() { }
+    L2NetworkConfigurator() {}
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
 
   protected:
@@ -43,8 +43,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     /**
      * Represents a node in the network.
      */
-    class Node : public Topology::Node
-    {
+    class Node : public Topology::Node {
       public:
         cModule *module;
         IInterfaceTable *interfaceTable;
@@ -58,8 +57,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     /**
      * Represents an interface in the network.
      */
-    class InterfaceInfo : public cObject
-    {
+    class InterfaceInfo : public cObject {
       public:
         Node *node;
         Node *childNode;
@@ -71,11 +69,10 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
         virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
-    class Matcher
-    {
+    class Matcher {
       protected:
         bool matchesany;
-        std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
+        std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
 
       public:
         Matcher(const char *pattern);
@@ -85,8 +82,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
         bool matchesAny() { return matchesany; }
     };
 
-    class Link : public Topology::Link
-    {
+    class Link : public Topology::Link {
       public:
         InterfaceInfo *sourceInterfaceInfo;
         InterfaceInfo *destinationInterfaceInfo;
@@ -95,8 +91,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
         Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
     };
 
-    class L2Topology : public Topology
-    {
+    class L2Topology : public Topology {
       protected:
         virtual Node *createNode(cModule *module) override { return new L2NetworkConfigurator::Node(module); }
         virtual Link *createLink() override { return new L2NetworkConfigurator::Link(); }

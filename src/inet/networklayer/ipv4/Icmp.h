@@ -20,7 +20,7 @@
 #ifndef __INET_ICMP_H
 #define __INET_ICMP_H
 
-//  Cleanup and rewrite: Andras Varga, 2004
+// Cleanup and rewrite: Andras Varga, 2004
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
@@ -38,8 +38,9 @@ class Ipv4Header;
 class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
-    std::set<int> transportProtocols;    // where to send up packets
+    std::set<int> transportProtocols; // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
+
   protected:
     virtual void processICMPMessage(Packet *);
     virtual void errorOut(Packet *);

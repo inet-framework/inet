@@ -66,7 +66,7 @@ void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
 void GroupCountRecorder::finish(cResultFilter *prev) {
     opp_string_map attributes = getStatisticAttributes();
 
-    for(auto & elem : groupcounts) {
+    for (auto& elem : groupcounts) {
         std::stringstream name;
         name << getResultName().c_str() << ":" << elem.first;
         getEnvir()->recordScalar(getComponent(), name.str().c_str(), elem.second, &attributes); // note: this is NaN if count==0
@@ -80,7 +80,7 @@ ElapsedTimeRecorder::ElapsedTimeRecorder()
     startTime = clock();
 }
 
-void ElapsedTimeRecorder::finish(cResultFilter* prev)
+void ElapsedTimeRecorder::finish(cResultFilter *prev)
 {
     clock_t t = clock();
     double elapsedTime = (t - startTime) / (double)CLOCKS_PER_SEC;

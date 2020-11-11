@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_RTPPAYLOADSENDER_H
 #define __INET_RTPPAYLOADSENDER_H
 
@@ -33,7 +32,7 @@ namespace inet {
 
 namespace rtp {
 
-//Forward declarations:
+// Forward declarations:
 class RtpInnerPacket;
 
 /**
@@ -68,8 +67,8 @@ class INET_API RtpPayloadSender : public cSimpleModule
      * A sender module's transmission can be in different states.
      */
     enum SenderStatus {
-        STOPPED,    //< No transmission.
-        PLAYING    ///< Data is being sent.
+        STOPPED, // < No transmission.
+        PLAYING ///< Data is being sent.
     };
 
     /**

@@ -135,10 +135,10 @@ void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee
         if (it != shortRetryCounter.end())
             shortRetryCounter.erase(it);
     }
-//
-// The CW shall be reset to aCWmin after every successful attempt to transmit a frame containing
-// all or part of an MSDU or MMPDU
-//
+    //
+    // The CW shall be reset to aCWmin after every successful attempt to transmit a frame containing
+    // all or part of an MSDU or MMPDU
+    //
     resetContentionWindow();
 }
 
@@ -257,3 +257,4 @@ bool QosRecoveryProcedure::isMulticastFrame(Packet *packet, const Ptr<const Ieee
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

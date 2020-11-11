@@ -41,9 +41,9 @@ void Ospfv3NeighborStateExStart::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getInterface()->getDeadInterval());
     }
     if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
-        EV_DEBUG << "Ospfv3Neighbor::IS_ADJACENCY_OK caught in ExStartState for neighbor "<<neighbor->getNeighborID() << "\n";
+        EV_DEBUG << "Ospfv3Neighbor::IS_ADJACENCY_OK caught in ExStartState for neighbor " << neighbor->getNeighborID() << "\n";
         if (!neighbor->needAdjacency()) {
-            EV_DEBUG << "The adjacency is needed for neighbor "<<neighbor->getNeighborID() << "\n";
+            EV_DEBUG << "The adjacency is needed for neighbor " << neighbor->getNeighborID() << "\n";
             neighbor->reset();
             changeState(neighbor, new Ospfv3NeighborState2Way, this);
         }
@@ -64,5 +64,5 @@ void Ospfv3NeighborStateExStart::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
 }
 
 } // namespace ospfv3
-}//namespace inet
+} // namespace inet
 

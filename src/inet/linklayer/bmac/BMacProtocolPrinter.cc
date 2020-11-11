@@ -30,7 +30,7 @@ void BMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
     if (auto header = dynamicPtrCast<const BMacHeaderBase>(chunk)) {
         context.sourceColumn << header->getSrcAddr();
         context.destinationColumn << header->getDestAddr();
-        context.infoColumn << "(Acking MAC) " << chunk;        //TODO
+        context.infoColumn << "(Acking MAC) " << chunk; // TODO
     }
     else
         context.infoColumn << "(Acking MAC) " << chunk;

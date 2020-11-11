@@ -47,7 +47,7 @@ void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short
     /* put sample parameters */
     c->bit_rate = sampleRate * sampleBits;
     c->sample_rate = sampleRate;
-    c->sample_fmt = AV_SAMPLE_FMT_S16;    //FIXME hack!
+    c->sample_fmt = AV_SAMPLE_FMT_S16; // FIXME hack!
     c->channels = 1;
     audio_st = st;
 }
@@ -129,8 +129,7 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = c->sample_rate;
 
-    int ret = avcodec_fill_audio_frame(frame,    /*channels*/ 1, c->sample_fmt,
-                (const uint8_t *)(decBuf), pktBytes, 1);
+    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, c->sample_fmt, (const uint8_t *)(decBuf), pktBytes, 1);
     if (ret < 0)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
 
@@ -140,7 +139,7 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     if (ret < 0 || gotPacket != 1)
         throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
 
-    pkt.dts = 0;    //HACK for libav 11
+    pkt.dts = 0; // HACK for libav 11
 
     // write the compressed frame into the media file
     ret = av_interleaved_write_frame(oc, &pkt);
@@ -165,7 +164,6 @@ bool AudioOutFile::close()
     /* close each codec */
     if (audio_st)
         avcodec_close(audio_st->codec);
-
 
     if (!(oc->oformat->flags & AVFMT_NOFILE)) {
         /* close the output file */

@@ -28,7 +28,7 @@
 
 namespace inet {
 
-//foreign declarations:
+// foreign declarations:
 class Ipv6Address;
 class Ipv6Header;
 class PingPayload;
@@ -59,12 +59,12 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
   protected:
     // internal helper functions
     virtual void sendToIP(Packet *msg, const Ipv6Address& dest);
-    virtual void sendToIP(Packet *msg);    // FIXME check if really needed
+    virtual void sendToIP(Packet *msg); // FIXME check if really needed
 
     virtual Packet *createDestUnreachableMsg(Icmpv6DestUnav code);
     virtual Packet *createPacketTooBigMsg(int mtu);
     virtual Packet *createTimeExceededMsg(Icmpv6TimeEx code);
-    virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code);    //TODO:Section 3.4 describes a pointer. What is it?
+    virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code); // TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**
@@ -108,7 +108,7 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     typedef std::map<long, int> PingMap;
     PingMap pingMap;
-    std::set<int> transportProtocols;    // where to send up packets
+    std::set<int> transportProtocols; // where to send up packets
 };
 
 } // namespace inet

@@ -120,37 +120,37 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     /*@}*/
 
     /** @brief MAC states
-    *
-    *  The MAC states help to keep track what the MAC is actually
-    *  trying to do.
-    *  INIT -- node has just started and its status is unclear
-    *  SLEEP -- node sleeps, but accepts packets from the network layer
-    *  CCA -- Clear Channel Assessment - MAC checks
-    *         whether medium is busy
-    *  SEND_PREAMBLE -- node sends preambles to wake up all nodes
-    *  WAIT_DATA -- node has received at least one preamble from another node
-    *               and wiats for the actual data packet
-    *  SEND_DATA -- node has sent enough preambles and sends the actual data
-    *               packet
-    *  WAIT_TX_DATA_OVER -- node waits until the data packet sending is ready
-    *  WAIT_ACK -- node has sent the data packet and waits for ack from the
-    *              receiving node
-    *  SEND_ACK -- node send an ACK back to the sender
-    *  WAIT_ACK_TX -- node waits until the transmission of the ack packet is
-    *                 over
-    */
+     *
+     *  The MAC states help to keep track what the MAC is actually
+     *  trying to do.
+     *  INIT -- node has just started and its status is unclear
+     *  SLEEP -- node sleeps, but accepts packets from the network layer
+     *  CCA -- Clear Channel Assessment - MAC checks
+     *         whether medium is busy
+     *  SEND_PREAMBLE -- node sends preambles to wake up all nodes
+     *  WAIT_DATA -- node has received at least one preamble from another node
+     *               and wiats for the actual data packet
+     *  SEND_DATA -- node has sent enough preambles and sends the actual data
+     *               packet
+     *  WAIT_TX_DATA_OVER -- node waits until the data packet sending is ready
+     *  WAIT_ACK -- node has sent the data packet and waits for ack from the
+     *              receiving node
+     *  SEND_ACK -- node send an ACK back to the sender
+     *  WAIT_ACK_TX -- node waits until the transmission of the ack packet is
+     *                 over
+     */
     enum States {
-        INIT,   //0
-        SLEEP,  //1
-        CCA,    //2
-        SEND_PREAMBLE,  //3
-        WAIT_DATA,      //4
-        SEND_DATA,      //5
-        WAIT_TX_DATA_OVER,  //6
-        WAIT_ACK,       //~7: think this is not used
-        SEND_ACK,       //8
-        WAIT_ACK_TX     //9
-      };
+        INIT, // 0
+        SLEEP, // 1
+        CCA, // 2
+        SEND_PREAMBLE, // 3
+        WAIT_DATA, // 4
+        SEND_DATA, // 5
+        WAIT_TX_DATA_OVER, // 6
+        WAIT_ACK, // ~7: think this is not used
+        SEND_ACK, // 8
+        WAIT_ACK_TX // 9
+    };
     /** @brief The current state of the protocol */
     States macState;
 
@@ -175,14 +175,14 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     MacAddress lastDataPktSrcAddr;
     MacAddress lastDataPktDestAddr;
     MacAddress lastPreamblePktSrcAddr;
-    b headerLength = b(0);    // XMacDataFrameHeader header length
-    b ctrlFrameLength = b(0);    // XMacControlFrame frame length
+    b headerLength = b(0); // XMacDataFrameHeader header length
+    b ctrlFrameLength = b(0); // XMacControlFrame frame length
 
     /** @brief The radio. */
     physicallayer::IRadio *radio;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-    int              txAttempts;
+    int txAttempts;
     /*@}*/
 
     /** @brief Animate (colorize) the nodes.
@@ -211,10 +211,10 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Possible colors of the node for animation */
     enum XMAC_COLORS {
-        GREEN = 1,
-        BLUE = 2,
-        RED = 3,
-        BLACK = 4,
+        GREEN  = 1,
+        BLUE   = 2,
+        RED    = 3,
+        BLACK  = 4,
         YELLOW = 5
     };
 

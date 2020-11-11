@@ -29,7 +29,7 @@ Define_Module(PacketDropOsgVisualizer);
 
 #ifdef WITH_OSG
 
-PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(osg::Node* node, const PacketDrop* packetDrop) :
+PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(osg::Node *node, const PacketDrop *packetDrop) :
     PacketDropVisualization(packetDrop),
     node(node)
 {

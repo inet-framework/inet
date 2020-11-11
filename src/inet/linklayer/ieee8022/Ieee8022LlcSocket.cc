@@ -55,7 +55,7 @@ void Ieee8022LlcSocket::processMessage(cMessage *msg)
     switch (msg->getKind()) {
         case SOCKET_I_DATA:
             if (callback)
-                callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+                callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
             else
                 delete msg;
             break;

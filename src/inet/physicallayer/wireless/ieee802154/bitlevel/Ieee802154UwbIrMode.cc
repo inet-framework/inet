@@ -54,7 +54,7 @@ const short Ieee802154UwbIrMode::C31[8][31] = {
     // C7
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     // C8
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 };
 
 const short Ieee802154UwbIrMode::shortSFD[8] = { 0, 1, 0, -1, 1, 0, 0, -1 };
@@ -63,43 +63,43 @@ short Ieee802154UwbIrMode::s_array[maxS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 int Ieee802154UwbIrMode::last_s = 15;
 
 const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_4M = {
-    3,                  // channel
-    NOMINAL_4_M,        // PRF
-    NON_RANGING,        // Frame type
-    PSR_DEFAULT,        // preamble length (number of preamble symbols)
-    31,                 // Spreading code length
-    64,                 // spreading delta L
-    4,                  // chips per burst
-    bps(850000),        // bit rate (bps)
-    4,                  // pulses per data burst
-    3974.36E-9,         // preamble symbol duration
-    1023.64E-9,         // data symbol duration
-    512.82E-9,          // burst time shift duration
-    2.003E-9,           // pulse duration (chip)
-    8.01E-9,            // burst duration (pulses per data burst * chip)
-    286.2E-6,           // synchronization preamble duration
-    MHz(4492.8),        // center frequency
-    MHz(499.2)          // bandwidth
+    3,           // channel
+    NOMINAL_4_M, // PRF
+    NON_RANGING, // Frame type
+    PSR_DEFAULT, // preamble length (number of preamble symbols)
+    31,          // Spreading code length
+    64,          // spreading delta L
+    4,           // chips per burst
+    bps(850000), // bit rate (bps)
+    4,           // pulses per data burst
+    3974.36E-9,  // preamble symbol duration
+    1023.64E-9,  // data symbol duration
+    512.82E-9,   // burst time shift duration
+    2.003E-9,    // pulse duration (chip)
+    8.01E-9,     // burst duration (pulses per data burst * chip)
+    286.2E-6,    // synchronization preamble duration
+    MHz(4492.8), // center frequency
+    MHz(499.2)   // bandwidth
 };
 
 const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_16M = {
-    3,					// channel
-    NOMINAL_16_M, 		// PRF
-    NON_RANGING, 		// Frame type
-    PSR_DEFAULT,		// preamble length (number of preamble symbols)
-    31,					// Spreading code length
-    16,					// spreading delta L
-    16,					// chips per burst
-    bps(850000),        // bit rate (bps)
-    16,					// pulses per data burst
-    993.6E-9,			// preamble symbol duration
-    1023.64E-9,			// data symbol duration
-    512.82E-9,			// burst time shift duration
-    2.003E-9,			// pulse duration (chip)
-    32.05E-9,			// burst duration (pulses per data burst * chip)
-    71.5E-6,			// synchronization preamble duration
-    MHz(4492.8),	    // center frequency
-    MHz(499.2)          // bandwidth
+    3,            // channel
+    NOMINAL_16_M, // PRF
+    NON_RANGING,  // Frame type
+    PSR_DEFAULT,  // preamble length (number of preamble symbols)
+    31,           // Spreading code length
+    16,           // spreading delta L
+    16,           // chips per burst
+    bps(850000),  // bit rate (bps)
+    16,           // pulses per data burst
+    993.6E-9,     // preamble symbol duration
+    1023.64E-9,   // data symbol duration
+    512.82E-9,    // burst time shift duration
+    2.003E-9,     // pulse duration (chip)
+    32.05E-9,     // burst duration (pulses per data burst * chip)
+    71.5E-6,      // synchronization preamble duration
+    MHz(4492.8),  // center frequency
+    MHz(499.2)    // bandwidth
 };
 
 // TODO: do this in a static initializer once (even better: simply create a function from symbol index to hopping position)
@@ -116,7 +116,7 @@ int Ieee802154UwbIrMode::s(int n) const
 
 int Ieee802154UwbIrMode::getHoppingPos(int sym) const
 {
-    //int m = 3;  // or 5 with 4M
+    // int m = 3;  // or 5 with 4M
     int pos = 0;
     int kNcpb = sym * Ncpb;
     switch (prf) {
@@ -131,7 +131,7 @@ int Ieee802154UwbIrMode::getHoppingPos(int sym) const
             break;
         case PRF_OFF:
         default:
-            ASSERT(0==1);  // unimplemented or invalid PRF value
+            ASSERT(0 == 1); // unimplemented or invalid PRF value
             break;
     }
     // ASSERT(pos > -1 && pos < 8); // TODO: update to reflect number of hopping pos for current config

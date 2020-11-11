@@ -30,7 +30,7 @@ void EthernetMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Prot
     if (auto header = dynamicPtrCast<const EthernetMacHeader>(chunk)) {
         context.sourceColumn << header->getSrc();
         context.destinationColumn << header->getDest();
-        context.infoColumn << "(Eth) " << chunk;        //TODO
+        context.infoColumn << "(Eth) " << chunk; // TODO
     }
     else
         context.infoColumn << "(Eth) " << chunk;

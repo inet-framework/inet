@@ -32,7 +32,7 @@ void WiseRouteProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protoc
         context.destinationColumn << header->getDestinationAddress();
         B payloadLength = header->getPayloadLengthField();
         context.infoColumn << "WiseRoute"
-                << " ttl:" << header->getNbHops();
+                           << " ttl:" << header->getNbHops();
         auto payloadProtocol = header->getProtocol();
         if (payloadProtocol)
             context.infoColumn << " payload:" << payloadProtocol->getName() << " " << payloadLength;

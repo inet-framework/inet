@@ -223,8 +223,7 @@ void VoipStreamReceiver::checkSourceAndParameters(Packet *pk)
         || vp->getSampleBits() != curConn.sampleBits
         || vp->getSampleRate() != curConn.sampleRate
         || vp->getSamplesPerPacket() != curConn.samplesPerPacket
-        || vp->getTransmitBitrate() != curConn.transmitBitrate
-        )
+        || vp->getTransmitBitrate() != curConn.transmitBitrate)
         throw cRuntimeError("Cannot change voice encoding parameters a during session");
 }
 
@@ -235,7 +234,7 @@ void VoipStreamReceiver::closeConnection()
         avcodec_close(curConn.decCtx);
         avcodec_free_context(&curConn.decCtx);
         curConn.outFile.close();
-        emit(connStateSignal, -1L);    // so that sum() yields the number of active sessions
+        emit(connStateSignal, -1L); // so that sum() yields the number of active sessions
     }
 }
 

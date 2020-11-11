@@ -33,3 +33,4 @@ const Protocol AccessoryProtocol::sequenceNumber("sequenceNumber", "Sequence num
 const Protocol AccessoryProtocol::withAcknowledge("withAcknowledge", "With acknowledge");
 
 } // namespace inet
+

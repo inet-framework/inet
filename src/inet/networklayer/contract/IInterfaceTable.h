@@ -45,7 +45,7 @@ typedef std::vector<MulticastGroup> MulticastGroupList;
  */
 class INET_API IInterfaceTable
 {
-    friend class NetworkInterface;    // so that it can call interfaceChanged()
+    friend class NetworkInterface; // so that it can call interfaceChanged()
 
   protected:
     // called from NetworkInterface

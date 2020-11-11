@@ -38,7 +38,7 @@ class INET_API Ppp : public MacProtocolBase
     const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     cGate *physOutGate = nullptr;
-    cChannel *datarateChannel = nullptr;    // nullptr if we're not connected
+    cChannel *datarateChannel = nullptr; // nullptr if we're not connected
 
     cMessage *endTransmissionEvent = nullptr;
 

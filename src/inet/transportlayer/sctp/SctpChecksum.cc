@@ -20,13 +20,13 @@
 #include "inet/transportlayer/sctp/SctpChecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>    // htonl, ntohl, ...
+#include <netinet/in.h> // htonl, ntohl, ...
 #endif // if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
 namespace inet {
 namespace sctp {
 
-#define CRC32C(c, d)     (c = (c >> 8) ^ crc_c[(c ^ (d)) & 0xFF])
+#define CRC32C(c, d)    (c = (c >> 8) ^ crc_c[(c ^ (d)) & 0xFF])
 
 static uint32_t crc_c[256] = {
     0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
@@ -117,3 +117,4 @@ uint32_t SctpChecksum::checksum(const void *addr, unsigned int len)
 
 } // namespace sctp
 } // namespace inet
+

@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 
 #include <fstream>
@@ -47,8 +46,7 @@ void RtpPayloadReceiver::initialize()
     const char *logFileName = par("outputLogFileName");
     if (strcmp(fileName, ""))
         openOutputFile(fileName);
-    if (strcmp(logFileName, ""))
-    {
+    if (strcmp(logFileName, "")) {
         char logName[200];
         sprintf(logName, logFileName, getId());
         _outputLogLoss.open(logName);
@@ -64,7 +62,7 @@ void RtpPayloadReceiver::handleMessage(cMessage *msg)
         delete rinp;
     }
     else {
-        //delete rinp;
+//        delete rinp;
         throw cRuntimeError("RtpInnerPacket of wrong type received");
     }
 }

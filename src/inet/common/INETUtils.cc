@@ -108,7 +108,7 @@ unsigned long atoul(const char *s)
 std::string stripnonalnum(const char *s)
 {
     std::string result;
-    for ( ; *s; s++)
+    for (; *s; s++)
         if (isalnum(*s))
             result += *s;
 
@@ -181,7 +181,7 @@ void splitFileName(const char *pathname, std::string& dir, std::string& fnameonl
 
     // find last "/" or "\"
     const char *s = pathname + strlen(pathname) - 1;
-    s--;  // ignore potential trailing "/"
+    s--; // ignore potential trailing "/"
     while (s > pathname && *s != '\\' && *s != '/')
         s--;
     const char *sep = s <= pathname ? nullptr : s;
@@ -199,8 +199,8 @@ void splitFileName(const char *pathname, std::string& dir, std::string& fnameonl
         }
     }
     else {
-        fnameonly = s+1;
-        dir = std::string(pathname, s-pathname+1);
+        fnameonly = s + 1;
+        dir = std::string(pathname, s - pathname + 1);
     }
 }
 

@@ -53,7 +53,7 @@ void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
         }
         case BPDU_TCN: {
             const auto& bpdu = CHK(dynamicPtrCast<const BpduTcn>(chunk));
-            (void)bpdu;    // unused
+            (void)bpdu; // unused
             break;
         }
         default:

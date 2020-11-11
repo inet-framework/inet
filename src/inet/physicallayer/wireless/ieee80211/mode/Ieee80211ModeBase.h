@@ -25,11 +25,12 @@ namespace physicallayer {
 
 class INET_API Ieee80211ModeBase : public IIeee80211Mode
 {
-    private:
-        std::string name;
-    public:
-        Ieee80211ModeBase(const char *name) : name(name) {}
-        virtual const char *getName() const override { return name.c_str(); }
+  private:
+    std::string name;
+
+  public:
+    Ieee80211ModeBase(const char *name) : name(name) {}
+    virtual const char *getName() const override { return name.c_str(); }
 };
 
 } /* namespace physicallayer */

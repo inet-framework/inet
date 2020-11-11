@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 /** \file RtpAvProfilePayload32Receiver.cc
  *  * In this file member functions of RtpAvProfilePayload32Receiver are
  *  * implemented.
@@ -70,12 +69,12 @@ void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
         _lowestAllowedTimeStamp = rtpHeader->getTimeStamp();
         _highestSequenceNumber = rtpHeader->getSequenceNumber();
         if (_outputLogLoss.is_open())
-        _outputLogLoss << "sequenceNumberBase" << rtpHeader->getSequenceNumber() << endl;
+            _outputLogLoss << "sequenceNumberBase" << rtpHeader->getSequenceNumber() << endl;
     }
     else if (_outputLogLoss.is_open()) {
         for (int i = _highestSequenceNumber + 1; i < rtpHeader->getSequenceNumber(); i++) {
-            //char line[100];
-            //sprintf(line, "%i", i);
+//            char line[100];
+//            sprintf(line, "%i", i);
             _outputLogLoss << i << endl;
         }
     }
@@ -116,7 +115,7 @@ void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
             while (!_queue->isEmpty()) {
                 Packet *qPacket = check_and_cast<Packet *>(_queue->pop());
                 const auto& qRtpHeader = qPacket->popAtFront<RtpHeader>();
-                (void)qRtpHeader;       // unused variable
+                (void)qRtpHeader; // unused variable
                 const auto& mpegPacket = qPacket->peekAtFront<RtpMpegHeader>();
                 if (pictureType == 0)
                     pictureType = mpegPacket->getPictureType();

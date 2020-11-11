@@ -110,7 +110,7 @@ void PatternMatcher::setPattern(const char *patt, bool dottedpath, bool fullstri
 
 void PatternMatcher::parseSet(const char *& s, Elem& e)
 {
-    s++;    // skip "{"
+    s++; // skip "{"
     e.type = SET;
     if (*s == '^') {
         e.type = NEGSET;
@@ -141,7 +141,7 @@ void PatternMatcher::parseSet(const char *& s, Elem& e)
     }
     if (!*s)
         throw cRuntimeError("unmatched '}' in expression");
-    s++;    // skip "}"
+    s++; // skip "}"
 }
 
 void PatternMatcher::parseLiteralString(const char *& s, Elem& e)
@@ -169,7 +169,7 @@ bool PatternMatcher::parseNumRange(const char *& str, char closingchar, long& lo
     // They are optional -- if missing, lo or up will be set to -1.
     //
     lo = up = -1L;
-    const char *s = str + 1;    // skip "[" or "{"
+    const char *s = str + 1; // skip "[" or "{"
     if (opp_isdigit(*s)) {
         lo = atol(s);
         while (opp_isdigit(*s))
@@ -258,8 +258,8 @@ bool PatternMatcher::doMatch(const char *s, int k, int suffixlen)
 {
     while (true) {
         Elem& e = pattern[k];
-        long num;    // case NUMRANGE
-        int len;    // case LITERALSTRING
+        long num; // case NUMRANGE
+        int len; // case LITERALSTRING
         switch (e.type) {
             case LITERALSTRING:
                 len = e.literalstring.length();
@@ -267,10 +267,7 @@ bool PatternMatcher::doMatch(const char *s, int k, int suffixlen)
                 if (suffixlen > 0 && k == (int)pattern.size() - 2)
                     len -= suffixlen;
                 // compare
-                if (iscasesensitive ?
-                    strncmp(s, e.literalstring.c_str(), len) :
-                    strncasecmp(s, e.literalstring.c_str(), len)
-                    )
+                if (iscasesensitive ? strncmp(s, e.literalstring.c_str(), len) : strncasecmp(s, e.literalstring.c_str(), len))
                     return false;
                 s += len;
                 break;
@@ -330,7 +327,7 @@ bool PatternMatcher::doMatch(const char *s, int k, int suffixlen)
                         return false;
                     s++;
                 }
-                break;    // at EOS
+                break; // at EOS
 
             case COMMONSEQ:
                 while (true) {
@@ -371,7 +368,7 @@ bool PatternMatcher::matches(const char *line)
             int pattlen = e.literalstring.size();
             int linelen = strlen(line);
             if (pattlen >= 2 && linelen >= 2 && (line[linelen - 1] != e.literalstring.at(pattlen - 1) ||
-                                                 line[linelen - 2] != e.literalstring.at(pattlen - 2))) //FIXME why doesn't work for pattlen==1 ?
+                                                 line[linelen - 2] != e.literalstring.at(pattlen - 2))) // FIXME why doesn't work for pattlen==1 ?
                 return false;
         }
     }
@@ -412,5 +409,6 @@ bool PatternMatcher::containsWildcards(const char *pattern)
            strchr(pattern, '\\') || strchr(pattern, '{') ||
            strstr(pattern, "..");
 }
-};
+
+} // namespace inet
 

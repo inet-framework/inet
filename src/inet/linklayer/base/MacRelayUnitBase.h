@@ -47,9 +47,9 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase
     virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress);
 
     //@{ for lifecycle:
-    virtual void handleStartOperation(LifecycleOperation *operation) override { }
-    virtual void handleStopOperation(LifecycleOperation *operation) override { }
-    virtual void handleCrashOperation(LifecycleOperation *operation) override { }
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}
     virtual bool isUpperMessage(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
     virtual bool isLowerMessage(cMessage *message) override { return message->arrivedOn("ifIn"); }
 

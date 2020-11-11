@@ -27,18 +27,18 @@ namespace ieee80211 {
 
 class INET_API DcfTransmitLifetimeHandler : public ITransmitLifetimeHandler
 {
-    protected:
-        simtime_t maxTransmitLifetime;
-        std::map<SequenceNumber, simtime_t> lifetimes;
+  protected:
+    simtime_t maxTransmitLifetime;
+    std::map<SequenceNumber, simtime_t> lifetimes;
 
-    public:
-        DcfTransmitLifetimeHandler(simtime_t maxTransmitLifetime) : maxTransmitLifetime(maxTransmitLifetime)
-        { }
+  public:
+    DcfTransmitLifetimeHandler(simtime_t maxTransmitLifetime) : maxTransmitLifetime(maxTransmitLifetime)
+    {}
 
-        virtual void frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header);
-        virtual void frameTransmitted(const Ptr<const Ieee80211DataHeader>& header);
+    virtual void frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header);
+    virtual void frameTransmitted(const Ptr<const Ieee80211DataHeader>& header);
 
-        virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header);
+    virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header);
 };
 
 } /* namespace ieee80211 */

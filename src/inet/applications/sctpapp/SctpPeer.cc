@@ -74,15 +74,15 @@ SctpPeer::~SctpPeer()
     cancelAndDelete(timeMsg);
     cancelAndDelete(timeoutMsg);
     cancelAndDelete(connectTimer);
-    for (auto & elem : bytesPerAssoc)
+    for (auto& elem : bytesPerAssoc)
         delete elem.second;
     bytesPerAssoc.clear();
 
-    for (auto & elem : endToEndDelay)
+    for (auto& elem : endToEndDelay)
         delete elem.second;
     endToEndDelay.clear();
 
-    for (auto & elem : histEndToEndDelay)
+    for (auto& elem : histEndToEndDelay)
         delete elem.second;
     histEndToEndDelay.clear();
 
@@ -131,7 +131,7 @@ void SctpPeer::initialize(int stage)
         clientSocket.setCallback(this);
         clientSocket.setOutputGate(gate("socketOut"));
 
-        if (simtime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
+        if (simtime_t(par("startTime")) > SIMTIME_ZERO) { // FIXME is invalid the startTime == 0 ????
             connectTimer = new cMessage("ConnectTimer", MSGKIND_CONNECT);
             scheduleAt(par("startTime"), connectTimer);
         }
@@ -262,7 +262,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                 sprintf(text, "Hist: EndToEndDelay of assoc %d", serverAssocId);
                 histEndToEndDelay[serverAssocId] = new cHistogram(text);
 
-                //delete connectInfo;
+//                delete connectInfo;
                 delete msg;
 
                 if (par("numPacketsToSendPerClient").intValue() > 0) {
@@ -398,7 +398,8 @@ void SctpPeer::handleMessage(cMessage *msg)
                     packetsSent++;
                     sendOrSchedule(cmsg);
                 }
-            } else {
+            }
+            else {
                 delete msg;
             }
             break;
@@ -714,7 +715,7 @@ void SctpPeer::finish()
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
-    for (auto & elem : rcvdBytesPerAssoc)
+    for (auto& elem : rcvdBytesPerAssoc)
         EV_DETAIL << getFullPath() << ": received " << elem.second << " bytes in assoc " << elem.first << "\n";
 
     EV_INFO << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";

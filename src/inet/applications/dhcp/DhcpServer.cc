@@ -58,8 +58,8 @@ void DhcpServer::initialize(int stage)
         WATCH_MAP(leased);
 
         // DHCP UDP ports
-        clientPort = 68;    // client
-        serverPort = 67;    // server
+        clientPort = 68; // client
+        serverPort = 67; // server
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);
@@ -178,7 +178,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
     if (dhcpMsg->getOp() == BOOTREQUEST) {
         int messageType = dhcpMsg->getOptions().getMessageType();
 
-        if (messageType == DHCPDISCOVER) {    // RFC 2131, 4.3.1
+        if (messageType == DHCPDISCOVER) { // RFC 2131, 4.3.1
             EV_INFO << "DHCPDISCOVER arrived. Handling it." << endl;
 
             DhcpLease *lease = getLeaseByMac(dhcpMsg->getChaddr());
@@ -186,11 +186,11 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 // MAC not registered, create offering a new lease to the client
                 lease = getAvailableLease(dhcpMsg->getOptions().getRequestedIp(), dhcpMsg->getChaddr());
                 if (lease != nullptr) {
-                    // std::cout << "MAC: " << packet->getChaddr() << " ----> IP: " << lease->ip << endl;
+//                    std::cout << "MAC: " << packet->getChaddr() << " ----> IP: " << lease->ip << endl;
                     lease->mac = dhcpMsg->getChaddr();
                     lease->xid = dhcpMsg->getXid();
-                    //lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO: !!
-                    lease->leased = true;    // TODO
+//                    lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO: !!
+                    lease->leased = true; // TODO
                     sendOffer(lease, dhcpMsg);
                 }
                 else
@@ -199,11 +199,11 @@ void DhcpServer::processDhcpMessage(Packet *packet)
             else {
                 // MAC already exist, offering the same lease
                 lease->xid = dhcpMsg->getXid();
-                //lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO: !!
+//                lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO: !!
                 sendOffer(lease, dhcpMsg);
             }
         }
-        else if (messageType == DHCPREQUEST) {    // RFC 2131, 4.3.2
+        else if (messageType == DHCPREQUEST) { // RFC 2131, 4.3.2
             EV_INFO << "DHCPREQUEST arrived. Handling it." << endl;
 
             // check if the request was in response of an offering
@@ -235,8 +235,8 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 }
             }
             else {
-                if (dhcpMsg->getCiaddr().isUnspecified()) {    // init-reboot
-                    // std::cout << "init-reboot" << endl;
+                if (dhcpMsg->getCiaddr().isUnspecified()) { // init-reboot
+//                    std::cout << "init-reboot" << endl;
                     Ipv4Address requestedAddress = dhcpMsg->getOptions().getRequestedIp();
                     auto it = leased.find(requestedAddress);
                     if (it == leased.end()) {
@@ -244,7 +244,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                         // and may output a warning to the network admin
                         EV_WARN << "DHCP server has no record of IP " << requestedAddress << "." << endl;
                     }
-                    else if (Ipv4Address::maskedAddrAreEqual(requestedAddress, it->second.ip, subnetMask)) {    // on the same network
+                    else if (Ipv4Address::maskedAddrAreEqual(requestedAddress, it->second.ip, subnetMask)) { // on the same network
                         DhcpLease *lease = &it->second;
                         EV_INFO << "Initialization with known IP address (INIT-REBOOT) " << lease->ip << " on " << lease->mac << " was successful." << endl;
                         lease->xid = dhcpMsg->getXid();
@@ -259,7 +259,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                         sendNak(dhcpMsg);
                     }
                 }
-                else {    // renewing or rebinding: in this case ciaddr must be filled in with client's IP address
+                else { // renewing or rebinding: in this case ciaddr must be filled in with client's IP address
                     auto it = leased.find(dhcpMsg->getCiaddr());
                     DhcpLease *lease = &it->second;
                     if (it != leased.end()) {
@@ -293,18 +293,18 @@ void DhcpServer::processDhcpMessage(Packet *packet)
 
 void DhcpServer::sendNak(const Ptr<const DhcpMessage>& msg)
 {
-    // EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
+//    EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
     Packet *pk = new Packet("DHCPNAK");
     const auto& nak = makeShared<DhcpMessage>();
     nak->setOp(BOOTREPLY);
-    uint16_t length = 236;    // packet size without the options field
-    nak->setHtype(1);    // ethernet
-    nak->setHlen(6);    // hardware address length (6 octets)
+    uint16_t length = 236; // packet size without the options field
+    nak->setHtype(1); // ethernet
+    nak->setHlen(6); // hardware address length (6 octets)
     nak->setHops(0);
-    nak->setXid(msg->getXid());    // transaction id from client
-    nak->setSecs(0);    // 0 seconds from transaction started.
+    nak->setXid(msg->getXid()); // transaction id from client
+    nak->setSecs(0); // 0 seconds from transaction started.
     nak->setBroadcast(msg->getBroadcast());
-    nak->setGiaddr(msg->getGiaddr());    // next server IP
+    nak->setGiaddr(msg->getGiaddr()); // next server IP
     nak->setChaddr(msg->getChaddr());
     nak->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
     length += 6;
@@ -335,26 +335,26 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     Packet *pk = new Packet("DHCPACK");
     const auto& ack = makeShared<DhcpMessage>();
     ack->setOp(BOOTREPLY);
-    uint16_t length = 236;    // packet size without the options field
-    ack->setHtype(1);    // ethernet
-    ack->setHlen(6);    // hardware address length (6 octets)
+    uint16_t length = 236; // packet size without the options field
+    ack->setHtype(1); // ethernet
+    ack->setHlen(6); // hardware address length (6 octets)
     ack->setHops(0);
-    ack->setXid(lease->xid);    // transaction id;
-    ack->setSecs(0);    // 0 seconds from transaction started
+    ack->setXid(lease->xid); // transaction id;
+    ack->setSecs(0); // 0 seconds from transaction started
     ack->setBroadcast(false);
-    ack->setCiaddr(lease->ip);    // client IP addr.
-    ack->setYiaddr(lease->ip);    // client IP addr.
+    ack->setCiaddr(lease->ip); // client IP addr.
+    ack->setYiaddr(lease->ip); // client IP addr.
 
-    ack->setChaddr(lease->mac);    // client MAC address
-    ack->setSname("");    // no server name given
-    ack->setFile("");    // no file given
+    ack->setChaddr(lease->mac); // client MAC address
+    ack->setSname(""); // no server name given
+    ack->setFile(""); // no file given
     ack->getOptionsForUpdate().setMessageType(DHCPACK);
     length += 3;
 
     // add the lease options
     ack->getOptionsForUpdate().setSubnetMask(lease->subnetMask);
     length += 6;
-    ack->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
+    ack->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S)); // RFC 4.4.5
     length += 6;
     ack->getOptionsForUpdate().setRebindingTime(SimTime(leaseTime * 0.875).trunc(SIMTIME_S));
     length += 6;
@@ -402,7 +402,7 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     else {
         // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MacAddress.
-        // destAddr = lease->ip;
+//        destAddr = lease->ip;
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     }
 
@@ -416,27 +416,27 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     Packet *pk = new Packet("DHCPOFFER");
     const auto& offer = makeShared<DhcpMessage>();
     offer->setOp(BOOTREPLY);
-    uint16_t length = 236;    // packet size without the options field
-    offer->setHtype(1);    // ethernet
-    offer->setHlen(6);    // hardware address lenght (6 octets)
+    uint16_t length = 236; // packet size without the options field
+    offer->setHtype(1); // ethernet
+    offer->setHlen(6); // hardware address lenght (6 octets)
     offer->setHops(0);
-    offer->setXid(lease->xid);    // transaction id
-    offer->setSecs(0);    // 0 seconds from transaction started
-    offer->setBroadcast(false);    // unicast
+    offer->setXid(lease->xid); // transaction id
+    offer->setSecs(0); // 0 seconds from transaction started
+    offer->setBroadcast(false); // unicast
 
-    offer->setYiaddr(lease->ip);    // ip offered.
-    offer->setGiaddr(lease->gateway);    // next server ip
+    offer->setYiaddr(lease->ip); // ip offered.
+    offer->setGiaddr(lease->gateway); // next server ip
 
-    offer->setChaddr(lease->mac);    // client mac address
-    offer->setSname("");    // no server name given
-    offer->setFile("");    // no file given
+    offer->setChaddr(lease->mac); // client mac address
+    offer->setSname(""); // no server name given
+    offer->setFile(""); // no file given
     offer->getOptionsForUpdate().setMessageType(DHCPOFFER);
     length += 3;
 
     // add the offer options
     offer->getOptionsForUpdate().setSubnetMask(lease->subnetMask);
     length += 6;
-    offer->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
+    offer->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S)); // RFC 4.4.5
     length += 6;
     offer->getOptionsForUpdate().setRebindingTime(SimTime(leaseTime * 0.875).trunc(SIMTIME_S));
     length += 6;
@@ -483,7 +483,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     else {
         // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MacAddress.
-        // destAddr = lease->ip;
+//        destAddr = lease->ip;
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     }
 
@@ -492,7 +492,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
 
 DhcpLease *DhcpServer::getLeaseByMac(MacAddress mac)
 {
-    for (auto & elem : leased) {
+    for (auto& elem : leased) {
         // lease exist
         if (elem.second.mac == mac) {
             EV_DETAIL << "Found lease for MAC " << mac << "." << endl;
@@ -507,10 +507,10 @@ DhcpLease *DhcpServer::getLeaseByMac(MacAddress mac)
 
 DhcpLease *DhcpServer::getAvailableLease(Ipv4Address requestedAddress, const MacAddress& clientMAC)
 {
-    int beginAddr = ipAddressStart.getInt();    // the first address that we might use
+    int beginAddr = ipAddressStart.getInt(); // the first address that we might use
 
     // try to allocate the requested address if that address is valid and not already allocated
-    if (!requestedAddress.isUnspecified()) {    // valid
+    if (!requestedAddress.isUnspecified()) { // valid
         if (leased.find(requestedAddress) != leased.end() && !leased[requestedAddress].leased) // not already leased (allocated)
             return &leased[requestedAddress];
 
@@ -587,8 +587,8 @@ void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
-        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+    if (operation->getRootModule() != getContainingNode(this)) // closes socket when the application crashed only
+        socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

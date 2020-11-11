@@ -94,8 +94,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             dissect = true;
 #endif // ifdef WITH_IPv4
     }
-    else
-    if (*protocol == Protocol::ipv6) {
+    else if (*protocol == Protocol::ipv6) {
 #ifdef WITH_IPv6
         dissect = false;
         const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
@@ -120,8 +119,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             dissect = true;
 #endif // ifdef WITH_IPv6
     }
-    else
-    if (isTransportProtocol(*protocol)) {
+    else if (isTransportProtocol(*protocol)) {
         const auto& transportHeader = dynamicPtrCast<const TransportHeaderBase>(chunk);
         if (!transportHeader)
             return;
@@ -186,7 +184,7 @@ void MultiFieldClassifier::refreshDisplay() const
 
 int MultiFieldClassifier::classifyPacket(Packet *packet)
 {
-    for (auto & elem : filters)
+    for (auto& elem : filters)
         if (elem.matches(packet))
             return elem.gateIndex;
     return -1;
@@ -230,7 +228,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
 {
     L3AddressResolver addressResolver;
     cXMLElementList filterElements = config->getChildrenByTagName("filter");
-    for (auto & filterElements_i : filterElements) {
+    for (auto& filterElements_i : filterElements) {
         cXMLElement *filterElement = filterElements_i;
         try {
             const char *gateAttr = xmlutils::getMandatoryAttribute(*filterElement, "gate");

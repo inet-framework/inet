@@ -65,9 +65,9 @@ osgText::Text *createText(const char *string, const Coord& position, const cFigu
 AutoTransform *createAutoTransform(Drawable *drawable, AutoTransform::AutoRotateMode mode, bool autoScaleToScreen, const Coord& position = Coord::ZERO);
 PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position, const Quaternion& orientation);
 
-std::string resolveImageResource(const char *imageName, cComponent *context=nullptr);
-Image* createImage(const char *fileName);
-Image* createImageFromResource(const char *imageName);
+std::string resolveImageResource(const char *imageName, cComponent *context = nullptr);
+Image *createImage(const char *fileName);
+Image *createImageFromResource(const char *imageName);
 Texture2D *createTexture(const char *name, bool repeat);
 Texture2D *createTextureFromResource(const char *imageName, bool repeat);
 

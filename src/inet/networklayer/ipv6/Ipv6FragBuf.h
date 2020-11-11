@@ -40,8 +40,7 @@ class INET_API Ipv6FragBuf
     //
     // Key for finding the reassembly buffer for a datagram.
     //
-    struct Key
-    {
+    struct Key {
         uint32_t id;
         Ipv6Address src;
         Ipv6Address dest;
@@ -55,11 +54,10 @@ class INET_API Ipv6FragBuf
     //
     // Reassembly buffer for the datagram
     //
-    struct DatagramBuffer
-    {
-        ReassemblyBuffer buf;    // reassembly buffer
-        Packet *packet = nullptr;    // the actual datagram
-        simtime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
+    struct DatagramBuffer {
+        ReassemblyBuffer buf; // reassembly buffer
+        Packet *packet = nullptr; // the actual datagram
+        simtime_t createdAt; // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };
 
     // we use std::map for fast lookup by datagram Id

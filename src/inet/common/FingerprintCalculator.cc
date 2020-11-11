@@ -96,8 +96,8 @@ void FingerprintCalculator::addEvent(cEvent *event)
 {
     if (networkCommunicationFilter || packetUpdateFilter) {
         cPacket *cpacket =
-                (event->isMessage() && static_cast<cMessage *>(event)->isPacket()) ?
-                static_cast<cPacket *>(event) : nullptr;
+            (event->isMessage() && static_cast<cMessage *>(event)->isPacket()) ?
+            static_cast<cPacket *>(event) : nullptr;
 
         if (packetUpdateFilter) {
             if (cpacket != nullptr && cpacket->isUpdate())

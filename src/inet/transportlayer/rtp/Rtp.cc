@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/Rtp.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -305,7 +304,7 @@ void Rtp::senderModuleStatus(RtpInnerPacket *rinp)
 void Rtp::dataOut(RtpInnerPacket *rinp)
 {
     Packet *packet = check_and_cast<Packet *>(rinp->getEncapsulatedPacket()->dup());
-    // RtpPacket *msg = check_and_cast<RtpPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RtpPacket?
+//    RtpPacket *msg = check_and_cast<RtpPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RtpPacket?
 
     _udpSocket.sendTo(packet, _destinationAddress, _port);
 
@@ -400,7 +399,7 @@ void Rtp::createSocket()
 {
     _udpSocket.bind(_port);
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
-    _udpSocket.joinLocalMulticastGroups(mgl);    //TODO make it parameter-dependent
+    _udpSocket.joinLocalMulticastGroups(mgl); // TODO make it parameter-dependent
     connectRet();
 }
 

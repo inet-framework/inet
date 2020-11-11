@@ -187,7 +187,7 @@ void EtherAppClient::sendPacket()
     packetsSent++;
 }
 
-void EtherAppClient::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
+void EtherAppClient::socketDataArrived(Ieee8022LlcSocket *, Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
 

@@ -45,8 +45,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 {
   protected:
 
-    struct traffic_path_t
-    {
+    struct traffic_path_t {
         SenderTemplateObj sender;
         SenderTspecObj tspec;
 
@@ -58,8 +57,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         int color;
     };
 
-    struct traffic_session_t
-    {
+    struct traffic_session_t {
         SessionObj sobj;
 
         std::vector<traffic_path_t> paths;
@@ -70,8 +68,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     /**
      * Path State Block (PSB) structure
      */
-    struct PathStateBlock
-    {
+    struct PathStateBlock {
         // SESSION object structure
         SessionObj Session_Object;
 
@@ -85,7 +82,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         Ipv4Address Previous_Hop_Address;
 
         // Logical Interface Handle from PHOP object
-        //Ipv4Address LIH;
+//        Ipv4Address LIH;
 
         // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
         Ipv4Address OutInterface;
@@ -112,8 +109,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     /**
      * Reservation State Block (RSB) structure
      */
-    struct ResvStateBlock
-    {
+    struct ResvStateBlock {
         // SESSION object structure
         SessionObj Session_Object;
 
@@ -129,8 +125,8 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // input labels we have currently installed in the database
         std::vector<int> inLabelVector;
 
-        //we always use shared explicit
-        //int style;
+        // we always use shared explicit
+//        int style;
 
         // FLOWSPEC structure
         FlowSpecObj Flowspec_Object;
@@ -149,8 +145,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     /**
      * RSVP Hello State structure
      */
-    struct HelloState
-    {
+    struct HelloState {
         Ipv4Address peer;
 
         int srcInstance;

@@ -16,8 +16,9 @@ class INET_API LSATrackingInfo
   public:
     enum InstallSource {
         ORIGINATED = 0,
-        FLOODED = 1
+        FLOODED    = 1
     };
+
   private:
     InstallSource source;
     unsigned long installTime;
@@ -63,7 +64,7 @@ class INET_API RouterLSA : public Ospfv3RouterLsa, public RoutingInfo, public LS
     RouterLSA(const RouterLSA& lsa) : Ospfv3RouterLsa(lsa), RoutingInfo(lsa) {}
     virtual ~RouterLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3RouterLsa *lsa);
     bool differsFrom(const Ospfv3RouterLsa *routerLSA) const;
@@ -77,7 +78,7 @@ class INET_API NetworkLSA : public Ospfv3NetworkLsa, public RoutingInfo, public 
     NetworkLSA(const NetworkLSA& lsa) : Ospfv3NetworkLsa(lsa), RoutingInfo(lsa) {}
     virtual ~NetworkLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3NetworkLsa *lsa);
     bool differsFrom(const Ospfv3NetworkLsa *networkLSA) const;
@@ -91,7 +92,7 @@ class INET_API InterAreaPrefixLSA : public Ospfv3InterAreaPrefixLsa, public Rout
     InterAreaPrefixLSA(const InterAreaPrefixLSA& lsa) : Ospfv3InterAreaPrefixLsa(lsa), RoutingInfo(lsa) {}
     virtual ~InterAreaPrefixLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3InterAreaPrefixLsa *lsa);
     bool differsFrom(const Ospfv3InterAreaPrefixLsa *interAreaPrefixLSA) const;
@@ -105,7 +106,7 @@ class INET_API InterAreaRouterLSA : public Ospfv3InterAreaRouterLsa, public Rout
     InterAreaRouterLSA(const InterAreaRouterLSA& lsa) : Ospfv3InterAreaRouterLsa(lsa), RoutingInfo(lsa) {}
     virtual ~InterAreaRouterLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3IntraAreaPrefixLsa *lsa);
     bool differsFrom(const Ospfv3IntraAreaPrefixLsa *interAreaRouterLSA) const;
@@ -119,7 +120,7 @@ class INET_API ASExternalLSA : public Ospfv3AsExternalLsa, public RoutingInfo, p
     ASExternalLSA(const ASExternalLSA& lsa) : Ospfv3AsExternalLsa(lsa), RoutingInfo(lsa) {}
     virtual ~ASExternalLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3AsExternalLsa *lsa);
     bool differsFrom(const Ospfv3AsExternalLsa *aSExternalLSA) const;
@@ -133,7 +134,7 @@ class INET_API NssaLSA : public Ospfv3NssaLsa, public RoutingInfo, public LSATra
     NssaLSA(const NssaLSA& lsa) : Ospfv3NssaLsa(lsa), RoutingInfo(lsa) {}
     virtual ~NssaLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3NssaLsa *lsa);
     bool differsFrom(const Ospfv3NssaLsa *nssaLSA) const;
@@ -147,7 +148,7 @@ class INET_API LinkLSA : public Ospfv3LinkLsa, public RoutingInfo, public LSATra
     LinkLSA(const LinkLSA& lsa) : Ospfv3LinkLsa(lsa), RoutingInfo(lsa) {}
     virtual ~LinkLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3LinkLsa *lsa);
     bool differsFrom(const Ospfv3LinkLsa *linkLSA) const;
@@ -161,7 +162,7 @@ class INET_API IntraAreaPrefixLSA : public Ospfv3IntraAreaPrefixLsa, public Rout
     IntraAreaPrefixLSA(const IntraAreaPrefixLSA& lsa) : Ospfv3IntraAreaPrefixLsa(lsa), RoutingInfo(lsa) {}
     virtual ~IntraAreaPrefixLSA() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv3IntraAreaPrefixLsa *lsa);
     bool differsFrom(const Ospfv3IntraAreaPrefixLsa *intraAreaPrefixLSA) const;
@@ -171,16 +172,16 @@ class INET_API Ospfv3SpfVertex
 {
   private:
     VertexID vertexID;
-    Ospfv3Lsa* asocLSA;
-    int distance; //link state cost of the current set of shortest paths from the root
-    uint16_t type; //router or network lsa
+    Ospfv3Lsa *asocLSA;
+    int distance; // link state cost of the current set of shortest paths from the root
+    uint16_t type; // router or network lsa
     // Ospfv3SpfVertex* parent = nullptr;   //TODO unused field
 
   public:
-    Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance);
+    Ospfv3SpfVertex(Ospfv3Lsa *asocLSA, int distance);
 };
 
-//unsigned int calculateLSASize(const Ospfv3Lsa *lsaC);
+// unsigned int calculateLSASize(const Ospfv3Lsa *lsaC);
 B calculateLSASize(const Ospfv3RouterLsa *routerLSA);
 B calculateLSASize(const Ospfv3NetworkLsa *networkLSA);
 B calculateLSASize(const Ospfv3InterAreaPrefixLsa *prefixLSA);
@@ -195,7 +196,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3InterAreaPrefixLsa& lsa
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa);
 
 } // namespace ospfv3
-}//namespace inet
+} // namespace inet
 
 #endif
 

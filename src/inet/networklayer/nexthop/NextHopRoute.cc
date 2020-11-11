@@ -58,12 +58,12 @@ std::string NextHopRoute::str() const
 
 std::string NextHopRoute::detailedInfo() const
 {
-    return "";    //TODO
+    return ""; // TODO
 }
 
 bool NextHopRoute::equals(const IRoute& route) const
 {
-    return false;    //TODO
+    return false; // TODO
 }
 
 void NextHopRoute::changed(int fieldCode)
@@ -77,23 +77,23 @@ IRoutingTable *NextHopRoute::getRoutingTableAsGeneric() const
     return owner;
 }
 
-//---
+// ---
 
-#if 0    /*FIXME TODO!!!! */
+#if 0 /*FIXME TODO!!!! */
 
 std::string NextHopMulticastRoute::str() const
 {
-    return "";    //TODO
+    return ""; // TODO
 }
 
 std::string NextHopMulticastRoute::detailedInfo() const
 {
-    return "";    //TODO
+    return ""; // TODO
 }
 
 bool NextHopMulticastRoute::addChild(NetworkInterface *ie, bool isLeaf)
 {
-    //TODO:
+    // TODO:
     children.push_back(Child());
     Child& child = children.back();
     child.ie = ie;
@@ -102,7 +102,7 @@ bool NextHopMulticastRoute::addChild(NetworkInterface *ie, bool isLeaf)
 
 bool NextHopMulticastRoute::removeChild(NetworkInterface *ie)
 {
-    //TODO:
+    // TODO:
 }
 
 #endif /*0*/

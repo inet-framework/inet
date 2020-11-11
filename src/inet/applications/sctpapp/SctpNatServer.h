@@ -60,7 +60,7 @@ class INET_API SctpNatServer : public cSimpleModule, public LifecycleUnsupported
     int32_t packetsSent;
     int32_t packetsRcvd;
     int32_t numSessions;
-    int32_t numRequestsToSend;    // requests to send in this session
+    int32_t numRequestsToSend; // requests to send in this session
     bool ordered;
     int32_t outboundStreams;
     int32_t inboundStreams;
@@ -71,8 +71,7 @@ class INET_API SctpNatServer : public cSimpleModule, public LifecycleUnsupported
     int32_t ssn;
 
   public:
-    struct pathStatus
-    {
+    struct pathStatus {
         bool active;
         bool primaryPath;
         L3Address pid;

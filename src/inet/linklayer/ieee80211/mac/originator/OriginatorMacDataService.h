@@ -32,27 +32,26 @@ namespace ieee80211 {
 //
 class INET_API OriginatorMacDataService : public IOriginatorMacDataService, public cSimpleModule
 {
-    protected:
-        // Figure 5-1—MAC data plane architecture
-        // MsduRateLimiting *msduRateLimiting = nullptr;
-        ISequenceNumberAssignment *sequenceNumberAssigment = nullptr;
-        // MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
-        IFragmentationPolicy *fragmentationPolicy = nullptr;
-        IFragmentation *fragmentation = nullptr;
-        // MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
-        // MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
+  protected:
+    // Figure 5-1—MAC data plane architecture
+//    MsduRateLimiting *msduRateLimiting = nullptr;
+    ISequenceNumberAssignment *sequenceNumberAssigment = nullptr;
+//    MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
+    IFragmentationPolicy *fragmentationPolicy = nullptr;
+    IFragmentation *fragmentation = nullptr;
+//    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
+//    MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;
 
-    protected:
-        virtual void initialize() override;
+  protected:
+    virtual void initialize() override;
 
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
-        virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
+    virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
+    virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
 
-    public:
-        virtual ~OriginatorMacDataService();
+  public:
+    virtual ~OriginatorMacDataService();
 
-        virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
-
+    virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
 };
 
 } /* namespace ieee80211 */

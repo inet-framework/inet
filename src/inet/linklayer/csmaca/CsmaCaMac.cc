@@ -172,7 +172,7 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
     txQueue->enqueuePacket(frame);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
-    else if (!txQueue->isEmpty()){
+    else if (!txQueue->isEmpty()) {
         popTxQueue();
         handleWithFsm(currentTxFrame);
     }
@@ -633,7 +633,7 @@ bool CsmaCaMac::isFcsOk(Packet *frame)
                 auto buffer = new uint8_t[bufferLength];
                 fcsBytes->copyToBuffer(buffer, bufferLength);
                 auto computedFcs = ethernetCRC(buffer, bufferLength);
-                delete [] buffer;
+                delete[] buffer;
                 return computedFcs == trailer->getFcs();
             }
             default:
@@ -648,7 +648,7 @@ uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
     auto buffer = new uint8_t[bufferLength];
     bytes->copyToBuffer(buffer, bufferLength);
     auto computedFcs = ethernetCRC(buffer, bufferLength);
-    delete [] buffer;
+    delete[] buffer;
     return computedFcs;
 }
 
@@ -665,3 +665,4 @@ void CsmaCaMac::handleCrashOperation(LifecycleOperation *operation)
 }
 
 } // namespace inet
+

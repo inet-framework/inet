@@ -27,7 +27,7 @@ namespace inet {
 
 namespace visualizer {
 
-PacketDrop::PacketDrop(PacketDropReason reason, const cPacket* packet, const int moduleId, const Coord& position) :
+PacketDrop::PacketDrop(PacketDropReason reason, const cPacket *packet, const int moduleId, const Coord& position) :
     packet(packet),
     moduleId(moduleId),
     position(position)
@@ -40,7 +40,7 @@ PacketDrop::~PacketDrop()
     delete packet;
 }
 
-const cModule* PacketDrop::getModule() const
+const cModule *PacketDrop::getModule() const
 {
     return check_and_cast<cModule *>(cSimulation::getActiveSimulation()->getComponent(moduleId));
 }
@@ -57,7 +57,7 @@ const NetworkInterface *PacketDrop::getNetworkInterface() const
     return module != nullptr ? findContainingNicModule(module) : nullptr;
 }
 
-PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(const PacketDrop* packetDrop) :
+PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(const PacketDrop *packetDrop) :
     packetDrop(packetDrop)
 {
 }
@@ -67,8 +67,8 @@ PacketDropVisualizerBase::PacketDropVisualization::~PacketDropVisualization()
     delete packetDrop;
 }
 
-PacketDropVisualizerBase::DirectiveResolver::DirectiveResolver(const PacketDrop* packetDrop) :
-        packetDrop(packetDrop)
+PacketDropVisualizerBase::DirectiveResolver::DirectiveResolver(const PacketDrop *packetDrop) :
+    packetDrop(packetDrop)
 {
 }
 
@@ -91,7 +91,7 @@ const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char d
     return result.c_str();
 }
 
-void PacketDropVisualizerBase::DetailsFilter::setPattern(const char* pattern)
+void PacketDropVisualizerBase::DetailsFilter::setPattern(const char *pattern)
 {
     matchExpression.setPattern(pattern, true, true, true);
 }

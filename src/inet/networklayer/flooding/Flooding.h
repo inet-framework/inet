@@ -78,8 +78,7 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
     /** @brief Defines whether to use plain flooding or not*/
     bool plainFlooding = false;
 
-    class Bcast
-    {
+    class Bcast {
       public:
         unsigned long seqNum;
         L3Address srcAddr;
@@ -156,9 +155,9 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
     virtual void setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr);
 
     // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStartOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {} // TODO implementation
 };
 
 } // namespace inet

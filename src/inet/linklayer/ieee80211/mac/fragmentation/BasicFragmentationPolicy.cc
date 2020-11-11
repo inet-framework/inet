@@ -50,7 +50,7 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
         int maxFragmentPayload = fragmentationThreshold - headerLength - trailerLength;
         if (payloadLength > maxFragmentPayload * MAX_NUM_FRAGMENTS)
             throw cRuntimeError("Fragmentation: frame \"%s\" too large, won't fit into %d fragments", frame->getName(), MAX_NUM_FRAGMENTS);
-        for(int i = 0; headerLength + trailerLength + payloadLength > fragmentationThreshold; i++) {
+        for (int i = 0; headerLength + trailerLength + payloadLength > fragmentationThreshold; i++) {
             auto size = fragmentationThreshold - headerLength - trailerLength;
             EV_TRACE << "Computed fragment: i = " << i << ", size = " << size << ".\n";
             sizes.push_back(size);
@@ -69,3 +69,4 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
 
 } // namespace ieee80211
 } // namespace inet
+

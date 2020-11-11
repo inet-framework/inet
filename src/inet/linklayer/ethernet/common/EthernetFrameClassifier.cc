@@ -26,8 +26,8 @@ Define_Module(EthernetFrameClassifier);
 
 int EthernetFrameClassifier::classifyPacket(Packet *packet)
 {
-    //FIXME need another way to detect pause frame
-    auto header = packet->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE);
+    // FIXME need another way to detect pause frame
+    auto header = packet->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR | Chunk::PF_ALLOW_INCOMPLETE);
     if (header != nullptr && header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL)
         return 0;
     else

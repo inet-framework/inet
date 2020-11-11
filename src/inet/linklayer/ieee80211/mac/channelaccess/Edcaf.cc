@@ -28,8 +28,8 @@ using namespace inet::physicallayer;
 
 Define_Module(Edcaf);
 
-inline double fallback(double a, double b) {return a!=-1 ? a : b;}
-inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
+inline double fallback(double a, double b) { return a != -1 ? a : b; }
+inline simtime_t fallback(simtime_t a, simtime_t b) { return a != -1 ? a : b; }
 
 Edcaf::~Edcaf()
 {
@@ -98,7 +98,6 @@ void Edcaf::calculateTimingParameters()
     EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
-
 void Edcaf::incrementCw()
 {
     Enter_Method("incrementCw");
@@ -119,8 +118,7 @@ void Edcaf::resetCw()
 
 int Edcaf::getAifsNumber(AccessCategory ac)
 {
-    switch (ac)
-    {
+    switch (ac) {
         case AC_BK: return 7;
         case AC_BE: return 3;
         case AC_VI: return 2;
@@ -155,7 +153,7 @@ void Edcaf::channelAccessGranted()
         EV_WARN << "Ignoring channel access granted due to internal collision.\n";
 }
 
-void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
+void Edcaf::releaseChannel(IChannelAccess::ICallback *callback)
 {
     Enter_Method("releaseChannel");
     ASSERT(owning);
@@ -165,7 +163,7 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
     EV_INFO << "Channel released.\n";
 }
 
-void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
+void Edcaf::requestChannel(IChannelAccess::ICallback *callback)
 {
     Enter_Method("requestChannel");
     this->callback = callback;
@@ -188,8 +186,7 @@ bool Edcaf::isInternalCollision()
 
 int Edcaf::getCwMax(AccessCategory ac, int aCwMax, int aCwMin)
 {
-    switch (ac)
-    {
+    switch (ac) {
         case AC_BK: return aCwMax;
         case AC_BE: return aCwMax;
         case AC_VI: return aCwMin;
@@ -200,8 +197,7 @@ int Edcaf::getCwMax(AccessCategory ac, int aCwMax, int aCwMin)
 
 int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 {
-    switch (ac)
-    {
+    switch (ac) {
         case AC_BK: return aCwMin;
         case AC_BE: return aCwMin;
         case AC_VI: return (aCwMin + 1) / 2 - 1;
@@ -210,14 +206,15 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
     }
 }
 
-void Edcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
+void Edcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");
     if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
+        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
         calculateTimingParameters();
     }
 }
 
 } // namespace ieee80211
 } // namespace inet
+

@@ -96,7 +96,7 @@ class INET_API Ospfv2Area : public cObject
     void addWatches();
     Ipv4AddressRange getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise = nullptr) const;
     void addInterface(Ospfv2Interface *intf);
-    int getInterfaceCount() const {return associatedInterfaces.size();}
+    int getInterfaceCount() const { return associatedInterfaces.size(); }
     Ospfv2Interface *getInterface(unsigned char ifIndex);
     Ospfv2Interface *getInterface(Ipv4Address address);
     std::vector<int> getInterfaceIndices();

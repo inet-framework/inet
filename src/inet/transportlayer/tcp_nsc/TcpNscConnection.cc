@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <dlfcn.h>
 #include <netinet/in.h>
-#include <sim_interface.h>    // NSC header
+#include <sim_interface.h> // NSC header
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -187,7 +187,7 @@ void TcpNscConnection::do_SEND()
             indication->addTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
             indication->addTag<SocketInd>()->setSocketId(connIdM);
             tcpNscM->send(indication, "appOut");
-            //FIXME this connection never will be deleted, stayed in tcpNscM. Should delete later!
+            // FIXME this connection never will be deleted, stayed in tcpNscM. Should delete later!
         }
     }
 }

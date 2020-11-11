@@ -90,7 +90,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     return new ObstacleLossOsgVisualization(group);
 }
 
-void TracingObstacleLossOsgVisualizer::addObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization)
+void TracingObstacleLossOsgVisualizer::addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization)
 {
     TracingObstacleLossVisualizerBase::addObstacleLossVisualization(obstacleLossVisualization);
     auto obstacleLossOsgVisualization = static_cast<const ObstacleLossOsgVisualization *>(obstacleLossVisualization);
@@ -98,7 +98,7 @@ void TracingObstacleLossOsgVisualizer::addObstacleLossVisualization(const Obstac
     scene->addChild(obstacleLossOsgVisualization->node);
 }
 
-void TracingObstacleLossOsgVisualizer::removeObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization)
+void TracingObstacleLossOsgVisualizer::removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization)
 {
     TracingObstacleLossVisualizerBase::removeObstacleLossVisualization(obstacleLossVisualization);
     auto obstacleLossOsgVisualization = static_cast<const ObstacleLossOsgVisualization *>(obstacleLossVisualization);

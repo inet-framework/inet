@@ -87,7 +87,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
         int networkId = node->getNetworkId();
         auto networkNodes = isolatedNetworks.find(networkId);
         if (networkNodes == isolatedNetworks.end()) {
-            std::vector<Node *> collection = {node};
+            std::vector<Node *> collection = { node };
             isolatedNetworks[networkId] = collection;
         }
         else
@@ -162,8 +162,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // collect wireless LAN interface infos into a map
-    std::map<std::string, std::vector<InterfaceInfo *> > wirelessIdToInterfaceInfosMap;
-    for (auto & entry : topology.interfaceInfos) {
+    std::map<std::string, std::vector<InterfaceInfo *>> wirelessIdToInterfaceInfosMap;
+    for (auto& entry : topology.interfaceInfos) {
         InterfaceInfo *interfaceInfo = entry.second;
         NetworkInterface *networkInterface = interfaceInfo->networkInterface;
         if (!networkInterface->isLoopback() && isWirelessInterface(networkInterface)) {
@@ -173,7 +173,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
-    for (auto & entry : wirelessIdToInterfaceInfosMap) {
+    for (auto& entry : wirelessIdToInterfaceInfosMap) {
         std::vector<InterfaceInfo *>& interfaceInfos = entry.second;
         for (size_t i = 0; i < interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
@@ -193,7 +193,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // determine gatewayInterfaceInfo for all linkInfos
-    for (auto & linkInfo : topology.linkInfos)
+    for (auto& linkInfo : topology.linkInfos)
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
 }
 
@@ -298,7 +298,7 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceIn
 {
     if (networkInterface == nullptr)
         return nullptr;
-    for (auto & interfaceInfo : node->interfaceInfos)
+    for (auto& interfaceInfo : node->interfaceInfos)
         if (interfaceInfo->networkInterface == networkInterface)
             return interfaceInfo;
 
@@ -441,7 +441,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
                 packetErrorRate = 1;
             else {
                 const IReceptionDecision *receptionDecision = new ReceptionDecision(reception, IRadioSignal::SIGNAL_PART_WHOLE, isReceptionPossible, true, true);
-                const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
+                const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> { receptionDecision };
                 const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
                 Packet *receivedFrame = const_cast<Packet *>(receptionResult->getPacket());
                 packetErrorRate = receivedFrame->getTag<ErrorRateInd>()->getPacketErrorRate();
@@ -477,9 +477,9 @@ std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInte
     std::string hostFullPath = hostModule->getFullPath();
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
     cXMLElementList wirelessElements = configuration->getChildrenByTagName("wireless");
-    for (auto & wirelessElement : wirelessElements) {
-        const char *hostAttr = wirelessElement->getAttribute("hosts");    // "host* router[0..3]"
-        const char *interfaceAttr = wirelessElement->getAttribute("interfaces");    // i.e. interface names, like "eth* ppp0"
+    for (auto& wirelessElement : wirelessElements) {
+        const char *hostAttr = wirelessElement->getAttribute("hosts"); // "host* router[0..3]"
+        const char *interfaceAttr = wirelessElement->getAttribute("interfaces"); // i.e. interface names, like "eth* ppp0"
         try {
             // parse host/interface expressions
             Matcher hostMatcher(hostAttr);
@@ -489,7 +489,7 @@ std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInte
             if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
                 (interfaceMatcher.matchesAny() || interfaceMatcher.matches(networkInterface->getInterfaceName())))
             {
-                const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
+                const char *idAttr = wirelessElement->getAttribute("id"); // identifier of wireless connection
                 return idAttr ? idAttr : wirelessElement->getSourceLocation();
             }
         }
@@ -540,7 +540,7 @@ std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInte
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
 {
     InterfaceInfo *gatewayInterfaceInfo = nullptr;
-    for (auto & interfaceInfo : linkInfo->interfaceInfos) {
+    for (auto& interfaceInfo : linkInfo->interfaceInfos) {
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
         IRoutingTable *routingTable = interfaceInfo->node->routingTable;
 
@@ -549,7 +549,6 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewa
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
             if (!interfaceTable->getInterface(i)->isLoopback())
                 numInterfaces++;
-
 
         if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled()) {
             // node has at least one more interface, supposedly connecting to another link
@@ -592,7 +591,7 @@ NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
 
 NetworkConfiguratorBase::Matcher::~Matcher()
 {
-    for (auto & matcher : matchers)
+    for (auto& matcher : matchers)
         delete matcher;
 }
 
@@ -600,7 +599,7 @@ bool NetworkConfiguratorBase::Matcher::matches(const char *s)
 {
     if (matchesany)
         return true;
-    for (auto & matcher : matchers)
+    for (auto& matcher : matchers)
         if (matcher->matches(s))
             return true;
 
@@ -624,9 +623,9 @@ NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
 
 NetworkConfiguratorBase::InterfaceMatcher::~InterfaceMatcher()
 {
-    for (auto & nameMatcher : nameMatchers)
+    for (auto& nameMatcher : nameMatchers)
         delete nameMatcher;
-    for (auto & towardsMatcher : towardsMatchers)
+    for (auto& towardsMatcher : towardsMatchers)
         delete towardsMatcher;
 }
 
@@ -636,19 +635,19 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
         return true;
 
     const char *interfaceName = interfaceInfo->networkInterface->getInterfaceName();
-    for (auto & nameMatcher : nameMatchers)
+    for (auto& nameMatcher : nameMatchers)
         if (nameMatcher->matches(interfaceName))
             return true;
 
     LinkInfo *linkInfo = interfaceInfo->linkInfo;
     cModule *ownerModule = interfaceInfo->networkInterface->getInterfaceTable()->getHostModule();
-    for (auto & candidateInfo : linkInfo->interfaceInfos) {
+    for (auto& candidateInfo : linkInfo->interfaceInfos) {
         cModule *candidateModule = candidateInfo->networkInterface->getInterfaceTable()->getHostModule();
         if (candidateModule == ownerModule)
             continue;
         std::string candidateFullPath = candidateModule->getFullPath();
         std::string candidateShortenedFullPath = candidateFullPath.substr(candidateFullPath.find('.') + 1);
-        for (auto & towardsMatcher : towardsMatchers)
+        for (auto& towardsMatcher : towardsMatchers)
             if (towardsMatcher->matches(candidateShortenedFullPath.c_str()) ||
                 towardsMatcher->matches(candidateFullPath.c_str()))
                 return true;

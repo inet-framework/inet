@@ -67,7 +67,7 @@ void Ipv4NatTable::handleMessage(cMessage *msg)
 void Ipv4NatTable::parseConfig()
 {
     cXMLElementList xmlEntries = config->getChildrenByTagName("entry");
-    for (auto & xmlEntry : xmlEntries) {
+    for (auto& xmlEntry : xmlEntries) {
         // type
         const char *typeAttr = xmlEntry->getAttribute("type");
         INetfilter::IHook::Type type;

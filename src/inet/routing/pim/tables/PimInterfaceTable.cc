@@ -29,7 +29,7 @@ Define_Module(PimInterfaceTable);
 
 PimInterfaceTable::~PimInterfaceTable()
 {
-    for (auto & elem : pimInterfaces)
+    for (auto& elem : pimInterfaces)
         delete elem;
 }
 
@@ -174,5 +174,5 @@ std::string PimInterface::str() const
     return out.str();
 }
 
-}    //namespace inet
+} // namespace inet
 

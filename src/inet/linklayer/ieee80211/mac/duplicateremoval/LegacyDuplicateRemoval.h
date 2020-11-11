@@ -29,11 +29,11 @@ namespace ieee80211 {
 
 class INET_API LegacyDuplicateRemoval : public IDuplicateRemoval
 {
-    protected:
-        std::map<MacAddress, SequenceControlField> lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
+  protected:
+    std::map<MacAddress, SequenceControlField> lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
 
-    public:
-        virtual bool isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
+  public:
+    virtual bool isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
 };
 
 } // namespace ieee80211

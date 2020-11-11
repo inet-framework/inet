@@ -22,8 +22,7 @@
 
 namespace inet {
 
-enum HeaderPosition
-{
+enum HeaderPosition {
     HP_UNDEFINED,
     HP_NONE,
     HP_FRONT,
@@ -32,7 +31,7 @@ enum HeaderPosition
 
 INET_API HeaderPosition parseHeaderPosition(const char *string);
 
-template <typename T>
+template<typename T>
 const Ptr<const T> peekHeader(const Packet *packet, HeaderPosition headerPosition, b length)
 {
     switch (headerPosition) {
@@ -45,7 +44,7 @@ const Ptr<const T> peekHeader(const Packet *packet, HeaderPosition headerPositio
     }
 }
 
-template <typename T>
+template<typename T>
 const Ptr<const T> popHeader(Packet *packet, HeaderPosition headerPosition, b length)
 {
     switch (headerPosition) {
@@ -58,7 +57,7 @@ const Ptr<const T> popHeader(Packet *packet, HeaderPosition headerPosition, b le
     }
 }
 
-template <typename T>
+template<typename T>
 void insertHeader(Packet *packet, const Ptr<const T>& chunk, HeaderPosition headerPosition)
 {
     switch (headerPosition) {

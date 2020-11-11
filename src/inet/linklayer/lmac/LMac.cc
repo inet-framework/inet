@@ -52,7 +52,7 @@ void LMac::initialize(int stage)
         slotChange = new cOutVector("slotChange");
 
         // how long does it take to send/receive a control packet
-        controlDuration = (double)(b(headerLength).get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
+        controlDuration = (double)(b(headerLength).get() + numSlots + 16) / (double)bitrate; // FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
         txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
@@ -157,8 +157,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                     mySlot = ((int)FindModule<>::findHost(this)->getId()) % (numSlots - reservedMobileSlots);
                 else
                     mySlot = myId;
-                //occSlotsDirect[mySlot] = address;
-                //occSlotsAway[mySlot] = address;
+//                occSlotsDirect[mySlot] = address;
+//                occSlotsAway[mySlot] = address;
                 currSlot = 0;
 
                 EV_DETAIL << "ID: " << FindModule<>::findHost(this)->getId() << ". Picked random slot: " << mySlot << endl;
@@ -193,7 +193,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     macState = WAIT_CONTROL;
                     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                     EV_DETAIL << "Old state: SLEEP, New state: WAIT_CONTROL" << endl;
-                    if (!SETUP_PHASE) //in setup phase do not sleep
+                    if (!SETUP_PHASE) // in setup phase do not sleep
                         scheduleAfter(2.f * controlDuration, timeout);
                 }
                 if (SETUP_PHASE) {
@@ -279,15 +279,15 @@ void LMac::handleSelfMessage(cMessage *msg)
                 }
                 delete packet;
             }
-            //probably it never happens
+            // probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
                 auto packet = check_and_cast<Packet *>(msg);
                 const MacAddress& dest = packet->peekAtFront<LMacDataFrameHeader>()->getDestAddr();
-                //bool collision = false;
+//                bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
                     cancelEvent(checkChannel);
-                    //collision = true;
+//                    collision = true;
                 }
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
@@ -421,7 +421,7 @@ void LMac::handleSelfMessage(cMessage *msg)
 
                 control->setSrcAddr(address);
                 control->setMySlot(mySlot);
-                control->setChunkLength(ctrlFrameLength + b(numSlots));    //FIXME check it: add only 1 bit / slot?
+                control->setChunkLength(ctrlFrameLength + b(numSlots)); // FIXME check it: add only 1 bit / slot?
                 control->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
@@ -626,22 +626,22 @@ void LMac::encapsulate(Packet *netwPkt)
     pkt->setDestAddr(dest);
     pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getTag<PacketProtocolTag>()->getProtocol()));
 
-    //delete the control info
+    // delete the control info
     delete netwPkt->removeControlInfo();
 
-    //set the src address to own mac address (nic module getId())
+    // set the src address to own mac address (nic module getId())
     pkt->setSrcAddr(networkInterface->getMacAddress());
 
-    //encapsulate the network packet
+    // encapsulate the network packet
     netwPkt->insertAtFront(pkt);
     EV_DETAIL << "pkt encapsulated\n";
 }
 
 void LMac::attachSignal(Packet *macPkt)
 {
-    //calc signal duration
+    // calc signal duration
     simtime_t duration = macPkt->getBitLength() / bitrate;
-    //create and initialize control info with new signal
+    // create and initialize control info with new signal
     macPkt->setDuration(duration);
 }
 

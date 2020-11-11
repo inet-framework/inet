@@ -42,7 +42,7 @@ typename std::set<T>& addAll(std::set<T>& s, const std::set<T>& t) {
 }
 
 template<typename K, typename V>
-inline std::map<K,V>& addAll(std::map<K,V>& m, const std::map<K,V>& n) {
+inline std::map<K, V>& addAll(std::map<K, V>& m, const std::map<K, V>& n) {
     m.insert(n.begin(), n.end());
 }
 
@@ -73,7 +73,7 @@ inline bool contains(const std::vector<T>& v, const T& a) {
 }
 
 template<typename K, typename V>
-inline bool containsKey(const std::map<K,V>& m, const K& a) {
+inline bool containsKey(const std::map<K, V>& m, const K& a) {
     return m.find(a) != m.end();
 }
 
@@ -95,7 +95,7 @@ inline void remove(std::vector<T>& v, const A& a) {
 }
 
 template<typename K, typename V>
-inline std::vector<K> keys(const std::map<K,V>& m) {
+inline std::vector<K> keys(const std::map<K, V>& m) {
     std::vector<K> result;
     for (auto it = m.begin(); it != m.end(); ++it)
         result.push_back(it->first);
@@ -103,7 +103,7 @@ inline std::vector<K> keys(const std::map<K,V>& m) {
 }
 
 template<typename K, typename V>
-inline std::vector<V> values(const std::map<K,V>& m) {
+inline std::vector<V> values(const std::map<K, V>& m) {
     std::vector<V> result;
     for (auto it = m.begin(); it != m.end(); ++it)
         result.push_back(it->second);
@@ -122,7 +122,7 @@ std::vector<T> sorted(const std::vector<T>& v) {
     return result;
 }
 
-template <typename T>
+template<typename T>
 std::string to_str(const std::vector<T>& v) {
     std::stringstream out;
     out << '[';
@@ -135,8 +135,8 @@ std::string to_str(const std::vector<T>& v) {
     return out.str();
 }
 
-template <typename K, typename V>
-std::string to_str(const std::map<K,V>& m) {
+template<typename K, typename V>
+std::string to_str(const std::map<K, V>& m) {
     std::stringstream out;
     out << '{';
     for (auto it = m.begin(); it != m.end(); ++it) {
@@ -147,7 +147,6 @@ std::string to_str(const std::map<K,V>& m) {
     out << "}";
     return out.str();
 }
-
 
 } // namespace inet
 

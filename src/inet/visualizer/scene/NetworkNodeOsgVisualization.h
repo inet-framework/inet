@@ -45,7 +45,6 @@ class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::N
         Annotation(osg::Node *node, osg::Vec3d size, double priority);
     };
 
-
   protected:
     osg::Vec3d size;
     osg::Group *annotationNode = nullptr;

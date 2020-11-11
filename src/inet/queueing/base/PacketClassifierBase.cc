@@ -133,7 +133,7 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketProgress(Packet *packet,  cGate *gate, bps datarate, b position, b extraProcessableLength)
+void PacketClassifierBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);

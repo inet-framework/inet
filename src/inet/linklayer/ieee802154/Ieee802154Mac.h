@@ -166,15 +166,15 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
     /** @brief MAC state machine events.
      * See state diagram.*/
     enum t_mac_event {
-        EV_SEND_REQUEST = 1,    // 1, 11, 20, 21, 22
-        EV_TIMER_BACKOFF,    // 2, 7, 14, 15
-        EV_FRAME_TRANSMITTED,    // 4, 19
-        EV_ACK_RECEIVED,    // 5
-        EV_ACK_TIMEOUT,    // 12
-        EV_FRAME_RECEIVED,    // 15, 26
+        EV_SEND_REQUEST = 1, // 1, 11, 20, 21, 22
+        EV_TIMER_BACKOFF, // 2, 7, 14, 15
+        EV_FRAME_TRANSMITTED, // 4, 19
+        EV_ACK_RECEIVED, // 5
+        EV_ACK_TIMEOUT, // 12
+        EV_FRAME_RECEIVED, // 15, 26
         EV_DUPLICATE_RECEIVED,
-        EV_TIMER_SIFS,    // 17
-        EV_BROADCAST_RECEIVED,    // 23, 24
+        EV_TIMER_SIFS, // 17
+        EV_BROADCAST_RECEIVED, // 23, 24
         EV_TIMER_CCA
     };
 
@@ -316,12 +316,12 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     Packet *ackMessage;
 
-    //sequence number for sending, map for the general case with more senders
-    //also in initialisation phase multiple potential parents
-    std::map<MacAddress, unsigned long> SeqNrParent;    //parent -> sequence number
+    // sequence number for sending, map for the general case with more senders
+    // also in initialisation phase multiple potential parents
+    std::map<MacAddress, unsigned long> SeqNrParent; // parent -> sequence number
 
-    //sequence numbers for receiving
-    std::map<MacAddress, unsigned long> SeqNrChild;    //child -> sequence number
+    // sequence numbers for receiving
+    std::map<MacAddress, unsigned long> SeqNrChild; // child -> sequence number
 
   private:
     /** @brief Copy constructor is not allowed.

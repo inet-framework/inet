@@ -42,8 +42,8 @@ class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationLi
   protected:
     simtime_t delay1;
 
-    //no longer used, see comment in intialize
-    //std::vector<bool> labelIf;
+    // no longer used, see comment in intialize
+//    std::vector<bool> labelIf;
 
     LibTable *lt;
     IInterfaceTable *ift;
@@ -70,10 +70,10 @@ class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationLi
     void popLabel(Packet *packet);
     virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel);
 
-    //IInterfaceRegistrationListener:
-    virtual void handleRegisterInterface(const NetworkInterface &interface, cGate *in, cGate *out) override;
+    // IInterfaceRegistrationListener:
+    virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *in, cGate *out) override;
 
-    //IProtocolRegistrationListener:
+    // IProtocolRegistrationListener:
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 };

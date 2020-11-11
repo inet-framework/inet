@@ -95,7 +95,7 @@ void VehicleMobility::move()
     Waypoint target = waypoints[targetPointIndex];
     double dx = target.x - lastPosition.x;
     double dy = target.y - lastPosition.y;
-    if (dx * dx + dy * dy < waypointProximity * waypointProximity)  // reached so change to next (within the predefined proximity of the waypoint)
+    if (dx * dx + dy * dy < waypointProximity * waypointProximity) // reached so change to next (within the predefined proximity of the waypoint)
         targetPointIndex = (targetPointIndex + 1) % waypoints.size();
     double targetDirection = atan2(dy, dx) / M_PI * 180;
     double diff = targetDirection - heading;
@@ -141,7 +141,7 @@ void VehicleMobility::orient()
             angle = std::acos(dp);
         else
             // correcting for the case where the angle should be over 90 degrees (or under -90):
-            angle = 2*M_PI - std::acos(dp);
+            angle = 2 * M_PI - std::acos(dp);
 
         // and finally rotating around the now-ground-orthogonal local Z
         quat *= Quaternion(Coord(0, 0, 1), angle);

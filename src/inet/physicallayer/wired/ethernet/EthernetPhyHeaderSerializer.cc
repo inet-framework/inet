@@ -80,14 +80,14 @@ void EthernetFragmentPhyHeaderSerializer::serialize(MemoryOutputStream& stream, 
             stream.writeByte(0x19);
             break;
         case SMD_Sx: {
-            int smdSxValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
+            int smdSxValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
             stream.writeByte(smdSxValues[header->getSmdNumber()]);
             break;
         }
         case SMD_Cx: {
-            int smdCxValues[] = {0x61, 0x52, 0x9E, 0x2A};
+            int smdCxValues[] = { 0x61, 0x52, 0x9E, 0x2A };
             stream.writeByte(smdCxValues[header->getSmdNumber()]);
-            int fragmentNumberValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
+            int fragmentNumberValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
             stream.writeByte(fragmentNumberValues[header->getFragmentNumber()]);
             break;
         }
@@ -107,7 +107,7 @@ const Ptr<Chunk> EthernetFragmentPhyHeaderSerializer::deserialize(MemoryInputStr
             header->setPreambleType(SFD);
         else {
             header->setPreambleType(SMD_Sx);
-            int smdSxValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
+            int smdSxValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
             int smdNumber = std::distance(smdSxValues, std::find(smdSxValues, smdSxValues + 4, value));
             header->setSmdNumber(smdNumber);
             header->setFragmentNumber(0);
@@ -116,10 +116,10 @@ const Ptr<Chunk> EthernetFragmentPhyHeaderSerializer::deserialize(MemoryInputStr
     else {
         header->setPreambleType(SMD_Cx);
         uint8_t value = stream.readByte();
-        int smdCxValues[] = {0x61, 0x52, 0x9E, 0x2A};
+        int smdCxValues[] = { 0x61, 0x52, 0x9E, 0x2A };
         int smdNumber = std::distance(smdCxValues, std::find(smdCxValues, smdCxValues + 4, value));
         header->setSmdNumber(smdNumber);
-        int fragmentNumberValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
+        int fragmentNumberValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
         int fragmentNumber = std::distance(fragmentNumberValues, std::find(fragmentNumberValues, fragmentNumberValues + 4, value));
         header->setFragmentNumber(fragmentNumber);
     }

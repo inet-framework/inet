@@ -116,13 +116,13 @@ void ExtEthernetSocket::openSocket()
         throw cRuntimeError("Cannot open socket");
     // get the index of the interface to send on
     memset(&if_idx, 0, sizeof(struct ifreq));
-    strncpy(if_idx.ifr_name, device, IFNAMSIZ-1);
+    strncpy(if_idx.ifr_name, device, IFNAMSIZ - 1);
     if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0)
         perror("SIOCGIFINDEX");
     ifindex = if_idx.ifr_ifindex;
     // get the MAC address of the interface to send on
     memset(&if_mac, 0, sizeof(struct ifreq));
-    strncpy(if_mac.ifr_name, device, IFNAMSIZ-1);
+    strncpy(if_mac.ifr_name, device, IFNAMSIZ - 1);
     if (ioctl(fd, SIOCGIFHWADDR, &if_mac) < 0)
         perror("SIOCGIFHWADDR");
     macAddress.setAddressBytes(if_mac.ifr_hwaddr.sa_data);
@@ -134,7 +134,7 @@ void ExtEthernetSocket::openSocket()
         throw cRuntimeError("Cannot bind raw socket to '%s' interface", device);
     // bind to all ethernet frames
     struct sockaddr_ll socket_address;
-    memset(&socket_address, 0, sizeof (socket_address));
+    memset(&socket_address, 0, sizeof(socket_address));
     socket_address.sll_family = PF_PACKET;
     socket_address.sll_ifindex = ifindex;
     socket_address.sll_protocol = htons(ETH_P_ALL);

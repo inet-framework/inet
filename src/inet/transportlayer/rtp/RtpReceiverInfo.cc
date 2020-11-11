@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/RtpReceiverInfo.h"
 
 #include "inet/transportlayer/rtp/Reports_m.h"
@@ -101,11 +100,11 @@ void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrival
             _packetLostOutVector.record(packet->getSequenceNumber() - _highestSequenceNumber -1);
             for (int i = _highestSequenceNumber+1; i< packet->getSequenceNumber(); i++ )
             {
-                //std::cout << "id = "<< id <<" SequeceNumber loss = "<<i<<endl;
+//                std::cout << "id = "<< id <<" SequeceNumber loss = "<<i<<endl;
                 packetSequenceLostLogFile = fopen ("PacketLossLog.log","+w");
                 if (packetSequenceLostLogFile != nullptr)
                 {
-                    //sprintf (line, "id = %d SequeceNumber loss = %f ", id,i);
+//                    sprintf (line, "id = %d SequeceNumber loss = %f ", id,i);
                     fputs (i, packetSequenceLostLogFile);
                     fclose (packetSequenceLostLogFile);
                 }
@@ -191,7 +190,7 @@ ReceptionReport *RtpReceiverInfo::receptionReport(simtime_t now)
         receptionReport->setPacketsLostCumulative(packetsLost);
         receptionReport->setSequenceNumber(_sequenceNumberCycles + _highestSequenceNumber);
 
-        receptionReport->setJitter((uint32_t)SIMTIME_DBL(_jitter));    //FIXME //XXX ??? store it in secs? --Andras
+        receptionReport->setJitter((uint32_t)SIMTIME_DBL(_jitter)); // FIXME store it in secs? --Andras
 
         // the middle 32 bit of the ntp time stamp of the last sender report
         receptionReport->setLastSR((_lastSenderReportNTPTimeStamp >> 16) & 0xFFFFFFFF);

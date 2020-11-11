@@ -25,9 +25,9 @@ namespace inet {
 // This is the interface for data structure visitors
 class INET_API IVisitor
 {
-    public:
-        virtual void visit(const cObject *) const = 0;
-        virtual ~IVisitor() {}
+  public:
+    virtual void visit(const cObject *) const = 0;
+    virtual ~IVisitor() {}
 };
 
 } /* namespace inet */

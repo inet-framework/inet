@@ -68,11 +68,11 @@ class INET_API rdObject
 class INET_API rdNormal : public rdObject
 {
   protected:
-    double m_mean = NaN;    ///< The mean of the distribution.
-    double m_sd = NaN;    ///< The sd of the distribution.
-    double m_min = NaN;    ///< The minimum limit   .
-    bool m_bMinLimit = NaN;    ///< Set if the minimum limit is set.
-    bool m_nonNegative = NaN;    ///< Non-negative only -- uses the truncnormal function.
+    double m_mean = NaN; ///< The mean of the distribution.
+    double m_sd = NaN; ///< The sd of the distribution.
+    double m_min = NaN; ///< The minimum limit   .
+    bool m_bMinLimit = NaN; ///< Set if the minimum limit is set.
+    bool m_nonNegative = NaN; ///< Non-negative only -- uses the truncnormal function.
 
   public:
 
@@ -109,8 +109,8 @@ class INET_API rdNormal : public rdObject
 class INET_API rdUniform : public rdObject
 {
   protected:
-    double m_beginning = NaN;    ///< Low limit
-    double m_end = NaN;    ///< High limit
+    double m_beginning = NaN; ///< Low limit
+    double m_end = NaN; ///< High limit
 
   public:
     /*
@@ -142,9 +142,9 @@ class INET_API rdUniform : public rdObject
 class INET_API rdExponential : public rdObject
 {
   protected:
-    double m_mean = NaN;    // the distribution mean
-    double m_min = NaN;    // the low limit
-    double m_max = NaN;    // the high limit
+    double m_mean = NaN; // the distribution mean
+    double m_min = NaN; // the low limit
+    double m_max = NaN; // the high limit
     bool m_bMinLimit = false;
     bool m_bMaxLimit = false;
 
@@ -178,8 +178,7 @@ class INET_API rdExponential : public rdObject
 class INET_API rdHistogram : public rdObject
 {
   protected:
-    struct rdHistogramBin
-    {
+    struct rdHistogramBin {
         int count = 0;
         double sum = NaN;
     };
@@ -218,7 +217,7 @@ class INET_API rdHistogram : public rdObject
 class INET_API rdConstant : public rdObject
 {
   protected:
-    double m_value = NaN;    ///< The constant
+    double m_value = NaN; ///< The constant
 
   public:
 
@@ -246,10 +245,10 @@ class INET_API rdConstant : public rdObject
 class INET_API rdZipf : public rdObject
 {
   protected:
-    double m_alpha = NaN;    // the alpha value
-    int m_number = 0;    // the number of nodes to pick from
-    double m_c = NaN;    // helper constant.
-    bool m_baseZero = false;    // true if we want a zero-based return value
+    double m_alpha = NaN; // the alpha value
+    int m_number = 0; // the number of nodes to pick from
+    double m_c = NaN; // helper constant.
+    bool m_baseZero = false; // true if we want a zero-based return value
 
   private:
     // Initialization methods.

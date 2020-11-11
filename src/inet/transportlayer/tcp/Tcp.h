@@ -102,12 +102,11 @@ class INET_API Tcp : public TransportProtocolBase
         EPHEMERAL_PORTRANGE_END   = 5000
     };
 
-    struct SockPair
-    {
+    struct SockPair {
         L3Address localAddr;
         L3Address remoteAddr;
-        int localPort;    // -1: unspec
-        int remotePort;    // -1: unspec
+        int localPort; // -1: unspec
+        int remotePort; // -1: unspec
 
         inline bool operator<(const SockPair& b) const
         {

@@ -50,8 +50,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     /**
      * Represents an Ipv4Header, queued by a Hook
      */
-    class QueuedDatagramForHook
-    {
+    class QueuedDatagramForHook {
       public:
         QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
             packet(packet), hookType(hookType) {}
@@ -62,15 +61,14 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     };
     typedef std::map<Ipv4Address, cPacketQueue> PendingPackets;
 
-    struct SocketDescriptor
-    {
+    struct SocketDescriptor {
         int socketId = -1;
         int protocolId = -1;
         Ipv4Address localAddress;
         Ipv4Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, Ipv4Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
   protected:
@@ -91,19 +89,19 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     cPatternMatcher directBroadcastInterfaceMatcher;
 
     // working vars
-    uint16_t curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
-    Ipv4FragBuf fragbuf;    // fragmentation reassembly buffer
-    simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
-    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
+    uint16_t curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams
+    Ipv4FragBuf fragbuf; // fragmentation reassembly buffer
+    simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
+    std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
     // ARP related
-    PendingPackets pendingPackets;    // map indexed with IPv4Address for outbound packets waiting for ARP resolution
+    PendingPackets pendingPackets; // map indexed with IPv4Address for outbound packets waiting for ARP resolution
 
     // statistics
     int numMulticast = 0;
     int numLocalDeliver = 0;
-    int numDropped = 0;    // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
+    int numDropped = 0; // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
     int numUnroutable = 0;
     int numForwarded = 0;
 

@@ -48,9 +48,9 @@ NextHopRoutingTable::NextHopRoutingTable()
 
 NextHopRoutingTable::~NextHopRoutingTable()
 {
-    for (auto & elem : routes)
+    for (auto& elem : routes)
         delete elem;
-    for (auto & elem : multicastRoutes)
+    for (auto& elem : multicastRoutes)
         delete elem;
 }
 
@@ -98,24 +98,24 @@ void NextHopRoutingTable::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         configureLoopback();
 
-//        // read routing table file (and interface configuration)
+        // read routing table file (and interface configuration)
 //        RoutingTableParser parser(ift, this);
 //        if (*filename && parser.readRoutingTableFromFile(filename)==-1)
 //            throw cRuntimeError("Error reading routing table file %s", filename);
 
-//TODO
-//        // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
-//        // do it later in a later stage, after network configurators configured the interfaces)
+        // TODO
+        // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
+        // do it later in a later stage, after network configurators configured the interfaces)
 //        const char *routerIdStr = par("routerId");
 //        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
 //            routerId = Ipv4Address(routerIdStr);
         // routerID selection must be after network autoconfiguration assigned interface addresses
         configureRouterId();
 
-//        // we don't use notifications during initialize(), so we do it manually.
+        // we don't use notifications during initialize(), so we do it manually.
 //        updateNetmaskRoutes();
 
-        //printRoutingTable();
+//        printRoutingTable();
     }
 }
 
@@ -131,21 +131,21 @@ void NextHopRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID
 
 void NextHopRoutingTable::routeChanged(NextHopRoute *entry, int fieldCode)
 {
-    if (fieldCode == IRoute::F_DESTINATION || fieldCode == IRoute::F_PREFIX_LENGTH || fieldCode == IRoute::F_METRIC) {    // our data structures depend on these fields
+    if (fieldCode == IRoute::F_DESTINATION || fieldCode == IRoute::F_PREFIX_LENGTH || fieldCode == IRoute::F_METRIC) { // our data structures depend on these fields
         entry = internalRemoveRoute(entry);
-        ASSERT(entry != nullptr);    // failure means inconsistency: route was not found in this routing table
+        ASSERT(entry != nullptr); // failure means inconsistency: route was not found in this routing table
         internalAddRoute(entry);
 
-        //invalidateCache();
+//        invalidateCache();
     }
-    emit(routeChangedSignal, entry);    // TODO include fieldCode in the notification
+    emit(routeChangedSignal, entry); // TODO include fieldCode in the notification
 }
 
 void NextHopRoutingTable::configureRouterId()
 {
-    if (routerId.isUnspecified()) {    // not yet configured
+    if (routerId.isUnspecified()) { // not yet configured
         const char *routerIdStr = par("routerId");
-        if (!strcmp(routerIdStr, "auto")) {    // non-"auto" cases already handled in earlier stage
+        if (!strcmp(routerIdStr, "auto")) { // non-"auto" cases already handled in earlier stage
             // choose highest interface address as routerId
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 NetworkInterface *ie = ift->getInterface(i);
@@ -171,7 +171,7 @@ void NextHopRoutingTable::configureRouterId()
 
 void NextHopRoutingTable::configureInterface(NetworkInterface *ie)
 {
-    int metric = (int)(ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
+    int metric = (int)(ceil(2e9 / ie->getDatarate())); // use OSPF cost as default
     int interfaceModuleId = ie->getId();
     // mac
     auto d = ie->addProtocolData<NextHopInterfaceData>();
@@ -199,7 +199,7 @@ void NextHopRoutingTable::configureLoopback()
 
 void NextHopRoutingTable::refreshDisplay() const
 {
-//TODO
+// TODO
 //    char buf[80];
 //    if (routerId.isUnspecified())
 //        sprintf(buf, "%d+%d routes", (int)routes.size(), (int)multicastRoutes.size());
@@ -239,7 +239,7 @@ L3Address NextHopRoutingTable::getRouterIdAsGeneric() const
 
 bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
 {
-    //TODO: Enter_Method("isLocalAddress(%s)", dest.str().c_str());
+    // TODO: Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
@@ -264,7 +264,7 @@ NetworkInterface *NextHopRoutingTable::getInterfaceByAddress(const L3Address& ad
 
 NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) const
 {
-    //TODO Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
+    // TODO Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
@@ -281,7 +281,7 @@ NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) 
 
 NetworkInterface *NextHopRoutingTable::getOutputInterfaceForDestination(const L3Address& dest) const
 {
-    //TODO Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
+    // TODO Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     const IRoute *e = findBestMatchingRoute(dest);
     return e ? e->getInterface() : nullptr;
@@ -289,7 +289,7 @@ NetworkInterface *NextHopRoutingTable::getOutputInterfaceForDestination(const L3
 
 L3Address NextHopRoutingTable::getNextHopForDestination(const L3Address& dest) const
 {
-    //TODO Enter_Method("getGatewayForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
+    // TODO Enter_Method("getGatewayForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     const IRoute *e = findBestMatchingRoute(dest);
     return e ? e->getNextHopAsGeneric() : L3Address();
@@ -297,12 +297,12 @@ L3Address NextHopRoutingTable::getNextHopForDestination(const L3Address& dest) c
 
 bool NextHopRoutingTable::isLocalMulticastAddress(const L3Address& dest) const
 {
-    return dest.isMulticast();    //TODO
+    return dest.isMulticast(); // TODO
 }
 
 IMulticastRoute *NextHopRoutingTable::findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const
 {
-    return nullptr;    //TODO
+    return nullptr; // TODO
 }
 
 int NextHopRoutingTable::getNumRoutes() const
@@ -385,27 +385,27 @@ NextHopRoute *NextHopRoutingTable::internalRemoveRoute(NextHopRoute *route)
 
 int NextHopRoutingTable::getNumMulticastRoutes() const
 {
-    return 0;    //TODO
+    return 0; // TODO
 }
 
 IMulticastRoute *NextHopRoutingTable::getMulticastRoute(int k) const
 {
-    return nullptr;    //TODO
+    return nullptr; // TODO
 }
 
 void NextHopRoutingTable::addMulticastRoute(IMulticastRoute *entry)
 {
-    //TODO
+    // TODO
 }
 
 IMulticastRoute *NextHopRoutingTable::removeMulticastRoute(IMulticastRoute *entry)
 {
-    return nullptr;    //TODO
+    return nullptr; // TODO
 }
 
 bool NextHopRoutingTable::deleteMulticastRoute(IMulticastRoute *entry)
 {
-    return false;    //TODO
+    return false; // TODO
 }
 
 IRoute *NextHopRoutingTable::createRoute()
@@ -415,7 +415,7 @@ IRoute *NextHopRoutingTable::createRoute()
 
 void NextHopRoutingTable::printRoutingTable() const
 {
-    for (const auto & elem : routes)
+    for (const auto& elem : routes)
         EV_INFO << (elem)->getInterface()->getInterfaceFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->str() << endl;
 }
 

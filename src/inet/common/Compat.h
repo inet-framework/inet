@@ -24,7 +24,7 @@
 
 namespace inet {
 
-#  define EVSTREAM                      EV
+#define EVSTREAM    EV
 
 #ifdef _MSC_VER
 // complementary error function, not in MSVC
@@ -48,7 +48,7 @@ inline double fmax(double a, double b)
     return a > b ? a : b;
 }
 
-#endif    // _MSC_VER
+#endif // _MSC_VER
 
 } // namespace inet
 

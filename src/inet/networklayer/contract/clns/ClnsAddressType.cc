@@ -28,6 +28,5 @@ namespace inet {
 
 CLNSAddressType CLNSAddressType::INSTANCE;
 
-
-
 } /* namespace inet */
+

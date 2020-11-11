@@ -25,8 +25,8 @@ namespace ieee80211 {
 
 class INET_API MpduDeaggregation : public IMpduDeaggregation, public cObject
 {
-    public:
-        virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) override;
+  public:
+    virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) override;
 };
 
 } /* namespace ieee80211 */

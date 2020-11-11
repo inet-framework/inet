@@ -18,7 +18,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpWestwood.h"
 
-#include <algorithm>    // min,max
+#include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
 
@@ -101,12 +101,12 @@ void TcpWestwood::processRexmitTimer(TcpEventCode& event)
     // and is set to 1 in cong. avoidance.
     // the cong. window is reset to 1 after a timeout, as is done by TCP Reno. Conservative. Reaseon: fairness.
 
-    if (state->snd_cwnd < state->ssthresh) {    // Slow start
+    if (state->snd_cwnd < state->ssthresh) { // Slow start
         state->w_a = state->w_a + 1;
         if (state->w_a > 4)
             state->w_a = 4;
     }
-    else {    // Cong. avoidance
+    else { // Cong. avoidance
         state->w_a = 1;
     }
 
@@ -139,7 +139,7 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
 
         // cumul_ack: cumulative ack's that acks 2 or more pkts count 1,
         // because DUPACKs count them
-        uint32_t cumul_ack = state->snd_una - firstSeqAcked;    // acked bytes
+        uint32_t cumul_ack = state->snd_una - firstSeqAcked; // acked bytes
         if ((state->dupacks * state->snd_mss) >= cumul_ack)
             cumul_ack = state->snd_mss; // cumul_ack = 1:
         else
@@ -150,7 +150,7 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
             cumul_ack = 2 * state->snd_mss;
 
         recalculateBWE(cumul_ack);
-    }    // Closes if w_sendtime != nullptr
+    } // Closes if w_sendtime != nullptr
 
     // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
@@ -182,8 +182,8 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
             // RFC would require other modifications as well in addition to the
             // two lines below.
             //
-            // int bytesAcked = state->snd_una - firstSeqAcked;
-            // state->snd_cwnd += bytesAcked * state->snd_mss;
+//            int bytesAcked = state->snd_una - firstSeqAcked;
+//            state->snd_cwnd += bytesAcked * state->snd_mss;
 
             conn->emit(cwndSignal, state->snd_cwnd);
 
@@ -223,7 +223,7 @@ void TcpWestwood::receivedDuplicateAck()
         // BWE calculation: dupack counts 1
         uint32_t cumul_ack = state->snd_mss;
         recalculateBWE(cumul_ack);
-    }    // Closes if w_sendtime != nullptr
+    } // Closes if w_sendtime != nullptr
 
     if (state->dupacks == state->dupthresh) {
         EV_DETAIL << "Westwood on dupAcks == DUPTHRESH(=" << state->dupthresh << ": Faster Retransmit \n";
@@ -249,12 +249,12 @@ void TcpWestwood::receivedDuplicateAck()
         // a is restored to 1 in cong. avoidance: ssthresh was set correctly and there is no need to reduce
         // the impact of BWE
 
-        if (state->snd_cwnd < state->ssthresh) {    // Slow start
+        if (state->snd_cwnd < state->ssthresh) { // Slow start
             state->w_a = state->w_a + 0.25;
             if (state->w_a > 4)
                 state->w_a = 4;
         }
-        else {    // Cong. avoidance
+        else { // Cong. avoidance
             state->w_a = 1;
         }
 

@@ -30,7 +30,7 @@ void LMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
     if (auto header = dynamicPtrCast<const LMacHeaderBase>(chunk)) {
         context.sourceColumn << header->getSrcAddr();
         context.destinationColumn << header->getDestAddr();
-        context.infoColumn << "L-MAC : " << header;        //TODO
+        context.infoColumn << "L-MAC : " << header; // TODO
     }
     else
         context.infoColumn << "(L-MAC) " << chunk;

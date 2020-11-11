@@ -147,6 +147,5 @@ const Coord& MoBanLocal::getCurrentVelocity()
     return lastCompositeVelocity;
 }
 
-
 } // namespace inet
 

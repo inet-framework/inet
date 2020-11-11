@@ -92,8 +92,8 @@ double SuiPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distan
     m R = distance;
     m R0 = m(100.0);
     m lambda = propagationSpeed / frequency;
-    double L = 0.0;    // [dBm]
-    double f = frequency.get() / 1000000000.0;    // [GHz]
+    double L = 0.0; // [dBm]
+    double f = frequency.get() / 1000000000.0; // [GHz]
     double alpha = 0.0;
     double gamma = a - b * ht.get() + c / ht.get();
     double Xf = 6 * log10(f / 2);

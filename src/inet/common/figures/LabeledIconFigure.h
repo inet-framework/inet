@@ -35,7 +35,7 @@ class INET_API LabeledIconFigure : public cGroupFigure
     cLabelFigure *getLabelFigure() const { return labelFigure; }
 
     void setTooltip(const char *tooltip);
-    void setAssociatedObject(cObject * object);
+    void setAssociatedObject(cObject *object);
 
     cFigure::Rectangle getBounds() const;
 

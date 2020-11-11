@@ -21,7 +21,7 @@
 #include "inet/environment/contract/IGround.h"
 
 #if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
-//TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
+// TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
 
 #include <osgEarth/ElevationQuery>
 #include <osgEarth/MapNode>

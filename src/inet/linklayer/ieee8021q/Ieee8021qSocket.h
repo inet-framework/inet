@@ -28,8 +28,7 @@ namespace inet {
 class INET_API Ieee8021qSocket : public SocketBase
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
 

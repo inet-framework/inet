@@ -22,10 +22,10 @@ namespace inet {
 namespace ospfv2 {
 
 Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(IInterfaceTable *_ift) :
-        ift(_ift),
-        destinationType(Ospfv2RoutingTableEntry::NETWORK_DESTINATION),
-        area(BACKBONE_AREAID),
-        pathType(Ospfv2RoutingTableEntry::INTRAAREA)
+    ift(_ift),
+    destinationType(Ospfv2RoutingTableEntry::NETWORK_DESTINATION),
+    area(BACKBONE_AREAID),
+    pathType(Ospfv2RoutingTableEntry::INTRAAREA)
 {
     setNetmask(Ipv4Address::ALLONES_ADDRESS);
     setSourceType(IRoute::OSPF);
@@ -33,15 +33,15 @@ Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(IInterfaceTable *_ift) :
 }
 
 Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(const Ospfv2RoutingTableEntry& entry) :
-        ift(entry.ift),
-        destinationType(entry.destinationType),
-        optionalCapabilities(entry.optionalCapabilities),
-        area(entry.area),
-        pathType(entry.pathType),
-        cost(entry.cost),
-        type2Cost(entry.type2Cost),
-        linkStateOrigin(entry.linkStateOrigin),
-        nextHops(entry.nextHops)
+    ift(entry.ift),
+    destinationType(entry.destinationType),
+    optionalCapabilities(entry.optionalCapabilities),
+    area(entry.area),
+    pathType(entry.pathType),
+    cost(entry.cost),
+    type2Cost(entry.type2Cost),
+    linkStateOrigin(entry.linkStateOrigin),
+    nextHops(entry.nextHops)
 {
     setDestination(entry.getDestination());
     setNetmask(entry.getNetmask());
@@ -116,7 +116,7 @@ std::ostream& operator<<(std::ostream& out, const Ospfv2RoutingTableEntry& entry
             out << gateway << "  ";
     }
     out << "cost: " << entry.getCost() << " ";
-    if(entry.getPathType() == Ospfv2RoutingTableEntry::TYPE2_EXTERNAL)
+    if (entry.getPathType() == Ospfv2RoutingTableEntry::TYPE2_EXTERNAL)
         out << "type2Cost: " << entry.getType2Cost() << " ";
     out << "if: " << entry.getInterfaceName() << " ";
     out << "destType: " << Ospfv2RoutingTableEntry::getDestinationTypeString(entry.getDestinationType());
@@ -146,7 +146,7 @@ std::string Ospfv2RoutingTableEntry::str() const
         out << "*  ";
     else
         out << getGateway() << "  ";
-    if(getRoutingTable() && getRoutingTable()->isAdminDistEnabled())
+    if (getRoutingTable() && getRoutingTable()->isAdminDistEnabled())
         out << "AD:" << getAdminDist() << "  ";
     out << "metric:" << getMetric() << "  ";
     out << "if:";
@@ -156,8 +156,8 @@ std::string Ospfv2RoutingTableEntry::str() const
         out << getInterfaceName();
 
     out << " destType:" << Ospfv2RoutingTableEntry::getDestinationTypeString(destinationType)
-            << " pathType:" << Ospfv2RoutingTableEntry::getPathTypeString(pathType)
-            << " area:" << area.str(false);
+        << " pathType:" << Ospfv2RoutingTableEntry::getPathTypeString(pathType)
+        << " area:" << area.str(false);
 
     return out.str();
 }

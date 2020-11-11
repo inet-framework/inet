@@ -25,7 +25,7 @@
 #ifndef __INET_EIGRPNEIGHBORTABLE_H_
 #define __INET_EIGRPNEIGHBORTABLE_H_
 
-//IPv6 ready
+// IPv6 ready
 
 #include <omnetpp.h>
 
@@ -50,8 +50,6 @@ class EigrpNeighborTable : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-
-
   public:
     EigrpNeighborTable() { neighborCounter = 1; stubCount = 0; }
     virtual ~EigrpNeighborTable();
@@ -67,7 +65,7 @@ class EigrpNeighborTable : public cSimpleModule
      * Finds neighbor by ID.
      */
     EigrpNeighbor<IPAddress> *findNeighborById(int id);
-    EigrpNeighbor<IPAddress> * removeNeighbor(EigrpNeighbor<IPAddress> *neighbor);
+    EigrpNeighbor<IPAddress> *removeNeighbor(EigrpNeighbor<IPAddress> *neighbor);
     /**
      * Returns first neighbor that resides on specified interface.
      */
@@ -80,14 +78,15 @@ class EigrpNeighborTable : public cSimpleModule
     void decStubCount() { stubCount--; }
 };
 
-//TODO - mozna predelat kontejnery do samostatnych souboru
+// TODO - mozna predelat kontejnery do samostatnych souboru
 //typedef EigrpNeighborTable<IPv4Address> EigrpIpv4NeighborTable;       //IPv6 - ADDED for backward compatibility with old IPv4-only version
 
 class EigrpIpv4NeighborTable : public EigrpNeighborTable<Ipv4Address>
 {
-//container class for IPv4NT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv4NeighborTable() {};
+// container class for IPv4NT, must exist because of Define_Module()
+
+  public:
+    virtual ~EigrpIpv4NeighborTable() {}
 };
 
 /*
@@ -98,13 +97,13 @@ class INET_API Eigrpv4NeighTableAccess : public ModuleAccess<EigrpIpv4NeighborTa
 };
 */
 
-
 #ifndef DISABLE_EIGRP_IPV6
 class EigrpIpv6NeighborTable : public EigrpNeighborTable<Ipv6Address>
 {
-//container class for IPv6NT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv6NeighborTable() {};
+// container class for IPv6NT, must exist because of Define_Module()
+
+  public:
+    virtual ~EigrpIpv6NeighborTable() {}
 };
 
 /*
@@ -115,6 +114,7 @@ class INET_API Eigrpv6NeighTableAccess : public ModuleAccess<EigrpIpv6NeighborTa
 };
 */
 #endif // DISABLE_EIGRP_IPV6
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif
+

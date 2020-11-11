@@ -147,7 +147,7 @@ class INET_API TcpLwipSendQueue : public cObject
 
   protected:
     TcpLwipConnection *connM = nullptr;
-    ChunkQueue dataBuffer;      // dataBuffer
+    ChunkQueue dataBuffer; // dataBuffer
 };
 
 class INET_API TcpLwipReceiveQueue : public cObject
@@ -221,7 +221,7 @@ class INET_API TcpLwipReceiveQueue : public cObject
 
   protected:
     TcpLwipConnection *connM = nullptr;
-    ChunkQueue dataBuffer;      // fifo dataBuffer
+    ChunkQueue dataBuffer; // fifo dataBuffer
     // ReorderBuffer reorderBuffer;     // ReorderBuffer not needed, because the original lwIP code manages the unordered buffer
 };
 

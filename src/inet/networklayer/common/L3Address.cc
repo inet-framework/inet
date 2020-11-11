@@ -45,8 +45,8 @@ void L3Address::set(AddressType type, uint64_t lo)
 void L3Address::set(const Ipv6Address& addr)
 {
     const uint32_t *words = addr.words();
-    hi = ((uint64_t) * (words + 0) << 32) + *(words + 1);
-    lo = ((uint64_t) * (words + 2) << 32) + *(words + 3);
+    hi = ((uint64_t)*(words + 0) << 32) + *(words + 1);
+    lo = ((uint64_t)*(words + 2) << 32) + *(words + 3);
     if (getType() != IPv6)
         throw cRuntimeError("Cannot set Ipv6 address");
 }
@@ -88,7 +88,7 @@ IL3AddressType *L3Address::getAddressType() const
             return &ModulePathAddressType::INSTANCE;
 
         case L3Address::CLNS:
-                    return &CLNSAddressType::INSTANCE;
+            return &CLNSAddressType::INSTANCE;
 
         default:
             throw cRuntimeError("Unknown type");
@@ -178,13 +178,13 @@ bool L3Address::isUnicast() const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::IPv4:
-            return !toIpv4().isMulticast() && !toIpv4().isLimitedBroadcastAddress();    // TODO: move to Ipv4Address
+            return !toIpv4().isMulticast() && !toIpv4().isLimitedBroadcastAddress(); // TODO: move to Ipv4Address
 
         case L3Address::IPv6:
             return toIpv6().isUnicast();
 
         case L3Address::MAC:
-            return !toMac().isBroadcast() && !toMac().isMulticast();    // TODO: move to MacAddress
+            return !toMac().isBroadcast() && !toMac().isMulticast(); // TODO: move to MacAddress
 
         case L3Address::MODULEID:
             return toModuleId().isUnicast();
@@ -235,7 +235,7 @@ bool L3Address::isBroadcast() const
         case L3Address::IPv6:
             return false;
 
-        //throw cRuntimeError("Ipv6 isBroadcast() unimplemented");
+//        throw cRuntimeError("Ipv6 isBroadcast() unimplemented");
         case L3Address::MAC:
             return toMac().isBroadcast();
 
@@ -351,7 +351,7 @@ bool L3Address::matches(const L3Address& other, int prefixLength) const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::IPv4:
-            return Ipv4Address::maskedAddrAreEqual(toIpv4(), other.toIpv4(), Ipv4Address::makeNetmask(prefixLength));    //FIXME !!!!!
+            return Ipv4Address::maskedAddrAreEqual(toIpv4(), other.toIpv4(), Ipv4Address::makeNetmask(prefixLength)); // FIXME !!!!!
 
         case L3Address::IPv6:
             return toIpv6().matches(other.toIpv6(), prefixLength);

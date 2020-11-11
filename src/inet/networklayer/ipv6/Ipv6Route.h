@@ -38,36 +38,36 @@ class INET_API Ipv6Route : public cObject, public IRoute
     /** Cisco like administrative distances (includes Ipv4 protocols)*/
     enum RouteAdminDist {
         dDirectlyConnected = 0,
-        dStatic = 1,
-        dEIGRPSummary = 5,
-        dBGPExternal = 20,
-        dEIGRPInternal = 90,
-        dIGRP = 100,
-        dOSPF = 110,
-        dISIS = 115,
-        dRIP = 120,
-        dEGP = 140,
-        dODR = 160,
-        dEIGRPExternal = 170,
-        dBGPInternal = 200,
-        dDHCPlearned = 254,
-        dBABEL = 125,
-        dLISP = 210,
-        dUnknown = 255
+        dStatic            = 1,
+        dEIGRPSummary      = 5,
+        dBGPExternal       = 20,
+        dEIGRPInternal     = 90,
+        dIGRP              = 100,
+        dOSPF              = 110,
+        dISIS              = 115,
+        dRIP               = 120,
+        dEGP               = 140,
+        dODR               = 160,
+        dEIGRPExternal     = 170,
+        dBGPInternal       = 200,
+        dDHCPlearned       = 254,
+        dBABEL             = 125,
+        dLISP              = 210,
+        dUnknown           = 255
     };
 
   protected:
-    Ipv6RoutingTable *_rt;    // TODO introduce IIPv6RoutingTable
+    Ipv6RoutingTable *_rt; // TODO introduce IIPv6RoutingTable
     Ipv6Address _destPrefix;
     short _prefixLength;
     SourceType _sourceType;
     NetworkInterface *_interfacePtr;
-    Ipv6Address _nextHop;    // unspecified means "direct"
-    simtime_t _expiryTime;    // if route is an advertised prefix: prefix lifetime
+    Ipv6Address _nextHop; // unspecified means "direct"
+    simtime_t _expiryTime; // if route is an advertised prefix: prefix lifetime
     int _metric;
     unsigned int _adminDist;
-    cObject *_source;    /// Object identifying the source
-    cObject *_protocolData;    /// Routing Protocol specific data
+    cObject *_source; /// Object identifying the source
+    cObject *_protocolData; /// Routing Protocol specific data
 
   protected:
     void changed(int fieldCode);
@@ -119,8 +119,8 @@ class INET_API Ipv6Route : public cObject, public IRoute
     virtual void setNextHop(const L3Address& nextHop) override { if (_nextHop != nextHop.toIpv6()) { _nextHop = nextHop.toIpv6(); changed(F_NEXTHOP); } }
     virtual void setSource(cObject *source) override { if (_source != source) { _source = source; changed(F_SOURCE); } }
     virtual void setSourceType(SourceType type) override { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
-    const char* getSourceTypeAbbreviation() const;
-    virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); }    //TODO rename Ipv6 method
+    const char *getSourceTypeAbbreviation() const;
+    virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); } // TODO rename Ipv6 method
     virtual L3Address getNextHopAsGeneric() const override { return getNextHop(); }
     virtual NetworkInterface *getInterface() const override { return _interfacePtr; }
     virtual void setInterface(NetworkInterface *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }

@@ -34,7 +34,7 @@ void Icmpv6ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol 
                 break;
             case ICMPv6_DESTINATION_UNREACHABLE: {
                 auto header2 = CHK(dynamicPtrCast<const Icmpv6DestUnreachableMsg>(header));
-                //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
+                // TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
                 context.infoColumn << "ICMPv6-DEST-UN code=" << header2->getCode();
                 break;
             }
@@ -50,53 +50,53 @@ void Icmpv6ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol 
             case ICMPv6_ECHO_REQUEST: {
                 auto echoHeader = CHK(dynamicPtrCast<const Icmpv6EchoRequestMsg>(header));
                 context.infoColumn << "ICMPv6-ECHO-REQ code=" << echoHeader->getCode()
-                        << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
+                                   << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
                 break;
             }
             case ICMPv6_ECHO_REPLY: {
                 auto echoHeader = CHK(dynamicPtrCast<const Icmpv6EchoReplyMsg>(header));
                 context.infoColumn << "ICMPv6-ECHO-REPLY code=" << echoHeader->getCode()
-                        << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
+                                   << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
                 break;
             }
             case ICMPv6_MLD_QUERY:
                 context.infoColumn << "ICMPv6-MLD-QRY";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_MLD_REPORT:
                 context.infoColumn << "ICMPv6-MLD-REPORT";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_MLD_DONE:
                 context.infoColumn << "ICMPv6-MLD-DONE";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_ROUTER_SOL:
                 context.infoColumn << "ICMPv6-ROUTER-SOL";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_ROUTER_AD:
                 context.infoColumn << "ICMPv6-ROUTER-AD";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_NEIGHBOUR_SOL:
                 context.infoColumn << "ICMPv6-NEIGHBOUR-SOL";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_NEIGHBOUR_AD:
                 context.infoColumn << "ICMPv6-NEIGHBOUR-AD";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_REDIRECT:
                 context.infoColumn << "ICMPv6-NEIGHBOUR-REDIR";
                 break;
             case ICMPv6_MLDv2_REPORT:
                 context.infoColumn << "ICMPv6-MLDv2-REPORT";
-                //TODO
+                // TODO
                 break;
             case ICMPv6_EXPERIMENTAL_MOBILITY:
                 context.infoColumn << "ICMPv6-EXPERIMENTAL-MOBILITY";
-                //TODO
+                // TODO
                 break;
         }
     }

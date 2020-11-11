@@ -34,7 +34,7 @@ void InterfaceStateDown::processEvent(Ospfv2Interface *intf, Ospfv2Interface::Os
 {
     if (event == Ospfv2Interface::INTERFACE_UP) {
         MessageHandler *messageHandler = intf->getArea()->getRouter()->getMessageHandler();
-        messageHandler->startTimer(intf->getHelloTimer(), RNGCONTEXT truncnormal(0.1, 0.01));    // add some deviation to avoid startup collisions
+        messageHandler->startTimer(intf->getHelloTimer(), RNGCONTEXT truncnormal(0.1, 0.01)); // add some deviation to avoid startup collisions
         messageHandler->startTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
         switch (intf->getType()) {
             case Ospfv2Interface::POINTTOPOINT:

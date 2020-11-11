@@ -23,12 +23,12 @@
 
 namespace inet {
 
-//forward declarations:
+// forward declarations:
 class L3Address;
 
 namespace tcp {
 
-//forward declarations:
+// forward declarations:
 struct pbuf;
 
 /**

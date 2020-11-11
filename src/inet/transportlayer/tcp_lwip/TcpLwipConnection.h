@@ -108,13 +108,13 @@ class INET_API TcpLwipConnection : public cSimpleModule
     bool sendUpEnabled = false;
 
     // statistics
-    static simsignal_t sndWndSignal;    // snd_wnd
-    static simsignal_t sndNxtSignal;    // sent seqNo
-    static simsignal_t sndAckSignal;    // sent ackNo
+    static simsignal_t sndWndSignal; // snd_wnd
+    static simsignal_t sndNxtSignal; // sent seqNo
+    static simsignal_t sndAckSignal; // sent ackNo
 
-    static simsignal_t rcvWndSignal;    // rcv_wnd
-    static simsignal_t rcvSeqSignal;    // received seqNo
-    static simsignal_t rcvAckSignal;    // received ackNo (= snd_una)
+    static simsignal_t rcvWndSignal; // rcv_wnd
+    static simsignal_t rcvSeqSignal; // received seqNo
+    static simsignal_t rcvAckSignal; // received ackNo (= snd_una)
 };
 
 } // namespace tcp

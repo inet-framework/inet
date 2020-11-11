@@ -40,8 +40,7 @@ class RsvpTe;
 class INET_API RsvpClassifier : public cSimpleModule, public IScriptable, public IRsvpClassifier
 {
   public:
-    struct FecEntry
-    {
+    struct FecEntry {
         int id;
 
         Ipv4Address src;

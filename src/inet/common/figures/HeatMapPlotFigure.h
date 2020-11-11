@@ -24,8 +24,7 @@ namespace inet {
 
 class INET_API HeatMapPlotFigure : public cGroupFigure
 {
-    struct Tick
-    {
+    struct Tick {
         cLineFigure *tick;
         cLineFigure *dashLine;
         cLabelFigure *number;
@@ -68,7 +67,7 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
 
   public:
     HeatMapPlotFigure(const char *name = nullptr);
-    virtual ~HeatMapPlotFigure() {};
+    virtual ~HeatMapPlotFigure() {}
 
     virtual void parse(cProperty *property) override;
     const char **getAllowedPropertyKeys() const override;
@@ -83,7 +82,7 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     void setBilinearValue(double x1, double x2, double y1, double y2, double v11, double v21, double v12, double v22, int channel);
     void bakeValues();
 
-    //getters and setters
+    // getters and setters
     void setPlotSize(const Point& figureSize, const Point& pixmapSize);
     const Point getPlotSize() const { return pixmapFigure->getBounds().getSize(); }
     const Point getPixmapSize() const { return Point(pixmapFigure->getPixmapWidth(), pixmapFigure->getPixmapHeight()); }
@@ -124,14 +123,14 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     void invertXAxis() { invertedXAxis = !invertedXAxis; }
     void invertYAxis() { invertedYAxis = !invertedYAxis; }
 
-    const char* getXAxisLabel() const { return xAxisLabelFigure->getText(); }
-    void setXAxisLabel(const char* text) { xAxisLabelFigure->setText(text); }
+    const char *getXAxisLabel() const { return xAxisLabelFigure->getText(); }
+    void setXAxisLabel(const char *text) { xAxisLabelFigure->setText(text); }
 
-    const char* getYAxisLabel() const { return yAxisLabelFigure->getText(); }
-    void setYAxisLabel(const char* text) { yAxisLabelFigure->setText(text); }
+    const char *getYAxisLabel() const { return yAxisLabelFigure->getText(); }
+    void setYAxisLabel(const char *text) { yAxisLabelFigure->setText(text); }
 
-    const char* getLabel() const { return labelFigure->getText(); }
-    void setLabel(const char* text) { labelFigure->setText(text); }
+    const char *getLabel() const { return labelFigure->getText(); }
+    void setLabel(const char *text) { labelFigure->setText(text); }
 
     int getLabelOffset() const;
     void setLabelOffset(int offset);

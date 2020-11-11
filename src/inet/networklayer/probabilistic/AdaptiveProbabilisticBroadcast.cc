@@ -40,14 +40,14 @@ void AdaptiveProbabilisticBroadcast::handleLowerPacket(Packet *packet)
 
 void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcastHeader *m)
 {
-    //find the network address of the node who sent the msg
+    // find the network address of the node who sent the msg
     NeighborMap::key_type nodeAddress = m->getSrcAddr();
-    //EV << "updateNeighMap(): neighAddress: " << nodeAddress << endl;
+//    EV << "updateNeighMap(): neighAddress: " << nodeAddress << endl;
 
-    //search for it in the "already-neighbors" map
+    // search for it in the "already-neighbors" map
     auto it = neighMap.find(nodeAddress);
 
-    //if the node is a "new" neighbor
+    // if the node is a "new" neighbor
     if (it == neighMap.end()) {
         EV << "updateNeighMap(): The message came from a new neighbor! " << endl;
 
@@ -64,7 +64,7 @@ void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcast
         // the node to be removed when the corresponding event occurs
         (ret.first)->second->setContextPointer((void *)(&(ret.first)->first));
     }
-    //if the node is NOT a "new" neighbor update its timer
+    // if the node is NOT a "new" neighbor update its timer
     else {
         EV << "updateNeighMap(): The message came from an already known neighbor! " << endl;
         // Cancel the event that was scheduled to remove the entry for this neighbor.

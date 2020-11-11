@@ -45,8 +45,8 @@ class INET_API SimpleVoipSender : public cSimpleModule, public LifecycleUnsuppor
     L3Address destAddress;
 
     // state
-    cMessage *selfSender = nullptr;    // timer for sending packets
-    cMessage *selfSource = nullptr;    // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
+    cMessage *selfSender = nullptr; // timer for sending packets
+    cMessage *selfSource = nullptr; // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
     simtime_t silenceDuration;
     simtime_t talkspurtDuration;
     int packetID = -1;

@@ -31,17 +31,17 @@ void IcmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
         switch (header->getType()) {
             case ICMP_DESTINATION_UNREACHABLE:
                 context.typeColumn << "DEST-UN";
-                //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
+                // TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
                 context.infoColumn << "code=" << header->getCode();
                 break;
             case ICMP_TIME_EXCEEDED:
                 context.typeColumn << "TIME-EX";
-                //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
+                // TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
                 context.infoColumn << "code=" << header->getCode();
                 break;
             case ICMP_PARAMETER_PROBLEM:
                 context.typeColumn << "PAR-PROB";
-                //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
+                // TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
                 context.infoColumn << "code=" << header->getCode();
                 break;
             case ICMP_ECHO_REQUEST:

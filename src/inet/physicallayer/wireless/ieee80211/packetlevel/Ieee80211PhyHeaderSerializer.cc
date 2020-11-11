@@ -197,7 +197,6 @@ const Ptr<Chunk> Ieee80211VhtPhyHeaderSerializer::deserialize(MemoryInputStream&
     return vhtPhyHeader;
 }
 
-
 } // namespace physicallayer
 
 } // namespace inet

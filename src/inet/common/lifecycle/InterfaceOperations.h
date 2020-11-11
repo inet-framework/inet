@@ -31,13 +31,15 @@ class INET_API InterfaceOperationBase : public LifecycleOperation
 {
   public:
     enum Stage { STAGE_LOCAL, STAGE_LAST };
+
   private:
     NetworkInterface *ie; // the interface to be operated on
+
   public:
     InterfaceOperationBase() : ie(nullptr) {}
     virtual void initialize(cModule *module, StringMap& params);
-    virtual int getNumStages() const {return STAGE_LAST+1;}
-    NetworkInterface *getInterface() const {return ie;}
+    virtual int getNumStages() const { return STAGE_LAST + 1; }
+    NetworkInterface *getInterface() const { return ie; }
 };
 
 /**

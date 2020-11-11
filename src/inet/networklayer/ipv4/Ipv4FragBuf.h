@@ -38,8 +38,7 @@ class INET_API Ipv4FragBuf
     //
     // Key for finding the reassembly buffer for a datagram.
     //
-    struct Key
-    {
+    struct Key {
         ushort id = static_cast<ushort>(-1);
         Ipv4Address src;
         Ipv4Address dest;
@@ -53,11 +52,10 @@ class INET_API Ipv4FragBuf
     //
     // Reassembly buffer for the datagram
     //
-    struct DatagramBuffer
-    {
-        ReassemblyBuffer buf;    // reassembly buffer
-        Packet *packet = nullptr;          // the packet
-        simtime_t lastupdate;    // last time a new fragment arrived
+    struct DatagramBuffer {
+        ReassemblyBuffer buf; // reassembly buffer
+        Packet *packet = nullptr; // the packet
+        simtime_t lastupdate; // last time a new fragment arrived
     };
 
     // we use std::map for fast lookup by datagram Id

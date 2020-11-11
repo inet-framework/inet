@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-//  Cleanup and rewrite: Andras Varga, 2004
+// Cleanup and rewrite: Andras Varga, 2004
 
 #include "inet/networklayer/ipv4/Icmp.h"
 
@@ -84,9 +84,10 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 
     // don't send ICMP error messages response to unspecified, broadcast or multicast addresses
     if ((inputInterfaceId != -1 && origSrcAddr.isUnspecified())
-            || origSrcAddr.isMulticast()
-            || origSrcAddr.isLimitedBroadcastAddress()
-            || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
+        || origSrcAddr.isMulticast()
+        || origSrcAddr.isLimitedBroadcastAddress()
+        || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId))
+    {
         EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << ipv4Header << endl;
         delete packet;
         return;
@@ -120,7 +121,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
     const auto& icmpHeader = makeShared<IcmpHeader>();
-    icmpHeader->setChunkLength(B(8));      //FIXME second 4 byte in icmp header not represented yet
+    icmpHeader->setChunkLength(B(8)); // FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
     // ICMP message length: the internet header plus the first 8 bytes of
@@ -135,7 +136,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     // process the ICMP message locally, right away
     if (origSrcAddr.isUnspecified()) {
         // pretend it came from the Ipv4 layer
-        errorPacket->addTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorPacket->addTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS); // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPMessage(errorPacket);
@@ -203,7 +204,7 @@ void Icmp::processICMPMessage(Packet *packet)
             int transportProtocol = bogusL3Packet->getProtocolId();
             if (transportProtocol == IP_PROT_ICMP) {
                 // received ICMP error answer to an ICMP packet:
-                //FIXME should send up dest unreachable answers to pingapps
+                // FIXME should send up dest unreachable answers to pingapps
                 errorOut(packet);
             }
             else {
@@ -264,7 +265,7 @@ void Icmp::processEchoRequest(Packet *request)
     reply->insertAtFront(icmpReply);
 
     // swap src and dest
-    // TBD check what to do if dest was multicast etc?
+    // TODO check what to do if dest was multicast etc?
     // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the Ipv4 layer
     auto addressReq = reply->addTag<L3AddressReq>();
     addressReq->setSrcAddress(addressInd->getDestAddress().toIpv4());

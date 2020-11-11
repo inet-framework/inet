@@ -31,7 +31,8 @@ namespace inet {
 
 typedef std::vector<L3Address> AddressVector;
 
-typedef struct {
+typedef struct
+{
     int maxInitRetrans;
     int maxInitRetransTimeout;
     double rtoInitial;
@@ -48,7 +49,8 @@ typedef struct {
     int assocMaxRtx;
 } SocketOptions;
 
-typedef struct {
+typedef struct
+{
     int inboundStreams;
     int outboundStreams;
     bool streamReset;
@@ -65,8 +67,7 @@ class INET_API SctpSocket : public ISocket
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cObject.
      */
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) = 0;
@@ -77,7 +78,7 @@ class INET_API SctpSocket : public ISocket
         virtual void socketPeerClosed(SctpSocket *socket) {}
         virtual void socketClosed(SctpSocket *socket) {}
         virtual void socketFailure(SctpSocket *socket, int code) {}
-        virtual void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) { }
+        virtual void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) {}
         virtual void socketDeleted(SctpSocket *socket) {}
         virtual void sendRequestArrived(SctpSocket *socket) {}
         virtual void msgAbandonedArrived(SctpSocket *socket) {}
@@ -181,33 +182,33 @@ class INET_API SctpSocket : public ISocket
      * Sets the gate on which to send to SCTP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("sctpOut"));</tt>
      */
-    void setOutputGate(cGate *toSctp) { gateToSctp = toSctp; };
+    void setOutputGate(cGate *toSctp) { gateToSctp = toSctp; }
 
     /**
      * Setter and getter methods for socket and API Parameters
      */
-    void setOutboundStreams(int streams) { appOptions->outboundStreams = streams; };
-    void setInboundStreams(int streams) { appOptions->inboundStreams = streams; };
-    void setAppLimited(bool option) { appLimited = option; };
-    void setStreamReset(int option) { appOptions->streamReset = option; };
+    void setOutboundStreams(int streams) { appOptions->outboundStreams = streams; }
+    void setInboundStreams(int streams) { appOptions->inboundStreams = streams; }
+    void setAppLimited(bool option) { appLimited = option; }
+    void setStreamReset(int option) { appOptions->streamReset = option; }
     void setStreamPriority(uint32_t stream, uint32_t priority);
-    void setMaxInitRetrans(int option) { sOptions->maxInitRetrans = option; };
-    void setMaxInitRetransTimeout(int option) { sOptions->maxInitRetransTimeout = option; };
-    void setRtoInitial(double option) { sOptions->rtoInitial = option; };
-    void setRtoMin(double option) { sOptions->rtoMin = option; };
-    void setRtoMax(double option) { sOptions->rtoMax = option; };
-    void setSackFrequency(int option) { sOptions->sackFrequency = option; };
-    void setSackPeriod(double option) { sOptions->sackPeriod = option; };
-    void setMaxBurst(int option) { sOptions->maxBurst = option; };
-    void setFragPoint(int option) { sOptions->fragPoint = option; };
-    void setNagle(int option) { sOptions->nagle = option; };
-    void setPathMaxRetrans(int option) { sOptions->pathMaxRetrans = option; };
-    void setEnableHeartbeats(bool option) { sOptions->enableHeartbeats = option; };
-    void setHbInterval(double option) { sOptions->hbInterval = option; };
+    void setMaxInitRetrans(int option) { sOptions->maxInitRetrans = option; }
+    void setMaxInitRetransTimeout(int option) { sOptions->maxInitRetransTimeout = option; }
+    void setRtoInitial(double option) { sOptions->rtoInitial = option; }
+    void setRtoMin(double option) { sOptions->rtoMin = option; }
+    void setRtoMax(double option) { sOptions->rtoMax = option; }
+    void setSackFrequency(int option) { sOptions->sackFrequency = option; }
+    void setSackPeriod(double option) { sOptions->sackPeriod = option; }
+    void setMaxBurst(int option) { sOptions->maxBurst = option; }
+    void setFragPoint(int option) { sOptions->fragPoint = option; }
+    void setNagle(int option) { sOptions->nagle = option; }
+    void setPathMaxRetrans(int option) { sOptions->pathMaxRetrans = option; }
+    void setEnableHeartbeats(bool option) { sOptions->enableHeartbeats = option; }
+    void setHbInterval(double option) { sOptions->hbInterval = option; }
     void setRtoInfo(double initial, double max, double min);
-    void setAssocMaxRtx(int option) { sOptions->assocMaxRtx = option; };
+    void setAssocMaxRtx(int option) { sOptions->assocMaxRtx = option; }
 
-    void setUserOptions(SocketOptions* msg) { delete sOptions; sOptions = msg; };
+    void setUserOptions(SocketOptions *msg) { delete sOptions; sOptions = msg; }
 
     int getOutboundStreams() { return appOptions->outboundStreams; };
     int getInboundStreams() { return appOptions->inboundStreams; };
@@ -237,10 +238,10 @@ class INET_API SctpSocket : public ISocket
 
     void addAddress(L3Address addr);
     //
-    // TBD add support for these options too!
-    //  string sendQueueClass;
-    //  string receiveQueueClass;
-    //  string sctpAlgorithmClass;
+    // TODO add support for these options too!
+//    string sendQueueClass;
+//    string receiveQueueClass;
+//    string sctpAlgorithmClass;
     //
 
     /**
@@ -357,9 +358,9 @@ class INET_API SctpSocket : public ISocket
     void processMessage(cMessage *msg) override;
     //@}
 
-    void setState(int state) { sockstate = state; };
+    void setState(int state) { sockstate = state; }
 
-    void setTunInterface(int id) { interfaceIdToTun = id; };
+    void setTunInterface(int id) { interfaceIdToTun = id; }
 
     int getTunInterface() { return interfaceIdToTun; };
 

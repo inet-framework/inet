@@ -60,7 +60,7 @@ void TcpSpoof::sendSpoofPacket()
     tcpseg->setDestPort(destPort);
     tcpseg->setChunkLength(TCP_MIN_HEADER_LENGTH);
     tcpseg->setSequenceNo(seq);
-    //tcpseg->setAckNo(...);
+//    tcpseg->setAckNo(...);
     tcpseg->setSynBit(isSYN);
     tcpseg->setWindow(16384);
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
@@ -71,7 +71,7 @@ void TcpSpoof::sendSpoofPacket()
 void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
 {
     EV_INFO << "Sending: ";
-    //printSegmentBrief(tcpseg);
+//    printSegmentBrief(tcpseg);
 
     ASSERT(pk != nullptr);
     IL3AddressType *addressType = dest.getAddressType();

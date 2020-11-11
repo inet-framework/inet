@@ -133,8 +133,7 @@ class INET_API TcpSocket : public ISocket
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cObject.
      */
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
         /**
@@ -150,8 +149,7 @@ class INET_API TcpSocket : public ISocket
         virtual void socketDeleted(TcpSocket *socket) = 0;
     };
 
-    class INET_API ReceiveQueueBasedCallback : public ICallback
-    {
+    class INET_API ReceiveQueueBasedCallback : public ICallback {
       public:
         virtual void socketDataArrived(TcpSocket *socket) = 0;
 
@@ -234,7 +232,7 @@ class INET_API TcpSocket : public ISocket
      */
     static const char *stateName(TcpSocket::State state);
 
-    void setState(TcpSocket::State state) { sockstate = state; };
+    void setState(TcpSocket::State state) { sockstate = state; }
 
     /** @name Getter functions */
     //@{

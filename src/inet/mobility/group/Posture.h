@@ -88,7 +88,7 @@ class INET_API Posture
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
      * for any pair of nodes (numNodes by numNodes matrix) */
-    double **alphaSD = nullptr;    // Standard deviation of alpha
+    double **alphaSD = nullptr; // Standard deviation of alpha
 
     /** @brief Radious of the sphere around each node for individual mobility */
     double *nodeRadius = nullptr;

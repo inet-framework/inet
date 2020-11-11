@@ -82,7 +82,6 @@ void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, Fra
         throw cRuntimeError("Channel access granted while a frame sequence is running");
 }
 
-
 void FrameSequenceHandler::startFrameSequenceStep()
 {
     ASSERT(isSequenceRunning());
@@ -98,8 +97,8 @@ void FrameSequenceHandler::startFrameSequenceStep()
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << ".\n";
                 callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
                 // TODO: lifetime
-                // if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
-                //    transmitLifetimeHandler->frameTransmitted(dataFrame);
+//                if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
+//                    transmitLifetimeHandler->frameTransmitted(dataFrame);
                 break;
             }
             case IFrameSequenceStep::Type::RECEIVE: {
@@ -162,7 +161,7 @@ void FrameSequenceHandler::abortFrameSequence()
     EV_INFO << "Frame sequence aborted.\n";
     auto inProgressFrames = context->getInProgressFrames();
     auto step = context->getLastStep();
-    auto failedTxStep = check_and_cast<ITransmitStep*>(dynamic_cast<IReceiveStep*>(step) ? context->getStepBeforeLast() : step);
+    auto failedTxStep = check_and_cast<ITransmitStep *>(dynamic_cast<IReceiveStep *>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
     auto header = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
@@ -188,3 +187,4 @@ FrameSequenceHandler::~FrameSequenceHandler()
 
 } // namespace ieee80211
 } // namespace inet
+

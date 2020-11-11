@@ -59,7 +59,7 @@ void HttpBrowserBase::initialize(int stage)
         // Activity period length -- the waking period
         cXMLElement *element = rootelement->getFirstChildWithTag("activityPeriod");
         if (element == nullptr) {
-            rdActivityLength = nullptr;    // Disabled if this parameter is not defined in the file
+            rdActivityLength = nullptr; // Disabled if this parameter is not defined in the file
         }
         else {
             attributes = element->getAttributes();
@@ -154,7 +154,7 @@ void HttpBrowserBase::initialize(int stage)
             readScriptedEvents(scriptFile.c_str());
         }
         else {
-            double activationTime = par("activationTime");    // This is the activation delay. Optional
+            double activationTime = par("activationTime"); // This is the activation delay. Optional
             if (rdActivityLength != nullptr)
                 activationTime += std::max(0.0, 86400.0 - rdActivityLength->draw()) / 2.0; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
@@ -216,8 +216,8 @@ void HttpBrowserBase::handleSelfActivityStart()
     eventTimer->setKind(MSGKIND_START_SESSION);
     messagesInCurrentSession = 0;
     reqNoInCurSession = 0;
-    double activityPeriodLength = (rdActivityLength != nullptr) ? rdActivityLength->draw() : 0.0;    // Get the length of the activity period
-    acitivityPeriodEnd = simTime() + activityPeriodLength;    // The end of the activity period
+    double activityPeriodLength = (rdActivityLength != nullptr) ? rdActivityLength->draw() : 0.0; // Get the length of the activity period
+    acitivityPeriodEnd = simTime() + activityPeriodLength; // The end of the activity period
     EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << (activityPeriodLength / 3600.0) << " hours." << endl;
     scheduleAfter(simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
 }
@@ -270,7 +270,7 @@ void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
 {
     EV_DEBUG << "Sending delayed message " << msg->getName() << " @ T=" << simTime() << endl;
     Packet *reqmsg = check_and_cast<Packet *>(msg);
-    //HttpRequestMessage *reqmsg = check_and_cast<HttpRequestMessage *>(msg);
+//    HttpRequestMessage *reqmsg = check_and_cast<HttpRequestMessage *>(msg);
     reqmsg->setKind(HTTPT_REQUEST_MESSAGE);
     sendRequestToServer(reqmsg);
 }
@@ -282,7 +282,7 @@ void HttpBrowserBase::handleDataMessage(Ptr<const HttpReplyMessage> appmsg)
     messagesInCurrentSession++;
 
     int serial = appmsg->getSerial();
-    const char *pkName = "REPLY";  //TODO it's was the pk->getName()
+    const char *pkName = "REPLY"; // TODO it's was the pk->getName()
 
     std::string senderWWW = appmsg->getOriginatorUrl();
     EV_DEBUG << "Handling received message from " << senderWWW << ": " << pkName << ". Received @T=" << simTime() << endl;
@@ -362,20 +362,20 @@ void HttpBrowserBase::handleDataMessage(Ptr<const HttpReplyMessage> appmsg)
                          << ", delay: " << delay << ", bad: " << bad << ", ref.size: " << refSize << endl;
 
                 // Generate a request message and push on queue for the intended recipient
-                Packet *reqmsg = generateResourceRequest(providerName, resourceName, serial++, bad, refSize);    // TODO: KVJ: CHECK HERE FOR XSITE
+                Packet *reqmsg = generateResourceRequest(providerName, resourceName, serial++, bad, refSize); // TODO: KVJ: CHECK HERE FOR XSITE
                 if (delay == 0.0) {
                     requestQueues[providerName].push_front(reqmsg);
                 }
                 else {
                     reqmsg->setKind(HTTPT_DELAYED_REQUEST_MESSAGE);
-                    scheduleAfter(delay, reqmsg);    // Schedule the message as a self message
+                    scheduleAfter(delay, reqmsg); // Schedule the message as a self message
                 }
             }
             // Iterate through the list of queues (one for each recipient encountered) and submit each queue.
             // A single socket will thus be opened for each recipient for a rough HTTP/1.1 emulation.
             // This is only done for messages which are not delayed in the simulated page.
             auto i = requestQueues.begin();
-            for ( ; i != requestQueues.end(); i++)
+            for (; i != requestQueues.end(); i++)
                 sendRequestsToServer((*i).first, (*i).second);
         }
     }
@@ -405,9 +405,9 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
     msg->setSerial(0);
-    msg->setChunkLength(B(requestLength + size));    // Add extra request size if specified
+    msg->setChunkLength(B(requestLength + size)); // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
-    msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
+    msg->setBadRequest(bad); // Simulates willingly requesting a non-existing resource.
     outPk->insertAtBack(msg);
 
     logRequest(msg);
@@ -456,9 +456,9 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
     msg->setSerial(serial);
-    msg->setChunkLength(B(requestLength));    // Add extra request size if specified
+    msg->setChunkLength(B(requestLength)); // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
-    msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
+    msg->setBadRequest(bad); // Simulates willingly requesting a non-existing resource.
     outPk->insertAtBack(msg);
 
     logRequest(msg);
@@ -483,7 +483,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             // Schedule the next activity period start. This corresponds to to a working day or home time, ie. time
             // when the user is near his workstation and periodically browsing the web. Inactivity periods then
             // correspond to sleep time or time away from the office
-            simtime_t activationTime = simTime() + std::max(0.0, 86400.0 - rdActivityLength->draw());    // Sleep for a while
+            simtime_t activationTime = simTime() + std::max(0.0, 86400.0 - rdActivityLength->draw()); // Sleep for a while
             EV_INFO << "Terminating current activity @ T=" << simTime() << ". Next activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             rescheduleAt(activationTime, eventTimer);

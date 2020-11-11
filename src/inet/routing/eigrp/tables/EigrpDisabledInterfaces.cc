@@ -29,7 +29,6 @@
 namespace inet {
 namespace eigrp {
 
-
 EigrpDisabledInterfaces::EigrpDisabledInterfaces()
 {
 }
@@ -39,8 +38,7 @@ EigrpDisabledInterfaces::~EigrpDisabledInterfaces()
     int cnt = ifVector.size();
     EigrpInterface *iface;
 
-    for (int i = 0; i < cnt; i++)
-    {
+    for (int i = 0; i < cnt; i++) {
         iface = ifVector[i];
         ifVector[i] = NULL;
         delete iface;
@@ -50,7 +48,7 @@ EigrpDisabledInterfaces::~EigrpDisabledInterfaces()
 
 void EigrpDisabledInterfaces::addInterface(EigrpInterface *interface)
 {
-    //TODO check duplicity
+    // TODO check duplicity
     this->ifVector.push_back(interface);
 }
 
@@ -58,8 +56,7 @@ EigrpInterface *EigrpDisabledInterfaces::removeInterface(EigrpInterface *iface)
 {
     std::vector<EigrpInterface *>::iterator it;
 
-    if ((it = std::find(ifVector.begin(), ifVector.end(), iface)) != ifVector.end())
-    {
+    if ((it = std::find(ifVector.begin(), ifVector.end(), iface)) != ifVector.end()) {
         ifVector.erase(it);
         return iface;
     }
@@ -70,13 +67,11 @@ EigrpInterface *EigrpDisabledInterfaces::removeInterface(EigrpInterface *iface)
 EigrpInterface *EigrpDisabledInterfaces::findInterface(int ifaceId)
 {
     std::vector<EigrpInterface *>::iterator it;
-    EigrpInterface * iface;
+    EigrpInterface *iface;
 
-    for (it = ifVector.begin(); it != ifVector.end(); it++)
-    {
+    for (it = ifVector.begin(); it != ifVector.end(); it++) {
         iface = *it;
-        if (iface->getInterfaceId() == ifaceId)
-        {
+        if (iface->getInterfaceId() == ifaceId) {
             return iface;
         }
     }
@@ -86,3 +81,4 @@ EigrpInterface *EigrpDisabledInterfaces::findInterface(int ifaceId)
 
 } // namespace eigrp
 } // namespace inet
+

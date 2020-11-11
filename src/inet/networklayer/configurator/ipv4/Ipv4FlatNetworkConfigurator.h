@@ -35,8 +35,7 @@ class IIpv4RoutingTable;
 class INET_API Ipv4FlatNetworkConfigurator : public cSimpleModule
 {
   protected:
-    class NodeInfo
-    {
+    class NodeInfo {
       public:
         bool isIPNode = false;
         IInterfaceTable *ift = nullptr;

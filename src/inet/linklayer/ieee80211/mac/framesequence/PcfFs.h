@@ -23,11 +23,12 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API PcfFs : public AlternativesFs {
-    public:
-        PcfFs();
+class INET_API PcfFs : public AlternativesFs
+{
+  public:
+    PcfFs();
 
-        virtual int selectPcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
+    virtual int selectPcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
 };
 
 } // namespace ieee80211

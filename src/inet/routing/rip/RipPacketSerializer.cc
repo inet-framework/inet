@@ -22,7 +22,7 @@
 
 namespace inet {
 
-//TODO
+// TODO
 // The inet::Rip uses RipPacket and RipEntry for IPv4 (RIPv2, see RFC 1058)
 // and for IPv6 (RIPng, see RFC 2080).
 // The serializer accepts only RFC1058 packets with IPv4 addresses.
@@ -58,7 +58,7 @@ const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) con
     ripPacket->setCommand((inet::RipCommand)stream.readUint8());
     int ripVer = stream.readUint8();
     if (ripVer != 2) {
-        //TODO add RIP v1 support
+        // TODO add RIP v1 support
         ripPacket->markIncorrect();
     }
 
@@ -70,14 +70,14 @@ const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) con
         RipEntry entry = {};
 
         entry.addressFamilyId = (inet::RipAf)stream.readUint16Be();
-        //TODO Valid addressFamilyId values: 0, 2, 0xFFFF
+        // TODO Valid addressFamilyId values: 0, 2, 0xFFFF
         // 0 and 2 means IPv4, 0xFFFF means Authentication packet
         entry.routeTag = stream.readUint16Be();
         entry.address = stream.readIpv4Address();
         Ipv4Address netmask = stream.readIpv4Address();
         entry.prefixLength = netmask.getNetmaskLength();
         if (netmask != Ipv4Address::makeNetmask(entry.prefixLength))
-            ripPacket->markIncorrect();         // netmask can not be converted into prefixLength       //TODO should replace prefixLength to netmask
+            ripPacket->markIncorrect(); // netmask can not be converted into prefixLength       //TODO should replace prefixLength to netmask
         entry.nextHop = stream.readIpv4Address();
         entry.metric = stream.readUint32Be();
 

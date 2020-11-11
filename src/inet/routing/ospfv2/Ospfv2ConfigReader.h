@@ -37,8 +37,8 @@ class INET_API Ospfv2ConfigReader
 {
   private:
     cModule *ospfModule = nullptr;
-    IInterfaceTable *ift = nullptr;    // provides access to the interface table
-    Router *ospfRouter = nullptr;    // data structure to fill in
+    IInterfaceTable *ift = nullptr; // provides access to the interface table
+    Router *ospfRouter = nullptr; // data structure to fill in
 
   private:
     cPar& par(const char *name) const { return ospfModule->par(name); }
@@ -52,7 +52,7 @@ class INET_API Ospfv2ConfigReader
      */
     std::vector<NetworkInterface *> getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
 
-    cXMLElement * findMatchingConfig(const cXMLElementList& routerConfig, const NetworkInterface& intf);
+    cXMLElement *findMatchingConfig(const cXMLElementList& routerConfig, const NetworkInterface& intf);
 
     /**
      * Loads a list of OSPF Areas connected to this router from the config XML.

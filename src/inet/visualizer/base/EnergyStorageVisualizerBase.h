@@ -29,8 +29,7 @@ namespace visualizer {
 class INET_API EnergyStorageVisualizerBase : public VisualizerBase
 {
   protected:
-    class INET_API EnergyStorageVisualization
-    {
+    class INET_API EnergyStorageVisualization {
       public:
         const power::IEnergyStorage *energyStorage;
 

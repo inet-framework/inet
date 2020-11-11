@@ -52,7 +52,7 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
     virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
     virtual void setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry);
     virtual void removeMobilityVisualization(const IMobility *mobility);
-    virtual MobilityCanvasVisualization* ensureMobilityVisualization(IMobility *mobility);
+    virtual MobilityCanvasVisualization *ensureMobilityVisualization(IMobility *mobility);
     virtual void extendMovementTrail(const IMobility *mobility, TrailFigure *trailFigure, cFigure::Point position) const;
 
   public:

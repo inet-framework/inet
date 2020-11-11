@@ -28,8 +28,8 @@ namespace inet {
  */
 class INET_API EncryptedChunk : public Chunk
 {
-  friend class Chunk;
-  friend class EncryptedChunkDescriptor;
+    friend class Chunk;
+    friend class EncryptedChunkDescriptor;
 
   protected:
     /**

@@ -30,7 +30,7 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
 {
   protected:
     UdpSocket socket;
-    int numEchoed;    // just for WATCH
+    int numEchoed; // just for WATCH
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

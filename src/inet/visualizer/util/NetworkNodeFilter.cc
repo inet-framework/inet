@@ -21,7 +21,7 @@ namespace inet {
 
 namespace visualizer {
 
-void NetworkNodeFilter::setPattern(const char* pattern)
+void NetworkNodeFilter::setPattern(const char *pattern)
 {
     matchExpression.setPattern(pattern, false, true, true);
 }

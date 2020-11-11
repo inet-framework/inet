@@ -24,16 +24,17 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API TxOpFs : public AlternativesFs {
+class INET_API TxOpFs : public AlternativesFs
+{
 
-    public:
-        TxOpFs();
-        virtual ~TxOpFs() { }
+  public:
+    TxOpFs();
+    virtual ~TxOpFs() {}
 
-        virtual int selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
-        virtual bool isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
-        virtual bool isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
-        virtual int selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceContext *context);
+    virtual int selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
+    virtual bool isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
+    virtual bool isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
+    virtual int selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceContext *context);
 };
 
 } // namespace ieee80211

@@ -38,14 +38,14 @@ namespace inet {
 Define_Module(NextHopForwarding);
 
 NextHopForwarding::NextHopForwarding() :
-        interfaceTable(nullptr),
-        routingTable(nullptr),
-        arp(nullptr),
-        defaultHopLimit(-1),
-        numLocalDeliver(0),
-        numDropped(0),
-        numUnroutable(0),
-        numForwarded(0)
+    interfaceTable(nullptr),
+    routingTable(nullptr),
+    arp(nullptr),
+    defaultHopLimit(-1),
+    numLocalDeliver(0),
+    numDropped(0),
+    numUnroutable(0),
+    numForwarded(0)
 {
 }
 
@@ -53,7 +53,7 @@ NextHopForwarding::~NextHopForwarding()
 {
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
-    for (auto & elem : queuedDatagramsForHooks) {
+    for (auto& elem : queuedDatagramsForHooks) {
         delete elem.datagram;
     }
     queuedDatagramsForHooks.clear();
@@ -112,15 +112,15 @@ void NextHopForwarding::refreshDisplay() const
 
 void NextHopForwarding::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->arrivedOn("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
+    if (msg->arrivedOn("transportIn")) { // TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
         if (auto request = dynamic_cast<Request *>(msg))
             handleCommand(request);
         else
-            handlePacketFromHL(check_and_cast<Packet*>(msg));
+            handlePacketFromHL(check_and_cast<Packet *>(msg));
     }
-    else if (msg->arrivedOn("queueIn")) {    // from network
+    else if (msg->arrivedOn("queueIn")) { // from network
         EV_INFO << "Received " << msg << " from network.\n";
-        handlePacketFromNetwork(check_and_cast<Packet*>(msg));
+        handlePacketFromNetwork(check_and_cast<Packet *>(msg));
     }
     else
         throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
@@ -177,7 +177,7 @@ const NetworkInterface *NextHopForwarding::getSourceInterfaceFrom(Packet *packet
 void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
 {
     if (packet->hasBitError()) {
-        //TODO emit packetDropped signal
+        // TODO emit packetDropped signal
         EV_WARN << "CRC error found, drop packet\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -233,7 +233,7 @@ void NextHopForwarding::handlePacketFromHL(Packet *packet)
     }
 
     // encapsulate and send
-    const NetworkInterface *destIE;    // will be filled in by encapsulate()
+    const NetworkInterface *destIE; // will be filled in by encapsulate()
     encapsulate(packet, destIE);
 
     L3Address nextHop;
@@ -523,7 +523,6 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const NetworkInterf
     const auto& ifTag = transportPacket->findTag<InterfaceReq>();
     destIE = ifTag ? interfaceTable->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
 
-
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
     if (!src.isUnspecified()) {
@@ -538,7 +537,7 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const NetworkInterf
     if (ttl != -1) {
         ASSERT(ttl > 0);
     }
-    else if (false) //TODO: datagram->getDestinationAddress().isLinkLocalMulticast())
+    else if (false) // TODO: datagram->getDestinationAddress().isLinkLocalMulticast())
         ttl = 1;
     else
         ttl = defaultHopLimit;
@@ -562,10 +561,11 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     auto localAddress(header->getDestAddr());
     auto remoteAddress(header->getSrcAddr());
     bool hasSocket = false;
-    for (const auto &elem: socketIdToSocketDescriptor) {
+    for (const auto& elem: socketIdToSocketDescriptor) {
         if (elem.second->protocolId == protocol->getId()
-                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
-                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+            && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
+        {
             auto *packetCopy = packet->dup();
             packetCopy->setKind(L3_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
@@ -584,8 +584,8 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     else {
         if (!hasSocket) {
             EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
-            //TODO send an ICMP error: protocol unreachable
-            // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+            // TODO send an ICMP error: protocol unreachable
+//            sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
         delete packet;
     }
@@ -596,19 +596,19 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
     delete datagram->removeControlInfo();
 
     if (datagram->getByteLength() > ie->getMtu())
-        throw cRuntimeError("datagram too large"); //TODO refine
+        throw cRuntimeError("datagram too large"); // TODO refine
 
     const auto& header = datagram->peekAtFront<NextHopForwardingHeader>();
     // hop counter check
     if (header->getHopLimit() <= 0) {
         EV_INFO << "datagram hopLimit reached zero, discarding\n";
-        delete datagram;    //TODO stats counter???
+        delete datagram; // TODO stats counter???
         return;
     }
 
     if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getInterfaceName() << " is not broadcast, skipping ARP\n";
-        //Peer to peer interface, no broadcast, no MACAddress. // packet->addTagIfAbsent<MACAddressReq>()->setDestinationAddress(macAddress);
+        // Peer to peer interface, no broadcast, no MACAddress. // packet->addTagIfAbsent<MACAddressReq>()->setDestinationAddress(macAddress);
         datagram->removeTagIfPresent<DispatchProtocolReq>();
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
@@ -725,11 +725,11 @@ void NextHopForwarding::reinjectQueuedDatagram(const Packet *datagram)
 
 INetfilter::IHook::Result NextHopForwarding::datagramPreRoutingHook(Packet *datagram)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case IHook::DROP:
                 delete datagram;
@@ -753,11 +753,11 @@ INetfilter::IHook::Result NextHopForwarding::datagramPreRoutingHook(Packet *data
 
 INetfilter::IHook::Result NextHopForwarding::datagramForwardHook(Packet *datagram)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramForwardHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case IHook::DROP:
                 delete datagram;
@@ -779,11 +779,11 @@ INetfilter::IHook::Result NextHopForwarding::datagramForwardHook(Packet *datagra
 
 INetfilter::IHook::Result NextHopForwarding::datagramPostRoutingHook(Packet *datagram)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case IHook::DROP:
                 delete datagram;
@@ -806,11 +806,11 @@ INetfilter::IHook::Result NextHopForwarding::datagramPostRoutingHook(Packet *dat
 INetfilter::IHook::Result NextHopForwarding::datagramLocalInHook(Packet *datagram)
 {
     L3Address address;
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case IHook::DROP:
                 delete datagram;
@@ -832,11 +832,11 @@ INetfilter::IHook::Result NextHopForwarding::datagramLocalInHook(Packet *datagra
 
 INetfilter::IHook::Result NextHopForwarding::datagramLocalOutHook(Packet *datagram)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalOutHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case IHook::DROP:
                 delete datagram;
@@ -886,12 +886,12 @@ void NextHopForwarding::stop()
 void NextHopForwarding::flush()
 {
     EV_DEBUG << "NextHopForwarding::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
-    for (auto & elem : queuedDatagramsForHooks) {
+    for (auto& elem : queuedDatagramsForHooks) {
         delete elem.datagram;
     }
     queuedDatagramsForHooks.clear();
 
-//    fragbuf.flush();
+// fragbuf.flush();
 }
 
 } // namespace inet

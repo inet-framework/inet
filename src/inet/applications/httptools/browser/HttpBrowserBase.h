@@ -65,12 +65,11 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     /*
      * Browse event item. Used in scripted mode.
      */
-    struct BrowseEvent
-    {
-        simtime_t time;    // Event triggering time
-        std::string wwwhost;    // Host to contact
-        std::string resourceName;    // The resource to request
-        HttpNodeBase *serverModule = nullptr;    // Reference to the omnet server object. Resolved at parse time.
+    struct BrowseEvent {
+        simtime_t time; // Event triggering time
+        std::string wwwhost; // Host to contact
+        std::string resourceName; // The resource to request
+        HttpNodeBase *serverModule = nullptr; // Reference to the omnet server object. Resolved at parse time.
     };
 
     /*
@@ -83,16 +82,16 @@ class INET_API HttpBrowserBase : public HttpNodeBase
      */
     typedef std::deque<Packet *> HttpRequestQueue;
 
-    cMessage *eventTimer = nullptr;    // The timer object used to trigger browsing events
-    HttpController *controller = nullptr;    // Reference to the central controller object
+    cMessage *eventTimer = nullptr; // The timer object used to trigger browsing events
+    HttpController *controller = nullptr; // Reference to the central controller object
 
-    bool scriptedMode = false;    // Set to true if a script file is defined
-    BrowseEventsList browseEvents;    // Queue of browse events used in scripted mode
+    bool scriptedMode = false; // Set to true if a script file is defined
+    BrowseEventsList browseEvents; // Queue of browse events used in scripted mode
 
     /* The current session parameters */
-    int reqInCurSession = 0;    // The number of requests made so far in the current session
-    int reqNoInCurSession = 0;    // The total number of requests to be made in the current session
-    simtime_t acitivityPeriodEnd;    // The end in simulation time of the current activity period
+    int reqInCurSession = 0; // The number of requests made so far in the current session
+    int reqNoInCurSession = 0; // The total number of requests to be made in the current session
+    simtime_t acitivityPeriodEnd; // The end in simulation time of the current activity period
 
     /* The random objects */
     rdObject *rdProcessingDelay = nullptr;

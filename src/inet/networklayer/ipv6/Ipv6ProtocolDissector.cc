@@ -41,7 +41,7 @@ void Ipv6ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
     packet->setBackOffset(ipv6EndOffset);
     const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (fh)
-        callback.dissectPacket(packet, nullptr);   //Fragment
+        callback.dissectPacket(packet, nullptr); // Fragment
     else
         callback.dissectPacket(packet, header->getProtocol());
     if (incorrect && packet->getDataLength() > b(0))

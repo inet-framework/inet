@@ -21,7 +21,6 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
 
-
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::unitDisk, UnitDiskProtocolDissector);

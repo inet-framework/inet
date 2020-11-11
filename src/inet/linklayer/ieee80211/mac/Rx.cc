@@ -53,7 +53,7 @@ void Rx::initialize(int stage)
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        address = check_and_cast<Ieee80211Mac*>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
+        address = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
         recomputeMediumFree();
     }
 }
@@ -125,7 +125,7 @@ bool Rx::isFcsOk(Packet *packet) const
                 auto buffer = new uint8_t[bufferLength];
                 fcsBytes->copyToBuffer(buffer, bufferLength);
                 auto computedFcs = ethernetCRC(buffer, bufferLength);
-                delete [] buffer;
+                delete[] buffer;
                 return computedFcs == trailer->getFcs();
             }
             default:
@@ -174,7 +174,7 @@ void Rx::setOrExtendNav(simtime_t navInterval)
         if (endNavTimer->isScheduled()) {
             simtime_t oldEndNav = endNavTimer->getArrivalTime();
             if (endNav < oldEndNav)
-                return;    // never decrease NAV
+                return; // never decrease NAV
             emit(navChangedSignal, endNavTimer->getArrivalTime() - simTime());
             cancelEvent(endNavTimer);
         }
@@ -220,7 +220,7 @@ void Rx::refreshDisplay() const
     }
 }
 
-void Rx::registerContention(IContention* contention)
+void Rx::registerContention(IContention *contention)
 {
     contention->mediumStateChanged(mediumFree);
     contentions.push_back(contention);
@@ -228,3 +228,4 @@ void Rx::registerContention(IContention* contention)
 
 } // namespace ieee80211
 } // namespace inet
+

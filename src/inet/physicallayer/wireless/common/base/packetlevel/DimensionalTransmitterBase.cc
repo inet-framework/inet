@@ -57,15 +57,15 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
             where = ' ';
             end = token;
         }
-// TODO: replace this BS with the expression evaluator when it supports simtime_t and bindings
-//      Allowed syntax:
-//        +-quantity
-//        s|c|e
-//        s|c|e+-quantity
-//        s|c|e+-b|d
-//        s|c|e+-b|d+-quantity
-//        s|c|e+-b|d*number
-//        s|c|e+-b|d*number+-quantity
+        // TODO: replace this BS with the expression evaluator when it supports simtime_t and bindings
+        // Allowed syntax:
+        // +-quantity
+        // s|c|e
+        // s|c|e+-quantity
+        // s|c|e+-b|d
+        // s|c|e+-b|d+-quantity
+        // s|c|e+-b|d*number
+        // s|c|e+-b|d*number+-quantity
         double lengthMultiplier = 0;
         if ((*(token + 1) == '+' || *(token + 1) == '-') &&
             (*(token + 2) == 'b' || *(token + 2) == 'd'))
@@ -119,8 +119,8 @@ void DimensionalTransmitterBase::parseFrequencyGains(const char *text)
 
 std::ostream& DimensionalTransmitterBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    // TODO: << EV_FIELD(timeGains)
-    // TODO: << EV_FIELD(frequencyGains);
+//  stream << EV_FIELD(timeGains);
+//  stream << EV_FIELD(frequencyGains);
     return stream;
 }
 
@@ -165,9 +165,9 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
             auto centerTime = (startTime + endTime) / 2;
             auto duration = endTime - startTime;
             std::map<simsec, std::pair<double, const IInterpolator<simsec, double> *>> ts;
-            ts[getLowerBound<simsec>()] = {0, firstTimeInterpolator};
-            ts[getUpperBound<simsec>()] = {0, nullptr};
-            for (const auto & entry : timeGains) {
+            ts[getLowerBound<simsec>()] = { 0, firstTimeInterpolator };
+            ts[getUpperBound<simsec>()] = { 0, nullptr };
+            for (const auto& entry : timeGains) {
                 simsec time;
                 switch (entry.where) {
                     case 's': time = simsec(startTime); break;
@@ -177,7 +177,7 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
                     default: throw cRuntimeError("Unknown qualifier");
                 }
                 time += simsec(duration) * entry.length + entry.offset;
-                ts[time] = {entry.gain, entry.interpolator};
+                ts[time] = { entry.gain, entry.interpolator };
             }
             timeGainFunction = makeShared<Interpolated1DFunction<double, simsec>>(ts);
         }
@@ -187,10 +187,10 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
         if (frequencyGains.size() != 0) {
             auto startFrequency = centerFrequency - bandwidth / 2;
             auto endFrequency = centerFrequency + bandwidth / 2;
-            std::map<Hz, std::pair<double, const IInterpolator<Hz, double>*>> fs;
-            fs[getLowerBound<Hz>()] = {0, firstFrequencyInterpolator};
-            fs[getUpperBound<Hz>()] = {0, nullptr};
-            for (const auto & entry : frequencyGains) {
+            std::map<Hz, std::pair<double, const IInterpolator<Hz, double> *>> fs;
+            fs[getLowerBound<Hz>()] = { 0, firstFrequencyInterpolator };
+            fs[getUpperBound<Hz>()] = { 0, nullptr };
+            for (const auto& entry : frequencyGains) {
                 Hz frequency;
                 switch (entry.where) {
                     case 's': frequency = startFrequency; break;
@@ -201,7 +201,7 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
                 }
                 frequency += bandwidth * entry.length + entry.offset;
                 ASSERT(!std::isnan(frequency.get()));
-                fs[frequency] = {entry.gain, entry.interpolator};
+                fs[frequency] = { entry.gain, entry.interpolator };
             }
             frequencyGainFunction = makeShared<Interpolated1DFunction<double, Hz>>(fs);
         }

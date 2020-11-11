@@ -37,12 +37,11 @@ namespace eigrp {
 /**
  * Class represents DUAL automaton.
  */
-template <typename IPAddress>
+template<typename IPAddress>
 class EigrpDual : public cObject /* cSimpleModule */
 {
   public:
-    enum DualEvent
-    {
+    enum DualEvent {
         RECV_UPDATE = 0,    /**< Change of route distance in received update message or on interface */
         RECV_QUERY,         /**< Received query message */
         RECV_REPLY,         /**< Received reply message */
@@ -53,7 +52,7 @@ class EigrpDual : public cObject /* cSimpleModule */
     };
 
   protected:
-    IEigrpPdm<IPAddress> *pdm;     /**< Protocol dependent module interface */
+    IEigrpPdm<IPAddress> *pdm; /**< Protocol dependent module interface */
 
     /**
      * Invalidates specified route.
@@ -99,6 +98,7 @@ class EigrpDual : public cObject /* cSimpleModule */
      */
     void processEvent(DualEvent event, EigrpRouteSource<IPAddress> *source, int neighborId, bool isSourceNew);
 };
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif /* EIGRPDUAL_H_ */
+

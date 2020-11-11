@@ -23,7 +23,7 @@
 
 namespace inet {
 
-#undef ALTERNATE    // conflicts with <windows.h>
+#undef ALTERNATE // conflicts with <windows.h>
 
 /**
  * Per-interface data needed by the STP and RSTP protocols.
@@ -35,8 +35,7 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     enum PortState { DISCARDING, LEARNING, FORWARDING };
 
-    class PortInfo
-    {
+    class PortInfo {
       public:
         /* The following values have same meaning in both STP and RSTP.
          * See Ieee8021dBDPU for more info.
@@ -54,19 +53,19 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         unsigned int bridgePriority;
         MacAddress bridgeAddress;
         unsigned int portPriority;
-        unsigned int portNum;    // The number of the switch port (i.e. EthernetSwitch ethg[] gate index).
+        unsigned int portNum; // The number of the switch port (i.e. EthernetSwitch ethg[] gate index).
 
-        simtime_t age;    // This parameter is conveyed to enable a switch to discard information whose age exceeds Max Age. (STP,RSTP)
+        simtime_t age; // This parameter is conveyed to enable a switch to discard information whose age exceeds Max Age. (STP,RSTP)
         simtime_t maxAge;
 
-        simtime_t fdWhile;    // Forward delay timer (see fwdDelay). (STP,RSTP)
-        simtime_t fwdDelay;    // The time spent by a Port in the Listening State and the Learning State before moving to the Learning or For-
-                               // warding State, respectively. (STP,RSTP)
+        simtime_t fdWhile; // Forward delay timer (see fwdDelay). (STP,RSTP)
+        simtime_t fwdDelay; // The time spent by a Port in the Listening State and the Learning State before moving to the Learning or For-
+                            // warding State, respectively. (STP,RSTP)
 
-        simtime_t helloTime;    // The time interval between the generation of Configuration BPDUs by the Root. (STP)
-                                // The interval between periodic transmissions of Configuration Messages by Designated Ports. (RSTP)
+        simtime_t helloTime; // The time interval between the generation of Configuration BPDUs by the Root. (STP)
+                             // The interval between periodic transmissions of Configuration Messages by Designated Ports. (RSTP)
 
-        simtime_t TCWhile;    // The Topology Change timer. TCN Messages are sent while this timer is running. (RSTP)
+        simtime_t TCWhile; // The Topology Change timer. TCN Messages are sent while this timer is running. (RSTP)
 
         unsigned int lostBPDU;
         simtime_t nextUpgrade;

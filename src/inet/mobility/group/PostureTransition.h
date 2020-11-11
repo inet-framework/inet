@@ -84,8 +84,7 @@ class INET_API PostureTransition
     int defaultMatrixID;
 
     /** @brief Data type for one instance of Markov transition matrix. */
-    typedef struct
-    {
+    typedef struct {
         std::string name;
         double **matrix;
     } TransMatrix;
@@ -97,15 +96,13 @@ class INET_API PostureTransition
     TransMatrixList matrixList;
 
     /** @brief Data type for one instance of the area (space) boundary. */
-    typedef struct
-    {
+    typedef struct {
         Coord low;
         Coord high;
     } AreaBound;
 
     /** @brief Data type for one instance of area type. */
-    typedef struct
-    {
+    typedef struct {
         std::string name;
         std::vector<AreaBound *> boundries;
     } AreaType;
@@ -117,15 +114,13 @@ class INET_API PostureTransition
     AreaTypeList areaTypeList;
 
     /** @brief Data type for one instance of the time boundary. */
-    typedef struct
-    {
+    typedef struct {
         simtime_t low;
         simtime_t high;
     } TimeBound;
 
     /** @brief Data type for one instance of time domain. */
-    typedef struct
-    {
+    typedef struct {
         std::string name;
         std::vector<TimeBound *> boundries;
     } TimeDomainType;
@@ -137,8 +132,7 @@ class INET_API PostureTransition
     TimeDomainList timeDomainList;
 
     /** @brief Data type for one instance of space-time combination. */
-    typedef struct
-    {
+    typedef struct {
         int timeID;
         int areaID;
         int matrixID;

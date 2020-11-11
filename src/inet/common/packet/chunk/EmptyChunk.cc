@@ -58,3 +58,4 @@ const Ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const 
 }
 
 } // namespace
+

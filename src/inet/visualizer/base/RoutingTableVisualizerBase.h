@@ -49,7 +49,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
         const Ipv4Route *route = nullptr;
 
       public:
-        DirectiveResolver(const Ipv4Route *route) : route(route) { }
+        DirectiveResolver(const Ipv4Route *route) : route(route) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

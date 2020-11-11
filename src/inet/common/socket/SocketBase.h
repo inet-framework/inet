@@ -35,7 +35,7 @@ class INET_API SocketBase : public ISocket
 
   public:
     SocketBase();
-    virtual ~SocketBase() { }
+    virtual ~SocketBase() {}
 
     /** @name Setting up a socket */
     //@{

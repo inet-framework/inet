@@ -52,7 +52,7 @@ void BoxedLabelFigure::setTooltip(const char *tooltip)
     rectangleFigure->setTooltip(tooltip);
 }
 
-void BoxedLabelFigure::setAssociatedObject(cObject * object)
+void BoxedLabelFigure::setAssociatedObject(cObject *object)
 {
     labelFigure->setAssociatedObject(object);
     rectangleFigure->setAssociatedObject(object);

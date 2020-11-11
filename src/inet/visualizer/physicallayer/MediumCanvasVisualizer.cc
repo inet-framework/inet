@@ -299,8 +299,8 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
     }
     else {
         // TODO:
-//            auto bandpassFilterFunction = makeShared<Boxcar1DFunction<double, Hz>>(powerDensityMapCenterFrequency - powerDensityMapBandwidth / 2, powerDensityMapCenterFrequency + powerDensityMapBandwidth / 2, 1);
-//            powerFunction = integrate<WpHz, Domain<m, m, m, simsec, Hz>, 0b11110, W, Domain<m, m, m, simsec>>(powerDensityFunction->multiply(bandpassFilter));
+//        auto bandpassFilterFunction = makeShared<Boxcar1DFunction<double, Hz>>(powerDensityMapCenterFrequency - powerDensityMapBandwidth / 2, powerDensityMapCenterFrequency + powerDensityMapBandwidth / 2, 1);
+//        powerFunction = integrate<WpHz, Domain<m, m, m, simsec, Hz>, 0b11110, W, Domain<m, m, m, simsec>>(powerDensityFunction->multiply(bandpassFilter));
         figure->setMinValue(mW2dBmW(mW(signalMinPower).get()));
         figure->setMaxValue(mW2dBmW(mW(signalMaxPower).get()));
         throw cRuntimeError("TODO");
@@ -455,7 +455,7 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
         auto lower = j.getLower();
         auto upper = j.getUpper();
         // NOTE: the interval is closed at the lower boundary and open at the upper boundary
-        //       we want to have the limit of the function's value at the upper boundary from the left
+        // we want to have the limit of the function's value at the upper boundary from the left
         if (std::get<4>(upper) != std::get<4>(lower))
             std::get<4>(upper) = Hz(std::nextafter(std::get<4>(upper).get(), std::get<4>(lower).get()));
         WpHz power1;
@@ -503,7 +503,7 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForPartitionBounds(con
     }
     ASSERT(!std::isnan(totalPower1.get()));
     ASSERT(!std::isnan(totalPower2.get()));
-    return {totalPower1, totalPower2};
+    return { totalPower1, totalPower2 };
 }
 
 std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const IAntenna *antenna, const Coord& position) const
@@ -525,14 +525,14 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(
             WpHz power2 = gain * powerFunction->getValue(upper);
             ASSERT(!std::isnan(power1.get()));
             ASSERT(!std::isnan(power2.get()));
-            return {power1, power2};
+            return { power1, power2 };
         }
     }
     WpHz power1 = powerFunction->getValue(lower);
     WpHz power2 = powerFunction->getValue(upper);
     ASSERT(!std::isnan(power1.get()));
     ASSERT(!std::isnan(power2.get()));
-    return {power1, power2};
+    return { power1, power2 };
 }
 
 void MediumCanvasVisualizer::refreshSpectrogramFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const
@@ -713,7 +713,7 @@ std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobi
         mobility = antenna->getMobility();
     else
         mobility = check_and_cast<IMobility *>(networkNode->getSubmodule("mobility"));
-    return std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobility *>{transmissionInProgress, receptionInProgress, antenna, mobility};
+    return std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobility *> { transmissionInProgress, receptionInProgress, antenna, mobility };
 }
 
 void MediumCanvasVisualizer::setAnimationSpeed()
@@ -849,12 +849,12 @@ cFigure *MediumCanvasVisualizer::removeSignalFigure(const ITransmission *transmi
     }
 }
 
-cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* transmission) const
+cGroupFigure *MediumCanvasVisualizer::createSignalFigure(const ITransmission *transmission) const
 {
     cFigure::Point position = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
-    cGroupFigure* groupFigure = new cGroupFigure("signal");
+    cGroupFigure *groupFigure = new cGroupFigure("signal");
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
-    SignalFigure* signalFigure = new SignalFigure("bubble");
+    SignalFigure *signalFigure = new SignalFigure("bubble");
     signalFigure->setTags((std::string("propagating_signal ") + tags).c_str());
     signalFigure->setTooltip("These rings represents a signal propagating through the medium");
     signalFigure->setAssociatedObject(const_cast<cObject *>(check_and_cast<const cObject *>(transmission)));
@@ -870,7 +870,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     signalFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
     signalFigure->refresh();
     groupFigure->addFigure(signalFigure);
-    cLabelFigure* nameFigure = new cLabelFigure("packet name");
+    cLabelFigure *nameFigure = new cLabelFigure("packet name");
     nameFigure->setPosition(position);
     nameFigure->setTags((std::string("propagating_signal packet_name label ") + tags).c_str());
     auto packet = transmission->getPacket();

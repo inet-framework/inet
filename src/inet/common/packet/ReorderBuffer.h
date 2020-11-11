@@ -37,8 +37,8 @@ class INET_API ReorderBuffer : public ChunkBuffer
     b expectedOffset;
 
   public:
-    ReorderBuffer(b expectedOffset = b(-1)) : expectedOffset(expectedOffset) { }
-    ReorderBuffer(const ReorderBuffer& other) : ChunkBuffer(other), expectedOffset(other.expectedOffset) { }
+    ReorderBuffer(b expectedOffset = b(-1)) : expectedOffset(expectedOffset) {}
+    ReorderBuffer(const ReorderBuffer& other) : ChunkBuffer(other), expectedOffset(other.expectedOffset) {}
 
     /**
      * Returns the offset of the next expected data chunk.

@@ -46,11 +46,10 @@ class PatternMatcher;
 class INET_API InterfaceMatcher
 {
   private:
-    class Matcher
-    {
+    class Matcher {
       private:
         bool matchesany;
-        std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
+        std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
 
       public:
         Matcher(const char *pattern);
@@ -58,8 +57,7 @@ class INET_API InterfaceMatcher
         bool matches(const char *s) const;
         bool matchesAny() const { return matchesany; }
     };
-    struct Selector
-    {
+    struct Selector {
         Matcher hostMatcher;
         Matcher nameMatcher;
         Matcher towardsMatcher;

@@ -47,7 +47,7 @@ uint16_t TcpIpChecksum::_checksum(const std::vector<uint8_t>& vec)
 {
     uint32_t sum = 0;
     for (size_t i = 0; i < vec.size(); i++) {
-        sum += (i&1) ? vec[i] : (vec[i] << 8);
+        sum += (i & 1) ? vec[i] : (vec[i] << 8);
         if (sum & 0x80000000)
             sum = (sum & 0xFFFF) + (sum >> 16);
     }

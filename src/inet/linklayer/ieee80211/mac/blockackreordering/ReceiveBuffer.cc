@@ -21,8 +21,8 @@ namespace inet {
 namespace ieee80211 {
 
 ReceiveBuffer::ReceiveBuffer(int bufferSize, SequenceNumber nextExpectedSequenceNumber) :
-        bufferSize(bufferSize),
-        nextExpectedSequenceNumber(nextExpectedSequenceNumber)
+    bufferSize(bufferSize),
+    nextExpectedSequenceNumber(nextExpectedSequenceNumber)
 {
 }
 
@@ -41,7 +41,7 @@ bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211Dat
     if (length < bufferSize && nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize) {
         auto it = buffer.find(sequenceNumber);
         if (it != buffer.end()) {
-            auto &fragments = it->second;
+            auto& fragments = it->second;
             // TODO: efficiency
             for (auto fragment : fragments) {
                 const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
@@ -97,3 +97,4 @@ ReceiveBuffer::~ReceiveBuffer()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

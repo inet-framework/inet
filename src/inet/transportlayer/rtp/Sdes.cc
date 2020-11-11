@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/Sdes.h"
 
 #include <string.h>
@@ -193,7 +192,7 @@ void SdesChunk::addSDESItem(SdesItem *sdesItem)
         }
     }
 
-    //sdesItem->setOwner(this);
+//    sdesItem->setOwner(this);
     add(sdesItem);
     _length += sdesItem->getSdesTotalLength();
 }

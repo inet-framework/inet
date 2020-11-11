@@ -25,12 +25,11 @@ namespace ieee80211 {
 
 class NonQoSSequenceNumberAssignment : public LegacySequenceNumberAssigment
 {
-    protected:
-        std::map<MacAddress, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
+  protected:
+    std::map<MacAddress, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
 
-    public:
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
-
+  public:
+    virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 };
 
 } /* namespace ieee80211 */

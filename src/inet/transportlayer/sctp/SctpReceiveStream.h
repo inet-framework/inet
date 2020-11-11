@@ -54,7 +54,7 @@ class INET_API SctpReceiveStream : public cObject
     SctpQueue *getUnorderedQ() const { return unorderedQ; };
 
     int32_t getStreamId() const { return streamId; };
-    void setStreamId(const uint16_t id) { streamId = id; };
+    void setStreamId(const uint16_t id) { streamId = id; }
 };
 
 } // namespace sctp

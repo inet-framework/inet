@@ -31,8 +31,7 @@ namespace inet {
 class INET_API L3Socket : public INetworkSocket
 {
   public:
-    class INET_API ICallback : public INetworkSocket::ICallback
-    {
+    class INET_API ICallback : public INetworkSocket::ICallback {
       public:
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override { socketDataArrived(check_and_cast<L3Socket *>(socket), packet); }
         virtual void socketDataArrived(L3Socket *socket, Packet *packet) = 0;
@@ -43,6 +42,7 @@ class INET_API L3Socket : public INetworkSocket
         virtual void socketClosed(INetworkSocket *socket) override { socketClosed(check_and_cast<L3Socket *>(socket)); }
         virtual void socketClosed(L3Socket *socket) = 0;
     };
+
   protected:
     bool bound = false;
     bool isOpen_ = false;

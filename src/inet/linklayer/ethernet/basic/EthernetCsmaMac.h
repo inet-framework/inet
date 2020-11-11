@@ -57,7 +57,7 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
 
   protected:
     // states
-    int backoffs = 0;    // value of backoff for exponential back-off algorithm
+    int backoffs = 0; // value of backoff for exponential back-off algorithm
 
     cMessage *endRxTimer = nullptr;
     cMessage *endBackoffTimer = nullptr;
@@ -66,21 +66,20 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
 
     // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
     // stores the end time of the reconnect state
-    struct PkIdRxTime
-    {
-        long packetTreeId;    // >=0: tree ID of packet being received; -1: this is a special entry that stores the end time of the reconnect state
-        simtime_t endTime;    // end of reception
+    struct PkIdRxTime {
+        long packetTreeId; // >=0: tree ID of packet being received; -1: this is a special entry that stores the end time of the reconnect state
+        simtime_t endTime; // end of reception
         PkIdRxTime(long id, simtime_t time) { packetTreeId = id; endTime = time; }
     };
 
     // statistics
-    simtime_t totalCollisionTime;    // total duration of collisions on channel
-    simtime_t totalSuccessfulRxTxTime;    // total duration of successful transmissions on channel
-    simtime_t channelBusySince;    // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
-    unsigned long numCollisions = 0;    // collisions (NOT number of collided frames!) sensed
-    unsigned long numBackoffs = 0;    // number of retransmissions
-    int framesSentInBurst = 0;    // Number of frames send out in current frame burst
-    B bytesSentInBurst = B(0);    // Number of bytes transmitted in current frame burst
+    simtime_t totalCollisionTime; // total duration of collisions on channel
+    simtime_t totalSuccessfulRxTxTime; // total duration of successful transmissions on channel
+    simtime_t channelBusySince; // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
+    unsigned long numCollisions = 0; // collisions (NOT number of collided frames!) sensed
+    unsigned long numBackoffs = 0; // number of retransmissions
+    int framesSentInBurst = 0; // Number of frames send out in current frame burst
+    B bytesSentInBurst = B(0); // Number of bytes transmitted in current frame burst
 
     static simsignal_t collisionSignal;
     static simsignal_t backoffSlotsGeneratedSignal;

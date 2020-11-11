@@ -42,8 +42,7 @@ namespace inet {
 class INET_API PacketDissector
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         /**
          * True means the packet dissector should recursively process the PDU.
@@ -72,8 +71,7 @@ class INET_API PacketDissector
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) = 0;
     };
 
-    class INET_API ProtocolDissectorCallback : public ProtocolDissector::ICallback
-    {
+    class INET_API ProtocolDissectorCallback : public ProtocolDissector::ICallback {
       protected:
         const PacketDissector& packetDissector;
 
@@ -87,8 +85,7 @@ class INET_API PacketDissector
         virtual void dissectPacket(Packet *packet, const Protocol *protocol) override;
     };
 
-    class INET_API ProtocolDataUnit : public Chunk
-    {
+    class INET_API ProtocolDataUnit : public Chunk {
       protected:
         int level;
         bool isCorrect_ = true;
@@ -96,7 +93,7 @@ class INET_API PacketDissector
         std::deque<Ptr<const Chunk>> chunks;
 
       public:
-        ProtocolDataUnit(int level, const Protocol* protocol);
+        ProtocolDataUnit(int level, const Protocol *protocol);
 
         int getLevel() const { return level; }
         bool isCorrect() const { return isCorrect_; }
@@ -111,8 +108,7 @@ class INET_API PacketDissector
         void insert(const Ptr<const Chunk>& chunk) { chunks.push_back(chunk); }
     };
 
-    class INET_API ChunkBuilder : public PacketDissector::ICallback
-    {
+    class INET_API ChunkBuilder : public PacketDissector::ICallback {
       protected:
         Ptr<const Chunk> content;
 
@@ -120,14 +116,13 @@ class INET_API PacketDissector
         const Ptr<const Chunk> getContent() { return content; }
 
         virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
-        virtual void startProtocolDataUnit(const Protocol *protocol) override { }
-        virtual void endProtocolDataUnit(const Protocol *protocol) override { }
-        virtual void markIncorrect() override { }
+        virtual void startProtocolDataUnit(const Protocol *protocol) override {}
+        virtual void endProtocolDataUnit(const Protocol *protocol) override {}
+        virtual void markIncorrect() override {}
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
-    class INET_API PduTreeBuilder : public PacketDissector::ICallback
-    {
+    class INET_API PduTreeBuilder : public PacketDissector::ICallback {
       protected:
         bool isEndProtocolDataUnitCalled = false;
         bool isSimplyEncapsulatedPacket_ = true;

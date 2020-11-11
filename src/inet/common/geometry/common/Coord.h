@@ -53,10 +53,10 @@ class INET_API Coord
 
   public:
     /** @brief Default constructor. */
-    Coord() : x(0.0), y(0.0), z(0.0) { }
+    Coord() : x(0.0), y(0.0), z(0.0) {}
 
     /** @brief Initializes a coordinate. */
-    Coord(double x, double y, double z = 0.0) : x(x), y(y), z(z) { }
+    Coord(double x, double y, double z = 0.0) : x(x), y(y), z(z) {}
 
     /** @brief Initializes coordinate from other coordinate. */
     Coord(const Coord& other) { copy(other); }

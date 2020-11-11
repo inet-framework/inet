@@ -29,13 +29,12 @@ namespace ieee80211 {
  */
 class INET_API ICoordinationFunction
 {
-    public:
-        virtual ~ICoordinationFunction() { }
+  public:
+    virtual ~ICoordinationFunction() {}
 
-        virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
-        virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
-        virtual void corruptedFrameReceived() = 0;
-
+    virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
+    virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+    virtual void corruptedFrameReceived() = 0;
 };
 
 } // namespace ieee80211

@@ -28,38 +28,36 @@
 #include "inet/routing/eigrp/pdms/EigrpPrint.h"
 
 namespace inet {
-namespace eigrp
-{
+namespace eigrp {
 
 // User messages
 const char *UserMsgs[] =
 {
-  // M_OK
-  "OK",
-  // M_UPDATE_SEND
-  "Update",
-  // M_REQUEST_SEND
-  "Request",
-  // M_QUERY_SEND
-  "Query",
-  // M_REPLY_SEND
-  "Reply",
-  // M_HELLO_SEND
-  "Hello",
-  // M_DISABLED_ON_IF
-  "EIGRP process isn't enabled on interface",
-  // M_NEIGH_BAD_AS
-  "AS number is different",
-  // M_NEIGH_BAD_KVALUES
-  "K-value mismatch",
-  // M_NEIGH_BAD_SUBNET
-  "Not on the common subnet",
-  // M_SIAQUERY_SEND
-  "Send SIA Query message",
-  // M_SIAREPLY_SEND
-  "Send SIA Reply message",
+    // M_OK
+    "OK",
+    // M_UPDATE_SEND
+    "Update",
+    // M_REQUEST_SEND
+    "Request",
+    // M_QUERY_SEND
+    "Query",
+    // M_REPLY_SEND
+    "Reply",
+    // M_HELLO_SEND
+    "Hello",
+    // M_DISABLED_ON_IF
+    "EIGRP process isn't enabled on interface",
+    // M_NEIGH_BAD_AS
+    "AS number is different",
+    // M_NEIGH_BAD_KVALUES
+    "K-value mismatch",
+    // M_NEIGH_BAD_SUBNET
+    "Not on the common subnet",
+    // M_SIAQUERY_SEND
+    "Send SIA Query message",
+    // M_SIAREPLY_SEND
+    "Send SIA Reply message",
 };
-
 }; // end of namespace eigrp
 
 std::ostream& operator<<(std::ostream& os, const eigrp::EigrpNetwork<Ipv4Address>& network)
@@ -91,4 +89,6 @@ std::ostream& operator<<(std::ostream& os, const EigrpStub& stub)
     if (stub.summaryRt) os << "summary";
     return os;
 }
-}
+
+} // namespace inet
+

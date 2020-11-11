@@ -30,8 +30,7 @@ namespace queueing {
 class INET_API IPacketBuffer : public virtual IPacketCollection
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         /**
          * Notifies the packet owner about the packet being removed from the buffer.

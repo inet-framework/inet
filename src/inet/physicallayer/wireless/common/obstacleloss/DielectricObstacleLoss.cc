@@ -102,8 +102,7 @@ double DielectricObstacleLoss::computeObjectLoss(const IPhysicalObject *object, 
     Coord intersection1, intersection2, normal1, normal2;
     intersectionComputationCount++;
     bool hasIntersections = shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
-    if (hasIntersections && (intersection1 != intersection2))
-    {
+    if (hasIntersections && (intersection1 != intersection2)) {
         intersectionCount++;
         const IMaterial *material = object->getMaterial();
         if (enableDielectricLoss) {

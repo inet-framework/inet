@@ -37,6 +37,7 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
       public:
         MobilityVisualization(IMobility *mobility);
     };
+
   protected:
     /** @name Parameters */
     //@{

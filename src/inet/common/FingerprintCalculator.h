@@ -22,7 +22,7 @@
 
 namespace inet {
 
-#define INET_FINGERPRINT_INGREDIENTS "~UNID"
+#define INET_FINGERPRINT_INGREDIENTS    "~UNID"
 
 class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
 {

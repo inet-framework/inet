@@ -31,13 +31,15 @@ class INET_API CPacketClassifierFunction : public cObject, public virtual IPacke
     PacketClassifierFunction packetClassifierFunction;
 
   public:
-    CPacketClassifierFunction(PacketClassifierFunction packetClassifierFunction) : packetClassifierFunction(packetClassifierFunction) { }
+    CPacketClassifierFunction(PacketClassifierFunction packetClassifierFunction) : packetClassifierFunction(packetClassifierFunction) {}
 
     virtual int classifyPacket(Packet *packet) const override { return packetClassifierFunction(packet); }
 };
 
 #define Register_Packet_Classifier_Function(name, function) \
-    class INET_API name : public ::inet::queueing::CPacketClassifierFunction { public: name() : CPacketClassifierFunction(function) { } }; \
+    class INET_API name : public ::inet::queueing::CPacketClassifierFunction { \
+      public: name() : CPacketClassifierFunction(function) {} \
+    }; \
     Register_Class(name)
 
 } // namespace queueing

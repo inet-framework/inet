@@ -43,7 +43,7 @@ static bool isBpdu(Packet *packet)
         const auto& ethernetHeader = packet->peekAtFront<EthernetMacHeader>();
         if (isIeee8023Header(*ethernetHeader)) {
             const auto& llcHeader = packet->peekDataAt<Ieee8022LlcHeader>(ethernetHeader->getChunkLength());
-            return (llcHeader->getSsap() == 0x42 && llcHeader->getDsap() == 0x42 && llcHeader->getControl() == 3);
+            return llcHeader->getSsap() == 0x42 && llcHeader->getDsap() == 0x42 && llcHeader->getControl() == 3;
         }
         else
             return false;
@@ -100,12 +100,12 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
     updatePeerAddress(incomingInterface, sourceAddress);
     // BPDU Handling
     if (isStpAware
-            && (destinationAddress == MacAddress::STP_MULTICAST_ADDRESS || destinationAddress == bridgeAddress)
-            && incomingInterfaceData->getRole() != Ieee8021dInterfaceData::DISABLED
-            && isBpdu(incomingPacket))
+        && (destinationAddress == MacAddress::STP_MULTICAST_ADDRESS || destinationAddress == bridgeAddress)
+        && incomingInterfaceData->getRole() != Ieee8021dInterfaceData::DISABLED
+        && isBpdu(incomingPacket))
     {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
-        sendUp(incomingPacket);    // deliver to the STP/RSTP module
+        sendUp(incomingPacket); // deliver to the STP/RSTP module
     }
     else if (isStpAware && !incomingInterfaceData->isForwarding()) {
         EV_INFO << "Dropping packet because the incoming interface is currently not forwarding" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << endl;
@@ -128,7 +128,7 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
         macAddressReq->setSrcAddress(sourceAddress);
         macAddressReq->setDestAddress(destinationAddress);
 
-        //TODO revise next "if"s: 2nd drops all packets for me if not forwarding port; 3rd sends up when dest==STP_MULTICAST_ADDRESS; etc.
+        // TODO revise next "if"s: 2nd drops all packets for me if not forwarding port; 3rd sends up when dest==STP_MULTICAST_ADDRESS; etc.
         // reordering, merge 1st and 3rd, ...
 
         if (destinationAddress.isBroadcast())

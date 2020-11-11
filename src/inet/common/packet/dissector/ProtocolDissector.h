@@ -38,8 +38,7 @@ namespace inet {
 class INET_API ProtocolDissector : public cObject
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         /**
          * Notifies about the start of a new protocol data unit (PDU).

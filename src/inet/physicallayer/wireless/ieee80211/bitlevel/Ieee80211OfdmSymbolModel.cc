@@ -46,6 +46,7 @@ Ieee80211OfdmReceptionSymbolModel::Ieee80211OfdmReceptionSymbolModel(int headerS
     ReceptionSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols, NaN)
 {
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

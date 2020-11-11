@@ -33,18 +33,18 @@ class PolyhedronFace;
  */
 class INET_API PolyhedronPoint : public Coord
 {
-    protected:
-        std::vector<PolyhedronFace *> fConflict; // visible faces from this point
-        bool selected;
+  protected:
+    std::vector<PolyhedronFace *> fConflict; // visible faces from this point
+    bool selected;
 
-    public:
-        std::vector<PolyhedronFace *>& getConflictVector() { return fConflict; }
-        bool isSelected() const { return selected; }
-        void setToSelected() { selected = true; }
-        bool hasConflicts() const { return !fConflict.empty(); }
-        void addConflictFace(PolyhedronFace * face) { fConflict.push_back(face); }
-        PolyhedronPoint(const Coord& point);
-        PolyhedronPoint();
+  public:
+    std::vector<PolyhedronFace *>& getConflictVector() { return fConflict; }
+    bool isSelected() const { return selected; }
+    void setToSelected() { selected = true; }
+    bool hasConflicts() const { return !fConflict.empty(); }
+    void addConflictFace(PolyhedronFace *face) { fConflict.push_back(face); }
+    PolyhedronPoint(const Coord& point);
+    PolyhedronPoint();
 };
 
 } /* namespace inet */

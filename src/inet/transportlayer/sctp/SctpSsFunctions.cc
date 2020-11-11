@@ -91,15 +91,15 @@ void SctpAssociation::addOutStreams(uint32_t outStreams)
 
 void SctpAssociation::deleteStreams()
 {
-    for (auto & elem : sendStreams) {
+    for (auto& elem : sendStreams) {
         delete elem.second;
     }
-    for (auto & elem : receiveStreams) {
+    for (auto& elem : receiveStreams) {
         delete elem.second;
     }
 }
 
-int32_t SctpAssociation::streamScheduler(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamScheduler(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     int32_t sid, testsid;
 
@@ -109,11 +109,13 @@ int32_t SctpAssociation::streamScheduler(SctpPathVariables *path, bool peek)    
 
     if ((state->ssLastDataChunkSizeSet == false || state->ssNextStream == false) &&
         (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
-         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0)) {
+         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0))
+    {
         sid = state->lastStreamScheduled;
         EV_DETAIL << "Stream Scheduler: again sid " << sid << ".\n";
         state->ssNextStream = true;
-    } else {
+    }
+    else {
         testsid = state->lastStreamScheduled;
 
         do {
@@ -149,14 +151,14 @@ int32_t SctpAssociation::numUsableStreams(void)
 {
     int32_t count = 0;
 
-    for (auto & elem : sendStreams)
+    for (auto& elem : sendStreams)
         if (elem.second->getStreamQ()->getLength() > 0 || elem.second->getUnorderedStreamQ()->getLength() > 0) {
             count++;
         }
     return count;
 }
 
-int32_t SctpAssociation::streamSchedulerRoundRobinPacket(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamSchedulerRoundRobinPacket(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     int32_t sid, testsid, lastsid = state->lastStreamScheduled;
 
@@ -202,14 +204,14 @@ int32_t SctpAssociation::streamSchedulerRoundRobinPacket(SctpPathVariables *path
     return sid;
 }
 
-int32_t SctpAssociation::streamSchedulerRandom(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamSchedulerRandom(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     EV_INFO << "Stream Scheduler: Random (peek: " << peek << ")" << endl;
     state->ssNextStream = true;
     return streamSchedulerRandomPacket(path, peek);
 }
 
-int32_t SctpAssociation::streamSchedulerRandomPacket(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamSchedulerRandomPacket(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     int32_t sid = -1, rnd;
     uint32_t lastsid = state->lastStreamScheduled;
@@ -218,7 +220,7 @@ int32_t SctpAssociation::streamSchedulerRandomPacket(SctpPathVariables *path, bo
     EV_INFO << "Stream Scheduler: RandomPacket (peek: " << peek << ")" << endl;
 
     if (state->ssNextStream) {
-        for (auto & elem : sendStreams) {
+        for (auto& elem : sendStreams) {
             if (elem.second->getUnorderedStreamQ()->getLength() > 0 ||
                 elem.second->getStreamQ()->getLength() > 0)
             {
@@ -252,7 +254,7 @@ int32_t SctpAssociation::streamSchedulerRandomPacket(SctpPathVariables *path, bo
     return sid;
 }
 
-int32_t SctpAssociation::streamSchedulerPriority(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamSchedulerPriority(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     int32_t sid = 0, testsid;
     std::list<uint32_t> PriorityList;
@@ -300,14 +302,14 @@ int32_t SctpAssociation::streamSchedulerPriority(SctpPathVariables *path, bool p
     return sid;
 }
 
-int32_t SctpAssociation::streamSchedulerFairBandwidth(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamSchedulerFairBandwidth(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     EV_INFO << "Stream Scheduler: FairBandwidth (peek: " << peek << ")" << endl;
     state->ssNextStream = true;
     return streamSchedulerFairBandwidthPacket(path, peek);
 }
 
-int32_t SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     uint32_t bandwidth = 0, packetsize = 0, lastDataChunkSize;
     int32_t sid = -1;
@@ -317,7 +319,7 @@ int32_t SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *p
     EV_INFO << "Stream Scheduler: FairBandwidthPacket (peek: " << peek << ")" << endl;
 
     if (state->ssFairBandwidthMap.empty()) {
-        for (auto & elem : sendStreams) {
+        for (auto& elem : sendStreams) {
             state->ssFairBandwidthMap[elem.first] = -1;
             EV_DETAIL << "initialize sid " << elem.first << " in fb map." << endl;
         }
@@ -325,7 +327,7 @@ int32_t SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *p
 
     if (peek) {
         EV_DETAIL << "just peeking, use duplicate fb map." << endl;
-        for (auto & elem : state->ssFairBandwidthMap) {
+        for (auto& elem : state->ssFairBandwidthMap) {
             peekMap[elem.first] = elem.second;
         }
         mapPointer = &peekMap;
@@ -333,7 +335,7 @@ int32_t SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *p
 
     lastDataChunkSize = (*mapPointer)[state->lastStreamScheduled];
 
-    for (auto & elem : sendStreams) {
+    for (auto& elem : sendStreams) {
         /* There is data in this stream */
         if (elem.second->getUnorderedStreamQ()->getLength() > 0 || elem.second->getStreamQ()->getLength() > 0) {
             /* Get size of the first packet in stream */
@@ -383,7 +385,7 @@ int32_t SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *p
     }
 
     if (state->ssNextStream) {
-        for (auto & elem : *mapPointer) {
+        for (auto& elem : *mapPointer) {
             if ((sid < 0 || (uint32_t)elem.second < bandwidth) && elem.second >= 0) {
                 sid = elem.first;
                 bandwidth = elem.second;
@@ -410,7 +412,7 @@ int32_t SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *p
     return sid;
 }
 
-int32_t SctpAssociation::streamSchedulerFCFS(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32_t SctpAssociation::streamSchedulerFCFS(SctpPathVariables *path, bool peek) // peek indicates that no data is sent, but we just want to peek
 {
     int32_t sid, testsid;
     simtime_t oldestEnqueuing, testTime;
@@ -508,7 +510,7 @@ int32_t SctpAssociation::pathStreamSchedulerMapToPath(SctpPathVariables *path, b
 {
     int32_t thisPath = -1;
     int32_t workingPaths = 0;
-    for (auto & elem : sctpPathMap) {
+    for (auto& elem : sctpPathMap) {
         SctpPathVariables *myPath = elem.second;
         if (myPath->activePath) {
             if (myPath == path) {
@@ -527,8 +529,8 @@ int32_t SctpAssociation::pathStreamSchedulerMapToPath(SctpPathVariables *path, b
          iterator != sendStreams.end(); iterator++)
     {
         SctpSendStream *stream = iterator->second;
-        if ((stream->getStreamId() % workingPaths) == thisPath) {    // Maps to "path" ...
-            if ((stream->getUnorderedStreamQ()->getLength() > 0) ||    // Stream has something to send ...
+        if ((stream->getStreamId() % workingPaths) == thisPath) { // Maps to "path" ...
+            if ((stream->getUnorderedStreamQ()->getLength() > 0) || // Stream has something to send ...
                 (stream->getStreamQ()->getLength() > 0))
             {
                 assert(sid == -1);

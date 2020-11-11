@@ -77,7 +77,7 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
             if (isBridgeNode(destinationNode))
                 continue;
 
-            //int destinationGateId = destinationNode->getPath(0)->getLocalGateId();
+//            int destinationGateId = destinationNode->getPath(0)->getLocalGateId();
             IInterfaceTable *destinationInterfaceTable = destinationNode->interfaceTable;
 
             // determine next hop interface

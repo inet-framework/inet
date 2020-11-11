@@ -81,9 +81,9 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     const Protocol& getProtocol() const override { return Protocol::wiseRoute; }
 
     // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStartOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {} // TODO implementation
 
   protected:
     enum messageKinds {
@@ -97,8 +97,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
         DUPLICATE
     } floodTypes;
 
-    typedef struct tRouteTableEntry
-    {
+    typedef struct tRouteTableEntry {
         L3Address nextHop;
         double rssi;
     } tRouteTableEntry;

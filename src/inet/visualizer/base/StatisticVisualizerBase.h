@@ -32,8 +32,7 @@ namespace visualizer {
 class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
 {
   public:
-    class INET_API LastValueRecorder : public cNumericResultRecorder
-    {
+    class INET_API LastValueRecorder : public cNumericResultRecorder {
       protected:
         double lastValue = NaN;
 
@@ -64,7 +63,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         const StatisticVisualization *visualization = nullptr;
 
       public:
-        DirectiveResolver(const StatisticVisualizerBase *visualizer, const StatisticVisualization *visualization) : visualizer(visualizer), visualization(visualization) { }
+        DirectiveResolver(const StatisticVisualizerBase *visualizer, const StatisticVisualization *visualization) : visualizer(visualizer), visualization(visualization) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };
@@ -112,11 +111,11 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void removeAllStatisticVisualizations();
 
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization);
-    virtual void processSignal(cComponent *source, simsignal_t signal, std::function<void (cIListener *)> receiveSignal);
+    virtual void processSignal(cComponent *source, simsignal_t signal, std::function<void(cIListener *)> receiveSignal);
 
   public:
 #define PROCESS_SIGNAL(value) { processSignal(source, signal, [=] (cIListener *listener) { listener->receiveSignal(source, signal, value, details); }); }
-    virtual void receiveSignal(cComponent* source, simsignal_t signal, bool b, cObject* details) override { PROCESS_SIGNAL(b); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { PROCESS_SIGNAL(b); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_SIGNAL(d); }

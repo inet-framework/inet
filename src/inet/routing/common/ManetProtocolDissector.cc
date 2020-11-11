@@ -32,7 +32,7 @@ void ManetProtocolDissector::dissect(Packet *packet, const Protocol *protocol, I
 //    callback.dissectPacket(packet, payloadProtocol);
 //    ASSERT(packet->getDataLength() == B(0));
 
-    callback.dissectPacket(packet, nullptr);    //FIXME KLUDGE choose from aodv|dsdv|dymo|gpsr
+    callback.dissectPacket(packet, nullptr); // FIXME KLUDGE choose from aodv|dsdv|dymo|gpsr
 
     callback.endProtocolDataUnit(&Protocol::manet);
 }

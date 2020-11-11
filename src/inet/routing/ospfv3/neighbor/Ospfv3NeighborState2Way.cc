@@ -56,5 +56,5 @@ void Ospfv3NeighborState2Way::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
 }
 
 } // namespace ospfv3
-}//namespace inet
+} // namespace inet
 

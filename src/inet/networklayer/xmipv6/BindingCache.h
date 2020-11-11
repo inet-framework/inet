@@ -37,8 +37,7 @@ class INET_API BindingCache : public cSimpleModule
     //###########################Declaration of BUL and BC added by Zarrar Yousaf @ CNI Uni Dortmund on 04.06.07######
     /* Section 9.1
          Each Binding Cache entry conceptually contains the following fields: */
-    struct BindingCacheEntry
-    {
+    struct BindingCacheEntry {
         /*o  The home address of the mobile node for which this is the Binding
              Cache entry.  This field is used as the key for searching the
              Binding Cache for the destination address of a packet being sent.*/
@@ -56,13 +55,13 @@ class INET_API BindingCache : public cSimpleModule
         /*o  A flag indicating whether or not this Binding Cache entry is a
              home registration entry (applicable only on nodes which support
              home agent functionality).*/
-        bool isHomeRegisteration;    //if FALSE, it is Correspondent Registeration
+        bool isHomeRegisteration; // if FALSE, it is Correspondent Registeration
 
         /*o  The maximum value of the Sequence Number field received in
              previous Binding Updates for this home address.  The Sequence
              Number field is 16 bits long.  Sequence Number values MUST be
              compared modulo 2**16 as explained in Section 9.5.1.*/
-        uint sequenceNumber;    //Sequence number of BU message sent
+        uint sequenceNumber; // Sequence number of BU message sent
 
         /*o  Usage information for this Binding Cache entry.  This is needed to
              implement the cache replacement policy in use in the Binding
@@ -72,7 +71,7 @@ class INET_API BindingCache : public cSimpleModule
         // omitted
     };
 
-    typedef std::map<Ipv6Address, BindingCacheEntry> BindingCache6;    //The Ipv6 Address KEY of this map is the HomeAddress of the MN
+    typedef std::map<Ipv6Address, BindingCacheEntry> BindingCache6; // The Ipv6 Address KEY of this map is the HomeAddress of the MN
     BindingCache6 bindingCache;
 
     friend std::ostream& operator<<(std::ostream& os, const BindingCacheEntry& bce);

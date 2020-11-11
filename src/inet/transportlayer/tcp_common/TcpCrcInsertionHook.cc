@@ -33,7 +33,7 @@ namespace tcp {
 INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
     if (packet->findTag<InterfaceInd>())
-        return ACCEPT;  // FORWARD
+        return ACCEPT; // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::tcp) {

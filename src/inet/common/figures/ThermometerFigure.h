@@ -87,7 +87,6 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
 
     double getTickSize() const;
     void setTickSize(double value);
-
 };
 
 } // namespace inet

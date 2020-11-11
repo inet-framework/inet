@@ -48,10 +48,10 @@ class INET_API MessageChecker : public cSimpleModule
     void checkFieldType(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attrList, int i = 0) const;
     int findFieldIndex(void *object, cClassDescriptor *descriptor, const std::string& fieldName) const;
 
-    cXMLElementList m_checkingInfo;    /// List of checking information
-    cXMLElementList::iterator m_iterChk;    /// Interator of the list of chacking information
-    unsigned forwardedMsg;    /// Number of received and forwarded messages
-    unsigned checkedMsg;    /// Number of checked messages
+    cXMLElementList m_checkingInfo; // List of checking information
+    cXMLElementList::iterator m_iterChk; // Interator of the list of chacking information
+    unsigned forwardedMsg; // Number of received and forwarded messages
+    unsigned checkedMsg; // Number of checked messages
 };
 
 } // namespace inet

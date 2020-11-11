@@ -566,7 +566,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getSlowerMode(const IIeee80211Mode *mode
 const IIeee80211Mode *Ieee80211ModeSet::getFasterMode(const IIeee80211Mode *mode) const
 {
     int index = findModeIndex(mode);
-    if (index >= 0 && index < (int)entries.size()-1)
+    if (index >= 0 && index < (int)entries.size() - 1)
         return entries[index + 1].mode;
     else
         return nullptr;
@@ -582,7 +582,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getSlowestMandatoryMode() const
 
 const IIeee80211Mode *Ieee80211ModeSet::getFastestMandatoryMode() const
 {
-    for (int i = (int)entries.size()-1; i >= 0; i--)
+    for (int i = (int)entries.size() - 1; i >= 0; i--)
         if (entries[i].isMandatory)
             return entries[i].mode;
     return nullptr;
@@ -592,7 +592,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getSlowerMandatoryMode(const IIeee80211M
 {
     int index = findModeIndex(mode);
     if (index > 0)
-        for (int i = index-1; i >= 0; i--)
+        for (int i = index - 1; i >= 0; i--)
             if (entries[i].isMandatory)
                 return entries[i].mode;
     return nullptr;
@@ -602,7 +602,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
 {
     int index = findModeIndex(mode);
     if (index >= 0)
-        for (int i = index+1; i < (int)entries.size(); i++)
+        for (int i = index + 1; i < (int)entries.size(); i++)
             if (entries[i].isMandatory)
                 return entries[i].mode;
     return nullptr;

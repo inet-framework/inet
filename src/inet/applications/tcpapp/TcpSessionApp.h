@@ -32,8 +32,7 @@ class INET_API TcpSessionApp : public TcpAppBase
 {
   protected:
     // parameters
-    struct Command
-    {
+    struct Command {
         simtime_t tSend;
         long numBytes = 0;
         Command(simtime_t t, long n) { tSend = t; numBytes = n; }

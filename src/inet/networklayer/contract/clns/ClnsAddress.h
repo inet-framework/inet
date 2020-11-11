@@ -38,19 +38,19 @@ class ClnsAddress
   private:
     uint64_t systemID;
     uint64_t areaID;
-    uint8_t nsel; //this field is probably not part of NET, but part of NSAP (still confused)
+    uint8_t nsel; // this field is probably not part of NET, but part of NSAP (still confused)
 
   public:
     enum AddressCategory {
-        UNSPECIFIED    // 00.0000.0000.0000.0000.00
+        UNSPECIFIED // 00.0000.0000.0000.0000.00
     };
 
     static const ClnsAddress UNSPECIFIED_ADDRESS;
 
     ClnsAddress();
     ClnsAddress(std::string net);
-    ClnsAddress(uint64_t areaID, uint64_t systemID, uint8_t nsel = 0);   //FIXME remove nsel initialization
-    void set(uint64_t areaID, uint64_t systemID, uint8_t nsel = 0);   //FIXME remove nsel initialization
+    ClnsAddress(uint64_t areaID, uint64_t systemID, uint8_t nsel = 0); // FIXME remove nsel initialization
+    void set(uint64_t areaID, uint64_t systemID, uint8_t nsel = 0); // FIXME remove nsel initialization
     virtual ~ClnsAddress();
 
     bool isUnspecified() const;
@@ -64,7 +64,7 @@ class ClnsAddress
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const ClnsAddress& toCmp) const { return (systemID == toCmp.systemID && areaID == toCmp.areaID); }
+    bool equals(const ClnsAddress& toCmp) const { return systemID == toCmp.systemID && areaID == toCmp.areaID; }
 
     uint64_t getAreaId() const;
     uint64_t getSystemId() const;
@@ -84,10 +84,10 @@ class ClnsAddress
     /**
      * Compares two CLNS addresses.
      */
-    bool operator<(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID < addr1.getSystemId();}else{ return areaID < addr1.getAreaId();} }
-    bool operator<=(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID <= addr1.getSystemId();}else{ return areaID < addr1.getAreaId();} }
-    bool operator>(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID > addr1.getSystemId();}else{ return areaID > addr1.getAreaId();} }
-    bool operator>=(const ClnsAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID >= addr1.getSystemId();}else{ return areaID > addr1.getAreaId();} }
+    bool operator<(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID < addr1.getSystemId(); } else { return areaID < addr1.getAreaId(); } }
+    bool operator<=(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID <= addr1.getSystemId(); } else { return areaID < addr1.getAreaId(); } }
+    bool operator>(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID > addr1.getSystemId(); } else { return areaID > addr1.getAreaId(); } }
+    bool operator>=(const ClnsAddress& addr1) const { if (areaID == addr1.getAreaId()) { return systemID >= addr1.getSystemId(); } else { return areaID > addr1.getAreaId(); } }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ClnsAddress& net)
@@ -95,7 +95,7 @@ inline std::ostream& operator<<(std::ostream& os, const ClnsAddress& net)
     return os << net.str();
 }
 
-} //end of namespace inet
+} // namespace inet
 
 #endif
 

@@ -25,23 +25,22 @@ namespace ieee80211 {
 
 class INET_API IChannelAccess
 {
-    public:
-        static simsignal_t channelOwnershipChangedSignal;
+  public:
+    static simsignal_t channelOwnershipChangedSignal;
 
-    public:
-        class ICallback
-        {
-            public:
-                virtual ~ICallback() { }
+  public:
+    class ICallback {
+      public:
+        virtual ~ICallback() {}
 
-                virtual void channelGranted(IChannelAccess *channelAccess) = 0;
-        };
+        virtual void channelGranted(IChannelAccess *channelAccess) = 0;
+    };
 
-    public:
-        virtual ~IChannelAccess() { }
+  public:
+    virtual ~IChannelAccess() {}
 
-        virtual void requestChannel(ICallback *callback) = 0;
-        virtual void releaseChannel(ICallback *callback) = 0;
+    virtual void requestChannel(ICallback *callback) = 0;
+    virtual void releaseChannel(ICallback *callback) = 0;
 };
 
 } // namespace ieee80211

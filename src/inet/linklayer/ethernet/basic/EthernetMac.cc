@@ -48,7 +48,7 @@ void EthernetMac::initialize(int stage)
             throw cRuntimeError("Half duplex operation is not supported by EthernetMac, use the EthernetCsmaMac module for that! (Please enable csmacdSupport on EthernetInterface)");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        beginSendFrames();    //FIXME choose an another stage for it
+        beginSendFrames(); // FIXME choose an another stage for it
     }
 }
 
@@ -103,8 +103,8 @@ void EthernetMac::startFrameTransmission()
     ASSERT(currentTxFrame);
     EV_DETAIL << "Transmitting a copy of frame " << currentTxFrame << endl;
 
-    Packet *frame = currentTxFrame->dup();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
-    const auto& hdr = frame->peekAtFront<EthernetMacHeader>();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
+    Packet *frame = currentTxFrame->dup(); // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
+    const auto& hdr = frame->peekAtFront<EthernetMacHeader>(); // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
@@ -145,7 +145,7 @@ void EthernetMac::handleUpperPacket(Packet *packet)
                 packet->getFullName(), frame->getDest().str().c_str());
     }
 
-    if (packet->getDataLength() > MAX_ETHERNET_FRAME_BYTES) {    //FIXME two MAX FRAME BYTES in specif...
+    if (packet->getDataLength() > MAX_ETHERNET_FRAME_BYTES) { // FIXME two MAX FRAME BYTES in specif...
         throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
                 (int)(packet->getByteLength()), B(MAX_ETHERNET_FRAME_BYTES).get());
     }
@@ -170,7 +170,7 @@ void EthernetMac::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
-    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
+    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES); // calculate valid FCS
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
@@ -191,7 +191,7 @@ void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
 
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
-        if (dynamic_cast<EthernetSignal*>(signal)) {    // do not count JAM and IFG packets
+        if (dynamic_cast<EthernetSignal *>(signal)) { // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
             decapsulate(packet);
@@ -283,7 +283,7 @@ void EthernetMac::handleEndTxPeriod()
 
     numFramesSent++;
     numBytesSent += currentTxFrame->getByteLength();
-    emit(packetSentToLowerSignal, currentTxFrame);    //consider: emit with start time of frame
+    emit(packetSentToLowerSignal, currentTxFrame); // consider: emit with start time of frame
 
     const auto& header = currentTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {

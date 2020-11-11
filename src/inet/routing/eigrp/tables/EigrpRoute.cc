@@ -24,6 +24,3 @@
 
 #include "inet/routing/eigrp/tables/EigrpRoute.h"
 
-
-
-

@@ -51,7 +51,6 @@ class INET_API RedDropper : public PacketFilterBase
 
     IPacketCollection *collection = nullptr;
 
-
   protected:
     virtual void initialize(int stage) override;
     virtual RedResult doRandomEarlyDetection(const Packet *packet);

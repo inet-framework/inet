@@ -29,40 +29,40 @@ namespace ieee80211 {
 
 class INET_API InProgressFrames : public cSimpleModule
 {
-    public:
-        static simsignal_t packetEnqueuedSignal;
-        static simsignal_t packetDequeuedSignal;
+  public:
+    static simsignal_t packetEnqueuedSignal;
+    static simsignal_t packetDequeuedSignal;
 
-    protected:
-        queueing::IPacketQueue *pendingQueue = nullptr;
-        IOriginatorMacDataService *dataService = nullptr;
-        IAckHandler *ackHandler = nullptr;
-        std::vector<Packet *> inProgressFrames;
-        std::vector<Packet *> droppedFrames;
+  protected:
+    queueing::IPacketQueue *pendingQueue = nullptr;
+    IOriginatorMacDataService *dataService = nullptr;
+    IAckHandler *ackHandler = nullptr;
+    std::vector<Packet *> inProgressFrames;
+    std::vector<Packet *> droppedFrames;
 
-    protected:
-        virtual void initialize(int stage) override;
-        virtual void updateDisplayString();
+  protected:
+    virtual void initialize(int stage) override;
+    virtual void updateDisplayString();
 
-        void ensureHasFrameToTransmit();
-        bool hasEligibleFrameToTransmit();
+    void ensureHasFrameToTransmit();
+    bool hasEligibleFrameToTransmit();
 
-    public:
-        virtual ~InProgressFrames();
+  public:
+    virtual ~InProgressFrames();
 
-        virtual std::string str() const override;
-        virtual void forEachChild(cVisitor *v) override;
-        virtual int getLength() const { return inProgressFrames.size(); }
-        virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
-        virtual Packet *getFrameToTransmit();
-        virtual Packet *getPendingFrameFor(Packet *frame);
-        virtual void dropFrame(Packet *packet);
-        virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
+    virtual std::string str() const override;
+    virtual void forEachChild(cVisitor *v) override;
+    virtual int getLength() const { return inProgressFrames.size(); }
+    virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
+    virtual Packet *getFrameToTransmit();
+    virtual Packet *getPendingFrameFor(Packet *frame);
+    virtual void dropFrame(Packet *packet);
+    virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
-        virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
-        virtual std::vector<Packet *> getOutstandingFrames();
+    virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
+    virtual std::vector<Packet *> getOutstandingFrames();
 
-        virtual void clearDroppedFrames();
+    virtual void clearDroppedFrames();
 };
 
 } /* namespace ieee80211 */

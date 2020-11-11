@@ -38,8 +38,7 @@ class INET_API PimBase : public RoutingProtocolBase
 {
   protected:
 
-    struct AssertMetric
-    {
+    struct AssertMetric {
         short rptBit;
         short preference;
         int metric;
@@ -59,17 +58,16 @@ class INET_API PimBase : public RoutingProtocolBase
         AssertMetric setAddress(Ipv4Address address) const { return AssertMetric(rptBit, preference, metric, address); }
     };
 
-    struct RouteEntry
-    {
+    struct RouteEntry {
         PimBase *owner;
         Ipv4Address source;
         Ipv4Address group;
         int flags;
-        AssertMetric metric;    // our metric of the unicast route to the source or RP(group)
+        AssertMetric metric; // our metric of the unicast route to the source or RP(group)
 
         RouteEntry(PimBase *owner, Ipv4Address source, Ipv4Address group)
             : owner(owner), source(source), group(group), flags(0) {}
-        virtual ~RouteEntry() {};
+        virtual ~RouteEntry() {}
 
         bool isFlagSet(int flag) const { return (flags & flag) != 0; }
         void setFlags(int flags) { this->flags |= flags; }
@@ -77,8 +75,7 @@ class INET_API PimBase : public RoutingProtocolBase
         void setFlag(int flag, bool value) { if (value) setFlags(flag); else clearFlag(flag); }
     };
 
-    struct Interface
-    {
+    struct Interface {
         RouteEntry *owner;
         NetworkInterface *ie;
         int flags;
@@ -117,8 +114,7 @@ class INET_API PimBase : public RoutingProtocolBase
         }
     };
 
-    struct SourceAndGroup
-    {
+    struct SourceAndGroup {
         Ipv4Address source;
         Ipv4Address group;
 
@@ -147,7 +143,7 @@ class INET_API PimBase : public RoutingProtocolBase
         SourceActiveTimer,
         StateRefreshTimer,
 
-        //PIM-SM specific timers
+        // PIM-SM specific timers
         KeepAliveTimer,
         RegisterStopTimer,
         ExpiryTimer,
@@ -198,7 +194,7 @@ class INET_API PimBase : public RoutingProtocolBase
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
-}    // namespace inet
+} // namespace inet
 
 #endif
 

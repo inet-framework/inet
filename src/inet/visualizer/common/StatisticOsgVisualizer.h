@@ -61,7 +61,7 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override { return nullptr;}
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override { return nullptr; }
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override {}
 
 #endif // ifdef WITH_OSG

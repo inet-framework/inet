@@ -34,12 +34,12 @@ namespace tcp {
 
 Define_Module(TcpLwipConnection);
 
-simsignal_t TcpLwipConnection::sndWndSignal = registerSignal("sndWnd");    // snd_wnd
-simsignal_t TcpLwipConnection::sndNxtSignal = registerSignal("sndNxt");    // sent seqNo
-simsignal_t TcpLwipConnection::sndAckSignal = registerSignal("sndAck");    // sent ackNo
-simsignal_t TcpLwipConnection::rcvWndSignal = registerSignal("rcvWnd");    // rcv_wnd
-simsignal_t TcpLwipConnection::rcvSeqSignal = registerSignal("rcvSeq");    // received seqNo
-simsignal_t TcpLwipConnection::rcvAckSignal = registerSignal("rcvAck");    // received ackNo (=snd_una)
+simsignal_t TcpLwipConnection::sndWndSignal = registerSignal("sndWnd"); // snd_wnd
+simsignal_t TcpLwipConnection::sndNxtSignal = registerSignal("sndNxt"); // sent seqNo
+simsignal_t TcpLwipConnection::sndAckSignal = registerSignal("sndAck"); // sent ackNo
+simsignal_t TcpLwipConnection::rcvWndSignal = registerSignal("rcvWnd"); // rcv_wnd
+simsignal_t TcpLwipConnection::rcvSeqSignal = registerSignal("rcvSeq"); // received seqNo
+simsignal_t TcpLwipConnection::rcvAckSignal = registerSignal("rcvAck"); // received ackNo (=snd_una)
 
 void TcpLwipConnection::recordSend(const TcpHeader& tcpsegP)
 {
@@ -69,7 +69,7 @@ void TcpLwipConnection::initConnection(TcpLwip& tcpLwipP, int connIdP)
     isListenerM = false;
     onCloseM = false;
     ASSERT(!pcbM);
-    pcbM = tcpLwipM->getLwipTcpLayer()->tcp_new();       //FIXME memory leak
+    pcbM = tcpLwipM->getLwipTcpLayer()->tcp_new(); // FIXME memory leak
     ASSERT(pcbM);
     pcbM->callback_arg = this;
     sendQueueM->setConnection(this);
@@ -121,7 +121,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     indication->addTag<SocketInd>()->setSocketId(listenConnId);
     tcpLwipM->send(indication, "appOut");
-    //TODO shouldn't read from lwip until accept arrived
+    // TODO shouldn't read from lwip until accept arrived
 }
 
 void TcpLwipConnection::sendEstablishedMsg()
@@ -143,7 +143,7 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpLwipM->send(indication, "appOut");
     sendUpEnabled = true;
     do_SEND();
-    //TODO now can read from lwip
+    // TODO now can read from lwip
     sendUpData();
 }
 
@@ -184,8 +184,8 @@ void TcpLwipConnection::sendIndicationToApp(int code)
 
 void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
 {
-//TODO    statusInfo.setState(fsm.getState());
-//TODO    statusInfo.setStateName(stateName(fsm.getState()));
+    // TODO    statusInfo.setState(fsm.getState());
+    // TODO    statusInfo.setStateName(stateName(fsm.getState()));
 
     statusInfo.setLocalAddr((pcbM->local_ip.addr));
     statusInfo.setLocalPort(pcbM->local_port);
@@ -193,19 +193,19 @@ void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
     statusInfo.setRemotePort(pcbM->remote_port);
 
     statusInfo.setSnd_mss(pcbM->mss);
-//TODO    statusInfo.setSnd_una(pcbM->snd_una);
+    // TODO    statusInfo.setSnd_una(pcbM->snd_una);
     statusInfo.setSnd_nxt(pcbM->snd_nxt);
-//TODO    statusInfo.setSnd_max(pcbM->snd_max);
+    // TODO    statusInfo.setSnd_max(pcbM->snd_max);
     statusInfo.setSnd_wnd(pcbM->snd_wnd);
-//TODO    statusInfo.setSnd_up(pcbM->snd_up);
+    // TODO    statusInfo.setSnd_up(pcbM->snd_up);
     statusInfo.setSnd_wl1(pcbM->snd_wl1);
     statusInfo.setSnd_wl2(pcbM->snd_wl2);
-//TODO    statusInfo.setIss(pcbM->iss);
+    // TODO    statusInfo.setIss(pcbM->iss);
     statusInfo.setRcv_nxt(pcbM->rcv_nxt);
     statusInfo.setRcv_wnd(pcbM->rcv_wnd);
-//TODO    statusInfo.setRcv_up(pcbM->rcv_up);
-//TODO    statusInfo.setIrs(pcbM->irs);
-//TODO    statusInfo.setFin_ack_rcvd(pcbM->fin_ack_rcvd);
+    // TODO    statusInfo.setRcv_up(pcbM->rcv_up);
+    // TODO    statusInfo.setIrs(pcbM->irs);
+    // TODO    statusInfo.setFin_ack_rcvd(pcbM->fin_ack_rcvd);
 }
 
 void TcpLwipConnection::listen(const L3Address& localAddr, unsigned short localPort)
@@ -216,7 +216,7 @@ void TcpLwipConnection::listen(const L3Address& localAddr, unsigned short localP
     // it works; does it actually accept a connection as well? It
     // shouldn't, as there is a tcp_accept
     LwipTcpLayer::tcp_pcb *pcb = pcbM;
-    pcbM = nullptr;    // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
+    pcbM = nullptr; // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
     pcbM = tcpLwipM->getLwipTcpLayer()->tcp_listen(pcb);
     totalSentM = 0;
 }
@@ -295,8 +295,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
             if (datalen < snd_buf)
                 break;
 
-            error = tcpLwipM->getLwipTcpLayer()->tcp_write(
-                        pcbM, ((const char *)data) + written, snd_buf, 1);
+            error = tcpLwipM->getLwipTcpLayer()->tcp_write(pcbM, ((const char *)data) + written, snd_buf, 1);
 
             if (error != ERR_OK)
                 break;

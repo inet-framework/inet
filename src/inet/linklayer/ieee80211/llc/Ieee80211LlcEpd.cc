@@ -60,7 +60,7 @@ void Ieee80211LlcEpd::handleMessage(cMessage *message)
 
 void Ieee80211LlcEpd::encapsulate(Packet *frame)
 {
-    const Protocol* protocol = frame->getTag<PacketProtocolTag>()->getProtocol();
+    const Protocol *protocol = frame->getTag<PacketProtocolTag>()->getProtocol();
     int ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
     if (ethType == -1)
         throw cRuntimeError("EtherType not found for protocol %s", protocol ? protocol->getName() : "(nullptr)");

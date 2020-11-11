@@ -31,8 +31,7 @@ namespace physicallayer {
 class INET_API IdealObstacleLoss : public TracingObstacleLossBase
 {
   protected:
-    class TotalObstacleLossComputation : public IVisitor
-    {
+    class TotalObstacleLossComputation : public IVisitor {
       protected:
         const IdealObstacleLoss *obstacleLoss = nullptr;
         const Coord transmissionPosition;

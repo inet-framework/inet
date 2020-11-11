@@ -41,7 +41,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
     b offset = b(0);
     b length = b(-1);
     bool endMeasurement_ = false;
-    const char* flowName = nullptr;
+    const char *flowName = nullptr;
     cMatchExpression flowNameMatcher;
     bool measureLifeTime = false;
     bool measureElapsedTime = false;
@@ -57,7 +57,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
     virtual void makeMeasurements(Packet *packet);
     virtual void endMeasurements(Packet *packet);
 
-    template <typename T>
+    template<typename T>
     void makeMeasurement(Packet *packet, b offset, b length, simsignal_t signal) {
         packet->mapAllRegionTags<T>(offset, length, [&] (b o, b l, const Ptr<const T>& timeTag) {
             for (int i = 0; i < (int)timeTag->getTotalTimesArraySize(); i++) {
@@ -69,7 +69,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
         });
     }
 
-    template <typename T>
+    template<typename T>
     void endMeasurement(Packet *packet, b offset, b length) {
         packet->mapAllRegionTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& timeTag) {
             for (int i = 0; i < (int)timeTag->getTotalTimesArraySize(); i++) {

@@ -87,8 +87,8 @@ void RoutingTableOsgVisualizer::removeRouteVisualization(const RouteVisualizatio
 void RoutingTableOsgVisualizer::refreshRouteVisualization(const RouteVisualization *routeVisualization) const
 {
     // TODO:
-    // auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
-    // auto text = getRouteVisualizationText(routeVisualization->route);
+//    auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
+//    auto text = getRouteVisualizationText(routeVisualization->route);
 }
 
 #endif // ifdef WITH_OSG

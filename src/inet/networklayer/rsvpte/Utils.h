@@ -44,7 +44,7 @@ bool find(std::vector<int>& vec, int value);
 /**
  * TODO documentation
  */
-bool find(const Ipv4AddressVector& vec, Ipv4Address addr);    // use TEMPLATE
+bool find(const Ipv4AddressVector& vec, Ipv4Address addr); // use TEMPLATE
 
 /**
  * TODO documentation

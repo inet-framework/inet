@@ -28,16 +28,16 @@ namespace ieee80211 {
  */
 class INET_API CtsProcedure : public ICtsProcedure
 {
-    protected:
-        int numReceivedRts = 0;
-        int numSentCts = 0;
+  protected:
+    int numReceivedRts = 0;
+    int numSentCts = 0;
 
-    protected:
-        virtual const Ptr<Ieee80211CtsFrame> buildCts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;
+  protected:
+    virtual const Ptr<Ieee80211CtsFrame> buildCts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;
 
-    public:
-        virtual void processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) override;
-        virtual void processTransmittedCts(const Ptr<const Ieee80211CtsFrame>& ctsFrame) override;
+  public:
+    virtual void processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) override;
+    virtual void processTransmittedCts(const Ptr<const Ieee80211CtsFrame>& ctsFrame) override;
 };
 
 } /* namespace ieee80211 */

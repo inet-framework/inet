@@ -27,8 +27,8 @@
 namespace inet {
 namespace physicallayer {
 
-Ieee80211OfdmModulation::Ieee80211OfdmModulation(const ApskModulationBase* subcarrierModulation) :
-        subcarrierModulation(subcarrierModulation)
+Ieee80211OfdmModulation::Ieee80211OfdmModulation(const ApskModulationBase *subcarrierModulation) :
+    subcarrierModulation(subcarrierModulation)
 {
 }
 
@@ -50,3 +50,4 @@ const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam256Modulatio
 
 } /* namespace physicallayer */
 } /* namespace inet */
+

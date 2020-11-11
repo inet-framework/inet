@@ -55,7 +55,7 @@ GlobalArp::~GlobalArp()
 {
     --globalArpCacheRefCnt;
     // delete my entries from the globalArpCache
-    for (auto it = globalArpCache.begin(); it != globalArpCache.end(); ) {
+    for (auto it = globalArpCache.begin(); it != globalArpCache.end();) {
         if (it->second->owner == this) {
             auto cur = it++;
             delete cur->second;
@@ -213,9 +213,9 @@ MacAddress GlobalArp::mapMulticastAddress(L3Address address)
     macAddress.setAddressByte(1, 0x00);
     macAddress.setAddressByte(2, 0x5e);
     // TODO:
-    // macAddress.setAddressByte(3, addr.getDByte(1) & 0x7f);
-    // macAddress.setAddressByte(4, addr.getDByte(2));
-    // macAddress.setAddressByte(5, addr.getDByte(3));
+//    macAddress.setAddressByte(3, addr.getDByte(1) & 0x7f);
+//    macAddress.setAddressByte(4, addr.getDByte(2));
+//    macAddress.setAddressByte(5, addr.getDByte(3));
     return macAddress;
 }
 
@@ -279,7 +279,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
         ArpCacheEntry *entry = nullptr;
 #ifdef WITH_IPv4
         if (signalID == interfaceIpv4ConfigChangedSignal) {
-            for ( ; it != globalArpCache.end(); ++it) {
+            for (; it != globalArpCache.end(); ++it) {
                 if (it->second->networkInterface == networkInterface && it->first.getType() == L3Address::IPv4)
                     break;
             }
@@ -299,7 +299,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                 auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>();
                 if (!ipv4Data || ipv4Data->getIPAddress().isUnspecified()) {
                     delete entry;
-                    return;    // if the address is not defined it isn't included in the global cache
+                    return; // if the address is not defined it isn't included in the global cache
                 }
             }
             Ipv4Address ipv4Address = networkInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
@@ -310,7 +310,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
 #endif
 #ifdef WITH_IPv6
         if (signalID == interfaceIpv6ConfigChangedSignal) {
-            for ( ; it != globalArpCache.end(); ++it) {
+            for (; it != globalArpCache.end(); ++it) {
                 if (it->second->networkInterface == networkInterface && it->first.getType() == L3Address::IPv6)
                     break;
             }
@@ -330,7 +330,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                 auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>();
                 if (ipv6Data == nullptr || ipv6Data->getLinkLocalAddress().isUnspecified()) {
                     delete entry;
-                    return;    // if the address is not defined it isn't included in the global cache
+                    return; // if the address is not defined it isn't included in the global cache
                 }
             }
             Ipv6Address ipv6Address = networkInterface->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();

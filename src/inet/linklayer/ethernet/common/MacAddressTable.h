@@ -34,11 +34,10 @@ namespace inet {
 class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 {
   protected:
-    struct AddressEntry
-    {
-        unsigned int vid = 0;    // VLAN ID
-        int interfaceId = -1;    // Input interface ID
-        simtime_t insertionTime;    // Arrival time of Lookup Address Table entry
+    struct AddressEntry {
+        unsigned int vid = 0; // VLAN ID
+        int interfaceId = -1; // Input interface ID
+        simtime_t insertionTime; // Arrival time of Lookup Address Table entry
         AddressEntry() {}
         AddressEntry(unsigned int vid, int interfaceId, simtime_t insertionTime) :
             vid(vid), interfaceId(interfaceId), insertionTime(insertionTime) {}
@@ -46,19 +45,18 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 
     friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
 
-    struct MacCompare
-    {
+    struct MacCompare {
         bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
 
     typedef std::map<MacAddress, AddressEntry, MacCompare> AddressTable;
     typedef std::map<unsigned int, AddressTable *> VlanAddressTable;
 
-    simtime_t agingTime;    // Max idle time for address table entries
-    simtime_t lastPurge;    // Time of the last call of removeAgedEntriesFromAllVlans()
-    AddressTable *addressTable = nullptr;    // VLAN-unaware address lookup (vid = 0)
+    simtime_t agingTime; // Max idle time for address table entries
+    simtime_t lastPurge; // Time of the last call of removeAgedEntriesFromAllVlans()
+    AddressTable *addressTable = nullptr; // VLAN-unaware address lookup (vid = 0)
     IInterfaceTable *ifTable = nullptr;
-    VlanAddressTable vlanAddressTable;    // VLAN-aware address lookup
+    VlanAddressTable vlanAddressTable; // VLAN-aware address lookup
 
   protected:
 

@@ -188,10 +188,11 @@ std::ostream& BytesChunk::printFieldsToStream(std::ostream& stream, int level, i
             stream << ", ";
         else
             first = false;
-        stream << (int) (byte);
+        stream << (int)(byte);
     }
     stream << "}";
     return stream;
 }
 
 } // namespace
+

@@ -23,7 +23,6 @@
 namespace inet {
 namespace physicallayer {
 
-
 Ieee80211OfdmModeBase::Ieee80211OfdmModeBase(const Ieee80211OfdmModulation *modulation, const Ieee80211OfdmCode *code, Hz channelSpacing, Hz bandwidth) :
     Ieee80211OfdmTimingRelatedParametersBase(channelSpacing),
     modulation(modulation),
@@ -305,7 +304,6 @@ const Ieee80211OfdmMode& Ieee80211OfdmCompliantModes::getCompliantMode(unsigned 
     else
         throw cRuntimeError("Channel spacing = %f must be 5, 10 or 20 MHz", channelSpacing.get());
 }
-
 
 // Preamble modes
 const Ieee80211OfdmPreambleMode Ieee80211OfdmCompliantModes::ofdmPreambleModeCS5MHz(MHz(5));

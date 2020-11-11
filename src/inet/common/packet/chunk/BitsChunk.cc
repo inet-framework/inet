@@ -175,3 +175,4 @@ std::ostream& BitsChunk::printFieldsToStream(std::ostream& stream, int level, in
 }
 
 } // namespace
+

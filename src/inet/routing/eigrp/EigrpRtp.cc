@@ -43,37 +43,34 @@ Define_Module(EigrpRtp6);
  *  - pad souseda se ale musi kontrolovat!
  */
 
-namespace eigrpRtp
-{
+namespace eigrpRtp {
 
 // User message codes
-enum UserMsgCodes
-{
-  M_OK = 0,                             // no message
-  M_UPDATE_SEND = EIGRP_UPDATE_MSG,     // send Update message
-  M_REQUEST_SEND = EIGRP_REQUEST_MSG,   // send Request message
-  M_QUERY_SEND = EIGRP_QUERY_MSG,       // send Query message
-  M_REPLY_SEND = EIGRP_REPLY_MSG,       // send Query message
-  M_HELLO_SEND = EIGRP_HELLO_MSG,       // send Hello message
+enum UserMsgCodes {
+    M_OK = 0,                             // no message
+    M_UPDATE_SEND = EIGRP_UPDATE_MSG,     // send Update message
+    M_REQUEST_SEND = EIGRP_REQUEST_MSG,   // send Request message
+    M_QUERY_SEND = EIGRP_QUERY_MSG,       // send Query message
+    M_REPLY_SEND = EIGRP_REPLY_MSG,       // send Query message
+    M_HELLO_SEND = EIGRP_HELLO_MSG,       // send Hello message
 };
 
 // User messages
 const char *UserMsgs[] =
 {
-  // M_OK
-  "OK",
-  // M_UPDATE_SEND
-  "Update",
-  // M_REQUEST_SEND
-  "Request",
-  // M_QUERY_SEND
-  "Query",
-  // M_REPLY_SEND
-  "Reply",
-  // M_HELLO_SEND
-  "Hello",
+    // M_OK
+    "OK",
+    // M_UPDATE_SEND
+    "Update",
+    // M_REQUEST_SEND
+    "Request",
+    // M_QUERY_SEND
+    "Query",
+    // M_REPLY_SEND
+    "Reply",
+    // M_HELLO_SEND
+    "Hello",
 };
-
 }; // end of namespace eigrp
 
 std::ostream& operator<<(std::ostream& os, const EigrpMsgReq& req)
@@ -92,8 +89,7 @@ void EigrpRequestQueue::printInfo() const
     EigrpMsgReq *req;
 
     EV_DEBUG << "EIGRP RTP: content of request queue:" << endl;
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++)
-    {
+    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
         req = *it;
 
         EV_DEBUG << "  Type:" << eigrpRtp::UserMsgs[req->getOpcode()];
@@ -108,8 +104,7 @@ void EigrpRequestQueue::printInfo() const
 EigrpRequestQueue::~EigrpRequestQueue()
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++)
-    {
+    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
         delete *it;
     }
 }
@@ -121,10 +116,8 @@ EigrpRequestQueue::~EigrpRequestQueue()
 EigrpMsgReq *EigrpRequestQueue::findReqByIf(int ifaceId, bool sent)
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++)
-    {
-        if ((*it)->getDestInterface() == ifaceId)
-        {
+    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
+        if ((*it)->getDestInterface() == ifaceId) {
             if (sent) // Get first message
                 return *it;
             else if ((*it)->getNumOfAck() == 0)
@@ -137,10 +130,8 @@ EigrpMsgReq *EigrpRequestQueue::findReqByIf(int ifaceId, bool sent)
 EigrpMsgReq *EigrpRequestQueue::findReqByNeighbor(int neighId, bool sent)
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++)
-    {
-        if ((*it)->getDestNeighbor() == neighId)
-        {
+    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
+        if ((*it)->getDestNeighbor() == neighId) {
             if (sent) // Get first message
                 return *it;
             else if ((*it)->getNumOfAck() == 0)
@@ -156,10 +147,8 @@ EigrpMsgReq *EigrpRequestQueue::findReqByNeighbor(int neighId, bool sent)
 EigrpMsgReq *EigrpRequestQueue::findUnrelReqByIf(int ifaceId)
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++)
-    {
-        if ((*it)->getDestInterface() == ifaceId && !(*it)->isMsgReliable())
-        {
+    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
+        if ((*it)->getDestInterface() == ifaceId && !(*it)->isMsgReliable()) {
             return *it;
         }
     }
@@ -169,10 +158,9 @@ EigrpMsgReq *EigrpRequestQueue::findUnrelReqByIf(int ifaceId)
 EigrpMsgReq *EigrpRequestQueue::findReqBySeq(uint32_t seqNumber)
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++)
-    {
+    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
         if ((*it)->getSeqNumber() == seqNumber)
-        return *it;
+            return *it;
     }
     return NULL;
 }
@@ -181,20 +169,18 @@ void EigrpRequestQueue::pushReq(EigrpMsgReq *req)
 {
     reqQueue.push_back(req);
 #ifdef EIGRP_RTP_DEBUG
-    //printInfo();
+//    printInfo();
 #endif
 }
 
 EigrpMsgReq *EigrpRequestQueue::removeReq(EigrpMsgReq *msgReq)
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); it++)
-    {
-        if ((*it) == msgReq)
-        {
+    for (it = reqQueue.begin(); it != reqQueue.end(); it++) {
+        if ((*it) == msgReq) {
             reqQueue.erase(it);
 #ifdef EIGRP_RTP_DEBUG
-            //printInfo();
+//            printInfo();
 #endif
             return msgReq;
         }
@@ -208,11 +194,9 @@ EigrpMsgReq *EigrpRequestQueue::removeReq(EigrpMsgReq *msgReq)
 void EigrpRequestQueue::removeAllMsgsToIf(int ifaceId)
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); )
-    {
-        if ((*it)->getDestInterface() == ifaceId)
-        {
-            delete (*it);
+    for (it = reqQueue.begin(); it != reqQueue.end();) {
+        if ((*it)->getDestInterface() == ifaceId) {
+            delete *it;
             it = reqQueue.erase(it);
         }
         else
@@ -226,11 +210,9 @@ void EigrpRequestQueue::removeAllMsgsToIf(int ifaceId)
 void EigrpRequestQueue::removeAllMsgsToNeigh(int neighborId)
 {
     MessageQueue::iterator it;
-    for (it = reqQueue.begin(); it != reqQueue.end(); )
-    {
-        if ((*it)->getDestNeighbor() == neighborId)
-        {
-            delete (*it);
+    for (it = reqQueue.begin(); it != reqQueue.end();) {
+        if ((*it)->getDestNeighbor() == neighborId) {
+            delete *it;
             it = reqQueue.erase(it);
         }
         else
@@ -238,74 +220,69 @@ void EigrpRequestQueue::removeAllMsgsToNeigh(int neighborId)
     }
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 EigrpRtpT<IPAddress>::EigrpRtpT()
 {
     RTP_OUTPUT_GW = "pdmOut";
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 EigrpRtpT<IPAddress>::~EigrpRtpT()
 {
     delete requestQ;
 }
 
-template <>
+template<>
 void EigrpRtpT<Ipv4Address>::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-    {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         seqNumber = 1;
 
-        //this->eigrpIft = EigrpIfTableAccess().get();
-        //this->eigrpNt = Eigrpv4NeighTableAccess().get();
-        eigrpIft = check_and_cast<EigrpInterfaceTable*>(getModuleByPath("^.eigrpInterfaceTable"));
-        eigrpNt = check_and_cast<EigrpIpv4NeighborTable*>(getModuleByPath("^.eigrpIpv4NeighborTable"));
+//        this->eigrpIft = EigrpIfTableAccess().get();
+//        this->eigrpNt = Eigrpv4NeighTableAccess().get();
+        eigrpIft = check_and_cast<EigrpInterfaceTable *>(getModuleByPath("^.eigrpInterfaceTable"));
+        eigrpNt = check_and_cast<EigrpIpv4NeighborTable *>(getModuleByPath("^.eigrpIpv4NeighborTable"));
 
         requestQ = new EigrpRequestQueue();
 
-        //WATCH_PTRLIST(requestQ->reqQueue);
+//        WATCH_PTRLIST(requestQ->reqQueue);
     }
 }
 
 #ifndef DISABLE_EIGRP_IPV6
-template <>
+template<>
 void EigrpRtpT<Ipv6Address>::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-    {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         seqNumber = 1;
 
-        //this->eigrpIft = EigrpIfTable6Access().get();
-        //this->eigrpNt = Eigrpv6NeighTableAccess().get();
-        eigrpIft = check_and_cast<EigrpInterfaceTable*>(getModuleByPath("^.eigrpInterfaceTable6"));
-        eigrpNt = check_and_cast<EigrpIpv6NeighborTable*>(getModuleByPath("^.eigrpIpv6NeighborTable"));
+//        this->eigrpIft = EigrpIfTable6Access().get();
+//        this->eigrpNt = Eigrpv6NeighTableAccess().get();
+        eigrpIft = check_and_cast<EigrpInterfaceTable *>(getModuleByPath("^.eigrpInterfaceTable6"));
+        eigrpNt = check_and_cast<EigrpIpv6NeighborTable *>(getModuleByPath("^.eigrpIpv6NeighborTable"));
         requestQ = new EigrpRequestQueue();
 
-        //WATCH_PTRLIST(requestQ->reqQueue);
+//        WATCH_PTRLIST(requestQ->reqQueue);
     }
 }
+
 #endif /* DISABLE_EIGRP_IPV6 */
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::handleMessage(cMessage *msg)
 {
 
-    if (msg->isSelfMessage())
-    { // Timer
+    if (msg->isSelfMessage()) { // Timer
     }
-    else
-    {
-        if (dynamic_cast<EigrpMsgReq *>(msg) != NULL)
-        {// EIGRP message request
+    else {
+        if (dynamic_cast<EigrpMsgReq *>(msg) != NULL) { // EIGRP message request
             processRequest(msg);
 
             // Do not delete msg
         }
-        else
-        {// Process EIGRP header
+        else { // Process EIGRP header
             processHeader(msg);
 
             delete msg;
@@ -313,7 +290,7 @@ void EigrpRtpT<IPAddress>::handleMessage(cMessage *msg)
     }
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::processRequest(cMessage *msg)
 {
     EigrpMsgReq *msgReq = check_and_cast<EigrpMsgReq *>(msg);
@@ -321,13 +298,13 @@ void EigrpRtpT<IPAddress>::processRequest(cMessage *msg)
     scheduleNewMsg(msgReq);
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
 {
     Packet *pk = check_and_cast<Packet *>(msg);
     const auto& header = pk->peekAtFront<EigrpMessage>();
-    uint32_t seqNumNeigh;   // Sequence number of neighbor
-    uint32_t ackNum;        // Acknowledge number
+    uint32_t seqNumNeigh; // Sequence number of neighbor
+    uint32_t ackNum; // Acknowledge number
     EigrpMsgReq *msgReq = NULL;
     int numOfAck;
     EigrpNeighbor<IPAddress> *neigh = NULL;
@@ -336,21 +313,18 @@ void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
     if ((neigh = getNeighborId(msg)) == NULL)
         return;
 
-    //EV_DEBUG << "EIGRP RTP: received " << eigrpRtp::UserMsgs[header->getOpcode()] << " message for processing" << endl;
+//    EV_DEBUG << "EIGRP RTP: received " << eigrpRtp::UserMsgs[header->getOpcode()] << " message for processing" << endl;
     //header->getOpcode() == EIGRP_UPDATE_MSG
     seqNumNeigh = header->getSeqNum();
     ackNum = header->getAckNum();
 
-    if (ackNum != 0)
-    { // Acknowledge of message
-        if ((msgReq = requestQ->findReqBySeq(ackNum)) != NULL && neigh->getAck() == ackNum)
-        { // Record ack
+    if (ackNum != 0) { // Acknowledge of message
+        if ((msgReq = requestQ->findReqBySeq(ackNum)) != NULL && neigh->getAck() == ackNum) { // Record ack
             neigh->setAck(0);
             numOfAck = msgReq->getNumOfAck();
             msgReq->setNumOfAck(--numOfAck);
 
-            if (numOfAck == 0)
-            { // All acknowledges received
+            if (numOfAck == 0) { // All acknowledges received
                 eigrpIface = eigrpIft->findInterfaceById(neigh->getIfaceId());
                 eigrpIface->decPendingMsgs();
 
@@ -365,8 +339,7 @@ void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
         // else do nothing (wrong message ack)
     }
 
-    if (seqNumNeigh != 0)
-    { // Received message must be acknowledged
+    if (seqNumNeigh != 0) { // Received message must be acknowledged
         // Store last sequence number from neighbor
         neigh->setSeqNumber(seqNumNeigh);
 
@@ -374,7 +347,7 @@ void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
     }
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::acknowledgeMsg(int neighId, int ifaceId, uint32_t ackNum)
 {
     EigrpMsgReq *msgReq = NULL;
@@ -395,10 +368,9 @@ void EigrpRtpT<IPAddress>::acknowledgeMsg(int neighId, int ifaceId, uint32_t ack
     scheduleNewMsg(msgReq);
 }
 
-template <>
+template<>
 EigrpNeighbor<Ipv4Address> *EigrpRtpT<Ipv4Address>::getNeighborId(cMessage *msg)
 {
-
     Packet *packet = check_and_cast<Packet *>(msg);
     Ipv4Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
 
@@ -406,19 +378,18 @@ EigrpNeighbor<Ipv4Address> *EigrpRtpT<Ipv4Address>::getNeighborId(cMessage *msg)
 }
 
 #ifndef DISABLE_EIGRP_IPV6
-template <>
+template<>
 EigrpNeighbor<Ipv6Address> *EigrpRtpT<Ipv6Address>::getNeighborId(cMessage *msg)
 {
-
-
     Packet *packet = check_and_cast<Packet *>(msg);
     Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
 
     return eigrpNt->findNeighbor(srcAddr);
 }
+
 #endif /* DISABLE_EIGRP_IPV6 */
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::scheduleNewMsg(EigrpMsgReq *msgReq)
 {
     requestQ->pushReq(msgReq);
@@ -431,37 +402,32 @@ void EigrpRtpT<IPAddress>::scheduleNewMsg(EigrpMsgReq *msgReq)
     scheduleNextMsg(msgReq->getDestInterface());
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::scheduleNextMsg(int ifaceId)
 {
     EigrpMsgReq *msgReq = NULL;
     EigrpInterface *eigrpIface = eigrpIft->findInterfaceById(ifaceId);
 
-    if (eigrpIface == NULL)
-    {
+    if (eigrpIface == NULL) {
         requestQ->removeAllMsgsToIf(ifaceId);
         return;
     }
 
-    if (eigrpIface->getPendingMsgs() == 0)
-    { // Try to send first rel/unrel message
-        if ((msgReq = requestQ->findReqByIf(ifaceId)) != NULL)
-        {
+    if (eigrpIface->getPendingMsgs() == 0) { // Try to send first rel/unrel message
+        if ((msgReq = requestQ->findReqByIf(ifaceId)) != NULL) {
             ASSERT(msgReq->getNumOfAck() == 0);
             sendMsg(msgReq);
         }
     }
-    else
-    { // Try to send first unrel message
-        if ((msgReq = requestQ->findUnrelReqByIf(ifaceId)) != NULL)
-        {
+    else { // Try to send first unrel message
+        if ((msgReq = requestQ->findUnrelReqByIf(ifaceId)) != NULL) {
             sendUnrelMsg(msgReq);
         }
     }
 
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::discardMsg(EigrpMsgReq *msgReq)
 {
     EV_DEBUG << "EIGRP RTP: discard message " << eigrpRtp::UserMsgs[msgReq->getOpcode()] << endl;
@@ -471,7 +437,7 @@ void EigrpRtpT<IPAddress>::discardMsg(EigrpMsgReq *msgReq)
     scheduleNextMsg(msgReq->getDestInterface());
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::sendUnrelMsg(EigrpMsgReq *msgReq)
 {
     int ifaceId = msgReq->getDestInterface();
@@ -482,20 +448,18 @@ void EigrpRtpT<IPAddress>::sendUnrelMsg(EigrpMsgReq *msgReq)
     scheduleNextMsg(ifaceId);
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::sendMsg(EigrpMsgReq *msgReq)
 {
-    if (msgReq->isMsgReliable())
-    { // Reliable
+    if (msgReq->isMsgReliable()) { // Reliable
         sendRelMsg(msgReq);
     }
-    else
-    { // Unreliable
+    else { // Unreliable
         sendUnrelMsg(msgReq);
     }
 }
 
-template <typename IPAddress>
+template<typename IPAddress>
 void EigrpRtpT<IPAddress>::sendRelMsg(EigrpMsgReq *msgReq)
 {
     NeighborInfo info;
@@ -506,16 +470,13 @@ void EigrpRtpT<IPAddress>::sendRelMsg(EigrpMsgReq *msgReq)
     info.neighborId = msgReq->getDestNeighbor();
     info.neighborIfaceId = msgReq->getDestInterface();
 
-    if (msgReq->getSeqNumber() == 0)
-    { // Add sequence number
+    if (msgReq->getSeqNumber() == 0) { // Add sequence number
         msgReq->setSeqNumber(seqNumber);
         seqNumber++;
     }
 
-    if (info.neighborId != 0)
-    { // Unicast
-        if ((neigh = eigrpNt->findNeighborById(info.neighborId)) == NULL)
-        {
+    if (info.neighborId != 0) { // Unicast
+        if ((neigh = eigrpNt->findNeighborById(info.neighborId)) == NULL) {
             requestQ->removeAllMsgsToNeigh(info.neighborId);
             discardMsg(msgReq);
             return;
@@ -524,10 +485,9 @@ void EigrpRtpT<IPAddress>::sendRelMsg(EigrpMsgReq *msgReq)
         neigh->setAck(msgReq->getSeqNumber());
         info.lastSeqNum = neigh->getSeqNumber();
     }
-    else
-    { // Multicast
+    else { // Multicast
         info.numOfAck = eigrpNt->setAckOnIface(info.neighborIfaceId, msgReq->getSeqNumber());
-        info.lastSeqNum = 0;   // Multicast message can not be an ack
+        info.lastSeqNum = 0; // Multicast message can not be an ack
     }
 
     eigrpIface = eigrpIft->findInterfaceById(info.neighborIfaceId);
@@ -549,5 +509,6 @@ template class EigrpRtpT<Ipv4Address>;
 #ifndef DISABLE_EIGRP_IPV6
 template class EigrpRtpT<Ipv6Address>;
 #endif /* DISABLE_EIGRP_IPV6 */
-} //eigrp
-} //inet
+} // eigrp
+} // inet
+

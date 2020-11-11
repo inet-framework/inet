@@ -26,14 +26,14 @@ namespace ieee80211 {
 
 class INET_API BasicFragmentationPolicy : public IFragmentationPolicy, public cSimpleModule
 {
-    protected:
-        int fragmentationThreshold = -1;
+  protected:
+    int fragmentationThreshold = -1;
 
-    protected:
-        virtual void initialize() override;
+  protected:
+    virtual void initialize() override;
 
-    public:
-        virtual std::vector<int> computeFragmentSizes(Packet *frame) override;
+  public:
+    virtual std::vector<int> computeFragmentSizes(Packet *frame) override;
 };
 
 } // namespace ieee80211

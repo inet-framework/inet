@@ -44,7 +44,7 @@ class INET_API PimNeighbor : public cObject
     Ipv4Address address;
     int version;
     unsigned int generationId;
-    long drPriority;    // -1 if not present
+    long drPriority; // -1 if not present
     cMessage *livenessTimer;
 
   public:
@@ -134,7 +134,7 @@ class INET_API PimNeighborTable : public cSimpleModule
     virtual void processLivenessTimer(cMessage *timer);
 };
 
-}    // namespace inet
+} // namespace inet
 
 #endif
 

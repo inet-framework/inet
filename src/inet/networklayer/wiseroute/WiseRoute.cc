@@ -149,8 +149,8 @@ void WiseRoute::handleLowerPacket(Packet *packet)
     const L3Address& srcAddr = wiseRouteHeader->getSourceAddress();
     // KLUDGE: TODO: get rssi and ber
     EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
-    double rssi = 1;    // TODO: ctrlInfo->getRSSI();
-    double ber = 0;    // TODO: ctrlInfo->getBitErrorRate();
+    double rssi = 1; // TODO: ctrlInfo->getRSSI();
+    double ber = 0; // TODO: ctrlInfo->getBitErrorRate();
     // Check whether the message is a flood and if it has to be forwarded.
     floodTypes floodType = updateFloodTable(wiseRouteHeader->getIsFlood(), initialSrcAddr, finalDestAddr,
                 wiseRouteHeader->getSeqNum());
@@ -227,7 +227,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setSourceAddress(myNetwAddr);
                 wiseRouteHeader->setDestinationAddress(nextHop);
                 pCtrlInfo = packet->removeControlInfo();
-                MacAddress nextHopMacAddr = arp->resolveL3Address(nextHop, nullptr);    //FIXME interface entry pointer needed
+                MacAddress nextHopMacAddr = arp->resolveL3Address(nextHop, nullptr); // FIXME interface entry pointer needed
                 if (nextHopMacAddr.isUnspecified())
                     throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalArp module.");
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
@@ -294,7 +294,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
     else {
         pkt->setIsFlood(0);
         nbPureUnicastSent++;
-        nextHopMacAddr = arp->resolveL3Address(nextHopAddr, nullptr);    //FIXME interface entry pointer needed
+        nextHopMacAddr = arp->resolveL3Address(nextHopAddr, nullptr); // FIXME interface entry pointer needed
         if (nextHopMacAddr.isUnspecified())
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalArp module.");
     }
@@ -365,7 +365,7 @@ void WiseRoute::decapsulate(Packet *packet)
     auto wiseRouteHeader = packet->popAtFront<WiseRouteHeader>();
     auto payloadLength = wiseRouteHeader->getPayloadLengthField();
     if (packet->getDataLength() < payloadLength) {
-        throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
+        throw cRuntimeError("Data error: illegal payload length"); // FIXME packet drop
     }
     if (packet->getDataLength() > payloadLength)
         packet->setBackOffset(packet->getFrontOffset() + payloadLength);
@@ -399,7 +399,7 @@ WiseRoute::floodTypes WiseRoute::updateFloodTable(bool isFlood, const tFloodTabl
         return NOTAFLOOD;
 }
 
-WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type& destAddr, bool    /*iAmOrigin*/) const
+WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type& destAddr, bool /*iAmOrigin*/) const
 {
     // Find a route to dest address. As in the embedded code, if no route exists, indicate
     // final destination as next hop. If we'are lucky, final destination is one hop away...

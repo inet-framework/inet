@@ -30,18 +30,15 @@ namespace visualizer {
 class INET_API QueueVisualizerBase : public VisualizerBase
 {
   protected:
-    class INET_API QueueVisitor : public cVisitor
-    {
-        public:
-            std::vector<queueing::IPacketQueue *> queues;
+    class INET_API QueueVisitor : public cVisitor {
+      public:
+        std::vector<queueing::IPacketQueue *> queues;
 
-        public:
-            virtual void visit(cObject *object) override;
-
+      public:
+        virtual void visit(cObject *object) override;
     };
 
-    class INET_API QueueVisualization
-    {
+    class INET_API QueueVisualization {
       public:
         queueing::IPacketQueue *queue = nullptr;
 

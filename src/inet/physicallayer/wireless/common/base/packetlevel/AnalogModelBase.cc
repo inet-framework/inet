@@ -23,7 +23,7 @@ namespace inet {
 
 namespace physicallayer {
 
-double AnalogModelBase::computeAntennaGain(const IAntennaGain* antennaGain, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation) const
+double AnalogModelBase::computeAntennaGain(const IAntennaGain *antennaGain, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation) const
 {
     if (antennaGain->getMinGain() == antennaGain->getMaxGain())
         return antennaGain->getMinGain();

@@ -151,7 +151,7 @@ void RadioMedium::finish()
     recordScalar("reception result cache hit", resultCacheHitPercentage, "%");
 }
 
-std::ostream& RadioMedium::printToStream(std::ostream &stream, int level, int evFlags) const
+std::ostream& RadioMedium::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE) {
@@ -307,7 +307,7 @@ const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio,
     const IInterference *interference = getInterference(radio, listening, transmission);
     const ISnir *snir = getSNIR(radio, transmission);
     const IReceptionDecision *receptionDecision = getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
-    const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
+    const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> { receptionDecision };
     return radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
 }
 

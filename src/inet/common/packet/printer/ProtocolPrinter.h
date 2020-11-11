@@ -29,8 +29,7 @@ namespace inet {
 class INET_API ProtocolPrinter : public cObject
 {
   public:
-    class INET_API Context
-    {
+    class INET_API Context {
       public:
         std::stringstream sourceColumn;
         std::stringstream destinationColumn;

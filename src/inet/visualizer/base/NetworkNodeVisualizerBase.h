@@ -28,14 +28,13 @@ namespace visualizer {
 class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListener
 {
   public:
-    class INET_API NetworkNodeVisualization
-    {
+    class INET_API NetworkNodeVisualization {
       public:
         const cModule *networkNode;
 
       public:
-        NetworkNodeVisualization(const cModule *networkNode) : networkNode(networkNode) { }
-        virtual ~NetworkNodeVisualization() { }
+        NetworkNodeVisualization(const cModule *networkNode) : networkNode(networkNode) {}
+        virtual ~NetworkNodeVisualization() {}
     };
 
   protected:

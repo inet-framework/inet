@@ -32,8 +32,7 @@ namespace inet {
 class INET_API PacketFilter
 {
   protected:
-    class INET_API PacketDissectorCallback : public PacketDissector::ICallback
-    {
+    class INET_API PacketDissectorCallback : public PacketDissector::ICallback {
       protected:
         bool matches_ = false;
         const PacketFilter& packetFilter;
@@ -56,7 +55,7 @@ class INET_API PacketFilter
     cMatchExpression chunkMatchExpression;
 
   public:
-    void setPattern(const char* packetPattern, const char* chunkPattern);
+    void setPattern(const char *packetPattern, const char *chunkPattern);
 
     bool matches(const cPacket *packet) const;
 };

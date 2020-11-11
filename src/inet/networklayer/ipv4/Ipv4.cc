@@ -56,7 +56,7 @@ namespace inet {
 
 Define_Module(Ipv4);
 
-//TODO TRANSLATE
+// TODO TRANSLATE
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
@@ -200,15 +200,15 @@ void Ipv4::handleRequest(Request *request)
 
 void Ipv4::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->arrivedOn("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
+    if (msg->arrivedOn("transportIn")) { // TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
         if (auto request = dynamic_cast<Request *>(msg))
             handleRequest(request);
         else
-            handlePacketFromHL(check_and_cast<Packet*>(msg));
+            handlePacketFromHL(check_and_cast<Packet *>(msg));
     }
-    else if (msg->arrivedOn("queueIn")) {    // from network
+    else if (msg->arrivedOn("queueIn")) { // from network
         EV_INFO << "Received " << msg << " from network.\n";
-        handleIncomingDatagram(check_and_cast<Packet*>(msg));
+        handleIncomingDatagram(check_and_cast<Packet *>(msg));
     }
     else
         throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
@@ -351,7 +351,7 @@ void Ipv4::preroutingFinish(Packet *packet)
             EV_WARN << "Skip forwarding of multicast datagram (packet is link-local)\n";
             delete packet;
         }
-        else if (ipv4Header->getTimeToLive() <= 1) {      // TTL before decrement
+        else if (ipv4Header->getTimeToLive() <= 1) { // TTL before decrement
             EV_WARN << "Skip forwarding of multicast datagram (TTL reached 0)\n";
             delete packet;
         }
@@ -458,7 +458,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
 
         if (destIE) {
             numMulticast++;
-            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());        //FIXME KLUDGE is it needed?
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // FIXME KLUDGE is it needed?
             packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
             fragmentPostRouting(packet);
         }
@@ -471,8 +471,8 @@ void Ipv4::datagramLocalOut(Packet *packet)
             delete packet;
         }
     }
-    else {    // unicast and broadcast
-              // check for local delivery
+    else { // unicast and broadcast
+           // check for local delivery
         if (rt->isLocalAddress(destAddr)) {
             EV_INFO << "Delivering " << packet << " locally.\n";
             if (destIE && !destIE->isLoopback()) {
@@ -566,7 +566,7 @@ void Ipv4::routeUnicastPacket(Packet *packet)
         }
     }
 
-    if (!destIE) {    // no route found
+    if (!destIE) { // no route found
         EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE, dropping packet\n";
         numUnroutable++;
         PacketDropDetails details;
@@ -574,7 +574,7 @@ void Ipv4::routeUnicastPacket(Packet *packet)
         emit(packetDroppedSignal, packet, &details);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
-    else {    // fragment and send
+    else { // fragment and send
         if (fromIE != nullptr) {
             if (datagramForwardHook(packet) != INetfilter::IHook::ACCEPT)
                 return;
@@ -599,7 +599,7 @@ void Ipv4::routeLocalBroadcastPacket(Packet *packet)
     // We always use 255.255.255.255 as nextHopAddress, because it is recognized by ARP,
     // and mapped to the broadcast MAC address.
     if (destIE != nullptr) {
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());    //FIXME KLUDGE is it needed?
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // FIXME KLUDGE is it needed?
         packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
         fragmentPostRouting(packet);
     }
@@ -687,7 +687,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
     }
     else {
         // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(ipv4DataOnRpfSignal, ipv4Header.get(), const_cast<NetworkInterface *>(fromIE));    // forwarding hook
+        emit(ipv4DataOnRpfSignal, ipv4Header.get(), const_cast<NetworkInterface *>(fromIE)); // forwarding hook
 
         numForwarded++;
         // copy original datagram for multiple destinations
@@ -711,7 +711,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         }
 
         // TODO: no need to emit fromIE when tags will be use, d in place of control infos
-        emit(ipv4MdataRegisterSignal, packet, const_cast<NetworkInterface *>(fromIE));    // postRouting hook
+        emit(ipv4MdataRegisterSignal, packet, const_cast<NetworkInterface *>(fromIE)); // postRouting hook
 
         // only copies sent, delete original packet
         delete packet;
@@ -763,10 +763,11 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     auto localAddress(ipv4Header->getDestAddress());
     decapsulate(packet);
     bool hasSocket = false;
-    for (const auto &elem: socketIdToSocketDescriptor) {
+    for (const auto& elem: socketIdToSocketDescriptor) {
         if (elem.second->protocolId == protocol->getId()
-                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
-                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+            && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
+        {
             auto *packetCopy = packet->dup();
             packetCopy->setKind(IPv4_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
@@ -788,7 +789,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     else {
         EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
         packet->setFrontOffset(ipv4HeaderPosition);
-        const NetworkInterface* fromIE = getSourceInterface(packet);
+        const NetworkInterface *fromIE = getSourceInterface(packet);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
@@ -884,7 +885,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         details.setReason(HOP_LIMIT_REACHED);
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
-        sendIcmpError(packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+        sendIcmpError(packet, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
     }
@@ -907,7 +908,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         PacketDropDetails details;
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-        sendIcmpError(packet, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
+        sendIcmpError(packet, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
         numDropped++;
         return;
@@ -916,7 +917,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = B(ipv4Header->getHeaderLength()).get();
     int payloadLength = B(packet->getDataLength()).get() - headerLength;
-    int fragmentLength = ((mtu - headerLength) / 8) * 8;    // payload only (without header)
+    int fragmentLength = ((mtu - headerLength) / 8) * 8; // payload only (without header)
     int offsetBase = ipv4Header->getFragmentOffset();
     if (fragmentLength <= 0)
         throw cRuntimeError("Cannot fragment datagram: MTU=%d too small for header size (%d bytes)", mtu, headerLength); // exception and not ICMP because this is likely a simulation configuration error, not something one wants to simulate
@@ -937,9 +938,9 @@ void Ipv4::fragmentAndSend(Packet *packet)
         std::string curFragName = fragMsgName + std::to_string(offset);
         if (lastFragment)
             curFragName += "-last";
-        Packet *fragment = new Packet(curFragName.c_str());     //TODO add offset or index to fragment name
+        Packet *fragment = new Packet(curFragName.c_str()); // TODO add offset or index to fragment name
 
-        //copy Tags from packet to fragment
+        // copy Tags from packet to fragment
         fragment->copyTags(*packet);
 
         ASSERT(fragment->getByteLength() == 0);
@@ -990,7 +991,7 @@ void Ipv4::encapsulate(Packet *transportPacket)
     // of the outgoing interface after routing
     if (!src.isUnspecified()) {
         if (!nonLocalSrcAddress && rt->getInterfaceByAddress(src) == nullptr)
-        // if interface parameter does not match existing interface, do not send datagram
+            // if interface parameter does not match existing interface, do not send datagram
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 
@@ -1223,11 +1224,11 @@ void Ipv4::reinjectQueuedDatagram(const Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramPreRoutingHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1249,11 +1250,11 @@ INetfilter::IHook::Result Ipv4::datagramPreRoutingHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramForwardHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramForwardHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1275,11 +1276,11 @@ INetfilter::IHook::Result Ipv4::datagramForwardHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1330,14 +1331,14 @@ void Ipv4::stop()
 void Ipv4::flush()
 {
     EV_DEBUG << "Ipv4::flush(): pending packets:\n";
-    for (auto & elem : pendingPackets) {
+    for (auto& elem : pendingPackets) {
         EV_DEBUG << "Ipv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
         elem.second.clear();
     }
     pendingPackets.clear();
 
     EV_DEBUG << "Ipv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
-    for (auto & elem : queuedDatagramsForHooks) {
+    for (auto& elem : queuedDatagramsForHooks) {
         delete elem.packet;
     }
     queuedDatagramsForHooks.clear();
@@ -1347,11 +1348,11 @@ void Ipv4::flush()
 
 INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1376,11 +1377,11 @@ INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramLocalOutHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalOutHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1418,3 +1419,4 @@ void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type
 }
 
 } // namespace inet
+

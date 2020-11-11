@@ -53,12 +53,11 @@ class INET_API TcpSinkAppThread : public TcpServerThreadBase
     long bytesRcvd;
     TcpSinkApp *sinkAppModule = nullptr;
 
-
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void refreshDisplay() const override;
 
-    //TcpServerThreadBase:
+    // TcpServerThreadBase:
     /**
      * Called when connection is established.
      */

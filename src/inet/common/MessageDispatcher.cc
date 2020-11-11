@@ -127,6 +127,7 @@ void MessageDispatcher::handleCanPushPacketChanged(cGate *outGate)
 void MessageDispatcher::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
 }
+
 #endif // #ifdef WITH_QUEUEING
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
@@ -140,9 +141,9 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         else
             throw cRuntimeError("handlePacket(): Unknown socket, id = %d, sender = %s", socketId, inGate->getPathStartGate()->getOwnerModule()->getFullName());
     }
-    const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();;
+    const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
-        const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();;
+        const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
         // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1)) {
@@ -211,7 +212,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         else
             throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketId);
     }
-    const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();;
+    const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
         // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
@@ -353,7 +354,7 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     }
 }
 
-void MessageDispatcher::handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in)
+void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
 {
     Enter_Method("handleRegisterInterface");
     EV_INFO << "Registering interface" << EV_FIELD(interface) << EV_FIELD(out, out) << EV_FIELD(in) << EV_ENDL;

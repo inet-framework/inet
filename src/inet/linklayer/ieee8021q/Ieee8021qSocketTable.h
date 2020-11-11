@@ -25,8 +25,7 @@ namespace inet {
 class INET_API Ieee8021qSocketTable : public cSimpleModule
 {
   public:
-    struct Socket
-    {
+    struct Socket {
         int socketId = -1;
         const Protocol *protocol = nullptr;
         int vlanId = -1;

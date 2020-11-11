@@ -24,7 +24,7 @@ HeaderPosition parseHeaderPosition(const char *string)
     if (!strcmp(string, "") || !strcmp(string, "none"))
         return HP_NONE;
     else if (!strcmp(string, "front"))
-        return  HP_FRONT;
+        return HP_FRONT;
     else if (!strcmp(string, "back"))
         return HP_BACK;
     else

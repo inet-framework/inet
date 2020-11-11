@@ -21,9 +21,9 @@
 //
 
 //
-//  Author: Vincent Oberle
-//  Date: Jan-March 2001
-//  Cleanup and rewrite: Andras Varga, 2004
+// Author: Vincent Oberle
+// Date: Jan-March 2001
+// Cleanup and rewrite: Andras Varga, 2004
 //
 
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -91,7 +91,7 @@ bool Ipv4Address::parseIPAddress(const char *text, unsigned char tobytes[])
         // skip '.'
         s++;
     }
-    return i == 4;    // must have all 4 numbers
+    return i == 4; // must have all 4 numbers
 }
 
 void Ipv4Address::set(const char *text)
@@ -107,7 +107,7 @@ void Ipv4Address::set(const char *text)
     set(buf[0], buf[1], buf[2], buf[3]);
 }
 
-std::string Ipv4Address::str(bool printUnspec    /* = true */) const
+std::string Ipv4Address::str(bool printUnspec /* = true */) const
 {
     if (printUnspec && isUnspecified())
         return std::string("<unspec>");
@@ -262,7 +262,7 @@ bool Ipv4Address::maskedAddrAreEqual(const Ipv4Address& addr1,
         const Ipv4Address& addr2,
         const Ipv4Address& netmask)
 {
-    // return addr1.doAnd(netmask).equals(addr2.doAnd(netmask));
+//    return addr1.doAnd(netmask).equals(addr2.doAnd(netmask));
     // Looks weird, but is the same and is faster
     return ((addr1.addr ^ addr2.addr) & netmask.addr) == 0;
 }

@@ -208,7 +208,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 
     if (extractServerName(request->getTargetUrl()) != hostName) {
         // This should never happen but lets check
-        throw cRuntimeError("Received message intended for '%s'", request->getTargetUrl());    // TODO: DEBUG HERE
+        throw cRuntimeError("Received message intended for '%s'", request->getTargetUrl()); // TODO: DEBUG HERE
         return nullptr;
     }
 
@@ -230,7 +230,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
         replymsg = generateErrorReply(request, 404);
     }
     else if (res[0] == "GET") {
-        replymsg = handleGetRequest(msg, res[1]);    // Pass in the resource string part
+        replymsg = handleGetRequest(msg, res[1]); // Pass in the resource string part
     }
     else {
         EV_ERROR << "Unsupported request type " << res[0] << " for " << request->getHeading() << endl;
@@ -304,7 +304,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
     replymsg->setProtocol(request->getProtocol());
     replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
-    replymsg->setContentType(CT_HTML);    // Emulates the content-type header field
+    replymsg->setContentType(CT_HTML); // Emulates the content-type header field
 
     if (scriptedMode) {
         replymsg->setPayload(htmlPages[resource].body.c_str());
@@ -341,10 +341,10 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessa
     int size;
     if (scriptedMode)
         size = resources[resource];
-    else if (category==CT_TEXT)
-        size = (int) rdTextResourceSize->draw();
-    else if (category==CT_IMAGE)
-        size = (int) rdImageResourceSize->draw();
+    else if (category == CT_TEXT)
+        size = (int)rdTextResourceSize->draw();
+    else if (category == CT_IMAGE)
+        size = (int)rdImageResourceSize->draw();
     else
         throw cRuntimeError("Invalid resource category");
 
@@ -355,10 +355,10 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessa
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->getOriginatorUrl());
-    replymsg->setProtocol(request->getProtocol());    // MIGRATE40: kvj
+    replymsg->setProtocol(request->getProtocol()); // MIGRATE40: kvj
     replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
-    replymsg->setContentType(category);    // Emulates the content-type header field
+    replymsg->setContentType(category); // Emulates the content-type header field
     replymsg->setChunkLength(B(size)); // Set the resource size
     replyPk->insertAtBack(replymsg);
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
@@ -376,7 +376,7 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->getOriginatorUrl());
-    replymsg->setProtocol(request->getProtocol());    // MIGRATE40: kvj
+    replymsg->setProtocol(request->getProtocol()); // MIGRATE40: kvj
     replymsg->setSerial(request->getSerial());
     replymsg->setResult(code);
     replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
@@ -464,7 +464,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                                 file.c_str(), linecount, line.c_str());
                 }
                 htmlfile = res[1];
-                body = readHtmlBodyFile(htmlfile, siteFileSplit[0]);    // Pass in the path of the definition file. Page defs are relative to that.
+                body = readHtmlBodyFile(htmlfile, siteFileSplit[0]); // Pass in the path of the definition file. Page defs are relative to that.
                 size = 0;
                 if (res.size() > 2) {
                     try {

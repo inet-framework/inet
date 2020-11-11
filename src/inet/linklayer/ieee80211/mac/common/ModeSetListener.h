@@ -25,13 +25,13 @@ namespace ieee80211 {
 
 class INET_API ModeSetListener : public cSimpleModule, public cListener
 {
-    protected:
-        physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+  protected:
+    physicallayer::Ieee80211ModeSet *modeSet = nullptr;
 
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
-        virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details) override;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 };
 
 } /* namespace ieee80211 */

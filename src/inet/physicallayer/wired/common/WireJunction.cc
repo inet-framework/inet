@@ -37,8 +37,8 @@ void WireJunction::initialize()
         throw cRuntimeError("Cannot find the gate vector");
     std::string gateName = gateNames[0];
     numPorts = gateSize(gateName.c_str());
-    inputGateBaseId = gateBaseId((gateName+"$i").c_str());
-    outputGateBaseId = gateBaseId((gateName+"$o").c_str());
+    inputGateBaseId = gateBaseId((gateName + "$i").c_str());
+    outputGateBaseId = gateBaseId((gateName + "$o").c_str());
 
     numMessages = 0;
     WATCH(numMessages);
@@ -119,7 +119,7 @@ void WireJunction::handleMessage(cMessage *msg)
             }
             else {
                 TxInfo *tx = findTxInfo(incomingTxId, i);
-                if (!tx) {  // we missed the original signal, ignore the update
+                if (!tx) { // we missed the original signal, ignore the update
                     delete outSignal;
                     continue;
                 }

@@ -26,7 +26,7 @@
 #endif
 
 #ifdef WITH_SCTP
-//TODO
+// TODO
 #endif
 
 namespace inet {
@@ -63,11 +63,9 @@ const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet)
 
 bool isTransportProtocol(const Protocol& protocol)
 {
-    return
-            (protocol == Protocol::tcp)
-            || (protocol == Protocol::udp)
-            // TODO: add other L4 protocols
-            ;
+    // TODO: add other L4 protocols
+    return protocol == Protocol::tcp ||
+           protocol == Protocol::udp;
 }
 
 const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol, int flags)

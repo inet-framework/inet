@@ -28,8 +28,7 @@ namespace inet {
 class INET_API EthernetSocket : public SocketBase
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
 
@@ -48,6 +47,7 @@ class INET_API EthernetSocket : public SocketBase
          */
         virtual void socketClosed(EthernetSocket *socket) = 0;
     };
+
   protected:
     ICallback *callback = nullptr;
     NetworkInterface *networkInterface = nullptr;

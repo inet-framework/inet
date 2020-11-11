@@ -64,8 +64,7 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
         bandwidth = Hz(par("bandwidth"));
         channelSpacing = Hz(par("channelSpacing"));
         isCompliant = par("isCompliant");
-        if (isCompliant && (dataDecoder || signalDecoder || dataDemodulator || signalDemodulator || pulseFilter || analogDigitalConverter))
-        {
+        if (isCompliant && (dataDecoder || signalDecoder || dataDemodulator || signalDemodulator || pulseFilter || analogDigitalConverter)) {
             throw cRuntimeError("In compliant mode it is forbidden to the following parameters: dataDecoder, signalDecoder, dataDemodulator, signalDemodulator, pulseFilter, analogDigitalConverter.");
         }
         const char *levelOfDetailStr = par("levelOfDetail");
@@ -322,7 +321,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
         const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getSymbols();
         std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
         symbols = dataFieldSymbolModel->getSymbols();
-        for (auto & symbol : *symbols)
+        for (auto& symbol : *symbols)
             completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
         return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getPayloadSymbolLength(), dataFieldSymbolModel->getPayloadSymbolRate(), completeSymbols);
     }

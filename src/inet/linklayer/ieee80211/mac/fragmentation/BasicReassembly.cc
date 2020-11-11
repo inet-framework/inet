@@ -62,7 +62,7 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     else
         delete packet;
 
-    //MacAddress txAddress = header->getTransmitterAddress();
+//    MacAddress txAddress = header->getTransmitterAddress();
 
     // if all fragments arrived, return assembled frame
     if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {
@@ -92,14 +92,14 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
     auto itEnd = fragmentsMap.upper_bound(key);
 
     if (endSeqNumber < startSeqNumber) {
-        for (auto it = itStart; it != fragmentsMap.end(); ) {
+        for (auto it = itStart; it != fragmentsMap.end();) {
             for (auto fragment : it->second.fragments)
                 delete fragment;
             it = fragmentsMap.erase(it);
         }
         itStart = fragmentsMap.begin();
     }
-    for (auto it = itStart; it != itEnd; ) {
+    for (auto it = itStart; it != itEnd;) {
         for (auto fragment : it->second.fragments)
             delete fragment;
         it = fragmentsMap.erase(it);

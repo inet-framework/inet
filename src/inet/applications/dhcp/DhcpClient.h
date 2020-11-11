@@ -46,28 +46,28 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     // parameters
     int serverPort = -1;
     int clientPort = -1;
-    UdpSocket socket;    // UDP socket for client-server communication
-    simtime_t startTime;    // application start time
-    MacAddress macAddress;    // client's MAC address
-    cModule *host = nullptr;    // containing host module (@networkNode)
-    NetworkInterface *ie = nullptr;    // interface to configure
-    IIpv4RoutingTable *irt = nullptr;    // routing table to update
+    UdpSocket socket; // UDP socket for client-server communication
+    simtime_t startTime; // application start time
+    MacAddress macAddress; // client's MAC address
+    cModule *host = nullptr; // containing host module (@networkNode)
+    NetworkInterface *ie = nullptr; // interface to configure
+    IIpv4RoutingTable *irt = nullptr; // routing table to update
 
     // state
-    cMessage *timerT1 = nullptr;    // time at which the client enters the RENEWING state
-    cMessage *timerT2 = nullptr;    // time at which the client enters the REBINDING state
-    cMessage *timerTo = nullptr;    // response timeout: WAIT_ACK, WAIT_OFFER
-    cMessage *leaseTimer = nullptr;    // length of time the lease is valid
-    cMessage *startTimer = nullptr;    // self message to start DHCP initialization
-    ClientState clientState = INIT;    // current state
-    unsigned int xid = 0;    // transaction id; to associate messages and responses between a client and a server
-    DhcpLease *lease = nullptr;    // leased IP information
-    Ipv4Route *route = nullptr;    // last added route
+    cMessage *timerT1 = nullptr; // time at which the client enters the RENEWING state
+    cMessage *timerT2 = nullptr; // time at which the client enters the REBINDING state
+    cMessage *timerTo = nullptr; // response timeout: WAIT_ACK, WAIT_OFFER
+    cMessage *leaseTimer = nullptr; // length of time the lease is valid
+    cMessage *startTimer = nullptr; // self message to start DHCP initialization
+    ClientState clientState = INIT; // current state
+    unsigned int xid = 0; // transaction id; to associate messages and responses between a client and a server
+    DhcpLease *lease = nullptr; // leased IP information
+    Ipv4Route *route = nullptr; // last added route
 
     // statistics
-    int numSent = 0;    // number of sent DHCP messages
-    int numReceived = 0;    // number of received DHCP messages
-    int responseTimeout = 0;    // timeout waiting for DHCPACKs, DHCPOFFERs
+    int numSent = 0; // number of sent DHCP messages
+    int numReceived = 0; // number of received DHCP messages
+    int responseTimeout = 0; // timeout waiting for DHCPACKs, DHCPOFFERs
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -80,7 +80,6 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     static const char *getStateName(ClientState state);
     const char *getAndCheckMessageTypeName(DhcpMessageType type);
     virtual void refreshDisplay() const override;
-
 
     /*
      * Opens a UDP socket for client-server communication.
@@ -170,7 +169,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
      */
     virtual NetworkInterface *chooseInterface();
 
-    //UdpSocket::ICallback methods
+    // UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override;

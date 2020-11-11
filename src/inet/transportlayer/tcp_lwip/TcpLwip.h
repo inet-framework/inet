@@ -125,7 +125,7 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     void process_STATUS(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
 
     // send a connection established msg to application layer
-    //void sendEstablishedMsg(TcpLwipConnection& connP);
+//    void sendEstablishedMsg(TcpLwipConnection& connP);
 
   public:
     LwipTcpLayer *getLwipTcpLayer() { return pLwipTcpLayerM; }
@@ -141,7 +141,7 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     virtual TcpLwipReceiveQueue *createReceiveQueue();
 
   protected:
-    typedef std::map<int, TcpLwipConnection *> TcpAppConnMap;    // connId-to-TcpLwipConnection
+    typedef std::map<int, TcpLwipConnection *> TcpAppConnMap; // connId-to-TcpLwipConnection
 
     // Maps:
     TcpAppConnMap tcpAppConnMapM;

@@ -28,18 +28,18 @@ class OriginatorBlockAckAgreement;
 
 class INET_API IOriginatorBlockAckAgreementPolicy
 {
-    public:
-        virtual ~IOriginatorBlockAckAgreementPolicy() { }
+  public:
+    virtual ~IOriginatorBlockAckAgreementPolicy() {}
 
-        virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) = 0;
-        virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement* agreement) = 0;
-        virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) = 0;
+    virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) = 0;
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement *agreement) = 0;
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) = 0;
 
-        virtual bool isMsduSupported() const = 0;
-        virtual simtime_t computeAddbaFailureTimeout() const = 0;
-        virtual simtime_t getBlockAckTimeoutValue() const = 0;
-        virtual bool isDelayedAckPolicySupported() const = 0;
-        virtual int getMaximumAllowedBufferSize() const = 0;
+    virtual bool isMsduSupported() const = 0;
+    virtual simtime_t computeAddbaFailureTimeout() const = 0;
+    virtual simtime_t getBlockAckTimeoutValue() const = 0;
+    virtual bool isDelayedAckPolicySupported() const = 0;
+    virtual int getMaximumAllowedBufferSize() const = 0;
 };
 
 } // namespace ieee80211

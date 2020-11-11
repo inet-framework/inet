@@ -150,7 +150,7 @@ void Ppp::refreshOutGateConnection(bool connected)
         }
 
         PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);      //TODO choose a correct PacketDropReason value
+        details.setReason(INTERFACE_DOWN); // TODO choose a correct PacketDropReason value
         flushQueue(details);
     }
 
@@ -196,7 +196,7 @@ void Ppp::startTransmitting()
     curTxPacket = pppFrame->dup();
     send(pppFrame, SendOptions().transmissionId(curTxPacket->getId()), physOutGate);
 
-    ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
+    ASSERT(datarateChannel == physOutGate->getTransmissionChannel()); // FIXME reread datarateChannel when changed
 
     // schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmissionTime = datarateChannel->getTransmissionFinishTime();
@@ -255,7 +255,7 @@ void Ppp::handleUpperPacket(Packet *packet)
 
 void Ppp::handleLowerPacket(Packet *packet)
 {
-    //TODO: if incoming gate is not connected now, then the link has been deleted
+    // TODO: if incoming gate is not connected now, then the link has been deleted
     // during packet transmission --> discard incomplete packet.
     EV_INFO << "Received " << packet << " from network.\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
@@ -353,7 +353,7 @@ void Ppp::decapsulate(Packet *packet)
     const auto& pppTrailer = packet->popAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
     if (pppHeader == nullptr || pppTrailer == nullptr)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
-    //TODO check CRC
+    // TODO check CRC
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
 
     auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
@@ -375,3 +375,4 @@ void Ppp::handleStopOperation(LifecycleOperation *operation)
 }
 
 } // namespace inet
+

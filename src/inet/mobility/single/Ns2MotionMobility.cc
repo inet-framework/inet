@@ -46,8 +46,7 @@ Ns2MotionMobility::Ns2MotionMobility()
 void Ns2MotionMobility::computeMaxSpeed()
 {
     unsigned int fileSize = ns2File->lines.size();
-    for (unsigned int i = 0; i < fileSize; i++)
-    {
+    for (unsigned int i = 0; i < fileSize; i++) {
         const Ns2MotionFile::Line& vec = ns2File->lines[i];
         if (vec[3] > maxSpeed)
             maxSpeed = vec[3];
@@ -180,7 +179,7 @@ void Ns2MotionMobility::setTargetPosition()
         nextChange = time;
         targetPosition = lastPosition;
     }
-    else if (vec[3] == 0) {    // the node is stopped
+    else if (vec[3] == 0) { // the node is stopped
         const Ns2MotionFile::Line& vec = ns2File->lines[vecpos + 1];
         double time = vec[0];
         nextChange = time;

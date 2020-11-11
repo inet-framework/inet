@@ -76,7 +76,7 @@ bool NeighborState::updateLsa(Neighbor *neighbor)
                     shouldRebuildRoutingTable |= networkLSA->update(newLSA);
                     delete newLSA;
                 }
-                else {    // no neighbors on the network -> old NetworkLsa must be flushed
+                else { // no neighbors on the network -> old NetworkLsa must be flushed
                     networkLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
                     networkLSA->incrementInstallTime();
                 }

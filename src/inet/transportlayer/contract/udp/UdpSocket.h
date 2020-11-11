@@ -65,8 +65,7 @@ namespace inet {
 class INET_API UdpSocket : public ISocket
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
 
@@ -85,7 +84,7 @@ class INET_API UdpSocket : public ISocket
          */
         virtual void socketClosed(UdpSocket *socket) = 0;
     };
-    enum State { CONNECTED, CLOSED};
+    enum State { CONNECTED, CLOSED };
 
   protected:
     int socketId;

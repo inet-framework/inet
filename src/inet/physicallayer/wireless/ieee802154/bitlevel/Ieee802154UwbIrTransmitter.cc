@@ -44,8 +44,7 @@ Ieee802154UwbIrTransmitter::Ieee802154UwbIrTransmitter()
 
 void Ieee802154UwbIrTransmitter::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         cfg = Ieee802154UwbIrMode::cfg_mandatory_16M;
     }
 }
@@ -81,7 +80,7 @@ simtime_t Ieee802154UwbIrTransmitter::getThdr() const
         default:
             switch (cfg.prf) {
                 case Ieee802154UwbIrMode::NOMINAL_4_M:
-                    //throw cRuntimeError("This optional mode is not implemented.");
+//                    throw cRuntimeError("This optional mode is not implemented.");
                     return 0;
                     break;
                 case Ieee802154UwbIrMode::NOMINAL_16_M:
@@ -102,12 +101,12 @@ void Ieee802154UwbIrTransmitter::generateSyncPreamble(std::map<simsec, WpHz>& da
     for (short n = 0; n < cfg.NSync; n = n + 1) {
         for (short pos = 0; pos < cfg.CLength; pos = pos + 1) {
             if (Ieee802154UwbIrMode::C31[Ieee802154UwbIrMode::Ci - 1][pos] != 0) {
-                if(n==0 && pos==0)
+                if (n == 0 && pos == 0)
                     // we slide the first pulse slightly in time to get the first point "inside" the signal
                     time = 1E-12 + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration;
                 else
                     time = n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration;
-                //generatePulse(data, time, startTime, C31[Ci - 1][pos], IEEE802154A::maxPulse, IEEE802154A::mandatory_pulse);
+//                generatePulse(data, time, startTime, C31[Ci - 1][pos], IEEE802154A::maxPulse, IEEE802154A::mandatory_pulse);
                 generatePulse(data, time, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration); // always positive polarity
             }
         }
@@ -121,8 +120,8 @@ void Ieee802154UwbIrTransmitter::generateSFD(std::map<simsec, WpHz>& data, simti
         if (Ieee802154UwbIrMode::shortSFD[n] != 0) {
             for (short pos = 0; pos < cfg.CLength; pos = pos + 1) {
                 if (Ieee802154UwbIrMode::C31[Ieee802154UwbIrMode::Ci - 1][pos] != 0) {
-                    time = sfdStart + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL*cfg.pulse_duration;
-                    //generatePulse(data, time, startTime, C31[Ci - 1][pos] * shortSFD[n]); // change pulse polarity
+                    time = sfdStart + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration;
+                    // generatePulse(data, time, startTime, C31[Ci - 1][pos] * shortSFD[n]); // change pulse polarity
                     generatePulse(data, time, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration); // always positive polarity
                 }
             }
@@ -138,7 +137,7 @@ void Ieee802154UwbIrTransmitter::generatePhyHeader(std::map<simsec, WpHz>& data,
 void Ieee802154UwbIrTransmitter::generatePulse(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const
 {
     ASSERT(polarity == -1 || polarity == +1);
-    time += startTime;  // adjust argument so that we use absolute time values in function
+    time += startTime; // adjust argument so that we use absolute time values in function
     data[simsec(time)] = WpHz(0);
     time += chip / 2;
     // Maximum point at symbol half (triangular pulse)
@@ -150,7 +149,7 @@ void Ieee802154UwbIrTransmitter::generatePulse(std::map<simsec, WpHz>& data, sim
 
 void Ieee802154UwbIrTransmitter::generateBurst(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime, const simtime_t burstStart, short /*polarity*/) const
 {
-    // ASSERT(burstStart < cfg.preambleLength + (psduLength * 8 + 48 + 2) * cfg.data_symbol_duration);
+//    ASSERT(burstStart < cfg.preambleLength + (psduLength * 8 + 48 + 2) * cfg.data_symbol_duration);
     // 1. Start point = zeros
     simtime_t offset = burstStart;
     for (int pulse = 0; pulse < cfg.nbPulsesPerBurst; pulse++) {
@@ -174,7 +173,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> Ieee802154UwbIrTransmitter::gener
 
     generateSyncPreamble(data, time, startTime);
     generateSFD(data, time, startTime);
-    //generatePhyHeader(data, time, startTime);
+//    generatePhyHeader(data, time, startTime);
 
     // generate bit values and modulates them according to
     // the IEEE 802.15.4A specification

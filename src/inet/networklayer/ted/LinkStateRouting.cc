@@ -125,7 +125,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, Ipv4Address sender)
 
     unsigned int n = msg->getLinkInfoArraySize();
 
-    bool change = false;    // in topology
+    bool change = false; // in topology
 
     // loop through every link in the message
     for (unsigned int i = 0; i < n; i++) {
@@ -182,7 +182,7 @@ void LinkStateRouting::sendToPeers(const std::vector<TeLinkStateInfo>& list, boo
     EV_INFO << "sending LINK_STATE message to peers" << endl;
 
     // send "list" to every peer (linkid in our ted[] entries???) in a LinkStateMsg
-    for (auto & elem : tedmod->ted) {
+    for (auto& elem : tedmod->ted) {
         if (elem.advrouter != routerId)
             continue;
 

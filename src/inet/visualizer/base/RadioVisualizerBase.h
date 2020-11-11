@@ -30,8 +30,7 @@ namespace visualizer {
 class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API RadioVisualization
-    {
+    class INET_API RadioVisualization {
       public:
         const int radioModuleId = -1;
 

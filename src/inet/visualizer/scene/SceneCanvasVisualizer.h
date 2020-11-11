@@ -41,7 +41,6 @@ class INET_API SceneCanvasVisualizer : public SceneVisualizerBase
     virtual RotationMatrix parseViewAngle(const char *viewAngle, bool& invertY);
     virtual cFigure::Point parse2D(const char *text, bool invertY = false);
     virtual void displayDescription(const char *descriptionFigurePath);
-
 };
 
 } // namespace visualizer

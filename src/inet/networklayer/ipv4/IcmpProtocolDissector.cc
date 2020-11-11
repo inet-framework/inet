@@ -20,7 +20,6 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 
-
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::icmpv4, IcmpProtocolDissector);
@@ -34,7 +33,7 @@ void IcmpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
         case ICMP_DESTINATION_UNREACHABLE:
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
-            //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
+            // TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
             callback.dissectPacket(packet, nullptr);
             break;
         }

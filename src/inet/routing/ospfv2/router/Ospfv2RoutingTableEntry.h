@@ -35,8 +35,8 @@ class INET_API Ospfv2RoutingTableEntry : public Ipv4Route
 {
   public:
     enum RoutingPathType {
-        INTRAAREA = 0,
-        INTERAREA = 1,
+        INTRAAREA      = 0,
+        INTERAREA      = 1,
         TYPE1_EXTERNAL = 2,
         TYPE2_EXTERNAL = 3
     };

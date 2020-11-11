@@ -47,7 +47,7 @@ void NeighborStateFull::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
         changeState(neighbor, new NeighborStateDown, this);
 
         if (neighbor->getInterface()->getState() == Ospfv2Interface::BACKUP_STATE &&
-                neighbor->getInterface()->getDesignatedRouter().routerID == neighbor->getNeighborID())
+            neighbor->getInterface()->getDesignatedRouter().routerID == neighbor->getNeighborID())
             neighbor->getInterface()->processEvent(Ospfv2Interface::NEIGHBOR_CHANGE);
     }
     else if (event == Neighbor::ONEWAY_RECEIVED) {

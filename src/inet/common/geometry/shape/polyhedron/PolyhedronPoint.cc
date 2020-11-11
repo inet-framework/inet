@@ -34,3 +34,4 @@ PolyhedronPoint::PolyhedronPoint()
 }
 
 } /* namespace inet */
+

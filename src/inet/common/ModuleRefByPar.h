@@ -32,7 +32,7 @@ namespace inet {
  *
  * TODO: follow parameter change
  */
-template <typename T>
+template<typename T>
 class INET_API ModuleRefByPar
 {
   private:

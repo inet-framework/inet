@@ -39,7 +39,7 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     T *getObjectPointer(void *object) const { return const_cast<T *>(getSharedPtr(object).get()); }
 
   public:
-    TemporarySharedPtrClassDescriptor(cClassDescriptor *classDescriptor) : cClassDescriptor(classDescriptor->getClassName()), classDescriptor(classDescriptor) { }
+    TemporarySharedPtrClassDescriptor(cClassDescriptor *classDescriptor) : cClassDescriptor(classDescriptor->getClassName()), classDescriptor(classDescriptor) {}
 
     virtual bool doesSupport(cObject *object) const override { return classDescriptor->doesSupport(getObjectPointer(object)); }
     virtual cClassDescriptor *getBaseClassDescriptor() const override { return classDescriptor->getBaseClassDescriptor(); }
@@ -75,7 +75,7 @@ class TemporarySharedPtr : public cObject
     TemporarySharedPtrClassDescriptor<T> *classDescriptor;
 
   public:
-    TemporarySharedPtr(const Ptr<const T> object) : object(object), classDescriptor(new TemporarySharedPtrClassDescriptor<T>(object.get()->getDescriptor())) { }
+    TemporarySharedPtr(const Ptr<const T> object) : object(object), classDescriptor(new TemporarySharedPtrClassDescriptor<T>(object.get()->getDescriptor())) {}
     virtual ~TemporarySharedPtr() { delete classDescriptor; }
 
     const Ptr<const T>& getObject() const { return object; }

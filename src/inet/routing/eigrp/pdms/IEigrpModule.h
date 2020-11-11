@@ -33,7 +33,7 @@ namespace eigrp {
  * Interface for EIGRP configuration.
  */
 
-template <typename IPAddress>
+template<typename IPAddress>
 class IEigrpModule
 {
   public:
@@ -91,8 +91,9 @@ class IEigrpModule
      * @return  True if successfully added, otherwise false (e.g. same IPv6 prefix on different interfaces)
      * @note    Checks duplicates
      */
-    virtual bool addNetPrefix(const IPAddress &network, const short int prefixLen, const int ifaceId) = 0;
+    virtual bool addNetPrefix(const IPAddress& network, const short int prefixLen, const int ifaceId) = 0;
 };
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif /* IEIGRPMODULE_H_ */
+

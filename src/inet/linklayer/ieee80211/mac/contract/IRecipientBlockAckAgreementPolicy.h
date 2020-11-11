@@ -25,16 +25,16 @@ namespace ieee80211 {
 
 class INET_API IRecipientBlockAckAgreementPolicy
 {
-    public:
-        virtual ~IRecipientBlockAckAgreementPolicy() { }
+  public:
+    virtual ~IRecipientBlockAckAgreementPolicy() {}
 
-        virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) = 0;
-        virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) = 0;
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) = 0;
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) = 0;
 
-        virtual simtime_t getBlockAckTimeoutValue() const = 0;
-        virtual bool aMsduSupported() const = 0;
-        virtual bool delayedBlockAckPolicySupported() const = 0;
-        virtual int getMaximumAllowedBufferSize() const = 0;
+    virtual simtime_t getBlockAckTimeoutValue() const = 0;
+    virtual bool aMsduSupported() const = 0;
+    virtual bool delayedBlockAckPolicySupported() const = 0;
+    virtual int getMaximumAllowedBufferSize() const = 0;
 };
 
 } // namespace ieee80211

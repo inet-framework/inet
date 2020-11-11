@@ -73,16 +73,16 @@ class INET_API L3AddressResolver
     // internal
     virtual bool getInterfaceModuleIdAddress(L3Address& ret, NetworkInterface *ie, bool mask);
     // internal
-    virtual void doCollectNetworkNodes(cModule *parent, std::vector<cModule*>& result);
+    virtual void doCollectNetworkNodes(cModule *parent, std::vector<cModule *>& result);
 
   public:
     enum {
-        ADDR_IPv4 = 1,
-        ADDR_IPv6 = 2,
-        ADDR_MAC = 4,
+        ADDR_IPv4       = 1,
+        ADDR_IPv6       = 2,
+        ADDR_MAC        = 4,
         ADDR_MODULEPATH = 8,
-        ADDR_MODULEID = 16,
-        ADDR_MASK = 32
+        ADDR_MODULEID   = 16,
+        ADDR_MASK       = 32
     };
 
   public:
@@ -199,7 +199,7 @@ class INET_API L3AddressResolver
     /**
      * Collect modules that represent network nodes, as denoted by the @networkNode(true) annotation.
      */
-    virtual std::vector<cModule*> collectNetworkNodes();
+    virtual std::vector<cModule *> collectNetworkNodes();
 
     /**
      * Find the Host with the specified address.

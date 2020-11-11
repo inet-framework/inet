@@ -109,8 +109,6 @@ class AccessModuleWrap
     {
     }
 
-    ;
-
     T *get(cModule *const from = nullptr)
     {
         if (!pModule) {

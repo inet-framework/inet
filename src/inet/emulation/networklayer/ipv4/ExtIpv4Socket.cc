@@ -75,7 +75,7 @@ void ExtIpv4Socket::handleMessage(cMessage *msg)
     size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
     ASSERT(packetLength == (size_t)packet->getByteLength());
 
-    //int sent = ::send(fd, buffer, packetLength, 0);
+//    int sent = ::send(fd, buffer, packetLength, 0);
     int sent = sendto(fd, buffer, packetLength, 0, (struct sockaddr *)&ip_addr, sizeof(ip_addr));
     if ((size_t)sent == packetLength)
         EV << "Sent " << sent << " bytes packet.\n";
@@ -104,7 +104,7 @@ void ExtIpv4Socket::openSocket()
     fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (fd == INVALID_SOCKET)
         throw cRuntimeError("Cannot open socket");
-    int hdrincl=1;
+    int hdrincl = 1;
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, &hdrincl, sizeof(hdrincl)) == -1)
         throw cRuntimeError("IP_HDRINCL");
     if (gate("upperLayerOut")->isConnected())

@@ -118,7 +118,7 @@ void Ipv4NodeConfigurator::prepareAllInterfaces()
 
 void Ipv4NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
 {
-    // ASSERT(!networkInterface->getProtocolData<Ipv4InterfaceData>());
+//    ASSERT(!networkInterface->getProtocolData<Ipv4InterfaceData>());
     auto interfaceData = networkInterface->addProtocolData<Ipv4InterfaceData>();
     if (networkInterface->isLoopback()) {
         // we may reconfigure later it to be the routerId
@@ -133,7 +133,7 @@ void Ipv4NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
             interfaceData->setMetric(1);
         else
             // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-            interfaceData->setMetric((int)ceil(2e9 / datarate));    // use OSPF cost as default
+            interfaceData->setMetric((int)ceil(2e9 / datarate)); // use OSPF cost as default
         if (networkInterface->isMulticast()) {
             interfaceData->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
             if (routingTable->isForwardingEnabled())

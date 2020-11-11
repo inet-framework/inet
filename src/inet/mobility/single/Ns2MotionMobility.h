@@ -77,6 +77,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
     virtual void move() override;
 
     virtual void computeMaxSpeed();
+
   public:
     Ns2MotionMobility();
     virtual ~Ns2MotionMobility();

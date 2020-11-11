@@ -45,7 +45,7 @@ void InterfaceStateDesignatedRouter::processEvent(Ospfv2Interface *intf, Ospfv2I
         if (intf->getType() == Ospfv2Interface::BROADCAST) {
             intf->sendHelloPacket(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
-        else {    // Ospfv2Interface::NBMA
+        else { // Ospfv2Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
             int ttl = (intf->getType() == Ospfv2Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {

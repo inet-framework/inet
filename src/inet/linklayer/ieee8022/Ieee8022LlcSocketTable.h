@@ -27,17 +27,15 @@ namespace inet {
 class INET_API Ieee8022LlcSocketTable : public cSimpleModule
 {
   public:
-    struct Socket
-    {
+    struct Socket {
         int socketId = -1;
         int localSap = -1;
         int remoteSap = -1;
 
         friend std::ostream& operator<<(std::ostream& o, const Socket& t);
 
-        Socket(int socketId) : socketId(socketId) { }
+        Socket(int socketId) : socketId(socketId) {}
     };
-
 
   protected:
     std::map<int, Socket *> socketIdToSocketMap;

@@ -35,7 +35,7 @@ static bool parseIntTo(const char *s, double& destValue)
     /* This method is only used to convert positions from the display strings,
      * which can contain floating point values.
      */
-    if(sscanf(s, "%lf", &destValue) != 1)
+    if (sscanf(s, "%lf", &destValue) != 1)
         return false;
 
     return true;

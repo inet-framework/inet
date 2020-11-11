@@ -44,7 +44,6 @@ using namespace inet::physicallayer;
 
 Define_Module(Ieee80211Mac);
 
-
 Ieee80211Mac::Ieee80211Mac()
 {
 }
@@ -90,15 +89,15 @@ void Ieee80211Mac::initialize(int stage)
 
 void Ieee80211Mac::initializeRadioMode() {
     const char *initialRadioMode = par("initialRadioMode");
-    if(!strcmp(initialRadioMode, "off"))
+    if (!strcmp(initialRadioMode, "off"))
         radio->setRadioMode(IRadio::RADIO_MODE_OFF);
-    else if(!strcmp(initialRadioMode, "sleep"))
+    else if (!strcmp(initialRadioMode, "sleep"))
         radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-    else if(!strcmp(initialRadioMode, "receiver"))
+    else if (!strcmp(initialRadioMode, "receiver"))
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-    else if(!strcmp(initialRadioMode, "transmitter"))
+    else if (!strcmp(initialRadioMode, "transmitter"))
         radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    else if(!strcmp(initialRadioMode, "transceiver"))
+    else if (!strcmp(initialRadioMode, "transceiver"))
         radio->setRadioMode(IRadio::RADIO_MODE_TRANSCEIVER);
     else
         throw cRuntimeError("Unknown initialRadioMode");
@@ -106,8 +105,8 @@ void Ieee80211Mac::initializeRadioMode() {
 
 const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 {
-    // if (!par("multiMac"))
-    //    return MacAddress::UNSPECIFIED_ADDRESS;
+//    if (!par("multiMac"))
+//        return MacAddress::UNSPECIFIED_ADDRESS;
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)
         return MacAddress::UNSPECIFIED_ADDRESS;
@@ -123,7 +122,7 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 
 void Ieee80211Mac::configureNetworkInterface()
 {
-    //TODO the mib module should use the mac address from NetworkInterface
+    // TODO the mib module should use the mac address from NetworkInterface
     mib->address = networkInterface->getMacAddress();
     networkInterface->setMtu(par("mtu"));
     // capabilities
@@ -220,11 +219,11 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
             pendingRadioConfigMsg = nullptr;
         }
 
-        if (rx->isMediumFree()) {    // TODO: this should be just the physical channel sense!!!!
+        if (rx->isMediumFree()) { // TODO: this should be just the physical channel sense!!!!
             EV_DEBUG << "Sending it down immediately\n";
-            // PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
-            // if (phyControlInfo)
-            // phyControlInfo->setAdaptiveSensitivity(true);
+//            PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
+//            if (phyControlInfo)
+//                phyControlInfo->setAdaptiveSensitivity(true);
             // end dynamic power
             sendDown(msg);
         }
@@ -407,7 +406,7 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211Ma
 void Ieee80211Mac::handleStartOperation(LifecycleOperation *operation)
 {
     if (!operation)
-        return;    // do nothing when called from initialize()
+        return; // do nothing when called from initialize()
 
     initializeRadioMode();
 }
@@ -424,3 +423,4 @@ void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 
 } // namespace ieee80211
 } // namespace inet
+

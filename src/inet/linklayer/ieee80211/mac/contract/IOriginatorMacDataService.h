@@ -25,14 +25,14 @@ namespace ieee80211 {
 
 class INET_API IOriginatorMacDataService
 {
-    public:
-        static simsignal_t packetFragmentedSignal;
-        static simsignal_t packetAggregatedSignal;
+  public:
+    static simsignal_t packetFragmentedSignal;
+    static simsignal_t packetAggregatedSignal;
 
-    public:
-        virtual ~IOriginatorMacDataService() { }
+  public:
+    virtual ~IOriginatorMacDataService() {}
 
-        virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) = 0;
+    virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) = 0;
 };
 
 } // namespace ieee80211

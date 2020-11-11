@@ -29,8 +29,8 @@ namespace eigrp {
 bool operator==(const EigrpKValues& k1, const EigrpKValues& k2)
 {
     return k1.K1 == k2.K1 && k1.K2 == k2.K2 &&
-            k1.K3 == k2.K3 && k1.K4 == k2.K4 &&
-            k1.K5 == k2.K5 && k1.K6 == k2.K6;
+           k1.K3 == k2.K3 && k1.K4 == k2.K4 &&
+           k1.K5 == k2.K5 && k1.K6 == k2.K6;
 }
 
 EigrpMetricHelper::EigrpMetricHelper() :
@@ -65,13 +65,11 @@ EigrpWideMetricPar EigrpMetricHelper::adjustParam(const EigrpWideMetricPar& ifPa
     newMetricPar.mtu = getMin(ifParam.mtu, neighParam.mtu);
     newMetricPar.hopCount = neighParam.hopCount + 1;
 
-    if (isParamMaximal(neighParam))
-    {
+    if (isParamMaximal(neighParam)) {
         newMetricPar.delay = DELAY_INF;
         newMetricPar.bandwidth = BANDWIDTH_INF;
     }
-    else
-    {
+    else {
         newMetricPar.delay = ifParam.delay + neighParam.delay;
         newMetricPar.bandwidth = getMin(ifParam.bandwidth, neighParam.bandwidth);
     }
@@ -88,18 +86,16 @@ uint64_t EigrpMetricHelper::computeClassicMetric(const EigrpWideMetricPar& par, 
         return METRIC_INF;
 
     // Adjust delay and bandwidth
-    if (kValues.K3)
-    { // Note: delay is in pico seconds and must be converted to micro seconds for classic metric
+    if (kValues.K3) { // Note: delay is in pico seconds and must be converted to micro seconds for classic metric
         classicDelay = par.delay / 10000000;
         classicDelay = classicDelay * CLASSIC_SCALE;
     }
     ASSERT(par.bandwidth > 0);
 
     if (kValues.K1)
-        classicBw = BANDWIDTH / par.bandwidth  * CLASSIC_SCALE;
+        classicBw = BANDWIDTH / par.bandwidth * CLASSIC_SCALE;
 
-
-    metric = kValues.K1*classicBw + kValues.K2*classicBw / (256 - par.load) + kValues.K3 * classicDelay;
+    metric = kValues.K1 * classicBw + kValues.K2 * classicBw / (256 - par.load) + kValues.K3 * classicDelay;
     if (kValues.K5 != 0)
         metric = metric * kValues.K5 / (par.reliability + kValues.K4);
 
@@ -119,7 +115,7 @@ uint64_t EigrpMetricHelper::computeWideMetric(const EigrpWideMetricPar& par, con
     throughput = (BANDWIDTH * WIDE_SCALE) / par.bandwidth;
     latency = (par.delay * WIDE_SCALE) / DELAY_PICO;
 
-    metric = kValues.K1*throughput + kValues.K2*kValues.K1*throughput/(256 - par.load) + kValues.K3*latency /*+ kValues.K6*extAttr*/;
+    metric = kValues.K1 * throughput + kValues.K2 * kValues.K1 * throughput / (256 - par.load) + kValues.K3 * latency /*+ kValues.K6*extAttr*/;
     if (kValues.K5 != 0)
         metric = metric * kValues.K5 / (par.reliability + kValues.K4);
 
@@ -139,5 +135,7 @@ bool EigrpMetricHelper::compareParameters(const EigrpWideMetricPar& par1, const 
 
     return true;
 }
-}
-}
+
+} // namespace eigrp
+} // namespace inet
+

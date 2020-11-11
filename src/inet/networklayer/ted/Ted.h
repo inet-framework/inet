@@ -42,22 +42,20 @@ class INET_API Ted : public RoutingProtocolBase
      * Only used internally, during shortest path calculation:
      * vertex in the graph we build from links in TeLinkStateInfoVector.
      */
-    struct vertex_t
-    {
-        Ipv4Address node;    // FIXME *** is this the routerID? ***
-        int parent;    // index into the same vertex_t vector
-        double dist;    // distance to root (???)
+    struct vertex_t {
+        Ipv4Address node; // FIXME *** is this the routerID? ***
+        int parent; // index into the same vertex_t vector
+        double dist; // distance to root (???)
     };
 
     /**
      * Only used internally, during shortest path calculation:
      * edge in the graph we build from links in TeLinkStateInfoVector.
      */
-    struct edge_t
-    {
-        int src;    // index into the vertex_t[] vector
-        int dest;    // index into the vertex_t[] vector
-        double metric;    // link cost
+    struct edge_t {
+        int src; // index into the vertex_t[] vector
+        int dest; // index into the vertex_t[] vector
+        double metric; // link cost
     };
 
     /**
@@ -104,7 +102,7 @@ class INET_API Ted : public RoutingProtocolBase
     IInterfaceTable *ift = nullptr;
     Ipv4Address routerId;
 
-    Ipv4AddressVector interfaceAddrs;    // list of local interface addresses
+    Ipv4AddressVector interfaceAddrs; // list of local interface addresses
 
     int maxMessageId = 0;
 
@@ -114,7 +112,7 @@ class INET_API Ted : public RoutingProtocolBase
     std::vector<vertex_t> calculateShortestPaths(const TeLinkStateInfoVector& topology,
             double req_bandwidth, int priority);
 
-  public:    //FIXME
+  public: // FIXME
     virtual bool checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match);
     virtual void updateTimestamp(TeLinkStateInfo *link);
 };

@@ -40,7 +40,7 @@ class INET_API StaticConcentricMobility : public StationaryMobilityBase
     StaticConcentricMobility() {};
 };
 
-}
+} // namespace inet
 
 #endif
 

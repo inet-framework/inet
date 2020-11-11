@@ -130,7 +130,7 @@ void TracingObstacleLossVisualizerBase::removeAllObstacleLossVisualizations()
     }
 }
 
-
 } // namespace visualizer
 
-}// namespace inet
+} // namespace inet
+

@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 /** \file RtpAvProfilePayload32Receiver.h
  * This file declares the class RtpAvProfilePayload32Receiver.
  */

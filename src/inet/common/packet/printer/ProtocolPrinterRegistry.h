@@ -23,7 +23,7 @@
 
 namespace inet {
 
-#define Register_Protocol_Printer(PROTOCOL, CLASSNAME) EXECUTE_ON_STARTUP(ProtocolPrinterRegistry::globalRegistry.registerProtocolPrinter(PROTOCOL, new CLASSNAME()));
+#define Register_Protocol_Printer(PROTOCOL, CLASSNAME)    EXECUTE_ON_STARTUP(ProtocolPrinterRegistry::globalRegistry.registerProtocolPrinter(PROTOCOL, new CLASSNAME()));
 
 class INET_API ProtocolPrinterRegistry
 {
@@ -36,10 +36,10 @@ class INET_API ProtocolPrinterRegistry
   public:
     ~ProtocolPrinterRegistry();
 
-    void registerProtocolPrinter(const Protocol* protocol, const ProtocolPrinter *printer);
+    void registerProtocolPrinter(const Protocol *protocol, const ProtocolPrinter *printer);
 
-    const ProtocolPrinter *findProtocolPrinter(const Protocol* protocol) const;
-    const ProtocolPrinter *getProtocolPrinter(const Protocol* protocol) const;
+    const ProtocolPrinter *findProtocolPrinter(const Protocol *protocol) const;
+    const ProtocolPrinter *getProtocolPrinter(const Protocol *protocol) const;
 };
 
 } // namespace

@@ -32,7 +32,7 @@ template<typename X, typename Y>
 class INET_API IInterpolator : public cObject
 {
   public:
-    virtual ~IInterpolator() { }
+    virtual ~IInterpolator() {}
 
     /**
      * Returns the interpolated value for the given x. The value of x must fall

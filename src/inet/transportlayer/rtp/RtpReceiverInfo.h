@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #ifndef __INET_RTPRECEIVERINFO_H
 #define __INET_RTPRECEIVERINFO_H
 
@@ -156,11 +155,11 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     /**
      * The output vector for jitter value
      */
-    //cOutVector _jitterOutVector;
+//    cOutVector _jitterOutVector;
     /**
      * The output vector for packet lost
      */
-    //cOutVector _packetLostOutVector;
+//    cOutVector _packetLostOutVector;
     /**
      * The clock rate (in ticks per second) the sender increases the
      * RTP timestamps. It is calculated when two sender reports have

@@ -18,7 +18,7 @@
 
 #include "inet/transportlayer/tcp/flavours/DcTcp.h"
 
-#include <algorithm>    // min,max
+#include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
 
@@ -32,7 +32,7 @@ simsignal_t DcTcp::calcLoadSignal = cComponent::registerSignal("calcLoad"); // w
 simsignal_t DcTcp::markingProbSignal = cComponent::registerSignal("markingProb"); // will record marking probability
 
 DcTcp::DcTcp() : TcpReno(),
-        state((DcTcpStateVariables *&)TcpAlgorithm::state)
+    state((DcTcpStateVariables *&)TcpAlgorithm::state)
 {
 }
 
@@ -56,12 +56,12 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
         conn->emit(cwndSignal, state->snd_cwnd);
     }
     else {
-        bool performSsCa = true; //Stands for: "perform slow start and congestion avoidance"
+        bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
         if (state && state->ect) {
             // RFC 8257 3.3.1
             uint32_t bytes_acked = state->snd_una - firstSeqAcked;
 
-//            bool cut = false; TODO: unused?
+            // bool cut = false; TODO: unused?
 
             // RFC 8257 3.3.2
             state->dctcp_bytesAcked += bytes_acked;
@@ -75,12 +75,11 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
                 conn->emit(markingProbSignal, 0);
             }
 
-
             // RFC 8257 3.3.4
             if (state->snd_una > state->dctcp_windEnd) {
 
                 if (state->dctcp_bytesMarked) {
-//                    cut = true;  TODO: unused?
+                    // cut = true;  TODO: unused?
                 }
 
                 // RFC 8257 3.3.5
@@ -108,12 +107,12 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
                 performSsCa = false;
                 state->sndCwr = true;
 
-                //RFC 8257 3.3.9
+                // RFC 8257 3.3.9
                 state->snd_cwnd = state->snd_cwnd * (1 - state->dctcp_alpha / 2);
 
                 conn->emit(cwndSignal, state->snd_cwnd);
 
-                uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
+                uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
                 state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
 
                 conn->emit(ssthreshSignal, state->ssthresh);
@@ -176,7 +175,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             state->lossRecovery = false;
         }
         // RFC 3517, page 7: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
-        //following actions MUST be taken:
+        // following actions MUST be taken:
         //
         // (B.1) Use Update () to record the new SACK information conveyed
         // by the incoming ACK.

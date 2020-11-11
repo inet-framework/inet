@@ -28,7 +28,7 @@ namespace inet {
  */
 class INET_API ByteCountChunk : public Chunk
 {
-  friend class Chunk;
+    friend class Chunk;
 
   protected:
     /**

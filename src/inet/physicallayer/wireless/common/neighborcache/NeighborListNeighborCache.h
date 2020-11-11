@@ -29,8 +29,7 @@ namespace physicallayer {
 class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighborCache
 {
   public:
-    struct RadioEntry
-    {
+    struct RadioEntry {
         RadioEntry(const IRadio *radio) : radio(radio) {};
         const IRadio *radio;
         std::vector<const IRadio *> neighborVector;

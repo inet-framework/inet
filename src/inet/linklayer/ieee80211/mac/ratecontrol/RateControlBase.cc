@@ -31,13 +31,13 @@ void RateControlBase::initialize(int stage)
     ModeSetListener::initialize(stage);
 }
 
-const IIeee80211Mode* RateControlBase::increaseRateIfPossible(const IIeee80211Mode* currentMode)
+const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)
 {
     const IIeee80211Mode *newMode = modeSet->getFasterMode(currentMode);
     return newMode == nullptr ? currentMode : newMode;
 }
 
-const IIeee80211Mode* RateControlBase::decreaseRateIfPossible(const IIeee80211Mode* currentMode)
+const IIeee80211Mode *RateControlBase::decreaseRateIfPossible(const IIeee80211Mode *currentMode)
 {
     const IIeee80211Mode *newMode = modeSet->getSlowerMode(currentMode);
     return newMode == nullptr ? currentMode : newMode;
@@ -49,11 +49,11 @@ void RateControlBase::emitDatarateChangedSignal()
     emit(datarateChangedSignal, rate.get());
 }
 
-void RateControlBase::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
+void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");
     if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
+        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
         double initRate = par("initialRate");
         currentMode = initRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initRate));
         emitDatarateChangedSignal();
@@ -62,3 +62,4 @@ void RateControlBase::receiveSignal(cComponent* source, simsignal_t signalID, cO
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

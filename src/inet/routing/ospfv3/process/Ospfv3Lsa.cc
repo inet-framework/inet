@@ -1,10 +1,9 @@
-
 #include "inet/routing/ospfv3/process/Ospfv3Lsa.h"
 
 namespace inet {
 namespace ospfv3 {
 
-Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
+Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa *asocLSA, int distance)
 {
     this->distance = distance;
     this->asocLSA = asocLSA;
@@ -16,25 +15,25 @@ Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
     }
 }
 
-//for ROUTER_LSA
+// for ROUTER_LSA
 B calculateLSASize(const Ospfv3RouterLsa *routerLSA)
 {
     return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_ROUTER_LSA_HEADER_LENGTH +
-            (OSPFV3_ROUTER_LSA_BODY_LENGTH * routerLSA->getRoutersArraySize());
+           (OSPFV3_ROUTER_LSA_BODY_LENGTH * routerLSA->getRoutersArraySize());
 }
 
 // for NETWORK_LSA
 B calculateLSASize(const Ospfv3NetworkLsa *networkLSA)
 {
-    return  OSPFV3_LSA_HEADER_LENGTH + OSPFV3_NETWORK_LSA_HEADER_LENGTH +
-            (OSPFV3_NETWORK_LSA_ATTACHED_LENGTH * networkLSA->getAttachedRouterArraySize());
+    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_NETWORK_LSA_HEADER_LENGTH +
+           (OSPFV3_NETWORK_LSA_ATTACHED_LENGTH * networkLSA->getAttachedRouterArraySize());
 }
 
 // for  INTER_AREA_PREFIX_LSA
 B calculateLSASize(const Ospfv3InterAreaPrefixLsa *prefixLSA)
 {
 //    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH;
-    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_LSA_PREFIX_HEADER_LENGTH + B( ((prefixLSA->getPrefix().prefixLen+31)/32) * 4);
+    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_LSA_PREFIX_HEADER_LENGTH + B(((prefixLSA->getPrefix().prefixLen + 31) / 32) * 4);
 }
 
 // for LINK_LSA
@@ -167,5 +166,5 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa)
 }
 
 } // namespace ospfv3
-} //namespace inet
+} // namespace inet
 

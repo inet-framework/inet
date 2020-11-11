@@ -33,19 +33,19 @@ namespace ospfv3 {
 #define CHECK_AGE               300
 #define LS_INFINITY             16777215
 
-//#define IPV6_DATAGRAM_LENGTH    65535
-//#define OSPFV3_HEADER_LENGTH    16
-//#define OSPFV3_DD_HEADER_LENGTH 12
-//#define OSPFV3_LSA_HEADER_LENGTH  20
-//#define OSPFV3_LSR_LENGTH       12
+//#define IPV6_DATAGRAM_LENGTH     65535
+//#define OSPFV3_HEADER_LENGTH     16
+//#define OSPFV3_DD_HEADER_LENGTH  12
+//#define OSPFV3_LSA_HEADER_LENGTH 20
+//#define OSPFV3_LSR_LENGTH        12
 //#define OSPFV3_ROUTER_LSA_HEADER_LENGTH 4
-//#define OSPFV3_ROUTER_LSA_BODY_LENGTH 16
+//#define OSPFV3_ROUTER_LSA_BODY_LENGTH   16
 //
-//#define OSPFV3_NETWORK_LSA_HEADER_LENGTH 4
+//#define OSPFV3_NETWORK_LSA_HEADER_LENGTH   4
 //#define OSPFV3_NETWORK_LSA_ATTACHED_LENGTH 4
 //
 //#define OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH 4
-//#define OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH 24
+//#define OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH   24
 //
 //#define OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH 12
 //#define OSPFV3_INTRA_AREA_PREFIX_LSA_PREFIX_LENGTH 20
@@ -72,20 +72,19 @@ const B OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH  = B(12);
 const B OSPFV3_INTRA_AREA_PREFIX_LSA_PREFIX_LENGTH  = B(20);
 
 const B OSPFV3_LINK_LSA_BODY_LENGTH                 = B(24);
-const B OSPFV3_LINK_LSA_PREFIX_LENGTH               = B(20);  //this is just temporary - the prefix now has fixed size
-const B OSPFV3_LSA_PREFIX_HEADER_LENGTH        = B(4); //fixed part of prefix - PrefixLength (1B), PrefixOptions (1B), "0" (2B)
 
-#define ROUTER_LSA_FUNCTION_CODE 1
+const B OSPFV3_LINK_LSA_PREFIX_LENGTH               = B(20); // this is just temporary - the prefix now has fixed size
+const B OSPFV3_LSA_PREFIX_HEADER_LENGTH             = B(4); // fixed part of prefix - PrefixLength (1B), PrefixOptions (1B), "0" (2B)
+
+#define ROUTER_LSA_FUNCTION_CODE    1
 
 const Ipv4Address NULL_ROUTERID(0, 0, 0, 0);
 const Ipv4Address BACKBONE_AREAID(0, 0, 0, 0);
 const Ipv4Address NULL_LINKSTATEID(0, 0, 0, 0);
 const Ipv4Address NULL_IPV4ADDRESS(0, 0, 0, 0);
 
-
 typedef Ipv4Address AreaID;
 typedef unsigned int Metric;
-
 
 struct Ipv6AddressRange
 {
@@ -106,13 +105,13 @@ struct Ipv6AddressRange
 
     bool contains(const Ipv6Address& other) const // ma to robit to, ze vezme other a zisti, ci patri pod adresu siete ,respektive ci maju prefix a other rovnaku siet (cize prefix s dlzkou prefixlen musi byt rovnaky ako other s dlzkou prefixlen)
     {
-        return (prefix.getPrefix(prefixLength) == other.getPrefix(prefixLength));
+        return prefix.getPrefix(prefixLength) == other.getPrefix(prefixLength);
     }
 
     bool contains(const Ipv6AddressRange& other) const
     {
 
-        return prefix.getPrefix(prefixLength) == other.prefix.getPrefix(prefixLength)&& (prefixLength <= other.prefixLength);
+        return prefix.getPrefix(prefixLength) == other.prefix.getPrefix(prefixLength) && (prefixLength <= other.prefixLength);
     }
 
     bool containsRange(const Ipv6Address& otherAddress, const int otherMask) const
@@ -145,7 +144,7 @@ const Ipv6AddressRange NULL_IPV6ADDRESSRANGE(Ipv6Address(0, 0, 0, 0), 0);
 
 inline bool isSameNetwork(Ipv6Address address1, int prefixLen1, Ipv6Address address2, int prefixLen2)
 {
-    return (prefixLen1 == prefixLen2) && (address1.getPrefix(prefixLen1) == address2.getPrefix(prefixLen2) );
+    return (prefixLen1 == prefixLen2) && (address1.getPrefix(prefixLen1) == address2.getPrefix(prefixLen2));
 }
 
 //-------------------------------------------------------------------------------------
@@ -224,8 +223,8 @@ inline bool isSameNetwork(Ipv4Address address1, Ipv4Address mask1, Ipv4Address a
     return (mask1 == mask2) && ((address1 & mask1) == (address2 & mask2));
 }
 
-//individual LSAs are identified by a combination
-//of their LS type, Link State ID, and Advertising Router fields
+// individual LSAs are identified by a combination
+// of their LS type, Link State ID, and Advertising Router fields
 struct LSAKeyType
 {
     uint16_t LSType;
@@ -233,36 +232,36 @@ struct LSAKeyType
     Ipv4Address advertisingRouter;
 };
 
-//Things needed for SPF Tree Vertices
+// Things needed for SPF Tree Vertices
 struct NextHop
 {
     int ifIndex;
-    //Ipv6Address hopAddress;
+//    Ipv6Address hopAddress;
     L3Address hopAddress;
-    Ipv4Address advertisingRouter;      // Router ID
+    Ipv4Address advertisingRouter; // Router ID
 };
 
-struct VertexID {
-    int interfaceID=-1; //Needed only for Network Vertex
+struct VertexID
+{
+    int interfaceID = -1; // Needed only for Network Vertex
     Ipv4Address routerID;
 };
 
 inline bool operator==(const VertexID& leftID, const VertexID& rightID)
 {
-    return ((leftID.interfaceID == rightID.interfaceID)
-            && (leftID.routerID == rightID.routerID));
+    return (leftID.interfaceID == rightID.interfaceID)
+           && (leftID.routerID == rightID.routerID);
 }
 
-enum InstallSource
-{
+enum InstallSource {
     ORIGINATED = 0,
-    FLOODED = 1
+    FLOODED    = 1
 };
 
 struct VertexLSA
 {
-    Ospfv3RouterLsa* routerLSA;
-    Ospfv3NetworkLsa* networkLSA;
+    Ospfv3RouterLsa *routerLSA;
+    Ospfv3NetworkLsa *networkLSA;
 };
 
 inline bool operator==(const NextHop& leftHop, const NextHop& rightHop)
@@ -284,40 +283,40 @@ struct Ospfv3DdPacketId
     unsigned long sequenceNumber;
 };
 
-inline bool operator != (Ospfv3DdOptions leftID, Ospfv3DdOptions rightID)
+inline bool operator!=(Ospfv3DdOptions leftID, Ospfv3DdOptions rightID)
 {
-    return ((leftID.iBit != rightID.iBit) ||
-            (leftID.mBit != rightID.mBit) ||
-            (leftID.msBit != rightID.msBit));
+    return (leftID.iBit != rightID.iBit) ||
+           (leftID.mBit != rightID.mBit) ||
+           (leftID.msBit != rightID.msBit);
 }
 
-inline bool operator == (Ospfv3Options leftID, Ospfv3Options rightID)
+inline bool operator==(Ospfv3Options leftID, Ospfv3Options rightID)
 {
-    return ((leftID.dcBit == rightID.dcBit) ||
-            (leftID.eBit == rightID.eBit) ||
-            (leftID.nBit == rightID.nBit) ||
-            (leftID.rBit == rightID.rBit) ||
-            (leftID.v6Bit == rightID.v6Bit) ||
-            (leftID.xBit == rightID.xBit));
+    return (leftID.dcBit == rightID.dcBit) ||
+           (leftID.eBit == rightID.eBit) ||
+           (leftID.nBit == rightID.nBit) ||
+           (leftID.rBit == rightID.rBit) ||
+           (leftID.v6Bit == rightID.v6Bit) ||
+           (leftID.xBit == rightID.xBit);
 }
 
-inline bool operator != (Ospfv3Options leftID, Ospfv3Options rightID)
+inline bool operator!=(Ospfv3Options leftID, Ospfv3Options rightID)
 {
-    return !(leftID==rightID);
+    return !(leftID == rightID);
 }
 
-inline bool operator !=(Ospfv3DdPacketId leftID, Ospfv3DdPacketId rightID)
+inline bool operator!=(Ospfv3DdPacketId leftID, Ospfv3DdPacketId rightID)
 {
-    return ((leftID.ddOptions.iBit != rightID.ddOptions.iBit) ||
-       (leftID.ddOptions.mBit != rightID.ddOptions.mBit) ||
-       (leftID.ddOptions.msBit != rightID.ddOptions.msBit) ||
-       (leftID.options.dcBit != rightID.options.dcBit) ||
-       (leftID.options.eBit != rightID.options.eBit) ||
-       (leftID.options.nBit != rightID.options.nBit) ||
-       (leftID.options.rBit != rightID.options.rBit) ||
-       (leftID.options.v6Bit != rightID.options.v6Bit) ||
-       (leftID.options.xBit != rightID.options.xBit) ||
-       (leftID.sequenceNumber != rightID.sequenceNumber));
+    return (leftID.ddOptions.iBit != rightID.ddOptions.iBit) ||
+           (leftID.ddOptions.mBit != rightID.ddOptions.mBit) ||
+           (leftID.ddOptions.msBit != rightID.ddOptions.msBit) ||
+           (leftID.options.dcBit != rightID.options.dcBit) ||
+           (leftID.options.eBit != rightID.options.eBit) ||
+           (leftID.options.nBit != rightID.options.nBit) ||
+           (leftID.options.rBit != rightID.options.rBit) ||
+           (leftID.options.v6Bit != rightID.options.v6Bit) ||
+           (leftID.options.xBit != rightID.options.xBit) ||
+           (leftID.sequenceNumber != rightID.sequenceNumber);
 }
 
 inline bool operator<(Ospfv3LsaHeader& leftLSA, Ospfv3LsaHeader& rightLSA)
@@ -407,10 +406,11 @@ inline bool operator==(const Ospfv3LsaHeader& leftLSA, const Ospfv3LsaHeader& ri
         return false;
     }
 }
-//Packets
 
-} //namespace ospfv3
-}//namespace inet
+// Packets
+
+} // namespace ospfv3
+} // namespace inet
 
 #endif
 

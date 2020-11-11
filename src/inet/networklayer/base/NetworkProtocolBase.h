@@ -31,15 +31,14 @@ namespace inet {
 class INET_API NetworkProtocolBase : public LayeredProtocolBase, public DefaultProtocolRegistrationListener
 {
   protected:
-    struct SocketDescriptor
-    {
+    struct SocketDescriptor {
         int socketId = -1;
         int protocolId = -1;
         L3Address localAddress;
         L3Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
     IInterfaceTable *interfaceTable;

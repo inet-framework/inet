@@ -33,7 +33,7 @@ LineSegment::LineSegment(const Coord& point1, const Coord& point2) :
 {
 }
 
-bool LineSegment::computeIntersection(const LineSegment& lineSegment, Coord &intersection1, Coord &intersection2)
+bool LineSegment::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2)
 {
     // TODO:
     throw cRuntimeError("Not yet implemented");

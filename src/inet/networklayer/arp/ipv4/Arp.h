@@ -50,18 +50,17 @@ class INET_API Arp : public OperationalBase, public IArp
     typedef std::vector<cMessage *> MsgPtrVector;
 
     // Ipv4Address -> MacAddress table
-    // TBD should we key it on (Ipv4Address, NetworkInterface*)?
-    class ArpCacheEntry
-    {
+    // TODO should we key it on (Ipv4Address, NetworkInterface*)?
+    class ArpCacheEntry {
       public:
-        Arp *owner = nullptr;    // owner ARP module of this cache entry
-        const NetworkInterface *ie = nullptr;    // NIC to send the packet to
-        bool pending = false;    // true if resolution is pending
-        MacAddress macAddress;    // MAC address
-        simtime_t lastUpdate;    // entries should time out after cacheTimeout
-        int numRetries = 0;    // if pending==true: 0 after first ARP request, 1 after second, etc.
-        cMessage *timer = nullptr;    // if pending==true: request timeout msg
-        ArpCache::iterator myIter;    // iterator pointing to this entry
+        Arp *owner = nullptr; // owner ARP module of this cache entry
+        const NetworkInterface *ie = nullptr; // NIC to send the packet to
+        bool pending = false; // true if resolution is pending
+        MacAddress macAddress; // MAC address
+        simtime_t lastUpdate; // entries should time out after cacheTimeout
+        int numRetries = 0; // if pending==true: 0 after first ARP request, 1 after second, etc.
+        cMessage *timer = nullptr; // if pending==true: request timeout msg
+        ArpCache::iterator myIter; // iterator pointing to this entry
     };
 
   protected:
@@ -82,7 +81,7 @@ class INET_API Arp : public OperationalBase, public IArp
     ArpCache arpCache;
 
     IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr;    // for answering ProxyARP requests
+    IIpv4RoutingTable *rt = nullptr; // for answering ProxyARP requests
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.
@@ -96,7 +95,7 @@ class INET_API Arp : public OperationalBase, public IArp
     /// IArp implementation  @{
     virtual MacAddress resolveL3Address(const L3Address& address, const NetworkInterface *ie) override;
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
-    /// @}
+    ///@}
 
     void sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode = ARP_REQUEST);
     void sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr);

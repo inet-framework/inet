@@ -35,7 +35,7 @@ typedef DcTcpFamilyStateVariables DcTcpStateVariables;
  */
 class INET_API DcTcp : public TcpReno
 {
-protected:
+  protected:
     DcTcpStateVariables *& state;
 
     static simsignal_t loadSignal; // will record load

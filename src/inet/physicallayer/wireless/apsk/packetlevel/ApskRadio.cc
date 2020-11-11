@@ -38,14 +38,14 @@ ApskRadio::ApskRadio() :
 b ApskRadio::computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const ApskModulationBase *modulation) const
 {
     int modulationCodeWordSize = modulation->getCodeWordSize();
-    int encodedCodeWordSize = forwardErrorCorrection == nullptr ? modulationCodeWordSize : modulationCodeWordSize * forwardErrorCorrection->getCodeRatePuncturingK();
+    int encodedCodeWordSize = forwardErrorCorrection == nullptr ? modulationCodeWordSize : modulationCodeWordSize *forwardErrorCorrection->getCodeRatePuncturingK();
     return b((encodedCodeWordSize - b(length).get() % encodedCodeWordSize) % encodedCodeWordSize);
 }
 
 const ApskModulationBase *ApskRadio::getModulation() const
 {
     const ApskModulationBase *modulation = nullptr;
-    // TODO: const ConvolutionalCode *forwardErrorCorrection = nullptr;
+//    const ConvolutionalCode *forwardErrorCorrection = nullptr; // TODO
     auto phyHeader = makeShared<ApskPhyHeader>();
     b headerLength = phyHeader->getChunkLength();
 
@@ -58,12 +58,12 @@ const ApskModulationBase *ApskRadio::getModulation() const
     else if (auto layeredTransmitter = dynamic_cast<const ApskLayeredTransmitter *>(transmitter)) {
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {
-            // const ApskEncoder *apskEncoder = check_and_cast<const ApskEncoder *>(encoder);
-            // TODO: forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
+//            const ApskEncoder *apskEncoder = check_and_cast<const ApskEncoder *>(encoder);
+//            forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode(); // TODO
         }
         modulation = check_and_cast<const ApskModulationBase *>(layeredTransmitter->getModulator()->getModulation());
     }
-    //FIXME when uses OFDM, ofdm modulator can not cast to apsk modulator, see /examples/wireless/layered80211/ -f omnetpp.ini -c LayeredCompliant80211Ping
+    // FIXME when uses OFDM, ofdm modulator can not cast to apsk modulator, see /examples/wireless/layered80211/ -f omnetpp.ini -c LayeredCompliant80211Ping
     ASSERT(modulation != nullptr);
     return modulation;
 }
@@ -113,7 +113,7 @@ void ApskRadio::decapsulate(Packet *packet) const
             packet->setBitError(true);
     }
 
-    //FIXME KLUDGE? higher layers accepts only byte length packets started on byte position
+    // FIXME KLUDGE? higher layers accepts only byte length packets started on byte position
     if (packet->getBitLength() % 8 != 0 || headerLength.get() % 8 != 0)
         packet->setBitError(true);
 

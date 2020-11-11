@@ -116,7 +116,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
             if (numNeighbors < 0)
                 helloPacket->markIncorrect();
             helloPacket->setNeighborArraySize(numNeighbors);
-            for (int i = 0; i< numNeighbors; i++) {
+            for (int i = 0; i < numNeighbors; i++) {
                 helloPacket->setNeighbor(i, stream.readIpv4Address());
             }
             return helloPacket;
@@ -136,7 +136,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
             if (numLsaHeaders < 0)
                 ddPacket->markIncorrect();
             ddPacket->setLsaHeadersArraySize(numLsaHeaders);
-            for (int i = 0; i< numLsaHeaders; i++) {
+            for (int i = 0; i < numLsaHeaders; i++) {
                 Ospfv2LsaHeader *lsaHeader = new Ospfv2LsaHeader();
                 deserializeLsaHeader(stream, *lsaHeader);
                 ddPacket->setLsaHeaders(i, *lsaHeader);
@@ -329,7 +329,7 @@ void Ospfv2PacketSerializer::deserializeNetworkLsa(MemoryInputStream& stream, co
 {
     networkLsa.setNetworkMask(stream.readIpv4Address());
     int numAttachedRouters = (B(networkLsa.getHeader().getLsaLength()) -
-            OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH).get() / OSPFv2_NETWORKLSA_ADDRESS_LENGTH.get();
+                              OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH).get() / OSPFv2_NETWORKLSA_ADDRESS_LENGTH.get();
     if (numAttachedRouters < 0)
         updatePacket->markIncorrect();
     else
@@ -358,7 +358,7 @@ void Ospfv2PacketSerializer::deserializeSummaryLsa(MemoryInputStream& stream, co
         updatePacket->markIncorrect();
     summaryLsa.setRouteCost(stream.readUint24Be());
     int numTos = (B(summaryLsa.getHeader().getLsaLength()) -
-            OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH - B(4)).get() / OSPFv2_TOS_LENGTH.get();
+                  OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH - B(4)).get() / OSPFv2_TOS_LENGTH.get();
     if (numTos < 0)
         updatePacket->markIncorrect();
     else
@@ -392,7 +392,7 @@ void Ospfv2PacketSerializer::deserializeAsExternalLsa(MemoryInputStream& stream,
     contents.setNetworkMask(stream.readIpv4Address());
 
     int numExternalTos = (B(asExternalLsa.getHeader().getLsaLength()) -
-            OSPFv2_LSA_HEADER_LENGTH - OSPFv2_ASEXTERNALLSA_HEADER_LENGTH).get() / OSPFv2_ASEXTERNALLSA_TOS_INFO_LENGTH.get();
+                          OSPFv2_LSA_HEADER_LENGTH - OSPFv2_ASEXTERNALLSA_HEADER_LENGTH).get() / OSPFv2_ASEXTERNALLSA_TOS_INFO_LENGTH.get();
     if (numExternalTos < 0)
         updatePacket->markIncorrect();
     else
@@ -415,29 +415,29 @@ void Ospfv2PacketSerializer::serializeLsa(MemoryOutputStream& stream, const Ospf
     serializeLsaHeader(stream, lsaHeader);
     Ospfv2LsaType type = lsaHeader.getLsType();
     switch (type) {
-    case ROUTERLSA_TYPE: {
-        const Ospfv2RouterLsa *routerLsa = static_cast<const Ospfv2RouterLsa *>(&lsa);
-        serializeRouterLsa(stream, *routerLsa);
-        break;
-    }
-    case NETWORKLSA_TYPE: {
-        const Ospfv2NetworkLsa *networkLsa = static_cast<const Ospfv2NetworkLsa *>(&lsa);
-        serializeNetworkLsa(stream, *networkLsa);
-        break;
-    }
-    case SUMMARYLSA_NETWORKS_TYPE:
-    case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
-        const Ospfv2SummaryLsa *summaryLsa = static_cast<const Ospfv2SummaryLsa *>(&lsa);
-        serializeSummaryLsa(stream, *summaryLsa);
-        break;
-    }
-    case AS_EXTERNAL_LSA_TYPE: {
-        const Ospfv2AsExternalLsa *asExternalLsa = static_cast<const Ospfv2AsExternalLsa *>(&lsa);
-        serializeAsExternalLsa(stream, *asExternalLsa);
-        break;
-    }
-    default:
-        throw cRuntimeError("Cannot serialize BGP packet: type %d not supported.", type);
+        case ROUTERLSA_TYPE: {
+            const Ospfv2RouterLsa *routerLsa = static_cast<const Ospfv2RouterLsa *>(&lsa);
+            serializeRouterLsa(stream, *routerLsa);
+            break;
+        }
+        case NETWORKLSA_TYPE: {
+            const Ospfv2NetworkLsa *networkLsa = static_cast<const Ospfv2NetworkLsa *>(&lsa);
+            serializeNetworkLsa(stream, *networkLsa);
+            break;
+        }
+        case SUMMARYLSA_NETWORKS_TYPE:
+        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
+            const Ospfv2SummaryLsa *summaryLsa = static_cast<const Ospfv2SummaryLsa *>(&lsa);
+            serializeSummaryLsa(stream, *summaryLsa);
+            break;
+        }
+        case AS_EXTERNAL_LSA_TYPE: {
+            const Ospfv2AsExternalLsa *asExternalLsa = static_cast<const Ospfv2AsExternalLsa *>(&lsa);
+            serializeAsExternalLsa(stream, *asExternalLsa);
+            break;
+        }
+        default:
+            throw cRuntimeError("Cannot serialize BGP packet: type %d not supported.", type);
     }
 }
 

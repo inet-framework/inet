@@ -55,7 +55,7 @@ double HttpNodeBase::transmissionDelay(Packet *pckt)
 {
     if (linkSpeed == 0)
         return 0.0; // No delay if link speed unspecified
-    return pckt->getBitLength() / ((double)linkSpeed);    // The link speed is in bit/s
+    return pckt->getBitLength() / ((double)linkSpeed); // The link speed is in bit/s
 }
 
 void HttpNodeBase::logRequest(const Ptr<const HttpRequestMessage>& httpRequest)
@@ -108,12 +108,12 @@ std::string HttpNodeBase::formatHttpRequestShort(const Ptr<const HttpRequestMess
     std::ostringstream str;
 
     std::string originatorStr = "";
-    //TODO get originator's name
+    // TODO get originator's name
 
     str << originatorStr << ";";
     str << "REQ;" << httpRequest->getOriginatorUrl() << ";" << httpRequest->getTargetUrl() << ";";
     str << httpRequest->getProtocol() << ";" << httpRequest->getKeepAlive() << ";" << httpRequest->getSerial() << ";";
-    str << httpRequest->getHeading() << ";" << httpRequest->getBadRequest() << ";;";    // Skip the response specific fields
+    str << httpRequest->getHeading() << ";" << httpRequest->getBadRequest() << ";;"; // Skip the response specific fields
 
     return str.str();
 }
@@ -123,12 +123,12 @@ std::string HttpNodeBase::formatHttpResponseShort(const Ptr<const HttpReplyMessa
     std::ostringstream str;
 
     std::string originatorStr = "";
-    //TODO get originator's name
+    // TODO get originator's name
 
     str << originatorStr << ";";
     str << "RESP;" << httpResponse->getOriginatorUrl() << ";" << httpResponse->getTargetUrl() << ";";
     str << httpResponse->getProtocol() << ";" << httpResponse->getKeepAlive() << ";" << httpResponse->getSerial() << ";";
-    str << httpResponse->getHeading() << ";;";    // Skip the request specific fields
+    str << httpResponse->getHeading() << ";;"; // Skip the request specific fields
     str << httpResponse->getResult() << ";" << httpResponse->getContentType();
 
     return str.str();
@@ -141,7 +141,7 @@ std::string HttpNodeBase::formatHttpRequestLong(const Ptr<const HttpRequestMessa
     str << "REQUEST: length=" << httpRequest->getChunkLength() << endl;
     str << "Target URL:" << httpRequest->getTargetUrl() << "  Originator URL:" << httpRequest->getOriginatorUrl() << endl;
     str << "PROTOCOL:";
-    switch (httpRequest->getProtocol()) {    // MIGRATE40: kvj
+    switch (httpRequest->getProtocol()) { // MIGRATE40: kvj
         case 10: str << "HTTP/1.0"; break;
         case 11: str << "HTTP/1.1"; break;
         default: str << "UNKNOWN"; break;
@@ -193,3 +193,4 @@ std::string HttpNodeBase::formatHttpResponseLong(const Ptr<const HttpReplyMessag
 } // namespace httptools
 
 } // namespace inet
+

@@ -41,9 +41,9 @@ void Dcf::initialize(int stage)
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         channelAccess = check_and_cast<Dcaf *>(getSubmodule("channelAccess"));
         originatorDataService = check_and_cast<IOriginatorMacDataService *>(getSubmodule(("originatorMacDataService")));
-        recipientDataService = check_and_cast<IRecipientMacDataService*>(getSubmodule("recipientMacDataService"));
+        recipientDataService = check_and_cast<IRecipientMacDataService *>(getSubmodule("recipientMacDataService"));
         recoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
-        rateSelection = check_and_cast<IRateSelection*>(getSubmodule("rateSelection"));
+        rateSelection = check_and_cast<IRateSelection *>(getSubmodule("rateSelection"));
         rtsProcedure = new RtsProcedure();
         rtsPolicy = check_and_cast<IRtsPolicy *>(getSubmodule("rtsPolicy"));
         recipientAckProcedure = new RecipientAckProcedure();
@@ -54,7 +54,7 @@ void Dcf::initialize(int stage)
         ctsProcedure = new CtsProcedure();
         ctsPolicy = check_and_cast<ICtsPolicy *>(getSubmodule("ctsPolicy"));
         stationRetryCounters = new StationRetryCounters();
-        originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism*>(getSubmodule("originatorProtectionMechanism"));
+        originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
     }
 }
 
@@ -65,7 +65,7 @@ void Dcf::forEachChild(cVisitor *v)
         v->visit(const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext()));
 }
 
-void Dcf::handleMessage(cMessage* msg)
+void Dcf::handleMessage(cMessage *msg)
 {
     if (msg == startRxTimer) {
         if (!isReceptionInProgress()) {
@@ -249,7 +249,7 @@ void Dcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
         throw cRuntimeError("Unknown control frame");
 }
 
-FrameSequenceContext* Dcf::buildContext()
+FrameSequenceContext *Dcf::buildContext()
 {
     auto nonQoSContext = new NonQoSContext(originatorAckPolicy);
     return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQoSContext, nullptr);

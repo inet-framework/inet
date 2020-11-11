@@ -26,14 +26,14 @@ Ieee80211VhtCode::Ieee80211VhtCode(
         const Ieee80211ConvolutionalCode* forwardErrorCorrection,
         const Ieee80211VhtInterleaving* interleaving,
         const AdditiveScrambling* scrambling) :
-                forwardErrorCorrection(forwardErrorCorrection),
-                interleaving(interleaving),
-                scrambling(scrambling)
+    forwardErrorCorrection(forwardErrorCorrection),
+    interleaving(interleaving),
+    scrambling(scrambling)
 {
 
 }
 
-const Ieee80211VhtCode* Ieee80211VhtCompliantCodes::getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211OfdmModulation *stream8Modulation, Hz bandwidth, bool withScrambling)
+const Ieee80211VhtCode *Ieee80211VhtCompliantCodes::getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211OfdmModulation *stream8Modulation, Hz bandwidth, bool withScrambling)
 {
     std::vector<unsigned int> numberOfCodedBitsPerSpatialStreams;
     if (stream1Modulation)
@@ -64,3 +64,4 @@ Ieee80211VhtCode::~Ieee80211VhtCode()
 
 } /* namespace physicallayer */
 } /* namespace inet */
+

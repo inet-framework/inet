@@ -29,7 +29,7 @@ const Protocol& getPacketProtocol(Packet *packet);
 
 void insertProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<Chunk>& header);
 
-template <typename T>
+template<typename T>
 const Ptr<T> removeProtocolHeader(Packet *packet)
 {
     packet->removeTagIfPresent<PacketProtocolTag>();
@@ -37,7 +37,7 @@ const Ptr<T> removeProtocolHeader(Packet *packet)
     return packet->removeAtFront<T>();
 }
 
-};
+} // namespace inet
 
 #endif
 

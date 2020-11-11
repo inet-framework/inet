@@ -57,7 +57,7 @@ class INET_API QueueOsgVisualizer : public QueueVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const override { return nullptr; }
-    virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override { }
+    virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override {}
 
 #endif // ifdef WITH_OSG
 };

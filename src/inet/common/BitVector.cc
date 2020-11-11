@@ -27,7 +27,7 @@ BitVector::BitVector()
     bytes.push_back(uint8_t(0));
 }
 
-BitVector::BitVector(const char* bits)
+BitVector::BitVector(const char *bits)
 {
     size = 0;
     stringToBitVector(bits);
@@ -38,8 +38,7 @@ BitVector::BitVector(unsigned int bits)
     size = 0;
     if (bits == 0)
         appendBit(false);
-    while (bits > 0)
-    {
+    while (bits > 0) {
         appendBit(bits % 2);
         bits /= 2;
     }
@@ -50,8 +49,7 @@ BitVector::BitVector(unsigned int bits, unsigned int size)
     this->size = 0;
     if (bits == 0)
         appendBit(false);
-    while (bits > 0)
-    {
+    while (bits > 0) {
         appendBit(bits % 2);
         bits /= 2;
     }
@@ -94,8 +92,7 @@ std::ostream& operator<<(std::ostream& out, const BitVector& bitVector)
         out << "1";
     else
         out << "0";
-    for (int i = 1; i < bitVector.size; i++)
-    {
+    for (int i = 1; i < bitVector.size; i++) {
         if (bitVector.getBit(i))
             out << " 1";
         else
@@ -124,8 +121,7 @@ void BitVector::appendByte(uint8_t value)
 std::string BitVector::toString() const
 {
     std::string str;
-    for (unsigned int i = 0; i < getSize(); i++)
-    {
+    for (unsigned int i = 0; i < getSize(); i++) {
         if (getBit(i))
             str += "1";
         else
@@ -137,8 +133,7 @@ std::string BitVector::toString() const
 void BitVector::stringToBitVector(const char *str)
 {
     int strSize = strlen(str);
-    for (int i = 0; i < strSize; i++)
-    {
+    for (int i = 0; i < strSize; i++) {
         if (str[i] == '1')
             appendBit(true);
         else if (str[i] == '0')
@@ -152,20 +147,19 @@ unsigned int BitVector::toDecimal() const
 {
     unsigned int dec = 0;
     unsigned int powerOfTwo = 1;
-    for (unsigned int i = 0; i < getSize(); i++)
-    {
+    for (unsigned int i = 0; i < getSize(); i++) {
         if (getBit(i))
             dec += powerOfTwo;
         powerOfTwo *= 2;
     }
     return dec;
 }
+
 unsigned int BitVector::reverseToDecimal() const
 {
     unsigned int dec = 0;
     unsigned int powerOfTwo = 1;
-    for (int i = getSize() - 1; i >= 0; i--)
-    {
+    for (int i = getSize() - 1; i >= 0; i--) {
         if (getBit(i))
             dec += powerOfTwo;
         powerOfTwo *= 2;

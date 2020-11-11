@@ -208,7 +208,7 @@ void EthernetCsmaMac::handleSignalFromNetwork(EthernetSignalBase *signal)
 
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping signal " << signal << endl;
-        if (!signal->isUpdate() && dynamic_cast<EthernetSignal *>(signal)) {    // count only signal starts, do not count JAM and IFG packets
+        if (!signal->isUpdate() && dynamic_cast<EthernetSignal *>(signal)) { // count only signal starts, do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
             decapsulate(packet);
@@ -281,7 +281,7 @@ void EthernetCsmaMac::handleUpperPacket(Packet *packet)
 
     // fill in src address if not set
     if (frame->getSrc().isUnspecified()) {
-        //frame is immutable
+        // frame is immutable
         frame = nullptr;
         auto newFrame = packet->removeAtFront<EthernetMacHeader>();
         newFrame->setSrc(address);
@@ -289,7 +289,7 @@ void EthernetCsmaMac::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
-    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
+    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES); // calculate valid FCS
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
@@ -322,7 +322,7 @@ void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
         cancelEvent((transmitState == TRANSMITTING_STATE) ? endTxTimer : endIfgTimer);
 
         EV_DETAIL << "Transmitting jam signal\n";
-        sendJamSignal();    // backoff will be executed when jamming finished
+        sendJamSignal(); // backoff will be executed when jamming finished
 
         numCollisions++;
         emit(collisionSignal, 1L);
@@ -334,8 +334,7 @@ void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
         updateRxSignals(signal, endRxTime);
         changeReceptionState(RECEIVING_STATE);
     }
-    else if (!signal->isUpdate() && receiveState == RECEIVING_STATE && endRxTimer->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
-    {
+    else if (!signal->isUpdate() && receiveState == RECEIVING_STATE && endRxTimer->getArrivalTime() - simTime() < curEtherDescr->halfBitTime) {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
         // BEFORE "end of previous frame" event (endRxMsg) -- same simulation time,
@@ -355,8 +354,8 @@ void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
         updateRxSignals(signal, endRxTime);
         changeReceptionState(RECEIVING_STATE);
     }
-    else {    // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
-              // handle overlapping receptions
+    else { // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
+           // handle overlapping receptions
         // EtherFrame or EtherPauseFrame
         updateRxSignals(signal, endRxTime);
         if (rxSignals.size() > 1) {
@@ -499,7 +498,7 @@ void EthernetCsmaMac::handleEndTxPeriod()
 
     numFramesSent++;
     numBytesSent += currentTxFrame->getByteLength();
-    emit(packetSentToLowerSignal, currentTxFrame);    //consider: emit with start time of frame
+    emit(packetSentToLowerSignal, currentTxFrame); // consider: emit with start time of frame
 
     const auto& header = currentTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
@@ -609,8 +608,8 @@ void EthernetCsmaMac::sendJamSignal()
 {
     // abort current transmission
     ASSERT(curTxSignal != nullptr);
-    simtime_t duration = simTime() - curTxSignal->getCreationTime();    //TODO save and use start tx time
-    cutEthernetSignalEnd(curTxSignal, duration);    //TODO save and use start tx time
+    simtime_t duration = simTime() - curTxSignal->getCreationTime(); // TODO save and use start tx time
+    cutEthernetSignalEnd(curTxSignal, duration); // TODO save and use start tx time
     send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()).duration(duration), physOutGate);
     curTxSignal = nullptr;
 
@@ -618,7 +617,7 @@ void EthernetCsmaMac::sendJamSignal()
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
     jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
     jam->setBitrate(curEtherDescr->txrate);
-    //emit(packetSentToLowerSignal, jam);
+//    emit(packetSentToLowerSignal, jam);
     duration = jam->getBitLength() / this->curEtherDescr->txrate;
     sendSignal(jam, duration);
 
@@ -661,7 +660,7 @@ void EthernetCsmaMac::handleRetransmission()
 
     int backoffRange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0, backoffRange - 1);
-    EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange -1 << "]" << endl;
+    EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange - 1 << "]" << endl;
 
     scheduleAfter(slotNumber * curEtherDescr->slotTime, endBackoffTimer);
     changeTransmissionState(BACKOFF_STATE);
@@ -845,8 +844,7 @@ void EthernetCsmaMac::fillIFGIfInBurst()
         && (framesSentInBurst > 0)
         && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
         && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + calculatePaddedFrameLength(currentTxFrame)
-            <= curEtherDescr->maxBytesInBurst)
-        )
+            <= curEtherDescr->maxBytesInBurst))
     {
         EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
         gap->setBitrate(curEtherDescr->txrate);
@@ -907,7 +905,7 @@ void EthernetCsmaMac::updateRxSignals(EthernetSignalBase *signal, simtime_t endR
     if (!found)
         rxSignals.push_back(RxSignal(signalTransmissionId, signal, endRxTime));
 
-    if (endRxTimer->getArrivalTime() != maxEndRxTime || endRxTime == maxEndRxTime ) {
+    if (endRxTimer->getArrivalTime() != maxEndRxTime || endRxTime == maxEndRxTime) {
         rescheduleAt(maxEndRxTime, endRxTimer);
     }
 }

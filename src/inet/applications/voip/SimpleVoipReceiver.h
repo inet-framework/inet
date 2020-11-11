@@ -39,8 +39,7 @@ class SimpleVoipPacket;
 class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
 {
   private:
-    class VoipPacketInfo
-    {
+    class VoipPacketInfo {
       public:
         unsigned int packetID = 0;
         simtime_t creationTime;
@@ -51,8 +50,7 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
     typedef std::list<VoipPacketInfo *> PacketsList;
     typedef std::vector<VoipPacketInfo> PacketsVector;
 
-    class TalkspurtInfo
-    {
+    class TalkspurtInfo {
       public:
         enum Status {
             EMPTY,
@@ -81,7 +79,7 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
     int emodelBpl = -1;
     int emodelA = -1;
     simtime_t playoutDelay;
-    simtime_t mosSpareTime;    // spare time before calculating MOS (after calculated playout time of last packet)
+    simtime_t mosSpareTime; // spare time before calculating MOS (after calculated playout time of last packet)
 
     // state
     UdpSocket socket;
@@ -105,7 +103,7 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
     void handleMessage(cMessage *msg) override;
     virtual void finish() override;
 
-    //UdpSocket::ICallback methods
+    // UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override {}

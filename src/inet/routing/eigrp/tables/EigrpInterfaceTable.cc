@@ -26,8 +26,8 @@
 
 #include <algorithm>
 
-namespace inet{
-namespace eigrp{
+namespace inet {
+namespace eigrp {
 
 Define_Module(EigrpInterfaceTable);
 
@@ -38,10 +38,10 @@ std::ostream& operator<<(std::ostream& out, const EigrpInterface& iface)
     out << "  Passive:";
     if (iface.isPassive()) out << "enabled";
     else out << "disabled";
-    //out << "  stubs:" << iface.getNumOfStubs();
+//    out << "  stubs:" << iface.getNumOfStubs();
     out << "  HelloInt:" << iface.getHelloInt();
     out << "  HoldInt:" << iface.getHoldInt();
-    out << "  SplitHorizon:" ;
+    out << "  SplitHorizon:";
     if (iface.isSplitHorizonEn()) out << "enabled";
     else out << "disabled";
     /*out << "  bw:" << iface.getBandwidth();
@@ -67,19 +67,17 @@ EigrpInterface::EigrpInterface(NetworkInterface *iface, int networkId, bool enab
     passive = false;
     mtu = iface->getMtu();
     this->setInterfaceDatarate(iface->getDatarate());
-    load=1;
+    load = 1;
     reliability = 255;
     interfaceName = iface->getInterfaceName();
     relMsgs = 0;
     pendingMsgs = 0;
 
-    if (!iface->isMulticast() && bandwidth <= 1544)
-    { // Non-broadcast Multi Access interface (no multicast) with bandwidth equal or lower than T1 link
+    if (!iface->isMulticast() && bandwidth <= 1544) { // Non-broadcast Multi Access interface (no multicast) with bandwidth equal or lower than T1 link
         helloInt = 60;
         holdInt = 180;
     }
-    else
-    {
+    else {
         helloInt = 5;
         holdInt = 15;
     }
@@ -94,39 +92,36 @@ bool EigrpInterface::isMulticastAllowedOnIface(NetworkInterface *iface)
     return false;
 }
 
-void EigrpInterface::setInterfaceDatarate(double datarate){
+void EigrpInterface::setInterfaceDatarate(double datarate) {
 
     interfaceDatarate = datarate;
 
-    switch ((long)datarate)
-        {
-        case 64000: //56k modem
+    switch ((long)datarate) {
+        case 64000: // 56k modem
             delay = 20000;
             break;
-        case 56000: //56k modem
+        case 56000: // 56k modem
             delay = 20000;
             break;
-        case 1544000: //T1
+        case 1544000: // T1
             delay = 20000;
             break;
-        case 10000000: //Eth10
+        case 10000000: // Eth10
             delay = 1000;
             break;
-        default: //>Eth10
+        default: // >Eth10
             delay = 100;
             break;
-        }
-        bandwidth = datarate/1000;
+    }
+    bandwidth = datarate / 1000;
 }
-
 
 EigrpInterfaceTable::~EigrpInterfaceTable()
 {
     int cnt = eigrpInterfaces.size();
     EigrpInterface *iface;
 
-    for (int i = 0; i < cnt; i++)
-    {
+    for (int i = 0; i < cnt; i++) {
 
         iface = eigrpInterfaces[i];
         eigrpInterfaces[i] = NULL;
@@ -138,8 +133,7 @@ EigrpInterfaceTable::~EigrpInterfaceTable()
 void EigrpInterfaceTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-    {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         WATCH_PTRVECTOR(eigrpInterfaces);
     }
 }
@@ -151,7 +145,7 @@ void EigrpInterfaceTable::handleMessage(cMessage *msg)
 
 void EigrpInterfaceTable::addInterface(EigrpInterface *interface)
 {
-    //TODO check duplicity
+    // TODO check duplicity
     eigrpInterfaces.push_back(interface);
 }
 
@@ -160,8 +154,7 @@ EigrpInterface *EigrpInterfaceTable::removeInterface(EigrpInterface *iface)
     InterfaceVector::iterator it;
     it = std::find(eigrpInterfaces.begin(), eigrpInterfaces.end(), iface);
 
-    if (it != eigrpInterfaces.end())
-    {
+    if (it != eigrpInterfaces.end()) {
         eigrpInterfaces.erase(it);
         return iface;
     }
@@ -172,13 +165,11 @@ EigrpInterface *EigrpInterfaceTable::removeInterface(EigrpInterface *iface)
 EigrpInterface *EigrpInterfaceTable::findInterfaceById(int ifaceId)
 {
     InterfaceVector::iterator it;
-    EigrpInterface * iface;
+    EigrpInterface *iface;
 
-    for (it = eigrpInterfaces.begin(); it != eigrpInterfaces.end(); it++)
-    {
+    for (it = eigrpInterfaces.begin(); it != eigrpInterfaces.end(); it++) {
         iface = *it;
-        if (iface->getInterfaceId() == ifaceId)
-        {
+        if (iface->getInterfaceId() == ifaceId) {
             return iface;
         }
     }
@@ -186,6 +177,6 @@ EigrpInterface *EigrpInterfaceTable::findInterfaceById(int ifaceId)
     return NULL;
 }
 
+} // namespace eigrp
+} // namespace inet
 
-} //namespace eigrp
-} //namespace inet

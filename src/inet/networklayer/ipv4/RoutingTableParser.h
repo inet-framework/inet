@@ -51,7 +51,7 @@ class INET_API RoutingTableParser
     /**
      * Destructor
      */
-    virtual ~RoutingTableParser() {};
+    virtual ~RoutingTableParser() {}
 
     /**
      * Read Routing Table file; return 0 on success, -1 on error

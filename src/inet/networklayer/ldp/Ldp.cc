@@ -92,21 +92,21 @@ Ldp::Ldp()
 
 Ldp::~Ldp()
 {
-    for (auto & elem : myPeers)
+    for (auto& elem : myPeers)
         cancelAndDelete(elem.timeout);
 
     cancelAndDelete(sendHelloMsg);
-    //this causes segfault at the end of simulation       -- Vojta
-    //socketMap.deleteSockets();
+    // this causes segfault at the end of simulation       -- Vojta
+//    socketMap.deleteSockets();
 }
 
 void Ldp::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
 
-    //FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
-    //FIXME register to NetworkInterface changes, for detecting the interface add/delete, and detecting multicast config changes:
-    //      should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
+    // FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
+    // FIXME register to NetworkInterface changes, for detecting the interface add/delete, and detecting multicast config changes:
+    // should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
 
     if (stage == INITSTAGE_LOCAL) {
         holdTime = par("holdTime");
@@ -223,7 +223,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
 void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming udp packet
-    //FIXME add implementation
+    // FIXME add implementation
     processLDPHello(check_and_cast<Packet *>(packet));
 }
 
@@ -244,7 +244,7 @@ void Ldp::handleStartOperation(LifecycleOperation *operation)
 
 void Ldp::handleStopOperation(LifecycleOperation *operation)
 {
-    for (auto & elem : myPeers)
+    for (auto& elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
@@ -259,7 +259,7 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
 
 void Ldp::handleCrashOperation(LifecycleOperation *operation)
 {
-    for (auto & elem : myPeers)
+    for (auto& elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
@@ -281,7 +281,7 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
 {
     Packet *pk = new Packet("Lb-Req");
     const auto& requestMsg = makeShared<LdpLabelRequest>();
-    requestMsg->setChunkLength(LDP_HEADER_BYTES);    // FIXME find out actual length
+    requestMsg->setChunkLength(LDP_HEADER_BYTES); // FIXME find out actual length
     requestMsg->setType(LABEL_REQUEST);
 
     FecTlv fec;
@@ -304,10 +304,10 @@ void Ldp::updateFecListEntry(Ldp::fec_t oldItem)
     // is next hop our LDP peer?
     bool ER = findPeerSocket(oldItem.nextHop) == nullptr;
 
-    ASSERT(!(ER && dit != fecDown.end()));    // can't be egress and have mapping at the same time
+    ASSERT(!(ER && dit != fecDown.end())); // can't be egress and have mapping at the same time
 
     // adjust upstream mappings
-    for (auto uit = fecUp.begin(); uit != fecUp.end(); ) {
+    for (auto uit = fecUp.begin(); uit != fecUp.end();) {
         if (uit->fecid != oldItem.fecid) {
             uit++;
             continue;
@@ -404,7 +404,7 @@ void Ldp::rebuildFecList()
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         NetworkInterface *ie = ift->getInterface(i);
 
-//TODO should replace to ie->isUp() or drop this code:
+        // TODO should replace to ie->isUp() or drop this code:
 //        if (ie->getNetworkLayerGateIndex() < 0)
 //            continue;
 
@@ -430,10 +430,10 @@ void Ldp::rebuildFecList()
     if (oldList.size() > 0) {
         EV_INFO << "there are " << oldList.size() << " deprecated FECs, removing them" << endl;
 
-        for (auto & elem : oldList) {
+        for (auto& elem : oldList) {
             EV_DETAIL << "removing FEC= " << elem << endl;
 
-            for (auto & _dit : fecDown) {
+            for (auto& _dit : fecDown) {
                 if (_dit.fecid != elem.fecid)
                     continue;
 
@@ -442,7 +442,7 @@ void Ldp::rebuildFecList()
                 sendMapping(LABEL_RELEASE, _dit.peer, _dit.label, elem.addr, elem.length);
             }
 
-            for (auto & _uit : fecUp) {
+            for (auto& _uit : fecUp) {
                 if (_uit.fecid != elem.fecid)
                     continue;
 
@@ -464,7 +464,7 @@ void Ldp::rebuildFecList()
 
 void Ldp::updateFecList(Ipv4Address nextHop)
 {
-    for (auto & elem : fecList) {
+    for (auto& elem : fecList) {
         if (elem.nextHop != nextHop)
             continue;
 
@@ -479,10 +479,10 @@ void Ldp::sendHelloTo(Ipv4Address dest)
     hello->setChunkLength(LDP_HEADER_BYTES);
     hello->setType(HELLO);
     hello->setSenderAddress(rt->getRouterId());
-    //hello->setReceiverAddress(...);
+//    hello->setReceiverAddress(...);
     hello->setHoldTime(SIMTIME_DBL(holdTime));
-    //hello->setRbit(...);
-    //hello->setTbit(...);
+//    hello->setRbit(...);
+//    hello->setTbit(...);
     pk->insertAtBack(hello);
     pk->addPar("color") = LDP_HELLO_TRAFFIC;
 
@@ -514,13 +514,13 @@ void Ldp::processHelloTimeout(cMessage *msg)
     ASSERT(!myPeers[i].timeout->isScheduled());
     delete myPeers[i].timeout;
     ASSERT(myPeers[i].socket);
-    myPeers[i].socket->abort();    // should we only close?
+    myPeers[i].socket->abort(); // should we only close?
     delete myPeers[i].socket;
     myPeers.erase(myPeers.begin() + i);
 
     EV_INFO << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
 
-    for (auto dit = fecDown.begin(); dit != fecDown.end(); ) {
+    for (auto dit = fecDown.begin(); dit != fecDown.end();) {
         if (dit->peer != peerIP) {
             dit++;
             continue;
@@ -538,7 +538,7 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
     EV_INFO << "removing bindings from sent to peer=" << peerIP << " from fecUp" << endl;
 
-    for (auto uit = fecUp.begin(); uit != fecUp.end(); ) {
+    for (auto uit = fecUp.begin(); uit != fecUp.end();) {
         if (uit->peer != peerIP) {
             uit++;
             continue;
@@ -570,7 +570,7 @@ void Ldp::processLDPHello(Packet *msg)
     ASSERT(socketId == udpSocket.getSocketId());
 
     const auto& ldpHello = msg->peekAtFront<LdpHello>();
-    //Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
+//    Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
     int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     delete msg;
@@ -648,7 +648,7 @@ void Ldp::socketEstablished(TcpSocket *socket)
 
 void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInfo)
 {
-    //TODO
+    // TODO
     // not yet in socketMap, must be new incoming connection.
     // find which peer it is and register connection
     TcpSocket *newSocket = new TcpSocket(availableInfo);
@@ -662,7 +662,7 @@ void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInf
     int i = findPeer(peerAddr);
     if (i == -1 || myPeers[i].socket) {
         // nothing known about this guy, or already connected: refuse
-        newSocket->close();    // reset()?
+        newSocket->close(); // reset()?
         delete newSocket;
         return;
     }
@@ -730,12 +730,12 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
             break;
 
         case ADDRESS:
-            // processADDRESS(ldpPacket);
+//            processADDRESS(ldpPacket);
             throw cRuntimeError("Received LDP ADDRESS message, unsupported in this version");
             break;
 
         case ADDRESS_WITHDRAW:
-            // processADDRESS_WITHDRAW(ldpPacket);
+//            processADDRESS_WITHDRAW(ldpPacket);
             throw cRuntimeError("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
             break;
 
@@ -781,19 +781,19 @@ Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
     // LSR's routing table!!! Use simple IP routing instead. --Andras
     //
     // Wrong code:
-    //int i;
-    //for (i=0; i < rt->getNumRoutes(); i++)
-    //    if (rt->getRoute(i)->host == dest)
-    //        break;
-    //
-    //if (i == rt->getNumRoutes())
-    //    return Ipv4Address();  // Signal an NOTIFICATION of NO ROUTE
-    //
+//    int i;
+//    for (i=0; i < rt->getNumRoutes(); i++)
+//       if (rt->getRoute(i)->host == dest)
+//           break;
+//
+//    if (i == rt->getNumRoutes())
+//        return Ipv4Address();  // Signal an NOTIFICATION of NO ROUTE
+//
     NetworkInterface *ie = rt->getInterfaceForDestAddr(dest);
     if (!ie)
         return Ipv4Address(); // no route
 
-    std::string iName = ie->getInterfaceName();    // FIXME why use name for lookup?
+    std::string iName = ie->getInterfaceName(); // FIXME why use name for lookup?
     return findPeerAddrFromInterface(iName);
 }
 
@@ -815,7 +815,7 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
             if (anEntry->getDestination() == myPeers[k].peerIP && anEntry->getInterface() == ie) {
                 return myPeers[k].peerIP;
             }
-            // addresses->push_back(peerIP[k]);
+//            addresses->push_back(peerIP[k]);
         }
     }
 
@@ -846,7 +846,7 @@ std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     }
     return string("X");
  */
-//    Rely on port index to find the interface name
+    // Rely on port index to find the interface name
 
     // this function is a misnomer, we must recognize our own address too
     if (rt->isLocalAddress(peerIP))
@@ -876,8 +876,8 @@ Ldp::FecBindVector::iterator Ldp::findFecEntry(FecBindVector& fecs, int fecid, I
 Ldp::FecVector::iterator Ldp::findFecEntry(FecVector& fecs, Ipv4Address addr, int length)
 {
     auto it = fecs.begin();
-    for ( ; it != fecs.end(); it++) {
-        if ((it->length == length) && (it->addr == addr)) // XXX compare only relevant part (?)
+    for (; it != fecs.end(); it++) {
+        if ((it->length == length) && (it->addr == addr)) // TODO compare only relevant part (?)
             break;
     }
     return it;
@@ -888,7 +888,7 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
     // Send NOTIFY message
     Packet *packet = new Packet("Lb-Notify");
     const auto& lnMessage = makeShared<LdpNotify>();
-    lnMessage->setChunkLength(LDP_HEADER_BYTES);    // FIXME find out actual length
+    lnMessage->setChunkLength(LDP_HEADER_BYTES); // FIXME find out actual length
     lnMessage->setType(NOTIFICATION);
     lnMessage->setStatus(NO_ROUTE);
     lnMessage->setReceiverAddress(dest);
@@ -909,7 +909,7 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     // Send LABEL MAPPING downstream
     Packet *packet = new Packet("Lb-Mapping");
     const auto& lmMessage = makeShared<LdpLabelMapping>();
-    lmMessage->setChunkLength(LDP_HEADER_BYTES);    // FIXME find out actual length
+    lmMessage->setChunkLength(LDP_HEADER_BYTES); // FIXME find out actual length
     lmMessage->setType(type);
     lmMessage->setReceiverAddress(dest);
     lmMessage->setSenderAddress(rt->getRouterId());
@@ -954,7 +954,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
                     if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
                         auto pk = new Packet(0, ldpPacket);
-                        scheduleAfter(1.0    /* XXX FIXME */, pk);
+                        scheduleAfter(1.0 /* XXX FIXME */, pk);
                         return;
                     }
                     else {
@@ -1012,7 +1012,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
     // is next hop our LDP peer?
     bool ER = !findPeerSocket(it->nextHop);
 
-    ASSERT(!(ER && dit != fecDown.end()));    // can't be egress and have mapping at the same time
+    ASSERT(!(ER && dit != fecDown.end())); // can't be egress and have mapping at the same time
 
     if (ER || dit != fecDown.end()) {
         fec_bind_t newItem;
@@ -1136,7 +1136,7 @@ void Ldp::processLABEL_WITHDRAW(Ptr<const LdpPacket>& ldpPacket)
     auto reply = makeShared<LdpLabelMapping>(*ldpLabelMapping.get());
     reply->setType(LABEL_RELEASE);
     auto pk = new Packet("LDP_RELEASE", reply);
-    // pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ldp) //FIXME
+//    pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ldp) //FIXME
     // send msg to peer over TCP
     sendToPeer(fromIP, pk);
 
@@ -1172,7 +1172,7 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
 
     // respond to pending requests
 
-    for (auto pit = pending.begin(); pit != pending.end(); ) {
+    for (auto pit = pending.begin(); pit != pending.end();) {
         if (pit->fecid != it->fecid) {
             pit++;
             continue;
@@ -1246,7 +1246,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
             return false;
     }
     else if (protocol == IP_PROT_TCP) {
-    // ...and session)
+        // ...and session)
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength());
         if (tcpHeader->getDestPort() == LDP_PORT || tcpHeader->getSrcPort() == LDP_PORT)
             return false;
@@ -1254,7 +1254,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
 
     // regular traffic, classify, label etc.
 
-    for (auto & elem : fecList) {
+    for (auto& elem : fecList) {
         if (!destAddr.prefixMatches(elem.addr, elem.length))
             continue;
 

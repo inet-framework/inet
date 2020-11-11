@@ -63,7 +63,7 @@ class INET_API SimpleCcBattery : public CcEnergyStorageBase
     virtual A getTotalCurrentConsumption() const override { return totalCurrentConsumption; }
     virtual A getTotalCurrentGeneration() const override { return totalCurrentGeneration; }
 
-    virtual C getNominalChargeCapacity() const override{ return nominalCapacity; }
+    virtual C getNominalChargeCapacity() const override { return nominalCapacity; }
     virtual C getResidualChargeCapacity() const override { return residualCapacity; }
 };
 

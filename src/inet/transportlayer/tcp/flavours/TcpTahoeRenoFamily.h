@@ -34,7 +34,7 @@ class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariable
     virtual std::string detailedInfo() const override;
     virtual void setSendQueueLimit(uint32_t newLimit);
 
-    uint32_t ssthresh;    ///< slow start threshold
+    uint32_t ssthresh; ///< slow start threshold
 };
 
 /**
@@ -44,7 +44,7 @@ class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariable
 class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
 {
   protected:
-    TcpTahoeRenoFamilyStateVariables *& state;    // alias to TcpAlgorithm's 'state'
+    TcpTahoeRenoFamilyStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
   public:
     /** Ctor */

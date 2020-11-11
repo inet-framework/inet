@@ -35,11 +35,11 @@ namespace inet {
  * advertises the routes to its neighbors.
  */
 enum RipMode {
-    NO_RIP,    // no updates are sent, and the attached network is not advertised
-    PASSIVE,   // no updates are sent, but the attached network is advertised
-    NO_SPLIT_HORIZON,    // every route is sent to the neighbor
-    SPLIT_HORIZON,    // do not send routes to the neighbor it was learnt from
-    SPLIT_HORIZON_POISON_REVERSE    // send the route to the neighbor it was learnt from with infinite metric (16)
+    NO_RIP, // no updates are sent, and the attached network is not advertised
+    PASSIVE, // no updates are sent, but the attached network is advertised
+    NO_SPLIT_HORIZON, // every route is sent to the neighbor
+    SPLIT_HORIZON, // do not send routes to the neighbor it was learnt from
+    SPLIT_HORIZON_POISON_REVERSE // send the route to the neighbor it was learnt from with infinite metric (16)
 };
 
 /**
@@ -51,12 +51,12 @@ enum RipMode {
  */
 struct RipNetworkInterface
 {
-    const NetworkInterface *ie = nullptr;    // the associated interface entry
-    int metric = 0;    // metric of this interface
-    RipMode mode = NO_RIP;    // RIP mode of this interface
+    const NetworkInterface *ie = nullptr; // the associated interface entry
+    int metric = 0; // metric of this interface
+    RipMode mode = NO_RIP; // RIP mode of this interface
 
     RipNetworkInterface(const NetworkInterface *ie)
-    : ie(ie), metric(1), mode(NO_RIP)
+        : ie(ie), metric(1), mode(NO_RIP)
     {
         ASSERT(!ie->isLoopback());
         ASSERT(ie->isMulticast());
@@ -92,26 +92,26 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     typedef std::vector<RipNetworkInterface> InterfaceVector;
     typedef std::vector<RipRoute *> RouteVector;
     // environment
-    cModule *host = nullptr;    // the host module that owns this module
-    IInterfaceTable *ift = nullptr;    // interface table of the host
-    IRoutingTable *rt = nullptr;    // routing table from which routes are imported and to which learned routes are added
-    IL3AddressType *addressType = nullptr;    // address type of the routing table
+    cModule *host = nullptr; // the host module that owns this module
+    IInterfaceTable *ift = nullptr; // interface table of the host
+    IRoutingTable *rt = nullptr; // routing table from which routes are imported and to which learned routes are added
+    IL3AddressType *addressType = nullptr; // address type of the routing table
     // state
-    InterfaceVector ripInterfaces;    // interfaces on which RIP is used
-    RouteVector ripRoutingTable;    // all advertised routes (imported or learned)
-    UdpSocket socket;    // bound to the RIP port (see udpPort parameter)
-    cMessage *updateTimer = nullptr;    // for sending unsolicited Response messages in every ~30 seconds.
-    cMessage *triggeredUpdateTimer = nullptr;    // scheduled when there are pending changes
-    cMessage *startupTimer = nullptr;    // timer for delayed startup
-    cMessage *shutdownTimer = nullptr;    // scheduled at shutdown
+    InterfaceVector ripInterfaces; // interfaces on which RIP is used
+    RouteVector ripRoutingTable; // all advertised routes (imported or learned)
+    UdpSocket socket; // bound to the RIP port (see udpPort parameter)
+    cMessage *updateTimer = nullptr; // for sending unsolicited Response messages in every ~30 seconds.
+    cMessage *triggeredUpdateTimer = nullptr; // scheduled when there are pending changes
+    cMessage *startupTimer = nullptr; // timer for delayed startup
+    cMessage *shutdownTimer = nullptr; // scheduled at shutdown
     // parameters
     Mode mode = static_cast<Mode>(-1);
-    int ripUdpPort = -1;    // UDP port RIP routers (usually 520)
-    simtime_t updateInterval;    // time between regular updates
-    simtime_t routeExpiryTime;    // learned routes becomes invalid if no update received in this period of time
-    simtime_t routePurgeTime;    // invalid routes are deleted after this period of time is elapsed
+    int ripUdpPort = -1; // UDP port RIP routers (usually 520)
+    simtime_t updateInterval; // time between regular updates
+    simtime_t routeExpiryTime; // learned routes becomes invalid if no update received in this period of time
+    simtime_t routePurgeTime; // invalid routes are deleted after this period of time is elapsed
     simtime_t holdDownTime;
-    simtime_t shutdownTime;    // time of shutdown processing
+    simtime_t shutdownTime; // time of shutdown processing
     bool triggeredUpdate = false;
 
     // signals
@@ -121,11 +121,11 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     static simsignal_t badResponseSignal;
     static simsignal_t numRoutesSignal;
 
-public:
+  public:
     Rip();
     ~Rip();
 
-protected:
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -159,7 +159,7 @@ protected:
 
     virtual void sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const NetworkInterface *destInterface);
 
-private:
+  private:
     RipNetworkInterface *findRipInterfaceById(int interfaceId);
 
     RipRoute *findRipRoute(const L3Address& destAddress, int prefixLength);
@@ -177,10 +177,12 @@ private:
         NetworkInterface *ie = dynamic_cast<NetworkInterface *>(route->getSource());
         return ie && ie->isLoopback();
     }
+
     bool isLocalInterfaceRoute(const IRoute *route) {
         NetworkInterface *ie = dynamic_cast<NetworkInterface *>(route->getSource());
         return ie && !ie->isLoopback();
     }
+
     bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
 };
 

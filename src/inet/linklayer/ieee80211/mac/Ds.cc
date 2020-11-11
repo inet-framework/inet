@@ -129,7 +129,6 @@ void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<const Ieee80211Dat
     mac->processUpperFrame(outgoingFrame, outgoingHeader);
 }
 
-
 } // namespace ieee80211
 } // namespace inet
 

@@ -46,13 +46,13 @@ std::pair<L3Address, int> Forwarding::findNextHop(const L3Address& destinationAd
     // TODO: KLUDGE: this is for testing only
     if (destinationAddress == Ipv4Address("10.0.0.10")) {
         if (address == Ipv4Address("10.0.0.1"))
-            return {Ipv4Address("10.0.0.2"), 0};
+            return { Ipv4Address("10.0.0.2"), 0 };
         else if (address == Ipv4Address("10.0.0.2"))
-            return {Ipv4Address("10.0.0.7"), 2};
+            return { Ipv4Address("10.0.0.7"), 2 };
         else if (address == Ipv4Address("10.0.0.7"))
-            return {Ipv4Address("10.0.0.10"), 2};
+            return { Ipv4Address("10.0.0.10"), 2 };
     }
-    return {Ipv4Address(), -1};
+    return { Ipv4Address(), -1 };
 }
 
 void Forwarding::pushPacket(Packet *packet, cGate *gate)

@@ -27,14 +27,13 @@ namespace inet {
 class INET_API Ipv4Encap : public cSimpleModule
 {
   protected:
-    struct SocketDescriptor
-    {
+    struct SocketDescriptor {
         int socketId = -1;
         int protocolId = -1;
         Ipv4Address localAddress;
         Ipv4Address remoteAddress;
 
-        SocketDescriptor(int socketId, int protocolId, Ipv4Address localAddress) : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+        SocketDescriptor(int socketId, int protocolId, Ipv4Address localAddress) : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
   protected:

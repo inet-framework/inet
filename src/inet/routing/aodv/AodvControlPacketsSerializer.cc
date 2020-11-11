@@ -105,12 +105,12 @@ void AodvControlPacketsSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeByte(aodvRerr->getPacketType());
             stream.writeBit(aodvRerr->getNoDeleteFlag());
             stream.writeNBitsOfUint64Be(aodvRerr->getReserved(), 15);
-            if(aodvRerr->getUnreachableNodesArraySize() == 0){
+            if (aodvRerr->getUnreachableNodesArraySize() == 0) {
                 throw cRuntimeError("Cannot serialize AODV control packet of type %d: DestCount must be at least 1.", aodvControlPacket->getPacketType());
             }
 
             stream.writeByte(aodvRerr->getUnreachableNodesArraySize());
-            for(uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index){
+            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 stream.writeIpv4Address(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).addr.toIpv4());
                 stream.writeUint32Be(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).seqNum);
             }
@@ -122,16 +122,16 @@ void AodvControlPacketsSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeByte(aodvRerr->getPacketType());
             stream.writeBit(aodvRerr->getNoDeleteFlag());
             stream.writeNBitsOfUint64Be(aodvRerr->getReserved(), 15);
-            if(aodvRerr->getUnreachableNodesArraySize() == 0){
+            if (aodvRerr->getUnreachableNodesArraySize() == 0) {
                 throw cRuntimeError("Cannot serialize AODV control packet of type %d: DestCount must be at least 1.", aodvControlPacket->getPacketType());
             }
 
             stream.writeByte(aodvRerr->getUnreachableNodesArraySize());
-            for(uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index){
+            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 stream.writeUint32Be(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).seqNum);
                 stream.writeIpv6Address(aodvRerr->getUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1)).addr.toIpv6());
             }
-            ASSERT(aodvRerr->getChunkLength() == B(4 + aodvRerr->getUnreachableNodesArraySize() * (4+16)));
+            ASSERT(aodvRerr->getChunkLength() == B(4 + aodvRerr->getUnreachableNodesArraySize() * (4 + 16)));
             break;
         }
         case RREPACK:
@@ -225,10 +225,10 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& st
             aodvRerr->setNoDeleteFlag(stream.readBit());
             aodvRerr->setReserved(stream.readNBitsToUint64Be(15));
             aodvRerr->setUnreachableNodesArraySize(stream.readByte());
-            if(aodvRerr->getUnreachableNodesArraySize() == 0)
+            if (aodvRerr->getUnreachableNodesArraySize() == 0)
                 aodvRerr->markIncorrect();
             UnreachableNode node = UnreachableNode();
-            for(uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index){
+            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 node.addr = L3Address(stream.readIpv4Address());
                 node.seqNum = stream.readUint32Be();
                 aodvRerr->setUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1), node);
@@ -242,19 +242,19 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& st
             aodvRerr->setNoDeleteFlag(stream.readBit());
             aodvRerr->setReserved(stream.readNBitsToUint64Be(15));
             aodvRerr->setUnreachableNodesArraySize(stream.readByte());
-            if(aodvRerr->getUnreachableNodesArraySize() == 0)
+            if (aodvRerr->getUnreachableNodesArraySize() == 0)
                 aodvRerr->markIncorrect();
             UnreachableNode node = UnreachableNode();
-            for(uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index){
+            for (uint8_t index = 0; index < aodvRerr->getUnreachableNodesArraySize(); ++index) {
                 node.seqNum = stream.readUint32Be();
                 node.addr = L3Address(stream.readIpv6Address());
                 aodvRerr->setUnreachableNodes(aodvRerr->getUnreachableNodesArraySize() - (index + 1), node);
             }
-            aodvRerr->setChunkLength(B(4 + aodvRerr->getUnreachableNodesArraySize() * (4+16)));
+            aodvRerr->setChunkLength(B(4 + aodvRerr->getUnreachableNodesArraySize() * (4 + 16)));
             return aodvRerr;
         }
         case RREPACK:
-        case RREPACK_IPv6:{
+        case RREPACK_IPv6: {
             const auto& aodvRrepAck = makeShared<RrepAck>();
             aodvRrepAck->setPacketType(packetType);
             aodvRrepAck->setReserved(stream.readByte());

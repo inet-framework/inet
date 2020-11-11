@@ -39,7 +39,7 @@ std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level, in
     return stream;
 }
 
-const Packet* ReceptionResult::getPacket() const
+const Packet *ReceptionResult::getPacket() const
 {
     return packet;
 }

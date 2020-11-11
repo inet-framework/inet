@@ -37,8 +37,7 @@ class SctpConnectInfo;
 class INET_API SctpPeer : public cSimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported
 {
   protected:
-    struct PathStatus
-    {
+    struct PathStatus {
         bool active;
         bool primaryPath;
         Ipv4Address pid;
@@ -70,7 +69,7 @@ class INET_API SctpPeer : public cSimpleModule, public SctpSocket::ICallback, pu
     bool shutdownReceived;
     bool sendAllowed;
     int serverAssocId;
-    int numRequestsToSend;    // requests to send in this session
+    int numRequestsToSend; // requests to send in this session
     int lastStream;
     int numPacketsToReceive;
 

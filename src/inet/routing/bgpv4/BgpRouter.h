@@ -37,7 +37,7 @@ class BgpSession;
 
 class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
 {
-private:
+  private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
@@ -61,11 +61,11 @@ private:
     Ipv4Address internalAddress = Ipv4Address::UNSPECIFIED_ADDRESS;
 
     typedef std::vector<BgpRoutingTableEntry *> RoutingTableEntryVector;
-    RoutingTableEntryVector bgpRoutingTable;    // The BGP routing table
+    RoutingTableEntryVector bgpRoutingTable; // The BGP routing table
     std::vector<Ipv4Address> advertiseList;
     RoutingTableEntryVector _prefixListIN;
     RoutingTableEntryVector _prefixListOUT;
-    RoutingTableEntryVector _prefixListINOUT;   // store union of pointers in _prefixListIN and _prefixListOUT
+    RoutingTableEntryVector _prefixListINOUT; // store union of pointers in _prefixListIN and _prefixListOUT
     std::vector<AsId> _ASListIN;
     std::vector<AsId> _ASListOUT;
 
@@ -101,12 +101,12 @@ private:
     void addToAsList(std::string nodeName, AsId id);
     void setNextHopSelf(Ipv4Address peer, bool nextHopSelf);
     void setLocalPreference(Ipv4Address peer, int localPref);
-    bool isExternalAddress(const Ipv4Route &rtEntry);
+    bool isExternalAddress(const Ipv4Route& rtEntry);
     void processMessageFromTCP(cMessage *msg);
 
     void printOpenMessage(const BgpOpenMessage& msg);
     void printUpdateMessage(const BgpUpdateMessage& msg);
-  //  void printNotificationMessage(const BgpNotificationMessage& msg);
+//    void printNotificationMessage(const BgpNotificationMessage& msg);
     void printKeepAliveMessage(const BgpKeepAliveMessage& msg);
 
   protected:
@@ -114,12 +114,12 @@ private:
     //@{
     virtual void socketDataArrived(TcpSocket *socket) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
-    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }      //TODO
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); } // TODO
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override {}
     virtual void socketFailure(TcpSocket *socket, int code) override;
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
     virtual void socketDeleted(TcpSocket *socket) override {}
     //@}
 
@@ -180,7 +180,7 @@ private:
     int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
-    bool isRouteExcluded(const Ipv4Route &rtEntry);
+    bool isRouteExcluded(const Ipv4Route& rtEntry);
     bool isDefaultRoute(const Ipv4Route *entry) const;
     bool isReachable(const Ipv4Address addr) const;
 };

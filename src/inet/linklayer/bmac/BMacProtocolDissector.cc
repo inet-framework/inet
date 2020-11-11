@@ -21,7 +21,6 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/bmac/BMacHeader_m.h"
 
-
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::bmac, BMacProtocolDissector);

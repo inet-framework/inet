@@ -307,8 +307,8 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
 #ifdef WITH_IPv4
                     || (signal == interfaceIpv4ConfigChangedSignal && (fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK))
 #endif // WITH_IPv4
-                    || (signal == interfaceStateChangedSignal && (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER))
-                    ) {
+                    || (signal == interfaceStateChangedSignal && (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER)))
+            {
                 if (interfaceFilter.matches(networkInterface)) {
                     auto interfaceVisualization = getInterfaceVisualization(networkNode, networkInterface);
                     if (interfaceVisualization == nullptr) {

@@ -155,7 +155,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getTag<InterfaceInd>())->getInterfaceId();
 
-    switch(tcpsegP->getCrcMode()) {
+    switch (tcpsegP->getCrcMode()) {
         case CRC_DECLARED_INCORRECT:
             EV_WARN << "CRC error, packet dropped\n";
             delete packet;
@@ -181,7 +181,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     memset(data, 0, maxBufferSize);
 
     ip_hdr *ih = (ip_hdr *)(data);
-    //tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
+//    tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
 
     // set the modified lwip IP header:
     ih->_hl = ipHdrLen / 4;
@@ -205,7 +205,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     u16_t rport = tcpsegP->getSrcPort();
 
     if (tcpsegP->getSynBit() && tcpsegP->getAckBit()) {
-        for (auto & elem : tcpAppConnMapM) {
+        for (auto& elem : tcpAppConnMapM) {
             LwipTcpLayer::tcp_pcb *pcb = elem.second->pcbM;
             if (pcb) {
                 if ((pcb->state == LwipTcpLayer::SYN_SENT)
@@ -254,7 +254,7 @@ void TcpLwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
 {
     TcpLwipConnection *conn = static_cast<TcpLwipConnection *>(pcb->callback_arg);
     if (conn != nullptr && conn->pcbM == pcb) {
-        // conn->sendIndicationToApp(TCP_I_????); // TODO send some indication when need
+//        conn->sendIndicationToApp(TCP_I_????); // TODO send some indication when need
         removeConnection(*conn);
     }
 }
@@ -445,7 +445,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
 {
     if (msgP->isSelfMessage()) {
         // timer expired
-        if (msgP == pLwipFastTimerM) {    // lwip fast timer
+        if (msgP == pLwipFastTimerM) { // lwip fast timer
             EV_TRACE << "Call tcp_fasttmr()\n";
             pLwipTcpLayerM->tcp_fasttmr();
             if (simTime() == roundTime(simTime(), 2)) {
@@ -466,18 +466,18 @@ void TcpLwip::handleMessage(cMessage *msgP)
             handleIpInputMessage(pk);
         }
         else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
-            EV_WARN << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
+            EV_WARN << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
             delete msgP;
         }
         else
             throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
     }
-    else {    // must be from app
+    else { // must be from app
         EV_TRACE << this << ": handle msg: " << msgP->getName() << "\n";
         handleAppMessage(msgP);
     }
 
-    if (!pLwipFastTimerM->isScheduled()) {    // lwip fast timer
+    if (!pLwipFastTimerM->isScheduled()) { // lwip fast timer
         if (nullptr != pLwipTcpLayerM->tcp_active_pcbs || nullptr != pLwipTcpLayerM->tcp_tw_pcbs)
             scheduleAfter(roundTime(simTime() + 0.250, 4) - simTime(), pLwipFastTimerM);
     }
@@ -496,7 +496,7 @@ void TcpLwip::refreshDisplay() const
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (auto & elem : tcpAppConnMapM) {
+    for (auto& elem : tcpAppConnMapM) {
         LwipTcpLayer::tcp_pcb *pcb = (elem).second->pcbM;
 
         if (nullptr == pcb) {
@@ -609,7 +609,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         packet = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
     }
     else {
-        const auto& bytes = makeShared<BytesChunk>((const uint8_t*)dataP, lenP);
+        const auto& bytes = makeShared<BytesChunk>((const uint8_t *)dataP, lenP);
         packet = new Packet(nullptr, bytes);
         const auto& tcpHdr = packet->popAtFront<TcpHeader>();
         packet->trimFront();
@@ -787,7 +787,7 @@ void TcpLwip::process_STATUS(TcpLwipConnection& connP, TcpCommand *tcpCommandP, 
 {
     EV_INFO << this << ": processing STATUS(" << connP.connIdM << ") command\n";
 
-    delete tcpCommandP;    // but we'll reuse msg for reply
+    delete tcpCommandP; // but we'll reuse msg for reply
 
     TcpStatusInfo *statusInfo = new TcpStatusInfo();
     connP.fillStatusInfo(*statusInfo);

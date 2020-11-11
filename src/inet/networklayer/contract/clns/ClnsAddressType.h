@@ -20,8 +20,7 @@
  * @author Marcel Marek (mailto:imarek@fit.vutbr.cz), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
  * @date 10.8.2016
  * @brief Class representing a CLNS Address type
-  */
-
+ */
 
 #ifndef __INET_CLNSADDRESSTYPE_H
 #define __INET_CLNSADDRESSTYPE_H
@@ -35,7 +34,6 @@ class INET_API CLNSAddressType : public IL3AddressType
 {
   public:
     static CLNSAddressType INSTANCE;
-
 
   public:
     CLNSAddressType() {}

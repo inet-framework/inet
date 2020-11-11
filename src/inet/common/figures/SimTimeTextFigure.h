@@ -22,10 +22,12 @@
 
 namespace inet {
 
-class SimTimeTextFigure: public cTextFigure {
-protected:
+class SimTimeTextFigure : public cTextFigure
+{
+  protected:
     std::string prefix;
-public:
+
+  public:
     using cTextFigure::cTextFigure;
     void refreshDisplay() override;
 
@@ -33,7 +35,7 @@ public:
     const char **getAllowedPropertyKeys() const override;
 };
 
-}
+} // namespace inet
 
 #endif
 

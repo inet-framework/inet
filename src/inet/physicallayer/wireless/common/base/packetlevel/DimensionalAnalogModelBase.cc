@@ -82,7 +82,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
         receptionPowers.push_back(backgroundNoisePower);
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-    for (const auto & interferingReception : *interferingReceptions) {
+    for (const auto& interferingReception : *interferingReceptions) {
         const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(interferingReception);
         auto receptionPower = dimensionalReception->getPower();
         receptionPowers.push_back(receptionPower);

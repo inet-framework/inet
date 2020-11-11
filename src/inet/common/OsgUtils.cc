@@ -206,7 +206,7 @@ osg::Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead s
     if (startArrowhead)
         group->addChild(createArrowhead(coords[1], coords[0]));
     if (endArrowhead)
-        group->addChild(createArrowhead(coords[coords.size() -  2], coords[coords.size() - 1]));
+        group->addChild(createArrowhead(coords[coords.size() - 2], coords[coords.size() - 1]));
     return group;
 }
 
@@ -245,7 +245,7 @@ std::string resolveImageResource(const char *imageName, cComponent *context)
     if (context == nullptr)
         context = getSimulation()->getContextModule();
     std::string path;
-    for (auto ext : {"", ".png", ".gif", ".jpg"}) {
+    for (auto ext : { "", ".png", ".gif", ".jpg" }) {
         path = context->resolveResourcePath((std::string(imageName) + ext).c_str());
         if (!path.empty())
             return path;
@@ -253,7 +253,7 @@ std::string resolveImageResource(const char *imageName, cComponent *context)
     throw cRuntimeError("Image '%s' not found", imageName);
 }
 
-osg::Image* createImage(const char *fileName)
+osg::Image *createImage(const char *fileName)
 {
     auto image = osgDB::readImageFile(fileName);
     if (image == nullptr)
@@ -261,7 +261,7 @@ osg::Image* createImage(const char *fileName)
     return image;
 }
 
-osg::Image* createImageFromResource(const char *imageName)
+osg::Image *createImageFromResource(const char *imageName)
 {
     return createImage(resolveImageResource(imageName).c_str());
 }
@@ -295,7 +295,7 @@ StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullB
     stateSet->setAttribute(material);
     stateSet->setMode(GL_BLEND, StateAttribute::ON);
     stateSet->setMode(GL_DEPTH_TEST, StateAttribute::ON);
-    stateSet->setRenderingHint(opacity == 1.0 ? StateSet::OPAQUE_BIN :  StateSet::TRANSPARENT_BIN);
+    stateSet->setRenderingHint(opacity == 1.0 ? StateSet::OPAQUE_BIN : StateSet::TRANSPARENT_BIN);
     if (cullBackFace) {
         auto cullFace = new CullFace();
         cullFace->setMode(CullFace::BACK);

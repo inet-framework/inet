@@ -32,7 +32,7 @@ void NextHopProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol
         context.destinationColumn << header->getDestinationAddress();
         B payloadLength = header->getPayloadLengthField();
         context.infoColumn << "Gnp"
-                << " nbHops:" << header->getHopLimit();
+                           << " nbHops:" << header->getHopLimit();
         auto payloadProtocol = header->getProtocol();
         if (payloadProtocol)
             context.infoColumn << " payload:" << payloadProtocol->getName() << " " << payloadLength;
