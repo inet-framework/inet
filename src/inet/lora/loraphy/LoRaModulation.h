@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORAMODULATION_H_
 #define LORAPHY_LORAMODULATION_H_
 
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 

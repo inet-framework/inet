@@ -20,7 +20,7 @@ package inet.linklayer.common;
 import inet.linklayer.contract.IMacProtocol;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.NetworkInterface;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
 // This module implements a generic wireless network interface.

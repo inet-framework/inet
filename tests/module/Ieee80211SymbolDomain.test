@@ -18,10 +18,10 @@ of SIGNAL field with pilots inserted.
 %file: test.ned
 
 import inet.test.moduletest.lib.ieee80211.Ieee80211SymbolDomainTest;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDecoder;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDemodulator;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmEncoder;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmModulator;
+import inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmDecoder;
+import inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmDemodulator;
+import inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmEncoder;
+import inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmModulator;
 
 network SymbolDomainTest
 {

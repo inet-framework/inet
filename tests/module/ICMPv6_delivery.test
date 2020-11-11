@@ -40,7 +40,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.srv.app[0].localPort = 1001
 
 # Ethernet NIC configuration
-**.eth[*].mac.queue.typename = "EtherQosQueue"
+**.eth[*].mac.queue.typename = "EthernetQosQueue"
 **.eth[*].mac.queue.dataQueue.typename = "DropTailQueue" # in routers
 **.eth[*].mac.queue.dataQueue.packetCapacity = 10  # in routers
 **.eth[*].mac.duplexEnabled = true

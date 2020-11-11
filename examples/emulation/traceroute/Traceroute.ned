@@ -18,7 +18,7 @@
 
 package inet.examples.emulation.traceroute;
 
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -94,25 +94,25 @@ network Traceroute
             gates:
                 ethg[1];
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             parameters:
                 @display("p=127,102;i=device/switch");
             gates:
                 ethg[3];
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             parameters:
                 @display("p=129,254;i=device/switch");
             gates:
                 ethg[3];
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             parameters:
                 @display("p=137,398;i=device/switch");
             gates:
                 ethg[3];
         }
-        switch4: EtherSwitch {
+        switch4: EthernetSwitch {
             parameters:
                 @display("p=138,534;i=device/switch");
             gates:

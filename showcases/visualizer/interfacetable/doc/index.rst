@@ -102,7 +102,7 @@ from the ini file. It uses the following network:
    :width: 80%
    :align: center
 
-It contains two :ned:`StandardHost`'s connected to an :ned:`EtherSwitch`. The
+It contains two :ned:`StandardHost`'s connected to an :ned:`EthernetSwitch`. The
 switch is connected to a :ned:`Router`, which is connected to an
 :ned:`AccessPoint`. There is a :ned:`WirelessHost` and an :ned:`AdhocHost` near
 the access point. They will obtain their addresses from the router via

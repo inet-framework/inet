@@ -17,21 +17,21 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocol.checksum.FcsHeaderChecker;
-import inet.protocol.checksum.FcsHeaderInserter;
-import inet.protocol.common.InterPacketGap;
-import inet.protocol.fragmentation.FragmentNumberHeaderBasedDefragmenter;
-import inet.protocol.ordering.SequenceNumbering;
-import inet.protocol.queue.InProgressQueue;
-import inet.protocol.server.PreemptingServer;
-import inet.protocol.transceiver.PacketReceiver;
-import inet.protocol.transceiver.StreamThroughTransmitter;
+import inet.protocolelement.checksum.FcsHeaderChecker;
+import inet.protocolelement.checksum.FcsHeaderInserter;
+import inet.protocolelement.common.InterpacketGapInserter;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
+import inet.protocolelement.ordering.SequenceNumbering;
+import inet.queueing.queue.InProgressQueue;
+import inet.protocolelement.transceiver.PacketReceiver;
+import inet.protocolelement.transceiver.StreamThroughTransmitter;
 import inet.queueing.classifier.ContentBasedClassifier;
 import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.marker.PacketTagger;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.server.InstantServer;
+import inet.queueing.server.PreemptingServer;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
@@ -88,7 +88,7 @@ module SenderHost
         fcsInserter: FcsHeaderInserter {
             @display("p=200,1100");
         }
-        interPacketGap: InterPacketGap {
+        InterpacketGapInserter: InterpacketGapInserter {
             @display("p=200,1200");
         }
         transmitter: StreamThroughTransmitter {
@@ -110,8 +110,8 @@ module SenderHost
         inProgressQueue.out --> preemptingServer.in;
         // TODO:        preemptingServer.preemptedOut --> multiplexer2.in++;
         preemptingServer.out --> fcsInserter.in;
-        fcsInserter.out --> interPacketGap.in;
-        interPacketGap.out --> transmitter.in;
+        fcsInserter.out --> InterpacketGapInserter.in;
+        InterpacketGapInserter.out --> transmitter.in;
         transmitter.out --> g;
 }
 
@@ -191,5 +191,5 @@ network Network90
             @display("p=200,100");
         }
     connections:
-        sender.g --> { delay = 1us; } --> receiver.g;
+        sender.g --> {  delay = 1us; } --> receiver.g;
 }

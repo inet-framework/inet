@@ -3,11 +3,11 @@ package inet.showcases.wireless.analogmodel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.ManetRouter;
-import inet.physicallayer.apskradio.bitlevel.ApskLayeredScalarRadioMedium;
-import inet.physicallayer.common.packetlevel.NoiseSource;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
+import inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.noise.NoiseSource;
+import inet.physicallayer.wireless.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.integrated.IntegratedMultiVisualizer;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
@@ -26,7 +26,7 @@ network AnalogModelShowcaseRoutingNetwork
         }
         destination: ManetRouter {
             @display("p=292,80");
-		}
+        }
         radioMedium: UnitDiskRadioMedium {
             @display("p=38,28");
         }

@@ -18,7 +18,7 @@
 package inet.examples.diffserv.onedomain;
 
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.DropTailQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 import inet.queueing.scheduler.WrrScheduler;
@@ -26,7 +26,7 @@ import inet.queueing.scheduler.WrrScheduler;
 //
 // Diffserv Queue used in Experiment 1.1 - 1.6 and 5.1.
 //
-module DSQueue1 extends CompoundPacketQueue
+module DSQueue1 extends CompoundPacketQueueBase
 {
     submodules:
         classifier: BehaviorAggregateClassifier {

@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORALOGNORMALSHADOWING_H_
 #define LORAPHY_LORALOGNORMALSHADOWING_H_
 
-#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 

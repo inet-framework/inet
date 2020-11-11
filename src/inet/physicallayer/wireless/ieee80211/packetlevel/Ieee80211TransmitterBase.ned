@@ -1,0 +1,38 @@
+//
+// Copyright (C) 2013 OpenSim Ltd.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
+package inet.physicallayer.wireless.ieee80211.packetlevel;
+
+import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase;
+
+//
+// This transmitter model serves as the base module for IEEE 802.11 transmitters.
+// It supports switching channels, configuring different operation modes, and
+// preamble modes.
+//
+// @see ~Ieee80211ReceiverBase, ~Ieee80211ScalarTransmitter,
+// ~Ieee80211DimensionalTransmitter.
+//
+module Ieee80211TransmitterBase extends NarrowbandTransmitterBase
+{
+    parameters:
+        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac");
+        string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz");
+        int channelNumber;
+        modulation = default("BPSK"); // TODO: this is simply wrong
+}
+

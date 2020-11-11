@@ -15,7 +15,7 @@
 
 package inet.lora.loraphy;
 
-import inet.physicallayer.pathloss.FreeSpacePathLoss;
+import inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss;
 
 module LoRaLogNormalShadowing extends FreeSpacePathLoss
 {

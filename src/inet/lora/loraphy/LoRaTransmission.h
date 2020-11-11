@@ -8,8 +8,8 @@
 #ifndef LORATRANSMISSION_H_
 #define LORATRANSMISSION_H_
 
-#include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 namespace lora {

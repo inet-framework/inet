@@ -22,7 +22,7 @@ package inet.applications.ethernet;
 // A simple traffic generator for the Ethernet model and the 802.11 model,
 // and generally for any L2 model that accepts ~Ieee802SapReq tags on the
 // packets. It generates packets containing ~EtherAppReq chunks. It should
-// be connected directly to ~EtherEncap/~Ieee8022Llc.
+// be connected directly to ~EthernetEncapsulation/~Ieee8022Llc.
 //
 simple EtherAppClient
 {

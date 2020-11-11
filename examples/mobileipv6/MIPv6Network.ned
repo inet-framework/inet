@@ -24,13 +24,13 @@
 package inet.examples.mobileipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.ipv6.Router6;
 import inet.node.wireless.AccessPoint;
 import inet.node.xmipv6.CorrespondentNode6;
 import inet.node.xmipv6.HomeAgent6;
 import inet.node.xmipv6.WirelessHost6;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 channel fiberline extends ned.DatarateChannel
@@ -91,7 +91,7 @@ network mIPv6Network
             parameters:
                 @display("p=566,172;i=device/accesspoint_s");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=405,467;i=device/hub_s");
         }

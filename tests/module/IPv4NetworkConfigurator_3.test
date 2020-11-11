@@ -6,13 +6,13 @@ Tests Ipv4NetworkConfigurator for a mixed wired and wireless LAN.
 
 import inet.test.moduletest.lib.*;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 network Test
 {
@@ -26,7 +26,7 @@ network Test
         radioMedium: Ieee80211ScalarRadioMedium;
         server: StandardHost;
         router: Router;
-        switch: EtherSwitch;
+        switch: EthernetSwitch;
         accessPoint: AccessPoint;
         mobile[numHosts]: WirelessHost;
         client[numHosts]: StandardHost;

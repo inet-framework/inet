@@ -1,6 +1,6 @@
 %description:
 Testing Ethernet communication between host pairs.
-All hosts use EtherMac implementation with half duplex mode.
+All hosts use EthernetCsmaMac implementation with half duplex mode.
 Both hosts in pair have same ethernet configurations.
 Both hosts in pair are source and sink, too.
 
@@ -18,13 +18,13 @@ checks:
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHost;
 
-module EtherHostQ extends EtherHost
+module EtherHostQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";
-        macType = "EtherMac";
+        macType = "EthernetCsmaMac";
         duplexMode = false;
 }
 

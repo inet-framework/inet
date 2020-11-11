@@ -1,0 +1,42 @@
+//
+// Copyright (C) 2013 OpenSim Ltd.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
+#ifndef __INET_IEEE80211SCALARTRANSMITTER_H
+#define __INET_IEEE80211SCALARTRANSMITTER_H
+
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
+
+namespace inet {
+
+namespace physicallayer {
+
+class INET_API Ieee80211ScalarTransmitter : public Ieee80211TransmitterBase
+{
+  public:
+    Ieee80211ScalarTransmitter();
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+
+    virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
+};
+
+} // namespace physicallayer
+
+} // namespace inet
+
+#endif
+

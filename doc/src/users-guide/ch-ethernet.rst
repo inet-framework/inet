@@ -33,23 +33,23 @@ There are several node models that can be used in an Ethernet network:
 -  Node models such as :ned:`StandardHost` and :ned:`Router` are
    Ethernet-capable
 
--  :ned:`EtherSwitch` models an Ethernet switch, i.e. a multiport
+-  :ned:`EthernetSwitch` models an Ethernet switch, i.e. a multiport
    bridging device
 
--  :ned:`EtherHub` models an Ethernet hub or multiport repeater
+-  :ned:`EthernetHub` models an Ethernet hub or multiport repeater
 
 -  :ned:`EtherBus` models the coaxial cable (10BASE2 or 10BASE5 network
    segments) on legacy Ethernet networks
 
--  :ned:`EtherHost` is a sample node which can be used to generate “raw”
+-  :ned:`EthernetHost` is a sample node which can be used to generate “raw”
    Ethernet traffic
 
 .. _ug:sec:ethernet:etherswitch:
 
-EtherSwitch
+EthernetSwitch
 ~~~~~~~~~~~
 
-:ned:`EtherSwitch` models an Ethernet switch. Ethernet switches play an
+:ned:`EthernetSwitch` models an Ethernet switch. Ethernet switches play an
 important role in modern Ethernet LANs. Unlike passive hubs and
 repeaters that work in the physical layer, the switches operate in the
 data link layer and relay frames between the connected subnets.
@@ -65,10 +65,10 @@ default it uses half-duplex MAC with CSMA/CD.
 
 .. _ug:sec:ethernet:etherhub:
 
-EtherHub
+EthernetHub
 ~~~~~~~~
 
-:ned:`EtherHub` models an Ethernet hub. Ethernet hubs are a simple
+:ned:`EthernetHub` models an Ethernet hub. Ethernet hubs are a simple
 broadcast devices. Messages arriving on a port are regenerated and
 broadcast to every other port.
 
@@ -133,8 +133,8 @@ Ethernet Interface
 ------------------
 
 The :ned:`EthernetInterface` compound module implements the
-:ned:`IWiredInterface` interface. Complements :ned:`EtherMac` and
-:ned:`EtherEncap` with an output queue for QoS and RED support. It also
+:ned:`IWiredInterface` interface. Complements :ned:`EthernetCsmaMac` and
+:ned:`EthernetEncapsulation` with an output queue for QoS and RED support. It also
 has configurable input/output filters as :ned:`IHook` components
 similarly to the :ned:`PppInterface` module.
 
@@ -142,7 +142,7 @@ The Ethernet MAC (Media Access Control) layer transmits the Ethernet
 frames on the physical media. This is a sublayer within the data link
 layer. Because encapsulation/decapsulation is not always needed (e.g.
 switches does not do encapsulation/decapsulation), it is implemented in
-a separate modules (e.g. :ned:`EtherEncap`) that are part
+a separate modules (e.g. :ned:`EthernetEncapsulation`) that are part
 of the LLC layer.
 
 Nowadays almost all Ethernet networks operate using full-duplex
@@ -150,8 +150,8 @@ point-to-point connections between hosts and switches. This means that
 there are no collisions, and the behaviour of the MAC component is much
 simpler than in classic Ethernet that used coaxial cables and hubs. The
 INET framework contains two MAC modules for Ethernet: the
-:ned:`EtherMacFullDuplex` is simpler to understand and easier to extend,
-because it supports only full-duplex connections. The :ned:`EtherMac`
+:ned:`EthernetMac` is simpler to understand and easier to extend,
+because it supports only full-duplex connections. The :ned:`EthernetCsmaMac`
 module implements the full MAC functionality including CSMA/CD, it can
 operate both half-duplex and full-duplex mode.
 
@@ -162,11 +162,11 @@ Components
 
 The following components are present in the model:
 
--  :ned:`EtherMacFullDuplex`
+-  :ned:`EthernetMac`
 
--  :ned:`EtherMac`
+-  :ned:`EthernetCsmaMac`
 
--  :ned:`EtherEncap`
+-  :ned:`EthernetEncapsulation`
 
 -  :ned:`MacRelayUnit`
 
@@ -176,10 +176,10 @@ The following components are present in the model:
 
 .. _ug:sec:ethernet:ethermacfullduplex:
 
-EtherMacFullDuplex
+EthernetMac
 ~~~~~~~~~~~~~~~~~~
 
-From the two MAC implementation :ned:`EtherMacFullDuplex` is the simpler
+From the two MAC implementation :ned:`EthernetMac` is the simpler
 one, it operates only in full-duplex mode (its :par:`duplexEnabled`
 parameter fixed to ``true`` in its NED definition). This module does
 not need to implement CSMA/CD, so there is no collision detection,
@@ -188,12 +188,12 @@ bursting.
 
 .. _ug:sec:ethernet:ethermac:
 
-EtherMac
+EthernetCsmaMac
 ~~~~~~~~
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex
 and full-duplex operations; in full-duplex mode it behaves as
-:ned:`EtherMacFullDuplex`. In half-duplex mode it detects collisions,
+:ned:`EthernetMac`. In half-duplex mode it detects collisions,
 sends jam messages and retransmit frames upon collisions using the
 exponential backoff algorithm. In Gigabit Ethernet networks it supports
 carrier extension and frame bursting. Carrier extension can be turned
@@ -201,10 +201,10 @@ off by setting the :par:`carrierExtension` parameter to ``false``.
 
 .. _ug:sec:ethernet:etherencap:
 
-EtherEncap
+EthernetEncapsulation
 ~~~~~~~~~~
 
-The :ned:`EtherEncap` module performs Ethernet II or Ethernet with SNAP
+The :ned:`EthernetEncapsulation` module performs Ethernet II or Ethernet with SNAP
 encapsulation/decapsulation.
 
 .. _ug:sec:ethernet:macrelayunit:

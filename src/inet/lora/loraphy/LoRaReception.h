@@ -8,7 +8,7 @@
 #ifndef LORAPHY_LORARECEPTION_H_
 #define LORAPHY_LORARECEPTION_H_
 
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 
 namespace inet {
 

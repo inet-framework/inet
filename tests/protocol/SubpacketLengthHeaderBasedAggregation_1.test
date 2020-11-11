@@ -6,8 +6,8 @@ Tests SubpacketLengthHeader based aggregation.
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.aggregation.SubpacketLengthHeaderBasedAggregator;
-import inet.protocol.aggregation.SubpacketLengthHeaderBasedDeaggregator;
+import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedAggregator;
+import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedDeaggregator;
 
 network TestSubpacketLengthHeaderBasedAggregation
 {

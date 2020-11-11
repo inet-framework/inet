@@ -29,7 +29,7 @@ import inet.queueing.marker.ContentBasedLabeler;
 import inet.queueing.marker.ContentBasedTagger;
 import inet.queueing.marker.PacketTagger;
 import inet.queueing.meter.RateMeter;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.DropTailQueue;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.queue.PriorityQueue;
@@ -525,10 +525,10 @@ network CompoundPacketQueueTutorialStep
 //-------------------------------------------------
 
 
-module ExampleCompoundPriorityQueue extends CompoundPacketQueue
+module ExampleCompoundPriorityQueue extends CompoundPacketQueueBase
 {
     parameters:
-        @class(::inet::queueing::CompoundPacketQueue);
+        @class(::inet::queueing::CompoundPacketQueueBase);
     submodules:
         classifier: WrrClassifier {
             @display("p=100,100");

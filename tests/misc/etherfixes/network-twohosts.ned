@@ -1,5 +1,5 @@
 
-import inet.node.ethernet.EtherHost2;
+import inet.node.ethernet.EthernetHost2;
 import ned.DatarateChannel;
 
 
@@ -7,11 +7,11 @@ network TwoHosts
 {
     types:
     submodules:
-        hostA: EtherHost2 {
+        hostA: EthernetHost2 {
             parameters:
                 @display("p=72,80");
         }
-        hostB: EtherHost2 {
+        hostB: EthernetHost2 {
             parameters:
                 @display("p=334,80");
         }

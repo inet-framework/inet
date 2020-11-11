@@ -18,7 +18,7 @@
 #ifndef __INET_TRACINGOBSTACLELOSSVISUALIZERBASE_H
 #define __INET_TRACINGOBSTACLELOSSVISUALIZERBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/ITracingObstacleLoss.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITracingObstacleLoss.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 

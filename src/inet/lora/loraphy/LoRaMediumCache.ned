@@ -17,7 +17,7 @@
 
 package inet.lora.loraphy;
 
-import inet.physicallayer.contract.packetlevel.IMediumLimitCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
 
 module LoRaMediumCache like IMediumLimitCache
 {

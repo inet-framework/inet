@@ -3,8 +3,8 @@ package inet.tests.ethernet;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.ethernet.EtherBus;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EtherHost2;
-import inet.physicallayer.common.packetlevel.WireJunction;
+import inet.node.ethernet.EthernetHost2;
+import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
 
 //
@@ -14,15 +14,15 @@ import ned.DatarateChannel;
 network HostsWithBus
 {
     submodules:
-        hostA: EtherHost2 {
+        hostA: EthernetHost2 {
             parameters:
                 @display("p=72,80");
         }
-        hostB: EtherHost2 {
+        hostB: EthernetHost2 {
             parameters:
                 @display("p=334,80");
         }
-        hostC: EtherHost2 {
+        hostC: EthernetHost2 {
             parameters:
                 @display("p=334,80");
         }

@@ -20,7 +20,7 @@ package inet.linklayer.ieee802154Loss;
 
 import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.NetworkInterface;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 module Ieee802154LossNarrowbandInterface extends NetworkInterface like IWirelessInterface
 {

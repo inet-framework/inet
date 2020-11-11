@@ -19,7 +19,7 @@
 package inet.examples.ethernet.arptest;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -48,7 +48,7 @@ network ARPTest
         host2: StandardHost {
             @display("p=250,300;i=device/pc");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             @display("p=400,200");
         }
         net: Router {

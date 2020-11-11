@@ -26,7 +26,7 @@ import inet.queueing.contract.IPacketScheduler;
 // This module implements a priority queue with multiple inner queues and an
 // optional shared memory buffer.
 //
-module PriorityQueue extends CompoundPacketQueue
+module PriorityQueue extends CompoundPacketQueueBase
 {
     parameters:
         int numQueues;

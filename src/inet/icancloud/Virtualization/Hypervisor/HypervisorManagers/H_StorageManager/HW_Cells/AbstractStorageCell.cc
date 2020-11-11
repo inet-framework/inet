@@ -52,13 +52,10 @@ void AbstractStorageCell::init(int newNodeGate) {
 
 AbstractStorageCell::~AbstractStorageCell() {
 
-  for (int i = 0; i < (int)remote_storage_cells.size();)
+  while (!remote_storage_cells.empty())
       remote_storage_cells.erase(remote_storage_cells.begin());
-
-      from_H_StorageManager = nullptr;
-      to_H_StorageManager = nullptr;
-
-
+  from_H_StorageManager = nullptr;
+  to_H_StorageManager = nullptr;
 }
 
 void AbstractStorageCell::finish() {

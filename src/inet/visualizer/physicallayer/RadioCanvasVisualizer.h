@@ -20,7 +20,7 @@
 
 #include "inet/common/figures/IndexedImageFigure.h"
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 

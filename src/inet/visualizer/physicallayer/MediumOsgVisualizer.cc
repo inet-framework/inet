@@ -21,7 +21,7 @@
 #include "inet/visualizer/physicallayer/MediumOsgVisualizer.h"
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 #endif // WITH_RADIO
 
 #ifdef WITH_OSG

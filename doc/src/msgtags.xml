@@ -34,7 +34,7 @@
   </compound>
   <compound kind="class">
     <name>ApskPhyHeader</name>
-    <filename>src-inet-physicallayer-apskradio-packetlevel-ApskPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-apsk-packetlevel-ApskPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>ArpOpcode</name>

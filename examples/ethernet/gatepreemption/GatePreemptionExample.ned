@@ -14,20 +14,20 @@
 
 package inet.examples.ethernet.gatepreemption;
 
-import inet.linklayer.ethernet.layered.EthernetMacLayer;
+import inet.linklayer.ethernet.modular.EthernetMacLayer;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
-import inet.protocol.common.PreemptableStreamer;
-import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
+import inet.protocolelement.common.PreemptableStreamer;
+import inet.protocolelement.fragmentation.FragmentTagBasedDefragmenter;
 import inet.queueing.contract.IPacketBuffer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 
-module StreamableSelectiveQueue extends CompoundPacketQueue
+module StreamableGatingQueue extends CompoundPacketQueueBase
 {
     parameters:
         int numQueues;

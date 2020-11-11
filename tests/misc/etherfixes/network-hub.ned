@@ -1,6 +1,6 @@
 
-import inet.linklayer.ethernet.EtherHub;
-import inet.node.ethernet.EtherHost2;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHost2;
 import ned.DatarateChannel;
 
 
@@ -8,19 +8,19 @@ network HostsWithHub
 {
     types:
     submodules:
-        hostA: EtherHost2 {
+        hostA: EthernetHost2 {
             parameters:
                 @display("p=72,80");
         }
-        hostB: EtherHost2 {
+        hostB: EthernetHost2 {
             parameters:
                 @display("p=334,80");
         }
-        hostC: EtherHost2 {
+        hostC: EthernetHost2 {
             parameters:
                 @display("p=334,80");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             parameters:
                 @display("p=204,80");
         }

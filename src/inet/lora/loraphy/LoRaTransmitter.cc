@@ -18,7 +18,7 @@
 #include "inet/lora/loraphy/LoRaModulation.h"
 #include "inet/lora/loraphy/LoraMode.h"
 //#include "inet/lora/lorabase/LoRaMacFrame_m.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
 #include "inet/lora/lorabase/LoRaTagInfo_m.h"
 

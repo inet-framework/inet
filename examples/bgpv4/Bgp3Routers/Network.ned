@@ -3,7 +3,7 @@ package inet.examples.bgpv4.Bgp3Routers;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.bgp.BgpRouter;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
@@ -92,37 +92,37 @@ network BgpNetwork
                 pppg[2];
                 ethg[1];
         }
-        PA1: EtherSwitch {
+        PA1: EthernetSwitch {
             parameters:
                 @display("p=400,130;i=device/switch");
             gates:
                 ethg[3];
         }
-        PA2: EtherSwitch {
+        PA2: EthernetSwitch {
             parameters:
                 @display("p=400,330;i=device/switch");
             gates:
                 ethg[3];
         }
-        PB1: EtherSwitch {
+        PB1: EthernetSwitch {
             parameters:
                 @display("p=1150,130;i=device/switch");
             gates:
                 ethg[3];
         }
-        PB2: EtherSwitch {
+        PB2: EthernetSwitch {
             parameters:
                 @display("p=1150,330;i=device/switch");
             gates:
                 ethg[3];
         }
-        PC1: EtherSwitch {
+        PC1: EthernetSwitch {
             parameters:
                 @display("p=625,530;i=device/switch");
             gates:
                 ethg[3];
         }
-        PC2: EtherSwitch {
+        PC2: EthernetSwitch {
             parameters:
                 @display("p=925,530;i=device/switch");
             gates:

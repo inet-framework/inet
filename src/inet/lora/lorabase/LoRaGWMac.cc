@@ -18,7 +18,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 
 namespace inet {

@@ -17,8 +17,7 @@ package inet.lora.loraphy;
 
 import inet.lora.loraphy.LoRaTransmitter;
 import inet.lora.loraphy.LoRaReceiver;
-import inet.physicallayer.common.packetlevel.Radio;
-import inet.physicallayer.base.packetlevel.FlatRadioBase;
+import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 import inet.power.storage.IdealEpEnergyStorage;
 module LoRaRadio extends FlatRadioBase
 {

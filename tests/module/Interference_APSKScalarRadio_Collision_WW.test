@@ -9,7 +9,7 @@ No signals are expected to be received.
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.apskradio.packetlevel.ApskScalarRadioMedium;
+import inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadioMedium;
 
 network Test
 {

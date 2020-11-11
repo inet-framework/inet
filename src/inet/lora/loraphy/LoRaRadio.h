@@ -16,12 +16,12 @@
 #ifndef LORA_LORARADIO_H_
 #define LORA_LORARADIO_H_
 
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
-#include "inet/physicallayer/common/packetlevel/Signal.h"
-#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerBase.h"
+#include "inet/physicallayer/common/Signal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
 
 namespace inet {
 

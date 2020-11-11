@@ -129,7 +129,7 @@ void VmMsgController::processRequestMessage (Packet *pkt){
 	    if ((sm_net != nullptr) && (sm_net->getCommId() != -1))
 	        insertCommId (uId, pId, sm->getCommId(), pkt->getId());
 
-		if (migrateActive){
+	    if (migrateActive){
 	        pkt->insertAtFront(sm);
 			pushMessage(pkt);
 		}
@@ -236,8 +236,8 @@ void VmMsgController::pushMessage(Packet *pkt){
     const auto & sm = pkt->peekAtFront<icancloud_Message>();
     if (sm == nullptr)
         throw cRuntimeError("Packet Error type");
-	pendingMessages.insert(pendingMessages.end(), pkt);
 
+    pendingMessages.insert(pendingMessages.end(), pkt);
 }
 
 Packet* VmMsgController::popMessage(){

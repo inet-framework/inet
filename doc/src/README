@@ -15,7 +15,7 @@ A docker image is provided at: https://github.com/omnetpp/dockerfiles/tree/maste
 
 Alternatively, you can install sphinx locally,
 
-  sudo apt-get install dvipng texlive-binaries
+  sudo apt install sphinx dvipng texlive-binaries texlive-latex-recommended texlive-pictures texlive-latex-extra
   python3 -m pip install --user -U Sphinx sphinxcontrib-images sphinxcontrib-doxylink sphinx-autobuild
 
 and then use 'make' directly (instead of the docker) with the above targets. Don't forget to add ~/.local/bin 

@@ -17,12 +17,12 @@
 
 package inet.examples.inet.ipv4largenet;
 
-import inet.linklayer.ethernet.EtherHub;
+import inet.node.ethernet.EthernetHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.common.packetlevel.WireJunction;
+import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -71,9 +71,9 @@ module IPv4MediumLAN
         inout ethg;
     submodules:
         router: Router;
-        switch: EtherSwitch;
+        switch: EthernetSwitch;
         host[n]: StandardHost;
-        hub: EtherHub;
+        hub: EthernetHub;
         hhost[h]: StandardHost;
     connections:
         for i=0..n-1 {
@@ -114,9 +114,9 @@ module IPv4LargeLAN
         }
     submodules:
         router: Router;
-        switch: EtherSwitch;
+        switch: EthernetSwitch;
         host[n]: StandardHost;
-        hub: EtherHub;
+        hub: EthernetHub;
         hhost[h]: StandardHost;
         tap[b+1]: WireJunction {
             parameters:

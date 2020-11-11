@@ -1,0 +1,453 @@
+2020-11-10
+
+	Added folders
+	=============
+	clock/base
+	clock/model
+	clock/oscillator
+	common/clock
+	linklayer/ethernet/base
+	linklayer/ethernet/basic
+	linklayer/ethernet/common
+	linklayer/ethernet/modular
+	linklayer/ethernet/contract
+	linklayer/virtual
+	networks
+	node/eigrp
+	protocolelement/aggregation/base
+	protocolelement/aggregation/contract
+	protocolelement/aggregation/policy
+	protocolelement/checksum/base
+	protocolelement/checksum/serializer
+	protocolelement/common
+	protocolelement/contract
+	protocolelement/fragmentation/base
+	protocolelement/fragmentation/contract
+	protocolelement/fragmentation/policy
+	protocolelement/fragmentation/serializer
+	protocolelement/measurement
+	protocolelement/service
+	protocolelement/trafficconditioner
+	protocolelement/transceiver
+	protocolelement/transceiver/base
+	protocolelement/transceiver/contract
+	queueing/gate
+	queueing/flow
+	routing/eigrp
+	routing/eigrp/messages
+	routing/eigrp/pdms
+	routing/eigrp/tables
+	visualizer/flow
+	
+	Refactored folders
+	==================
+	linklayer/ethernet -> linklayer/ethernet/base
+	linklayer/ethernet -> linklayer/ethernet/basic
+	linklayer/ethernet -> linklayer/ethernet/common
+	linklayer/ethernet -> linklayer/ethernet/contract
+	linklayer/ethernet/switch -> linklayer/ethernet/common
+	
+	Added modules
+	=============
+	clock/base/ClockBase
+	clock/base/OscillatorBase
+	clock/contract/IClock
+	clock/contract/IOscillator
+	clock/model/IdealClock
+	clock/model/OscillatorBasedClock
+	clock/model/SettableClock
+	clock/oscillator/ConstantDriftOscillator
+	clock/oscillator/IdealOscillator
+	clock/oscillator/RandomDriftOscillator
+	linklayer/base/MacRelayUnitBase
+	linklayer/common/OmittedPolicyLayer
+	linklayer/contract/IPolicyLayer
+	linklayer/ethernet/modular/LayeredEthernetInterface
+	linklayer/ethernet/modular/EthernetAddressChecker
+	linklayer/ethernet/modular/EthernetAddressInserter
+	linklayer/ethernet/modular/EthernetCutthroughInterface
+	linklayer/ethernet/modular/EthernetCutthroughLayer
+	linklayer/ethernet/modular/EthernetCutthroughSink
+	linklayer/ethernet/modular/EthernetCutthroughSource
+	linklayer/ethernet/modular/EthernetFcsChecker
+	linklayer/ethernet/modular/EthernetFcsInserter
+	linklayer/ethernet/modular/EthernetFragmentFcsChecker
+	linklayer/ethernet/modular/EthernetFragmentFcsInserter
+	linklayer/ethernet/modular/EthernetFragmentingMacLayer
+	linklayer/ethernet/modular/EthernetGatingQueue
+	linklayer/ethernet/modular/EthernetLayer
+	linklayer/ethernet/modular/EthernetMacHeaderChecker
+	linklayer/ethernet/modular/EthernetMacHeaderInserter
+	linklayer/ethernet/modular/EthernetMacLayer
+	linklayer/ethernet/modular/EthernetPauseCommandProcessor
+	linklayer/ethernet/modular/EthernetPreemptingMacLayer
+	linklayer/ethernet/modular/EthernetPriorityQueue
+	linklayer/ethernet/modular/EthernetQueue
+	linklayer/ethernet/modular/EthernetSocketCommandProcessor
+	linklayer/ethernet/modular/EthernetSocketPacketProcessor
+	linklayer/ethernet/modular/EthernetSocketTable
+	linklayer/ethernet/modular/EthernetStreamingMacLayer
+	linklayer/ethernet/modular/EthernetTypeOrLengthChecker
+	linklayer/ethernet/modular/EthernetTypeOrLengthInserter
+	linklayer/ethernet/modular/IEthernetLayer
+	linklayer/ethernet/modular/IEthernetMacLayer
+	linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderChecker
+	linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderInserter
+	linklayer/ieee8021ae/IIeee8021aeTagEpdHeaderChecker
+	linklayer/ieee8021ae/IIeee8021aeTagEpdHeaderInserter
+	linklayer/ieee8021q/Ieee8021qLayer
+	linklayer/ieee8021q/Ieee8021qSocketCommandProcessor
+	linklayer/ieee8021q/Ieee8021qSocketPacketProcessor
+	linklayer/ieee8021q/Ieee8021qSocketTable
+	linklayer/ieee8021q/Ieee8021qTagEpdHeaderChecker
+	linklayer/ieee8021q/Ieee8021qTagEpdHeaderInserter
+	linklayer/ieee8021q/Ieee8021qTagTpidHeaderChecker
+	linklayer/ieee8021q/Ieee8021qTagTpidHeaderInserter
+	linklayer/ieee8021q/IIeee8021qLayer
+	linklayer/ieee8021q/IIeee8021qTagEpdHeaderChecker
+	linklayer/ieee8021q/IIeee8021qTagEpdHeaderInserter
+	linklayer/ieee8021q/IIeee8021qTagTpidHeaderChecker
+	linklayer/ieee8021q/IIeee8021qTagTpidHeaderInserter
+	linklayer/ieee8021q/OmittedIeee8021qTagEpdHeaderChecker
+	linklayer/ieee8021q/OmittedIeee8021qTagEpdHeaderInserter
+	linklayer/ieee8021q/OmittedIeee8021qTagTpidHeaderChecker
+	linklayer/ieee8021q/OmittedIeee8021qTagTpidHeaderInserter
+	linklayer/ieee8022/Ieee8022LlcChecker
+	linklayer/ieee8022/Ieee8022LlcInserter
+	linklayer/ieee8022/Ieee8022LlcLayer
+	linklayer/ieee8022/Ieee8022LlcSocketCommandProcessor
+	linklayer/ieee8022/Ieee8022LlcSocketPacketProcessor
+	linklayer/ieee8022/Ieee8022LlcSocketTable
+	linklayer/ieee8022/Ieee8022SnapChecker
+	linklayer/ieee8022/Ieee8022SnapInserter
+	linklayer/ieee8022/IIeee8022LlcChecker
+	linklayer/ieee8022/IIeee8022LlcInserter
+	linklayer/ieee8022/IIeee8022LlcLayer
+	linklayer/ieee8022/IIeee8022SnapChecker
+	linklayer/ieee8022/IIeee8022SnapInserter
+	linklayer/ieee8022/OmittedIeee8022Llc
+	linklayer/ieee8022/OmittedIeee8022LlcChecker
+	linklayer/ieee8022/OmittedIeee8022LlcInserter
+	linklayer/ieee8022/OmittedIeee8022LlcLayer
+	linklayer/ieee8022/OmittedIeee8022SnapChecker
+	linklayer/ieee8022/OmittedIeee8022SnapInserter
+	linklayer/vlan/VlanIndFilter
+	linklayer/vlan/VlanPolicyLayer
+	linklayer/vlan/VlanReqFilter
+	linklayer/vlan/VlanReqMapper
+	networks/Ieee80211NetworkBase
+	networks/NetworkBase
+	networks/WiredNetworkBase
+	networks/WirelessNetworkBase
+	node/eigrp/EigrpRouter
+	physicallayer/common/packetlevel/WireJunction
+	physicallayer/ethernet/EthernetFragmentPhyHeaderChecker
+	physicallayer/ethernet/EthernetFragmentPhyHeaderInserter
+	physicallayer/ethernet/EthernetPhyHeaderChecker
+	physicallayer/ethernet/EthernetPhyHeaderInserter
+	physicallayer/ethernet/EthernetPhyLayer
+	physicallayer/ethernet/EthernetPreemptingPhyLayer
+	physicallayer/ethernet/EthernetStreamingPhyLayer
+	physicallayer/ethernet/EthernetStreamThroughPhyLayer
+	physicallayer/ethernet/IEthernetPhyLayer
+	protocolelement/acknowledgement/ReceiveWithAcknowledge
+	protocolelement/acknowledgement/Resending
+	protocolelement/acknowledgement/SendWithAcknowledge
+	protocolelement/aggregation/base/AggregatorBase
+	protocolelement/aggregation/base/DeaggregatorBase
+	protocolelement/aggregation/contract/IAggregatorPolicy
+	protocolelement/aggregation/contract/IPacketAggregator
+	protocolelement/aggregation/contract/IPacketDeaggregator
+	protocolelement/aggregation/policy/LengthBasedAggregatorPolicy
+	protocolelement/aggregation/SubpacketLengthHeaderBasedAggregator
+	protocolelement/aggregation/SubpacketLengthHeaderBasedDeaggregator
+	protocolelement/checksum/base/CrcCheckerBase
+	protocolelement/checksum/base/CrcInserterBase
+	protocolelement/checksum/base/FcsCheckerBase
+	protocolelement/checksum/base/FcsInserterBase
+	protocolelement/checksum/CrcHeaderChecker
+	protocolelement/checksum/CrcHeaderInserter
+	protocolelement/checksum/FcsHeaderChecker
+	protocolelement/checksum/FcsHeaderInserter
+	protocolelement/common/InterpacketGapInserter
+	protocolelement/common/PacketDeserializer
+	protocolelement/common/PacketDestreamer
+	protocolelement/common/PacketEmitter
+	protocolelement/common/PacketSerializer
+	protocolelement/common/PacketStreamer
+	protocolelement/common/PaddingInserter
+	protocolelement/common/PreemptableStreamer
+	protocolelement/common/ProtocolChecker
+	protocolelement/contract/IProtocolHeaderChecker
+	protocolelement/contract/IProtocolHeaderInserter
+	protocolelement/dispatching/ReceiveWithProtocol
+	protocolelement/dispatching/SendWithProtocol
+	protocolelement/forwarding/Forwarding
+	protocolelement/forwarding/ReceiveWithHopLimit
+	protocolelement/forwarding/SendWithHopLimit
+	protocolelement/fragmentation/base/DefragmenterBase
+	protocolelement/fragmentation/base/FragmenterBase
+	protocolelement/fragmentation/contract/IFragmenterPolicy
+	protocolelement/fragmentation/contract/IPacketDefragmenter
+	protocolelement/fragmentation/contract/IPacketFragmenter
+	protocolelement/fragmentation/FragmentNumberHeaderBasedDefragmenter
+	protocolelement/fragmentation/FragmentNumberHeaderBasedFragmenter
+	protocolelement/fragmentation/FragmentNumberHeaderChecker
+	protocolelement/fragmentation/FragmentNumberHeaderInserter
+	protocolelement/fragmentation/FragmentTagBasedDefragmenter
+	protocolelement/fragmentation/FragmentTagBasedFragmenter
+	protocolelement/fragmentation/policy/LengthBasedFragmenterPolicy
+	protocolelement/measurement/IMeasurementLayer
+	protocolelement/measurement/MeasurementLayer
+	protocolelement/measurement/OmittedMeasurementLayer
+	protocolelement/ordering/DuplicateRemoval
+	protocolelement/ordering/Reordering
+	protocolelement/ordering/SequenceNumbering
+	protocolelement/selectivity/ReceiveAtL3Address
+	protocolelement/selectivity/ReceiveAtMacAddress
+	protocolelement/selectivity/ReceiveAtPort
+	protocolelement/selectivity/SendToL3Address
+	protocolelement/selectivity/SendToMacAddress
+	protocolelement/selectivity/SendToPort
+	protocolelement/service/DataService
+	protocolelement/service/ForwardingService
+	protocolelement/service/InterfaceService
+	protocolelement/service/MacService
+	protocolelement/service/SelectivityService
+	protocolelement/socket/ISocketLayer
+	protocolelement/socket/OmittedSocketLayer
+	protocolelement/trafficconditioner/ITrafficConditionerLayer
+	protocolelement/trafficconditioner/OmittedTrafficConditionerLayer
+	protocolelement/trafficconditioner/TrafficConditionerLayer
+	protocolelement/transceiver/base/PacketReceiverBase
+	protocolelement/transceiver/base/PacketTransmitterBase
+	protocolelement/transceiver/base/StreamingReceiverBase
+	protocolelement/transceiver/base/StreamingTransmitterBase
+	protocolelement/transceiver/contract/IPacketReceiver
+	protocolelement/transceiver/contract/IPacketTransmitter
+	protocolelement/transceiver/DestreamingReceiver
+	protocolelement/transceiver/PacketReceiver
+	protocolelement/transceiver/PacketTransmitter
+	protocolelement/transceiver/StreamingTransmitter
+	protocolelement/transceiver/StreamThroughReceiver
+	protocolelement/transceiver/StreamThroughTransmitter
+	queueing/base/ActivePacketSinkBase
+	queueing/base/ActivePacketSourceBase
+	queueing/base/PacketDuplicatorBase
+	queueing/base/PacketFlowBase
+	queueing/base/PacketGateBase
+	queueing/base/PacketPullerBase
+	queueing/base/PacketPusherBase
+	queueing/base/PassivePacketSinkBase
+	queueing/base/PassivePacketSourceBase
+	queueing/classifier/DynamicClassifier
+	queueing/common/OmittedPacketFlow
+	queueing/contract/IPacketFlow
+	queueing/contract/IPacketGate
+	queueing/contract/IPacketPuller
+	queueing/contract/IPacketPusher
+	queueing/filter/OmittedPacketFilter
+	queueing/gate/PeriodicGate
+	queueing/queue/InProgressQueue
+	queueing/queue/OmittedPacketQueue
+	queueing/queue/SelectiveQueue
+	queueing/server/InstantServer
+	queueing/server/OmittedPacketServer
+	queueing/server/PreemptingServer
+	queueing/shaper/OmittedTrafficConditioner
+	queueing/flow/FlowMeasurementRecorder
+	queueing/flow/FlowMeasurementStarter
+	routing/contract/IEigrp
+	routing/eigrp/EigrpProcessDS
+	routing/eigrp/EigrpRtp
+	routing/eigrp/EigrpRtp6
+	routing/eigrp/EigrpSplitter
+	routing/eigrp/package
+	routing/eigrp/pdms/EigrpIpv4Pdm
+	routing/eigrp/pdms/EigrpIpv6Pdm
+	routing/eigrp/tables/EigrpInterfaceTable
+	routing/eigrp/tables/EigrpIpv4NeighborTable
+	routing/eigrp/tables/EigrpIpv4TopologyTable
+	routing/eigrp/tables/EigrpIpv6NeighborTable
+	routing/eigrp/tables/EigrpIpv6TopologyTable
+	visualizer/contract/IPacketFlowVisualizer
+	visualizer/flow/PacketFlowCanvasVisualizer
+	visualizer/flow/PacketFlowOsgVisualizer
+	visualizer/flow/PacketFlowVisualizer
+	
+	Refactored modules
+	==================
+	linklayer/contract/ITrafficConditioner -> queueing/contract/ITrafficConditioner
+	linklayer/contract/IVlanInterface -> linklayer/contract/IVirtualInterface
+	linklayer/ethernet/EtherEncapDummy -> linklayer/ethernet/OmittedEtherEncap
+	linklayer/vlan/VlanInterface -> linklayer/virtual/VirtualInterface
+	linklayer/vlan/VlanTunnel -> linklayer/virtual/VirtualTunnel
+	networklayer/common/InterfaceEntry -> networklayer/common/NetworkInterface
+	queueing/common/PacketGate -> queueing/gate/PacketGate
+	
+	Removed modules
+	===============
+	common/misc/NetAnimTrace
+	linklayer/ethernet/EtherBus
+	linklayer/ieee8021q/Ieee8021qEncap
+	linklayer/ieee8021q/IIeee8021qEncap
+	
+	Added signals
+	=============
+	packetFlowStartedSignal
+	packetFlowEndedSignal
+	
+	Refactored signals
+	==================
+	packetPoppedSignal -> packetPulledSignal
+	receptionStartedSignal
+	receptionEndedSignal
+	transmissionStartedSignal
+	transmissionEndedSignal
+	
+	Added C++ classes
+	=================
+	clock/common/ClockTime
+	common/clock/ClockUserModuleBase
+	common/clock/ClockUserModuleMixin
+	common/clock/ClockUserModuleMixinImpl
+	common/FlowTag
+	common/lifecycle/OperationalMixin
+	common/lifecycle/OperationalMixinImpl
+	common/packet/chunk/EncryptedChunk
+	common/packet/recorder/IPcapWriter
+	common/packet/recorder/PcapngWriter
+	common/packet/tag/SharingRegionTagSet
+	common/packet/tag/SharingTagSet
+	common/PacketEventTag
+	common/socket/SocketBase
+	common/SubmoduleLayout
+	linklayer/base/MacRelayUnitBase
+	linklayer/ethernet/EthernetControlFrameSerializer
+	linklayer/ethernet/modular/EthernetClassifier
+	linklayer/ieee802/Ieee802EpdHeaderSerializer
+	linklayer/ieee802/Ieee802EpdProtocolDissector
+	linklayer/ieee802/Ieee802EpdProtocolPrinter
+	linklayer/ieee8021ae/Ieee8021aeTagHeaderSerializer
+	linklayer/ieee8021q/Ieee8021qSocket
+	linklayer/ieee8021q/Ieee8021qTagEpdProtocolDissector
+	linklayer/ieee8021q/Ieee8021qTagHeaderSerializer
+	physicallayer/common/packetlevel/WirelessSignal
+	physicallayer/ethernet/EthernetPhyHeaderSerializer
+	physicallayer/ethernet/EthernetPhyProtocolDissector
+	protocolelement/checksum/serializer/CrcHeaderSerializer
+	protocolelement/checksum/serializer/FcsHeaderSerializer
+	protocolelement/common/AccessoryProtocol
+	protocolelement/common/HeaderPosition
+	protocolelement/fragmentation/serializer/FragmentNumberHeaderSerializer
+	protocolelement/ordering/SequenceNumberHeaderSerializer
+	protocolelement/ordering/SequenceNumberPacketClassifierFunction
+	routing/dsdv/DsdvHelloSerializer
+	routing/eigrp/EigrpDeviceConfigurator
+	routing/eigrp/EigrpDual
+	routing/eigrp/EigrpDualStack
+	routing/eigrp/messages/EigrpMsgReq
+	routing/eigrp/pdms/EigrpMetricHelper
+	routing/eigrp/pdms/EigrpPrint
+	routing/eigrp/tables/EigrpDisabledInterfaces
+	routing/eigrp/tables/EigrpNeighborTable
+	routing/eigrp/tables/EigrpNetworkTable
+	routing/eigrp/tables/EigrpRoute
+	routing/eigrp/tables/EigrpTopologyTable
+	
+	Refactored C++ classes
+	======================
+	common/int128 -> common/Int128
+	common/NetworkCommunicationFingerprintCalculator -> common/FingerprintCalculator
+	linklayer/ethernet/EthernetHeaderSerializer -> linklayer/ethernet/EthernetMacHeaderSerializer
+	linklayer/ethernet/EthernetProtocolDissector -> linklayer/ethernet/EthernetMacProtocolDissector
+	linklayer/ethernet/EthernetProtocolPrinter -> linklayer/ethernet/EthernetMacProtocolPrinter
+	
+	Removed C++ classes
+	===================
+	common/packet/recorder/PacketDump
+	common/packet/tag/RegionTagSet
+	linklayer/ieee80211/llc/Ieee80211EtherTypeHeaderSerializer
+	linklayer/ieee80211/llc/Ieee80211EtherTypeProtocolDissector
+	linklayer/ieee80211/llc/Ieee80211EtherTypeProtocolPrinter
+	
+	Added MSG classes
+	=================
+	common/DirectionTag.msg: DirectionTag
+	common/FlowTag.msg: FlowTag
+	common/IdentityTag.msg: IdentityTag
+	common/packet/chunk/Chunk.msg: EmptyChunk
+	common/packet/chunk/Chunk.msg: EncryptedChunk
+	common/PacketEventTag.msg: PacketEvent
+	common/PacketEventTag.msg: PacketEventTag
+	common/PacketEventTag.msg: PacketQueuedEvent
+	common/PacketEventTag.msg: PacketTransmittedEvent
+	common/socket/SocketCommand.msg: SocketBindCommand
+	common/socket/SocketCommand.msg: SocketCloseCommand
+	common/socket/SocketCommand.msg: SocketClosedIndication
+	common/socket/SocketCommand.msg: SocketCommandBase
+	common/socket/SocketCommand.msg: SocketDestroyCommand
+	common/TimeTag.msg: DelayingTimeTag
+	common/TimeTag.msg: ElapsedTimeTag
+	common/TimeTag.msg: ProcessingTimeTag
+	common/TimeTag.msg: PropagationTimeTag
+	common/TimeTag.msg: QueueingTimeTag
+	common/TimeTag.msg: TimeTagBase
+	common/TimeTag.msg: TransmissionTimeTag
+	linklayer/ethernet/EthernetMacHeader.msg: EthernetFragmentFcs
+	linklayer/ieee802/Ieee802EpdHeader.msg: Ieee802EpdHeader
+	linklayer/ieee8021ae/Ieee8021aeTagHeader.msg: Ieee8021aeTagEpdHeader
+	linklayer/ieee8021ae/Ieee8021aeTagHeader.msg: Ieee8021aeTagTpidHeader
+	linklayer/ieee8021q/Ieee8021qCommand.msg: Ieee8021qBindCommand
+	physicallayer/ethernet/EthernetPhyHeader.msg: EthernetFragmentPhyHeader
+	physicallayer/ethernet/EthernetPhyHeader.msg: EthernetPhyHeaderBase
+	protocolelement/acknowledgement/AcknowledgeHeader.msg: AcknowledgeHeader
+	protocolelement/aggregation/header/SubpacketLengthHeader.msg: SubpacketLengthHeader
+	protocolelement/checksum/header/CrcHeader.msg: CrcHeader
+	protocolelement/checksum/header/FcsHeader.msg: FcsHeader
+	protocolelement/dispatching/ProtocolHeader.msg: ProtocolHeader
+	protocolelement/forwarding/HopLimitHeader.msg: HopLimitHeader
+	protocolelement/fragmentation/header/FragmentNumberHeader.msg: FragmentNumberHeader
+	protocolelement/fragmentation/tag/FragmentTag.msg: FragmentTag
+	protocolelement/ordering/SequenceNumberHeader.msg: SequenceNumberHeader
+	protocolelement/selectivity/DestinationL3AddressHeader.msg: DestinationL3AddressHeader
+	protocolelement/selectivity/DestinationMacAddressHeader.msg: DestinationMacAddressHeader
+	protocolelement/selectivity/DestinationPortHeader.msg: DestinationPortHeader
+	queueing/common/ProgressTag.msg: ProgressTag
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv4Ack
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv4Hello
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv4Message
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv4Query
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv4Reply
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv4Update
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Ack
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Hello
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Message
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Query
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Reply
+	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Update
+	routing/eigrp/messages/EigrpMessage.msg: EigrpMessage
+	
+	Refactored MSG classes
+	======================
+	linklayer/ethernet/EtherFrame.msg: EthernetControlFrame -> linklayer/ethernet/EthernetControlFrame.msg: EthernetControlFrameBase
+	linklayer/ethernet/EtherFrame.msg: EthernetPauseFrame -> linklayer/ethernet/EthernetControlFrame.msg: EthernetPauseFrame
+	linklayer/ethernet/EthernetMacHeader.msg: EthernetMacAddressFields
+	linklayer/ethernet/EthernetMacHeader.msg: EthernetTypeOrLengthField
+	linklayer/ethernet/EtherPhyFrame.msg: EthernetPhyHeader -> physicallayer/ethernet/EthernetPhyHeader.msg: EthernetPhyHeader
+	linklayer/ieee8021q/Ieee8021qHeader.msg: Ieee8021qHeader -> linklayer/ieee8021q/Ieee8021qTagHeader.msg: Ieee8021qTagEpdHeader
+	linklayer/ieee8021q/Ieee8021qHeader.msg: Ieee8021qHeader -> linklayer/ieee8021q/Ieee8021qTagHeader.msg: Ieee8021qTagTpidHeader
+	linklayer/ieee8022/Ieee8022LlcHeader.msg: Ieee8022LlcSnapHeader -> linklayer/ieee8022/Ieee8022SnapHeader.msg: Ieee8022LlcSnapHeader
+	linklayer/ieee8022/Ieee8022LlcHeader.msg: Ieee8022LlcSnapHeader -> linklayer/ieee8022/Ieee8022SnapHeader.msg: Ieee8022SnapHeader
+	
+	Removed MSG classes
+	===================
+	linklayer/ethernet/EthernetCommand.msg: EthernetCloseCommand
+	linklayer/ethernet/EthernetCommand.msg: EthernetCommandBase
+	linklayer/ethernet/EthernetCommand.msg: EthernetDestroyCommand
+	linklayer/ethernet/EthernetCommand.msg: EthernetSocketClosedIndication
+	linklayer/ieee80211/llc/Ieee80211EtherTypeHeader.msg: Ieee80211EtherTypeHeader
+	linklayer/ieee8022/Ieee8022LlcSocketCommand.msg: Ieee8022LlcSocketCloseCommand
+	linklayer/ieee8022/Ieee8022LlcSocketCommand.msg: Ieee8022LlcSocketClosedIndication
+	linklayer/ieee8022/Ieee8022LlcSocketCommand.msg: Ieee8022LlcSocketCommand
+	linklayer/ieee8022/Ieee8022LlcSocketCommand.msg: Ieee8022LlcSocketDestroyCommand

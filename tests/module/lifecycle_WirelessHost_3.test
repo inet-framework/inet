@@ -42,7 +42,7 @@ import inet.test.moduletest.lib.*;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.status.NodeStatus;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 network Test

@@ -17,11 +17,11 @@
 
 package inet.tutorials.protocol;
 
-import inet.protocol.checksum.FcsHeaderChecker;
-import inet.protocol.checksum.FcsHeaderInserter;
-import inet.protocol.common.InterPacketGap;
-import inet.protocol.transceiver.PacketReceiver;
-import inet.protocol.transceiver.PacketTransmitter;
+import inet.protocolelement.checksum.FcsHeaderChecker;
+import inet.protocolelement.checksum.FcsHeaderInserter;
+import inet.protocolelement.common.InterpacketGapInserter;
+import inet.protocolelement.transceiver.PacketReceiver;
+import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.server.InstantServer;
 import inet.queueing.sink.PassivePacketSink;
@@ -46,7 +46,7 @@ module ClientHost5
         fcsInserter: FcsHeaderInserter {
             @display("p=150,400");
         }
-        interPacketGap: InterPacketGap {
+        InterpacketGapInserter: InterpacketGapInserter {
             @display("p=150,500");
         }
         transmitter: PacketTransmitter {
@@ -56,8 +56,8 @@ module ClientHost5
         app.out --> queue.in;
         queue.out --> server.in;
         server.out --> fcsInserter.in;
-        fcsInserter.out --> interPacketGap.in;
-        interPacketGap.out --> transmitter.in;
+        fcsInserter.out --> InterpacketGapInserter.in;
+        InterpacketGapInserter.out --> transmitter.in;
         transmitter.out --> out;
 }
 

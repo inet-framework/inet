@@ -39,8 +39,8 @@
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/common/WirelessGetNeig.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 

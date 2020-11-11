@@ -16,7 +16,7 @@
 #ifndef LORA_LORAGWMAC_H_
 #define LORA_LORAGWMAC_H_
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/common/ModuleAccess.h"

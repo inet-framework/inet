@@ -1,5 +1,5 @@
 %description:
-EtherMac and EtherMacFullDuplex modules: tests IFG in full duplex mode
+EthernetCsmaMac and EthernetMac modules: tests IFG in full duplex mode
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]

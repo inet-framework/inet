@@ -19,11 +19,12 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/physicallayer/common/packetlevel/Interference.h"
-#include "inet/physicallayer/common/packetlevel/Radio.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
+//#include "inet/physicallayer/wireless/common/radio/packetlevel/Interference.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
 
 
 namespace inet {

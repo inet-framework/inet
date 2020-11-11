@@ -21,11 +21,11 @@
 #include "inet/common/LayeredProtocolBase.h"
 //#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/common/packetlevel/Radio.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 #include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
 #include "inet/lora/lorabase/LoRaTagInfo_m.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 //#include "LoRaMacFrame_m.h"
 

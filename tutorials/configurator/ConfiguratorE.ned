@@ -17,12 +17,12 @@ package inet.tutorials.configurator;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 
@@ -54,7 +54,7 @@ network ConfiguratorE
         area3router: Router {
             @display("p=780.8625,535.8375");
         }
-        area3Switch: EtherSwitch {
+        area3Switch: EthernetSwitch {
             @display("p=805.6125,665.775");
         }
         configurator: Ipv4NetworkConfigurator {

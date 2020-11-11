@@ -19,10 +19,10 @@
 
 package inet.examples.ethernet.lans;
 
-import inet.linklayer.ethernet.EtherHub;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
-import inet.physicallayer.common.packetlevel.WireJunction;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -48,16 +48,16 @@ module SmallLAN
     gates:
         inout ethg;
     submodules:
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 numEthInterfaces = 2;
                 eth[1].duplexMode = false;
                 @display("p=625,100");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             @display("p=400,100");
         }
-        host[h]: EtherHost {
+        host[h]: EthernetHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -83,23 +83,23 @@ module MediumLAN
     gates:
         inout ethg;
     submodules:
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 numEthInterfaces = n+2;
                 eth[0].duplexMode = false;
                 @display("p=625,100");
         }
-        host[n]: EtherHost {
+        host[n]: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=100,200,row,150");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             parameters:
                 @display("p=625,300");
         }
-        hhost[h]: EtherHost {
+        hhost[h]: EthernetHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -142,22 +142,22 @@ module LargeLAN
                 datarate = 10Mbps;
         }
     submodules:
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 eth[0].duplexMode = false;
                 @display("p=450,100");
         }
-        host[n]: EtherHost {
+        host[n]: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=100,200,row,100");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             parameters:
                 @display("p=900,100");
         }
-        hhost[h]: EtherHost {
+        hhost[h]: EthernetHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -167,7 +167,7 @@ module LargeLAN
             parameters:
                 @display("p=,,r,50");
         }
-        bhost[b]: EtherHost {
+        bhost[b]: EthernetHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -227,7 +227,7 @@ network LargeNet
                 datarate = 1Gbps;
         }
     submodules:
-        switchBB[n]: EtherSwitch {
+        switchBB[n]: EthernetSwitch {
             @display("p=200,180,row,200");
         }
         slanBB[n*bbs]: SmallLAN {
@@ -239,10 +239,10 @@ network LargeNet
         llanBB[n*bbl]: LargeLAN {
             @display("p=200,280,row,200");
         }
-        switchA: EtherSwitch {
+        switchA: EthernetSwitch {
             @display("p=400,580");
         }
-        serverA: EtherHost {
+        serverA: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -257,10 +257,10 @@ network LargeNet
         llanA[al]: LargeLAN {
             @display("p=475,680");
         }
-        switchB: EtherSwitch {
+        switchB: EthernetSwitch {
             @display("p=700,380");
         }
-        serverB: EtherHost {
+        serverB: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -275,10 +275,10 @@ network LargeNet
         llanB[bl]: LargeLAN {
             @display("p=775,480");
         }
-        switchC: EtherSwitch {
+        switchC: EthernetSwitch {
             @display("p=1000,580");
         }
-        serverC: EtherHost {
+        serverC: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -293,10 +293,10 @@ network LargeNet
         llanC[cl]: LargeLAN {
             @display("p=1075,680");
         }
-        switchD: EtherSwitch {
+        switchD: EthernetSwitch {
             @display("p=1300,380");
         }
-        serverD: EtherHost {
+        serverD: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;

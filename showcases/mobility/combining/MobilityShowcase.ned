@@ -4,7 +4,7 @@ import inet.node.inet.StandardHost;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
 
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedMultiVisualizer;
 
 

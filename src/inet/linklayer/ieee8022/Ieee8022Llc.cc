@@ -43,7 +43,7 @@ void Ieee8022Llc::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
+        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
             //register service and protocol
             registerService(Protocol::ieee8022llc, gate("upperLayerIn"), gate("upperLayerOut"));
         }

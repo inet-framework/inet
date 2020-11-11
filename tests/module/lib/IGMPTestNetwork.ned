@@ -1,6 +1,6 @@
 package inet.test.moduletest.lib;
 
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import ned.DatarateChannel;
 import inet.node.inet.StandardHost;
 import inet.node.inet.Router;
@@ -38,7 +38,7 @@ network IGMPTestNetwork
             @display("p=384,152");
             multicastForwarding = true;
         }
-        etherSwitch: EtherSwitch {
+        etherSwitch: EthernetSwitch {
             @display("p=221,151");
         }
         // Non-querier router

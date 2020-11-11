@@ -18,9 +18,9 @@
 #include "inet/lora/loraphy/LoRaReceiver.h"
 #include "inet/lora/loraphy/LoRaReception.h"
 #include "inet/lora/loraphy/LoRaTransmission.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/lora/loraphy/LoRaRadio.h"
 
 namespace inet {

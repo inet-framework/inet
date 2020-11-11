@@ -13,6 +13,16 @@ set -e # make the script exit with error if any executed command exits with erro
 
 export PATH="/root/omnetpp-6.0pre9-$TARGET_PLATFORM/bin:$PATH"
 
+# HACK: When cross-building to macOS, the linker complains about this
+# being a missing search directory, so let's make sure it exists...
+# (Just to silence that warning...)
+mkdir -p /root/omnetpp-6.0pre9-macosx/tools/macosx/lib
+# MEGA HACK: When cross-building to Windows, make complains about this
+# being a missing executable. Let's make sure it exists, but it doesn't
+# matter exactly what it does, as it's only used to translate
+# OMNETPP_IMAGE_PATH, which we don't use for testing at all.
+ln -s /usr/bin/echo /usr/local/bin/cygpath
+
 # this is where the cloned INET repo is mounted into the container
 cd $GITHUB_WORKSPACE
 

@@ -15,7 +15,7 @@
 
 package inet.lora.loraphy;
 
-import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
+import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase;
 
 module LoRaTransmitter extends NarrowbandTransmitterBase
 {

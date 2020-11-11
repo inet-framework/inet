@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <omnetpp/cobject.h>
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
 #include "inet/lora/loraphy/LoRaModulation.h"
 #include "inet/lora/loraphy/LoraMode.h"
 

@@ -15,7 +15,7 @@
 
 package inet.lora.loraphy;
 
-import inet.physicallayer.contract.packetlevel.IAnalogModel;
+import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
 
 //
 // This analog model computes with scalar analog power representation. In other

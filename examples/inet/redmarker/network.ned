@@ -18,7 +18,7 @@ package inet.examples.inet.redmarker;
 
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-//import inet.node.ethernet.EtherSwitch;
+//import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 //import inet.node.dmpr.DmprRouter;
 //import inet.nodes.inet.Router;

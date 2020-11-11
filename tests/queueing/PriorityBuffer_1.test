@@ -11,7 +11,7 @@ prioritizing over the packet queues.
 
 import inet.queueing.buffer.PriorityBuffer;
 import inet.queueing.classifier.PacketClassifier;
-import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.sink.ActivePacketSink;
 import inet.queueing.source.ActivePacketSource;

@@ -17,7 +17,7 @@
 #ifndef LORAPHY_LORANEIGHBORCACHE_H_
 #define LORAPHY_LORANEIGHBORCACHE_H_
 
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 
 #include <set>
 #include <vector>

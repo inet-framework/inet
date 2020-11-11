@@ -3,7 +3,7 @@ This test checks the correctness of dimensional signal power representation with
 
 %includes:
 #include "inet/common/math/Functions.h"
-#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalTransmitterBase.h"
 
 %global:
 

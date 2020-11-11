@@ -15,7 +15,7 @@
 
 package inet.lora.loraphy;
 
-import inet.physicallayer.contract.packetlevel.INeighborCache;
+import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
 
 //
 // This neighbor cache model maintains a separate periodically updated neighbor

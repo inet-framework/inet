@@ -19,7 +19,7 @@
 
 package inet.examples.ethernet.arptest2;
 
-import inet.linklayer.ethernet.EtherHub;
+import inet.node.ethernet.EthernetHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.Router;
@@ -78,10 +78,10 @@ network ARPTest
             numEthInterfaces = 1;
             @display("p=775,200");
         }
-        hub1: EtherHub {
+        hub1: EthernetHub {
             @display("p=475,300;b=500,5");
         }
-        hub2: EtherHub {
+        hub2: EthernetHub {
             @display("p=475,100;b=350,5");
         }
         configurator: Ipv4NetworkConfigurator {

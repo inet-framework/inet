@@ -19,10 +19,10 @@
 #define __INET_IEEE80211SYMBOLMODELTEST_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoderModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmEncoderModule.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
 
 using namespace inet::physicallayer;
 

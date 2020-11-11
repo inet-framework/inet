@@ -17,7 +17,7 @@ package inet.showcases.wireless.coexistence;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.wireless.Probe;
-import inet.physicallayer.common.packetlevel.RadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network CoexistenceShowcase

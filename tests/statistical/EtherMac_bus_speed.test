@@ -1,7 +1,7 @@
 %description:
 Testing Ethernet communication on EtherBus with 10MBps.
 The network contains two hosts that communicate with each other.
-All hosts use EtherMac implementation with half duplex mode.
+All hosts use EthernetCsmaMac implementation with half duplex mode.
 All hosts have same ethernet configurations.
 All hosts send requests and also reply to requests sent to them.
 
@@ -15,10 +15,10 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.linklayer.ethernet.EtherBus;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHost;
 import ned.DatarateChannel;
 
-module EtherHostQ extends EtherHost
+module EtherHostQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";

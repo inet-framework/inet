@@ -17,9 +17,9 @@
 #define LORAPHY_LORAANALOGMODEL_H_
 
 #include "inet/lora/loraphy/LoRaBandListening.h"
-#include "inet/physicallayer/base/packetlevel/ScalarAnalogModelBase.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
 
 
 namespace inet {

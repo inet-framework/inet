@@ -17,7 +17,7 @@
 #define __LORANETWORK_NETWORKSERVERAPP_H_
 
 #include <omnetpp.h>
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include <vector>
 #include <tuple>
 #include <algorithm>

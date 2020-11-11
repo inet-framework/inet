@@ -19,7 +19,7 @@
 #include "inet/lora/loraphy/LoRaRadio.h"
 #include "inet/lora/loraphy/LoRaModulation.h"
 #include "inet/lora/loraphy/LoRaTransmission.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/lora/lorabase/LoRaMacFrame_m.h"
 
 namespace inet {

@@ -1,7 +1,7 @@
 %description:
-Testing Ethernet communication on EtherHub with 100MBps, with disconnecting and reconnecting some hosts.
+Testing Ethernet communication on EthernetHub with 100MBps, with disconnecting and reconnecting some hosts.
 Simulation has 5 pairs of hosts that communicate with each other.
-All hosts use EtherMac implementation with half duplex mode.
+All hosts use EthernetCsmaMac implementation with half duplex mode.
 All hosts have same ethernet configurations.
 All hosts send requests and also reply to requests sent to them.
 
@@ -14,13 +14,13 @@ checks:
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
-import inet.linklayer.ethernet.EtherHub;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHost;
 import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
 
-module EtherHostQ extends EtherHost
+module EtherHostQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";
@@ -78,7 +78,7 @@ network SpeedTest
             parameters:
                 @display("p=210,350");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             parameters:
                 @display("p=140,210");
             gates:

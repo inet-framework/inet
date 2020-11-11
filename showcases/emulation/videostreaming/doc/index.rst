@@ -59,7 +59,7 @@ The network for the simulation is the following:
    :width: 90%
    :align: center
 
-It contains two :ned:`StandardHost`'s. Each host is connected by an :ned:`EtherSwitch` to a :ned:`Router`.
+It contains two :ned:`StandardHost`'s. Each host is connected by an :ned:`EthernetSwitch` to a :ned:`Router`.
 
 The sender VLC application will stream the video to the address of the router's ``eth0`` in the simulation.
 The router will perform network address translation to rewrite the destination address to the address of

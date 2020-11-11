@@ -7,8 +7,8 @@ Tests signal transmitter and signal receiver.
 import ned.DatarateChannel;
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.transceiver.PacketTransmitter;
-import inet.protocol.transceiver.PacketReceiver;
+import inet.protocolelement.transceiver.PacketTransmitter;
+import inet.protocolelement.transceiver.PacketReceiver;
 
 network TestTransceiver
 {

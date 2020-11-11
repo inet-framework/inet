@@ -6,8 +6,8 @@ Tests FCS checksum.
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.checksum.FcsHeaderInserter;
-import inet.protocol.checksum.FcsHeaderChecker;
+import inet.protocolelement.checksum.FcsHeaderInserter;
+import inet.protocolelement.checksum.FcsHeaderChecker;
 
 network TestFcs
 {

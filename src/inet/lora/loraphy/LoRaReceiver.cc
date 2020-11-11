@@ -15,8 +15,8 @@
 
 #include "inet/lora/loraphy/LoRaReceiver.h"
 #include "inet/lora/loraapp/SimpleLoRaApp.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/lora/loraphy/LoRaPhyPreamble_m.h"

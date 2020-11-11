@@ -4,7 +4,7 @@
 package inet.icancloud.Architecture.Aggregation;
 
 import inet.icancloud.Architecture.Node.INode;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import ned.DatarateChannel;
 
 channel ethernet_bladeChannel extends DatarateChannel
@@ -37,7 +37,7 @@ module Blade
                 @display("i=old/drive1;p=72,40,row,50");
         }
         // Switch
-        switch: EtherSwitch{
+        switch: EthernetSwitch{
             parameters:
                 @display("i=icons/switch2;p=220,150");
         }

@@ -1,6 +1,6 @@
 %description:
 Tests Ethernet communication via switch.
-All hosts use EtherMac implementation with external queue.
+All hosts use EthernetCsmaMac implementation with external queue.
 Simulation has pairs of hosts that communicate with each other via only one switch.
 Both hosts in pair have same ethernet configurations.
 Both hosts in pair are source and sink, too.
@@ -18,10 +18,10 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import ned.DatarateChannel;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
 
-module EtherHostQ extends EtherHost
+module EtherHostQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";
@@ -74,7 +74,7 @@ network SpeedTest
             parameters:
                 @display("p=210,210");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=140,140");
             gates:

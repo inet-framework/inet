@@ -1,7 +1,7 @@
 package inet.tests.ethernet;
 
-import inet.linklayer.ethernet.EtherHub;
-import inet.node.ethernet.EtherHost2;
+import inet.node.ethernet.EthernetHub;
+import inet.node.ethernet.EthernetHost2;
 import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
@@ -9,19 +9,19 @@ import ned.DatarateChannel;
 network HostsWithHub
 {
     submodules:
-        hostA: EtherHost2 {
+        hostA: EthernetHost2 {
             parameters:
                 @display("p=80,200");
         }
-        hostB: EtherHost2 {
+        hostB: EthernetHost2 {
             parameters:
                 @display("p=200,200");
         }
-        hostC: EtherHost2 {
+        hostC: EthernetHost2 {
             parameters:
                 @display("p=320,200");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             parameters:
                 @display("p=200,80");
         }

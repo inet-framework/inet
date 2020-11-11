@@ -20,12 +20,12 @@
 
 package inet.examples.ethernet.lans;
 
-import inet.linklayer.ethernet.EtherHub;
+import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
-import inet.physicallayer.common.packetlevel.WireJunction;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
 
 
@@ -64,73 +64,73 @@ network MixedLAN
             parameters:
                 @display("p=753,307");
         }
-        busHostA: EtherHost {
+        busHostA: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=126,200");
         }
-        busHostB: EtherHost {
+        busHostB: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=258,200");
         }
-        busHostC: EtherHost {
+        busHostC: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=514,400");
         }
-        busHostD: EtherHost {
+        busHostD: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=753,400");
         }
-        switchHostA: EtherHost {
+        switchHostA: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=100,500");
         }
-        switchHostB: EtherHost {
+        switchHostB: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,500");
         }
-        switchHostC: EtherHost {
+        switchHostC: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=400,500");
         }
-        switchHostD: EtherHost {
+        switchHostD: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=550,500");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 eth[4].duplexMode = false;
                 @display("p=344,400");
             gates:
                 ethg[5];
         }
-        hubHostA: EtherHost {
+        hubHostA: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=500,100");
         }
-        hubHostB: EtherHost {
+        hubHostB: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=650,100");
         }
-        hubHostC: EtherHost {
+        hubHostC: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=800,100");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             parameters:
                 @display("p=650,200");
         }
@@ -169,11 +169,11 @@ network MixedLAN
 network TwoHosts
 {
     submodules:
-        hostA: EtherHost {
+        hostA: EthernetHost {
             parameters:
                 @display("p=100,100");
         }
-        hostB: EtherHost {
+        hostB: EthernetHost {
             parameters:
                 @display("p=300,100");
         }
@@ -194,31 +194,31 @@ network SwitchedLAN
             datarate = 100Mbps;
         }
     submodules:
-        hostA: EtherHost {
+        hostA: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,100");
         }
-        hostB: EtherHost {
+        hostB: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=400,200");
         }
-        hostC: EtherHost {
+        hostC: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,300");
         }
-        hostD: EtherHost {
+        hostD: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=100,200");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=250,200");
             gates:
@@ -238,27 +238,27 @@ network SwitchedLAN
 network HubLAN
 {
     submodules:
-        hostA: EtherHost {
+        hostA: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=250,100");
         }
-        hostB: EtherHost {
+        hostB: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=400,200");
         }
-        hostC: EtherHost {
+        hostC: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=250,300");
         }
-        hostD: EtherHost {
+        hostD: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=100,200");
         }
-        hub: EtherHub {
+        hub: EthernetHub {
             parameters:
                 @display("p=250,200");
             gates:
@@ -283,22 +283,22 @@ network BusLAN
             length = 1cm;
         }
     submodules:
-        hostA: EtherHost {
+        hostA: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=100,111");
         }
-        hostB: EtherHost {
+        hostB: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=250,111");
         }
-        hostC: EtherHost {
+        hostC: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=400,111");
         }
-        hostD: EtherHost {
+        hostD: EthernetHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=550,111");
@@ -340,31 +340,31 @@ network SwitchedDuplexLAN
         }
 
     submodules:
-        hostA: EtherHost {
+        hostA: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,100");
         }
-        hostB: EtherHost {
+        hostB: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=400,200");
         }
-        hostC: EtherHost {
+        hostC: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,300");
         }
-        hostD: EtherHost {
+        hostD: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=100,200");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=250,200");
             gates:

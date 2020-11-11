@@ -1,7 +1,7 @@
 
 package inet.examples.ospfv2.areas;
 
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 import ned.DatarateChannel;
@@ -26,7 +26,7 @@ module OneNetArea
             gates:
                 ethg[1];
         }
-        N3: EtherSwitch {
+        N3: EthernetSwitch {
             parameters:
                 @display("p=400,110");
             gates:

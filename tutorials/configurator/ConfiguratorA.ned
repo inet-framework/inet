@@ -18,7 +18,7 @@ package inet.tutorials.configurator;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
@@ -67,13 +67,13 @@ network ConfiguratorA
         host8: StandardHost {
             @display("p=1430.4075,736.3875");
         }
-        switch0: EtherSwitch {
+        switch0: EthernetSwitch {
             @display("p=518.4975,574.9875");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=1162.08,574.9875");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=821.1225,225.95999");
         }
         visualizer: IntegratedCanvasVisualizer {

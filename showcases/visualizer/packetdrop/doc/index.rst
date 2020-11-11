@@ -81,7 +81,7 @@ queue:
    :width: 80%
    :align: center
 
-It contains a :ned:`StandardHost` named ``source``, an :ned:`EtherSwitch`, a
+It contains a :ned:`StandardHost` named ``source``, an :ned:`EthernetSwitch`, a
 :ned:`Router`, an :ned:`AccessPoint`, and a :ned:`WirelessHost` named
 ``destination``. The ``source`` is configured to send a stream of UDP
 packets to ``destination``. The packet stream starts at two seconds

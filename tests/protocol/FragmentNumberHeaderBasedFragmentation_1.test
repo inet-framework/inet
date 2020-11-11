@@ -6,8 +6,8 @@ Tests FragmentNumberHeader based fragmentation.*?
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.fragmentation.FragmentNumberHeaderBasedFragmenter;
-import inet.protocol.fragmentation.FragmentNumberHeaderBasedDefragmenter;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedFragmenter;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedDefragmenter;
 
 network TestFragmentNumberHeaderBasedFragmentation
 {

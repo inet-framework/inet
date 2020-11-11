@@ -1,6 +1,6 @@
 %description:
 Testing Ethernet communication between two hosts.
-All hosts use EtherMacFullDuplex implementation.
+All hosts use EthernetMac implementation.
 Both hosts in pair have same ethernet configurations.
 Both hosts in pair are source and sink, too.
 
@@ -18,14 +18,14 @@ checks:
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHost;
 
 
-module EtherHostFullDuplexQ extends EtherHost
+module EtherHostFullDuplexQ extends EthernetHost
 {
     parameters:
         queueType = "DropTailQueue";
-        macType = "EtherMacFullDuplex";
+        macType = "EthernetMac";
 }
 
 network SpeedTest

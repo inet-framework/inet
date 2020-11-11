@@ -19,7 +19,7 @@ package inet.examples.voipstream.VoIPStreamTest;
 
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
@@ -45,7 +45,7 @@ network VoIPStreamTest
             parameters:
                 @display("p=71,64;i=device/laptop_l");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=202,156;i=device/switch");
         }

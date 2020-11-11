@@ -21,7 +21,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100G;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
@@ -40,7 +40,7 @@ network Hierarchical
             gates:
                 inout ethg[];
             submodules:
-                switch: EtherSwitch;
+                switch: EthernetSwitch;
                 host[numHosts]: StandardHost;
             connections:
                 for i=0..numHosts-1 {

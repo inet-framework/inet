@@ -22,7 +22,7 @@ import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10G;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
@@ -41,7 +41,7 @@ network Hierarchical99
             gates:
                 inout ethg[];
             submodules:
-                switch: EtherSwitch {
+                switch: EthernetSwitch {
                     @display("p=250,100");
                 }
                 host1: StandardHost {

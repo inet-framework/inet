@@ -17,10 +17,10 @@ package inet.showcases.visualizer.routingtable;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.aodv.AodvRouter;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
 network RoutingTableVisualizationDisplayingAllShowcase
@@ -64,7 +64,7 @@ network RoutingTableVisualizationFilteringShowcase
         host4: StandardHost {
             @display("p=634.88,382.72");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             @display("p=299.52,302.08");
         }
         router: Router {

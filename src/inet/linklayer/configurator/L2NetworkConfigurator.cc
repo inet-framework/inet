@@ -69,7 +69,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
         node->module = node->getModule();
         cModule *ifTable = node->module->getSubmodule("interfaceTable");
 
-        // EtherHost has no InterfaceTable
+        // EthernetHost has no InterfaceTable
         if (ifTable) //todo:
             node->interfaceTable = dynamic_cast<IInterfaceTable *>(ifTable);
     }

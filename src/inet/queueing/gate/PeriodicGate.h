@@ -18,7 +18,7 @@
 #ifndef __INET_PERIODICGATE_H
 #define __INET_PERIODICGATE_H
 
-#include "inet/common/base/ClockUserModuleMixin.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketGateBase.h"
 
 namespace inet {

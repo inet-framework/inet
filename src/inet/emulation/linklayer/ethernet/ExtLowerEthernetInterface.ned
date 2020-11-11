@@ -19,7 +19,7 @@ package inet.emulation.linklayer.ethernet;
 
 import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.IEtherEncap;
+import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 
 //
 // This module provides an Ethernet network interface suitable for emulation.
@@ -35,7 +35,7 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
         output cutthroughOut @loose;
         inout phys @loose;
     submodules:
-        encap: <default("EtherEncap")> like IEtherEncap {
+        encap: <default("EthernetEncapsulation")> like IEthernetEncapsulation {
             parameters:
                 @display("p=300,100");
         }

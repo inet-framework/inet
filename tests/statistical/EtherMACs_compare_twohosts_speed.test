@@ -4,7 +4,7 @@ The hosts have same ethernet configurations in pairs.
 
 variations:
  - queue: internal / external
- - implementation: EtherMac / EtherMacFullDuplex
+ - implementation: EthernetCsmaMac / EthernetMac
 
 compare results of variations and checks:
  - the number of sent packets are equals (one packet different is acceptable, because the first event of endtime is processed.)
@@ -18,7 +18,7 @@ compare results of variations and checks:
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EthernetHost;
 
 network CompareMACs
 {
@@ -30,44 +30,44 @@ network CompareMACs
         }
 
     submodules:
-        host_iq_1_F_A: EtherHost {
+        host_iq_1_F_A: EthernetHost {
             parameters:
                 @display("p=70,70");
         }
-        host_iq_1_F_B: EtherHost {
+        host_iq_1_F_B: EthernetHost {
             parameters:
                 @display("p=210,70");
         }
-        host_eq_1_F_A: EtherHost {
+        host_eq_1_F_A: EthernetHost {
             parameters:
                 queueType = "DropTailQueue";
                 @display("p=70,140");
         }
-        host_eq_1_F_B: EtherHost {
+        host_eq_1_F_B: EthernetHost {
             parameters:
                 queueType = "DropTailQueue";
                 @display("p=210,140");
         }
-        host_iq_2_F_A: EtherHost {
+        host_iq_2_F_A: EthernetHost {
             parameters:
-                macType = "EtherMacFullDuplex";
+                macType = "EthernetMac";
                 @display("p=70,210");
         }
-        host_iq_2_F_B: EtherHost {
+        host_iq_2_F_B: EthernetHost {
             parameters:
-                macType = "EtherMacFullDuplex";
+                macType = "EthernetMac";
                 @display("p=210,210");
         }
-        host_eq_2_F_A: EtherHost {
+        host_eq_2_F_A: EthernetHost {
             parameters:
                 queueType = "DropTailQueue";
-                macType = "EtherMacFullDuplex";
+                macType = "EthernetMac";
                 @display("p=70,280");
         }
-        host_eq_2_F_B: EtherHost {
+        host_eq_2_F_B: EthernetHost {
             parameters:
                 queueType = "DropTailQueue";
-                macType = "EtherMacFullDuplex";
+                macType = "EthernetMac";
                 @display("p=210,280");
         }
 

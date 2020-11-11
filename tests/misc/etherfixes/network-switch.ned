@@ -1,6 +1,6 @@
 
-import inet.node.ethernet.EtherHost2;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetHost2;
+import inet.node.ethernet.EthernetSwitch;
 import ned.DatarateChannel;
 
 
@@ -9,19 +9,19 @@ network HostsWithSwitch
     @display("bgl=2");
     types:
     submodules:
-        hostA: EtherHost2 {
+        hostA: EthernetHost2 {
             parameters:
                 @display("p=113,43");
         }
-        hostB: EtherHost2 {
+        hostB: EthernetHost2 {
             parameters:
                 @display("p=106,136");
         }
-        hostC: EtherHost2 {
+        hostC: EthernetHost2 {
             parameters:
                 @display("p=397,68");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             parameters:
                 @display("p=260,79");
         }

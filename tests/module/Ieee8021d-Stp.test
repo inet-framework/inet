@@ -6,8 +6,8 @@ Test Rstp treebuilding
 
 import inet.test.moduletest.lib.*;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
@@ -19,24 +19,24 @@ network LargeNet
         scenarioManager: ScenarioManager;
         l2NetworkConfigurator: L2NetworkConfigurator;
 
-        switch1: EtherSwitch;
-        switch2: EtherSwitch;
-        switch3: EtherSwitch;
-        switch4: EtherSwitch;
-        switch5: EtherSwitch;
-        switch6: EtherSwitch;
-        switch7: EtherSwitch;
-        switch8: EtherSwitch;
-        switch9: EtherSwitch;
-        switch10: EtherSwitch;
-        switch11: EtherSwitch;
+        switch1: EthernetSwitch;
+        switch2: EthernetSwitch;
+        switch3: EthernetSwitch;
+        switch4: EthernetSwitch;
+        switch5: EthernetSwitch;
+        switch6: EthernetSwitch;
+        switch7: EthernetSwitch;
+        switch8: EthernetSwitch;
+        switch9: EthernetSwitch;
+        switch10: EthernetSwitch;
+        switch11: EthernetSwitch;
 
-        host1: EtherHost;
-        host2: EtherHost;
-        host3: EtherHost;
-        host4: EtherHost;
-        host5: EtherHost;
-        host6: EtherHost;
+        host1: EthernetHost;
+        host2: EthernetHost;
+        host3: EthernetHost;
+        host4: EthernetHost;
+        host5: EthernetHost;
+        host6: EthernetHost;
 
     connections:
         switch1.ethg++ <--> Eth1G <--> switch4.ethg++;

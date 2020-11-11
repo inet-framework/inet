@@ -16,8 +16,8 @@
 #ifndef LORAPHY_LORABANDLISTENING_H_
 #define LORAPHY_LORABANDLISTENING_H_
 
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/base/packetlevel/ListeningBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ListeningBase.h"
 
 namespace inet {
 

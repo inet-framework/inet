@@ -23,7 +23,7 @@
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "inet/physicallayer/common/Signal.h"
 #endif // WITH_RADIO
 
 namespace inet {

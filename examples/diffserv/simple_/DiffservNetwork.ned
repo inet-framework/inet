@@ -18,7 +18,7 @@
 package inet.examples.diffserv.simple_;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -60,7 +60,7 @@ network DiffservNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("is=s;p=100,100");
         }
-        etherSwitch: EtherSwitch {
+        etherSwitch: EthernetSwitch {
             @display("p=400,100");
         }
     connections:

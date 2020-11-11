@@ -1,7 +1,7 @@
 %description:
 
-Test shutdown and startup operations on EtherAppClient/EtherAppServer/EtherEncap modules.
-The EtherSwitch, EtherMac modules tested, too.
+Test shutdown and startup operations on EtherAppClient/EtherAppServer/EthernetEncapsulation modules.
+The EthernetSwitch, EthernetCsmaMac modules tested, too.
 
 sender[0] and recip start at down
 
@@ -38,8 +38,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: test.ned
 
 import inet.test.moduletest.lib.*;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
 import inet.common.scenario.ScenarioManager;
 
 
@@ -49,13 +49,13 @@ network Test
         scenarioManager: ScenarioManager {
             @display("p=450,50");
         }
-        sender[2]: EtherHost {
+        sender[2]: EthernetHost {
             @display("p=100,350,r,150");
         }
-        recip: EtherHost {
+        recip: EthernetHost {
             @display("p=500,350");
         }
-        switch: EtherSwitch {
+        switch: EthernetSwitch {
             @display("p=300,180");
         }
 

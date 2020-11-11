@@ -17,7 +17,7 @@ package inet.examples.timing;
 
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 
 network TimingExample extends WiredNetworkBase
@@ -29,10 +29,10 @@ network TimingExample extends WiredNetworkBase
         client2: StandardHost {
             @display("p=300,350");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=500,250");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=700,250");
         }
         server1: StandardHost {

@@ -7,7 +7,7 @@ Testing OSPF routing
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.linklayer.ethernet.EtherHub;
+import inet.node.ethernet.EthernetHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
@@ -34,7 +34,7 @@ network Test1
             gates:
                 ethg[1];
         }
-        N1: EtherHub {
+        N1: EthernetHub {
             parameters:
                 @display("p=184,182");
             gates:
@@ -74,7 +74,7 @@ network Test1
             gates:
                 ethg[2];
         }
-        N2: EtherHub {
+        N2: EthernetHub {
             parameters:
                 @display("p=532,182");
             gates:

@@ -21,9 +21,9 @@
 #include "inet/lora/loraphy/LoRaReception.h"
 #include "inet/lora/loraphy/LoRaTransmission.h"
 #include "inet/lora/loraphy/LoRaTransmitter.h"
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
 #include "inet/lora/lorabase/LoRaMacFrame_m.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common//medium/RadioMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
 
 namespace inet {

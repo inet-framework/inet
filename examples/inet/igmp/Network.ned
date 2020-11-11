@@ -19,7 +19,7 @@ package inet.examples.inet.igmp;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
@@ -45,7 +45,7 @@ network Network
         Carlos: StandardHost {
             @display("p=550,300");
         }
-        etherSwitch: EtherSwitch {
+        etherSwitch: EthernetSwitch {
             @display("p=400,150");
         }
         configurator: Ipv4NetworkConfigurator {
