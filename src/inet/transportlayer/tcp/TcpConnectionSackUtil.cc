@@ -18,8 +18,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <algorithm>    // min,max
 #include <string.h>
+
+#include <algorithm>    // min,max
 
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"

@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/dymo/Dymo.h"
+
 #include "inet/common/INETMath.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -27,7 +29,6 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/routing/dymo/Dymo.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {

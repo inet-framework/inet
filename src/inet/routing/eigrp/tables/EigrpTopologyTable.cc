@@ -23,10 +23,11 @@
  */
 
 //Ipv6 ready - mozny problem s originator (address vs. routerID)!!!
-#include "inet/networklayer/common/L3Address.h"
+#include "inet/routing/eigrp/tables/EigrpTopologyTable.h"
+
 #include <algorithm>
 
-#include "inet/routing/eigrp/tables/EigrpTopologyTable.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 #include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
 namespace inet {

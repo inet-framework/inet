@@ -16,8 +16,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <algorithm>    // min,max
 #include "inet/transportlayer/tcp/flavours/DcTcp.h"
+
+#include <algorithm>    // min,max
+
 #include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {

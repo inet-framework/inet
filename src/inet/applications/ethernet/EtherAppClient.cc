@@ -16,11 +16,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/applications/ethernet/EtherAppClient.h"
+
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-
-#include "inet/applications/ethernet/EtherAppClient.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/common/ModuleAccess.h"

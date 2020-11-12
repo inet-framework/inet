@@ -17,10 +17,11 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
+#include "inet/routing/pim/tables/PimInterfaceTable.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/pim/tables/PimInterfaceTable.h"
 
 namespace inet {
 

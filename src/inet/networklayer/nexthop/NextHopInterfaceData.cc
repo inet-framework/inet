@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+
 #include <algorithm>
 #include <sstream>
-
-#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 
 namespace inet {
 

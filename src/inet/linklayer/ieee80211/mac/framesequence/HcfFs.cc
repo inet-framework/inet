@@ -16,6 +16,7 @@
 //
 
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
+
 #include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/TxOpFs.h"
 

@@ -17,16 +17,18 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <map>
+#include "inet/routing/ospfv2/Ospfv2.h"
+
 #include <memory.h>
 #include <stdlib.h>
+
+#include <map>
 #include <string>
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/routing/ospfv2/Ospfv2.h"
 #include "inet/routing/ospfv2/Ospfv2ConfigReader.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 

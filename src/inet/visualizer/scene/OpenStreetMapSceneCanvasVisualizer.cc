@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/scene/OpenStreetMapSceneCanvasVisualizer.h"
+
+#include "inet/common/ModuleAccess.h"
 
 using namespace inet::osm;
 

@@ -19,6 +19,8 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
+#include "inet/networklayer/ipv4/Icmp.h"
+
 #include <string.h>
 
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -31,7 +33,6 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 

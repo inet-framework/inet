@@ -1,3 +1,5 @@
+#include "inet/transportlayer/sctp/SctpNatHook.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
@@ -7,7 +9,6 @@
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/sctp/SctpNatHook.h"
 
 namespace inet {
 namespace sctp {

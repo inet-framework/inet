@@ -22,6 +22,7 @@
 #include <functional>
 #include <numeric>
 #include <type_traits>
+
 #include "inet/common/math/Point.h"
 
 namespace inet {

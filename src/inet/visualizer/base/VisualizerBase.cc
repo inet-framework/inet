@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/VisualizerBase.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/geometry/shape/Cuboid.h"
@@ -23,7 +25,6 @@
 #include "inet/common/packet/chunk/SliceChunk.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
 

@@ -1,6 +1,7 @@
 
-#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfacePassive.h"
+
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDown.h"
 
 namespace inet {

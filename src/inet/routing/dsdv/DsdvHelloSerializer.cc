@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/dsdv/DsdvHelloSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/dsdv/DsdvHello_m.h"
-#include "inet/routing/dsdv/DsdvHelloSerializer.h"
 
 namespace inet {
 

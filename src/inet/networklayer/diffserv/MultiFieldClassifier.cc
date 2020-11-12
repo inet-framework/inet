@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/diffserv/MultiFieldClassifier.h"
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
-#include "inet/networklayer/diffserv/MultiFieldClassifier.h"
 #include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
 #ifdef WITH_IPv4

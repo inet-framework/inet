@@ -15,13 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulator.h"
+
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
 #include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 
 namespace inet {
 namespace physicallayer {

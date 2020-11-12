@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskAnalogModel.h"
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskAnalogModel.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskNoise.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskReception.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskSnir.h"

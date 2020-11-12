@@ -47,8 +47,9 @@
  *
  **************************************************************************/
 
-#include "inet/common/INETMath.h"
 #include "inet/mobility/group/MoBanLocal.h"
+
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

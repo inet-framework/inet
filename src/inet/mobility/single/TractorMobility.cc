@@ -16,8 +16,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/INETMath.h"
 #include "inet/mobility/single/TractorMobility.h"
+
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

@@ -18,8 +18,8 @@
 #ifndef __INET_QUEUECANVASVISUALIZER_H
 #define __INET_QUEUECANVASVISUALIZER_H
 
-#include "inet/common/figures/QueueFigure.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/figures/QueueFigure.h"
 #include "inet/visualizer/base/QueueVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/MediumVisualizerBase.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/visualizer/base/MediumVisualizerBase.h"
 
 #ifdef WITH_RADIO
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"

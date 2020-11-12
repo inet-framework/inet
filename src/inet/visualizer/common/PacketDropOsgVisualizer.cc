@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/common/PacketDropOsgVisualizer.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-#include "inet/visualizer/common/PacketDropOsgVisualizer.h"
 
 namespace inet {
 

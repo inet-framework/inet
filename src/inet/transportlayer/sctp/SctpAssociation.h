@@ -22,9 +22,10 @@
 #define __INET_SCTPASSOCIATION_H
 
 #include <errno.h>
+#include <math.h>
+
 #include <iostream>
 #include <list>
-#include <math.h>
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"

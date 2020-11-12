@@ -19,9 +19,8 @@
 #ifndef __INET_ETHERAPPCLIENT_H
 #define __INET_ETHERAPPCLIENT_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"

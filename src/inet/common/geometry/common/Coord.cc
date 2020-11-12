@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <assert.h>
-
 #include "inet/common/geometry/common/Coord.h"
+
+#include <assert.h>
 
 namespace inet {
 

@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrReceiver.h"
+
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrReceiver.h"
 
 namespace inet {
 

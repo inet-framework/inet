@@ -18,17 +18,16 @@
 #ifndef __INET_HTTPCONTROLLER_H
 #define __INET_HTTPCONTROLLER_H
 
-#include <string>
-#include <list>
-#include <vector>
 #include <fstream>
-
-#include "inet/common/INETDefs.h"
-#include "inet/common/INETMath.h"
+#include <list>
+#include <string>
+#include <vector>
 
 #include "inet/applications/httptools/common/HttpEventMessages_m.h"
 #include "inet/applications/httptools/common/HttpRandom.h"
 #include "inet/applications/httptools/common/HttpUtils.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

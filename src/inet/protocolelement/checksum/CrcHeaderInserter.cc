@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/checksum/CrcHeaderInserter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocolelement/checksum/CrcHeaderInserter.h"
 #include "inet/protocolelement/checksum/header/CrcHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 

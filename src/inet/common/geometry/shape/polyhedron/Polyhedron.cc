@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
+
 #include <algorithm>
 
 namespace inet {

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/common/OrdinalBasedDuplicator.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/Simsignals.h"
-#include "inet/queueing/common/OrdinalBasedDuplicator.h"
 
 namespace inet {
 namespace queueing {

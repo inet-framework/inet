@@ -16,6 +16,7 @@
 //
 
 #include "inet/applications/httptools/configurator/HttpController.h"
+
 #include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {

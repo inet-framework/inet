@@ -18,8 +18,8 @@
 #ifndef __INET_LWIPTCPSTACKIF_H
 #define __INET_LWIPTCPSTACKIF_H
 
-#include "lwip/opt.h"
 #include "lwip/lwip_tcp.h"
+#include "lwip/opt.h"
 
 namespace inet {
 

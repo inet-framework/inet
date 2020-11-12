@@ -32,6 +32,7 @@
 #define __INET_IEEE802154UWBIRTRANSMITTER_H
 
 #include <vector>
+
 #include "inet/common/math/Functions.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
 #include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrMode.h"

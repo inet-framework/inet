@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/lmac/LMacProtocolDissector.h"
+
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/lmac/LMacHeader_m.h"
-#include "inet/linklayer/lmac/LMacProtocolDissector.h"
 
 namespace inet {
 

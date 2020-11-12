@@ -22,9 +22,9 @@
 ***************************************************************************/
 
 
-#include <string.h>
-
 #include "inet/transportlayer/rtp/Sdes.h"
+
+#include <string.h>
 
 namespace inet {
 

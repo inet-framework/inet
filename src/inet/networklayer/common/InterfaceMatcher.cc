@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/common/InterfaceMatcher.h"
+
 #include <set>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/stlutils.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/common/InterfaceMatcher.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

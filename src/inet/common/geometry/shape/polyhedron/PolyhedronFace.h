@@ -19,9 +19,10 @@
 #define __INET_POLYHEDRONFACE_H
 
 #include <vector>
-#include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
-#include "inet/common/geometry/shape/polyhedron/PolyhedronEdge.h"
+
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronEdge.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
 
 namespace inet {
 

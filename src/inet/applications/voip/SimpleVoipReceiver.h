@@ -20,8 +20,9 @@
 #ifndef __INET_SIMPLEVOIPRECEIVER_H
 #define __INET_SIMPLEVOIPRECEIVER_H
 
-#include <list>
 #include <string.h>
+
+#include <list>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"

@@ -20,8 +20,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
+
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 namespace inet {
 

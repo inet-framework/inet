@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/noise/NoiseSource.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
-#include "inet/physicallayer/wireless/noise/NoiseSource.h"
 
 namespace inet {
 namespace physicallayer {

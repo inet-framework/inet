@@ -28,9 +28,10 @@
  * 				Foundation under grant number 5005-67322.
  ***************************************************************************/
 
+#include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrTransmitter.h"
+
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrTransmitter.h"
 
 namespace inet {
 namespace physicallayer {

@@ -21,9 +21,10 @@
  * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
+#include "inet/routing/eigrp/tables/EigrpDisabledInterfaces.h"
+
 #include <algorithm>
 
-#include "inet/routing/eigrp/tables/EigrpDisabledInterfaces.h"
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 namespace inet {
 namespace eigrp {

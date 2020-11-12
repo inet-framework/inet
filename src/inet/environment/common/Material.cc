@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETMath.h"
 #include "inet/environment/common/Material.h"
+
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

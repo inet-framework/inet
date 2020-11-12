@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/OmittedModule.h"
+
 #include "inet/common/SubmoduleLayout.h"
 
 namespace inet {

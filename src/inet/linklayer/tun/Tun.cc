@@ -16,16 +16,17 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/linklayer/tun/Tun.h"
+
 #include <algorithm>
 
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/tun/Tun.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 

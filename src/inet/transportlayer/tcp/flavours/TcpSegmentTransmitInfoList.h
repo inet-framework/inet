@@ -19,7 +19,6 @@
 #define __INET_TCPSEGMENTTRANSMITINFOLIST_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
 namespace inet {

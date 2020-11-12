@@ -16,13 +16,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/rsvpte/RsvpClassifier.h"
+
 #include <iostream>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/mpls/LibTable.h"
-#include "inet/networklayer/rsvpte/RsvpClassifier.h"
 #include "inet/networklayer/rsvpte/RsvpTe.h"
 
 namespace inet {

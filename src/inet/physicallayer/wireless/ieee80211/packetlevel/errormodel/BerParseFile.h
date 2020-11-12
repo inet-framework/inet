@@ -21,6 +21,7 @@
 #define __INET_BERPARSEFILE_H
 
 #include <math.h>
+
 #include <vector>
 
 namespace inet {

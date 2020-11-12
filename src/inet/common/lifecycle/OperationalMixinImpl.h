@@ -18,10 +18,10 @@
 #ifndef __INET_OPERATIONALMIXINIMPL_H
 #define __INET_OPERATIONALMIXINIMPL_H
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
-#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

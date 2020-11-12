@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/base/PacketLabelerBase.h"
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/common/LabelsTag_m.h"
 
 namespace inet {

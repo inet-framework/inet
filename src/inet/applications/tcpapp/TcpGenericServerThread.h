@@ -18,9 +18,8 @@
 #ifndef __INET_TCPGENERICSERVERTHREAD_H
 #define __INET_TCPGENERICSERVERTHREAD_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/applications/tcpapp/TcpServerHostApp.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

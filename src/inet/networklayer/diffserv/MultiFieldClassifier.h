@@ -19,9 +19,9 @@
 #define __INET_MULTIFIELDCLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/queueing/base/PacketClassifierBase.h"
-#include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/queueing/base/PacketClassifierBase.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"

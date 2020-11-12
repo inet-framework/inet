@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/diffserv/SingleRateThreeColorMeter.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
-#include "inet/networklayer/diffserv/SingleRateThreeColorMeter.h"
 
 namespace inet {
 

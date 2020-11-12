@@ -18,6 +18,7 @@
 //
 
 #include "inet/applications/voipstream/VoipStreamSender.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"

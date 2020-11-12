@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/scenario/ScenarioManager.h"
-#include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
 
 namespace inet {
 

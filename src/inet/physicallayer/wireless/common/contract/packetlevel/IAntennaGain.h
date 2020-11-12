@@ -19,9 +19,9 @@
 #ifndef __INET_IANTENNAGAIN_H
 #define __INET_IANTENNAGAIN_H
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/Ptr.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {

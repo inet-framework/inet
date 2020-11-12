@@ -18,6 +18,7 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
+#include "IWirelessSignal.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/environment/contract/IMaterial.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
@@ -33,7 +34,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IPropagation.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
-#include "IWirelessSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
 
 namespace inet {

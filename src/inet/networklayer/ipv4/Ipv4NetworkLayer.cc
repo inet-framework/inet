@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/StringFormat.h"
 #include "inet/networklayer/ipv4/Ipv4NetworkLayer.h"
+
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 

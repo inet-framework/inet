@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/selectivity/ReceiveAtPort.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/selectivity/DestinationPortHeader_m.h"
-#include "inet/protocolelement/selectivity/ReceiveAtPort.h"
 
 namespace inet {
 

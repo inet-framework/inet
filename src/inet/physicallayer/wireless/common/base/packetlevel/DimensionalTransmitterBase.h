@@ -18,9 +18,9 @@
 #ifndef __INET_DIMENSIONALTRANSMITTERBASE_H
 #define __INET_DIMENSIONALTRANSMITTERBASE_H
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/math/IFunction.h"
 #include "inet/common/math/IInterpolator.h"
-#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 

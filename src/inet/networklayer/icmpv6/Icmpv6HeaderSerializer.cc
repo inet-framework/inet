@@ -16,9 +16,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/icmpv6/Icmpv6HeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/networklayer/icmpv6/Icmpv6HeaderSerializer.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)

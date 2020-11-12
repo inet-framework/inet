@@ -15,9 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
-#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/gate/PacketGate.h"
+
+#include <algorithm>
+
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 namespace queueing {

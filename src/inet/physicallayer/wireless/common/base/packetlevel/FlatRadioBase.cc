@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
+
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"

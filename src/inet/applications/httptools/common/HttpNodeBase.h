@@ -18,19 +18,19 @@
 #ifndef __INET_HTTPNODEBASE_H
 #define __INET_HTTPNODEBASE_H
 
-#include <string>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <queue>
-#include <iostream>
-#include <fstream>
+#include <string>
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/applications/httptools/configurator/HttpController.h"
 #include "inet/applications/httptools/common/HttpMessages_m.h"
 #include "inet/applications/httptools/common/HttpRandom.h"
 #include "inet/applications/httptools/common/HttpUtils.h"
+#include "inet/applications/httptools/configurator/HttpController.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 

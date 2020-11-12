@@ -18,9 +18,9 @@
 #ifndef __INET_IRADIOSIGNAL_H
 #define __INET_IRADIOSIGNAL_H
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/math/Functions.h"
-#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {

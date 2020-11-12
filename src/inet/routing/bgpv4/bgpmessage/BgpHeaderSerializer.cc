@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/bgpv4/bgpmessage/BgpHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
-#include "inet/routing/bgpv4/bgpmessage/BgpHeaderSerializer.h"
 
 namespace inet {
 namespace bgp {

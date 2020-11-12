@@ -20,12 +20,11 @@
 #define __INET_SCTPPEER_H
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 

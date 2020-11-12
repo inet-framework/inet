@@ -2,10 +2,11 @@
 #define __INET_OSPFV3INTERFACESTATEPOINTTOPOINT_H
 
 #include <omnetpp.h>
+
 #include <string>
 
-#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 #include "inet/common/INETDefs.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
 namespace ospfv3 {

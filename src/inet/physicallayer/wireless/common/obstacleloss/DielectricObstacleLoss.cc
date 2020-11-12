@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/common/obstacleloss/DielectricObstacleLoss.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/geometry/object/LineSegment.h"
-#include "inet/physicallayer/wireless/common/obstacleloss/DielectricObstacleLoss.h"
 
 namespace inet {
 

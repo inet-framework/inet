@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
+
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {

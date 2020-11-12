@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/selectivity/SendToMacAddress.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/selectivity/DestinationMacAddressHeader_m.h"
-#include "inet/protocolelement/selectivity/SendToMacAddress.h"
 
 namespace inet {
 

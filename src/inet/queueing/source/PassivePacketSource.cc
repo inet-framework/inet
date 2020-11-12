@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/Simsignals.h"
 #include "inet/queueing/source/PassivePacketSource.h"
+
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace queueing {

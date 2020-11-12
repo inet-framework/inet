@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/Packet.h"
-#include "inet/common/Units.h"
 #include "inet/physicallayer/common/Signal.h"
+
+#include "inet/common/Units.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 namespace physicallayer {

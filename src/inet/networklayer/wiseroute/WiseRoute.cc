@@ -32,6 +32,8 @@
  * last modification: 06/02/11
  **************************************************************************/
 
+#include "inet/networklayer/wiseroute/WiseRoute.h"
+
 #include <algorithm>
 #include <limits>
 
@@ -45,7 +47,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/wiseroute/WiseRoute.h"
 
 namespace inet {
 

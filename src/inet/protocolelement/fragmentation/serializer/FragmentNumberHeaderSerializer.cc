@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/fragmentation/serializer/FragmentNumberHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
-#include "inet/protocolelement/fragmentation/serializer/FragmentNumberHeaderSerializer.h"
 
 namespace inet {
 

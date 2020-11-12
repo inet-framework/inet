@@ -19,8 +19,8 @@
 #define __INET_ISCRAMBLER_H
 
 #include "inet/common/BitVector.h"
-#include "inet/common/ShortBitVector.h"
 #include "inet/common/IPrintableObject.h"
+#include "inet/common/ShortBitVector.h"
 
 namespace inet {
 namespace physicallayer {

@@ -18,9 +18,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/arp/ipv4/GlobalArp.h"
+
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/networklayer/arp/ipv4/GlobalArp.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"

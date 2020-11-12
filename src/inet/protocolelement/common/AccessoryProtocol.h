@@ -18,8 +18,8 @@
 #ifndef __INET_ACCESSORYPROTOCOL_H
 #define __INET_ACCESSORYPROTOCOL_H
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
 
 namespace inet {

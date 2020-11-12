@@ -19,9 +19,9 @@
 #define __INET_IEEE80211OFDMMODULATOR_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 

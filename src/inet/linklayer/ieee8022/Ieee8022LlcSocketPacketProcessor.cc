@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketPacketProcessor.h"
+
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcSocketPacketProcessor.h"
 
 namespace inet {
 

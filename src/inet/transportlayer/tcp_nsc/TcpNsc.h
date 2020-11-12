@@ -20,12 +20,11 @@
 #ifndef __INET_TCPNSC_H
 #define __INET_TCPNSC_H
 
+#include <sim_interface.h>    // NSC. We need this here to derive from classes
+
 #include <map>
 
 #include "inet/common/INETDefs.h"
-
-#include <sim_interface.h>    // NSC. We need this here to derive from classes
-
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/L3Address.h"

@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/flow/FlowMeasurementStarter.h"
+
 #include "inet/common/FlowTag.h"
 #include "inet/common/PacketEventTag_m.h"
 #include "inet/common/TimeTag_m.h"
-#include "inet/queueing/flow/FlowMeasurementStarter.h"
 
 namespace inet {
 namespace queueing {

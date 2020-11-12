@@ -17,10 +17,10 @@
 /* First, we deal with  platform-specific or compiler-specific issues. */
 
 /* begin standard C headers. */
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* end standard C headers. */
 
@@ -1280,8 +1280,9 @@ char *yytext;
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>
 #endif
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "PacketDrillUtils.h"
 
 using namespace inet;

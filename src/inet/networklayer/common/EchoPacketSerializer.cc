@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/common/EchoPacketSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/common/EchoPacket_m.h"
-#include "inet/networklayer/common/EchoPacketSerializer.h"
 
 namespace inet {
 

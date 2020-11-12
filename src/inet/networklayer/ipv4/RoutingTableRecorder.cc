@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv4/RoutingTableRecorder.h"
+
 #include <cinttypes>
 
 #include "inet/common/INETDefs.h"
@@ -25,7 +27,6 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
-#include "inet/networklayer/ipv4/RoutingTableRecorder.h"
 
 namespace inet {
 

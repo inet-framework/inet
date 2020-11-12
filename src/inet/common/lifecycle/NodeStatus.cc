@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/lifecycle/NodeStatus.h"
+
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

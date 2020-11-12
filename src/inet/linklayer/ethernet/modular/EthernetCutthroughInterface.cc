@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/modular/EthernetCutthroughInterface.h"
+
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ethernet/modular/EthernetCutthroughInterface.h"
 
 namespace inet {
 

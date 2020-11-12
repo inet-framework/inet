@@ -21,8 +21,6 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/SnirReceiverBase.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IAnalogDigitalConverter.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
@@ -30,6 +28,8 @@
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IPulseFilter.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 
 namespace inet {
 

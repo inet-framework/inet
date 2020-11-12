@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/common/QueueCanvasVisualizer.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/queueing/queue/PacketQueue.h"
-#include "inet/visualizer/common/QueueCanvasVisualizer.h"
 
 namespace inet {
 

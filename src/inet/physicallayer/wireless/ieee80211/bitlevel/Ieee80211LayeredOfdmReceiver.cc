@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
+
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
@@ -29,7 +31,6 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"

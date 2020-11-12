@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/tcp_common/TcpProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/transportlayer/tcp_common/TcpProtocolPrinter.h"
 
 namespace inet {
 

@@ -16,16 +16,18 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <algorithm>
+#include "inet/transportlayer/sctp/SctpNatTable.h"
+
 #include <ctype.h>
-#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <algorithm>
+#include <sstream>
+
 #include "inet/common/Simsignals.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/sctp/SctpNatTable.h"
 
 namespace inet {
 namespace sctp {

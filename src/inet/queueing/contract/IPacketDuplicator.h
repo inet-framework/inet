@@ -18,8 +18,8 @@
 #ifndef __INET_IPACKETDUPLICATOR_H
 #define __INET_IPACKETDUPLICATOR_H
 
-#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace queueing {

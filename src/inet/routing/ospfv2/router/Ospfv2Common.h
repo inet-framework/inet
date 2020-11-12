@@ -20,8 +20,9 @@
 #define __INET_OSPFV2COMMON_H
 
 #include <ctype.h>
-#include <functional>
 #include <stdio.h>
+
+#include <functional>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/Units_m.h"

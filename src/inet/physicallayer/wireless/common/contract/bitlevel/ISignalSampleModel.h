@@ -18,8 +18,8 @@
 #ifndef __INET_ISIGNALSAMPLEMODEL_H
 #define __INET_ISIGNALSAMPLEMODEL_H
 
-#include "inet/common/Units.h"
 #include "inet/common/IPrintableObject.h"
+#include "inet/common/Units.h"
 
 namespace inet {
 

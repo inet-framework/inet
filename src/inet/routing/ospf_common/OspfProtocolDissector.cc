@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/ospf_common/OspfProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/routing/ospf_common/OspfPacketBase_m.h"
-#include "inet/routing/ospf_common/OspfProtocolDissector.h"
 
 namespace inet {
 namespace ospf {

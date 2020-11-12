@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
-
 #include "inet/power/base/EnergySourceBase.h"
+
+#include <algorithm>
 
 namespace inet {
 

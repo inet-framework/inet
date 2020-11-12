@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/base/PacketTaggerBase.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -26,7 +28,6 @@
 #include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
-#include "inet/queueing/base/PacketTaggerBase.h"
 
 namespace inet {
 namespace queueing {

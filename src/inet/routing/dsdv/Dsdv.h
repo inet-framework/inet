@@ -17,10 +17,11 @@
 #ifndef __INET_DSDV_H
 #define __INET_DSDV_H
 
-#include <list>
-#include <map>
 #include <stdio.h>
 #include <string.h>
+
+#include <list>
+#include <map>
 #include <vector>
 
 #include "inet/common/INETDefs.h"

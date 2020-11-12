@@ -18,6 +18,7 @@
 //
 
 #include "inet/networklayer/ipv6/Ipv6Route.h"
+
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
 namespace inet {

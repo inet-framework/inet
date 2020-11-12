@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/ordering/Reordering.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
-#include "inet/protocolelement/ordering/Reordering.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {

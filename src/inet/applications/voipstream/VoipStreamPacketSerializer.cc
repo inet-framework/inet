@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/applications/voipstream/VoipStreamPacketSerializer.h"
+
+#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {

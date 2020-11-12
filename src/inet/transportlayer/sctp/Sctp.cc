@@ -17,12 +17,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/transportlayer/sctp/Sctp.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/packet/chunk/Chunk.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
@@ -30,7 +32,6 @@
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
 

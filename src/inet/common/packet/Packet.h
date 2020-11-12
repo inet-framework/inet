@@ -19,14 +19,15 @@
 #define __INET_PACKET_H
 
 #include <functional>
+
 #include "inet/common/IPrintableObject.h"
+#include "inet/common/TagBase.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/tag/IRegionTaggedObject.h"
 #include "inet/common/packet/tag/ITaggedObject.h"
-#include "inet/common/TagBase.h"
 
 namespace inet {
 

@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/arp/ipv4/ArpPacketSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
-#include "inet/networklayer/arp/ipv4/ArpPacketSerializer.h"
 
 namespace inet {
 

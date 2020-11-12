@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/PathOsgVisualizerBase.h"
+
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/visualizer/base/PathOsgVisualizerBase.h"
 
 #ifdef WITH_OSG
 #include <osg/LineWidth>

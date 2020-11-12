@@ -19,6 +19,8 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+
 #include <algorithm>
 #include <sstream>
 
@@ -31,7 +33,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv4/RoutingTableParser.h"
 
 namespace inet {

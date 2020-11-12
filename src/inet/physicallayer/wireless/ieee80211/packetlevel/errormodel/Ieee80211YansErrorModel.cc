@@ -18,12 +18,8 @@
 // Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
 //
 
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211YansErrorModel.h"
+
 #include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam1024Modulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
@@ -31,6 +27,11 @@
 #include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
 #include "inet/physicallayer/wireless/common/modulation/QbpskModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 
 namespace inet {
 

@@ -29,8 +29,8 @@
 
 #include <omnetpp.h>
 
-#include "inet/routing/eigrp/tables/EigrpNeighbor.h"
 #include "inet/routing/eigrp/EigrpDualStack.h"
+#include "inet/routing/eigrp/tables/EigrpNeighbor.h"
 namespace inet {
 namespace eigrp {
 /**

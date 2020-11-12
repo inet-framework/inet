@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/environment/PhysicalEnvironmentCanvasVisualizer.h"
+
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
@@ -22,7 +24,6 @@
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/Sphere.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
-#include "inet/visualizer/environment/PhysicalEnvironmentCanvasVisualizer.h"
 
 namespace inet {
 

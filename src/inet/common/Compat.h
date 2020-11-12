@@ -18,8 +18,9 @@
 #ifndef __INET_COMPAT_H
 #define __INET_COMPAT_H
 
-#include <iostream>
 #include <omnetpp.h>
+
+#include <iostream>
 
 namespace inet {
 

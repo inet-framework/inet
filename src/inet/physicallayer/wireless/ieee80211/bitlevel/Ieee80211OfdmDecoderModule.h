@@ -19,9 +19,9 @@
 #define __INET_IEEE80211OFDMDECODERMODULE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"

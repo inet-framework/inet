@@ -20,16 +20,20 @@
 //
 
 #include <string.h>
+
 #include <algorithm>    // min,max
 
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/common/socket/SocketTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/TosTag_m.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -39,9 +43,6 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/networklayer/common/DscpTag_m.h"
-#include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/TosTag_m.h"
 
 namespace inet {
 namespace tcp {

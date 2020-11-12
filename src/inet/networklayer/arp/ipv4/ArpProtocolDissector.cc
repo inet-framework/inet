@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/arp/ipv4/ArpProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
-#include "inet/networklayer/arp/ipv4/ArpProtocolDissector.h"
 
 namespace inet {
 

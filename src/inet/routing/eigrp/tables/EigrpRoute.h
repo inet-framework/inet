@@ -26,6 +26,7 @@
 #define EIGRPROUTE_H_
 
 #include <omnetpp.h>
+
 #include <algorithm>
 
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"

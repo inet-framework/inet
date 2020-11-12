@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/diffserv/DscpMarker.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/networklayer/diffserv/Dscp_m.h"
-#include "inet/networklayer/diffserv/DscpMarker.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4.h"

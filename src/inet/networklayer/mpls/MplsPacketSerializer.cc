@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/mpls/MplsPacketSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/mpls/MplsPacket_m.h"
-#include "inet/networklayer/mpls/MplsPacketSerializer.h"
 
 namespace inet {
 

@@ -19,9 +19,10 @@
 
 // for INT64_C(x), UINT64_C(x):
 #define __STDC_CONSTANT_MACROS
+#include "inet/applications/voipstream/AudioOutFile.h"
+
 #include <stdint.h>
 
-#include "inet/applications/voipstream/AudioOutFile.h"
 #include "inet/common/INETEndians.h"
 
 namespace inet {

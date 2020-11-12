@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderInserter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/packet/chunk/EncryptedChunk.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderInserter.h"
+#include "inet/common/packet/chunk/EncryptedChunk.h"
 #include "inet/linklayer/ieee8021ae/Ieee8021aeTagHeader_m.h"
 
 namespace inet {

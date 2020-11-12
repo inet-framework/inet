@@ -25,9 +25,9 @@
 #include "inet/common/INETDefs.h"
 
 #ifdef ENABLE_GSL
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_integration.h>
 #include <gsl/gsl_cdf.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_math.h>
 #include <gsl/gsl_sf_bessel.h>
 
 #endif // ifdef ENABLE_GSL

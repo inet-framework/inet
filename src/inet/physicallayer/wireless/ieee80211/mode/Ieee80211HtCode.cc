@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtCode.h"
+
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmCode.h"
 
 namespace inet {

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/ospf_common/OspfPacketSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/ospf_common/OspfPacketBase_m.h"
-#include "inet/routing/ospf_common/OspfPacketSerializer.h"
 #ifdef WITH_OSPFv2
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
 #endif // #ifdef WITH_OSPFv2

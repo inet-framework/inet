@@ -17,14 +17,14 @@
 
 #include "inet/applications/tcpapp/TcpGenericServerApp.h"
 
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/common/TimeTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 

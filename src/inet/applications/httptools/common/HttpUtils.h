@@ -18,10 +18,11 @@
 #ifndef __INET_HTTPUTILS_H
 #define __INET_HTTPUTILS_H
 
-#include <vector>
-#include <string>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <string>
+#include <vector>
 
 #ifdef _WIN32
 # include <io.h>

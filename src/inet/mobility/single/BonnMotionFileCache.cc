@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/mobility/single/BonnMotionFileCache.h"
+
 #include <fstream>
 #include <sstream>
-
-#include "inet/mobility/single/BonnMotionFileCache.h"
 
 namespace inet {
 

@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/Packet.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPhy.h"
+
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
-#include "inet/physicallayer/wired/ethernet/EthernetPhy.h"
 
 namespace inet {
 

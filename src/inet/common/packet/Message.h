@@ -19,8 +19,8 @@
 #define __INET_MESSAGE_H
 
 #include "inet/common/IPrintableObject.h"
-#include "inet/common/packet/tag/ITaggedObject.h"
 #include "inet/common/TagBase.h"
+#include "inet/common/packet/tag/ITaggedObject.h"
 
 namespace inet {
 

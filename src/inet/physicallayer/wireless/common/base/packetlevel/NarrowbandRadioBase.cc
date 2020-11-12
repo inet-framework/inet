@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandRadioBase.h"
+
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandReceiverBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"

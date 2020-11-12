@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/lifecycle/OperationalMixinImpl.h"
+
 #include "inet/protocolelement/transceiver/base/PacketReceiverBase.h"
 #include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
 

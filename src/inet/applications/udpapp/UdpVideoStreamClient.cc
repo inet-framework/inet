@@ -18,6 +18,7 @@
 //
 
 #include "inet/applications/udpapp/UdpVideoStreamClient.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

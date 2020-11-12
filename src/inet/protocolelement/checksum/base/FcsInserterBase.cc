@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/protocolelement/checksum/base/FcsInserterBase.h"
+
+#include "inet/common/checksum/EthernetCRC.h"
 
 namespace inet {
 

@@ -21,8 +21,8 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 

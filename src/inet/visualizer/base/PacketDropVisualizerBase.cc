@@ -15,11 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/PacketDropVisualizerBase.h"
+
 #include <algorithm>
+
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/visualizer/base/PacketDropVisualizerBase.h"
 
 namespace inet {
 

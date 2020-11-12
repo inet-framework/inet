@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/checksum/serializer/FcsHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/protocolelement/checksum/header/FcsHeader_m.h"
-#include "inet/protocolelement/checksum/serializer/FcsHeaderSerializer.h"
 
 namespace inet {
 

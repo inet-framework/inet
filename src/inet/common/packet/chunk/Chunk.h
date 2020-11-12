@@ -23,10 +23,10 @@
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
-#include "inet/common/packet/tag/IRegionTaggedObject.h"
 #include "inet/common/Ptr.h"
 #include "inet/common/TemporarySharedPtr.h"
 #include "inet/common/Units.h"
+#include "inet/common/packet/tag/IRegionTaggedObject.h"
 
 // checking chunk implementation is disabled by default
 #ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED

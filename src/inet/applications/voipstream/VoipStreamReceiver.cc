@@ -18,6 +18,7 @@
 //
 
 #include "inet/applications/voipstream/VoipStreamReceiver.h"
+
 #include "inet/common/INETEndians.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"

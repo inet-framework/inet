@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/rip/RipPacketSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/rip/RipPacket_m.h"
-#include "inet/routing/rip/RipPacketSerializer.h"
 
 namespace inet {
 

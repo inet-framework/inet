@@ -29,30 +29,26 @@ topology table.
 #ifndef EIGRPIPV6PDM_H_
 #define EIGRPIPV6PDM_H_
 
-#include <omnetpp.h>
 #include <errno.h>
+#include <omnetpp.h>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
-
-#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
-#include "inet/routing/eigrp/tables/EigrpNeighborTable.h"
-#include "inet/routing/eigrp/tables/EigrpRoute.h"
-#include "inet/routing/eigrp/tables/EigrpTopologyTable.h"
-
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/routing/eigrp/EigrpDual.h"
+#include "inet/routing/eigrp/messages/EigrpMessage_m.h"
+#include "inet/routing/eigrp/messages/EigrpMsgReq.h"
+#include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
 #include "inet/routing/eigrp/pdms/IEigrpModule.h"
 #include "inet/routing/eigrp/pdms/IEigrpPdm.h"
-
-#include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 #include "inet/routing/eigrp/tables/EigrpDisabledInterfaces.h"
-#include "inet/routing/eigrp/EigrpDual.h"
+#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
+#include "inet/routing/eigrp/tables/EigrpNeighborTable.h"
 #include "inet/routing/eigrp/tables/EigrpNetworkTable.h"
-#include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
-#include "inet/routing/eigrp/messages/EigrpMsgReq.h"
-
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/routing/eigrp/tables/EigrpRoute.h"
+#include "inet/routing/eigrp/tables/EigrpTopologyTable.h"
 
 namespace inet {
 namespace eigrp {

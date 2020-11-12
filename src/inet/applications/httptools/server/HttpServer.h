@@ -18,11 +18,11 @@
 #ifndef __INET_HTTPSERVER_H
 #define __INET_HTTPSERVER_H
 
+#include "inet/applications/httptools/server/HttpServerBase.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {
 

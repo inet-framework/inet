@@ -15,8 +15,9 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inet/common/Simsignals.h"
 #include "inet/physicallayer/wired/common/WireJunction.h"
+
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace physicallayer {

@@ -18,8 +18,8 @@
 #ifndef __INET_RADIOCANVASVISUALIZER_H
 #define __INET_RADIOCANVASVISUALIZER_H
 
-#include "inet/common/figures/IndexedImageFigure.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/figures/IndexedImageFigure.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"

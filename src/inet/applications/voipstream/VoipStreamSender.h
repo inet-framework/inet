@@ -25,6 +25,7 @@
 #endif // ifndef HAVE_FFMPEG
 
 #include <fnmatch.h>
+
 #include <vector>
 
 #define __STDC_CONSTANT_MACROS

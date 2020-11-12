@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <tuple>
-
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+
+#include <tuple>
 
 namespace inet {
 namespace ieee80211 {

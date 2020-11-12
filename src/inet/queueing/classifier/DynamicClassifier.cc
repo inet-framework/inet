@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/classifier/DynamicClassifier.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/classifier/DynamicClassifier.h"
 
 namespace inet {
 namespace queueing {

@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
+
 #include <queue>
 #include <set>
 #include <sstream>
@@ -22,7 +24,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
-#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 

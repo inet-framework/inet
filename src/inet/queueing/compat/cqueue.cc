@@ -18,10 +18,11 @@
   `license' for details on this and other legal matters.
 *--------------------------------------------------------------*/
 
+#include "inet/queueing/compat/cqueue.h"
+
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-#include "inet/queueing/compat/cqueue.h"
 
 namespace inet {
 namespace queueing {

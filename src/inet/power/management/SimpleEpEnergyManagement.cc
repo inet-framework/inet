@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/power/management/SimpleEpEnergyManagement.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/power/management/SimpleEpEnergyManagement.h"
 
 namespace inet {
 

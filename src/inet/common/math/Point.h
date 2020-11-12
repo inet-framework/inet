@@ -18,8 +18,8 @@
 #ifndef __INET_POINT_H
 #define __INET_POINT_H
 
-#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/Units.h"
+#include "inet/common/geometry/common/Quaternion.h"
 
 namespace inet {
 

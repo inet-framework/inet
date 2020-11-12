@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/internetcloud/CloudDelayerBase.h"
+
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4.h"
 
 namespace inet {

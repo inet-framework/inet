@@ -15,10 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/buffer/PacketBuffer.h"
+
 #include <algorithm>
+
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
-#include "inet/queueing/buffer/PacketBuffer.h"
 #include "inet/queueing/compat/cpacketqueue.h"
 
 namespace inet {

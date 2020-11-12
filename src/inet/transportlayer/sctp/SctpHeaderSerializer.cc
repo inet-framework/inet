@@ -17,22 +17,23 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
+
 #include "inet/common/Endian.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
-#include "inet/networklayer/ipv4/headers/ip.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/headers/ip.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpChecksum.h"
-#include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
 #include "inet/transportlayer/sctp/headers/sctphdr.h"
 
 
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>    // htonl, ntohl, ...
 #include <arpa/inet.h>
+#include <netinet/in.h>    // htonl, ntohl, ...
 #include <sys/socket.h>
 #endif // if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 

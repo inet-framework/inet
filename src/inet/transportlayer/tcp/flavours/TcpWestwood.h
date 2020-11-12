@@ -20,7 +20,6 @@
 #define __INET_TCPWESTWOOD_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 #include "inet/transportlayer/tcp/flavours/TcpSegmentTransmitInfoList.h"
 

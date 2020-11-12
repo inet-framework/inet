@@ -16,10 +16,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "inet/applications/sctpapp/SctpPeer.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

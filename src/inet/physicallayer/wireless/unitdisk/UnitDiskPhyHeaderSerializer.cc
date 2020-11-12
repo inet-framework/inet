@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeaderSerializer.h"
 
 namespace inet {
 

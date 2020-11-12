@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/marker/EcnMarker.h"
+
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/networklayer/common/L3Tools.h"
-#include "inet/queueing/marker/EcnMarker.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #endif // #ifdef WITH_ETHERNET
 
 #ifdef WITH_IPv4

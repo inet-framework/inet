@@ -23,8 +23,8 @@
 
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 

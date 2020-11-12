@@ -18,9 +18,9 @@
 #ifndef __INET_POLYHEDRONEDGE_H
 #define __INET_POLYHEDRONEDGE_H
 
-#include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
-#include "inet/common/geometry/shape/polyhedron/PolyhedronFace.h"
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronFace.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
 
 namespace inet {
 

@@ -20,10 +20,10 @@
 
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 

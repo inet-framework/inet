@@ -16,8 +16,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/ipv4/IgmpHeaderSerializer.h"
+
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/ipv4/IgmpMessage_m.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)

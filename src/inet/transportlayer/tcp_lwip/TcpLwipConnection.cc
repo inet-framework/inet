@@ -15,18 +15,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
-#include "lwip/lwip_tcp.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwip.h"
-#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
+#include "lwip/lwip_tcp.h"
 
 namespace inet {
 namespace tcp {

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/shortcut/ShortcutPhyProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/wireless/shortcut/ShortcutPhyHeader_m.h"
-#include "inet/physicallayer/wireless/shortcut/ShortcutPhyProtocolDissector.h"
 
 namespace inet {
 

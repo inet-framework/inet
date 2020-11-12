@@ -16,10 +16,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/linklayer/ieee802/Ieee802EpdProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
-#include "inet/linklayer/ieee802/Ieee802EpdProtocolPrinter.h"
 
 namespace inet {
 

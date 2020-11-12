@@ -47,13 +47,15 @@
  *
  **************************************************************************/
 
+#include "inet/mobility/group/MoBanCoordinator.h"
+
 #include <assert.h>
 #include <stdio.h>
+
 #include <string>
 
 #include "inet/common/INETMath.h"
 #include "inet/common/INETUtils.h"
-#include "inet/mobility/group/MoBanCoordinator.h"
 #include "inet/mobility/group/MoBanLocal.h"
 
 namespace inet {

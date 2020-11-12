@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/sctp/SctpProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
-#include "inet/transportlayer/sctp/SctpProtocolDissector.h"
 
 namespace inet {
 namespace sctp {

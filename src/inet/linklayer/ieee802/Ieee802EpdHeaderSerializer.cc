@@ -16,9 +16,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/linklayer/ieee802/Ieee802EpdHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
-#include "inet/linklayer/ieee802/Ieee802EpdHeaderSerializer.h"
 
 namespace inet {
 

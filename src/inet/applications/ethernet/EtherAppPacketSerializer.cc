@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/applications/ethernet/EtherAppPacketSerializer.h"
+
+#include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {

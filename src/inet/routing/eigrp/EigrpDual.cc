@@ -23,9 +23,10 @@
  */
 
 #include "inet/routing/eigrp/EigrpDual.h"
-#include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
 
 #include <omnetpp.h>
+
+#include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
 
 #define EIGRP_DUAL_DEBUG
 namespace inet {

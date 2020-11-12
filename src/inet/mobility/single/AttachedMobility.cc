@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/mobility/single/AttachedMobility.h"
+
+#include "inet/common/geometry/common/Quaternion.h"
 
 namespace inet {
 

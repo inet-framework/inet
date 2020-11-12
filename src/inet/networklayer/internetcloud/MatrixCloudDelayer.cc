@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/internetcloud/MatrixCloudDelayer.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/internetcloud/MatrixCloudDelayer.h"
 
 namespace inet {
 

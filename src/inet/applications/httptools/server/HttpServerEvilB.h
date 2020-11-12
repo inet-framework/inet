@@ -19,6 +19,7 @@
 #define __INET_HTTPSERVEREVILB_H
 
 #include <string>
+
 #include "inet/applications/httptools/server/HttpServer.h"
 
 namespace inet {

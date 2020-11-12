@@ -19,10 +19,9 @@
 #ifndef __INET_PACKETDRILL_H
 #define __INET_PACKETDRILL_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/applications/packetdrill/PacketDrillApp.h"
 #include "inet/applications/packetdrill/PacketDrillUtils.h"
+#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"

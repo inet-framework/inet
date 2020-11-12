@@ -19,8 +19,8 @@
 
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/applications/tcpapp/TcpAppBase.h"
+#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 

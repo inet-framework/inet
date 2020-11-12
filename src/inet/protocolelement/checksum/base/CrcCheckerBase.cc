@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/protocolelement/checksum/base/CrcCheckerBase.h"
+
+#include "inet/common/checksum/TcpIpChecksum.h"
 
 namespace inet {
 

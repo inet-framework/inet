@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/common/communicationcache/VectorCommunicationCache.h"
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {

@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/printer/ProtocolPrinter.h"
+
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
-#include "inet/common/packet/printer/ProtocolPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 
 namespace inet {

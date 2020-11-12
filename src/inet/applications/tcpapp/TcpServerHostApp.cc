@@ -16,6 +16,7 @@
 //
 
 #include "inet/applications/tcpapp/TcpServerHostApp.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"

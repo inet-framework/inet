@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/queueing/function/PacketSchedulerFunction.h"
+
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 
 namespace inet {
 namespace queueing {

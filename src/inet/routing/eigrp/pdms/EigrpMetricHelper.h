@@ -27,8 +27,8 @@
 
 //#include "InterfaceEntry.h"
 
-#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
+#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 namespace inet {
 namespace eigrp {
 bool operator==(const EigrpKValues& k1, const EigrpKValues& k2);

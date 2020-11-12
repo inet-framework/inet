@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/aggregation/SubpacketLengthHeaderBasedDeaggregator.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/aggregation/header/SubpacketLengthHeader_m.h"
-#include "inet/protocolelement/aggregation/SubpacketLengthHeaderBasedDeaggregator.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 
 namespace inet {

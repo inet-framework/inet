@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/EnergyStorageVisualizerBase.h"
+
 #include <algorithm>
 
 #include "inet/power/contract/ICcEnergyStorage.h"
 #include "inet/power/contract/IEpEnergyStorage.h"
-#include "inet/visualizer/base/EnergyStorageVisualizerBase.h"
 
 namespace inet {
 namespace visualizer {

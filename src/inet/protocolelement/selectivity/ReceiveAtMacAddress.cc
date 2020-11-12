@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/selectivity/ReceiveAtMacAddress.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -22,7 +24,6 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/selectivity/DestinationMacAddressHeader_m.h"
-#include "inet/protocolelement/selectivity/ReceiveAtMacAddress.h"
 
 namespace inet {
 

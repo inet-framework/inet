@@ -18,8 +18,8 @@
 #ifndef __INET_ILISTENING_H
 #define __INET_ILISTENING_H
 
-#include "inet/common/geometry/common/Coord.h"
 #include "inet/common/IPrintableObject.h"
+#include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
 

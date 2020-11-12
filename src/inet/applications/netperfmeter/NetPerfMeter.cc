@@ -26,12 +26,12 @@
 // *   Contact: dreibh@iem.uni-due.de
 
 #include "NetPerfMeter.h"
-#include "NetPerfMeter_m.h"
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "NetPerfMeter_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {

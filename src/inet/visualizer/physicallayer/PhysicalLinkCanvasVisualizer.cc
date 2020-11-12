@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/visualizer/physicallayer/PhysicalLinkCanvasVisualizer.h"
+
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
 

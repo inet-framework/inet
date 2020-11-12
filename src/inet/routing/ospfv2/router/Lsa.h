@@ -20,6 +20,7 @@
 #define __INET_LSA_H
 
 #include <math.h>
+
 #include <vector>
 
 #include "inet/common/INETDefs.h"

@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/server/PacketServer.h"
+
 #include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag.h"
-#include "inet/queueing/server/PacketServer.h"
 
 namespace inet {
 namespace queueing {

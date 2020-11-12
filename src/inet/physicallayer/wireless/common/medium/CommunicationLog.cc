@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/common/medium/CommunicationLog.h"
+
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 
 namespace inet {

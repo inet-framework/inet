@@ -18,10 +18,11 @@
 // Author: Gary Pei <guangyu.pei@boeing.com>
 //
 
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
+
 #include <math.h>
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
 
 namespace inet {
 

@@ -19,6 +19,7 @@
 #define __INET_RADIOMEDIUM_H
 
 #include <algorithm>
+
 #include "inet/common/IntervalTree.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"

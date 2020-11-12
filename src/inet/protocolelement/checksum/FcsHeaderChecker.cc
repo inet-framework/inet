@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/checksum/FcsHeaderChecker.h"
+
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/checksum/header/FcsHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 

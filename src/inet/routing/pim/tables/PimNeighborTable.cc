@@ -17,9 +17,9 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include <algorithm>
-
 #include "inet/routing/pim/tables/PimNeighborTable.h"
+
+#include <algorithm>
 
 namespace inet {
 

@@ -17,10 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/mpls/LibTable.h"
+
 #include <iostream>
 
 #include "inet/common/XMLUtils.h"
-#include "inet/networklayer/mpls/LibTable.h"
 
 namespace inet {
 

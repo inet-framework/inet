@@ -20,9 +20,8 @@
 #define __INET_DCTCP_H
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/transportlayer/tcp/flavours/TcpReno.h"
 #include "inet/transportlayer/tcp/flavours/DcTcpFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpReno.h"
 
 namespace inet {
 namespace tcp {

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/power/storage/SimpleCcBattery.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
-#include "inet/power/storage/SimpleCcBattery.h"
 
 namespace inet {
 

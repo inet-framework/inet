@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/flooding/FloodingProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/flooding/FloodingHeader_m.h"
-#include "inet/networklayer/flooding/FloodingProtocolDissector.h"
 
 namespace inet {
 

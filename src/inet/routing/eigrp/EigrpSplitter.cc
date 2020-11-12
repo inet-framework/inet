@@ -23,6 +23,7 @@
  */
 
 #include "inet/routing/eigrp/EigrpSplitter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 

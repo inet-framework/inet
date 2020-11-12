@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/acking/AckingMacHeader_m.h"
 #include "inet/linklayer/acking/AckingMacHeaderSerializer.h"
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/linklayer/acking/AckingMacHeader_m.h"
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"

@@ -16,6 +16,7 @@
 //
 
 #include "WirelessSignal.h"
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 

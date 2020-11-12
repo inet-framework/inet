@@ -32,6 +32,8 @@
  ***************************************************************************
  * part of:    Modifications to the MF-2 framework by CSEM
  **************************************************************************/
+#include "inet/linklayer/ieee802154/Ieee802154Mac.h"
+
 #include <cassert>
 
 #include "inet/common/FindModule.h"
@@ -42,7 +44,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ieee802154/Ieee802154Mac.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 

@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211FhssMode.h"
+
 #include "inet/physicallayer/wireless/common/modulation/2GfskModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/4GfskModulation.h"
 

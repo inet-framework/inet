@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitter.h"
+
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitter.h"
 
 namespace inet {
 namespace physicallayer {

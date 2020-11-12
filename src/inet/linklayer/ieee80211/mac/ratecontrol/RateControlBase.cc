@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/ratecontrol/RateControlBase.h"
+
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace ieee80211 {

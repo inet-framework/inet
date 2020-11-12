@@ -18,9 +18,8 @@
 #ifndef __INET_TCPBASICCLIENTAPP_H
 #define __INET_TCPBASICCLIENTAPP_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/applications/tcpapp/TcpAppBase.h"
+#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 

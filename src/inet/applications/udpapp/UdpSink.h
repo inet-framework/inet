@@ -20,9 +20,8 @@
 #ifndef __INET_UDPSINK_H
 #define __INET_UDPSINK_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {

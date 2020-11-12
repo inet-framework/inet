@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -25,7 +27,6 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
-#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 
 namespace inet {
 namespace tcp {

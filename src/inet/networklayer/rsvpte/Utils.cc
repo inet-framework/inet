@@ -16,8 +16,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/networklayer/rsvpte/Utils.h"
+
+#include "inet/networklayer/rsvpte/IntServ_m.h"
 
 namespace inet {
 

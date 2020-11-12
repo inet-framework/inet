@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee8021d/common/StpBase.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/ieee8021d/common/StpBase.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

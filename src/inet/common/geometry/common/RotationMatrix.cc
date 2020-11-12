@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/geometry/common/RotationMatrix.h"
+
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/common/geometry/common/RotationMatrix.h"
 
 namespace inet {
 

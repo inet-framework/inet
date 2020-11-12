@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/geometry/shape/Sphere.h"
+
 #include "inet/common/geometry/object/Plane.h"
 
 namespace inet {

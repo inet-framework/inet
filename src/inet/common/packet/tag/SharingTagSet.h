@@ -18,8 +18,9 @@
 #ifndef __INET_SHARINGTAGSET_H
 #define __INET_SHARINGTAGSET_H
 
-#include <vector>
 #include <memory>
+#include <vector>
+
 #include "inet/common/Ptr.h"
 #include "inet/common/TagBase.h"
 

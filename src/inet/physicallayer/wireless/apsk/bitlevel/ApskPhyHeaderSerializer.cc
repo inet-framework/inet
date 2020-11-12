@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskPhyHeaderSerializer.h"
+
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskPhyHeaderSerializer.h"
 
 namespace inet {
 namespace physicallayer {

@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee8022/Ieee8022SnapInserter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/linklayer/ieee8022/Ieee8022SnapInserter.h"
 
 namespace inet {
 

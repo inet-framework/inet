@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/wiseroute/WiseRouteProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/wiseroute/WiseRouteHeader_m.h"
-#include "inet/networklayer/wiseroute/WiseRouteProtocolDissector.h"
 
 
 namespace inet {

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
+
 #include "inet/common/Endian.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
 #include "inet/networklayer/ipv4/headers/ip.h"
 
 namespace inet {

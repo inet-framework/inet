@@ -18,12 +18,12 @@
 #ifndef __INET_NETWORKINTERFACE_H
 #define __INET_NETWORKINTERFACE_H
 
-#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/packet/tag/TagSet.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TagBase.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/tag/TagSet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/common/L3Address.h"

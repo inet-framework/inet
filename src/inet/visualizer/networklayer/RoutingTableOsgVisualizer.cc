@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/networklayer/RoutingTableOsgVisualizer.h"
+
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-#include "inet/visualizer/networklayer/RoutingTableOsgVisualizer.h"
 
 #ifdef WITH_OSG
 #include <osg/Geode>

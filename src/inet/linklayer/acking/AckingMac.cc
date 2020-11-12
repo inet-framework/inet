@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/acking/AckingMac.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -23,7 +25,6 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/acking/AckingMac.h"
 #include "inet/linklayer/acking/AckingMacHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"

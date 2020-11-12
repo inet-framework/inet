@@ -29,6 +29,7 @@
 #define __INET_NETPERFMETER_H
 
 #include <assert.h>
+
 #include <fstream>
 
 #include "inet/applications/netperfmeter/NetPerfMeter_m.h"

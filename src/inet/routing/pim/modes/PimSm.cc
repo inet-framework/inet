@@ -17,6 +17,8 @@
 // Authors: Tomas Prochazka (xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz)
 //          Tamas Borbely (tomi@omnetpp.org)
 
+#include "inet/routing/pim/modes/PimSm.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -27,7 +29,6 @@
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/pim/modes/PimSm.h"
 
 namespace inet {
 

@@ -29,9 +29,10 @@
 #define EIGRPPRINT_H_
 
 #include <iostream>
+
 #include "inet/routing/eigrp/EigrpDualStack.h"
-#include "inet/routing/eigrp/tables/EigrpNetworkTable.h"
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
+#include "inet/routing/eigrp/tables/EigrpNetworkTable.h"
 namespace inet {
 std::ostream& operator<<(std::ostream& os, const eigrp::EigrpNetwork<Ipv4Address>& network);
 std::ostream& operator<<(std::ostream& os, const eigrp::EigrpNetwork<Ipv6Address>& network);

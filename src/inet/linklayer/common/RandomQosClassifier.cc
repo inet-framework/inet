@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/RandomQosClassifier.h"
+
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 
 namespace inet {

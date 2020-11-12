@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/TxOpFs.h"
+
+#include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
 
 namespace inet {
 namespace ieee80211 {

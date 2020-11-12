@@ -18,8 +18,8 @@
 #ifndef __INET_INFOCANVASVISUALIZER_H
 #define __INET_INFOCANVASVISUALIZER_H
 
-#include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/visualizer/base/InfoVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 

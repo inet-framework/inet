@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/dispatching/SendWithProtocol.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocolelement/dispatching/ProtocolHeader_m.h"
-#include "inet/protocolelement/dispatching/SendWithProtocol.h"
 
 namespace inet {
 

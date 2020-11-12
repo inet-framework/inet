@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ppp/Ppp.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -27,7 +29,6 @@
 #include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ppp/Ppp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

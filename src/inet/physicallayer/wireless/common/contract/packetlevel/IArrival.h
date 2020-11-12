@@ -18,9 +18,9 @@
 #ifndef __INET_IARRIVAL_H
 #define __INET_IARRIVAL_H
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/common/IPrintableObject.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {

@@ -18,8 +18,8 @@
 #ifndef __INET_SEQUENCECONTROLFIELD_H
 #define __INET_SEQUENCECONTROLFIELD_H
 
-#include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 
 namespace inet {
 namespace ieee80211 {

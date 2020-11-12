@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee8021d/tester/StpTester.h"
+
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/linklayer/ieee8021d/tester/StpTester.h"
 
 namespace inet {
 

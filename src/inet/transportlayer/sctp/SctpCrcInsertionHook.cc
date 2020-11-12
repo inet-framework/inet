@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
@@ -23,7 +25,6 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/sctp/SctpChecksum.h"
-#include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 

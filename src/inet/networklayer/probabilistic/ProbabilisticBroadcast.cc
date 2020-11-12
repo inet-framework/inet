@@ -5,6 +5,8 @@
  *      Author: Damien Piguet
  */
 
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcast.h"
+
 #include <cassert>
 
 #include "inet/common/ProtocolGroup.h"
@@ -13,7 +15,6 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/probabilistic/ProbabilisticBroadcast.h"
 
 namespace inet {
 

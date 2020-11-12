@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211BerTableErrorModel.h"
+
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211BerTableErrorModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 
 namespace inet {

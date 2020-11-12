@@ -19,6 +19,7 @@
 //
 
 #include "inet/applications/rtpapp/RtpApplication.h"
+
 #include "inet/applications/rtpapp/RtpApplication_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"

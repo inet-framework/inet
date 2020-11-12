@@ -19,8 +19,8 @@
 #define __INET_PRISM_H
 
 #include "inet/common/geometry/base/ShapeBase.h"
-#include "inet/common/geometry/object/Polygon.h"
 #include "inet/common/geometry/common/RotationMatrix.h"
+#include "inet/common/geometry/object/Polygon.h"
 
 namespace inet {
 

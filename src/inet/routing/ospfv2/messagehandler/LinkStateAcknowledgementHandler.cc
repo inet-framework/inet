@@ -17,6 +17,7 @@
 //
 
 #include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
+
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {

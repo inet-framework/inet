@@ -16,8 +16,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/routing/ospfv2/Ospfv2Crc.h"
 #include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
+
+#include "inet/routing/ospfv2/Ospfv2Crc.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
 #include "inet/routing/ospfv2/router/Ospfv2Area.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"

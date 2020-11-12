@@ -16,10 +16,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/common/ProtocolGroup.h"
-#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee802/Ieee802EpdProtocolDissector.h"
+
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 
 namespace inet {
 

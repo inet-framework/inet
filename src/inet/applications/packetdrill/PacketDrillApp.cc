@@ -16,17 +16,18 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/applications/packetdrill/PacketDrillApp.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "inet/common/socket/SocketTag_m.h"
-#include "inet/applications/packetdrill/PacketDrillApp.h"
 #include "inet/applications/packetdrill/PacketDrillInfo_m.h"
 #include "inet/applications/packetdrill/PacketDrillUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NodeConfigurator.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"

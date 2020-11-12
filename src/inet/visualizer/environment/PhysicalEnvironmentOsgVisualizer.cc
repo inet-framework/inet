@@ -15,14 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/environment/PhysicalEnvironmentOsgVisualizer.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/common/geometry/shape/Cuboid.h"
-#include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/Sphere.h"
-#include "inet/visualizer/environment/PhysicalEnvironmentOsgVisualizer.h"
+#include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 
 #ifdef WITH_OSG
 #include <osg/Material>

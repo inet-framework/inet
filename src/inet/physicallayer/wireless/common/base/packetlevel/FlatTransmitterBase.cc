@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {

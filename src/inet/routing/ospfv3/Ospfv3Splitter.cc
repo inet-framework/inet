@@ -1,7 +1,8 @@
 
+#include "inet/routing/ospfv3/Ospfv3Splitter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
-#include "inet/routing/ospfv3/Ospfv3Splitter.h"
 
 namespace inet {
 namespace ospfv3 {

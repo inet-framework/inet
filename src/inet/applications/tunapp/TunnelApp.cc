@@ -15,16 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/applications/tunapp/TunnelApp.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
-
-#include "inet/applications/tunapp/TunnelApp.h"
 
 namespace inet {
 

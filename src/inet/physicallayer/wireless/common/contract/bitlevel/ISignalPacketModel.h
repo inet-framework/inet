@@ -18,11 +18,11 @@
 #ifndef __INET_ISIGNALPACKETMODEL_H
 #define __INET_ISIGNALPACKETMODEL_H
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IFecCoder.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IInterleaver.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IScrambler.h"
-#include "inet/common/IPrintableObject.h"
 
 namespace inet {
 

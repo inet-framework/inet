@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
+
 #include <algorithm>
 
 #include "inet/common/INETMath.h"
 #include "inet/common/figures/BoxedLabelFigure.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
 
 namespace inet {
 

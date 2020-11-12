@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/common/PacketEmitter.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/protocolelement/common/PacketEmitter.h"
 
 namespace inet {
 

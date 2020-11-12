@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/udp/UdpProtocolDissector.h"
+
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/transportlayer/udp/Udp.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/udp/UdpProtocolDissector.h"
 
 namespace inet {
 

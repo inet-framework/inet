@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/common/PaddingInserter.h"
+
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/protocolelement/common/PaddingInserter.h"
 
 namespace inet {
 

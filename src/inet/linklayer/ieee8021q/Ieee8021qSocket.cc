@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/Message.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qSocket.h"
+
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qCommand_m.h"
-#include "inet/linklayer/ieee8021q/Ieee8021qSocket.h"
 
 namespace inet {
 

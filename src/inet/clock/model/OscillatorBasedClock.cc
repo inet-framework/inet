@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
 #include "inet/clock/model/OscillatorBasedClock.h"
+
+#include <algorithm>
 
 namespace inet {
 

@@ -29,9 +29,9 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetTapDevice.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"

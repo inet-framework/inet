@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"

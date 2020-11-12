@@ -18,12 +18,13 @@
 // Authors: ANSA Team
 //
 
+#include "inet/linklayer/ieee8021d/stp/Stp.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ieee8021d/stp/Stp.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

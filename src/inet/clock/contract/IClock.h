@@ -18,8 +18,8 @@
 #ifndef __INET_ICLOCK_H
 #define __INET_ICLOCK_H
 
-#include "inet/clock/contract/ClockTime.h"
 #include "inet/clock/contract/ClockEvent.h"
+#include "inet/clock/contract/ClockTime.h"
 
 namespace inet {
 

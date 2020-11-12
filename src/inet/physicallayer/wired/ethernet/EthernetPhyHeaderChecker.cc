@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wired/ethernet/EthernetPhyHeaderChecker.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/wired/ethernet/EthernetPhyHeaderChecker.h"
 
 namespace inet {
 

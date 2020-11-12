@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/filter/RedDropper.h"
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/marker/EcnMarker.h"
 
 namespace inet {

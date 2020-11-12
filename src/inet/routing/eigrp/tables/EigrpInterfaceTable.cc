@@ -23,6 +23,7 @@
  */
 
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
+
 #include <algorithm>
 
 namespace inet{

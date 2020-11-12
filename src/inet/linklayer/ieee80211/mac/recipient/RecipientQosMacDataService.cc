@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
@@ -22,7 +24,6 @@
 #include "inet/linklayer/ieee80211/mac/duplicateremoval/QosDuplicateRemoval.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
-#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 
 namespace inet {
 namespace ieee80211 {

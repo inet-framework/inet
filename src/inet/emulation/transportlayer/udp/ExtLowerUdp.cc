@@ -15,16 +15,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/emulation/transportlayer/udp/ExtLowerUdp.h"
+
 #include <omnetpp/platdep/sockets.h>
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/emulation/transportlayer/udp/ExtLowerUdp.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"

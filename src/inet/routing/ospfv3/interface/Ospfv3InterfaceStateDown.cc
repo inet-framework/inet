@@ -1,6 +1,7 @@
 
-#include "inet/routing/ospfv3/interface/Ospfv3InterfacePassive.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDown.h"
+
+#include "inet/routing/ospfv3/interface/Ospfv3InterfacePassive.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDrOther.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateLoopback.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStatePointToPoint.h"

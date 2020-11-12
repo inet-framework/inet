@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETUtils.h"
 #include "inet/common/figures/LinearGaugeFigure.h"
+
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

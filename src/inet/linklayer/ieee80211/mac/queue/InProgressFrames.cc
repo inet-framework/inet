@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
-
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+
+#include <algorithm>
 
 namespace inet {
 namespace ieee80211 {
