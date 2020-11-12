@@ -51,7 +51,7 @@ then
     # newline characters are replaced with '%0A' to make them appear as multiline on the web UI
     # Source: https://github.com/actions/starter-workflows/issues/68#issuecomment-581479448
     # (Also: https://github.com/mheap/phpunit-github-actions-printer/pull/14 )
-    echo "::error::${ERRORS//$'\n'/%0A}"
+    echo "::warning::${ERRORS//$'\n'/%0A}"
 fi
 
 DIFFPATTERN="([^\n]*\n[?] *\^\n)" # matches a line that looks like "?     ^" and the line before it
@@ -69,7 +69,7 @@ then
     # newline characters are replaced with '%0A' to make them appear as multiline on the web UI
     # Source: https://github.com/actions/starter-workflows/issues/68#issuecomment-581479448
     # (Also: https://github.com/mheap/phpunit-github-actions-printer/pull/14 )
-    echo "::error::${FAILS//$'\n'/%0A}"
+    echo "::warning::${FAILS//$'\n'/%0A}"
 fi
 
 exit $EXITCODE
