@@ -19,7 +19,6 @@
 #ifndef __INET_OSPFV2INTERFACESTATEWAITING_H
 #define __INET_OSPFV2INTERFACESTATEWAITING_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/interface/Ospfv2InterfaceState.h"
 
 namespace inet {

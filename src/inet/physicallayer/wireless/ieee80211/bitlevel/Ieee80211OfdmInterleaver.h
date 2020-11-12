@@ -19,7 +19,6 @@
 #define __INET_IEEE80211OFDMINTERLEAVER_H
 
 #include "inet/common/BitVector.h"
-#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IInterleaver.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
 

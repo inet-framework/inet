@@ -17,7 +17,6 @@
 
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"

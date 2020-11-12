@@ -18,7 +18,6 @@
 #ifndef __INET_IPV4FLATNETWORKCONFIGURATOR_H
 #define __INET_IPV4FLATNETWORKCONFIGURATOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {

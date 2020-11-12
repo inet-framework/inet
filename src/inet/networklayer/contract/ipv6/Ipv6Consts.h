@@ -18,7 +18,6 @@
 #ifndef __INET_IPV6CONSTS_H
 #define __INET_IPV6CONSTS_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Units_m.h"
 
 namespace inet {

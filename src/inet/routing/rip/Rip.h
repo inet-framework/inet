@@ -18,7 +18,6 @@
 #ifndef __INET_RIP_H
 #define __INET_RIP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoute.h"

@@ -17,7 +17,6 @@
 
 #include "inet/networklayer/diffserv/BehaviorAggregateClassifier.h"
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3Address.h"

@@ -25,7 +25,6 @@
 #ifndef __INET_RTPSENDERINFO_H
 #define __INET_RTPSENDERINFO_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 namespace inet {

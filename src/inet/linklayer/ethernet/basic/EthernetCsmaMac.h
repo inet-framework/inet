@@ -19,7 +19,6 @@
 #ifndef __INET_ETHERNETCSMAMAC_H
 #define __INET_ETHERNETCSMAMAC_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/base/EthernetMacBase.h"
 

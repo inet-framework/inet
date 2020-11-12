@@ -21,7 +21,6 @@
 #include <map>
 #include <set>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"

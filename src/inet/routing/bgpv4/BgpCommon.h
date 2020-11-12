@@ -19,7 +19,6 @@
 #ifndef __INET_BGPCOMMON_H
 #define __INET_BGPCOMMON_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/routing/bgpv4/BgpCommon_m.h"

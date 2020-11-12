@@ -18,7 +18,6 @@
 #ifndef __INET_TESTOPERATION_H_
 #define __INET_TESTOPERATION_H_
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {

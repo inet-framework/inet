@@ -18,7 +18,6 @@
 #ifndef __INET_IANTENNA_H
 #define __INET_IANTENNA_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/IPrintableObject.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"

@@ -17,7 +17,6 @@
 
 #include <fstream>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"

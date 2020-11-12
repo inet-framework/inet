@@ -18,7 +18,6 @@
 #ifndef __INET_TESTMOBILITY_H_
 #define __INET_TESTMOBILITY_H_
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {

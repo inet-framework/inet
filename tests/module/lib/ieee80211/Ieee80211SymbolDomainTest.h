@@ -18,7 +18,6 @@
 #ifndef __INET_IEEE80211SYMBOLMODELTEST_H
 #define __INET_IEEE80211SYMBOLMODELTEST_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmEncoderModule.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"

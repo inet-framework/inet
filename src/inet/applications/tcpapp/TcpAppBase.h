@@ -19,7 +19,6 @@
 #define __INET_TCPAPPBASE_H
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {

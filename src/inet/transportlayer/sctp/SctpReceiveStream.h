@@ -20,7 +20,6 @@
 #ifndef __INET_SCTPRECEIVESTREAM_H
 #define __INET_SCTPRECEIVESTREAM_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/sctp/SctpQueue.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #ifndef __INET_INTERPOLATINGANTENNA_H
 #define __INET_INTERPOLATINGANTENNA_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/AntennaBase.h"
 
 namespace inet {

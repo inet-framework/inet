@@ -18,7 +18,6 @@
 #ifndef __INET_INETFILTER_H
 #define __INET_INETFILTER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/NetworkInterface.h"

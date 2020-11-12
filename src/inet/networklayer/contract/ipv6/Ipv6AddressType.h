@@ -18,7 +18,6 @@
 #ifndef __INET_IPV6ADDRESSTYPE_H
 #define __INET_IPV6ADDRESSTYPE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"

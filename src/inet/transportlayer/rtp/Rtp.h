@@ -25,7 +25,6 @@
 #ifndef __INET_RTP_H
 #define __INET_RTP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"

@@ -19,7 +19,6 @@
 #ifndef __INET_LINKSTATEUPDATEHANDLER_H
 #define __INET_LINKSTATEUPDATEHANDLER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 

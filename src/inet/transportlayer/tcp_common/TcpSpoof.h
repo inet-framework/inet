@@ -18,7 +18,6 @@
 #ifndef __INET_TCPSPOOF_H
 #define __INET_TCPSPOOF_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"

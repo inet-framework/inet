@@ -18,7 +18,6 @@
 #ifndef __INET_PLOTFIGURE_H
 #define __INET_PLOTFIGURE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/figures/IIndicatorFigure.h"
 

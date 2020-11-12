@@ -19,7 +19,6 @@
 #include <fstream>
 #include <iomanip>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"

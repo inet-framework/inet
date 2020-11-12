@@ -18,7 +18,6 @@
 #ifndef __INET_IFRAMESEQUENCEHANDLER_H
 #define __INET_IFRAMESEQUENCEHANDLER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 
 namespace inet {

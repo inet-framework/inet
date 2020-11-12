@@ -19,7 +19,6 @@
 #ifndef __INET_OSPFV2NEIGHBORSTATEEXCHANGESTART_H
 #define __INET_OSPFV2NEIGHBORSTATEEXCHANGESTART_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2NeighborState.h"
 
 namespace inet {

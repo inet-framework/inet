@@ -18,7 +18,6 @@
 #ifndef __INET_ICMPPROTOCOLDISSECTOR_H
 #define __INET_ICMPPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {

@@ -21,7 +21,6 @@
 #ifndef __INET_STP_H
 #define __INET_STP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"

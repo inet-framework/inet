@@ -18,7 +18,6 @@
 #ifndef __INET_BVHTREE_H
 #define __INET_BVHTREE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/environment/contract/IPhysicalObject.h"

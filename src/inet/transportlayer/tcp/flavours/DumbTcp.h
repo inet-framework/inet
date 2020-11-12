@@ -18,7 +18,6 @@
 #ifndef __INET_DUMBTCP_H
 #define __INET_DUMBTCP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {

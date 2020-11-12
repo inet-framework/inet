@@ -1,7 +1,6 @@
 #ifndef __INET_SCTPNATHOOK_H
 #define __INET_SCTPNATHOOK_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/sctp/SctpNatTable.h"
 

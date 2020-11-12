@@ -21,7 +21,6 @@
 
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvpte/IRsvpClassifier.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"

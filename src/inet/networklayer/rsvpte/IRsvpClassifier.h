@@ -19,7 +19,6 @@
 #ifndef __INET_IRSVPCLASSIFIER_H
 #define __INET_IRSVPCLASSIFIER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 

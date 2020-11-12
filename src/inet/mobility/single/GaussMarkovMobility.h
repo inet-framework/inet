@@ -19,7 +19,6 @@
 #ifndef __INET_GAUSSMARKOVMOBILITY_H
 #define __INET_GAUSSMARKOVMOBILITY_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
 
 namespace inet {

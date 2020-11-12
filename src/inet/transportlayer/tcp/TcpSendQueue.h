@@ -18,7 +18,6 @@
 #ifndef __INET_TCPSENDQUEUE_H
 #define __INET_TCPSENDQUEUE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"

@@ -20,7 +20,6 @@
 #ifndef __INET_PIMNEIGHBORTABLE_H
 #define __INET_PIMNEIGHBORTABLE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

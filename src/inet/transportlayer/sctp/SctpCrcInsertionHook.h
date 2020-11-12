@@ -18,7 +18,6 @@
 #ifndef __INET_SCTPCRCINSERTIONHOOK_H
 #define __INET_SCTPCRCINSERTIONHOOK_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CrcMode_m.h"

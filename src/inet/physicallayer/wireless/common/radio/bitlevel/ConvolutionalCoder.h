@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "inet/common/BitVector.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/ShortBitVector.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IFecCoder.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"

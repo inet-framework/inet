@@ -20,7 +20,6 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"

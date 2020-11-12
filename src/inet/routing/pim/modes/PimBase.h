@@ -20,7 +20,6 @@
 #ifndef __INET_PIMBASE_H
 #define __INET_PIMBASE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"

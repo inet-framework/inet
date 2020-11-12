@@ -18,7 +18,6 @@
 #ifndef __INET_RSVPPROTOCOLDISSECTOR_H
 #define __INET_RSVPPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {

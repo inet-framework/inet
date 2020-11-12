@@ -19,7 +19,6 @@
 #define __INET_HTTPBROWSER_H
 
 #include "inet/applications/httptools/browser/HttpBrowserBase.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/SocketMap.h"

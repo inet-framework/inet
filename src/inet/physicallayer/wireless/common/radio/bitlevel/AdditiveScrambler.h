@@ -19,7 +19,6 @@
 #define __INET_ADDITIVESCRAMBLER_H
 
 #include "inet/common/BitVector.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/ShortBitVector.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambling.h"

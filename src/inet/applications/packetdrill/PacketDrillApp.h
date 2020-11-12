@@ -22,7 +22,6 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/applications/packetdrill/PacketDrill.h"
 #include "inet/applications/packetdrill/PacketDrillUtils.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/linklayer/tun/TunSocket.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"

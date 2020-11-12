@@ -19,7 +19,6 @@
 #ifndef __INET_SCTPNATPEER_H
 #define __INET_SCTPNATPEER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"

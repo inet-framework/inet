@@ -27,7 +27,6 @@
 
 #include <cassert>
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 namespace inet {

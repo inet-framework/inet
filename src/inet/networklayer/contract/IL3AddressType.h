@@ -18,7 +18,6 @@
 #ifndef __INET_IL3ADDRESSTYPE_H
 #define __INET_IL3ADDRESSTYPE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/NetworkInterface.h"

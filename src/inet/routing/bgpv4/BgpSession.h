@@ -21,7 +21,6 @@
 
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/bgpv4/Bgp.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/routing/bgpv4/BgpFsm.h"

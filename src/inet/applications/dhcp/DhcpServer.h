@@ -26,7 +26,6 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/applications/dhcp/DhcpLease.h"
 #include "inet/applications/dhcp/DhcpMessage_m.h"
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/arp/ipv4/Arp.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"

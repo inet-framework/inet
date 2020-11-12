@@ -26,7 +26,6 @@
 #include "inet/applications/httptools/common/HttpEventMessages_m.h"
 #include "inet/applications/httptools/common/HttpRandom.h"
 #include "inet/applications/httptools/common/HttpUtils.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 
 namespace inet {

@@ -19,7 +19,6 @@
 #ifndef __INET_SCTPPEER_H
 #define __INET_SCTPPEER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"

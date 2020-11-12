@@ -19,7 +19,6 @@
 #ifndef __INET_TCPLWIPQUEUES_H
 #define __INET_TCPLWIPQUEUES_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"

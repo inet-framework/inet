@@ -21,7 +21,6 @@
 #define __INET_PINGAPP_H
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"

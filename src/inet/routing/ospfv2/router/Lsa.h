@@ -23,7 +23,6 @@
 
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/Ospfv2Packet_m.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 

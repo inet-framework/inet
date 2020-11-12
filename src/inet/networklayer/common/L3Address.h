@@ -18,7 +18,6 @@
 #ifndef __INET_L3ADDRESS_H
 #define __INET_L3ADDRESS_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/ModuleIdAddress.h"
 #include "inet/networklayer/common/ModulePathAddress.h"

@@ -25,7 +25,6 @@
 #ifndef __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 #define __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
 namespace inet {

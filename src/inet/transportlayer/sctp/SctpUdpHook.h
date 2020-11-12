@@ -18,7 +18,6 @@
 #ifndef __INET_SCTPUDPHOOK_H
 #define __INET_SCTPUDPHOOK_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 

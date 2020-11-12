@@ -18,7 +18,6 @@
 #ifndef __INET_LIFECYCLECONTROLLER_H
 #define __INET_LIFECYCLECONTROLLER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/scenario/IScriptable.h"
 

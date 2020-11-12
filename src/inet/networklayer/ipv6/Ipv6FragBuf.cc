@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"

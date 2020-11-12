@@ -19,7 +19,6 @@
 #ifndef __INET_TCPSACKREXMITQUEUE_H
 #define __INET_TCPSACKREXMITQUEUE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 

@@ -19,7 +19,6 @@
 #ifndef __INET_BGPCONFIGREADER_H
 #define __INET_BGPCONFIGREADER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

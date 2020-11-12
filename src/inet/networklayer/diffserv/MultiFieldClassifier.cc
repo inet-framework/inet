@@ -17,7 +17,6 @@
 
 #include "inet/networklayer/diffserv/MultiFieldClassifier.h"
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"

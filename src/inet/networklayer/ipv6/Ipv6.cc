@@ -19,7 +19,6 @@
 
 #include "inet/networklayer/ipv6/Ipv6.h"
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"

@@ -18,7 +18,6 @@
 #ifndef __INET_IINTERFACETABLE_H
 #define __INET_IINTERFACETABLE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {

@@ -20,7 +20,6 @@
 #ifndef __INET_TCPBASEALG_H
 #define __INET_TCPBASEALG_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {

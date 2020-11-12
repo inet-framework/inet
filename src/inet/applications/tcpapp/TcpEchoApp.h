@@ -19,7 +19,6 @@
 #define __INET_TCPECHOAPP_H
 
 #include "inet/applications/tcpapp/TcpServerHostApp.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 

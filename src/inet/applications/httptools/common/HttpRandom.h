@@ -22,7 +22,6 @@
 #include <string>
 
 #include "inet/applications/httptools/common/HttpUtils.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 
 namespace inet {

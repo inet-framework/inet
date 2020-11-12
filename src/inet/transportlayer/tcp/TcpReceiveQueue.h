@@ -24,7 +24,6 @@
 #include <list>
 #include <string>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/ReorderBuffer.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"

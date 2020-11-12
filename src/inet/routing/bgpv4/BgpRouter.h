@@ -19,7 +19,6 @@
 #ifndef __INET_BGPROUTER_H
 #define __INET_BGPROUTER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

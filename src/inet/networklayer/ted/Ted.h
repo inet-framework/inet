@@ -19,7 +19,6 @@
 #ifndef __INET_TED_H
 #define __INET_TED_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/networklayer/ted/Ted_m.h"
 #include "inet/routing/base/RoutingProtocolBase.h"

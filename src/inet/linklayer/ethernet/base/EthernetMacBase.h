@@ -18,7 +18,6 @@
 #ifndef __INET_ETHERNETMACBASE_H
 #define __INET_ETHERNETMACBASE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"

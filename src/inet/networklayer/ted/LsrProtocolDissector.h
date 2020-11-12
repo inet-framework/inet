@@ -18,7 +18,6 @@
 #ifndef __INET_LSRPROTOCOLDISSECTOR_H
 #define __INET_LSRPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {

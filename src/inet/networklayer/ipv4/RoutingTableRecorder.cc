@@ -19,7 +19,6 @@
 
 #include <cinttypes>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"

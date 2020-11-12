@@ -18,7 +18,6 @@
 #ifndef __INET_PPP_H
 #define __INET_PPP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"

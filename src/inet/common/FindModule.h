@@ -1,7 +1,6 @@
 #ifndef __INET_FINDMODULE_H
 #define __INET_FINDMODULE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #ifndef __INET_COORD_H
 #define __INET_COORD_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #ifndef __INET_LOOPBACK_H
 #define __INET_LOOPBACK_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 
 namespace inet {

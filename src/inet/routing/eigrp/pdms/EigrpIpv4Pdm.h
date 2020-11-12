@@ -33,7 +33,6 @@ topology table.
 
 #include <omnetpp.h>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"

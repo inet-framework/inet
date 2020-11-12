@@ -17,7 +17,6 @@
 
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Packet.h"

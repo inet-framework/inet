@@ -24,7 +24,6 @@
 
 #include <functional>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Units_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"

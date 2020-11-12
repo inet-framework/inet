@@ -1,7 +1,6 @@
 #ifndef __INET_OSPFV3ROUTINGTABLEENTRY_H
 #define __INET_OSPFV3ROUTINGTABLEENTRY_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"

@@ -18,7 +18,6 @@
 #ifndef __INET_ILAYEREDERRORMODEL_H
 #define __INET_ILAYEREDERRORMODEL_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
 

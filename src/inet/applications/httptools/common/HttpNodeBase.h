@@ -28,7 +28,6 @@
 #include "inet/applications/httptools/common/HttpRandom.h"
 #include "inet/applications/httptools/common/HttpUtils.h"
 #include "inet/applications/httptools/configurator/HttpController.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 

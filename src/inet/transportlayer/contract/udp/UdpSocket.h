@@ -20,7 +20,6 @@
 
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"

@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE8022LLCCHECKER_H
 #define __INET_IEEE8022LLCCHECKER_H
 
+#include "inet/common/Protocol.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 

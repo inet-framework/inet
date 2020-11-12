@@ -20,7 +20,6 @@
 #ifndef __INET_PIMSPLITTER_H
 #define __INET_PIMSPLITTER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/pim/PimPacket_m.h"

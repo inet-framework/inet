@@ -19,7 +19,6 @@
 #define __INET_TESTPROTOCOL_H_
 
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {

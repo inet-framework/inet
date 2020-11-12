@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 

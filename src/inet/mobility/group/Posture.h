@@ -53,7 +53,6 @@
 
 #include <string.h>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/Coord.h"
 

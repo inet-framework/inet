@@ -18,7 +18,6 @@
 #ifndef __INET_ACKINGMAC_H
 #define __INET_ACKINGMAC_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"

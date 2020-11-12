@@ -18,7 +18,6 @@
 #ifndef __INET_IPV4NODECONFIGURATOR_H
 #define __INET_IPV4NODECONFIGURATOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
