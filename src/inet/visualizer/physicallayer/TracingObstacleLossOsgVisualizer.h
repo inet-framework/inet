@@ -20,6 +20,10 @@
 
 #include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
 
+#ifdef WITH_OSG
+#include <osg/Group>
+#endif // ifdef WITH_OSG
+
 namespace inet {
 
 namespace visualizer {

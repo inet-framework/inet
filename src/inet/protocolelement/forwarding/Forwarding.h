@@ -18,6 +18,7 @@
 #ifndef __INET_FORWARDING_H
 #define __INET_FORWARDING_H
 
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

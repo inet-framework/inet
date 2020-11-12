@@ -41,6 +41,8 @@ namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::math;
+
 /**
  * This generates pulse-level representation of an IEEE 802.15.4A UWB PHY frame
  * using the mandatory mode (high PRF).

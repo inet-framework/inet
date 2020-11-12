@@ -21,6 +21,8 @@
 #ifndef __INET_IEEE80211YANSERRORMODEL_H
 #define __INET_IEEE80211YANSERRORMODEL_H
 
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 

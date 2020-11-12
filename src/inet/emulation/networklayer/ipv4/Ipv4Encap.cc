@@ -20,7 +20,6 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"

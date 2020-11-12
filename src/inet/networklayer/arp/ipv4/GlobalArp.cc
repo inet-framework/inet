@@ -20,7 +20,6 @@
 
 #include "inet/networklayer/arp/ipv4/GlobalArp.h"
 
-#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #ifdef WITH_IPv6

@@ -18,7 +18,6 @@
 #include "inet/power/management/SimpleEpEnergyManagement.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
