@@ -15,6 +15,7 @@ jobs:
     strategy:
       matrix:
         mode: ["debug", "release"]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - name: Pull Docker image
@@ -35,6 +36,7 @@ jobs:
       matrix:
         target: ["windows", "macosx"]
         mode: ["debug", "release"]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - name: Pull Docker image
@@ -51,6 +53,7 @@ jobs:
     strategy:
       matrix:
         mode: ["debug", "release"]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
@@ -74,6 +77,7 @@ jobs:
         # MODEs or executables based on command line arguments or envvars
         testdir: ["module", "unit", "packet", "queueing", "protocol",
                   "packetdrill/udp", "packetdrill/tcp", "packetdrill/sctp"]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
