@@ -32,8 +32,8 @@ import inet.greencloudsimulator.RouterGreenCloud;
 
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.EthernetSwitch;
 import ned.DatarateChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv4.Ipv4FlatNetworkConfigurator;

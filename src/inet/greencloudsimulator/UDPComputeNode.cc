@@ -82,7 +82,7 @@ void UDPComputeNode::initialize(int stage)
     destPort = par("destPort");
 
 
-    const char *destAddrs = par("destAddresses");
+    //const char *destAddrs = par("destAddresses");
     //const char *destAddrs = "192.168.0.3";
     //const char *destAddrs = "ServerNode[15]";
 
@@ -213,7 +213,7 @@ Packet *UDPComputeNode::CopyCloudTaskPacket(int cter, int srcid,double mip,doubl
     tsk->setSrcaddress(srcA);
     tsk->setChunkLength(B(par("messageLength").intValue()));
     tsk->setMpis_(mip);
-    tsk->setSize_(0.1);
+    tsk->setSize_(0); //tsk->setSize_(0.1); // I think that is a mistake of the authors
     tsk->setDeadline_(deadline); // START TIME + SIM DURATION
     tsk->setOutput_(0);
     tsk->setIntercom_(0);

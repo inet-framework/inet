@@ -287,7 +287,6 @@ cNEDValue nedf_selectWithRandomDistribution(cComponent *context, cNEDValue argv[
 
     double p = context->uniform(0, 1.0);
 
-    char valStr[40];
     for (unsigned int i = 0; i < list2.size(); i++) {
         if (p < list2[i]) {
             return list1[i];

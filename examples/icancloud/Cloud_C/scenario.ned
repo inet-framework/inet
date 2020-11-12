@@ -1,7 +1,7 @@
 package inet.examples.icancloud.Cloud_C; 
 
 import ned.DatarateChannel; 
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.icancloud.Architecture.Node.NodeVL.NodeVL; 
 import inet.icancloud.Management.CloudManagement.ResourcesProvisioning.**.*; 
@@ -183,34 +183,34 @@ network Cloud_C{
 	// ---------------------------------------------------------------
 	//   Definition of switches
 	// ---------------------------------------------------------------
-	switch_0:EtherSwitch{
+	switch_0:EthernetSwitch{
 	}
 
-	switch_1:EtherSwitch{
+	switch_1:EthernetSwitch{
 	}
 
-	switch_2:EtherSwitch{
+	switch_2:EthernetSwitch{
 	}
 
-	switch_3:EtherSwitch{
+	switch_3:EthernetSwitch{
 	}
 
-	rackSwitch_0:EtherSwitch{
+	rackSwitch_0:EthernetSwitch{
 	}
 
-	rackSwitch_1:EtherSwitch{
+	rackSwitch_1:EthernetSwitch{
 	}
 
-	rackSwitch_2:EtherSwitch{
+	rackSwitch_2:EthernetSwitch{
 	}
 
-	rackSwitch_3:EtherSwitch{
+	rackSwitch_3:EthernetSwitch{
 	}
 
-	rackSwitch_4:EtherSwitch{
+	rackSwitch_4:EthernetSwitch{
 	}
 
-	rackSwitch_5:EtherSwitch{
+	rackSwitch_5:EthernetSwitch{
 	}
 
 	// ---------------------------------------------------------------

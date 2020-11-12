@@ -257,7 +257,7 @@ Packet *UDPSchedular::createCloudTaskPacket()
     packet->setSrcProcId(this->getIndex());
     tsk->setChunkLength(B(par("messageLength").intValue()));
     tsk->setMpis_(1000);
-    tsk->setSize_(0.1);
+    tsk->setSize_(0); //tsk->setSize_(0.1); // I think that is a mistake of the authors
     tsk->setDeadline_(1); // START TIME + SIM DURATION
     tsk->setOutput_(0);
     tsk->setIntercom_(0);
@@ -848,26 +848,20 @@ void UDPSchedular::updateTskList()
     bool chk = false; // added if task is not empty schedule event
     cloudTask *schdTask = new cloudTask();
 
-    if(!tasks_list_.empty())
-    {
-    for (iter = tasks_list_.begin(); iter != tasks_list_.end(); iter++)
-    {
-        if (nextDeadline > (*iter)->getDeadline())
-        {
-            nextDeadline = (*iter)->execTime();
-
-                    schdTask->setMIPS((*iter)->getMIPS());
-                    schdTask->setSize((*iter)->getSize());
-                    schdTask->setIntercom((*iter)->getIntercom());
-                    schdTask->setExecTime((*iter)->execTime());
-                    simtime_t d = simTime();
-                    schdTask->setComputingRate((*iter)->getComputingRate(),d.dbl());
-                    schdTask->setDeadline((*iter)->getDeadline());
-                    chk = true;
-
-
+    if(!tasks_list_.empty()) {
+        for (iter = tasks_list_.begin(); iter != tasks_list_.end(); iter++) {
+            if (nextDeadline > (*iter)->getDeadline()) {
+                nextDeadline = (*iter)->execTime();
+                schdTask->setMIPS((*iter)->getMIPS());
+                schdTask->setSize((*iter)->getSize());
+                schdTask->setIntercom((*iter)->getIntercom());
+                schdTask->setExecTime((*iter)->execTime());
+                simtime_t d = simTime();
+                schdTask->setComputingRate((*iter)->getComputingRate(),d.dbl());
+                schdTask->setDeadline((*iter)->getDeadline());
+                chk = true;
+            }
         }
-    }
     }
 
     /* reschedule next update */

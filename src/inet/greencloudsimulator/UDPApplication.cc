@@ -181,7 +181,7 @@ Packet *UDPApplication::createCloudTaskPacket()
 
     double prob = dblrand();
     tsk->setMpis_(prob * 1000);
-    tsk->setSize_(0.1);
+    tsk->setSize_(0); //tsk->setSize_(0.1); // I think that is a mistake of the authors
     tsk->setDeadline_(1); //  SIM DURATION
     tsk->setOutput_(0);
     tsk->setIntercom_(0);
