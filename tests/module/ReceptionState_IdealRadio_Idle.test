@@ -7,7 +7,7 @@ The received signal is too weak to sense at all.
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
+import inet.physicallayer.wireless.unitdisk.UnitDiskRadioMedium;
 
 network Test
 {

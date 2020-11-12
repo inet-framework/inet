@@ -19,9 +19,9 @@ The testing process is as follows:
 %file: test.ned
 
 import inet.test.moduletest.lib.ieee80211.Ieee80211BitDomainTest;
-import inet.physicallayer.common.bitlevel.ConvolutionalCoder;
+import inet.physicallayer.wireless.common.radio.bitlevel.ConvolutionalCoder;
 import inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmInterleaver;
-import inet.physicallayer.common.bitlevel.AdditiveScrambler;
+import inet.physicallayer.wireless.common.radio.bitlevel.AdditiveScrambler;
 
 network BitDomainTest
 {

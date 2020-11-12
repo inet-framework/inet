@@ -51,7 +51,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 import inet.test.moduletest.lib.*;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
+import inet.physicallayer.wireless.unitdisk.UnitDiskRadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 
