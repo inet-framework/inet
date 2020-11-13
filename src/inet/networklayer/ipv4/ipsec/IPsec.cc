@@ -188,11 +188,11 @@ IPsecRule::Protection IPsec::parseProtection(const cXMLElement *elem)
 void IPsec::initialize(int stage)
 {
     if (stage == INITSTAGE_NETWORK_LAYER_3) {
-        ahProtectOutDelay = par("ahProtectOutDelay");
-        ahProtectInDelay = par("ahProtectInDelay");
+        ahProtectOutDelay = &par("ahProtectOutDelay");
+        ahProtectInDelay = &par("ahProtectInDelay");
 
-        espProtectOutDelay = par("espProtectOutDelay");
-        espProtectInDelay = par("espProtectInDelay");
+        espProtectOutDelay = &par("espProtectOutDelay");
+        espProtectInDelay = &par("espProtectInDelay");
 
         ipLayer = getModuleFromPar<IPv4>(par("networkProtocolModule"), this);
 
@@ -366,7 +366,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
                 ipv4datagram->setTransportProtocol(IP_PROT_ESP);
                 transport = espProtect(transport, (saEntry), transportType);
 
-                delay += espProtectOutDelay;
+                delay += espProtectOutDelay->doubleValue();
             }
             else if (saEntry->getProtection() == IPsecRule::Protection::AH) {
                 EV_INFO << "IPsec OUT AH PROTECT packet: " << packetInfo.str() << std::endl;
@@ -375,7 +375,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
                 ipv4datagram->setTransportProtocol(IP_PROT_AH);
                 transport = ahProtect(transport, saEntry, transportType);
 
-                delay += ahProtectOutDelay;
+                delay += ahProtectOutDelay->doubleValue();
             }
         }
     }
@@ -433,7 +433,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
             ipv4datagram->encapsulate(ah->decapsulate());
             ipv4datagram->setTransportProtocol(ah->getNextHeader());
 
-            delay = ahProtectInDelay;
+            delay = ahProtectInDelay->doubleValue();
 
             if (ah->getNextHeader() != IP_PROT_ESP) {
                 delete ah;
@@ -492,7 +492,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
             ipv4datagram->setTransportProtocol(esp->getNextHeader());
             delete esp;
 
-            delay += espProtectInDelay;
+            delay += espProtectInDelay->doubleValue();
 
             if (delay > 0 || lastProtectedIn > simTime()) {
                 cMessage *selfmsg = new cMessage("IPsecProtectInDelay");
