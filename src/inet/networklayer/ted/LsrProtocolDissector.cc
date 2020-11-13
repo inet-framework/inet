@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ted/LsrProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"
-#include "inet/networklayer/ted/LsrProtocolDissector.h"
 
 
 namespace inet {

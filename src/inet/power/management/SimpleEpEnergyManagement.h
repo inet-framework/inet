@@ -18,6 +18,7 @@
 #ifndef __INET_SIMPLEEPENERGYMANAGEMENT_H
 #define __INET_SIMPLEEPENERGYMANAGEMENT_H
 
+#include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/power/contract/IEpEnergyManagement.h"
 #include "inet/power/contract/IEpEnergyStorage.h"

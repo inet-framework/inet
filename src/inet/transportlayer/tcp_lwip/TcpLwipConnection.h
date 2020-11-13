@@ -18,7 +18,6 @@
 #ifndef __INET_TCPLWIPCONNECTION_H
 #define __INET_TCPLWIPCONNECTION_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"

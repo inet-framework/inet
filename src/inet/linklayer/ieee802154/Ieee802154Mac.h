@@ -35,11 +35,11 @@
 #ifndef __INET_IEEE802154MAC_H
 #define __INET_IEEE802154MAC_H
 
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 

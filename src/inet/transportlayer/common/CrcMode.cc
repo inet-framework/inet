@@ -17,7 +17,6 @@
 
 #include <string.h>
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {

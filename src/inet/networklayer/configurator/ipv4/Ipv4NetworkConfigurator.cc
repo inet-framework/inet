@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
+
 #include <set>
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/stlutils.h"
 #include "inet/common/XMLUtils.h"
-#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 

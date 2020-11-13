@@ -18,7 +18,6 @@
 #ifndef __INET_CSMACAMACPROTOCOLDISSECTOR_H
 #define __INET_CSMACAMACPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {

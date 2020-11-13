@@ -15,7 +15,6 @@ simple TestApp
 %file: TestApp.cc
 
 #include <fstream>
-#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"

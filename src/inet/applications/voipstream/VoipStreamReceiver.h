@@ -33,8 +33,9 @@ extern "C" {
 #include <libavformat/avformat.h>
 };
 
-#include <iostream>
 #include <sys/stat.h>
+
+#include <iostream>
 
 #include "inet/applications/voipstream/AudioOutFile.h"
 #include "inet/applications/voipstream/VoipStreamPacket_m.h"

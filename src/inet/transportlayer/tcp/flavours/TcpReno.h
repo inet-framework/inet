@@ -18,7 +18,6 @@
 #ifndef __INET_TCPRENO_H
 #define __INET_TCPRENO_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
 namespace inet {

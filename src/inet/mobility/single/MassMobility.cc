@@ -19,8 +19,9 @@
 // Generalization: Andras Varga
 //
 
-#include "inet/common/INETMath.h"
 #include "inet/mobility/single/MassMobility.h"
+
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

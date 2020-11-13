@@ -20,9 +20,9 @@
 
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/IModulator.h"
 
 namespace inet {
 

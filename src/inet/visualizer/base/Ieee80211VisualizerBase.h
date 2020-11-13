@@ -21,9 +21,9 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
-#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 

@@ -21,7 +21,6 @@
 
 #include <string>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 
 namespace inet {

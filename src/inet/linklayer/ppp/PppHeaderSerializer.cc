@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ppp/PppHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
-#include "inet/linklayer/ppp/PppHeaderSerializer.h"
 
 namespace inet {
 

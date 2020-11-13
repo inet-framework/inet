@@ -26,7 +26,6 @@
 #include <map>
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"

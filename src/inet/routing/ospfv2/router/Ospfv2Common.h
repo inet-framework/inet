@@ -20,10 +20,10 @@
 #define __INET_OSPFV2COMMON_H
 
 #include <ctype.h>
-#include <functional>
 #include <stdio.h>
 
-#include "inet/common/INETDefs.h"
+#include <functional>
+
 #include "inet/common/Units_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"

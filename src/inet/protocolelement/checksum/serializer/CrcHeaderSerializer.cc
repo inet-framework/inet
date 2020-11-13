@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/checksum/serializer/CrcHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/protocolelement/checksum/header/CrcHeader_m.h"
-#include "inet/protocolelement/checksum/serializer/CrcHeaderSerializer.h"
 
 namespace inet {
 

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/aodv/AodvControlPacketsSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/aodv/AodvControlPackets_m.h"
-#include "inet/routing/aodv/AodvControlPacketsSerializer.h"
 
 namespace inet {
 namespace aodv {

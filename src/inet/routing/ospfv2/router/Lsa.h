@@ -20,9 +20,9 @@
 #define __INET_LSA_H
 
 #include <math.h>
+
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/Ospfv2Packet_m.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 

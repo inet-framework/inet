@@ -15,14 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv6/Ipv6FragBuf.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
-#include "inet/networklayer/ipv6/Ipv6FragBuf.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 namespace inet {

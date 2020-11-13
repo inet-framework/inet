@@ -17,6 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -25,7 +27,6 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
-#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"

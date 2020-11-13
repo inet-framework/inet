@@ -17,8 +17,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/applications/udpapp/UdpBasicBurst.h"
+
+#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"

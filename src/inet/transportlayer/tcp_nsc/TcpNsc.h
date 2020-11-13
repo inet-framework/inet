@@ -23,9 +23,6 @@
 #include <map>
 
 #include "inet/common/INETDefs.h"
-
-#include <sim_interface.h>    // NSC. We need this here to derive from classes
-
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -33,6 +30,7 @@
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
+#include "sim_interface.h"    // NSC. We need this here to derive from classes
 
 namespace inet {
 

@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/linklayer/ethernet/modular/EthernetSocketPacketProcessor.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetCommand_m.h"
-#include "inet/linklayer/ethernet/modular/EthernetSocketPacketProcessor.h"
 
 namespace inet {
 

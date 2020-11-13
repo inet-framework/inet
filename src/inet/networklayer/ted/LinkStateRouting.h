@@ -19,7 +19,6 @@
 #ifndef __INET_LINKSTATEROUTING_H
 #define __INET_LINKSTATEROUTING_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"

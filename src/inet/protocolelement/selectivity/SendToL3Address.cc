@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/selectivity/SendToL3Address.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/selectivity/DestinationL3AddressHeader_m.h"
-#include "inet/protocolelement/selectivity/SendToL3Address.h"
 
 namespace inet {
 

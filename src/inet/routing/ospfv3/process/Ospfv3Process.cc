@@ -1,6 +1,7 @@
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/routing/ospfv3/process/Ospfv3Process.h"
+
+#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 namespace ospfv3 {

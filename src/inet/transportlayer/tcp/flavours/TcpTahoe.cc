@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/tcp/flavours/TcpTahoe.h"
+
 #include <algorithm>    // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
-#include "inet/transportlayer/tcp/flavours/TcpTahoe.h"
 
 namespace inet {
 namespace tcp {

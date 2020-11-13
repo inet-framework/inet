@@ -18,20 +18,20 @@
 #ifndef __INET_MEDIUMCANVASVISUALIZER_H
 #define __INET_MEDIUMCANVASVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/figures/HeatMapFigure.h"
 #include "inet/common/figures/HeatMapPlotFigure.h"
 #include "inet/common/figures/PlotFigure.h"
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 #include "inet/visualizer/util/AnimationSpeedInterpolator.h"
 
 #ifdef WITH_RADIO
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 #endif // WITH_RADIO
 
 namespace inet {

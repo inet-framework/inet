@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <stdio.h>
-
 #include "inet/common/Simsignals.h"
+
+#include <stdio.h>
 
 namespace inet {
 

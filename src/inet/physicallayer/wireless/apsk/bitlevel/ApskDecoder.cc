@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskDecoder.h"
+
+#include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 
 namespace inet {

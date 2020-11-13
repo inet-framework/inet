@@ -25,7 +25,6 @@
 #ifndef __INET_RTPPARTICIPANTINFO_H
 #define __INET_RTPPARTICIPANTINFO_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"

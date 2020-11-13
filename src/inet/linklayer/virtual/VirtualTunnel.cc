@@ -15,16 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/linklayer/virtual/VirtualTunnel.h"
+
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/ethernet/common/EthernetSocket.h"
-#include "inet/linklayer/ieee8021q/Ieee8021qSocket.h"
-#include "inet/linklayer/virtual/VirtualTunnel.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

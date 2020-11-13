@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/rip/RipProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/routing/rip/RipPacket_m.h"
-#include "inet/routing/rip/RipProtocolDissector.h"
 
 namespace inet {
 

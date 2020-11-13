@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/FlowTag.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 

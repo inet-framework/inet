@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
+
 #include "inet/common/packet/chunk/EmptyChunk.h"
 
 namespace inet {

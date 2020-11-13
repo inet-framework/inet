@@ -18,13 +18,13 @@
 #ifndef __INET_ICOMMUNICATIONCACHE_H
 #define __INET_ICOMMUNICATIONCACHE_H
 
+#include "IWirelessSignal.h"
 #include "inet/common/IntervalTree.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionResult.h"
-#include "IWirelessSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
 
 namespace inet {

@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/arp/ipv4/ArpProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
-#include "inet/networklayer/arp/ipv4/ArpProtocolPrinter.h"
 
 namespace inet {
 

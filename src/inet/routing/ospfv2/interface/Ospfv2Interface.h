@@ -23,7 +23,6 @@
 #include <map>
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"

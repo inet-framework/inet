@@ -18,6 +18,7 @@
 #ifndef __INET_EDCAF_H
 #define __INET_EDCAF_H
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/common/StationRetryCounters.h"
@@ -26,7 +27,6 @@
 #include "inet/linklayer/ieee80211/mac/contract/IEdcaCollisionController.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"

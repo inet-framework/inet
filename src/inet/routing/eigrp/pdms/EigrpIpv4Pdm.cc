@@ -26,16 +26,17 @@
 topology table.
  */
 
-#include <algorithm>
 #include "inet/routing/eigrp/pdms/EigrpIpv4Pdm.h"
+
+#include <algorithm>
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/routing/eigrp/pdms/EigrpPrint.h"
 #define EIGRP_DEBUG
 

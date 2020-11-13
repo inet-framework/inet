@@ -18,7 +18,6 @@
 #ifndef __INET_RECTANGLEMOBILITY_H
 #define __INET_RECTANGLEMOBILITY_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/mobility/base/MovingMobilityBase.h"
 
 namespace inet {

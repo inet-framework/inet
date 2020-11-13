@@ -20,6 +20,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/xmipv6/xMIPv6.h"
+
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
@@ -37,7 +39,6 @@
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingCache.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
-#include "inet/networklayer/xmipv6/xMIPv6.h"
 
 namespace inet {
 

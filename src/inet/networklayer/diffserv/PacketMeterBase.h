@@ -19,8 +19,8 @@
 #define __INET_PACKETMETERBASE_H
 
 #include "inet/queueing/base/PacketProcessorBase.h"
-#include "inet/queueing/contract/IPassivePacketSource.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 

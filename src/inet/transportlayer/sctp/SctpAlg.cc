@@ -17,8 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpAlg.h"
+
+#include "inet/transportlayer/sctp/Sctp.h"
 
 namespace inet {
 namespace sctp {

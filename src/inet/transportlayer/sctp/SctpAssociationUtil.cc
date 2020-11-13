@@ -21,18 +21,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

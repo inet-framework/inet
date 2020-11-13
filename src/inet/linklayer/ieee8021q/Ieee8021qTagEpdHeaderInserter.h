@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE8021QTAGEPDHEADERINSERTER_H
 #define __INET_IEEE8021QTAGEPDHEADERINSERTER_H
 
+#include "inet/common/Protocol.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {

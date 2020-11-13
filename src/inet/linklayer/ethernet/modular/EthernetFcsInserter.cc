@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/modular/EthernetFcsInserter.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/modular/EthernetFcsInserter.h"
 
 namespace inet {
 

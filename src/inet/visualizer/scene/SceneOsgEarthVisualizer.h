@@ -22,9 +22,9 @@
 #include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 
 #ifdef WITH_OSGEARTH
+#include <osgEarth/GeoTransform>
 #include <osgEarth/MapNode>
 #include <osgEarthAnnotation/RectangleNode>
-#include <osgEarth/GeoTransform>
 #endif // ifdef WITH_OSGEARTH
 
 namespace inet {

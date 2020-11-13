@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/tcp_common/TcpProtocolDissector.h"
+
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/transportlayer/tcp_common/TcpProtocolDissector.h"
 
 namespace inet {
 

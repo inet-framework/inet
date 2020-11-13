@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211HTCODE_H
 #define __INET_IEEE80211HTCODE_H
 
-#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambling.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ICode.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambling.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211HtInterleaving.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"

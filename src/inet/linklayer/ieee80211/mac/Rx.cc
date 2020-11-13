@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
-#include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 

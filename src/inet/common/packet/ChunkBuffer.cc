@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/ChunkBuffer.h"
+
 #include <algorithm>
 
-#include "inet/common/packet/ChunkBuffer.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 

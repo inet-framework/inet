@@ -16,9 +16,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/linklayer/common/MacAddress.h"
+
 #include <ctype.h>
 
-#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 

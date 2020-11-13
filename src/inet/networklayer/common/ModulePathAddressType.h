@@ -18,7 +18,6 @@
 #ifndef __INET_MODULEPATHADDRESSTYPE_H
 #define __INET_MODULEPATHADDRESSTYPE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/ModulePathAddress.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 

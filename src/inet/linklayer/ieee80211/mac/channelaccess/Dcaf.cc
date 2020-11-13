@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Dcaf.h"
-#include "inet/linklayer/ieee80211/mac/contract/IRx.h"
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

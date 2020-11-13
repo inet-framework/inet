@@ -14,12 +14,13 @@
 // Also we hope it will help in the developing of routing protocols using INET.
 //
 
+#include "inet/routing/dsdv/Dsdv.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/routing/dsdv/Dsdv.h"
 
 namespace inet {
 

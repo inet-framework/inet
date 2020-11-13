@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
+
 #include "inet/common/Endian.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)

@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv4/IcmpProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "inet/networklayer/ipv4/IcmpProtocolDissector.h"
 
 
 namespace inet {

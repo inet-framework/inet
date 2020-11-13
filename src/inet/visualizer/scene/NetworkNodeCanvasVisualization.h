@@ -18,9 +18,8 @@
 #ifndef __INET_NETWORKNODECANVASVISUALIZATION_H
 #define __INET_NETWORKNODECANVASVISUALIZATION_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 

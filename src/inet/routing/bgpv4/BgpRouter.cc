@@ -16,10 +16,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/routing/bgpv4/BgpRouter.h"
+
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {

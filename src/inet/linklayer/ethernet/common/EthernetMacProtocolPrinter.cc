@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/common/EthernetMacProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/common/EthernetMacProtocolPrinter.h"
 
 namespace inet {
 

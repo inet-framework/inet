@@ -21,7 +21,6 @@
 #ifndef __INET_RTPAPPLICATION_H
 #define __INET_RTPAPPLICATION_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 

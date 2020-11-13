@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/linklayer/InterfaceTableCanvasVisualizer.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/visualizer/linklayer/InterfaceTableCanvasVisualizer.h"
 
 namespace inet {
 

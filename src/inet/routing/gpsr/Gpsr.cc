@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/gpsr/Gpsr.h"
+
 #include <algorithm>
 
 #include "inet/common/INETUtils.h"
@@ -29,7 +31,6 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/routing/gpsr/Gpsr.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"

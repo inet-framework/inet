@@ -15,16 +15,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 #include "inet/physicallayer/wireless/common/signal/Interference.h"
 

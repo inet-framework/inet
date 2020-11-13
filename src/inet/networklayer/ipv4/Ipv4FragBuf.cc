@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv4/Ipv4FragBuf.h"
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "inet/networklayer/ipv4/Icmp.h"
-#include "inet/networklayer/ipv4/Ipv4FragBuf.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #ifndef __INET_INDICATORLABELFIGURE_H
 #define __INET_INDICATORLABELFIGURE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/figures/IIndicatorFigure.h"
 

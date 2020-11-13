@@ -22,7 +22,6 @@
 #ifndef __INET_MASSMOBILITY_H
 #define __INET_MASSMOBILITY_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
 
 namespace inet {

@@ -21,20 +21,21 @@
  * @date 12.5.2013
  */
 
+#include "inet/networklayer/ipv4/Igmpv3.h"
+
 #include <algorithm>
 #include <bitset>
 
-#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Igmpv3.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"

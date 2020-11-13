@@ -15,16 +15,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/base/EthernetMacBase.h"
+
 #include <stdlib.h>
-#include "inet/common/checksum/EthernetCRC.h"
+
 #include "inet/common/INETUtils.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ethernet/base/EthernetMacBase.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"

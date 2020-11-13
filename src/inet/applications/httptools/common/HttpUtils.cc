@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
+#include "inet/applications/httptools/common/HttpUtils.h"
+
 #include <ctype.h>
 
-#include "inet/applications/httptools/common/HttpUtils.h"
+#include <algorithm>
 
 namespace inet {
 

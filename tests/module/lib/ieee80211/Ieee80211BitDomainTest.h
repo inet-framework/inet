@@ -18,10 +18,9 @@
 #ifndef __INET_IEEE80211BITDOMAINTEST_H_
 #define __INET_IEEE80211BITDOMAINTEST_H_
 
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoderModule.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoderModule.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaverModule.h"
-#include "inet/physicallayer/common/bitlevel/AdditiveScramblerModule.h"
-#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScramblerModule.h"
 #include "inet/common/ModuleAccess.h"
 
 using namespace inet::physicallayer;

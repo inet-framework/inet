@@ -22,8 +22,8 @@
 #include <map>
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"

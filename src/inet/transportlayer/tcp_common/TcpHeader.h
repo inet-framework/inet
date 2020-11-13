@@ -20,7 +20,6 @@
 
 #include <list>
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 
 namespace inet {

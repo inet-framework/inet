@@ -18,8 +18,8 @@
 #ifndef __INET_ETHERNETSOCKET_H
 #define __INET_ETHERNETSOCKET_H
 
-#include "inet/common/packet/Message.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketBase.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 

@@ -26,7 +26,6 @@
 #ifndef __INET_CLNSADDRESSTYPE_H
 #define __INET_CLNSADDRESSTYPE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/clns/ClnsAddress.h"
 

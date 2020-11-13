@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/visualizer/linklayer/DataLinkCanvasVisualizer.h"
+
+#include "inet/linklayer/base/MacProtocolBase.h"
 
 #ifdef WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"

@@ -24,9 +24,9 @@
 
 //#include "inet/networklayer/contract/ipv4/Ipv4ControlInfo.h"
 //#include "inet/networklayer/contract/ipv6/Ipv6ControlInfo.h"
-#include "inet/common/ModuleAccess.h"
-
 #include "inet/routing/eigrp/EigrpRtp.h"
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 namespace inet {
 namespace eigrp {

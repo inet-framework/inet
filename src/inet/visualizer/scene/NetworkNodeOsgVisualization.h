@@ -21,9 +21,9 @@
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
 
 #ifdef WITH_OSG
+#include <osg/AutoTransform>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
-#include <osg/AutoTransform>
 #endif // ifdef WITH_OSG
 
 namespace inet {

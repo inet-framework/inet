@@ -19,11 +19,11 @@
 #define __INET_IEEE80211OFDMDECODER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"

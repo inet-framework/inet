@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv6/Ipv6ProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
-#include "inet/networklayer/ipv6/Ipv6ProtocolPrinter.h"
 
 namespace inet {
 

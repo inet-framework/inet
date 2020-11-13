@@ -17,6 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/ipv4/Igmpv2.h"
+
 #include <algorithm>
 
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -28,7 +30,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Igmpv2.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"

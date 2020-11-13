@@ -16,6 +16,7 @@
 //
 
 #include "inet/networklayer/configurator/nexthop/NextHopNetworkConfigurator.h"
+
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 

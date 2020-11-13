@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/common/MacAddressTable.h"
+
 #include <map>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
-#include "inet/linklayer/ethernet/common/MacAddressTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 

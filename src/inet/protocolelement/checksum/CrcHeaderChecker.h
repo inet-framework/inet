@@ -18,8 +18,8 @@
 #ifndef __INET_CRCHEADERCHECKER_H
 #define __INET_CRCHEADERCHECKER_H
 
-#include "inet/protocolelement/common/HeaderPosition.h"
 #include "inet/protocolelement/checksum/base/CrcCheckerBase.h"
+#include "inet/protocolelement/common/HeaderPosition.h"
 
 namespace inet {
 

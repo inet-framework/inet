@@ -16,9 +16,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/ted/Ted.h"
+
 #include <algorithm>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -27,7 +28,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ted/Ted.h"
 
 namespace inet {
 

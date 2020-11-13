@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/protocolelement/common/InterpacketGapInserter.h"
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/common/ProgressTag_m.h"
 
 namespace inet {

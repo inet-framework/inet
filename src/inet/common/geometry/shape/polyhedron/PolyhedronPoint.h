@@ -18,10 +18,11 @@
 #ifndef __INET_POLYHEDRONPOINT_H
 #define __INET_POLYHEDRONPOINT_H
 
-#include <vector>
 #include <map>
-#include "inet/common/geometry/shape/polyhedron/PolyhedronFace.h"
+#include <vector>
+
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronFace.h"
 
 namespace inet {
 

@@ -18,11 +18,10 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "lwip/lwip_tcp.h"
-#include "lwip/memp.h"
-
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/tcp_lwip/LwipTcpStackIf.h"
+#include "lwip/lwip_tcp.h"
+#include "lwip/memp.h"
 
 namespace inet {
 

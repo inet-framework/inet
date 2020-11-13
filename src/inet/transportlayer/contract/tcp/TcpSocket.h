@@ -18,7 +18,6 @@
 #ifndef __INET_TCPSOCKET_H
 #define __INET_TCPSOCKET_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"

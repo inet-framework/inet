@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/ordering/SequenceNumbering.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
-#include "inet/protocolelement/ordering/SequenceNumbering.h"
 
 namespace inet {
 

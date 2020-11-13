@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/udp/UdpProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/udp/UdpProtocolPrinter.h"
 
 namespace inet {
 

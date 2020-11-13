@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/diffserv/DiffservUtil.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/networklayer/diffserv/Dscp_m.h"
 
 #ifdef WITH_IPv4

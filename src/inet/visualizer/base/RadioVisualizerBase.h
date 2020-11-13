@@ -20,8 +20,8 @@
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 

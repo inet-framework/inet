@@ -19,6 +19,7 @@
 #define __INET_STRINGFORMAT_H
 
 #include <functional>
+
 #include "inet/common/INETDefs.h"
 
 namespace inet {

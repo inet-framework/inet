@@ -17,11 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/applications/pingapp/PingApp.h"
+
 #include <iostream>
 
-#include "inet/applications/pingapp/PingApp.h"
 #include "inet/applications/pingapp/PingApp_m.h"
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
@@ -31,10 +31,10 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/EchoPacket_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/L3Socket.h"

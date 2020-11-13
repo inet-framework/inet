@@ -15,17 +15,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/common/NetworkInterface.h"
+
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/StringFormat.h"
+#include "inet/common/SubmoduleLayout.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/StringFormat.h"
-#include "inet/common/SubmoduleLayout.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/networklayer/common/NetworkInterface.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

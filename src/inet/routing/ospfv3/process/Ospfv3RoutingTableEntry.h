@@ -1,13 +1,12 @@
 #ifndef __INET_OSPFV3ROUTINGTABLEENTRY_H
 #define __INET_OSPFV3ROUTINGTABLEENTRY_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/routing/ospfv3/Ospfv3Common.h"
 #include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 

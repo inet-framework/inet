@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/queueing/common/LabelsTag_m.h"
 #include "inet/queueing/scheduler/LabelScheduler.h"
+
+#include "inet/queueing/common/LabelsTag_m.h"
 
 namespace inet {
 namespace queueing {

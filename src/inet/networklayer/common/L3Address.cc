@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/common/MacAddressType.h"
 #include "inet/networklayer/common/L3Address.h"
+
+#include "inet/linklayer/common/MacAddressType.h"
 #include "inet/networklayer/common/ModuleIdAddressType.h"
 #include "inet/networklayer/common/ModulePathAddressType.h"
 #include "inet/networklayer/contract/clns/ClnsAddressType.h"

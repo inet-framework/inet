@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/rip/Rip.h"
+
 #include <algorithm>
 #include <functional>
 
@@ -22,12 +24,11 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Consts.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/routing/rip/Rip.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Consts.h"
 #include "inet/routing/rip/RipPacket_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"

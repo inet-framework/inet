@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
+
 #include <set>
 
 #include "inet/common/ModuleAccess.h"
@@ -24,7 +26,6 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
 #ifdef WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"

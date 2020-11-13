@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientMacDataService.h"
+
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/duplicateremoval/LegacyDuplicateRemoval.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
-#include "inet/linklayer/ieee80211/mac/recipient/RecipientMacDataService.h"
 
 namespace inet {
 namespace ieee80211 {

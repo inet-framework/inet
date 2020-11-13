@@ -21,7 +21,10 @@
 #define __INET_BERPARSEFILE_H
 
 #include <math.h>
+
 #include <vector>
+
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 namespace physicallayer {

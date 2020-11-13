@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETEVENTTAG_H
 #define __INET_PACKETEVENTTAG_H
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/PacketEventTag_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 

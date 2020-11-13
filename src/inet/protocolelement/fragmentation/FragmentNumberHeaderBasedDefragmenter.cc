@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/fragmentation/FragmentNumberHeaderBasedDefragmenter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
-#include "inet/protocolelement/fragmentation/FragmentNumberHeaderBasedDefragmenter.h"
 #include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
 
 namespace inet {

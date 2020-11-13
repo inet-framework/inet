@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <fstream>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

@@ -16,6 +16,7 @@
 //
 
 #include "inet/protocolelement/fragmentation/FragmentTagBasedDefragmenter.h"
+
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {

@@ -18,11 +18,11 @@
 #ifndef __INET_INPROGRESSFRAMES_H
 #define __INET_INPROGRESSFRAMES_H
 
-#include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace ieee80211 {

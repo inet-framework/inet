@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/LayeredProtocolBase.h"
+
 #include "inet/common/Simsignals.h"
 
 namespace inet {

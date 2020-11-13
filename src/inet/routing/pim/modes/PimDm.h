@@ -20,7 +20,6 @@
 #ifndef __INET_PIMDM_H
 #define __INET_PIMDM_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

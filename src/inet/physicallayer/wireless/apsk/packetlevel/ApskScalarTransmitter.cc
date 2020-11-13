@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskScalarTransmitter.h"
+
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskScalarTransmission.h"
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskScalarTransmitter.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {

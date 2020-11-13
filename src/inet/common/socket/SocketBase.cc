@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketBase.h"
+
+#include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketCommand_m.h"
 #include "inet/common/socket/SocketTag_m.h"
 

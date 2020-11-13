@@ -19,8 +19,8 @@
 #define __INET_DS_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ieee80211/mac/contract/IDs.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/IDs.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet {

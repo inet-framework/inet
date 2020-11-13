@@ -17,12 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/mobility/single/Ns2MotionMobility.h"
+
 #include <fstream>
 #include <sstream>
 #include <string>
 
 #include "inet/common/INETMath.h"
-#include "inet/mobility/single/Ns2MotionMobility.h"
 
 #ifndef atoi
 #include <cstdlib>

@@ -17,6 +17,7 @@
 //
 
 #include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateDesignatedRouter.h"
+
 #include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateDown.h"
 #include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateLoopback.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"

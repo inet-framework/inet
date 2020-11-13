@@ -22,7 +22,6 @@
 #include <map>
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/router/Lsa.h"

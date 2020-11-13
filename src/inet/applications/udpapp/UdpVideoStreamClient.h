@@ -20,8 +20,6 @@
 #ifndef __INET_UDPVIDEOSTREAMCLIENT_H
 #define __INET_UDPVIDEOSTREAMCLIENT_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"

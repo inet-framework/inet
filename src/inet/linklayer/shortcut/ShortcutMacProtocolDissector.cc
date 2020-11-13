@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/shortcut/ShortcutMacProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/shortcut/ShortcutMacHeader_m.h"
-#include "inet/linklayer/shortcut/ShortcutMacProtocolDissector.h"
 
 namespace inet {
 

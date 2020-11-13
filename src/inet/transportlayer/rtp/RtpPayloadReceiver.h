@@ -27,7 +27,6 @@
 
 #include <fstream>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
 

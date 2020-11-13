@@ -29,9 +29,9 @@
 
 //#include "IPv4Address.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/routing/eigrp/tables/EigrpRoute.h"
-#include "inet/routing/eigrp/pdms/IEigrpPdm.h"
 #include "inet/routing/eigrp/EigrpDualStack.h"
+#include "inet/routing/eigrp/pdms/IEigrpPdm.h"
+#include "inet/routing/eigrp/tables/EigrpRoute.h"
 namespace inet {
 namespace eigrp {
 /**

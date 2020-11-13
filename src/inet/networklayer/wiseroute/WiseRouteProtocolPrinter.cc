@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/wiseroute/WiseRouteProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/wiseroute/WiseRouteHeader_m.h"
-#include "inet/networklayer/wiseroute/WiseRouteProtocolPrinter.h"
 
 namespace inet {
 

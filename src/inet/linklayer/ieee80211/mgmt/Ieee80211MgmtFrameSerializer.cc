@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrameSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrameSerializer.h"
 
 namespace inet {
 

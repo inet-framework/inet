@@ -19,8 +19,8 @@
 #define __INET_PACKETEMITTER_H
 
 #include "inet/common/DirectionTag_m.h"
-#include "inet/common/packet/PacketFilter.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {

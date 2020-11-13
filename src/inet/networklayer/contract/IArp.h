@@ -18,7 +18,6 @@
 #ifndef __INET_IARP_H
 #define __INET_IARP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/L3Address.h"

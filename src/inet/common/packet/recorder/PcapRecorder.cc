@@ -20,14 +20,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/common/packet/recorder/PcapRecorder.h"
+
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/stlutils.h"
 #include "inet/common/StringFormat.h"
-#include "inet/common/packet/recorder/PcapngWriter.h"
-#include "inet/common/packet/recorder/PcapRecorder.h"
 #include "inet/common/packet/recorder/PcapWriter.h"
+#include "inet/common/packet/recorder/PcapngWriter.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 

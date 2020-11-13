@@ -18,7 +18,6 @@
 #ifndef __INET_ETHERNETPAUSECOMMANDPROCESSOR_H
 #define __INET_ETHERNETPAUSECOMMANDPROCESSOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"

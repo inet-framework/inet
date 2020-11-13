@@ -15,11 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/common/EthernetMacHeaderSerializer.h"
+
 #include <algorithm>
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/common/EthernetMacHeaderSerializer.h"
 
 namespace inet {
 

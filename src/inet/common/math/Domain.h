@@ -19,6 +19,7 @@
 #define __INET_DOMAIN_H
 
 #include <algorithm>
+
 #include "inet/common/math/Interval.h"
 #include "inet/common/math/Point.h"
 

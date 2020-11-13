@@ -20,12 +20,12 @@
 
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskCode.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IEncoder.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IFecCoder.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IInterleaver.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 
 namespace inet {
 

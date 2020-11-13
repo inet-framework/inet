@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
+#include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 
 #include <omnetpp/osgutil.h>
 
+#include <algorithm>
+
 #include "inet/common/OsgUtils.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 
 #ifdef WITH_OSG
 #include <osg/AutoTransform>

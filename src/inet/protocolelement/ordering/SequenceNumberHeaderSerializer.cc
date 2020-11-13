@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeaderSerializer.h"
+
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {

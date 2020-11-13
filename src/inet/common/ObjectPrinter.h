@@ -18,8 +18,9 @@
 #ifndef __INET_OBJECTPRINTER_H
 #define __INET_OBJECTPRINTER_H
 
-#include <vector>
 #include <iostream>
+#include <vector>
+
 #include "inet/common/INETDefs.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #ifndef __INET_SINGLERATETHREECOLORMETER_H
 #define __INET_SINGLERATETHREECOLORMETER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/diffserv/PacketMeterBase.h"
 

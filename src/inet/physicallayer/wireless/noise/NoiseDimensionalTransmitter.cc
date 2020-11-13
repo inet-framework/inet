@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/noise/NoiseDimensionalTransmitter.h"
+
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/wireless/noise/NoiseDimensionalTransmitter.h"
 
 namespace inet {
 

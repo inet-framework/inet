@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/backgroundnoise/DimensionalBackgroundNoise.h"
+
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
 namespace inet {

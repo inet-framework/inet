@@ -13,9 +13,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/rtp/RtcpPacketSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/transportlayer/rtp/RtcpPacket_m.h"
-#include "inet/transportlayer/rtp/RtcpPacketSerializer.h"
 
 namespace inet {
 namespace rtp {

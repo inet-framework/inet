@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv4/Ipv4ProtocolDissector.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/ipv4/Ipv4.h"
-#include "inet/networklayer/ipv4/Ipv4ProtocolDissector.h"
 
 namespace inet {
 

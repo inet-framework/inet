@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+
 #include <algorithm>
 
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
-#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 
 namespace inet {

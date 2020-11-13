@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wired/ethernet/EthernetPhyProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
-#include "inet/physicallayer/wired/ethernet/EthernetPhyProtocolDissector.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {

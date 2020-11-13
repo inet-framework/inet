@@ -27,7 +27,11 @@
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/common/socket/SocketTag_m.h"
+#include <assert.h>
+#include <dlfcn.h>
+#include <netinet/in.h>
+#include <sim_errno.h>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -35,6 +39,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
@@ -42,12 +47,6 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 #include "inet/transportlayer/tcp_nsc/queues/TcpNscQueues.h"
-
-#include <assert.h>
-#include <dlfcn.h>
-#include <netinet/in.h>
-
-#include <sim_errno.h>
 
 namespace inet {
 

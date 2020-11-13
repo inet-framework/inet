@@ -18,6 +18,7 @@
 //
 
 #include <assert.h>
+
 #include <algorithm>
 
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"

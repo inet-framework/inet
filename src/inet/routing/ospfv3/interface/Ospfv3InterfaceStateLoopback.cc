@@ -1,8 +1,9 @@
 
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateLoopback.h"
+
 #include "inet/routing/ospfv3/Ospfv3Timers.h"
 #include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDown.h"
-#include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateLoopback.h"
 
 namespace inet {
 namespace ospfv3 {

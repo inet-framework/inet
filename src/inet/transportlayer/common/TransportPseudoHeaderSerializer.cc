@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/common/TransportPseudoHeaderSerializer.h"
+
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
-#include "inet/transportlayer/common/TransportPseudoHeaderSerializer.h"
 
 namespace inet {
 

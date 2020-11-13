@@ -19,6 +19,7 @@
 #define __INET_ORDINALBASEDDUPLICATOR_H
 
 #include <vector>
+
 #include "inet/queueing/base/PacketDuplicatorBase.h"
 
 namespace inet {

@@ -16,13 +16,14 @@
 //
 
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredScalarAnalogModel.h"
+
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
 namespace inet {
 

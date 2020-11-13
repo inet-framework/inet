@@ -17,16 +17,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/mpls/Mpls.h"
+
 #include <string.h>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ldp/Ldp.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
-#include "inet/networklayer/mpls/Mpls.h"
 #include "inet/networklayer/rsvpte/Utils.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 

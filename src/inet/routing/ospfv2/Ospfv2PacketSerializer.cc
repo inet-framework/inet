@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
+
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {

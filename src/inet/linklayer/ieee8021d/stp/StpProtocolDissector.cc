@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee8021d/stp/StpProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
-#include "inet/linklayer/ieee8021d/stp/StpProtocolDissector.h"
 
 namespace inet {
 

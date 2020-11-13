@@ -18,7 +18,6 @@
 #ifndef __INET_L2NODECONFIGURATOR_H
 #define __INET_L2NODECONFIGURATOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/configurator/L2NetworkConfigurator.h"

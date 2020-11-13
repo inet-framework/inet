@@ -15,13 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/queue/PacketQueue.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 #include "inet/queueing/function/PacketDropperFunction.h"
-#include "inet/queueing/queue/PacketQueue.h"
 
 namespace inet {
 namespace queueing {

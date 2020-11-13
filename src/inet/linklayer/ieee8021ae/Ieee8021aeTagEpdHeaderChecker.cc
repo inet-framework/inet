@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderChecker.h"
+
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderChecker.h"
 #include "inet/linklayer/ieee8021ae/Ieee8021aeTagHeader_m.h"
 
 namespace inet {

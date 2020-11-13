@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/probabilistic/ProbabilisticProtocolDissector.h"
+
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
-#include "inet/networklayer/probabilistic/ProbabilisticProtocolDissector.h"
 
 
 namespace inet {

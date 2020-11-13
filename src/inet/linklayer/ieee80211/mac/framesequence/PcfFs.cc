@@ -16,6 +16,7 @@
 //
 
 #include "inet/linklayer/ieee80211/mac/framesequence/PcfFs.h"
+
 #include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
 
 namespace inet {

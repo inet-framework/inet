@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/power/storage/SimpleEpEnergyStorage.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
-#include "inet/power/storage/SimpleEpEnergyStorage.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 

@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ShortBitVector.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/AdditiveScrambler.h"
+
+#include "inet/common/ShortBitVector.h"
 
 namespace inet {
 namespace physicallayer {

@@ -18,7 +18,6 @@
 #ifndef __INET_PIM_H
 #define __INET_PIM_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/PimPacket_m.h"

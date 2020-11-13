@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
 
 namespace inet {

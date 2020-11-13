@@ -18,7 +18,6 @@
 #ifndef __INET_LINEARGAUGEFIGURE_H
 #define __INET_LINEARGAUGEFIGURE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/figures/IIndicatorFigure.h"
 

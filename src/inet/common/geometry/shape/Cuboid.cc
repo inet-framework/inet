@@ -16,8 +16,9 @@
 //
 
 #include "inet/common/geometry/shape/Cuboid.h"
-#include "inet/common/geometry/object/Polygon.h"
+
 #include "inet/common/geometry/object/Plane.h"
+#include "inet/common/geometry/object/Polygon.h"
 #include "inet/common/geometry/shape/Prism.h"
 
 namespace inet {

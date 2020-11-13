@@ -32,40 +32,31 @@ topology table.
 
 
 #include <omnetpp.h>
-#include "inet/common/INETDefs.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/Packet.h"
-
-#include "inet/networklayer/contract/IInterfaceTable.h"
-
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/routing/base/RoutingProtocolBase.h"
-
-#include "inet/routing/eigrp/pdms/IEigrpModule.h"
-#include "inet/routing/eigrp/pdms/IEigrpPdm.h"
-
-#include "inet/routing/eigrp/messages/EigrpMessage_m.h"
-#include "inet/routing/eigrp/messages/EigrpMsgReq.h"
-
-#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
-#include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
-#include "inet/routing/eigrp/EigrpDual.h"
-#include "inet/routing/eigrp/tables/EigrpDisabledInterfaces.h"
-#include "inet/routing/eigrp/tables/EigrpNeighborTable.h"
-#include "inet/routing/eigrp/tables/EigrpTopologyTable.h"
-#include "inet/routing/eigrp/tables/EigrpRoute.h"
-#include "inet/routing/eigrp/tables/EigrpNetworkTable.h"
-#include "inet/routing/eigrp/EigrpDeviceConfigurator.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
-
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-
-#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
+#include "inet/routing/eigrp/EigrpDeviceConfigurator.h"
+#include "inet/routing/eigrp/EigrpDual.h"
+#include "inet/routing/eigrp/messages/EigrpMessage_m.h"
+#include "inet/routing/eigrp/messages/EigrpMsgReq.h"
+#include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
+#include "inet/routing/eigrp/pdms/IEigrpModule.h"
+#include "inet/routing/eigrp/pdms/IEigrpPdm.h"
+#include "inet/routing/eigrp/tables/EigrpDisabledInterfaces.h"
+#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
+#include "inet/routing/eigrp/tables/EigrpNeighborTable.h"
+#include "inet/routing/eigrp/tables/EigrpNetworkTable.h"
+#include "inet/routing/eigrp/tables/EigrpRoute.h"
+#include "inet/routing/eigrp/tables/EigrpTopologyTable.h"
 
 namespace inet {
 namespace eigrp {

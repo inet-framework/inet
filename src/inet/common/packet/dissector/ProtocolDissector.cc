@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
+
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 
 

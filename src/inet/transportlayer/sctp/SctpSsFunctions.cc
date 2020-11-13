@@ -32,8 +32,9 @@
 
 ************************************************************/
 
-#include <list>
 #include <math.h>
+
+#include <list>
 
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"

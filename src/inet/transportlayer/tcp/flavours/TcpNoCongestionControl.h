@@ -18,7 +18,6 @@
 #ifndef __INET_TCPNOCONGESTIONCONTROL_H
 #define __INET_TCPNOCONGESTIONCONTROL_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
 namespace inet {

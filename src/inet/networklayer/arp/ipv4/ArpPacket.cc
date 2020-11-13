@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 
 namespace inet {

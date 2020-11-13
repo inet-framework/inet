@@ -16,9 +16,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/ipv4/IcmpHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "inet/networklayer/ipv4/IcmpHeaderSerializer.h"
 
 namespace inet {
 

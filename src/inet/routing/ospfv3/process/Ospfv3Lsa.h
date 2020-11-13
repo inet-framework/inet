@@ -1,7 +1,6 @@
 #ifndef __INET_OSPFV3LSA_H
 #define __INET_OSPFV3LSA_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv3/Ospfv3Common.h"
 #include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 

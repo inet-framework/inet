@@ -15,13 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskRadio.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredTransmitter.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskRadio.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {

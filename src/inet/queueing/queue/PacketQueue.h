@@ -20,11 +20,11 @@
 
 #include "inet/queueing/base/PacketQueueBase.h"
 #include "inet/queueing/compat/cpacketqueue.h"
-#include "inet/queueing/contract/IPacketBuffer.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPacketBuffer.h"
 #include "inet/queueing/contract/IPacketComparatorFunction.h"
 #include "inet/queueing/contract/IPacketDropperFunction.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {

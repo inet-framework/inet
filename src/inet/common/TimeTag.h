@@ -18,8 +18,8 @@
 #ifndef __INET_TIMETAG_H
 #define __INET_TIMETAG_H
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 

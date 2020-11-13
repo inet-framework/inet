@@ -18,9 +18,9 @@
 #ifndef __INET_PACKETPROCESSORBASE_H
 #define __INET_PACKETPROCESSORBASE_H
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 

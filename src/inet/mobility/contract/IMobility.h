@@ -18,7 +18,6 @@
 #ifndef __INET_IMOBILITY_H
 #define __INET_IMOBILITY_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 

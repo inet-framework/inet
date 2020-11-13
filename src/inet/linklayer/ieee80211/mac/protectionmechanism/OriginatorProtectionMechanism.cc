@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
+
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 
 namespace inet {

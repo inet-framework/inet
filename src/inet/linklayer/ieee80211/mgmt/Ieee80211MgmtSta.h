@@ -18,7 +18,6 @@
 #ifndef __INET_IEEE80211MGMTSTA_H
 #define __INET_IEEE80211MGMTSTA_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
 

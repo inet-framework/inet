@@ -20,7 +20,6 @@
 #ifndef __INET_SCTPQUEUE_H
 #define __INET_SCTPQUEUE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/sctp/Sctp.h"
 

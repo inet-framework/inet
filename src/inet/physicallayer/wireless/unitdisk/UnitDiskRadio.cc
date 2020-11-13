@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskRadio.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskRadio.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitter.h"
 
 namespace inet {

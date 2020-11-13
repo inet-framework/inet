@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {

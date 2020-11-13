@@ -22,8 +22,8 @@
 #include <osg/Depth>
 #include <osg/Light>
 #include <osg/LightSource>
-#include <osg/LineWidth>
 #include <osg/LineStipple>
+#include <osg/LineWidth>
 #include <osgDB/ReadFile>
 #endif // ifdef WITH_OSG
 

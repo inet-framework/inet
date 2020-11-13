@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskProtocolDissector.h"
+
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskProtocolDissector.h"
 
 
 namespace inet {

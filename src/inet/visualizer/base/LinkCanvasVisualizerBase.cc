@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/LinkCanvasVisualizerBase.h"
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/geometry/shape/Cuboid.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/visualizer/base/LinkCanvasVisualizerBase.h"
 
 namespace inet {
 

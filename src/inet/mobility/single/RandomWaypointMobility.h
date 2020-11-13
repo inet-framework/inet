@@ -20,7 +20,6 @@
 #ifndef __INET_RANDOMWAYPOINTMOBILITY_H
 #define __INET_RANDOMWAYPOINTMOBILITY_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
 
 namespace inet {

@@ -17,13 +17,14 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
+#include "inet/routing/pim/PimSplitter.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "inet/routing/pim/PimSplitter.h"
 
 namespace inet {
 

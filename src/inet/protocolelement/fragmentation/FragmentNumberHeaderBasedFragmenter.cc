@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/fragmentation/FragmentNumberHeaderBasedFragmenter.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
-#include "inet/protocolelement/fragmentation/FragmentNumberHeaderBasedFragmenter.h"
 #include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 

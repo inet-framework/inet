@@ -18,8 +18,8 @@
 #ifndef __INET_FLOWMEASUREMENTMAKER_H
 #define __INET_FLOWMEASUREMENTMAKER_H
 
-#include "inet/common/packet/PacketFilter.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {

@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/mobility/single/VehicleMobility.h"
+
 #include <fstream>
 #include <iostream>
 
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/mobility/single/VehicleMobility.h"
 
 namespace inet {
 

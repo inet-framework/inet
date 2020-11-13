@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee8021d/common/Ieee8021dBpduSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
-#include "inet/linklayer/ieee8021d/common/Ieee8021dBpduSerializer.h"
 
 namespace inet {
 

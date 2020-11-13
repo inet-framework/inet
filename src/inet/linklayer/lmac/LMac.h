@@ -12,12 +12,12 @@
 #ifndef __INET_LMAC_H
 #define __INET_LMAC_H
 
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/lmac/LMacHeader_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 

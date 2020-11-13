@@ -17,6 +17,7 @@
 //
 
 #include "inet/routing/bgpv4/BgpFsm.h"
+
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #ifndef __INET_APSKPROTOCOLDISSECTOR_H
 #define __INET_APSKPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {

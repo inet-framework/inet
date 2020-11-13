@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "omnetpp/cstatisticbuilder.h"
+#include "inet/visualizer/base/StatisticVisualizerBase.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/visualizer/base/StatisticVisualizerBase.h"
+#include "omnetpp/cstatisticbuilder.h"
 
 namespace inet {
 

@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/common/PacketDeserializer.h"
+
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/protocolelement/common/PacketDeserializer.h"
 
 namespace inet {
 

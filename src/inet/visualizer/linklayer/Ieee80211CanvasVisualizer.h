@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211CANVASVISUALIZER_H
 #define __INET_IEEE80211CANVASVISUALIZER_H
 
-#include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/visualizer/base/Ieee80211VisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 

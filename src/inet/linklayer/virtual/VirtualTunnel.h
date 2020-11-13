@@ -18,7 +18,10 @@
 #ifndef __INET_VIRTUALTUNNEL_H
 #define __INET_VIRTUALTUNNEL_H
 
-#include "inet/common/socket/ISocket.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ethernet/common/EthernetSocket.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qSocket.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

@@ -1,7 +1,6 @@
 #ifndef __INET_OSPFV3NEIGHBORSTATE_H
 #define __INET_OSPFV3NEIGHBORSTATE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
 

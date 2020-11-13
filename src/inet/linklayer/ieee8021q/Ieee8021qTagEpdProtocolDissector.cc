@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagEpdProtocolDissector.h"
+
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ieee8021q/Ieee8021qTagEpdProtocolDissector.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
 
 namespace inet {

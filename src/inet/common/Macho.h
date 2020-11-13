@@ -206,8 +206,8 @@
 //       - Initial release
 //
 
-#include <new>
 #include <cassert>
+#include <new>
 
 #include "inet/common/INETDefs.h"
 

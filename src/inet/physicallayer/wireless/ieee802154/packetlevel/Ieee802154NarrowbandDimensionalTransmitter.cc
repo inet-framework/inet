@@ -17,10 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandDimensionalTransmitter.h"
+
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandDimensionalTransmitter.h"
 
 namespace inet {
 

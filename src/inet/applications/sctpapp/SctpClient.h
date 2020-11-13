@@ -20,7 +20,6 @@
 #ifndef __INET_SCTPCLIENT_H
 #define __INET_SCTPCLIENT_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 

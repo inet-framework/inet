@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/clock/ClockUserModuleMixinImpl.h"
+
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #ifdef WITH_QUEUEING
 #include "inet/queueing/base/PacketGateBase.h"

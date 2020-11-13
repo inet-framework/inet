@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/tokengenerator/PacketBasedTokenGenerator.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/queueing/base/TokenGeneratorBase.h"
-#include "inet/queueing/tokengenerator/PacketBasedTokenGenerator.h"
 
 namespace inet {
 namespace queueing {

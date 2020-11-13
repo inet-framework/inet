@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/protocolelement/fragmentation/base/FragmenterBase.h"
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
 
 namespace inet {

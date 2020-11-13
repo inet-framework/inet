@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/PacketEventTag.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag.h"
-#include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
 
 namespace inet {
 

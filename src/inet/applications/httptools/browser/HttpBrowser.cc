@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/httptools/browser/HttpBrowser.h"
+
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
-#include "inet/applications/httptools/browser/HttpBrowser.h"
 
 namespace inet {
 

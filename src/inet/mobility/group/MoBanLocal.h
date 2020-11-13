@@ -50,7 +50,6 @@
 #ifndef __INET_MOBANLOCAL_H
 #define __INET_MOBANLOCAL_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
 #include "inet/mobility/group/MoBanCoordinator.h"
 

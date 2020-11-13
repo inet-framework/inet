@@ -18,6 +18,8 @@
 #ifndef __INET_IEEE8021QTAGEPDHEADERCHECKER_H
 #define __INET_IEEE8021QTAGEPDHEADERCHECKER_H
 
+#include "inet/common/Protocol.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {

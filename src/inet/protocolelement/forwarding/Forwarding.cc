@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/forwarding/Forwarding.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/protocolelement/forwarding/Forwarding.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/selectivity/DestinationL3AddressHeader_m.h"
 

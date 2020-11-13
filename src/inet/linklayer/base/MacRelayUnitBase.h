@@ -19,8 +19,8 @@
 #define __INET_MACRELAYUNITBASE_H
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

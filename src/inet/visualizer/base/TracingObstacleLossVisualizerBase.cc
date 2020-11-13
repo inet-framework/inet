@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
+
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
 
 namespace inet {
 

@@ -28,12 +28,13 @@
  *              the user can decide whether to use plain flooding or not
  **************************************************************************/
 
+#include "inet/networklayer/flooding/Flooding.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/flooding/Flooding.h"
 
 namespace inet {
 

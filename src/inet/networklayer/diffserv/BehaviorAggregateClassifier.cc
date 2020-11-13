@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
+#include "inet/networklayer/diffserv/BehaviorAggregateClassifier.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/diffserv/BehaviorAggregateClassifier.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 
 #ifdef WITH_IPv4

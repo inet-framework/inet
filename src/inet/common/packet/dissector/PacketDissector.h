@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETDISSECTOR_H
 #define __INET_PACKETDISSECTOR_H
 
-#include <stack>
 #include <functional>
+#include <stack>
 
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"

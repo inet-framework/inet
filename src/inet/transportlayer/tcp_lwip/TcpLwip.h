@@ -22,7 +22,6 @@
 
 #include <map>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -30,8 +29,8 @@
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
-#include "lwip/lwip_tcp.h"
 #include "inet/transportlayer/tcp_lwip/LwipTcpStackIf.h"
+#include "lwip/lwip_tcp.h"
 
 namespace inet {
 

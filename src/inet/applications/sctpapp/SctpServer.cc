@@ -17,18 +17,18 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "inet/applications/sctpapp/SctpServer.h"
 
-#include "inet/common/socket/SocketTag_m.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"

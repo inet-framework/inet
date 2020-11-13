@@ -16,11 +16,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
+
 #include <algorithm>
 
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
-#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 

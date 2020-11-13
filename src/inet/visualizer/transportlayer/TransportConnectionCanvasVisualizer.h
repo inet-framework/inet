@@ -18,9 +18,9 @@
 #ifndef __INET_TRANSPORTCONNECTIONCANVASVISUALIZER_H
 #define __INET_TRANSPORTCONNECTIONCANVASVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/TransportConnectionVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 

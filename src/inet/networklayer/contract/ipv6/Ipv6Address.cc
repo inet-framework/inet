@@ -17,11 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+
 #include <iostream>
 #include <sstream>
 
 #include "inet/networklayer/common/InterfaceToken.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
 

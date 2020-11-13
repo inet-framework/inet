@@ -20,7 +20,6 @@
 #ifndef __INET_PIMINTERFACETABLE_H
 #define __INET_PIMINTERFACETABLE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 

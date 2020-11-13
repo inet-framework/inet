@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtProtocolPrinter.h"
+
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtProtocolPrinter.h"
 
 namespace inet {
 namespace ieee80211 {

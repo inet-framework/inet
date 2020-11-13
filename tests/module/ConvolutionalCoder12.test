@@ -4,7 +4,7 @@
 %file: test.ned
 
 import inet.test.moduletest.lib.ieee80211.Ieee80211BitDomainTest;
-import inet.physicallayer.common.bitlevel.ConvolutionalCoder;
+import inet.physicallayer.wireless.common.radio.bitlevel.ConvolutionalCoder;
 
 network ConvCoder
 {

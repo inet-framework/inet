@@ -18,7 +18,6 @@
 #ifndef __INET_IEEE80211OFDMDEMODULATORMODULE_H
 #define __INET_IEEE80211OFDMDEMODULATORMODULE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulator.h"
 

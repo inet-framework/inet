@@ -20,7 +20,6 @@
 
 #include <map>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Topology.h"
 #include "inet/linklayer/ieee8021d/stp/Stp.h"
 

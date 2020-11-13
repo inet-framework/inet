@@ -20,8 +20,6 @@
 
 #include <vector>
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 

@@ -21,8 +21,6 @@
 #include <exception>
 #include <string>
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/applications/httptools/common/HttpUtils.h"
 #include "inet/common/INETMath.h"
 

@@ -15,16 +15,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/base/PacketSourceBase.h"
+
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/IdentityTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/Simsignals.h"
-#include "inet/common/TimeTag_m.h"
-#include "inet/queueing/base/PacketSourceBase.h"
 
 namespace inet {
 namespace queueing {

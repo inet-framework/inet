@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/loopback/Loopback.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -24,7 +26,6 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/loopback/Loopback.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

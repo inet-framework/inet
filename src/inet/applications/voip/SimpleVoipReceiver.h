@@ -20,10 +20,10 @@
 #ifndef __INET_SIMPLEVOIPRECEIVER_H
 #define __INET_SIMPLEVOIPRECEIVER_H
 
-#include <list>
 #include <string.h>
 
-#include "inet/common/INETDefs.h"
+#include <list>
+
 #include "inet/common/INETMath.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

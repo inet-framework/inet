@@ -20,10 +20,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/common/packet/recorder/PcapWriter.h"
+
 #include <cerrno>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/recorder/PcapWriter.h"
 
 namespace inet {
 

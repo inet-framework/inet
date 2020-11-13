@@ -18,9 +18,9 @@
 #ifndef __INET_FUNCTIONS_H
 #define __INET_FUNCTIONS_H
 
-#include "inet/common/math/PrimitiveFunctions.h"
 #include "inet/common/math/AlgebraicOperations.h"
 #include "inet/common/math/CompoundFunctions.h"
+#include "inet/common/math/PrimitiveFunctions.h"
 
 #endif
 

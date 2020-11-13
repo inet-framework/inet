@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211IrMode.h"
+
 #include "inet/physicallayer/wireless/common/modulation/16PpmModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/4PpmModulation.h"
 

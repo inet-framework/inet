@@ -34,10 +34,10 @@
 
 /** \author Jia Pan */
 
-#include <iostream>
-#include <cstdlib>
-
 #include "inet/common/IntervalTree.h"
+
+#include <cstdlib>
+#include <iostream>
 
 namespace inet {
 

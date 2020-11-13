@@ -1,6 +1,7 @@
 
-#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospfv3/process/Ospfv3Instance.h"
+
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 
 namespace inet {
 namespace ospfv3 {

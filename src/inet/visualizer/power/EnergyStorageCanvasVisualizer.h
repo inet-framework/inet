@@ -18,8 +18,8 @@
 #ifndef __INET_ENERGYSTORAGECANVASVISUALIZER_H
 #define __INET_ENERGYSTORAGECANVASVISUALIZER_H
 
-#include "inet/common/figures/BarFigure.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/figures/BarFigure.h"
 #include "inet/visualizer/base/EnergyStorageVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 

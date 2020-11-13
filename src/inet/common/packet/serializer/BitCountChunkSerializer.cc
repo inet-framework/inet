@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/serializer/BitCountChunkSerializer.h"
+
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {

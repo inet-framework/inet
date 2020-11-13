@@ -17,14 +17,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
-#include "inet/common/INETDefs.h"
+#include "inet/networklayer/ipv6/Ipv6.h"
+
 #include "inet/common/INETUtils.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
@@ -37,9 +38,8 @@
 #include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
-#include "inet/networklayer/ipv6/Ipv6.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 #ifdef WITH_xMIPv6

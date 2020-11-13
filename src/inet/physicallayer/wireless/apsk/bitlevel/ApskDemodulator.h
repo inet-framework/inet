@@ -21,7 +21,6 @@
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalSymbolModel.h"
 

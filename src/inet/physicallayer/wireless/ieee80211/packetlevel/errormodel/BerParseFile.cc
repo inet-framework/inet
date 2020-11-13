@@ -17,13 +17,12 @@
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/BerParseFile.h"
+
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <string>
-
-#include "inet/common/INETDefs.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/BerParseFile.h"
 
 namespace inet {
 

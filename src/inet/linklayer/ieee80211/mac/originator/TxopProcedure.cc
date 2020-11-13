@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+
+#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"

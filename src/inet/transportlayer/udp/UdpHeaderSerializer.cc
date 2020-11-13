@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/udp/UdpHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/udp/UdpHeaderSerializer.h"
 
 namespace inet {
 

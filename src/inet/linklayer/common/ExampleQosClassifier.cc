@@ -16,16 +16,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/common/ExampleQosClassifier.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/ExampleQosClassifier.h"
 #include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 
 #ifdef WITH_IPv4
-#  include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #  include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#  include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif
 #ifdef WITH_IPv6
 #  include "inet/networklayer/icmpv6/Icmpv6Header_m.h"

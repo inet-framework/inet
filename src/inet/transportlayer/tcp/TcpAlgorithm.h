@@ -20,7 +20,6 @@
 #ifndef __INET_TCPALGORITHM_H
 #define __INET_TCPALGORITHM_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 

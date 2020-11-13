@@ -18,7 +18,6 @@
 #ifndef __INET_RANDOMQOSCLASSIFIER_H
 #define __INET_RANDOMQOSCLASSIFIER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {

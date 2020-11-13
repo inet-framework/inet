@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/protocolelement/common/PreemptableStreamer.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocolelement/common/PreemptableStreamer.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {

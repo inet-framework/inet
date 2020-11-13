@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <cstdio>
+#include "inet/common/NetworkNamespaceContext.h"
+
 #include <fcntl.h>
 
-#include "inet/common/NetworkNamespaceContext.h"
+#include <cstdio>
 
 namespace inet {
 

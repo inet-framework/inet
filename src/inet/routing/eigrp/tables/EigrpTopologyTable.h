@@ -30,10 +30,9 @@
 #include <omnetpp.h>
 
 #include "inet/common/ModuleAccess.h"
-
-#include "inet/routing/eigrp/tables/EigrpRoute.h"
-#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 #include "inet/routing/eigrp/EigrpDualStack.h"
+#include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
+#include "inet/routing/eigrp/tables/EigrpRoute.h"
 namespace inet {
 namespace eigrp {
 /**

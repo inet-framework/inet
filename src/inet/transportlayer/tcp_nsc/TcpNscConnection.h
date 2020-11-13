@@ -20,7 +20,6 @@
 #ifndef __INET_TCPNSCCONNECTION_H
 #define __INET_TCPNSCCONNECTION_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 

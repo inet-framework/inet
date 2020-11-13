@@ -9,13 +9,14 @@
  * 1WAY_RECEIVED - new state INIT
  * 2WAY_RECEIVED - no change
  */
+#include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateLoading.h"
+
 #include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
 #include "inet/routing/ospfv3/neighbor/Ospfv3NeighborState2Way.h"
 #include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateDown.h"
 #include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateExStart.h"
 #include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateFull.h"
 #include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateInit.h"
-#include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateLoading.h"
 
 namespace inet {
 namespace ospfv3 {

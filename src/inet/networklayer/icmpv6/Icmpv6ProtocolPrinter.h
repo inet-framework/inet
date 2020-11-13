@@ -18,7 +18,6 @@
 #ifndef __INET_ICMPV6PROTOCOLPRINTER_H
 #define __INET_ICMPV6PROTOCOLPRINTER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
 namespace inet {

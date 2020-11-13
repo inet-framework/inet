@@ -18,9 +18,9 @@
 #ifndef __INET_PULSEFILTER_H
 #define __INET_PULSEFILTER_H
 
+#include "inet/physicallayer/wireless/common/contract/bitlevel/IPulseFilter.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/IPulseFilter.h"
 
 namespace inet {
 namespace physicallayer {

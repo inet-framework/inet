@@ -22,9 +22,10 @@
 ***************************************************************************/
 
 
+#include "inet/transportlayer/rtp/RtpSenderInfo.h"
+
 #include "inet/transportlayer/rtp/Reports_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
-#include "inet/transportlayer/rtp/RtpSenderInfo.h"
 
 namespace inet {
 namespace rtp {

@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/errormodel/ApskLayeredErrorModel.h"
+
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"

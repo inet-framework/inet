@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
+
 #include "inet/common/packet/serializer/BytesChunkSerializer.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
-#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 
 namespace inet {
 

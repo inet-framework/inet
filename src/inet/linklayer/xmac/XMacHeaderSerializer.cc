@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/xmac/XMacHeaderSerializer.h"
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/xmac/XMacHeader_m.h"
-#include "inet/linklayer/xmac/XMacHeaderSerializer.h"
 
 namespace inet {
 

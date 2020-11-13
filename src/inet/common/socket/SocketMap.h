@@ -20,7 +20,6 @@
 
 #include <map>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/socket/ISocket.h"
 
 namespace inet {

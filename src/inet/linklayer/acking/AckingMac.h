@@ -18,11 +18,10 @@
 #ifndef __INET_ACKINGMAC_H
 #define __INET_ACKINGMAC_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 

@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/modular/EthernetAddressInserter.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/modular/EthernetAddressInserter.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

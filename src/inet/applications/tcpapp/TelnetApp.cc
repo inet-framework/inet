@@ -19,10 +19,10 @@
 
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 

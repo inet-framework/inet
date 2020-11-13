@@ -23,6 +23,7 @@
 #include <set>
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"

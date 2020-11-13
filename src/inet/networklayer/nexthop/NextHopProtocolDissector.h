@@ -18,7 +18,6 @@
 #ifndef __INET_NEXTHOPPROTOCOLDISSECTOR_H
 #define __INET_NEXTHOPPROTOCOLDISSECTOR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {

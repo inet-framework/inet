@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/linklayer/tun/TunSocket.h"
+
 #include "inet/common/packet/Message.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
-#include "inet/linklayer/tun/TunSocket.h"
 
 namespace inet {
 

@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/shortcut/ShortcutRadio.h"
+
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/wireless/shortcut/ShortcutPhyHeader_m.h"
-#include "inet/physicallayer/wireless/shortcut/ShortcutRadio.h"
 
 namespace inet {
 namespace physicallayer {

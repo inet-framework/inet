@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211UNITDISKTRANSMISSION_H
 #define __INET_IEEE80211UNITDISKTRANSMISSION_H
 
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
 
 namespace inet {
 

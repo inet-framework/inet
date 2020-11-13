@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ethernet/modular/EthernetTypeOrLengthInserter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/modular/EthernetTypeOrLengthInserter.h"
 
 namespace inet {
 

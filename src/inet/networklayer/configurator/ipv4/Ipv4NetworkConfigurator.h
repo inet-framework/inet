@@ -19,10 +19,11 @@
 #define __INET_IPV4NETWORKCONFIGURATOR_H
 
 #include <algorithm>
+
 #include "inet/common/Topology.h"
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 

@@ -15,11 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/recorder/PcapngWriter.h"
+
 #include <cerrno>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/recorder/PcapngWriter.h"
 
 
 namespace inet {

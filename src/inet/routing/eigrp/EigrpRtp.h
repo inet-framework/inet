@@ -27,12 +27,12 @@
 
 #include <omnetpp.h>
 
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/routing/eigrp/EigrpDualStack.h"
 #include "inet/routing/eigrp/messages/EigrpMsgReq.h"
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 #include "inet/routing/eigrp/tables/EigrpNeighborTable.h"
-#include "inet/routing/eigrp/EigrpDualStack.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/common/packet/Packet.h"
 namespace inet {
 namespace eigrp{
 class EigrpRtp;

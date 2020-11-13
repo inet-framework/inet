@@ -18,7 +18,6 @@
 #ifndef __INET_INTERFACEMATCHER_H
 #define __INET_INTERFACEMATCHER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

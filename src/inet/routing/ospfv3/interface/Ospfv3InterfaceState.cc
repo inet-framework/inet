@@ -1,5 +1,6 @@
 
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
+
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateBackup.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDr.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDrOther.h"

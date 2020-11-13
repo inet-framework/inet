@@ -19,7 +19,6 @@
 #ifndef __INET_SCTPALGORITHM_H
 #define __INET_SCTPALGORITHM_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpQueue.h"
 

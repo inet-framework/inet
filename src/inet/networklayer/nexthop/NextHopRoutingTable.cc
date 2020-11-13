@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
+
 #include <algorithm>
 #include <sstream>
 
@@ -23,7 +25,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"
-#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 

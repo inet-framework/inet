@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+
+#include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 
 namespace inet {
 namespace ieee80211 {

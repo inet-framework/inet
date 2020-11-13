@@ -14,10 +14,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/mobility/base/MobilityBase.h"
+
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/mobility/base/MobilityBase.h"
 #ifdef WITH_VISUALIZERS
 #include "inet/visualizer/mobility/MobilityCanvasVisualizer.h"
 #endif

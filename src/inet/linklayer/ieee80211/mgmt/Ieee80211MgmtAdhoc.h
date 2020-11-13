@@ -18,7 +18,6 @@
 #ifndef __INET_IEEE80211MGMTADHOC_H
 #define __INET_IEEE80211MGMTADHOC_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
 namespace inet {

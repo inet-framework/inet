@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "inet/common/IInterfaceRegistrationListener.h"
-#include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

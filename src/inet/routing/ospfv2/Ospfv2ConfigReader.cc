@@ -17,10 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include <algorithm>
-#include <map>
+#include "inet/routing/ospfv2/Ospfv2ConfigReader.h"
+
 #include <memory.h>
 #include <stdlib.h>
+
+#include <algorithm>
+#include <map>
 #include <string>
 
 #include "inet/common/ModuleAccess.h"
@@ -30,7 +33,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/ospfv2/Ospfv2ConfigReader.h"
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/Ospfv2Area.h"

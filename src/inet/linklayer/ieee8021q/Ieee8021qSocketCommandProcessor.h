@@ -20,8 +20,8 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
-#include "inet/queueing/base/PacketFlowBase.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qSocketTable.h"
+#include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 

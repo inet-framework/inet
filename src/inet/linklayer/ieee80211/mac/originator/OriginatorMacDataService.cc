@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorMacDataService.h"
+
+#include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQoSSequenceNumberAssignment.h"
 
 namespace inet {

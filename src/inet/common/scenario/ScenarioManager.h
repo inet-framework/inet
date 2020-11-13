@@ -18,7 +18,6 @@
 #ifndef __INET_SCENARIOMANAGER_H
 #define __INET_SCENARIOMANAGER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/scenario/IScriptable.h"
 

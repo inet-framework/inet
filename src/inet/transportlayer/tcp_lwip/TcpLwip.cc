@@ -30,13 +30,13 @@
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"

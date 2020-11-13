@@ -20,7 +20,6 @@
 
 #include <algorithm>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"

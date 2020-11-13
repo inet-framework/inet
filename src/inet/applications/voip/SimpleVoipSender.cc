@@ -17,10 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/applications/voip/SimpleVoipSender.h"
+
 #include <cmath>
 
 #include "inet/applications/voip/SimpleVoipPacket_m.h"
-#include "inet/applications/voip/SimpleVoipSender.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 

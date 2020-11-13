@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
+
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/wireless/common/modulation/Qam64Modulation.h"
 #include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 
 namespace inet {
 namespace physicallayer {

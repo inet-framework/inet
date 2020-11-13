@@ -18,7 +18,6 @@
 #ifndef __INET_SIMSIGNALS_H
 #define __INET_SIMSIGNALS_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Simsignals_m.h"
 
 namespace inet {

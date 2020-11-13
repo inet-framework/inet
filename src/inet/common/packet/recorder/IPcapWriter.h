@@ -18,8 +18,8 @@
 #ifndef __INET_IPCAPWRITER_H
 #define __INET_IPCAPWRITER_H
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/DirectionTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

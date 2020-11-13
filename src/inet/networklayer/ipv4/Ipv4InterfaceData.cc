@@ -17,11 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+
 #include <algorithm>
 #include <sstream>
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 

@@ -18,8 +18,9 @@
 // Author: Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)
 //
 
-#include "inet/common/INETMath.h"
 #include "inet/mobility/single/LinearMobility.h"
+
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

@@ -1,9 +1,10 @@
 
-#include <iostream>
+#include "inet/routing/ospfv3/process/Ospfv3Area.h"
+
 #include <stdio.h>
 #include <string.h>
 
-#include "inet/routing/ospfv3/process/Ospfv3Area.h"
+#include <iostream>
 
 namespace inet {
 namespace ospfv3 {

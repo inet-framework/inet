@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/wired/ethernet/EthernetFragmentPhyHeaderInserter.h"
+
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 

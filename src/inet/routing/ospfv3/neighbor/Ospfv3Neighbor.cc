@@ -1,5 +1,6 @@
 
 #include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
+
 #include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateDown.h"
 
 namespace inet {

@@ -23,9 +23,9 @@
  * @detail Class representing a CLNS Address. It should be probably called NSAPAddress or something similar.
  */
 
-#include <iomanip>
-
 #include "inet/networklayer/contract/clns/ClnsAddress.h"
+
+#include <iomanip>
 
 namespace inet{
 

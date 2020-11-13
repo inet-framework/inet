@@ -18,9 +18,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/applications/dhcp/DhcpServer.h"
+
 #include <algorithm>
 
-#include "inet/applications/dhcp/DhcpServer.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"

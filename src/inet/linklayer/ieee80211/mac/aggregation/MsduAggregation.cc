@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 
 namespace inet {
 namespace ieee80211 {

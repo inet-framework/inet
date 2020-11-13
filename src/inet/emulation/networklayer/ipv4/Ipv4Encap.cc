@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/socket/SocketTag_m.h"
+#include "inet/emulation/networklayer/ipv4/Ipv4Encap.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/emulation/networklayer/ipv4/Ipv4Encap.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"

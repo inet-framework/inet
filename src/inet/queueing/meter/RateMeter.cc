@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/meter/RateMeter.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/queueing/common/RateTag_m.h"
-#include "inet/queueing/meter/RateMeter.h"
 
 namespace inet {
 namespace queueing {

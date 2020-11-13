@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/queueing/sink/PassivePacketSink.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
-#include "inet/queueing/sink/PassivePacketSink.h"
 
 namespace inet {
 namespace queueing {

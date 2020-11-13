@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {

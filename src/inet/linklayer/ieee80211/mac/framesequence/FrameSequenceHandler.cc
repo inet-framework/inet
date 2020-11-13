@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
-#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 
 namespace inet {

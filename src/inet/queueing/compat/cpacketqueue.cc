@@ -15,10 +15,11 @@
   `license' for details on this and other legal matters.
 *--------------------------------------------------------------*/
 
+#include "inet/queueing/compat/cpacketqueue.h"
+
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-#include "inet/queueing/compat/cpacketqueue.h"
 
 namespace inet {
 namespace queueing {

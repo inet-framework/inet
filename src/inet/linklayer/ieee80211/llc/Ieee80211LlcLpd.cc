@@ -16,8 +16,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/ProtocolGroup.h"
 #include "inet/linklayer/ieee80211/llc/Ieee80211LlcLpd.h"
+
+#include "inet/common/ProtocolGroup.h"
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #ifndef __INET_SPATIALGRID_H
 #define __INET_SPATIALGRID_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/object/LineSegment.h"

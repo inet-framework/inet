@@ -18,7 +18,6 @@
 #ifndef __INET_IMATERIAL_H
 #define __INET_IMATERIAL_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/Units.h"
 
 namespace inet {

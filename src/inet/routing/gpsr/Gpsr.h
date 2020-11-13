@@ -18,7 +18,6 @@
 #ifndef __INET_GPSR_H
 #define __INET_GPSR_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"

@@ -15,9 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <cerrno>
-#include "inet/common/INETUtils.h"
 #include "inet/common/packet/recorder/PcapReader.h"
+
+#include <cerrno>
+
+#include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {

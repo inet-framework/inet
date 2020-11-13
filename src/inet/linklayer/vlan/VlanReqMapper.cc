@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/vlan/VlanReqMapper.h"
+
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/vlan/VlanReqMapper.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {

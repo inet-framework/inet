@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/tcp_common/TcpSpoof.h"
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
-#include "inet/transportlayer/tcp_common/TcpSpoof.h"
 
 namespace inet {
 namespace tcp {

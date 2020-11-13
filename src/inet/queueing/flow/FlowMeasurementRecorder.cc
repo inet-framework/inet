@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/FlowTag.h"
 #include "inet/queueing/flow/FlowMeasurementRecorder.h"
+
+#include "inet/common/FlowTag.h"
 
 namespace inet {
 namespace queueing {

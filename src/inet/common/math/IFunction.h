@@ -18,10 +18,10 @@
 #ifndef __INET_IFUNCTION_H
 #define __INET_IFUNCTION_H
 
+#include "inet/common/Ptr.h"
 #include "inet/common/math/Domain.h"
 #include "inet/common/math/Interval.h"
 #include "inet/common/math/Point.h"
-#include "inet/common/Ptr.h"
 
 namespace inet {
 

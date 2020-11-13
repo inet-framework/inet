@@ -22,12 +22,13 @@
 ***************************************************************************/
 
 
+#include "inet/transportlayer/rtp/RtpProfile.h"
+
 #include <string.h>
 
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
-#include "inet/transportlayer/rtp/RtpProfile.h"
 
 namespace inet {
 namespace rtp {

@@ -18,7 +18,6 @@
 #ifndef __INET_TOKENBUCKETMETER_H
 #define __INET_TOKENBUCKETMETER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/diffserv/PacketMeterBase.h"
 

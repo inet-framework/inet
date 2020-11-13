@@ -15,7 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/sctp/SctpUdpHook.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
@@ -25,7 +26,6 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/sctp/SctpUdpHook.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {

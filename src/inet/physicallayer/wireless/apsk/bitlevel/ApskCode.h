@@ -18,10 +18,10 @@
 #ifndef __INET_APSKCODE_H
 #define __INET_APSKCODE_H
 
-#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ICode.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IInterleaver.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
 
 namespace inet {
 

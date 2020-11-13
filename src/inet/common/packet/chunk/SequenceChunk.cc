@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
+
+#include "inet/common/packet/chunk/EmptyChunk.h"
 
 namespace inet {
 

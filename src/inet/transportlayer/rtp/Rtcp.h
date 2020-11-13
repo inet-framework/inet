@@ -24,7 +24,6 @@
 #ifndef __INET_RTCP_H
 #define __INET_RTCP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"

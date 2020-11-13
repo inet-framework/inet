@@ -1,7 +1,6 @@
 #ifndef __INET_OSPFV3AREA_H
 #define __INET_OSPFV3AREA_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 #include "inet/routing/ospfv3/interface/Ospfv3Interface.h"

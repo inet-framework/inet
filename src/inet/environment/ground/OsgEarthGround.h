@@ -25,6 +25,7 @@
 
 #include <osgEarth/ElevationQuery>
 #include <osgEarth/MapNode>
+
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 
 namespace inet {

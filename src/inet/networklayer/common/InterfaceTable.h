@@ -20,7 +20,6 @@
 
 #include <vector>
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/networklayer/common/NetworkInterface.h"

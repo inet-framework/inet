@@ -34,6 +34,8 @@
 // TODO
 //  - 8.: Tunnel Error Reporting and Processing
 
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
+
 #include <algorithm>
 #include <functional>
 
@@ -47,11 +49,10 @@
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 #ifdef WITH_xMIPv6
-#include "inet/networklayer/xmipv6/xMIPv6.h"
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"    // for HA Option header
+#include "inet/networklayer/xmipv6/xMIPv6.h"
 #endif // ifdef WITH_xMIPv6
 
 namespace inet {

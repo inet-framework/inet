@@ -18,8 +18,9 @@
 //
 
 #include <assert.h>
-#include <sstream>
 #include <string.h>
+
+#include <sstream>
 
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/Sctp.h"

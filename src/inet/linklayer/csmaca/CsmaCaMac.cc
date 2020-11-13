@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/csmaca/CsmaCaMac.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -24,7 +26,6 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/linklayer/csmaca/CsmaCaMac.h"
 
 namespace inet {
 

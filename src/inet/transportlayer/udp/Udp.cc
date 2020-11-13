@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <string>
 
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
@@ -29,13 +28,14 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"

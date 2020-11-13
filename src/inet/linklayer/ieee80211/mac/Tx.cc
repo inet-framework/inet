@@ -15,13 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mac/Tx.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
-#include "inet/linklayer/ieee80211/mac/Tx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 
 namespace inet {

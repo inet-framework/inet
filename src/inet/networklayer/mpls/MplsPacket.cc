@@ -17,7 +17,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-#include "inet/common/INETDefs.h"
 #include "inet/networklayer/mpls/MplsPacket_m.h"
 
 namespace inet {

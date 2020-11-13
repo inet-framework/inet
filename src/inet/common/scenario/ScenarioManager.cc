@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/scenario/ScenarioManager.h"
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/scenario/ScenarioManager.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
 
 namespace inet {

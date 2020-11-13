@@ -21,8 +21,8 @@
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 

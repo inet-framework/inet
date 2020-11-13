@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredReceiver.h"
+
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskDecoder.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskDemodulator.h"
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredReceiver.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"

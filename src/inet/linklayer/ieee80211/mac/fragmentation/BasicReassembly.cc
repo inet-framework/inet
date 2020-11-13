@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
+
 #include <algorithm>
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
 
 namespace inet {

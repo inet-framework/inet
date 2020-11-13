@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/linklayer/LinkBreakOsgVisualizer.h"
+
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-#include "inet/visualizer/linklayer/LinkBreakOsgVisualizer.h"
 
 #ifdef WITH_OSG
 #include <osg/Geode>

@@ -18,7 +18,7 @@
 #ifndef __INET_IFRAGMENTATION_H
 #define __INET_IFRAGMENTATION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 namespace ieee80211 {

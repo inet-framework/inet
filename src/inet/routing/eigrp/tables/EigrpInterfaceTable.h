@@ -26,10 +26,9 @@
 #ifndef __INET_EIGRPINTERFACETABLE_H_
 #define __INET_EIGRPINTERFACETABLE_H_
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/routing/eigrp/EigrpTimer_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/routing/eigrp/EigrpTimer_m.h"
 
 namespace inet {
 namespace eigrp {
