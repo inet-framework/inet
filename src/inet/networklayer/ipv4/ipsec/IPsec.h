@@ -41,11 +41,11 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     SecurityPolicyDatabase *spdModule;
     SecurityAssociationDatabase *sadModule;
 
-    double ahProtectOutDelay;
-    double ahProtectInDelay;
+    cPar *ahProtectOutDelay;
+    cPar *ahProtectInDelay;
 
-    double espProtectOutDelay;
-    double espProtectInDelay;
+    cPar *espProtectOutDelay;
+    cPar *espProtectInDelay;
 
     simtime_t lastProtectedIn = 0;
     simtime_t lastProtectedOut = 0;

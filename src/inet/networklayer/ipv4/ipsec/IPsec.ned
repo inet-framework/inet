@@ -172,11 +172,10 @@ simple IPsec
 		string sadModule = default("^.sad");
 		xml spdConfig;
           
-        double ahProtectOutDelay @unit(s) = default(0.0s);
-        double ahProtectInDelay @unit(s) = default(0.0s);
-        
-        double espProtectOutDelay @unit(s) = default(0.0s);
-        double espProtectInDelay @unit(s) = default(0.0s);
+        volatile double ahProtectOutDelay @unit(s) = default(0.0s);
+        volatile double ahProtectInDelay @unit(s) = default(0.0s);
+        volatile double espProtectOutDelay @unit(s) = default(0.0s);
+        volatile double espProtectInDelay @unit(s) = default(0.0s);
         
         @signal[inProtectedAccept](type=long);
         @signal[inProtectedDrop](type=long);
