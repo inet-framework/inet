@@ -155,9 +155,11 @@ double Ieee80211NistErrorModel::getFec16QamBer(double snr, uint32_t nbits, uint3
     if (ber == 0.0) {
         return 1.0;
     }
+    std::cout << "ERROR MODEL: " << "snr " << snr << " " << "nbits " << nbits << " " << "bValue " << bValue << "\n";
     double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, (double)nbits);
+    std::cout << "PMS: " << pms << "PE: " << pe << "\n";
     return pms;
 }
 

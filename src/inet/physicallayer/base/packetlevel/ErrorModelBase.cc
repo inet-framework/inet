@@ -49,6 +49,7 @@ void ErrorModelBase::initialize(int stage)
 double ErrorModelBase::getScalarSnir(const ISnir *snir) const
 {
     if (snirMode == SnirMode::SM_MIN)
+        std::cout << snir->getMin();
         return snir->getMin();
     else if (snirMode == SnirMode::SM_MEAN)
         return snir->getMean();
