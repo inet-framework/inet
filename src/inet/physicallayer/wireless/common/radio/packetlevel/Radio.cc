@@ -481,13 +481,14 @@ void Radio::endReception(cMessage *timer)
         // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
         sendUp(macFrame);
-        receptionTimer = nullptr;
         emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
     }
     else
         EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
+    if(timer == receptionTimer)
+        receptionTimer = nullptr;
     delete timer;
     // TODO: move to radio medium
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
