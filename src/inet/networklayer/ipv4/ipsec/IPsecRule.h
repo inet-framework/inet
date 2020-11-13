@@ -22,6 +22,16 @@
 #include "inet/common/INETDefs.h"
 #include "PacketSelector.h"
 
+// Some Windows header defines IN and OUT as macros, which clashes with our use of those words.
+#ifdef _WIN32
+#  ifdef IN
+#    undef IN
+#  endif
+#  ifdef OUT
+#    undef OUT
+#  endif
+#endif
+
 namespace inet {
 namespace ipsec {
 
