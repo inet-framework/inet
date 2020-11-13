@@ -189,7 +189,7 @@ void UdpBasicBurstNotification::generateBurst()
     scheduleAt(nextPkt, timerNext);
 }
 
-void UdpBasicBurstNotification::receiveSignal(cComponent *source, simsignal_t signalID, long l, cObject *details)
+void UdpBasicBurstNotification::receiveSignal(cComponent *source, simsignal_t signalID, intval_t l, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == interfaceIpv4ConfigChangedSignal || signalID == interfaceIpv6ConfigChangedSignal)

@@ -45,53 +45,53 @@ void Disk_LI::initialize(int stage) {
 
 void Disk_LI::finish(){
 
-	// Finish the super-class
-	icancloud_Base::finish();
+    // Finish the super-class
+    icancloud_Base::finish();
 }
 
 
 cGate* Disk_LI::getOutGate (cMessage *msg){
 
-	// If msg arrive from scheduler
-	if (msg->getArrivalGate()==inGate){
-		if (outGate->getNextGate()->isConnected()){
-			return (outGate);
-		}
-	}
-	// If gate not found!
-	return nullptr;
+    // If msg arrive from scheduler
+    if (msg->getArrivalGate()==inGate){
+        if (outGate->getNextGate()->isConnected()){
+            return (outGate);
+        }
+    }
+    // If gate not found!
+    return nullptr;
 }
 
 
 void Disk_LI::processSelfMessage (cMessage *msg){
 
-		// Latency message...
-		if (!strcmp (msg->getName(), SM_LATENCY_MESSAGE.c_str())){
+    // Latency message...
+    if (!strcmp (msg->getName(), SM_LATENCY_MESSAGE.c_str())){
 
-			// Cast!
-		    auto sm_bl = pendingMessage->peekAtFront<icancloud_BlockList_Message>();
-		    if (sm_bl == nullptr)
-		        throw cRuntimeError("Header type error");
-			sm_bl = check_and_cast<icancloud_BlockList_Message *>(pendingMessage);
+        // Cast!
+        auto sm_bl = pendingMessage->peekAtFront<icancloud_BlockList_Message>();
+        if (sm_bl == nullptr)
+            throw cRuntimeError("Header type error");
+        sm_bl = check_and_cast<icancloud_BlockList_Message *>(pendingMessage);
 
-			// Init pending message...
+        // Init pending message...
 
-			changeState (DISK_IDLE);
-			// Send message back!
-			auto pkt = pendingMessage;
-			pendingMessage=nullptr;
-			sendResponseMessage (pkt);
+        changeState (DISK_IDLE);
+        // Send message back!
+        auto pkt = pendingMessage;
+        pendingMessage=nullptr;
+        sendResponseMessage (pkt);
 
-		}
+    }
 
-//		else if (!strcmp (msg->getName(), SM_WAIT_TO_EXECUTE.c_str())){
-//			changeState (DISK_OFF);
-//			delete (msg);
-//		}
-		else{
+    //		else if (!strcmp (msg->getName(), SM_WAIT_TO_EXECUTE.c_str())){
+    //			changeState (DISK_OFF);
+    //			delete (msg);
+    //		}
+    else{
 
-			showErrorMessage ("Unknown self message [%s]", msg->getName());
-		}
+        showErrorMessage ("Unknown self message [%s]", msg->getName());
+    }
 }
 
 
@@ -102,54 +102,54 @@ void Disk_LI::processRequestMessage (Packet *pkt){
     const auto & sm = pkt->peekAtFront<icancloud_Message>();
     operation = sm->getOperation();
 
-	if (operation == SM_CHANGE_DISK_STATE){
+    if (operation == SM_CHANGE_DISK_STATE){
 
-		changeDeviceState(sm->getChangingState().c_str());
-		delete(pkt);
+        changeDeviceState(sm->getChangingState().c_str());
+        delete(pkt);
 
-	} else {
-		// Link pending message
-		pendingMessage = pkt;
+    } else {
+        // Link pending message
+        pendingMessage = pkt;
 
-		// Process the current IO request
-		requestTime = service (pkt);
+        // Process the current IO request
+        requestTime = service (pkt);
 
-		// Change disk state to active
-		changeState (DISK_ACTIVE);
+        // Change disk state to active
+        changeState (DISK_ACTIVE);
 
-		// Schedule a selft message to wait the request time...
-		scheduleAt (simTime()+requestTime, latencyMessage);
-	}
+        // Schedule a selft message to wait the request time...
+        scheduleAt (simTime()+requestTime, latencyMessage);
+    }
 }
 
 
 void Disk_LI::processResponseMessage (Packet *pkt){
-	showErrorMessage ("There is no response messages in Disk Modules!");
+    showErrorMessage ("There is no response messages in Disk Modules!");
 }
 
 
 simtime_t Disk_LI::service (Packet *pkt){
 
-	unsigned int i;
-	simtime_t totalDelay;					// Time to perform the IO operation
-	char operation;							// Operation type
+    unsigned int i;
+    simtime_t totalDelay;					// Time to perform the IO operation
+    char operation;							// Operation type
 
-	size_blockList_t currentBranchSize;		// Size of current branch
-	off_blockList_t currentBranchOffset;	// Offset of current branch
-	unsigned int numBranches;				// NUmber of branches
-	pkt->trimFront();
-	auto  sm = pkt->removeAtFront<icancloud_Message>();
-	// Init
-	totalDelay = 0;
-	// Cast to Standard message
-	auto sm_bl = dynamicPtrCast<icancloud_BlockList_Message>(sm);
+    size_blockList_t currentBranchSize;		// Size of current branch
+    off_blockList_t currentBranchOffset;	// Offset of current branch
+    unsigned int numBranches;				// NUmber of branches
+    pkt->trimFront();
+    auto  sm = pkt->removeAtFront<icancloud_Message>();
+    // Init
+    totalDelay = 0;
+    // Cast to Standard message
+    auto sm_bl = dynamicPtrCast<icancloud_BlockList_Message>(sm);
 
-	// Get the number of blocks
-	numBranches = sm_bl->getFile().getNumberOfBranches();
-	// Get the operation type
-	int op =sm_bl->getOperation();
-	if (op == SM_READ_FILE)
-	    operation = 'r';
+    // Get the number of blocks
+    numBranches = sm_bl->getFile().getNumberOfBranches();
+    // Get the operation type
+    int op =sm_bl->getOperation();
+    if (op == SM_READ_FILE)
+        operation = 'r';
     else
         operation = 'w';
     // Update message length
@@ -180,23 +180,23 @@ simtime_t Disk_LI::service (Packet *pkt){
     sm_bl->setIsResponse(true);
     pkt->insertAtFront(sm_bl);
 
-	return totalDelay;
+    return totalDelay;
 }
 
 
 simtime_t Disk_LI::storageDeviceTime (off_blockList_t offsetBlock, size_blockList_t brachSize, char operation){
 
-	simtime_t transferTime;	// Transfer time
-	int64_t jumpBytes;		// Total Number of bytes
-	int64_t totalBytes;		// Total Number of bytes
+    simtime_t transferTime;	// Transfer time
+    int64_t jumpBytes;		// Total Number of bytes
+    int64_t totalBytes;		// Total Number of bytes
 
-	int blockSizeIndex_1;	// Index to first blockSize
-	int blockSizeIndex_2;	// Index to second blockSize
-	int offsetIndex_1;		// Index to first jump
-	int offsetIndex_2;		// Index to second jump
+    int blockSizeIndex_1;	// Index to first blockSize
+    int blockSizeIndex_2;	// Index to second blockSize
+    int offsetIndex_1;		// Index to first jump
+    int offsetIndex_2;		// Index to second jump
 
-	simtime_t subResult_A;		// First Lineal interpolation subResult
-	simtime_t subResult_B;		// Second lineal interpolation subResult
+    simtime_t subResult_A;		// First Lineal interpolation subResult
+    simtime_t subResult_B;		// Second lineal interpolation subResult
 
     // Init...
     transferTime = 0.0;
@@ -226,18 +226,18 @@ simtime_t Disk_LI::storageDeviceTime (off_blockList_t offsetBlock, size_blockLis
     else {
 
         subResult_A = fabs(linealInterpolation(jumpBytes, jumpsSizes[offsetIndex_1],
-                        jumpsSizes[offsetIndex_2],
-                        readTimes[blockSizeIndex_1][offsetIndex_1],
-                        readTimes[blockSizeIndex_1][offsetIndex_2]));
+                jumpsSizes[offsetIndex_2],
+                readTimes[blockSizeIndex_1][offsetIndex_1],
+                readTimes[blockSizeIndex_1][offsetIndex_2]));
 
         subResult_B = fabs(linealInterpolation(jumpBytes, jumpsSizes[offsetIndex_1],
-                        jumpsSizes[offsetIndex_2],
-                        readTimes[blockSizeIndex_2][offsetIndex_1],
-                        readTimes[blockSizeIndex_2][offsetIndex_2]));
+                jumpsSizes[offsetIndex_2],
+                readTimes[blockSizeIndex_2][offsetIndex_1],
+                readTimes[blockSizeIndex_2][offsetIndex_2]));
 
         transferTime = fabs(linealInterpolation(totalBytes, blockSizes[blockSizeIndex_1],
-                        blockSizes[blockSizeIndex_2], subResult_A,
-                        subResult_B));
+                blockSizes[blockSizeIndex_2], subResult_A,
+                subResult_B));
     }
 
     // Debug
@@ -250,123 +250,123 @@ simtime_t Disk_LI::storageDeviceTime (off_blockList_t offsetBlock, size_blockLis
 
 void Disk_LI::calculateIndex (int64_t jump, int64_t numBytes, int *blockSizeIndex_1, int *blockSizeIndex_2, int *offsetIndex_1, int *offsetIndex_2){
 
-	int currentOffset, currentBlockSize;
-	bool found;
+    int currentOffset, currentBlockSize;
+    bool found;
 
-		// Init...
-		found = false;
-		currentOffset = 0;
-		currentBlockSize = 0;
+    // Init...
+    found = false;
+    currentOffset = 0;
+    currentBlockSize = 0;
 
-		// Search the Offset coordinates!
-		while ((currentOffset<NUM_JUMP_SIZES) && (!found)){
+    // Search the Offset coordinates!
+    while ((currentOffset<NUM_JUMP_SIZES) && (!found)){
 
-			// Found!
-			if (jumpsSizes[currentOffset] > jump){
-				*offsetIndex_1 = currentOffset-1;
-				*offsetIndex_2 = currentOffset;
-				found = true;
-			}
+        // Found!
+        if (jumpsSizes[currentOffset] > jump){
+            *offsetIndex_1 = currentOffset-1;
+            *offsetIndex_2 = currentOffset;
+            found = true;
+        }
 
-			// Not found!
-			else
-				currentOffset++;
-		}
+        // Not found!
+        else
+            currentOffset++;
+    }
 
-		// Out of range! Use the last Jump Size!
-		if (!found){
-			*offsetIndex_1 = NUM_JUMP_SIZES-1;
-			*offsetIndex_2 = NUM_JUMP_SIZES;
-		}
+    // Out of range! Use the last Jump Size!
+    if (!found){
+        *offsetIndex_1 = NUM_JUMP_SIZES-1;
+        *offsetIndex_2 = NUM_JUMP_SIZES;
+    }
 
-		// Re-init!
-		found = false;
+    // Re-init!
+    found = false;
 
-		// Search the blockSize coordinates!
-		while ((currentBlockSize<NUM_BLOCK_SIZES) && (!found)){
+    // Search the blockSize coordinates!
+    while ((currentBlockSize<NUM_BLOCK_SIZES) && (!found)){
 
-			// Found!
-			if (blockSizes[currentBlockSize] > numBytes){
+        // Found!
+        if (blockSizes[currentBlockSize] > numBytes){
 
-				// Adjust!
-				if (currentBlockSize==0){
-					*blockSizeIndex_1 = 0;
-					*blockSizeIndex_2 = 1;
-				}
+            // Adjust!
+            if (currentBlockSize==0){
+                *blockSizeIndex_1 = 0;
+                *blockSizeIndex_2 = 1;
+            }
 
-				else{
-					*blockSizeIndex_1 = currentBlockSize-1;
-					*blockSizeIndex_2 = currentBlockSize;
-				}
+            else{
+                *blockSizeIndex_1 = currentBlockSize-1;
+                *blockSizeIndex_2 = currentBlockSize;
+            }
 
-				found = true;
-			}
+            found = true;
+        }
 
-			// Not found!
-			else
-				currentBlockSize++;
-		}
+        // Not found!
+        else
+            currentBlockSize++;
+    }
 
-		// Out of range!
-		if (!found){
-			*blockSizeIndex_1 = -1;
-			*blockSizeIndex_2 = -1;
-		}
+    // Out of range!
+    if (!found){
+        *blockSizeIndex_1 = -1;
+        *blockSizeIndex_2 = -1;
+    }
 }
 
 
 simtime_t Disk_LI::linealInterpolation (int64_t x, int64_t x0, int64_t x1, simtime_t y0, simtime_t y1){
 
-	simtime_t y;
+    simtime_t y;
 
-		y = y0 + ( ((y1-y0) / (x1-x0)) * (x-x0));
+    y = y0 + ( ((y1-y0) / (x1-x0)) * (x-x0));
 
-	return y;
+    return y;
 }
 
 
 void Disk_LI::changeDeviceState (const string &state,  unsigned componentIndex){
 
-	if (state == MACHINE_STATE_IDLE) {
+    if (state == MACHINE_STATE_IDLE) {
 
-		nodeState = MACHINE_STATE_IDLE;
-		changeState (DISK_IDLE);
+        nodeState = MACHINE_STATE_IDLE;
+        changeState (DISK_IDLE);
 
-	}
-	else if (state == MACHINE_STATE_RUNNING) {
+    }
+    else if (state == MACHINE_STATE_RUNNING) {
 
-		nodeState = MACHINE_STATE_RUNNING;
-		changeState (DISK_IDLE);
+        nodeState = MACHINE_STATE_RUNNING;
+        changeState (DISK_IDLE);
 
-	}
-	else if (state == MACHINE_STATE_OFF) {
+    }
+    else if (state == MACHINE_STATE_OFF) {
 
-		nodeState = MACHINE_STATE_OFF;
-		changeState (DISK_OFF);
+        nodeState = MACHINE_STATE_OFF;
+        changeState (DISK_OFF);
 
-	}
+    }
 }
 
 
 void Disk_LI::changeState (const string &energyState, unsigned componentIndex){
 
-	// If the module receive any message, doesn't have to accumulate the energy consumption time
+    // If the module receive any message, doesn't have to accumulate the energy consumption time
 
-	if (nodeState == MACHINE_STATE_OFF ) {
-		//energyState = DISK_OFF;
-		e_changeState (DISK_OFF);
-		return;
-	}
+    if (nodeState == MACHINE_STATE_OFF ) {
+        //energyState = DISK_OFF;
+        e_changeState (DISK_OFF);
+        return;
+    }
 
-//	if (strcmp (energyState.c_str(), DISK_OFF) == 0) nullptr;
-//
-//	else if (strcmp (energyState.c_str(), DISK_IDLE) == 0) nullptr;
-//
-//	else if (strcmp (energyState.c_str(), DISK_ACTIVE) == 0) nullptr;
-//
-// 	else nullptr;
+    //	if (strcmp (energyState.c_str(), DISK_OFF) == 0) nullptr;
+    //
+    //	else if (strcmp (energyState.c_str(), DISK_IDLE) == 0) nullptr;
+    //
+    //	else if (strcmp (energyState.c_str(), DISK_ACTIVE) == 0) nullptr;
+    //
+    // 	else nullptr;
 
-	e_changeState (energyState);
+    e_changeState (energyState);
 
 }
 

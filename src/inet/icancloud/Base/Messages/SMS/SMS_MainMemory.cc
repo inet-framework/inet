@@ -8,34 +8,34 @@ namespace icancloud {
 using namespace omnetpp;
 
 SMS_MainMemory::SMS_MainMemory(unsigned int newMemorySize,
-							  unsigned int newReadAheadBlocks,
-							  unsigned int newMemoryBlockSize){
+        unsigned int newReadAheadBlocks,
+        unsigned int newMemoryBlockSize){
 
-	memorySize = newMemorySize;
-	readAheadBlocks = newReadAheadBlocks;
-	memoryBlockSize = newMemoryBlockSize;
+    memorySize = newMemorySize;
+    readAheadBlocks = newReadAheadBlocks;
+    memoryBlockSize = newMemoryBlockSize;
 }
 
 
 void SMS_MainMemory::splitRequest(cMessage*msg){
 
-	int offset;									// Request offset
-	unsigned int requestSize;							// Request size
+    int offset;									// Request offset
+    unsigned int requestSize;							// Request size
 
-	int currentSubRequest;						// Current subRequest (number)
-	int currentOffset;							// Current subRequest offset
-	int currentSize;							// Current subRequest size;
+    int currentSubRequest;						// Current subRequest (number)
+    int currentOffset;							// Current subRequest offset
+    int currentSize;							// Current subRequest size;
 
-	int bytesInFirstBlock;						// Bytes of first blocks (write only)
-	int firstRequestBlock;						// First requested block
-	int numRequestedBlocks;						// Total number of requested blocks
+    int bytesInFirstBlock;						// Bytes of first blocks (write only)
+    int firstRequestBlock;						// First requested block
+    int numRequestedBlocks;						// Total number of requested blocks
 
-	int operation;
+    int operation;
 
-	auto pkt = check_and_cast<inet::Packet*>(msg);
+    auto pkt = check_and_cast<inet::Packet*>(msg);
 
-	const auto &sm = pkt->peekAtFront<icancloud_Message>();
-	const auto &sm_io = CHK(dynamicPtrCast<const icancloud_App_IO_Message>(sm));
+    const auto &sm = pkt->peekAtFront<icancloud_Message>();
+    const auto &sm_io = CHK(dynamicPtrCast<const icancloud_App_IO_Message>(sm));
 
 
     // Init...
@@ -58,9 +58,9 @@ void SMS_MainMemory::splitRequest(cMessage*msg){
         numRequestedBlocks =
                 ((std::abs((int) (requestSize - bytesInFirstBlock)) % memoryBlockSize) == 0) ?
                         (std::abs((int)(requestSize - bytesInFirstBlock)) / memoryBlockSize)
-                                + 1 :
+                        + 1 :
                         (std::abs((int)(requestSize - bytesInFirstBlock)) / memoryBlockSize)
-                                + 2;
+                        + 2;
 
         // Calculate the involved data blocks
         firstRequestBlock = offset / memoryBlockSize;
@@ -198,61 +198,61 @@ void SMS_MainMemory::splitRequest(cMessage*msg){
 
 
 bool SMS_MainMemory::arrivesRequiredBlocks(inet::Packet * request, unsigned int extraBlocks){
-	
-	int parentIndex, subIndex;
-	bool allArrived;
 
-		// Search...
-		parentIndex = searchRequest (request);
-		allArrived = true;
-		subIndex = 0;
+    int parentIndex, subIndex;
+    bool allArrived;
 
-		// Request found...
-		if (parentIndex != NOT_FOUND){
-			while ((subIndex < ((int)((requestVector[parentIndex])->getNumSubRequest())- ((int)extraBlocks))) && (allArrived)){
-				
-				if ((requestVector[parentIndex])->getSubRequest(subIndex) == nullptr)
-					allArrived = false;
-				else
-					subIndex++;
-			}
-		}
-		else
-			allArrived = false;
-		
-		
-	return allArrived;
+    // Search...
+    parentIndex = searchRequest (request);
+    allArrived = true;
+    subIndex = 0;
+
+    // Request found...
+    if (parentIndex != NOT_FOUND){
+        while ((subIndex < ((int)((requestVector[parentIndex])->getNumSubRequest())- ((int)extraBlocks))) && (allArrived)){
+
+            if ((requestVector[parentIndex])->getSubRequest(subIndex) == nullptr)
+                allArrived = false;
+            else
+                subIndex++;
+        }
+    }
+    else
+        allArrived = false;
+
+
+    return allArrived;
 }
 
 
 inet::Packet* SMS_MainMemory::getFirstSubRequest(){
 
-	if (subRequests.empty())
-		return nullptr;
-	else {
-	    const auto &sm = subRequests.front()->peekAtFront<icancloud_App_IO_Message>();
-	    if (sm == nullptr)
-	        throw cRuntimeError("Incorrect header");
-		return (subRequests.front());
-	}
+    if (subRequests.empty())
+        return nullptr;
+    else {
+        const auto &sm = subRequests.front()->peekAtFront<icancloud_App_IO_Message>();
+        if (sm == nullptr)
+            throw cRuntimeError("Incorrect header");
+        return (subRequests.front());
+    }
 }
 
 
 inet::Packet* SMS_MainMemory::popSubRequest(){
 
-	Packet *msg;
-	if (subRequests.empty())
-	    msg = nullptr;
-	else{
-	    msg = subRequests.front();
-	    subRequests.pop_front();
-	}
-	const auto &sm = subRequests.front()->peekAtFront<icancloud_Message>();
-	const auto &sm_bl = CHK(dynamicPtrCast<const icancloud_App_IO_Message>(sm));
-	if (sm_bl == nullptr)
-	    throw cRuntimeError("Incorrect header");
+    Packet *msg;
+    if (subRequests.empty())
+        msg = nullptr;
+    else{
+        msg = subRequests.front();
+        subRequests.pop_front();
+    }
+    const auto &sm = subRequests.front()->peekAtFront<icancloud_Message>();
+    const auto &sm_bl = CHK(dynamicPtrCast<const icancloud_App_IO_Message>(sm));
+    if (sm_bl == nullptr)
+        throw cRuntimeError("Incorrect header");
 
-	return msg;
+    return msg;
 }
 
 
@@ -285,7 +285,7 @@ string SMS_MainMemory::requestToStringByIndex(unsigned int index) {
                 // Is nullptr?
                 if ((requestVector[index])->getSubRequest(i) == nullptr)
                     info << "  subRequest[" << i << "]: Not arrived yet!"
-                            << endl;
+                    << endl;
                 else {
 
                     // Cast!
@@ -307,7 +307,7 @@ string SMS_MainMemory::requestToStringByIndex(unsigned int index) {
 
 void SMS_MainMemory::clear() {
 
-//    std::list<icancloud_App_IO_Message*>::iterator iter;
+    //    std::list<icancloud_App_IO_Message*>::iterator iter;
     unsigned int i;
 
     for (i = 0; i < requestVector.size(); i++) {

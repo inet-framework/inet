@@ -54,55 +54,55 @@ void LocalNetManager::processResponseMessage (Packet *){
 }
 
 void LocalNetManager::initializePAT (const L3Address &nodeIP){
-	ip_LocalNode = nodeIP;
-	pat->pat_initialize(nodeIP);
+    ip_LocalNode = nodeIP;
+    pat->pat_initialize(nodeIP);
 
-	cModule* networkmanager_mod;
+    cModule* networkmanager_mod;
 
-	networkmanager_mod =  getParentModule()->getParentModule()->getParentModule()->getParentModule()->getSubmodule("networkManager");
-	netManagerPtr = check_and_cast <NetworkManager*> (networkmanager_mod);
+    networkmanager_mod =  getParentModule()->getParentModule()->getParentModule()->getParentModule()->getSubmodule("networkManager");
+    netManagerPtr = check_and_cast <NetworkManager*> (networkmanager_mod);
 
-	if (netManagerPtr == nullptr){
-		showErrorMessage("LocalNetManager::initializePAT --> Error. Net Manager Pointer is nullptr .. ");
-	}
+    if (netManagerPtr == nullptr){
+        showErrorMessage("LocalNetManager::initializePAT --> Error. Net Manager Pointer is nullptr .. ");
+    }
 
 }
 
 void LocalNetManager::createVM(Packet* pkt){
 
-	// Define ..
-		//icancloud_App_NET_Message* sm_net;
+    // Define ..
+    //icancloud_App_NET_Message* sm_net;
     const auto &sm = pkt->peekAtFront<icancloud_Message>();
-	// Init ..
+    // Init ..
     const auto &sm_net = CHK(dynamicPtrCast<const icancloud_App_NET_Message> (sm));
     if (sm_net == nullptr)
         throw cRuntimeError("Header error");
 
-	// create the user into the structure
-		pat->pat_createVM(sm->getUid(), sm->getPid(), sm_net->getLocalIP());
+    // create the user into the structure
+    pat->pat_createVM(sm->getUid(), sm->getPid(), sm_net->getLocalIP());
 }
 
 void LocalNetManager::manage_listen(Packet* pkt){
 
-	//icancloud_App_NET_Message* sm_net;
-	int realPort;
-	int virtualPort;
-	pkt->trimFront();
-	auto sm = pkt->removeAtFront<icancloud_Message>();
-	auto sm_net = CHK(dynamicPtrCast<icancloud_App_NET_Message> (sm));
+    //icancloud_App_NET_Message* sm_net;
+    int realPort;
+    int virtualPort;
+    pkt->trimFront();
+    auto sm = pkt->removeAtFront<icancloud_Message>();
+    auto sm_net = CHK(dynamicPtrCast<icancloud_App_NET_Message> (sm));
     if (sm_net == nullptr)
         throw cRuntimeError("Header error");
 
-	//sm_net = dynamic_cast <icancloud_App_NET_Message*> (sm);
+    //sm_net = dynamic_cast <icancloud_App_NET_Message*> (sm);
 
-	virtualPort = sm_net->getLocalPort();
-	realPort = pat->pat_createListen(sm->getUid(), sm->getPid(), virtualPort);
+    virtualPort = sm_net->getLocalPort();
+    realPort = pat->pat_createListen(sm->getUid(), sm->getPid(), virtualPort);
 
-	sm_net->setLocalPort(realPort);
-	sm_net->setVirtual_localPort(virtualPort);
-	pkt->insertAtFront(sm);
+    sm_net->setLocalPort(realPort);
+    sm_net->setVirtual_localPort(virtualPort);
+    pkt->insertAtFront(sm);
 
-	netManagerPtr->registerPort(sm->getUid(), ip_LocalNode.toIpv4().str(false), sm->getPid(), realPort, virtualPort, LISTEN);
+    netManagerPtr->registerPort(sm->getUid(), ip_LocalNode.toIpv4().str(false), sm->getPid(), realPort, virtualPort, LISTEN);
 }
 
 int LocalNetManager::manage_create_storage_Connection(Packet* pkt) {
@@ -160,22 +160,22 @@ int LocalNetManager::manage_create_storage_Connection(Packet* pkt) {
 
 int LocalNetManager::manage_createConnection(Packet* pkt){
 
-	//icancloud_App_NET_Message* sm_net;
-	string virtual_destinationIP, virtual_localIP;
-	string destinationIP, localIP;
-	int realDestinationPort;
-	int virtualDestinationPort;
-	int decision;
+    //icancloud_App_NET_Message* sm_net;
+    string virtual_destinationIP, virtual_localIP;
+    string destinationIP, localIP;
+    int realDestinationPort;
+    int virtualDestinationPort;
+    int decision;
 
-//	sm_net = dynamic_cast <icancloud_App_NET_Message*> (sm);
-	pkt->trimFront();
+    //	sm_net = dynamic_cast <icancloud_App_NET_Message*> (sm);
+    pkt->trimFront();
     auto sm = pkt->removeAtFront<icancloud_Message>();
     auto sm_net = CHK(dynamicPtrCast<icancloud_App_NET_Message> (sm));
     if (sm_net == nullptr)
         throw cRuntimeError("Header error");
 
 
-	// Get the destinationIP (vm) and the local ip (vm)
+    // Get the destinationIP (vm) and the local ip (vm)
     virtual_destinationIP = sm_net->getDestinationIP();
     virtual_localIP = sm_net->getLocalIP();
 
@@ -189,10 +189,10 @@ int LocalNetManager::manage_createConnection(Packet* pkt){
         showErrorMessage("LocalNetManager::manage_createConnection-> destination IP for the UserPid(%i) - vmID: %i and virtual destination IP: %s is nullptr", sm->getUid(), sm->getPid(), virtual_destinationIP.c_str());
     }
 
-	// Get the virtual port
+    // Get the virtual port
     realDestinationPort = netManagerPtr->getRealPort (destinationIP, virtualDestinationPort, sm_net->getUid(), netManagerPtr->getVMid(virtual_destinationIP,sm_net->getUid()));
 
-	// The port is not found .. maybe it will be open soon? ..
+    // The port is not found .. maybe it will be open soon? ..
     if (realDestinationPort == PORT_NOT_FOUND){
         decision = -1;
     }
@@ -208,7 +208,7 @@ int LocalNetManager::manage_createConnection(Packet* pkt){
         sm_net->setVirtual_destinationPort(virtualDestinationPort);
         sm_net->setDestinationPort(realDestinationPort);
 
-		decision = 0;
+        decision = 0;
     }
     pkt->insertAtFront(sm_net);
     return decision;
@@ -328,53 +328,53 @@ vector<Packet*> LocalNetManager::manage_close_connections(
 
 void LocalNetManager::manage_receiveMessage(Packet *pkt){
 
-	//icancloud_App_NET_Message* sm_net;
-	string virtual_destinationIP, virtual_localIP;
-	int realDestinationPort;
-	int virtualDestinationPort;
-	pkt->trimFront();
+    //icancloud_App_NET_Message* sm_net;
+    string virtual_destinationIP, virtual_localIP;
+    int realDestinationPort;
+    int virtualDestinationPort;
+    pkt->trimFront();
     auto sm = pkt->removeAtFront<icancloud_Message>();
     auto sm_net = CHK(dynamicPtrCast<icancloud_App_NET_Message>(sm));
     if (sm_net == nullptr)
         throw cRuntimeError("Header error");
 
-	//sm_net = dynamic_cast <icancloud_App_NET_Message> (sm);
+    //sm_net = dynamic_cast <icancloud_App_NET_Message> (sm);
 
-	virtual_destinationIP = sm_net->getVirtual_destinationIP();
-	sm_net->setDestinationIP(virtual_destinationIP.c_str());
+    virtual_destinationIP = sm_net->getVirtual_destinationIP();
+    sm_net->setDestinationIP(virtual_destinationIP.c_str());
 
-	virtual_localIP = sm_net->getVirtual_localIP();
-	sm_net->setLocalIP(virtual_localIP.c_str());
+    virtual_localIP = sm_net->getVirtual_localIP();
+    sm_net->setLocalIP(virtual_localIP.c_str());
 
-	virtualDestinationPort = sm_net->getDestinationPort();
-	realDestinationPort = sm_net->getVirtual_destinationPort();
-	sm_net->setVirtual_destinationPort (virtualDestinationPort);
-	sm_net->setDestinationPort(realDestinationPort);
+    virtualDestinationPort = sm_net->getDestinationPort();
+    realDestinationPort = sm_net->getVirtual_destinationPort();
+    sm_net->setVirtual_destinationPort (virtualDestinationPort);
+    sm_net->setDestinationPort(realDestinationPort);
 
-	pkt->insertAtFront(sm_net);
+    pkt->insertAtFront(sm_net);
 
 }
 
 void LocalNetManager::manage_sendMessage(Packet* pkt){
 
-	//icancloud_App_NET_Message* sm_net;
-	//icancloud_MPI_Message* sm_mpi;
-	string virtual_destinationIP, virtual_localIP;
-	string destinationIP, localIP;
-	int realDestinationPort;
-	int virtualDestinationPort;
+    //icancloud_App_NET_Message* sm_net;
+    //icancloud_MPI_Message* sm_mpi;
+    string virtual_destinationIP, virtual_localIP;
+    string destinationIP, localIP;
+    int realDestinationPort;
+    int virtualDestinationPort;
 
     auto sm = pkt->removeAtFront<icancloud_Message>();
     auto sm_net = dynamicPtrCast<icancloud_App_NET_Message>(sm);
     auto sm_mpi = dynamicPtrCast<icancloud_MPI_Message>(sm);
 
-	//sm_mpi = dynamic_cast<icancloud_MPI_Message *>(sm);
-	//sm_net = dynamic_cast <icancloud_App_NET_Message*> (sm);
+    //sm_mpi = dynamic_cast<icancloud_MPI_Message *>(sm);
+    //sm_net = dynamic_cast <icancloud_App_NET_Message*> (sm);
 
-	// Process a MPI message
-	if (sm_mpi != nullptr){
+    // Process a MPI message
+    if (sm_mpi != nullptr){
 
-	    // Get the destinationIP (vm) and the local ip (vm)
+        // Get the destinationIP (vm) and the local ip (vm)
 
         if (sm_mpi->getVirtual_user() == -1){
             sm_mpi->setVirtual_user(sm_mpi->getUid());
@@ -387,9 +387,9 @@ void LocalNetManager::manage_sendMessage(Packet* pkt){
 
         destinationIP = netManagerPtr->searchNodeIP(virtual_destinationIP.c_str(), sm_mpi->getUid());
 
-	            //      if (destinationIP.empty()){
-	            //          showErrorMessage("LocalNetManager::sendMessage-> destination IP for the vmID: %s and virtual destination IP: %s is nullptr", sm->getVmID(), virtual_destinationIP.c_str());
-	            //      }
+        //      if (destinationIP.empty()){
+        //          showErrorMessage("LocalNetManager::sendMessage-> destination IP for the vmID: %s and virtual destination IP: %s is nullptr", sm->getVmID(), virtual_destinationIP.c_str());
+        //      }
 
         // Get the virtual port
         realDestinationPort = netManagerPtr->getRealPort (destinationIP, virtualDestinationPort, sm_mpi->getUid(), sm_net->getPid());
@@ -406,49 +406,49 @@ void LocalNetManager::manage_sendMessage(Packet* pkt){
         sm_mpi->setVirtual_destinationPort(virtualDestinationPort);
         sm_mpi->setDestinationPort(realDestinationPort);
         pkt->insertAtFront(sm_mpi);
-	}
+    }
 
-	// Process a NET message
-	else{
-            // Get the destinationIP (vm) and the local ip (vm)
-            virtual_destinationIP = sm_net->getDestinationIP();
-            virtual_localIP = sm_net->getLocalIP();
+    // Process a NET message
+    else{
+        // Get the destinationIP (vm) and the local ip (vm)
+        virtual_destinationIP = sm_net->getDestinationIP();
+        virtual_localIP = sm_net->getLocalIP();
 
-            sm_net->setVirtual_user(sm->getUid());
+        sm_net->setVirtual_user(sm->getUid());
 
-            // Get the port from the message (virtual) and set it in its field
-            virtualDestinationPort = sm_net->getDestinationPort();
+        // Get the port from the message (virtual) and set it in its field
+        virtualDestinationPort = sm_net->getDestinationPort();
 
-            destinationIP = netManagerPtr->searchNodeIP(virtual_destinationIP, sm_net->getUid());
+        destinationIP = netManagerPtr->searchNodeIP(virtual_destinationIP, sm_net->getUid());
 
-            // Get the virtual port
-            realDestinationPort = netManagerPtr->getRealPort (destinationIP, virtualDestinationPort, sm_net->getUid(), sm_net->getPid());
+        // Get the virtual port
+        realDestinationPort = netManagerPtr->getRealPort (destinationIP, virtualDestinationPort, sm_net->getUid(), sm_net->getPid());
 
-            // Set the virtual ip's in the message
-            sm_net->setVirtual_destinationIP(virtual_destinationIP.c_str());
-            sm_net->setVirtual_localIP(virtual_localIP.c_str());
+        // Set the virtual ip's in the message
+        sm_net->setVirtual_destinationIP(virtual_destinationIP.c_str());
+        sm_net->setVirtual_localIP(virtual_localIP.c_str());
 
-            // Set real destination and local ips of the nodes
-            sm_net->setLocalIP(ip_LocalNode.toIpv4().str(false).c_str());
-            sm_net->setDestinationIP(destinationIP.c_str());
+        // Set real destination and local ips of the nodes
+        sm_net->setLocalIP(ip_LocalNode.toIpv4().str(false).c_str());
+        sm_net->setDestinationIP(destinationIP.c_str());
 
-            // Set the ports for the connection..
-            sm_net->setVirtual_destinationPort(virtualDestinationPort);
-            sm_net->setDestinationPort(realDestinationPort);
-            pkt->insertAtFront(sm_net);
-	}
+        // Set the ports for the connection..
+        sm_net->setVirtual_destinationPort(virtualDestinationPort);
+        sm_net->setDestinationPort(realDestinationPort);
+        pkt->insertAtFront(sm_net);
+    }
 
 }
 
 void LocalNetManager::manage_close_single_connection(Packet *pkt){
 
-	//icancloud_App_NET_Message *sm_close_connection;
+    //icancloud_App_NET_Message *sm_close_connection;
 
-	int userID;
-	int vmID;
+    int userID;
+    int vmID;
 
-	// Init ..
-	pkt->trimFront();
+    // Init ..
+    pkt->trimFront();
     auto sm = pkt->removeAtFront<icancloud_Message>();
     auto sm_close_connection = CHK(dynamicPtrCast<icancloud_App_NET_Message>(sm));
     if (sm_close_connection == nullptr)
@@ -483,12 +483,12 @@ void LocalNetManager::manage_close_single_connection(Packet *pkt){
 
 vector<int> LocalNetManager::getConnectionsIDs(int uId, int pId){
 
-	//vector<User_VirtualPort_Cell*>::iterator it;
-	vector<int> connectionIDs;
+    //vector<User_VirtualPort_Cell*>::iterator it;
+    vector<int> connectionIDs;
 
-	connectionIDs = pat->pat_closeVM(uId, pId);
+    connectionIDs = pat->pat_closeVM(uId, pId);
 
-	return connectionIDs;
+    return connectionIDs;
 }
 
 } // namespace icancloud

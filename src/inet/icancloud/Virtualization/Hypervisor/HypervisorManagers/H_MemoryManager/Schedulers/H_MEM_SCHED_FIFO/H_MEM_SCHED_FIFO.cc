@@ -126,7 +126,7 @@ void H_MEM_SCHED_FIFO::schedulingMemory(Packet *pkt){
 
             for (int i = 0; (i < (int)memoryCells.size()) && (!found); i++){
                 cell = (*(memoryCells.begin() + i));
-                if ((cell->uId == sm->getUid()) && (cell->pId) == (cell->pId)){
+                if ((cell->uId == sm->getUid()) && (cell->pId) == (sm->getPid())){
                     found = true;
                     cell->remainingBlocks_KB += requiredBlocks;
                     if (cell->remainingBlocks_KB > cell->vmTotalBlocks_KB) cell->remainingBlocks_KB = cell->vmTotalBlocks_KB;

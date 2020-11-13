@@ -23,7 +23,7 @@ namespace icancloud {
 Define_Module(EnergyMeterController);
 
 EnergyMeterController::~EnergyMeterController() {
-	// TODO Auto-generated destructor stub
+    // TODO Auto-generated destructor stub
 }
 
 void EnergyMeterController::finish(){
@@ -82,7 +82,7 @@ void EnergyMeterController::loadMemo(MemoSupport* c,MemoSupport* m,MemoSupport* 
 }
 
 double EnergyMeterController::cpuInstantConsumption(string state, int partIndex){
-   return cpu->getInstantConsumption(state,partIndex);
+    return cpu->getInstantConsumption(state,partIndex);
 }
 
 double EnergyMeterController::getCPUEnergyConsumed(int partIndex){

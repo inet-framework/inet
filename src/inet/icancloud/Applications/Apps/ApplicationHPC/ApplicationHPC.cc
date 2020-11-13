@@ -41,25 +41,25 @@ void ApplicationHPC::getRAM(bool isInit){
     int bufsize = 1000;
     char outputFile[100];
 
-		// Open mem file
-		stream = fopen("/proc/meminfo", "r" );
+    // Open mem file
+    stream = fopen("/proc/meminfo", "r" );
 
-		// Output file name
-		if (isInit)
-			sprintf (outputFile, "memInit_%d.txt", myRank);
-		else
-			sprintf (outputFile, "memEnd_%d.txt", myRank);
+    // Output file name
+    if (isInit)
+        sprintf (outputFile, "memInit_%d.txt", myRank);
+    else
+        sprintf (outputFile, "memEnd_%d.txt", myRank);
 
-		streamOut = fopen(outputFile, "w+" );
+    streamOut = fopen(outputFile, "w+" );
 
-		// Read data
-		while(!feof(stream) && !ferror(stream)){
-			char buf[bufsize];
-			fwrite (buf, 1, bufsize, streamOut);
-		}
+    // Read data
+    while(!feof(stream) && !ferror(stream)){
+        char buf[bufsize];
+        fwrite (buf, 1, bufsize, streamOut);
+    }
 
-		fclose (stream);
-		fclose (streamOut);
+    fclose (stream);
+    fclose (streamOut);
 }
 
 
@@ -73,105 +73,108 @@ void ApplicationHPC::initialize(int stage){
 
 void ApplicationHPC::finish(){
 
-	// Finish the super-class
-	MPI_Base::finish();
-	
+    // Finish the super-class
+    MPI_Base::finish();
+
 
 }
 
 void ApplicationHPC::startExecution(){
 
-  // Define ..
+    // Define ..
     std::ostringstream osStream;
-        // Get the workers per set
-        workersSet = par ("workersSet");
+    // Get the workers per set
+    workersSet = par ("workersSet");
 
-        CfgMPI *mpiCfg = userPtr->getMPIEnv();
-        numProcesses = mpiCfg->getNumProcesses();
+    CfgMPI *mpiCfg = userPtr->getMPIEnv();
+    numProcesses = mpiCfg->getNumProcesses();
 
-        MPI_Base::startExecution ();
+    MPI_Base::startExecution ();
 
-        // Set the moduleIdName
-        osStream << "ApplicationHPC." << getId();
-        moduleIdName = osStream.str();
+    // Set the moduleIdName
+    osStream << "ApplicationHPC." << getId();
+    moduleIdName = osStream.str();
 
-            numIterations = par ("numIterations");
-            sliceToWorkers_KB = par ("sliceToWorkers_KB");
-            sliceToMaster_KB = par ("sliceToMaster_KB");
-            sliceCPU = par ("sliceCPU");
-            workersRead = par ("workersRead");
-            workersWrite = par ("workersWrite");
-            currentIteration = 1;
-            offsetRead = offsetWrite = 0;
-            createdResultsFile = false;
+    numIterations = par ("numIterations");
+    sliceToWorkers_KB = par ("sliceToWorkers_KB");
+    sliceToMaster_KB = par ("sliceToMaster_KB");
+    sliceCPU = par ("sliceCPU");
+    workersRead = par ("workersRead");
+    workersWrite = par ("workersWrite");
+    currentIteration = 1;
+    offsetRead = offsetWrite = 0;
+    createdResultsFile = false;
 
-            // Calculate the dataSet size
-            dataSet_total_KB = sliceToWorkers_KB * numProcesses * numIterations;
-            dataResult_total_KB = sliceToMaster_KB * numProcesses * numIterations;
+    // Calculate the dataSet size
+    dataSet_total_KB = sliceToWorkers_KB * numProcesses * numIterations;
+    dataResult_total_KB = sliceToMaster_KB * numProcesses * numIterations;
 
-            // Output file!
-            if (workersRead){
+    // Output file!
+    if (workersRead){
 
-                previousData_input_KB = myRank * sliceToWorkers_KB * numIterations;
-                previousData_output_KB = myRank * sliceToMaster_KB * numIterations;
+        previousData_input_KB = myRank * sliceToWorkers_KB * numIterations;
+        previousData_output_KB = myRank * sliceToMaster_KB * numIterations;
 
-                currentInputFile = previousData_input_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
-                currentOutputFile = previousData_output_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
+        currentInputFile = previousData_input_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
+        currentOutputFile = previousData_output_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
 
-                offsetRead = (previousData_input_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
-                offsetWrite = (previousData_output_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
-            }
-            else if (isMaster(myRank)){
-                if (workersSet == 0) {
-                    previousData_input_KB = (myRank) * sliceToWorkers_KB * numIterations ;
-                    previousData_output_KB = (myRank) * sliceToMaster_KB * numIterations ;
-                } else{
-                    previousData_input_KB = (myRank/workersSet) * sliceToWorkers_KB * numIterations * workersSet;
-                    previousData_output_KB = (myRank/workersSet) * sliceToMaster_KB * numIterations * workersSet;
-                }
+        offsetRead = (previousData_input_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
+        offsetWrite = (previousData_output_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
+    }
+    else if (isMaster(myRank)){
+        if (workersSet == 0) {
+            previousData_input_KB = (myRank) * sliceToWorkers_KB * numIterations ;
+            previousData_output_KB = (myRank) * sliceToMaster_KB * numIterations ;
+        }
+        else{
+            previousData_input_KB = (myRank/workersSet) * sliceToWorkers_KB * numIterations * workersSet;
+            previousData_output_KB = (myRank/workersSet) * sliceToMaster_KB * numIterations * workersSet;
+        }
 
-                currentInputFile = previousData_input_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
-                currentOutputFile = previousData_output_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
+        currentInputFile = previousData_input_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
+        currentOutputFile = previousData_output_KB / (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB);
 
-                offsetRead = (previousData_input_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
-                offsetWrite = (previousData_output_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
-            }
+        offsetRead = (previousData_input_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
+        offsetWrite = (previousData_output_KB % (HPCAPP_MAX_SIZE_PER_INPUT_FILE / KB)) * KB;
+    }
 
-            // Set file names
-            sprintf (inputFileName, "%s_%d.dat", APP_HPC_INPUT_FILENAME, currentInputFile);
-            sprintf (outFileName, "%s_%d.dat", APP_HPC_RESULTS_FILENAME, currentOutputFile);
-
-
-            if (isMaster(myRank))
-                printf ("---> Rank:%d - inputFile:%d - readOffset:%d - outputFile:%d - writeOffset:%d\n",
-                        myRank,
-                        currentInputFile,
-                        offsetRead,
-                        currentOutputFile,
-                        offsetWrite);
-
-            // Assign names to the results
-            jobResults->newJobResultSet("moduleIdName");
-            if (isMaster(myRank)) jobResults->newJobResultSet("Master");
-            else jobResults->newJobResultSet("Slave_rank");
-            jobResults->newJobResultSet("totalIO");
-            jobResults->newJobResultSet("totalCPU");
-            jobResults->newJobResultSet("Real run-time");
-            jobResults->newJobResultSet("Simulation time");
-
-            // Init state
-            currentState = HPCAPP_INIT;
-
-            totalIO = ioStart = ioEnd = 0.0;
-            totalNET = netStart = netEnd = 0.0;
-            totalCPU = cpuStart = cpuEnd = 0.0;
+    // Set file names
+    sprintf (inputFileName, "%s_%d.dat", APP_HPC_INPUT_FILENAME, currentInputFile);
+    sprintf (outFileName, "%s_%d.dat", APP_HPC_RESULTS_FILENAME, currentOutputFile);
 
 
-            if ((CHECK_MEMORY_HPC_APP) && (isMaster(myRank))){
-                getRAM(true);
-            }
+    if (isMaster(myRank))
+        printf ("---> Rank:%d - inputFile:%d - readOffset:%d - outputFile:%d - writeOffset:%d\n",
+                myRank,
+                currentInputFile,
+                offsetRead,
+                currentOutputFile,
+                offsetWrite);
 
-            // Show info?
+    // Assign names to the results
+    jobResults->newJobResultSet("moduleIdName");
+    if (isMaster(myRank))
+        jobResults->newJobResultSet("Master");
+    else
+        jobResults->newJobResultSet("Slave_rank");
+    jobResults->newJobResultSet("totalIO");
+    jobResults->newJobResultSet("totalCPU");
+    jobResults->newJobResultSet("Real run-time");
+    jobResults->newJobResultSet("Simulation time");
+
+    // Init state
+    currentState = HPCAPP_INIT;
+
+    totalIO = ioStart = ioEnd = 0.0;
+    totalNET = netStart = netEnd = 0.0;
+    totalCPU = cpuStart = cpuEnd = 0.0;
+
+
+    if ((CHECK_MEMORY_HPC_APP) && (isMaster(myRank))){
+        getRAM(true);
+    }
+
+    // Show info?
             showStartedModule (" WorkerSet:%d -  %s ", workersSet, mpiCommunicationsToString().c_str());
 
             printf ("PROCESS [%d] -> read:%d - write:%d - sliceWorkers:%d - sliceMaster:%d - sliceCPU:%d - allToAll:%d\n", myRank, workersRead, workersWrite, sliceToWorkers_KB, sliceToMaster_KB, sliceCPU, allToAllConnections);
@@ -189,21 +192,21 @@ void ApplicationHPC::processSelfMessage (cMessage *msg){
     // Execute!!!
     else if (!strcmp (msg->getName(), SM_WAIT_TO_EXECUTE.c_str())){
 
-            // Delete msg!
-            cancelAndDelete (msg);
+        // Delete msg!
+        cancelAndDelete (msg);
 
-            // Execute!
-            calculateNextState ();
+        // Execute!
+        calculateNextState ();
     }
 
     // Establish connection with server...
     else if (!strcmp (msg->getName(), SM_WAIT_TO_CONNECT.c_str())){
 
-            // Delete message
-            cancelAndDelete (msg);
+        // Delete message
+        cancelAndDelete (msg);
 
-            // Establish all connections...
-            establishAllConnections();
+        // Establish all connections...
+        establishAllConnections();
     }
 
     else if (!strcmp (msg->getName(), SM_FINISH_JOB.c_str())){
@@ -216,7 +219,7 @@ void ApplicationHPC::processSelfMessage (cMessage *msg){
     }
 
     else
-            showErrorMessage ("Unknown self message [%s]", msg->getName());
+        showErrorMessage ("Unknown self message [%s]", msg->getName());
 
 
 }
@@ -282,483 +285,483 @@ void ApplicationHPC::processResponseMessage (Packet *pkt){
 
 void ApplicationHPC::calculateNextState (){
 
-	// Master process?
-	if (isMaster(myRank)){
-		
-		// Init state... read data!
-		if (currentState == HPCAPP_INIT){
-			
-			if ((!createdResultsFile) && (!workersWrite)){
-				
-				totalResponses = 1;
-				
-				if (DEBUG_ApplicationHPC)
-					showDebugMessage ("[It:%d] Process %d - State:%s: Creating results file %s", currentIteration, myRank, stateToString(currentState).c_str(), outFileName);
-				
-				createdResultsFile = true;
-				icancloud_request_create (outFileName);
-			}
-			
-			else{
-				currentState = HPCAPP_MASTER_READING;
-				totalResponses = workersSet;
-				
-				if ((!workersRead) && (DEBUG_ApplicationHPC))
-				    showDebugMessage ("[It:%d] Process %d - State:%s: Reading data...", currentIteration, myRank, stateToString(currentState).c_str());
+    // Master process?
+    if (isMaster(myRank)){
 
-				ioStart = simTime();
+        // Init state... read data!
+        if (currentState == HPCAPP_INIT){
 
-				readInputData();		
-			}				
-		}
-		
-		// Read finished! Start delivering data among workers..
-		else if (currentState == HPCAPP_MASTER_READING){
-			
-			// There are pending requests...
-			if (totalResponses > 0){
-				readInputData();
-			}
-			
-			// All requests have been performed
-			else{
+            if ((!createdResultsFile) && (!workersWrite)){
 
-			    if (DEBUG_ApplicationHPC)
-			        showDebugMessage ("[It:%d] Process %d - State:%s: Read data completed!", currentIteration, myRank, stateToString(currentState).c_str());
+                totalResponses = 1;
 
-				ioEnd = simTime();
-				totalIO = totalIO + (ioEnd - ioStart);
-				printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
-				currentState = HPCAPP_MASTER_DELIVERING;	
-				
-				if (DEBUG_ApplicationHPC)
-					showDebugMessage ("[It:%d] Process %d - State:%s: Delivering data...", currentIteration, myRank, stateToString(currentState).c_str());
+                if (DEBUG_ApplicationHPC)
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Creating results file %s", currentIteration, myRank, stateToString(currentState).c_str(), outFileName);
 
-				netStart = simTime();
+                createdResultsFile = true;
+                icancloud_request_create (outFileName);
+            }
 
-				deliverData();
-			}
-		}
-		
-		// Wait for results...
-		else if (currentState == HPCAPP_MASTER_DELIVERING){
-			
-			currentState = HPCAPP_MASTER_WAITING_RESULTS;
-			
-			// Init responses
-			totalResponses = workersSet - 1;
-			
-			if (DEBUG_ApplicationHPC)
-				showDebugMessage ("[It:%d] Process %d - State:%s - Waiting for %d responses", currentIteration, myRank, stateToString(currentState).c_str(), totalResponses);
-			
-			// Receiving results...
-			receivingResults();			
-		}	
-		
-		// Waiting for results...
-		else if (currentState == HPCAPP_MASTER_WAITING_RESULTS){
-									
-			// Init responses
-			totalResponses--;
-			
-			if (DEBUG_ApplicationHPC)
-				showDebugMessage ("[It:%d] Process %d - State:%s - Waiting for results. %d responses left!", currentIteration, myRank, stateToString(currentState).c_str(), totalResponses);
-			
-			// Check the number of responses received...
-			if (totalResponses==0){
+            else{
+                currentState = HPCAPP_MASTER_READING;
+                totalResponses = workersSet;
 
-			    if (DEBUG_ApplicationHPC)
-			        showDebugMessage ("[It:%d] Process %d - State:%s: Receiving responses completed!", currentIteration, myRank, stateToString(currentState).c_str());
-				
-				netEnd = simTime ();
-				totalNET = totalNET + (netEnd - netStart);
+                if ((!workersRead) && (DEBUG_ApplicationHPC))
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Reading data...", currentIteration, myRank, stateToString(currentState).c_str());
 
-				currentState = HPCAPP_MASTER_WRITTING;
-				totalResponses = workersSet;
-				
-				if ((!workersWrite) && (DEBUG_ApplicationHPC))
-					showDebugMessage ("[It:%d] Process %d - State:%s: Writing data...", currentIteration, myRank, stateToString(currentState).c_str());
-						
-				ioStart = simTime();
+                ioStart = simTime();
 
-				writtingData();			
-			}
-			else
-				receivingResults();					
-		}		
-		
-		// Writting results...
-		else if (currentState == HPCAPP_MASTER_WRITTING){
-			
-			// There are pending requests...
-			if (totalResponses > 0){
-				writtingData();
-			}
-			
-			// All requests have been performed
-			else{	
+                readInputData();
+            }
+        }
 
-				ioEnd = simTime();
-				totalIO = totalIO + (ioEnd - ioStart);
-				printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
-				currentState = HPCAPP_INIT;		
-				nextIteration();
-			}			
-		}			
-	}	
-			
-	// Worker processes
-	else{
-		
-		// Init state... read data!
-		if (currentState == HPCAPP_INIT){
-			
-			if ((!createdResultsFile) && (workersWrite)){
-				
-				totalResponses = 1;
-				
-				if (DEBUG_ApplicationHPC)
-				    showDebugMessage ("[It:%d] Process %d - State:%s: Creating results file %s", currentIteration, myRank, stateToString(currentState).c_str(), outFileName);
+        // Read finished! Start delivering data among workers..
+        else if (currentState == HPCAPP_MASTER_READING){
 
-				createdResultsFile = true;
-				icancloud_request_create (outFileName);
-			}
-			
-			else{
-				currentState = HPCAPP_WORKER_RECEIVING;
-				
-				if (DEBUG_ApplicationHPC)
-					showDebugMessage ("[It:%d] Process %d - State:%s: Waiting data from coordinator process...", currentIteration, myRank, stateToString(currentState).c_str());
-					
+            // There are pending requests...
+            if (totalResponses > 0){
+                readInputData();
+            }
 
-				netStart = simTime();
-				receiveInputData();			
-			}
-		}
-		
-		// Worker read data
-		else if (currentState == HPCAPP_WORKER_RECEIVING){
-			
-			currentState = HPCAPP_WORKER_READING;
+            // All requests have been performed
+            else{
 
-			if (DEBUG_ApplicationHPC)
-			    showDebugMessage ("[It:%d] Process %d - State:%s: Preparing for reading data...", currentIteration, myRank, stateToString(currentState).c_str());
+                if (DEBUG_ApplicationHPC)
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Read data completed!", currentIteration, myRank, stateToString(currentState).c_str());
 
-			netEnd = simTime();
-			totalNET = totalNET + (netEnd - netStart);
+                ioEnd = simTime();
+                totalIO = totalIO + (ioEnd - ioStart);
+                printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
+                currentState = HPCAPP_MASTER_DELIVERING;
 
-			ioStart = simTime();
+                if (DEBUG_ApplicationHPC)
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Delivering data...", currentIteration, myRank, stateToString(currentState).c_str());
 
-			readInputDataWorkers();
-		}
+                netStart = simTime();
 
-		// Worker starts allocating memory...
-		else if (currentState == HPCAPP_WORKER_READING){
+                deliverData();
+            }
+        }
 
-			currentState = HPCAPP_WORKER_ALLOCATING;
+        // Wait for results...
+        else if (currentState == HPCAPP_MASTER_DELIVERING){
 
-			if (DEBUG_ApplicationHPC)
-			    showDebugMessage ("[It:%d] Process %d - State:%s: Allocating memory...", currentIteration, myRank, stateToString(currentState).c_str());
+            currentState = HPCAPP_MASTER_WAITING_RESULTS;
 
-			ioEnd = simTime();
-			totalIO = totalIO + (ioEnd - ioStart);
-			printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
-			allocating();
-		}
+            // Init responses
+            totalResponses = workersSet - 1;
 
-				
-		// Worker starts to processing CPU
-		else if (currentState == HPCAPP_WORKER_ALLOCATING){
-			
-			currentState = HPCAPP_WORKER_PROCESSING;
-			
-			if (DEBUG_ApplicationHPC)
-				showDebugMessage ("[It:%d] Process %d - State:%s: Processing CPU...", currentIteration, myRank, stateToString(currentState).c_str());
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s - Waiting for %d responses", currentIteration, myRank, stateToString(currentState).c_str(), totalResponses);
 
-			cpuStart = simTime();
+            // Receiving results...
+            receivingResults();
+        }
 
-			processingCPU();
-		}	
-		
-		// Workers send data to master process
-		else if (currentState == HPCAPP_WORKER_PROCESSING){
-			
-			currentState = HPCAPP_WORKER_WRITTING;
+        // Waiting for results...
+        else if (currentState == HPCAPP_MASTER_WAITING_RESULTS){
 
-			if (DEBUG_ApplicationHPC)
-			    showDebugMessage ("[It:%d] Process %d - State:%s: Writing data...", currentIteration, myRank, stateToString(currentState).c_str());
+            // Init responses
+            totalResponses--;
 
-			cpuEnd = simTime();
-			totalCPU = totalCPU + (cpuEnd - cpuStart);
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s - Waiting for results. %d responses left!", currentIteration, myRank, stateToString(currentState).c_str(), totalResponses);
 
-			ioStart = simTime();
-			writtingDataWorkers();
-		}
-		
-		// Workers send data to master process
-		else if (currentState == HPCAPP_WORKER_WRITTING){
-			
-			currentState = HPCAPP_WORKER_SENDING_BACK;
+            // Check the number of responses received...
+            if (totalResponses==0){
 
-			if (DEBUG_ApplicationHPC)
-			    showDebugMessage ("[It:%d] Process %d - State:%s: Sending results to coordinator...", currentIteration, myRank, stateToString(currentState).c_str());
+                if (DEBUG_ApplicationHPC)
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Receiving responses completed!", currentIteration, myRank, stateToString(currentState).c_str());
 
-			ioEnd = simTime();
-			totalIO = totalIO + (ioEnd - ioStart);
-			netStart = simTime();
-			printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
-			sendResults();
-		}	
-		
-		
-		// Workers send data to master process
-		else if (currentState == HPCAPP_WORKER_SENDING_BACK){
+                netEnd = simTime ();
+                totalNET = totalNET + (netEnd - netStart);
 
-			netEnd = simTime();
-			totalNET = totalNET + (netEnd  - netStart);
+                currentState = HPCAPP_MASTER_WRITTING;
+                totalResponses = workersSet;
 
-			if (DEBUG_ApplicationHPC)
-			    showDebugMessage ("[It:%d] Process %d - State:%s: Iteration completed!", currentIteration, myRank, stateToString(currentState).c_str());
+                if ((!workersWrite) && (DEBUG_ApplicationHPC))
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Writing data...", currentIteration, myRank, stateToString(currentState).c_str());
 
-			currentState = HPCAPP_INIT;
-			nextIteration();
-		}			
-	}
+                ioStart = simTime();
+
+                writtingData();
+            }
+            else
+                receivingResults();
+        }
+
+        // Writting results...
+        else if (currentState == HPCAPP_MASTER_WRITTING){
+
+            // There are pending requests...
+            if (totalResponses > 0){
+                writtingData();
+            }
+
+            // All requests have been performed
+            else{
+
+                ioEnd = simTime();
+                totalIO = totalIO + (ioEnd - ioStart);
+                printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
+                currentState = HPCAPP_INIT;
+                nextIteration();
+            }
+        }
+    }
+
+    // Worker processes
+    else{
+
+        // Init state... read data!
+        if (currentState == HPCAPP_INIT){
+
+            if ((!createdResultsFile) && (workersWrite)){
+
+                totalResponses = 1;
+
+                if (DEBUG_ApplicationHPC)
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Creating results file %s", currentIteration, myRank, stateToString(currentState).c_str(), outFileName);
+
+                createdResultsFile = true;
+                icancloud_request_create (outFileName);
+            }
+
+            else{
+                currentState = HPCAPP_WORKER_RECEIVING;
+
+                if (DEBUG_ApplicationHPC)
+                    showDebugMessage ("[It:%d] Process %d - State:%s: Waiting data from coordinator process...", currentIteration, myRank, stateToString(currentState).c_str());
+
+
+                netStart = simTime();
+                receiveInputData();
+            }
+        }
+
+        // Worker read data
+        else if (currentState == HPCAPP_WORKER_RECEIVING){
+
+            currentState = HPCAPP_WORKER_READING;
+
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s: Preparing for reading data...", currentIteration, myRank, stateToString(currentState).c_str());
+
+            netEnd = simTime();
+            totalNET = totalNET + (netEnd - netStart);
+
+            ioStart = simTime();
+
+            readInputDataWorkers();
+        }
+
+        // Worker starts allocating memory...
+        else if (currentState == HPCAPP_WORKER_READING){
+
+            currentState = HPCAPP_WORKER_ALLOCATING;
+
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s: Allocating memory...", currentIteration, myRank, stateToString(currentState).c_str());
+
+            ioEnd = simTime();
+            totalIO = totalIO + (ioEnd - ioStart);
+            printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
+            allocating();
+        }
+
+
+        // Worker starts to processing CPU
+        else if (currentState == HPCAPP_WORKER_ALLOCATING){
+
+            currentState = HPCAPP_WORKER_PROCESSING;
+
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s: Processing CPU...", currentIteration, myRank, stateToString(currentState).c_str());
+
+            cpuStart = simTime();
+
+            processingCPU();
+        }
+
+        // Workers send data to master process
+        else if (currentState == HPCAPP_WORKER_PROCESSING){
+
+            currentState = HPCAPP_WORKER_WRITTING;
+
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s: Writing data...", currentIteration, myRank, stateToString(currentState).c_str());
+
+            cpuEnd = simTime();
+            totalCPU = totalCPU + (cpuEnd - cpuStart);
+
+            ioStart = simTime();
+            writtingDataWorkers();
+        }
+
+        // Workers send data to master process
+        else if (currentState == HPCAPP_WORKER_WRITTING){
+
+            currentState = HPCAPP_WORKER_SENDING_BACK;
+
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s: Sending results to coordinator...", currentIteration, myRank, stateToString(currentState).c_str());
+
+            ioEnd = simTime();
+            totalIO = totalIO + (ioEnd - ioStart);
+            netStart = simTime();
+            printf("ApplicationHPC::calculateNextState - total [%f] - start [%f] - end [%f]\n", totalIO.dbl(), ioStart.dbl(), ioEnd.dbl());
+            sendResults();
+        }
+
+
+        // Workers send data to master process
+        else if (currentState == HPCAPP_WORKER_SENDING_BACK){
+
+            netEnd = simTime();
+            totalNET = totalNET + (netEnd  - netStart);
+
+            if (DEBUG_ApplicationHPC)
+                showDebugMessage ("[It:%d] Process %d - State:%s: Iteration completed!", currentIteration, myRank, stateToString(currentState).c_str());
+
+            currentState = HPCAPP_INIT;
+            nextIteration();
+        }
+    }
 }
 
 void ApplicationHPC::nextIteration (){
-	
-	printf ("***** [%s] Process %d. It:%d:   IO:%s   NET:%s   CPU:%s\n", simTime().str().c_str(), myRank,
-					currentIteration,
-					totalIO.str().c_str(),
-					totalNET.str().c_str(),
-					totalCPU.str().c_str());
 
-	// Next iteration
-	currentIteration++;
+    printf ("***** [%s] Process %d. It:%d:   IO:%s   NET:%s   CPU:%s\n", simTime().str().c_str(), myRank,
+            currentIteration,
+            totalIO.str().c_str(),
+            totalNET.str().c_str(),
+            totalCPU.str().c_str());
 
-	if (isMaster (myRank))
-		printf ("-----> Process %d - Iteration: %d/%d\n", myRank, currentIteration, numIterations);
+    // Next iteration
+    currentIteration++;
 
-	if ((CHECK_MEMORY_HPC_APP) && (isMaster(myRank)) && (currentIteration==2)){
-				getRAM(false);
-	}
-			
-	// All iterations complete?
+    if (isMaster (myRank))
+        printf ("-----> Process %d - Iteration: %d/%d\n", myRank, currentIteration, numIterations);
 
-	if (currentIteration > numIterations){
+    if ((CHECK_MEMORY_HPC_APP) && (isMaster(myRank)) && (currentIteration==2)){
+        getRAM(false);
+    }
 
-	    cMessage* msg;
+    // All iterations complete?
 
-	    msg = new cMessage(SM_FINISH_JOB.c_str());
+    if (currentIteration > numIterations){
 
-	    scheduleAt(simTime() + 0.5, msg);
+        cMessage* msg;
 
-	}
-	else		
-		calculateNextState ();	
+        msg = new cMessage(SM_FINISH_JOB.c_str());
+
+        scheduleAt(simTime() + 0.5, msg);
+
+    }
+    else
+        calculateNextState ();
 }
 
 void ApplicationHPC::continueExecution (){
-		
-	calculateNextState ();
+
+    calculateNextState ();
 }
 
 void ApplicationHPC::readInputData(){
 
-	// Master process performs READ!
-	if (!workersRead){
-										
-		if (DEBUG_ApplicationHPC)
-			showDebugMessage ("Process %d - Reading file:%s - Offset:%u - Size:%u", myRank, inputFileName, offsetRead, sliceToWorkers_KB*KB);
-			
-			// Reading data for each worker process
-			icancloud_request_read (inputFileName, offsetRead, sliceToWorkers_KB*KB);
-			
-			// Calculating next offset
-			if ((offsetRead+(sliceToWorkers_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
-				currentInputFile++;
-				sprintf (inputFileName, "%s_%d.dat", APP_HPC_INPUT_FILENAME, currentInputFile);
-				offsetRead = 0;
-			}
-			else{
-				offsetRead += sliceToWorkers_KB*KB;
-			}
-	}
-	
-	// Master process does not READ data
-	else{
-		totalResponses = 0;
-		calculateNextState ();
-	}
+    // Master process performs READ!
+    if (!workersRead){
+
+        if (DEBUG_ApplicationHPC)
+            showDebugMessage ("Process %d - Reading file:%s - Offset:%u - Size:%u", myRank, inputFileName, offsetRead, sliceToWorkers_KB*KB);
+
+        // Reading data for each worker process
+        icancloud_request_read (inputFileName, offsetRead, sliceToWorkers_KB*KB);
+
+        // Calculating next offset
+        if ((offsetRead+(sliceToWorkers_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
+            currentInputFile++;
+            sprintf (inputFileName, "%s_%d.dat", APP_HPC_INPUT_FILENAME, currentInputFile);
+            offsetRead = 0;
+        }
+        else{
+            offsetRead += sliceToWorkers_KB*KB;
+        }
+    }
+
+    // Master process does not READ data
+    else{
+        totalResponses = 0;
+        calculateNextState ();
+    }
 }
 
 void ApplicationHPC::readInputDataWorkers(){
-		
-	// Master process performs READ!
-	if (workersRead){
-		
-		if (DEBUG_ApplicationHPC)
-			showDebugMessage ("[It:%d] Process %d - State:%s", currentIteration, myRank, stateToString(currentState).c_str());
-		
-		// Init
-		totalResponses = 1;
-			
-		if (DEBUG_ApplicationHPC)
-			showDebugMessage ("Process %d - Reading file:%s - Offset:%u - Size:%u", myRank, inputFileName, offsetRead, sliceToWorkers_KB*KB);
-		
-		// Reading data for each worker process
-		icancloud_request_read (inputFileName, offsetRead, sliceToWorkers_KB*KB);
-		
-		// Calculating next offset
-		if ((offsetRead+(sliceToWorkers_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
-			currentInputFile++;
-			sprintf (inputFileName, "%s_%d.dat", APP_HPC_INPUT_FILENAME, currentInputFile);
-			offsetRead = 0;
-		}
-		else
-			offsetRead += sliceToWorkers_KB*KB;
-	}
-	
-	// Master process does not READ data
-	else{
-		totalResponses = 0;
-		calculateNextState ();
-	}
+
+    // Master process performs READ!
+    if (workersRead){
+
+        if (DEBUG_ApplicationHPC)
+            showDebugMessage ("[It:%d] Process %d - State:%s", currentIteration, myRank, stateToString(currentState).c_str());
+
+        // Init
+        totalResponses = 1;
+
+        if (DEBUG_ApplicationHPC)
+            showDebugMessage ("Process %d - Reading file:%s - Offset:%u - Size:%u", myRank, inputFileName, offsetRead, sliceToWorkers_KB*KB);
+
+        // Reading data for each worker process
+        icancloud_request_read (inputFileName, offsetRead, sliceToWorkers_KB*KB);
+
+        // Calculating next offset
+        if ((offsetRead+(sliceToWorkers_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
+            currentInputFile++;
+            sprintf (inputFileName, "%s_%d.dat", APP_HPC_INPUT_FILENAME, currentInputFile);
+            offsetRead = 0;
+        }
+        else
+            offsetRead += sliceToWorkers_KB*KB;
+    }
+
+    // Master process does not READ data
+    else{
+        totalResponses = 0;
+        calculateNextState ();
+    }
 }
 
 void ApplicationHPC::allocating(){
 
-	icancloud_request_allocMemory (1, 0);
+    icancloud_request_allocMemory (1, 0);
 }
 
 void ApplicationHPC::deliverData(){
-	
-	unsigned int i;
-	unsigned int dataSize;
-			
-		// Master Process READ!
-		if (!workersRead)
-			dataSize = sliceToWorkers_KB*KB;
-		else
-			dataSize = METADATA_MSG_SIZE;
-			
-		if (DEBUG_ApplicationHPC)
-			showDebugMessage ("Process %d - Delivering data to worker processes (%d bytes)", myRank, dataSize);
-	
-		// Send data to each process
-		for (i=(myRank+1); i<(myRank+workersSet); i++)
-			mpi_send (i, dataSize);		
-		
-		// Wai for responses...
-		calculateNextState();						
+
+    unsigned int i;
+    unsigned int dataSize;
+
+    // Master Process READ!
+    if (!workersRead)
+        dataSize = sliceToWorkers_KB*KB;
+    else
+        dataSize = METADATA_MSG_SIZE;
+
+    if (DEBUG_ApplicationHPC)
+        showDebugMessage ("Process %d - Delivering data to worker processes (%d bytes)", myRank, dataSize);
+
+    // Send data to each process
+    for (i=(myRank+1); i<(myRank+workersSet); i++)
+        mpi_send (i, dataSize);
+
+    // Wai for responses...
+    calculateNextState();
 }
 
 void ApplicationHPC::receivingResults(){
-	
-	// Master Process READ!
-	if (!workersWrite)		
-		mpi_recv (MPI_ANY_SENDER, sliceToMaster_KB*KB);
-	else
-		mpi_recv (MPI_ANY_SENDER, METADATA_MSG_SIZE);			
+
+    // Master Process READ!
+    if (!workersWrite)
+        mpi_recv (MPI_ANY_SENDER, sliceToMaster_KB*KB);
+    else
+        mpi_recv (MPI_ANY_SENDER, METADATA_MSG_SIZE);
 }
 
 void ApplicationHPC::receiveInputData(){
-	
-	// Master Process READ!
-	if (!workersRead)		
-		mpi_recv (getMyMaster(myRank), sliceToWorkers_KB*KB);
-	else
-		mpi_recv (getMyMaster(myRank), METADATA_MSG_SIZE);
+
+    // Master Process READ!
+    if (!workersRead)
+        mpi_recv (getMyMaster(myRank), sliceToWorkers_KB*KB);
+    else
+        mpi_recv (getMyMaster(myRank), METADATA_MSG_SIZE);
 }
 
 void ApplicationHPC::processingCPU(){
-	
-	if (DEBUG_ApplicationHPC)
-		showDebugMessage ("Process %d - Processing...", myRank);	
-	
-	icancloud_request_cpu (sliceCPU);
+
+    if (DEBUG_ApplicationHPC)
+        showDebugMessage ("Process %d - Processing...", myRank);
+
+    icancloud_request_cpu (sliceCPU);
 }
 
 void ApplicationHPC::writtingData(){
-		
-		// Master process performs WRITE!
-		if (!workersWrite){
-				
-			if (DEBUG_ApplicationHPC)
-				showDebugMessage ("Process %d - Writing file:%s - Offset:%u - Size:%u", myRank, outFileName, offsetRead, sliceToMaster_KB*KB);
-			
-			// Reading data for each worker process
-			icancloud_request_write (outFileName, offsetWrite, sliceToMaster_KB*KB);
-			
-			// Calculating next offset
-			if ((offsetWrite+(sliceToMaster_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
-				currentOutputFile++;
-				sprintf (outFileName, "%s_%d.dat", APP_HPC_RESULTS_FILENAME, currentOutputFile);
-				offsetWrite = 0;
-			}
-			else
-				offsetWrite += sliceToMaster_KB*KB;
-		}
-		
-		// Master process does not WRITE data
-		else{
-			totalResponses = 0;
-			calculateNextState ();
-		}
+
+    // Master process performs WRITE!
+    if (!workersWrite){
+
+        if (DEBUG_ApplicationHPC)
+            showDebugMessage ("Process %d - Writing file:%s - Offset:%u - Size:%u", myRank, outFileName, offsetRead, sliceToMaster_KB*KB);
+
+        // Reading data for each worker process
+        icancloud_request_write (outFileName, offsetWrite, sliceToMaster_KB*KB);
+
+        // Calculating next offset
+        if ((offsetWrite+(sliceToMaster_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
+            currentOutputFile++;
+            sprintf (outFileName, "%s_%d.dat", APP_HPC_RESULTS_FILENAME, currentOutputFile);
+            offsetWrite = 0;
+        }
+        else
+            offsetWrite += sliceToMaster_KB*KB;
+    }
+
+    // Master process does not WRITE data
+    else{
+        totalResponses = 0;
+        calculateNextState ();
+    }
 }
 
 void ApplicationHPC::writtingDataWorkers(){
-	
-	// Master process performs WRITE!
-	if (workersWrite){
-		
-		if (DEBUG_ApplicationHPC)
-			showDebugMessage ("[It:%d] Process %d - State:%s", currentIteration, myRank, stateToString(currentState).c_str());
 
-		// Init
-		totalResponses = 1;		
-			
-		if (DEBUG_ApplicationHPC)
-			showDebugMessage ("Process %d - Writing file:%s - Offset:%u - Size:%u", myRank, outFileName, offsetRead, sliceToMaster_KB*KB);
-		
-		// Reading data for each worker process
-		icancloud_request_write (outFileName, offsetWrite, sliceToMaster_KB*KB);
-		
-		// Calculating next offset
-		if ((offsetWrite+(sliceToMaster_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
-			currentOutputFile++;
-			sprintf (outFileName, "%s_%d.dat", APP_HPC_RESULTS_FILENAME, currentOutputFile);
-			offsetWrite = 0;
-		}
-		else
-			offsetWrite += sliceToMaster_KB*KB;
-	}
-	
-	// Master process does not WRITE data
-	else{
-		totalResponses = 0;
-		calculateNextState ();
-	}
+    // Master process performs WRITE!
+    if (workersWrite){
+
+        if (DEBUG_ApplicationHPC)
+            showDebugMessage ("[It:%d] Process %d - State:%s", currentIteration, myRank, stateToString(currentState).c_str());
+
+        // Init
+        totalResponses = 1;
+
+        if (DEBUG_ApplicationHPC)
+            showDebugMessage ("Process %d - Writing file:%s - Offset:%u - Size:%u", myRank, outFileName, offsetRead, sliceToMaster_KB*KB);
+
+        // Reading data for each worker process
+        icancloud_request_write (outFileName, offsetWrite, sliceToMaster_KB*KB);
+
+        // Calculating next offset
+        if ((offsetWrite+(sliceToMaster_KB*KB)) > HPCAPP_MAX_SIZE_PER_INPUT_FILE){
+            currentOutputFile++;
+            sprintf (outFileName, "%s_%d.dat", APP_HPC_RESULTS_FILENAME, currentOutputFile);
+            offsetWrite = 0;
+        }
+        else
+            offsetWrite += sliceToMaster_KB*KB;
+    }
+
+    // Master process does not WRITE data
+    else{
+        totalResponses = 0;
+        calculateNextState ();
+    }
 }
 
 void ApplicationHPC::sendResults(){
-	
-	unsigned int dataSize;
-	
-		// Master Process WRITE!
-		if (!workersWrite)
-			dataSize = sliceToMaster_KB*KB;
-		else
-			dataSize = METADATA_MSG_SIZE;
-			
-		if (DEBUG_ApplicationHPC)
-			showDebugMessage ("Process %d - Sending results to MASTER (%d bytes)", myRank, dataSize);
 
-		// Send data to each process			
-		mpi_send (getMyMaster(myRank), dataSize);
-	
-	calculateNextState ();	
+    unsigned int dataSize;
+
+    // Master Process WRITE!
+    if (!workersWrite)
+        dataSize = sliceToMaster_KB*KB;
+    else
+        dataSize = METADATA_MSG_SIZE;
+
+    if (DEBUG_ApplicationHPC)
+        showDebugMessage ("Process %d - Sending results to MASTER (%d bytes)", myRank, dataSize);
+
+    // Send data to each process
+    mpi_send (getMyMaster(myRank), dataSize);
+
+    calculateNextState ();
 }
 
 void ApplicationHPC::processNetCallResponse (Packet * pkt){
@@ -768,19 +771,19 @@ void ApplicationHPC::processNetCallResponse (Packet * pkt){
 
     operation = responseMsg->getOperation ();
 
-	// Create connection response...
-	if (operation == SM_CREATE_CONNECTION){
+    // Create connection response...
+    if (operation == SM_CREATE_CONNECTION){
 
-		// Set the established connection.
-		setEstablishedConnection (pkt);
+        // Set the established connection.
+        setEstablishedConnection (pkt);
 
-		// delete (responseMsg);
-	}
-	else {
-	    pkt->trimFront();
-	    auto responseMsg = pkt->removeAtFront<icancloud_App_NET_Message>();
-		showErrorMessage ("Unknown NET call response :%s", responseMsg->contentsToString(true).c_str());
-	}
+        // delete (responseMsg);
+    }
+    else {
+        pkt->trimFront();
+        auto responseMsg = pkt->removeAtFront<icancloud_App_NET_Message>();
+        showErrorMessage ("Unknown NET call response :%s", responseMsg->contentsToString(true).c_str());
+    }
 }
 
 void ApplicationHPC::processIOCallResponse(Packet *pkt) {
@@ -922,60 +925,60 @@ void ApplicationHPC::processIOCallResponse(Packet *pkt) {
 }
 
 void ApplicationHPC::processCPUCallResponse (Packet * pkt){
-	
-	
-	//delete (responseMsg);
-	calculateNextState ();	
+
+
+    //delete (responseMsg);
+    calculateNextState ();
 }
 
 void ApplicationHPC::processMEMCallResponse (Packet *pkt){
 
 
-	// delete (responseMsg);
-	calculateNextState ();
+    // delete (responseMsg);
+    calculateNextState ();
 }
 
 string ApplicationHPC::stateToString(int state){
-	
-	string stringState;	
-	
-		if (state == HPCAPP_INIT)
-			stringState = "HPCAPP_INIT";
-			
-		else if (state == HPCAPP_MASTER_READING)
-			stringState = "HPCAPP_MASTER_READING";
-			
-		else if (state == HPCAPP_MASTER_DELIVERING)
-			stringState = "HPCAPP_MASTER_DELIVERING";
-			
-		else if (state == HPCAPP_MASTER_WAITING_RESULTS)
-			stringState = "HPCAPP_MASTER_WAITING_RESULTS";				
 
-		else if (state == HPCAPP_MASTER_WRITTING)
-			stringState = "HPCAPP_MASTER_WRITTING";				
-			
-		else if (state == HPCAPP_WORKER_RECEIVING)
-			stringState = "HPCAPP_WORKER_RECEIVING";
-			
-		else if (state == HPCAPP_WORKER_READING)
-			stringState = "HPCAPP_WORKER_READING";
-			
-		else if (state == HPCAPP_WORKER_PROCESSING)
-			stringState = "HPCAPP_WORKER_PROCESSING";
-			
-		else if (state == HPCAPP_WORKER_WRITTING)
-			stringState = "HPCAPP_WORKER_WRITTING";
-			
-		else if (state == HPCAPP_WORKER_SENDING_BACK)
-			stringState = "HPCAPP_WORKER_SENDING_BACK";
+    string stringState;
 
-		else if (state == HPCAPP_WORKER_ALLOCATING)
-					stringState = "HPCAPP_WORKER_ALLOCATING";
-							
-		else stringState = "Unknown state";		
-	
-			
-	return stringState;
+    if (state == HPCAPP_INIT)
+        stringState = "HPCAPP_INIT";
+
+    else if (state == HPCAPP_MASTER_READING)
+        stringState = "HPCAPP_MASTER_READING";
+
+    else if (state == HPCAPP_MASTER_DELIVERING)
+        stringState = "HPCAPP_MASTER_DELIVERING";
+
+    else if (state == HPCAPP_MASTER_WAITING_RESULTS)
+        stringState = "HPCAPP_MASTER_WAITING_RESULTS";
+
+    else if (state == HPCAPP_MASTER_WRITTING)
+        stringState = "HPCAPP_MASTER_WRITTING";
+
+    else if (state == HPCAPP_WORKER_RECEIVING)
+        stringState = "HPCAPP_WORKER_RECEIVING";
+
+    else if (state == HPCAPP_WORKER_READING)
+        stringState = "HPCAPP_WORKER_READING";
+
+    else if (state == HPCAPP_WORKER_PROCESSING)
+        stringState = "HPCAPP_WORKER_PROCESSING";
+
+    else if (state == HPCAPP_WORKER_WRITTING)
+        stringState = "HPCAPP_WORKER_WRITTING";
+
+    else if (state == HPCAPP_WORKER_SENDING_BACK)
+        stringState = "HPCAPP_WORKER_SENDING_BACK";
+
+    else if (state == HPCAPP_WORKER_ALLOCATING)
+        stringState = "HPCAPP_WORKER_ALLOCATING";
+
+    else stringState = "Unknown state";
+
+
+    return stringState;
 }
 
 void ApplicationHPC::showResults (){
@@ -988,50 +991,50 @@ void ApplicationHPC::showResults (){
 
     if (isMaster(myRank)){
         printf ("App [%s] - Rank MASTER:%d - Simulation time:%f - Real execution time:%f - IO:%f  NET:%f  CPU:%f\n",
-                                                                                                   moduleIdName.c_str(),
-                                                                                                   myRank,
-                                                                                                   (simEndTime-simStartTime).dbl(),
-                                                                                                   (difftime (runEndTime,runStartTime)),
-                                                                                                   totalIO.dbl(),
-                                                                                                   totalNET.dbl(),
-                                                                                                   totalCPU.dbl());
+                moduleIdName.c_str(),
+                myRank,
+                (simEndTime-simStartTime).dbl(),
+                (difftime (runEndTime,runStartTime)),
+                totalIO.dbl(),
+                totalNET.dbl(),
+                totalCPU.dbl());
     }else{
         printf ("App [%s] - Rank:%d - Simulation time:%f - Real execution time:%f - IO:%f  NET:%f  CPU:%f\n",
-                                                                                                   moduleIdName.c_str(),
-                                                                                                   myRank,
-                                                                                                   (simEndTime-simStartTime).dbl(),
-                                                                                                   (difftime (runEndTime,runStartTime)),
-                                                                                                   totalIO.dbl(),
-                                                                                                   totalNET.dbl(),
-                                                                                                   totalCPU.dbl());
+                moduleIdName.c_str(),
+                myRank,
+                (simEndTime-simStartTime).dbl(),
+                (difftime (runEndTime,runStartTime)),
+                totalIO.dbl(),
+                totalNET.dbl(),
+                totalCPU.dbl());
     }
 
-        osStream << moduleIdName.c_str();
-        jobResults->setJobResult(0,osStream.str());
-        osStream.str("");
+    osStream << moduleIdName.c_str();
+    jobResults->setJobResult(0,osStream.str());
+    osStream.str("");
 
-        osStream <<  myRank;
-        jobResults->setJobResult(1, osStream.str());
-        osStream.str("");
+    osStream <<  myRank;
+    jobResults->setJobResult(1, osStream.str());
+    osStream.str("");
 
-        osStream <<  totalIO.dbl();
-        jobResults->setJobResult(2, osStream.str());
-        osStream.str("");
+    osStream <<  totalIO.dbl();
+    jobResults->setJobResult(2, osStream.str());
+    osStream.str("");
 
-        osStream <<  totalCPU.dbl();
-        jobResults->setJobResult(3, osStream.str());
-        osStream.str("");
+    osStream <<  totalCPU.dbl();
+    jobResults->setJobResult(3, osStream.str());
+    osStream.str("");
 
-        osStream <<  difftime (runEndTime,runStartTime);
-        jobResults->setJobResult(4, osStream.str());
-        osStream.str("");
+    osStream <<  difftime (runEndTime,runStartTime);
+    jobResults->setJobResult(4, osStream.str());
+    osStream.str("");
 
-        osStream << (simEndTime - simStartTime).dbl();
-        jobResults->setJobResult(5, osStream.str());
+    osStream << (simEndTime - simStartTime).dbl();
+    jobResults->setJobResult(5, osStream.str());
 
-        addResults(jobResults);
+    addResults(jobResults);
 
-        userPtr->notify_UserJobHasFinished(this);
+    userPtr->notify_UserJobHasFinished(this);
 
 }
 

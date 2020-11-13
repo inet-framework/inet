@@ -156,24 +156,24 @@ simtime_t EnergyMeterStates::getStateTime (string state){
 
     vector<EnergyState*>::iterator stateIt;
     int counter = 0;
-	string getstate;
-	simtime_t acumulated_time = 0.0;
-	bool found = false;
+    string getstate;
+    simtime_t acumulated_time = 0.0;
+    bool found = false;
 
-	for (stateIt = states.begin() ; (stateIt < states.end()) && (!found) ; stateIt++){
+    for (stateIt = states.begin() ; (stateIt < states.end()) && (!found) ; stateIt++){
 
-		getstate = (*stateIt)->getState();
-		if (strcmp (getstate.c_str() , state.c_str()) == 0 ){
-		    if (memorization)
-		        acumulated_time = (*stateIt)->getStateTime();
-		    else
-		        acumulated_time = nonAccumulatedTimeStates[counter];
-			found = true;
-		}
-		counter++;
-	}
+        getstate = (*stateIt)->getState();
+        if (strcmp (getstate.c_str() , state.c_str()) == 0 ){
+            if (memorization)
+                acumulated_time = (*stateIt)->getStateTime();
+            else
+                acumulated_time = nonAccumulatedTimeStates[counter];
+            found = true;
+        }
+        counter++;
+    }
 
-	return acumulated_time;
+    return acumulated_time;
 }
 
 simtime_t EnergyMeterStates::getStateTime (int statePosition){

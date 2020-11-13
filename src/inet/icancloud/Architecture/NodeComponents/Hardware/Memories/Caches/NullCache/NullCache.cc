@@ -43,36 +43,36 @@ void NullCache::initialize(int stage) {
 
 void NullCache::finish(){
 
-	// Finish the super-class
-	icancloud_Base::finish();
+    // Finish the super-class
+    icancloud_Base::finish();
 }
 
 
 cGate* NullCache::getOutGate (cMessage *msg){
 
-	int i;
+    int i;
 
-		// If msg arrive from Output
-		if (msg->getArrivalGate()==fromOutputGate){
-			if (gate("toOutput")->getNextGate()->isConnected()){
-				return (toOutputGate);
-			}
-		}
+    // If msg arrive from Output
+    if (msg->getArrivalGate()==fromOutputGate){
+        if (gate("toOutput")->getNextGate()->isConnected()){
+            return (toOutputGate);
+        }
+    }
 
-		// If msg arrive from Inputs
-		else if (msg->arrivedOn("fromInput")){
-			for (i=0; i<numInputs; i++)
-				if (msg->arrivedOn ("fromInput", i))
-					return (gate("toInput", i));
-		}
+    // If msg arrive from Inputs
+    else if (msg->arrivedOn("fromInput")){
+        for (i=0; i<numInputs; i++)
+            if (msg->arrivedOn ("fromInput", i))
+                return (gate("toInput", i));
+    }
 
-	// If gate not found!
-	return nullptr;
+    // If gate not found!
+    return nullptr;
 }
 
 
 void NullCache::processSelfMessage (cMessage *msg){
-	showErrorMessage ("Unknown self message [%s]", msg->getName());
+    showErrorMessage ("Unknown self message [%s]", msg->getName());
 }
 
 
@@ -89,7 +89,7 @@ void NullCache::processResponseMessage (Packet *pkt){
     const auto &sm = pkt->peekAtFront<icancloud_Message>();
     if (sm == nullptr)
         throw cRuntimeError("packet doesn't include icancloud_Message header");
-	sendResponseMessage (pkt);
+    sendResponseMessage (pkt);
 }
 
 

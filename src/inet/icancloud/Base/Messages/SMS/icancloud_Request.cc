@@ -7,97 +7,97 @@ namespace icancloud {
 
 
 icancloud_Request::icancloud_Request (){
-	arrivedSubRequests = 0;
-	parentRequest = nullptr;
+    arrivedSubRequests = 0;
+    parentRequest = nullptr;
 }
 
 
 icancloud_Request::icancloud_Request (Packet *newParent){
-	arrivedSubRequests = 0;
-	parentRequest = newParent;
+    arrivedSubRequests = 0;
+    parentRequest = newParent;
 }
 
 
 icancloud_Request::icancloud_Request (inet::Packet *newParent, unsigned int numSubReq){
-	
-	unsigned int i;
-	
-		arrivedSubRequests = 0;
-		parentRequest = newParent;
-		subRequests.reserve (numSubReq);
-		
-		for (i=0; i<numSubReq; i++)
-			subRequests.push_back (nullptr);
+
+    unsigned int i;
+
+    arrivedSubRequests = 0;
+    parentRequest = newParent;
+    subRequests.reserve (numSubReq);
+
+    for (i=0; i<numSubReq; i++)
+        subRequests.push_back (nullptr);
 }
 
 
 icancloud_Request::~icancloud_Request (){
-	
-	int i;		
 
-		// Removes messages...
-		for (i=0; i<((int)subRequests.size()); i++){
-			
-			if (subRequests[i] != nullptr)				
-				delete (subRequests[i]);
-				subRequests[i] = nullptr;
-		}
-		
-	subRequests.clear();		
+    int i;
+
+    // Removes messages...
+    for (i=0; i<((int)subRequests.size()); i++){
+
+        if (subRequests[i] != nullptr)
+            delete (subRequests[i]);
+        subRequests[i] = nullptr;
+    }
+
+    subRequests.clear();
 }
 
 
 Packet* icancloud_Request::getParentRequest () {
-	return parentRequest;	
+    return parentRequest;
 }
 
 
 void icancloud_Request::setParentRequest (inet::Packet* newParent){
-	parentRequest = newParent;
+    parentRequest = newParent;
 }
 
 
 unsigned int icancloud_Request::getNumSubRequest (){
-	return subRequests.size();
+    return subRequests.size();
 }
 
 
 unsigned int icancloud_Request::getNumArrivedSubRequest () const {
-	return arrivedSubRequests;
+    return arrivedSubRequests;
 }
 
 
 void icancloud_Request::setSubRequest (Packet* subRequest, unsigned int index){
-	
-	if (index < subRequests.size())
-		subRequests[index] = subRequest;
-	else		
-		throw cRuntimeError("[icancloud_Request.setSubRequest] Index out of bounds!");	
-	
+
+    if (index < subRequests.size())
+        subRequests[index] = subRequest;
+    else
+        throw cRuntimeError("[icancloud_Request.setSubRequest] Index out of bounds!");
+
 }
 
 
 void icancloud_Request::addSubRequest (Packet* subRequest){
-	subRequests.push_back (subRequest);
+    subRequests.push_back (subRequest);
 }
 
 
 inet::Packet* icancloud_Request::getSubRequest (unsigned int index){
-	
-	Packet * pkt = nullptr;
-	
-	if (index < subRequests.size()){
-	    if (subRequests[index] != nullptr) {
-	        const auto & sm = subRequests[index]->peekAtFront<icancloud_Message>();
-	        if (sm == nullptr)
-	            throw cRuntimeError("Packet doesn't include icancloud_Message header");
-	        pkt = subRequests[index];
-	    }
-	}
-	else
-	    throw cRuntimeError("[icancloud_Request.getSubRequest] Index out of bounds!");
-		
-	return pkt;
+
+    Packet * pkt = nullptr;
+
+    if (index < subRequests.size()){
+        if (subRequests[index] != nullptr) {
+            const auto & sm = subRequests[index]->peekAtFront<icancloud_Message>();
+            if (sm == nullptr)
+                throw cRuntimeError("Packet doesn't include icancloud_Message header");
+            pkt = subRequests[index];
+        }
+    }
+    else
+        throw cRuntimeError("[icancloud_Request.getSubRequest] Index out of bounds!");
+
+    return pkt;
 }
 
 
@@ -163,8 +163,8 @@ inet::Packet* icancloud_Request::popNextSubRequest() {
 
 
 bool icancloud_Request::arrivesAllSubRequest (){
-	
-	return (arrivedSubRequests == subRequests.size());
+
+    return (arrivedSubRequests == subRequests.size());
 }
 
 
@@ -174,19 +174,19 @@ void icancloud_Request::arrivesSubRequest (inet::Packet* subRequest, unsigned in
     if (sm == nullptr)
         throw cRuntimeError("Packet doesn't include icancloud_Message header");
 
-	if (index < subRequests.size()){
-		
-		if (subRequests[index] == nullptr){
-			subRequests[index] = subRequest;
-		}
-		else{
-		    subRequests[index] = nullptr;
-		}
+    if (index < subRequests.size()){
+
+        if (subRequests[index] == nullptr){
+            subRequests[index] = subRequest;
+        }
+        else{
+            subRequests[index] = nullptr;
+        }
         arrivedSubRequests++;
-	}
-	else{
-		throw cRuntimeError("[icancloud_Request.arrivesSubRequest] Index out of bounds!");
-	}
+    }
+    else{
+        throw cRuntimeError("[icancloud_Request.arrivesSubRequest] Index out of bounds!");
+    }
 }
 
 void icancloud_Request::clearSubRequests() {

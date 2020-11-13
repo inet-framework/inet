@@ -29,24 +29,24 @@ void StorageMeterCore::initialize(){
 }
 
 StorageMeterCore::~StorageMeterCore() {
-	// TODO Auto-generated destructor stub
+    // TODO Auto-generated destructor stub
 }
 
 double StorageMeterCore::getInstantConsumption(const string & state, int partIndex){
 
-// Define ..
+    // Define ..
     int componentsQuantity, i;
     double consumptionValue;
     double instantConsumption;
     string actualState;
 
-// Initialize ..
+    // Initialize ..
     consumptionValue = 0.0;
     componentsQuantity = e_internal->getNumberOfComponents();
     instantConsumption = 0.0;
     actualState = "";
 
-// Initialize ..
+    // Initialize ..
 
     if (partIndex == -1){
 
@@ -65,17 +65,17 @@ double StorageMeterCore::getInstantConsumption(const string & state, int partInd
     else {
 
         // Get the state
-            if (strcmp (state.c_str(), NULL_STATE) == 0)
-                actualState = e_internal -> e_getActualState(partIndex);
-            else
-                actualState = state;
+        if (strcmp (state.c_str(), NULL_STATE) == 0)
+            actualState = e_internal -> e_getActualState(partIndex);
+        else
+            actualState = state;
 
         // Get the consumption of the state
-            consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
+        consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
 
-            instantConsumption =  consumptionValue;
+        instantConsumption =  consumptionValue;
 
-            if (instantConsumption != 0) instantConsumption += e_internal->getConsumptionBase();
+        if (instantConsumption != 0) instantConsumption += e_internal->getConsumptionBase();
 
     }
 
@@ -85,73 +85,73 @@ double StorageMeterCore::getInstantConsumption(const string & state, int partInd
 double StorageMeterCore::getEnergyConsumed (int partIndex){
 
     // Define ..
-        int componentsQuantity, statesSize, i, j;
-        double consumptionValue;
-        double timeState;
-        string actualState;
-        double consumption, componentConsumption;
-        vector<double> totalConsumption;
+    int componentsQuantity, statesSize, i, j;
+    double consumptionValue;
+    double timeState;
+    string actualState;
+    double consumption, componentConsumption;
+    vector<double> totalConsumption;
 
     // Initialize
-       consumption= AbstractMeterUnit::getEnergyConsumed(partIndex);
-       totalConsumption.clear();
+    consumption= AbstractMeterUnit::getEnergyConsumed(partIndex);
+    totalConsumption.clear();
 
     if (consumption == -1){
 
         // Initialize ..
-           componentConsumption = 0.0;
-           componentsQuantity = e_internal->getNumberOfComponents();
-           consumption = 0.0;
-           timeState = 0.0;
-           actualState = "";
+        componentConsumption = 0.0;
+        componentsQuantity = e_internal->getNumberOfComponents();
+        consumption = 0.0;
+        timeState = 0.0;
+        actualState = "";
 
         // Initialize ..
 
-            if (partIndex == -1){
+        if (partIndex == -1){
 
-                for (i= 0; i < componentsQuantity; i++){
-                    // Get the states size
-                       statesSize = e_internal -> e_getStatesSize();
+            for (i= 0; i < componentsQuantity; i++){
+                // Get the states size
+                statesSize = e_internal -> e_getStatesSize();
 
-                    for (j = 0; j < statesSize ; j++){
-                        // Get the consumption of the state
-                            timeState = e_internal->e_getStateTime(j).dbl();
+                for (j = 0; j < statesSize ; j++){
+                    // Get the consumption of the state
+                    timeState = e_internal->e_getStateTime(j).dbl();
 
-                        // Get the consumption of the state
-                            consumptionValue = e_internal->e_getConsumptionValue(j);
+                    // Get the consumption of the state
+                    consumptionValue = e_internal->e_getConsumptionValue(j);
 
-                            componentConsumption +=  consumptionValue * timeState;
-
-                    }
-
-                    // reset the value
-                    totalConsumption.push_back(componentConsumption);
-                    componentConsumption = 0.0;
+                    componentConsumption +=  consumptionValue * timeState;
 
                 }
 
-                consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+                // reset the value
+                totalConsumption.push_back(componentConsumption);
+                componentConsumption = 0.0;
 
             }
-            else {
 
-             // Get the states size
-                 statesSize = e_internal -> e_getStatesSize(partIndex);
+            consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
 
-              for (j = 0; j < statesSize ; j++){
-                  // Get the consumption of the state
-                      timeState = e_internal->e_getStateTime(j, partIndex).dbl();
+        }
+        else {
 
-                  // Get the consumption of the state
-                      consumptionValue = e_internal->e_getConsumptionValue(j, partIndex);
+            // Get the states size
+            statesSize = e_internal -> e_getStatesSize(partIndex);
 
-                      consumption +=  consumptionValue * timeState;
+            for (j = 0; j < statesSize ; j++){
+                // Get the consumption of the state
+                timeState = e_internal->e_getStateTime(j, partIndex).dbl();
 
-              }
+                // Get the consumption of the state
+                consumptionValue = e_internal->e_getConsumptionValue(j, partIndex);
 
-              totalConsumption.push_back(consumption);
-              consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+                consumption +=  consumptionValue * timeState;
+
             }
+
+            totalConsumption.push_back(consumption);
+            consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+        }
     }
 
     return consumption;

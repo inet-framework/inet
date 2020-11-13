@@ -57,7 +57,7 @@ void CfgPreloadFS::parseFile(const char* preLoad_data){
 	        // Load the current path entry
 	        strcpy(line,(*config.begin()).c_str());
 	        config.erase (config.begin());
-	        if (line == NULL){
+	        if (strlen(line) == 0){
 	            info << "Error parsing preload defined in basic file system: " << line;
 	            throw cRuntimeError(info.str().c_str());
 	        }

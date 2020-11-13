@@ -38,187 +38,187 @@ MemoryMeterCore::~MemoryMeterCore() {
 double MemoryMeterCore::getInstantConsumption(const string & state, int partIndex){
 
     // Define ..
-          int componentsQuantity, i;
-          double consumptionValue;
-          double powerMemoryConsumption, powerDimmConsumption;
-          string actualState;
-          int numRamChipsActived;
-          int numRamChipsNotActived;
-          RAMmemory* memory;
+    int componentsQuantity, i;
+    double consumptionValue;
+    double powerMemoryConsumption, powerDimmConsumption;
+    string actualState;
+    int numRamChipsActived;
+    int numRamChipsNotActived;
+    RAMmemory* memory;
 
-          memory = check_and_cast<RAMmemory*>(e_internal);
-          float percentLoaded = memory->getMemoryOccupation();
+    memory = check_and_cast<RAMmemory*>(e_internal);
+    float percentLoaded = memory->getMemoryOccupation();
 
-      // Initialize ..
+    // Initialize ..
 
-          if (percentLoaded == 0.0) {
-              numRamChipsActived = 1;
-          }
-          else{
-              numRamChipsActived = ceil((numDRAMChips * percentLoaded) /100);
-          }
+    if (percentLoaded == 0.0) {
+        numRamChipsActived = 1;
+    }
+    else{
+        numRamChipsActived = ceil((numDRAMChips * percentLoaded) /100);
+    }
 
-          numRamChipsNotActived = numDRAMChips - numRamChipsActived;
+    numRamChipsNotActived = numDRAMChips - numRamChipsActived;
 
-          consumptionBase = AbstractMeterUnit::getConsumptionBase();
-          componentsQuantity = e_internal->getNumberOfComponents();
-          powerMemoryConsumption = 0.0;
-          powerDimmConsumption = 0.0;
-          actualState = "";
+    consumptionBase = AbstractMeterUnit::getConsumptionBase();
+    componentsQuantity = e_internal->getNumberOfComponents();
+    powerMemoryConsumption = 0.0;
+    powerDimmConsumption = 0.0;
+    actualState = "";
 
-      // Initialize ..
+    // Initialize ..
 
-          if (partIndex == -1){
+    if (partIndex == -1){
 
-              for (i= 0; i < componentsQuantity; i++){
-                  // Get the state
-                      actualState = e_internal -> e_getActualState();
+        for (i= 0; i < componentsQuantity; i++){
+            // Get the state
+            actualState = e_internal -> e_getActualState();
 
-                  // Get the consumption of the state
-                      consumptionValue = e_internal->e_getConsumptionValue(actualState);
+            // Get the consumption of the state
+            consumptionValue = e_internal->e_getConsumptionValue(actualState);
 
-                      // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
-                      powerDimmConsumption += (consumptionValue * numRamChipsActived);
-                      if (powerDimmConsumption != 0) powerDimmConsumption+= (consumptionBase * numRamChipsNotActived);
+            // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
+            powerDimmConsumption += (consumptionValue * numRamChipsActived);
+            if (powerDimmConsumption != 0) powerDimmConsumption+= (consumptionBase * numRamChipsNotActived);
 
-                      // Calculate the power consumption the set of modules
-                      powerMemoryConsumption += powerDimmConsumption * numModules;
+            // Calculate the power consumption the set of modules
+            powerMemoryConsumption += powerDimmConsumption * numModules;
 
-                      // Reset for the next operation
-                      powerDimmConsumption = 0.0;
+            // Reset for the next operation
+            powerDimmConsumption = 0.0;
 
-              }
-          }
-          else {
+        }
+    }
+    else {
 
-              // Get the state
-              if (strcmp (state.c_str(), NULL_STATE) == 0)
-                  actualState = e_internal -> e_getActualState(partIndex);
-              else
-                  actualState = state;
+        // Get the state
+        if (strcmp (state.c_str(), NULL_STATE) == 0)
+            actualState = e_internal -> e_getActualState(partIndex);
+        else
+            actualState = state;
 
-              // Get the consumption of the state
-                  consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
+        // Get the consumption of the state
+        consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
 
-              // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
-                  powerDimmConsumption += (consumptionValue * numRamChipsActived);
-                  if (powerDimmConsumption != 0) powerDimmConsumption+= (consumptionBase * numRamChipsNotActived);
+        // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
+        powerDimmConsumption += (consumptionValue * numRamChipsActived);
+        if (powerDimmConsumption != 0) powerDimmConsumption+= (consumptionBase * numRamChipsNotActived);
 
-              // Calculate the power consumption the set of modules
-                  powerMemoryConsumption = powerDimmConsumption * numModules;
+        // Calculate the power consumption the set of modules
+        powerMemoryConsumption = powerDimmConsumption * numModules;
 
-               // Reset for the next operation
-                  powerDimmConsumption = 0.0;
+        // Reset for the next operation
+        powerDimmConsumption = 0.0;
 
-          }
+    }
 
-          if (powerMemoryConsumption != 0.0) powerMemoryConsumption += e_internal->getConsumptionBase();
+    if (powerMemoryConsumption != 0.0) powerMemoryConsumption += e_internal->getConsumptionBase();
 
-          return powerMemoryConsumption;
+    return powerMemoryConsumption;
 }
 
 
 double MemoryMeterCore::getEnergyConsumed(int partIndex){
 
     // Define ..
-        double powerMemoryConsumption;
-        int componentsQuantity,statesSize;
-        double consumptionValue, i, j;
-        double timeState, powerDimmConsumption;
-        int numRamChipsActived;
-        string actualState;
-        vector<double> totalConsumption;
-        RAMmemory* memory;
+    double powerMemoryConsumption;
+    int componentsQuantity,statesSize;
+    double consumptionValue, i, j;
+    double timeState, powerDimmConsumption;
+    int numRamChipsActived;
+    string actualState;
+    vector<double> totalConsumption;
+    RAMmemory* memory;
 
-        memory = check_and_cast<RAMmemory*>(e_internal);
-        float percentLoaded = memory->getMemoryOccupation();
+    memory = check_and_cast<RAMmemory*>(e_internal);
+    float percentLoaded = memory->getMemoryOccupation();
 
     // Initialize ..
-        powerMemoryConsumption = AbstractMeterUnit::getEnergyConsumed(partIndex);
-        totalConsumption.clear();
-        if (percentLoaded == 0.0) {
-            numRamChipsActived = 1;
-        }
-        else{
-            numRamChipsActived = ceil((numDRAMChips * percentLoaded) /100);
-        }
+    powerMemoryConsumption = AbstractMeterUnit::getEnergyConsumed(partIndex);
+    totalConsumption.clear();
+    if (percentLoaded == 0.0) {
+        numRamChipsActived = 1;
+    }
+    else{
+        numRamChipsActived = ceil((numDRAMChips * percentLoaded) /100);
+    }
 
     if (powerMemoryConsumption == -1){
 
         // Initialize ..
-            componentsQuantity = e_internal->getNumberOfComponents();
-            consumptionValue = 0.0;
-            powerMemoryConsumption = 0.0;
-            powerDimmConsumption = 0.0;
-            timeState = 0.0;
-            actualState = "";
+        componentsQuantity = e_internal->getNumberOfComponents();
+        consumptionValue = 0.0;
+        powerMemoryConsumption = 0.0;
+        powerDimmConsumption = 0.0;
+        timeState = 0.0;
+        actualState = "";
 
-           if (partIndex == -1){
+        if (partIndex == -1){
 
-                for (i= 0; i < componentsQuantity; i++){
-                    // Get the states size
-                       statesSize = e_internal -> e_getStatesSize();
+            for (i= 0; i < componentsQuantity; i++){
+                // Get the states size
+                statesSize = e_internal -> e_getStatesSize();
 
-                    for (j = 0; j < statesSize ; j++){
-                        // Get the consumption of the state
-                            timeState = e_internal->e_getStateTime(j).dbl();
+                for (j = 0; j < statesSize ; j++){
+                    // Get the consumption of the state
+                    timeState = e_internal->e_getStateTime(j).dbl();
 
-                        // Get the consumption of the state
-                            consumptionValue = e_internal->e_getConsumptionValue(j);
+                    // Get the consumption of the state
+                    consumptionValue = e_internal->e_getConsumptionValue(j);
 
-                        // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
-                            powerDimmConsumption += (consumptionValue * timeState * (numRamChipsActived));
+                    // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
+                    powerDimmConsumption += (consumptionValue * timeState * (numRamChipsActived));
 
-                            if (powerDimmConsumption != 0) powerDimmConsumption+= (AbstractMeterUnit::getConsumptionBase() * timeState * (numDRAMChips - numRamChipsActived));
+                    if (powerDimmConsumption != 0) powerDimmConsumption+= (AbstractMeterUnit::getConsumptionBase() * timeState * (numDRAMChips - numRamChipsActived));
 
-                        // Calculate the power consumption the set of modules
-                            powerMemoryConsumption += powerDimmConsumption * numModules;
+                    // Calculate the power consumption the set of modules
+                    powerMemoryConsumption += powerDimmConsumption * numModules;
 
-                        // Reset for the next operation
-                            powerDimmConsumption = 0.0;
-
-                    }
-
-                    if (powerMemoryConsumption != 0.0) powerMemoryConsumption += e_internal->getConsumptionBase();
-
-                    // reset the value
-                    totalConsumption.push_back(powerMemoryConsumption);
-                    powerMemoryConsumption = 0.0;
+                    // Reset for the next operation
+                    powerDimmConsumption = 0.0;
 
                 }
-                powerMemoryConsumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
-            }
-            else{
 
-             // Get the states size
-                 statesSize = e_internal -> e_getStatesSize(partIndex);
+                if (powerMemoryConsumption != 0.0) powerMemoryConsumption += e_internal->getConsumptionBase();
 
-              for (j = 0; j < statesSize ; j++){
-                  // Get the consumption of the state
-                      timeState = e_internal->e_getStateTime(j, partIndex).dbl();
-
-                  // Get the consumption of the state
-                      consumptionValue = e_internal->e_getConsumptionValue(j, partIndex);
-
-                  // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
-                      powerDimmConsumption += (consumptionValue * timeState * (numRamChipsActived));
-                      if (powerDimmConsumption != 0) powerDimmConsumption+= (AbstractMeterUnit::getConsumptionBase() * timeState * (numDRAMChips - numRamChipsActived));
-
-                  // Calculate the power consumption the set of modules
-                      powerMemoryConsumption = powerDimmConsumption * numModules;
-
-                  // Reset for the next operation
-                      powerDimmConsumption = 0.0;
-
-              }
-
-              totalConsumption.push_back(powerMemoryConsumption);
-              powerMemoryConsumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+                // reset the value
+                totalConsumption.push_back(powerMemoryConsumption);
+                powerMemoryConsumption = 0.0;
 
             }
-       }
+            powerMemoryConsumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+        }
+        else{
 
-       return powerMemoryConsumption;
+            // Get the states size
+            statesSize = e_internal -> e_getStatesSize(partIndex);
+
+            for (j = 0; j < statesSize ; j++){
+                // Get the consumption of the state
+                timeState = e_internal->e_getStateTime(j, partIndex).dbl();
+
+                // Get the consumption of the state
+                consumptionValue = e_internal->e_getConsumptionValue(j, partIndex);
+
+                // Calculate the power consumption of a module (Voltage * current * time * num dram chips)
+                powerDimmConsumption += (consumptionValue * timeState * (numRamChipsActived));
+                if (powerDimmConsumption != 0) powerDimmConsumption+= (AbstractMeterUnit::getConsumptionBase() * timeState * (numDRAMChips - numRamChipsActived));
+
+                // Calculate the power consumption the set of modules
+                powerMemoryConsumption = powerDimmConsumption * numModules;
+
+                // Reset for the next operation
+                powerDimmConsumption = 0.0;
+
+            }
+
+            totalConsumption.push_back(powerMemoryConsumption);
+            powerMemoryConsumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+
+        }
+    }
+
+    return powerMemoryConsumption;
 }
 
 } // namespace icancloud

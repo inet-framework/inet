@@ -28,7 +28,7 @@ void NetworkMeterCore::initialize(){
     type = "network";
     AbstractMeterUnit::initialize();
 
- }
+}
 
 NetworkMeterCore::~NetworkMeterCore() {
     AbstractMeterUnit::finish();
@@ -38,114 +38,114 @@ double NetworkMeterCore::getInstantConsumption(const string &state,int partIndex
 
     // Define ..
 
-        int componentsQuantity, i;
-        double consumptionValue;
-        double instantConsumption;
-        string actualState;
+    int componentsQuantity, i;
+    double consumptionValue;
+    double instantConsumption;
+    string actualState;
 
     // Initialize ..
-        componentsQuantity = e_internal->getNumberOfComponents();
-        instantConsumption = 0.0;
-        actualState = "";
+    componentsQuantity = e_internal->getNumberOfComponents();
+    instantConsumption = 0.0;
+    actualState = "";
 
     // Initialize ..
 
-        if (partIndex == -1){
+    if (partIndex == -1){
 
-            for (i= 0; i < componentsQuantity; i++){
-                // Get the state
-                    actualState = e_internal -> e_getActualState();
-
-                // Get the consumption of the state
-                    consumptionValue = e_internal->e_getConsumptionValue(actualState);
-
-                    instantConsumption +=  consumptionValue;
-            }
-        }
-        else {
-
+        for (i= 0; i < componentsQuantity; i++){
             // Get the state
-            if (strcmp (state.c_str(), NULL_STATE) == 0)
-                actualState = e_internal -> e_getActualState(partIndex);
-            else
-                actualState = state;
+            actualState = e_internal -> e_getActualState();
+
             // Get the consumption of the state
-            consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
-            instantConsumption =  consumptionValue;
+            consumptionValue = e_internal->e_getConsumptionValue(actualState);
 
+            instantConsumption +=  consumptionValue;
         }
+    }
+    else {
 
-        if (instantConsumption != 0) instantConsumption += e_internal->getConsumptionBase();
+        // Get the state
+        if (strcmp (state.c_str(), NULL_STATE) == 0)
+            actualState = e_internal -> e_getActualState(partIndex);
+        else
+            actualState = state;
+        // Get the consumption of the state
+        consumptionValue = e_internal->e_getConsumptionValue(actualState, partIndex);
+        instantConsumption =  consumptionValue;
 
-        return instantConsumption;
+    }
+
+    if (instantConsumption != 0) instantConsumption += e_internal->getConsumptionBase();
+
+    return instantConsumption;
 }
 
 double NetworkMeterCore::getEnergyConsumed (int partIndex){
 
     // Define ..
-        int componentsQuantity, statesSize, i, j;
-        double consumptionValue;
-        double timeState;
-        string actualState;
-        double consumption;
-        vector<double> totalConsumption;
+    int componentsQuantity, statesSize, i, j;
+    double consumptionValue;
+    double timeState;
+    string actualState;
+    double consumption;
+    vector<double> totalConsumption;
 
     // Initialize
-        consumption = AbstractMeterUnit::getEnergyConsumed(partIndex);
-        totalConsumption.clear();
+    consumption = AbstractMeterUnit::getEnergyConsumed(partIndex);
+    totalConsumption.clear();
 
     if (consumption == -1){
 
         // Initialize ..
-            componentsQuantity = e_internal->getNumberOfComponents();
-            consumption = 0.0;
-            timeState = 0.0;
-            actualState = "";
+        componentsQuantity = e_internal->getNumberOfComponents();
+        consumption = 0.0;
+        timeState = 0.0;
+        actualState = "";
 
         // Initialize ..
 
-            if (partIndex == -1){
+        if (partIndex == -1){
 
-                for (i= 0; i < componentsQuantity; i++){
-                    // Get the states size
-                       statesSize = e_internal -> e_getStatesSize();
+            for (i= 0; i < componentsQuantity; i++){
+                // Get the states size
+                statesSize = e_internal -> e_getStatesSize();
 
-                    for (j = 0; j < statesSize ; j++){
-                        // Get the consumption of the state
-                            timeState = e_internal->e_getStateTime(j).dbl();
+                for (j = 0; j < statesSize ; j++){
+                    // Get the consumption of the state
+                    timeState = e_internal->e_getStateTime(j).dbl();
 
-                        // Get the consumption of the state
-                            consumptionValue = e_internal->e_getConsumptionValue(j);
+                    // Get the consumption of the state
+                    consumptionValue = e_internal->e_getConsumptionValue(j);
 
-                            consumption +=  consumptionValue * timeState;
+                    consumption +=  consumptionValue * timeState;
 
-                    }
-                    totalConsumption.push_back(consumption);
-                    consumption = 0;
                 }
+                totalConsumption.push_back(consumption);
+                consumption = 0;
+            }
 
-                consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+            consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+
+        }
+        else {
+
+
+            // Get the states size
+            statesSize = e_internal -> e_getStatesSize(partIndex);
+
+            for (j = 0; j < statesSize ; j++){
+                // Get the consumption of the state
+                timeState = e_internal->e_getStateTime(j, partIndex).dbl();
+
+                // Get the consumption of the state
+                consumptionValue = e_internal->e_getConsumptionValue(j, partIndex);
+
+                consumption +=  consumptionValue * timeState;
 
             }
-            else {
-
-
-             // Get the states size
-                 statesSize = e_internal -> e_getStatesSize(partIndex);
-
-              for (j = 0; j < statesSize ; j++){
-                  // Get the consumption of the state
-                      timeState = e_internal->e_getStateTime(j, partIndex).dbl();
-
-                  // Get the consumption of the state
-                      consumptionValue = e_internal->e_getConsumptionValue(j, partIndex);
-
-                      consumption +=  consumptionValue * timeState;
-
-              }
-              totalConsumption.push_back(consumption);
-              consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
-            }
+            totalConsumption.push_back(consumption);
+            consumption = postEnergyConsumedCalculus(partIndex, totalConsumption);
+        }
     }
 
 

@@ -10,33 +10,33 @@ Define_Module (RAMMemory_BlockModel);
 using namespace inet;
 
 RAMMemory_BlockModel::~RAMMemory_BlockModel(){
-	
-	cMessage *message;	
 
-    	// Cancel the flush message
-		cancelAndDelete (flushMessage);
-		
-		// Removes all messages placed on SMS
-		SMS_memory->clear();
-		
-		// Removes the SMS object
-		delete (SMS_memory);
-		
-		while (!memoryBlockList.empty()){
-			delete (memoryBlockList.front());
-			memoryBlockList.pop_front();
-		}
-		
-		// Renoves all messages in memory list
-		memoryBlockList.clear();
-		
-		// Removes all messages in flushQueue
-		while (!flushQueue.isEmpty()){
-			message = (cMessage *) flushQueue.pop();
-			delete (message);			
-		}
-		
-		flushQueue.clear();	
+    cMessage *message;
+
+    // Cancel the flush message
+    cancelAndDelete (flushMessage);
+
+    // Removes all messages placed on SMS
+    SMS_memory->clear();
+
+    // Removes the SMS object
+    delete (SMS_memory);
+
+    while (!memoryBlockList.empty()){
+        delete (memoryBlockList.front());
+        memoryBlockList.pop_front();
+    }
+
+    // Renoves all messages in memory list
+    memoryBlockList.clear();
+
+    // Removes all messages in flushQueue
+    while (!flushQueue.isEmpty()){
+        message = (cMessage *) flushQueue.pop();
+        delete (message);
+    }
+
+    flushQueue.clear();
 
 }
 
@@ -121,24 +121,24 @@ void RAMMemory_BlockModel::initialize(int stage) {
 
 void RAMMemory_BlockModel::finish(){
 
-	// Finish the super-class
-	icancloud_Base::finish();
+    // Finish the super-class
+    icancloud_Base::finish();
 }
 
 
 cGate* RAMMemory_BlockModel::getOutGate (cMessage *msg){
 
-        // If msg arrive from Output
-        if (msg->getArrivalGate()==fromOutputGate){
-            if (toOutputGate->getNextGate()->isConnected()){
-                return (toOutputGate);
-            }
+    // If msg arrive from Output
+    if (msg->getArrivalGate()==fromOutputGate){
+        if (toOutputGate->getNextGate()->isConnected()){
+            return (toOutputGate);
         }
+    }
 
-        // If msg arrive from Inputs
-        else if (msg->arrivedOn("fromInput")){
-                    return (toInputGates);
-        }
+    // If msg arrive from Inputs
+    else if (msg->arrivedOn("fromInput")){
+        return (toInputGates);
+    }
 
     // If gate not found!
     return nullptr;
@@ -264,12 +264,12 @@ void RAMMemory_BlockModel::processRequestMessage (Packet *pkt){
     pkt->trimFront();
     auto sm = pkt->removeAtFront<icancloud_Message>();
 
-	auto sm_io = dynamicPtrCast<icancloud_App_IO_Message>(sm);
-	auto sm_mem = dynamicPtrCast<icancloud_App_MEM_Message>(sm);
-	unsigned int requiredBlocks;
-	int operation = sm->getOperation();
-	
-	// Changing energy state operations came from OS
+    auto sm_io = dynamicPtrCast<icancloud_App_IO_Message>(sm);
+    auto sm_mem = dynamicPtrCast<icancloud_App_MEM_Message>(sm);
+    unsigned int requiredBlocks;
+    int operation = sm->getOperation();
+
+    // Changing energy state operations came from OS
     if (operation == SM_CHANGE_MEMORY_STATE){
 
         // change the state of the memory
@@ -283,124 +283,124 @@ void RAMMemory_BlockModel::processRequestMessage (Packet *pkt){
     else if (operation == SM_CHANGE_DISK_STATE){
 
         // Cast!
-         if (sm_io == nullptr)
-             throw cRuntimeError("Header is not of the type icancloud_App_IO_Message");
+        if (sm_io == nullptr)
+            throw cRuntimeError("Header is not of the type icancloud_App_IO_Message");
 
         // Send request
         pkt->insertAtFront(sm_io);
         sendRequest (pkt);
 
-    // Allocating memory for application space!
+        // Allocating memory for application space!
     }
     else if (sm->getOperation() == SM_MEM_ALLOCATE){
 
         changeState (MEMORY_STATE_WRITE);
 
-		// Cast!
+        // Cast!
         if (sm_mem == nullptr)
             throw cRuntimeError("Header is not of the type icancloud_App_MEM_Message");
 
-		
-		// Memory account
-		requiredBlocks = (unsigned int) ceil (sm_mem->getMemSize() / blockSize_KB);
-				
-		if (DEBUG_Main_Memory)
-			showDebugMessage ("Memory Request. Free memory blocks: %d - Requested blocks: %d", freeAppBlocks, requiredBlocks);
-		
-		if (requiredBlocks <= freeAppBlocks)
-			freeAppBlocks -= requiredBlocks;
-		else{
-			
-			showDebugMessage ("Not enough memory!. Free memory blocks: %d - Requested blocks: %d", freeAppBlocks, requiredBlocks);			
-			sm_mem->setResult (SM_NOT_ENOUGH_MEMORY);			
-		}		
-		
-		// Response message
-		sm_mem->setIsResponse(true);						
+
+        // Memory account
+        requiredBlocks = (unsigned int) ceil (sm_mem->getMemSize() / blockSize_KB);
+
+        if (DEBUG_Main_Memory)
+            showDebugMessage ("Memory Request. Free memory blocks: %d - Requested blocks: %d", freeAppBlocks, requiredBlocks);
+
+        if (requiredBlocks <= freeAppBlocks)
+            freeAppBlocks -= requiredBlocks;
+        else{
+
+            showDebugMessage ("Not enough memory!. Free memory blocks: %d - Requested blocks: %d", freeAppBlocks, requiredBlocks);
+            sm_mem->setResult (SM_NOT_ENOUGH_MEMORY);
+        }
+
+        // Response message
+        sm_mem->setIsResponse(true);
 
         // Time to perform the read operation
-		pkt->insertAtFront(sm_mem);
+        pkt->insertAtFront(sm_mem);
         scheduleAt (writeLatencyTime_s+simTime(), pkt);
 
-	}
-	
-	
-	// Releasing memory for application space!
-	else if (sm->getOperation() == SM_MEM_RELEASE){
-				
-	    changeState (MEMORY_STATE_WRITE);
-		// Cast!
+    }
+
+
+    // Releasing memory for application space!
+    else if (sm->getOperation() == SM_MEM_RELEASE){
+
+        changeState (MEMORY_STATE_WRITE);
+        // Cast!
         if (sm_mem == nullptr)
             throw cRuntimeError("Header is not of the type icancloud_App_MEM_Message");
-		
-		// Memory account
-		requiredBlocks = (unsigned int) ceil (sm_mem->getMemSize() / blockSize_KB);		
-		
-		if (DEBUG_Main_Memory)
-			showDebugMessage ("Memory Request. Free memory blocks: %d - Released blocks: %d", freeAppBlocks, requiredBlocks);
-		
-		
-		// Update number of free blocks
-		freeAppBlocks += requiredBlocks;				
-		
-		// Response message
-		sm_mem->setIsResponse(true);
+
+        // Memory account
+        requiredBlocks = (unsigned int) ceil (sm_mem->getMemSize() / blockSize_KB);
+
+        if (DEBUG_Main_Memory)
+            showDebugMessage ("Memory Request. Free memory blocks: %d - Released blocks: %d", freeAppBlocks, requiredBlocks);
+
+
+        // Update number of free blocks
+        freeAppBlocks += requiredBlocks;
+
+        // Response message
+        sm_mem->setIsResponse(true);
 
         // Time to perform the write operation
-		pkt->insertAtFront(sm_mem);
+        pkt->insertAtFront(sm_mem);
         scheduleAt (writeLatencyTime_s+simTime(), pkt);
 
-	}
-	
-	
-	// Disk cache space!
-	else{
+    }
 
-		// Cast!
+
+    // Disk cache space!
+    else{
+
+        // Cast!
         if (sm_io == nullptr)
             throw cRuntimeError("Header is not of the type icancloud_App_IO_Message");
 
         string debugMsg = sm_io->contentsToString(DEBUG_MSG_Main_Memory);
         pkt->insertAtFront(sm_io);
 
-		// Read or write operation?
-		if ((sm_io->getOperation() == SM_READ_FILE) ||
-			(sm_io->getOperation() == SM_WRITE_FILE)){
+        // Read or write operation?
+        if ((sm_io->getOperation() == SM_READ_FILE) ||
+                (sm_io->getOperation() == SM_WRITE_FILE)){
 
-			// Request cames from Service Redirector... Split it and process subRequests!
-			if (!sm_io->getRemoteOperation()){
+            // Request cames from Service Redirector... Split it and process subRequests!
+            if (!sm_io->getRemoteOperation()){
 
-				// Split and process current request!
+                // Split and process current request!
                 SMS_memory->splitRequest(pkt);
 
-				// Verbose mode? Show detailed request
-				if (DEBUG_Main_Memory) {
-					showDebugMessage ("Processing original request:%s from message:%s", 
-									SMS_memory->requestToString(pkt, DEBUG_SMS_Main_Memory).c_str(),
-									debugMsg.c_str());
-				}
+                // Verbose mode? Show detailed request
+                if (DEBUG_Main_Memory) {
+                    showDebugMessage ("Processing original request:%s from message:%s",
+                            SMS_memory->requestToString(pkt, DEBUG_SMS_Main_Memory).c_str(),
+                            debugMsg.c_str());
+                }
 
 
 
-				showSMSContents(DEBUG_ALL_SMS_Main_Memory);
+                showSMSContents(DEBUG_ALL_SMS_Main_Memory);
 
                 changeState(MEMORY_STATE_SEARCHING);
 
                 scheduleAt (searchLatencyTime_s+simTime(), pkt);
 
-			}
+            }
 
-			// Request cames from I/O Redirector... send to corresponding App (NFS)!
-			else {
-				sendRequest (pkt);
-			}
-		}
+            // Request cames from I/O Redirector... send to corresponding App (NFS)!
+            else {
+                sendRequest (pkt);
+            }
+        }
 
-		// Control operation...
-		else{
-			sendRequest (pkt);
-		}
-	}
+        // Control operation...
+        else{
+            sendRequest (pkt);
+        }
+    }
 }
 
 void RAMMemory_BlockModel::processResponseMessage(Packet *pkt) {
@@ -459,38 +459,38 @@ void RAMMemory_BlockModel::processResponseMessage(Packet *pkt) {
 void RAMMemory_BlockModel::sendRequest (Packet *pkt){
 
     const auto & sm = pkt->peekAtFront<icancloud_Message>();
-	// Send to destination! I/O Redirector...
-	if (!sm->getRemoteOperation())
-		sendRequestMessage (pkt, toOutputGate);
+    // Send to destination! I/O Redirector...
+    if (!sm->getRemoteOperation())
+        sendRequestMessage (pkt, toOutputGate);
 
-	// Request cames from I/O Redirector... send to corresponding App!
-	else{	
-		sendRequestMessage (pkt, toInputGates);
-	}
+    // Request cames from I/O Redirector... send to corresponding App!
+    else{
+        sendRequestMessage (pkt, toInputGates);
+    }
 }
 
 
 void RAMMemory_BlockModel::sendRequestWithoutCheck (Packet *pkt){
 
     const auto & sm = pkt->peekAtFront<icancloud_Message>();
-	// If trace is empty, add current hostName, module and request number
-	if (sm->isTraceEmpty()){
-	    pkt->trimFront();
-	    auto sm = pkt->removeAtFront<icancloud_Message>();
-		sm->addNodeToTrace (getHostName());
-		pkt->insertAtFront(sm);
-		updateMessageTrace (pkt);
-	}
+    // If trace is empty, add current hostName, module and request number
+    if (sm->isTraceEmpty()){
+        pkt->trimFront();
+        auto sm = pkt->removeAtFront<icancloud_Message>();
+        sm->addNodeToTrace (getHostName());
+        pkt->insertAtFront(sm);
+        updateMessageTrace (pkt);
+    }
 
-	// Send to destination! Probably a file system...
-	if (!sm->getRemoteOperation()){
-		send (pkt, toOutputGate);
-	}
+    // Send to destination! Probably a file system...
+    if (!sm->getRemoteOperation()){
+        send (pkt, toOutputGate);
+    }
 
-	// Request cames from IOR... send to corresponding App!
-	else{	
-		send (pkt, toInputGates);
-	}
+    // Request cames from IOR... send to corresponding App!
+    else{
+        send (pkt, toInputGates);
+    }
 }
 
 
@@ -727,124 +727,124 @@ void RAMMemory_BlockModel::arrivesSubRequest (Packet *pkt){
 
     auto subRequest = pkt->peekAtFront<icancloud_App_IO_Message>();
 
-	// Parent request
-	auto pktParent = subRequest->getParentRequest();
+    // Parent request
+    auto pktParent = subRequest->getParentRequest();
 
-	// Search for the request on request vector!
-	bool isRequestHere = (SMS_memory->searchRequest (pktParent) != NOT_FOUND);
-	// If request is not here... delete current subRequest!
-	if (!isRequestHere){
-	    if ((DEBUG_DETAILED_Main_Memory) && (DEBUG_Main_Memory)) {
-	        pkt->trimFront();
-	        auto subRequest = pkt->removeAtFront<icancloud_App_IO_Message>();
-	        showDebugMessage ("Arrived subRequest has no parent.. deleting! %s", subRequest->contentsToString(DEBUG_MSG_Main_Memory).c_str());
-	        pkt->insertAtFront(subRequest);
-	    }
-	    delete (pkt);
-	}
-	else{
-	    // Casting!
-	    // SubRequest arrives...
-	    SMS_memory->arrivesSubRequest (pkt, pktParent);
-	    // Check for errors...
-	    if (subRequest->getResult() != icancloud_OK){
-	        auto parentRequest = pktParent->removeAtFront<icancloud_App_IO_Message>();
-	        parentRequest->setResult (subRequest->getResult());
-	        pktParent->insertAtFront(parentRequest);
-	    }
+    // Search for the request on request vector!
+    bool isRequestHere = (SMS_memory->searchRequest (pktParent) != NOT_FOUND);
+    // If request is not here... delete current subRequest!
+    if (!isRequestHere){
+        if ((DEBUG_DETAILED_Main_Memory) && (DEBUG_Main_Memory)) {
+            pkt->trimFront();
+            auto subRequest = pkt->removeAtFront<icancloud_App_IO_Message>();
+            showDebugMessage ("Arrived subRequest has no parent.. deleting! %s", subRequest->contentsToString(DEBUG_MSG_Main_Memory).c_str());
+            pkt->insertAtFront(subRequest);
+        }
+        delete (pkt);
+    }
+    else{
+        // Casting!
+        // SubRequest arrives...
+        SMS_memory->arrivesSubRequest (pkt, pktParent);
+        // Check for errors...
+        if (subRequest->getResult() != icancloud_OK){
+            auto parentRequest = pktParent->removeAtFront<icancloud_App_IO_Message>();
+            parentRequest->setResult (subRequest->getResult());
+            pktParent->insertAtFront(parentRequest);
+        }
 
 
-			// Verbose mode? Show detailed request
-			if ((DEBUG_DETAILED_Main_Memory) && (DEBUG_Main_Memory)) {
-			    pkt->trimFront();
-			    auto subRequest = pkt->removeAtFront<icancloud_App_IO_Message>();
-				showDebugMessage ("Processing request response:%s from message:%s", 
-									SMS_memory->requestToString(pktParent, DEBUG_SMS_Main_Memory).c_str(),
-									subRequest->contentsToString(DEBUG_MSG_Main_Memory).c_str());
-				pkt->insertAtFront(subRequest);
-			}
-			
-			
-			// If all request have arrived...
-			if ((SMS_memory->arrivesAllSubRequest(pktParent)) ||
-				(SMS_memory->arrivesRequiredBlocks(pktParent, readAheadBlocks))){
-							
-				if ((DEBUG_DETAILED_Main_Memory) && (DEBUG_Main_Memory))
-					showDebugMessage ("Arrives all subRequest!");
+        // Verbose mode? Show detailed request
+        if ((DEBUG_DETAILED_Main_Memory) && (DEBUG_Main_Memory)) {
+            pkt->trimFront();
+            auto subRequest = pkt->removeAtFront<icancloud_App_IO_Message>();
+            showDebugMessage ("Processing request response:%s from message:%s",
+                    SMS_memory->requestToString(pktParent, DEBUG_SMS_Main_Memory).c_str(),
+                    subRequest->contentsToString(DEBUG_MSG_Main_Memory).c_str());
+            pkt->insertAtFront(subRequest);
+        }
 
-				// Removes the request object!
-				SMS_memory->removeRequest (pktParent);
 
-				// Show complete SMS
-				showSMSContents (DEBUG_SHOW_CONTENTS_Main_Memory);
-				pktParent->trimFront();
-				auto parentRequest = pktParent->removeAtFront<icancloud_App_IO_Message>();
-				// Now is a Response Message
-				parentRequest->setIsResponse (true);
-				// Update the mesage length!
-				parentRequest->updateLength();
-				pktParent->insertAtFront(parentRequest);
+        // If all request have arrived...
+        if ((SMS_memory->arrivesAllSubRequest(pktParent)) ||
+                (SMS_memory->arrivesRequiredBlocks(pktParent, readAheadBlocks))){
 
-				// Send response
-				sendResponseMessage (pktParent);
-			}
-		}
+            if ((DEBUG_DETAILED_Main_Memory) && (DEBUG_Main_Memory))
+                showDebugMessage ("Arrives all subRequest!");
+
+            // Removes the request object!
+            SMS_memory->removeRequest (pktParent);
+
+            // Show complete SMS
+            showSMSContents (DEBUG_SHOW_CONTENTS_Main_Memory);
+            pktParent->trimFront();
+            auto parentRequest = pktParent->removeAtFront<icancloud_App_IO_Message>();
+            // Now is a Response Message
+            parentRequest->setIsResponse (true);
+            // Update the mesage length!
+            parentRequest->updateLength();
+            pktParent->insertAtFront(parentRequest);
+
+            // Send response
+            sendResponseMessage (pktParent);
+        }
+    }
 }
 
 
 void RAMMemory_BlockModel::flushMemory (){
 
- Packet *unqueuedMessage;
+    Packet *unqueuedMessage;
 
-	if (simTime() >= 2999)
-		endSimulation();
+    if (simTime() >= 2999)
+        endSimulation();
 
-	// If there is elements inside the queue
-	while (flushQueue.getLength()>0){
-		// pop next element...
-		unqueuedMessage = (Packet *)flushQueue.pop();
-		auto sm_io = unqueuedMessage->peekAtFront<icancloud_App_IO_Message>();
-		if (sm_io == nullptr)
-		    throw cRuntimeError("Header of incorrect type");
-		sendRequestWithoutCheck (unqueuedMessage);
-	}
+    // If there is elements inside the queue
+    while (flushQueue.getLength()>0){
+        // pop next element...
+        unqueuedMessage = (Packet *)flushQueue.pop();
+        auto sm_io = unqueuedMessage->peekAtFront<icancloud_App_IO_Message>();
+        if (sm_io == nullptr)
+            throw cRuntimeError("Header of incorrect type");
+        sendRequestWithoutCheck (unqueuedMessage);
+    }
 }
 
 
 void RAMMemory_BlockModel::insertRequestOnFlushQueue (Packet *pktSubRequest){
 
-	// Insert a block on flush queue
+    // Insert a block on flush queue
     auto subRequest = pktSubRequest->peekAtFront<icancloud_App_IO_Message>();
     if (subRequest == nullptr)
         throw cRuntimeError("Header of incorrect type");
     // check type
 
-	flushQueue.insert (pktSubRequest);
+    flushQueue.insert (pktSubRequest);
 
-	// If memory Full!! Must force the flush...
-	if (isMemoryFull()){
+    // If memory Full!! Must force the flush...
+    if (isMemoryFull()){
 
-		// If there was activated a previous timer, then cancel it!
-		if (flushMessage->isScheduled())
-			cancelEvent (flushMessage);
+        // If there was activated a previous timer, then cancel it!
+        if (flushMessage->isScheduled())
+            cancelEvent (flushMessage);
 
-		// Forced flush!
-		flushMemory();
-	}
+        // Forced flush!
+        flushMemory();
+    }
 
-	// If timer is not active... activate it!
-	else if (!flushMessage->isScheduled()){
-		scheduleAt (flushTime_s+simTime(), flushMessage);
-	}
+    // If timer is not active... activate it!
+    else if (!flushMessage->isScheduled()){
+        scheduleAt (flushTime_s+simTime(), flushMessage);
+    }
 }
 
 
 bool RAMMemory_BlockModel::isMemoryFull (){
 
-	if (memoryBlockList.size() >= totalCacheBlocks)
-		return true;
-	else
-		return false;
+    if (memoryBlockList.size() >= totalCacheBlocks)
+        return true;
+    else
+        return false;
 }
 
 
@@ -873,134 +873,131 @@ bool RAMMemory_BlockModel::allBlocksPending() {
 
 void RAMMemory_BlockModel::insertBlock (string fileName, unsigned int offset, unsigned int size){
 
-	icancloud_MemoryBlock *block;
-	int blockOffset;
-	int blockNumber;
+    icancloud_MemoryBlock *block;
+    int blockOffset;
+    int blockNumber;
 
 
-		// Bigger than memory block size...
-		if (size > (blockSize_KB*KB))
-			throw new cRuntimeError("[searchMemoryBlock] memory Block size too big!!!");
+    // Bigger than memory block size...
+    if (size > (blockSize_KB*KB))
+        throw new cRuntimeError("[searchMemoryBlock] memory Block size too big!!!");
 
-		// Block number and Block offset
-		blockNumber = offset/(blockSize_KB*KB);
-		blockOffset = blockNumber*(blockSize_KB*KB);
+    // Block number and Block offset
+    blockNumber = offset/(blockSize_KB*KB);
+    blockOffset = blockNumber*(blockSize_KB*KB);
 
-		if ((offset+size)>((blockNumber+1)*(blockSize_KB*KB))){
-			throw new cRuntimeError("[searchMemoryBlock] Wrong memory Block size (out of bounds)!!!");
-		}
+    if ((offset+size)>((blockNumber+1)*(blockSize_KB*KB))){
+        throw new cRuntimeError("[searchMemoryBlock] Wrong memory Block size (out of bounds)!!!");
+    }
 
-		block = new icancloud_MemoryBlock();
+    block = new icancloud_MemoryBlock();
 
-		// Set corresponding values
-		block->setFileName (fileName);
-		block->setOffset (blockOffset);
-		block->setBlockSize (blockSize_KB*KB);
-		block->setIsPending (true);
+    // Set corresponding values
+    block->setFileName (fileName);
+    block->setOffset (blockOffset);
+    block->setBlockSize (blockSize_KB*KB);
+    block->setIsPending (true);
 
-		// Insert block on memory list!
-		memoryBlockList.push_front (block);
+    // Insert block on memory list!
+    memoryBlockList.push_front (block);
 }
 
 
 void RAMMemory_BlockModel::reInsertBlock (icancloud_MemoryBlock *block){
 
-	list <icancloud_MemoryBlock*>::iterator listIterator;
-	icancloud_MemoryBlock* memoryBlock;
-	bool found;
+    list <icancloud_MemoryBlock*>::iterator listIterator;
+    icancloud_MemoryBlock* memoryBlock;
+    bool found;
 
 
-		// Init
-		memoryBlock = nullptr;
-		found = false;
+    // Init
+    memoryBlock = nullptr;
+    found = false;
 
-		// Walk through the list searching the requested block!
-		for (listIterator=memoryBlockList.begin();
-			(listIterator!=memoryBlockList.end() && (!found));
-			++listIterator){
+    // Walk through the list searching the requested block!
+    for (listIterator=memoryBlockList.begin();
+            (listIterator!=memoryBlockList.end() && (!found));
+            ++listIterator){
 
-			// Found?
-			if ((block->getFileName() == (*listIterator)->getFileName()) &&
-				(block->getOffset() == (*listIterator)->getOffset() )){
-				found = true;
-				memoryBlock = *listIterator;
-				memoryBlockList.erase (listIterator);
-				memoryBlockList.push_front (memoryBlock);
-			}
-		}
+        // Found?
+        if ((block->getFileName() == (*listIterator)->getFileName()) &&
+                (block->getOffset() == (*listIterator)->getOffset() )){
+            found = true;
+            memoryBlock = *listIterator;
+            memoryBlockList.erase (listIterator);
+            memoryBlockList.push_front (memoryBlock);
+        }
+    }
 }
 
 
 icancloud_MemoryBlock* RAMMemory_BlockModel::searchMemoryBlock (const char* fileName, unsigned int offset){
 
-	list <icancloud_MemoryBlock*>::iterator listIterator;
-	icancloud_MemoryBlock* memoryBlock;
-	bool found;
-	int currentBlock, requestedBlock;
+    list <icancloud_MemoryBlock*>::iterator listIterator;
+    icancloud_MemoryBlock* memoryBlock;
+    bool found;
+    int currentBlock, requestedBlock;
 
 
-		// Init
-		memoryBlock = nullptr;
-		found = false;
-		requestedBlock = offset/(blockSize_KB*KB);
+    // Init
+    memoryBlock = nullptr;
+    found = false;
+    requestedBlock = offset/(blockSize_KB*KB);
 
-		// Walk through the list searching the requested block!
-		for (listIterator=memoryBlockList.begin(); ((listIterator!=memoryBlockList.end()) && (!found)); listIterator++){
+    // Walk through the list searching the requested block!
+    for (listIterator=memoryBlockList.begin(); ((listIterator!=memoryBlockList.end()) && (!found)); listIterator++){
 
-			currentBlock = 	((*listIterator)->getOffset())/(blockSize_KB*KB);
+        currentBlock = 	((*listIterator)->getOffset())/(blockSize_KB*KB);
 
-			if ((!strcmp (fileName, (*listIterator)->getFileName().c_str()) ) &&
-				(requestedBlock==currentBlock)){
-				found = true;
-				memoryBlock = *listIterator;
-			}
-		}
+        if ((!strcmp (fileName, (*listIterator)->getFileName().c_str()) ) &&
+                (requestedBlock==currentBlock)){
+            found = true;
+            memoryBlock = *listIterator;
+        }
+    }
 
 
-	return (memoryBlock);
+    return (memoryBlock);
 }
 
 
 string RAMMemory_BlockModel::memoryListToString (){
 
-	list <icancloud_MemoryBlock*>::iterator listIterator;
-	std::ostringstream info;
-	int currentBlock;
+    list <icancloud_MemoryBlock*>::iterator listIterator;
+    std::ostringstream info;
+    int currentBlock;
 
 
-		// Init
-		currentBlock = 0;
-		info << "Memory list..." << endl;
+    // Init
+    currentBlock = 0;
+    info << "Memory list..." << endl;
 
-			// Walk through the list searching the requested block!
-			for (listIterator=memoryBlockList.begin();
-				listIterator!=memoryBlockList.end();
-				listIterator++){
+    // Walk through the list searching the requested block!
+    for (listIterator=memoryBlockList.begin(); listIterator!=memoryBlockList.end(); listIterator++){
+        info << "Block[" << currentBlock << "]: " << (*listIterator)->memoryBlockToString() << endl;
+        currentBlock++;
+    }
 
-					info << "Block[" << currentBlock << "]: " << (*listIterator)->memoryBlockToString() << endl;
-					currentBlock++;
-			}
-
-	return info.str();
+    return info.str();
 }
 
 
 void RAMMemory_BlockModel::showSMSContents (bool showContents){
 
-	int i;
-	int numRequests;
-	
-		if (showContents){
+    int i;
+    int numRequests;
 
-			// Get the number of requests
-			numRequests = SMS_memory->getNumberOfRequests();
-			
-			showDebugMessage ("Showing the complete SMS vector... (%d requests)", numRequests);
-	
-			// Get all requests
-			for (i=0; i<numRequests; i++)			
-				showDebugMessage (" Request[%d]:%s ", i, SMS_memory->requestToStringByIndex(i).c_str());
-		}
+    if (showContents){
+
+        // Get the number of requests
+        numRequests = SMS_memory->getNumberOfRequests();
+
+        showDebugMessage ("Showing the complete SMS vector... (%d requests)", numRequests);
+
+        // Get all requests
+        for (i=0; i<numRequests; i++)
+            showDebugMessage (" Request[%d]:%s ", i, SMS_memory->requestToStringByIndex(i).c_str());
+    }
 }
 
 void RAMMemory_BlockModel::changeDeviceState (const string & state,unsigned componentIndex){
@@ -1029,21 +1026,21 @@ void RAMMemory_BlockModel::changeDeviceState (const string & state,unsigned comp
 
 void RAMMemory_BlockModel::changeState (const string & energyState,unsigned componentIndex ){
 
-//  if (strcmp (nodeState.c_str(),MACHINE_STATE_OFF ) == 0) {
-//      energyState = MEMORY_STATE_OFF;
-//  }
+    //  if (strcmp (nodeState.c_str(),MACHINE_STATE_OFF ) == 0) {
+    //      energyState = MEMORY_STATE_OFF;
+    //  }
 
-//  if (strcmp (energyState.c_str(), MEMORY_STATE_READ) == 0) nullptr;
-//
-//  else if (strcmp (energyState.c_str(), MEMORY_STATE_WRITE) == 0) nullptr;
-//
-//  else if (strcmp (energyState.c_str(), MEMORY_STATE_IDLE) == 0) nullptr;
-//
-//  else if (strcmp (energyState.c_str(), MEMORY_STATE_OFF) == 0) nullptr;
-//
-//  else if (strcmp (energyState.c_str(), MEMORY_STATE_SEARCHING) == 0) nullptr;
-//
-//  else nullptr;
+    //  if (strcmp (energyState.c_str(), MEMORY_STATE_READ) == 0) nullptr;
+    //
+    //  else if (strcmp (energyState.c_str(), MEMORY_STATE_WRITE) == 0) nullptr;
+    //
+    //  else if (strcmp (energyState.c_str(), MEMORY_STATE_IDLE) == 0) nullptr;
+    //
+    //  else if (strcmp (energyState.c_str(), MEMORY_STATE_OFF) == 0) nullptr;
+    //
+    //  else if (strcmp (energyState.c_str(), MEMORY_STATE_SEARCHING) == 0) nullptr;
+    //
+    //  else nullptr;
 
 
     e_changeState (energyState);

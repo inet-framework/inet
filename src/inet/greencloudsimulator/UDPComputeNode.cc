@@ -242,7 +242,7 @@ Packet *UDPComputeNode::createCloudTaskPacket()
     tsk->setChunkLength(B(par("messageLength").intValue()));
     //tsk->setByteLength(par("messageLength").longValue());
     tsk->setMpis_(1000);
-    tsk->setSize_(0.1);
+    tsk->setSize_(0); //tsk->setSize_(0.1); // I think that is a mistake of the authors
     tsk->setDeadline_(0 + 1000); // START TIME + SIM DURATION
     tsk->setOutput_(0);
     tsk->setIntercom_(0);
