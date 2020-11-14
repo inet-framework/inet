@@ -1283,7 +1283,24 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.queueing
+                       inet.queueing.base
+                       inet.queueing.buffer
+                       inet.queueing.classifier
+                       inet.queueing.common
+                       inet.queueing.compat
+                       inet.queueing.filter
+                       inet.queueing.flow
+                       inet.queueing.function
+                       inet.queueing.gate
+                       inet.queueing.marker
+                       inet.queueing.meter
+                       inet.queueing.queue
+                       inet.queueing.scheduler
+                       inet.queueing.server
+                       inet.queueing.shaper
+                       inet.queueing.sink
+                       inet.queueing.source
+                       inet.queueing.tokengenerator
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_QUEUEING"
