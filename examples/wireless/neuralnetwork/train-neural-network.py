@@ -13,10 +13,11 @@ import tensorflow
 import keras.utils
 
 from keras.models import Model, Sequential
-from keras.layers import Activation, Dense, InputLayer, Concatenate, BatchNormalization, Conv1D, LSTM, GlobalAveragePooling1D, MaxPool1D, AveragePooling1D
+from keras.layers import Input, Activation, Dense, InputLayer, Concatenate, BatchNormalization, Conv1D, LSTM, GlobalAveragePooling1D, MaxPool1D, AveragePooling1D, concatenate
 from keras.optimizers import SGD, Adam, Adagrad
 from keras2cpp import keras2cpp
 from PySide2.QtWidgets import QWidget, QSlider, QHBoxLayout, QSplitter, QScrollArea, QLabel, QApplication, QDialog, QLineEdit, QPushButton
+from tensorflow.keras import callbacks
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
@@ -33,10 +34,8 @@ parser.add_argument("trainingDataset", nargs="+")
 args = parser.parse_args()
 
 model = None
-inputs = None
-outputs = None
 
-def loadTrainingDatasetFile(filename, inputs, outputs):
+def loadTrainingDatasetFile(filename, inputs_fixed, inputs_vary, outputs):
     with open(filename, "r") as f:
         reader = csv.reader(f, delimiter=",")
         for line in reader:
@@ -63,21 +62,25 @@ def loadTrainingDatasetFile(filename, inputs, outputs):
             #print(index, packetErrorRate, noisePowerMean, noisePowerStddev, bitrate, packetLength, modulation, centerFrequency, bandwidth, numSymbols, len(symbolSnirMeans))
             snirarray = numpy.array([float(snir) for snir in symbolSnirMeans])
             snirarray = numpy.log(snirarray)
-            inputs.append(numpy.array(snirarray))
+            inputs_fixed.append(numpy.array([bitrate, packetLength, centerFrequency, bandwidth, numSymbols]))
+            inputs_vary.append(numpy.array(snirarray))
             outputs.append(numpy.array([packetErrorRate]))
-            
+
 def loadTrainingDataset(trainingDataset):
-    inputs = list()
+    inputs_fixed = list()
+    inputs_vary = list()
     outputs = list()
     for filename in trainingDataset:
         print(f"Loading training dataset from {filename}")
-        loadTrainingDatasetFile(filename, inputs, outputs)
-    return keras.preprocessing.sequence.pad_sequences(inputs, dtype="float"), numpy.array(outputs)
-            
-inputs, outputs = loadTrainingDataset(args.trainingDataset)
+        loadTrainingDatasetFile(filename, inputs_fixed, inputs_vary, outputs)
+    return inputs_fixed, inputs_vary, numpy.array(outputs)
 
-def buildModel(inputs=inputs, outputs=outputs):
-    print(f"Building model for {len(inputs[0])} inputs")
+inputs_fixed, inputs_vary, outputs = loadTrainingDataset(args.trainingDataset)
+
+"""
+def buildModel(inputs_fixed=inputs_fixed, inputs_vary=inputs_vary, outputs=outputs):
+    print(f"Building model for {len(inputs_fixed[0])} fixed and {len(inputs_vary[0])} vary inputs")
+
     model = Sequential()
 
     model.add(Conv1D(filters=32, kernel_size=7, padding="same", input_shape=(None, 1)))
@@ -91,17 +94,72 @@ def buildModel(inputs=inputs, outputs=outputs):
     model.add(Dense(16, activation="tanh"))
     model.add(Dense(1, activation="sigmoid"))
     model.build()
+
+    return model
+"""
+
+def buildModel(inputs_fixed=inputs_fixed, inputs_vary=inputs_vary, outputs=outputs):
+    print(f"Building model for {len(inputs_fixed[0])} fixed and {len(inputs_vary[0])} vary inputs")
+
+
+    inputB = Input(shape=(5,))
+    y = Dense(5, activation="relu")(inputB)
+    y = Model(inputs=inputB, outputs=y)
+
+
+    # define two sets of inputs
+    inputA = Input(shape=(None, 1))
+    x = Conv1D(filters=32, kernel_size=7, padding="same")(inputA)
+    x = AveragePooling1D(4)(x)
+    x = Conv1D(filters=8, kernel_size=3, padding="same")(x)
+    x = LSTM(4, return_sequences=True)(x)
+    x = GlobalAveragePooling1D()(x)
+    x = Dense(32, activation="tanh")(x)
+    x = Model(inputs=inputA, outputs=x)
+
+    # combine the output of the two branches
+    combined = concatenate([y.output, x.output])
+
+    # apply a FC layer and then a regression prediction on the
+    # combined outputs
+    #z = Dense(4, activation="relu")(combined)
+
+    z = Dense(16, activation="tanh")(combined)
+    z = Dense(1, activation="sigmoid")(z)
+    # our model will accept the inputs of the two branches and
+    # then output a single value
+    model = Model(inputs=[y.input, x.input], outputs=z)
+
     return model
 
-model = buildModel(inputs, outputs)
 
-def trainModel(model=model, inputs=inputs, outputs=outputs):
+
+
+model = buildModel(inputs_fixed, inputs_vary, outputs)
+
+import tensorflow as tf
+
+model.save("sm")
+
+# Convert the model.
+converter = tf.lite.TFLiteConverter.from_saved_model("sm")
+tflite_model = converter.convert()
+
+# Save the model.
+with open('model.tflite', 'wb') as f:
+  f.write(tflite_model)
+
+
+def trainModel(model=model, inputs_fixed=inputs_fixed, inputs_vary=inputs_vary, outputs=outputs):
     optimizer = SGD() if args.optimizer == "sgd" else Adam() if args.optimizer == "adam" else exit(0)
     model.compile(loss="mean_squared_logarithmic_error", optimizer=optimizer)
     model.summary()
     try:
-        inse = numpy.expand_dims(inputs, 2)
-        model.fit(inse, outputs, epochs=int(args.epochs), validation_split=0.1, verbose=1, shuffle=True, batch_size=args.batch)
+        inse = numpy.expand_dims(inputs_vary, 2)
+
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs")
+
+        model.fit([numpy.expand_dims(inputs_fixed, 2), inse], outputs, epochs=int(args.epochs), validation_split=0.1, verbose=1, shuffle=True, batch_size=args.batch, callbacks=[tensorboard_callback])
     except KeyboardInterrupt:
         print("interrupted fitting")
 
@@ -114,89 +172,21 @@ def saveModel(model=model):
     model.save(args.output + ".h5")
     keras2cpp.export_model(model, args.output + ".model")
 
-def printSamples(model=model, inputs=inputs, outputs=outputs, numSamples=args.numSamples):
+def printSamples(model=model, inputs_fixed=inputs_fixed, inputs_vary=inputs_vary, outputs=outputs, numSamples=args.numSamples):
     for i in range(numSamples):
-        i = random.randint(0, len(inputs) - 1)
+        i = random.randint(0, len(inputs_vary) - 1)
         actual = outputs[i][0]
-        predicted = model.predict(numpy.array([inputs[i]]))[0][0]
+        predicted = model.predict([inputs_fixed[i], inputs_vary[i]])[0][0]
         difference = actual-predicted
         percent_diff = difference/actual*100
         print("actual:", actual, "\tpredicted:", round(predicted, 2), "  \tdifference:", round(difference, 2), f"\t({round(percent_diff,2)}%)")
-      
-def showGui(inputs=inputs, outputs=outputs):
-    sliders = list()
-    label = None
 
-    def slide_handler(widget):
-        print("puts, outputschanged")
-        global label
-        if not label:
-            return
-        inp = numpy.array([ [(s.value() / 1000.0 * 5) for s in sliders] ] )
-        print("predicting for " + str(inp))
-        outp = model.predict(inp)
-        label.setText(str(outp[0][0]))
 
-    class Form(QDialog):
+#saveModel()
 
-        def __init__(self, parent=None):
-            super(Form, self).__init__(parent)
-            self.setWindowTitle("My Form")
-    
-            self.scrollArea = QScrollArea()
-    
-            # Create layout and add widgets
-            layout = QHBoxLayout()
-            self.sliders = list()
-            for i in range(len(inputs[0])):
-                slider = QSlider()
-                slider.setMinimum(0)
-                slider.setMaximum(1000)
-                slider.setValue(500)
-                slider.valueChanged.connect(slide_handler)
-                layout.addWidget(slider)
-    
-                self.sliders.append(slider)
-    
-            global sliders
-            sliders = self.sliders
-    
-            w = QWidget()
-            w.setLayout(layout)
-            # Set dialog layout
-            self.scrollArea.setWidget(w)
-            self.splitter = QSplitter()
-            self.splitter.addWidget(self.scrollArea)
-    
-            # Create widgets
-            self.label = QLabel("?")
-            self.splitter.addWidget(self.label)
-    
-            global label
-            label = self.label
-    
-            l = QHBoxLayout()
-            l.addWidget(self.splitter)
-    
-            self.setLayout(l)
-    
-    # Create the Qt Application
-    app = QApplication(sys.argv)
-    # Create and show the form
-    form = Form()
-    form.show()
-    # Run the main Qt loop
-    sys.exit(app.exec_())
+trainModel()
+saveModel()
 
-if args.interactive :
-    print("You can use trainModel(), saveModel(), printSamples(), showGui(), etc.")
-    code.interact(banner="", local=locals())
-else :
-    trainModel()
-    saveModel()
 
 if args.numSamples > 0 :
     printSamples()
-
-if args.showGui :
-    showGui()
