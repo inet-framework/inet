@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.examples.wireless.neuralnetwork;
+package inet.showcases.wireless.neuralnetwork;
 
 import inet.physicallayer.contract.packetlevel.IRadio;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
