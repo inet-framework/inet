@@ -1395,6 +1395,6 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ICANCLOUD"
-        linkerFlags = "-lz"
+        linkerFlags = ""
         />
 </features>
