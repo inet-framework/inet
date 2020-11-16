@@ -490,14 +490,14 @@ void UDPComputeNode::socketDataArrived(UdpSocket *socket, Packet *packet)
           tlk->setExecutedSince_(simTime().dbl());
                 /* error if I uncomment this function I guess it is when to remove
                  * from the task list ------ > */
-     //     std::cout<<"Before updateTskList completed "<<endl;*/
+     //     std::cout<<"Before updateTskList completed "<<endl;
     /*
           updateTskList();
    //       std::cout<<"updateTskList completed "<<endl;
           /* update energy */
       /*    updateTskComputingRates();
           eUpdate(); /* update energy for the last interval */
-    /*      setCurrentConsumption(); /* update current energy consumption */
+    /*      setCurrentConsumption(); *//* update current energy consumption */
 
     totalEnergy+=eConsumed_;
     //  }

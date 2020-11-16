@@ -453,7 +453,7 @@ void UDPSchedular::ShortestJobFirst()
         double mips_required=DBL_MAX;
         int index=-1;
 
-        for(int t=0;t<scheduling_task.size();t++)
+        for(unsigned int t=0;t<scheduling_task.size();t++)
         {
             auto packet = scheduling_task[t];
             const auto & tmpt_ = packet->peekAtFront<CloudTask>();
@@ -845,7 +845,7 @@ void UDPSchedular::updateTskList()
 
     /* compute next deadline */
     double nextDeadline = DBL_MAX;
-    bool chk = false; // added if task is not empty schedule event
+    //bool chk = false; // added if task is not empty schedule event
     cloudTask *schdTask = new cloudTask();
 
     if(!tasks_list_.empty()) {
@@ -859,7 +859,7 @@ void UDPSchedular::updateTskList()
                 simtime_t d = simTime();
                 schdTask->setComputingRate((*iter)->getComputingRate(),d.dbl());
                 schdTask->setDeadline((*iter)->getDeadline());
-                chk = true;
+                //chk = true;
             }
         }
     }

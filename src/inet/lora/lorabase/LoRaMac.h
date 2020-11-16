@@ -160,7 +160,7 @@ class LoRaMac : public MacProtocolBase
     virtual void handleLowerMessage(cMessage *msg) override;
     virtual void handleWithFsm(cMessage *msg);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     virtual Packet *encapsulate(Packet *msg);
     virtual Packet *decapsulate(Packet *frame);

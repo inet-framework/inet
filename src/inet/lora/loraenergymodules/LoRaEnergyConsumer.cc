@@ -140,7 +140,7 @@ bool LoRaEnergyConsumer::readConfigurationFile()
     return true;
 }
 
-void LoRaEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void LoRaEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal ||
         signal == IRadio::receptionStateChangedSignal ||

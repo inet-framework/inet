@@ -414,29 +414,29 @@ void UDPApplication::updateTskList()
 
     /* compute next deadline */
     double nextDeadline = DBL_MAX;
-    bool chk = false; // added if task is not empty schedule event
+   // bool chk = false; // added if task is not empty schedule event
     cloudTask *schdTask = new cloudTask();
 
     if(!tasks_list_.empty())
     {
-    for (iter = tasks_list_.begin(); iter != tasks_list_.end(); iter++)
-    {
-        if (nextDeadline > (*iter)->getDeadline())
+        for (iter = tasks_list_.begin(); iter != tasks_list_.end(); iter++)
         {
-            nextDeadline = (*iter)->execTime();
+            if (nextDeadline > (*iter)->getDeadline())
+            {
+                nextDeadline = (*iter)->execTime();
 
-                    schdTask->setMIPS((*iter)->getMIPS());
-                    schdTask->setSize((*iter)->getSize());
-                    schdTask->setIntercom((*iter)->getIntercom());
-                    schdTask->setExecTime((*iter)->execTime());
-                    simtime_t d = simTime();
-                    schdTask->setComputingRate((*iter)->getComputingRate(),d.dbl());
-                    schdTask->setDeadline((*iter)->getDeadline());
-                    chk = true;
+                schdTask->setMIPS((*iter)->getMIPS());
+                schdTask->setSize((*iter)->getSize());
+                schdTask->setIntercom((*iter)->getIntercom());
+                schdTask->setExecTime((*iter)->execTime());
+                simtime_t d = simTime();
+                schdTask->setComputingRate((*iter)->getComputingRate(),d.dbl());
+                schdTask->setDeadline((*iter)->getDeadline());
+                //  chk = true;
 
 
+            }
         }
-    }
     }
 
     /* reschedule next update */

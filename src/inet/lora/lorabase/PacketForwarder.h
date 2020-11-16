@@ -46,7 +46,7 @@ class INET_API PacketForwarder : public cSimpleModule, public cListener
     void sendPacket();
     void setSocketOptions();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
   public:
       simsignal_t LoRa_GWPacketReceived;
       int counterOfSentPacketsFromNodes = 0;

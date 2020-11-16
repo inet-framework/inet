@@ -150,7 +150,7 @@ void LoRaMac::configureNetworkInterface()
 
     // capabilities
     //interfaceEntry->setMtu(par("mtu"));
-    networkInterface->setMtu(NaN);
+    networkInterface->setMtu(std::numeric_limits<int>::quiet_NaN());
     networkInterface->setMulticast(true);
     networkInterface->setBroadcast(true);
     networkInterface->setPointToPoint(false);
@@ -327,7 +327,7 @@ void LoRaMac::handleWithFsm(cMessage *msg)
     getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
-void LoRaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LoRaMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal) {

@@ -168,7 +168,7 @@ void LoRaGWMac::createFakeLoRaMacFrame()
 
 }
 
-void LoRaGWMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LoRaGWMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

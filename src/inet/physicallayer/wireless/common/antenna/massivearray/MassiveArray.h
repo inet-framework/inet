@@ -14,8 +14,8 @@ using std::cout;
 class INET_API MassiveArray : public AntennaBase, protected cListener
 {
   public:
-    int M = NaN;
-    int N = NaN;
+    int M = std::numeric_limits<int>::quiet_NaN();
+    int N = std::numeric_limits<int>::quiet_NaN();
   protected:
     class Simpson2D
     {

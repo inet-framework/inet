@@ -26,7 +26,7 @@ import inet.common.Units;
 namespace inet;
 
 class VideoPacket extends FieldsChunk {
-    uint64_t seqNum;
+    int64_t seqNum = -1;
     char type;
     B frameSize;
 }

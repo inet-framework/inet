@@ -390,7 +390,7 @@ void DijkstraKshortest::run()
 
         if (elem.iD != rootNode)
         {
-            if (it->second.size() > elem.idx && it->second[elem.idx].label == perm)
+            if ((int)it->second.size() > elem.idx && it->second[elem.idx].label == perm)
                 continue; // set
             if ((int)it->second.size() == K_LIMITE)
             {
@@ -578,7 +578,7 @@ void DijkstraKshortest::runUntil (const NodeId &target)
 
         if (elem.iD != rootNode)
         {
-            if (it->second.size() > elem.idx && it->second[elem.idx].label == perm)
+            if ((int)it->second.size() > elem.idx && it->second[elem.idx].label == perm)
                 continue; // set
             if ((int)it->second.size() == K_LIMITE)
             {
@@ -718,7 +718,7 @@ void DijkstraKshortest::getAllRoutes(std::map<NodeId, std::vector<std::vector<No
     for (auto elem : routeMap) {
         std::vector<std::vector<NodeId>> nodePaths;
 
-        for (int i = 0; i < elem.second.size(); i++) {
+        for (unsigned int i = 0; i < elem.second.size(); i++) {
             std::vector<NodeId> path;
             std::vector<NodeId> pathNode;
             NodeId currentNode = elem.first;

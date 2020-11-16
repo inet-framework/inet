@@ -91,7 +91,7 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     void addPktToProcessingTable(Packet* pkt);
     void processScheduledPacket(cMessage* selfMsg);
     void evaluateADR(Packet *pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW);
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
     bool evaluateADRinServer;
 
     cHistogram receivedRSSI;

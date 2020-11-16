@@ -447,7 +447,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
     delete pkt;
 }
 
-void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     if (simTime() >= getSimulation()->getWarmupPeriod())
     {
