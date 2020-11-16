@@ -17,6 +17,7 @@
 
 #include "inet/networklayer/diffserv/DscpMarker.h"
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/networklayer/diffserv/Dscp_m.h"

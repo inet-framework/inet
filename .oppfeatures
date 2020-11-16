@@ -337,13 +337,14 @@
                        Includes a switch model with various relay unit implementations,
                        and also Ethernet-level traffic generators."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing Ieee8022 physicallayer protocolsupport"
         labels = "protocols"
         nedPackages = "
                        inet.applications.ethernet
                        inet.linklayer.ethernet
                        inet.linklayer.ieee8021q
                        inet.linklayer.vlan
+                       inet.linklayer.virtual
                        inet.node.ethernet
                        inet.physicallayer.wired.ethernet
                       "
@@ -612,6 +613,34 @@
         linkerFlags = ""
         />
     <feature
+        id="EIGRP"
+        name="EIGRP"
+        description = "EIGRP routing"
+        initiallyEnabled = "true"
+        requires = "IPv4 IPv6"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.eigrp
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_EIGRP"
+        linkerFlags = ""
+        />
+    <feature
+        id="EIGRP_examples"
+        name="EIGRP examples"
+        description = "EIGRP routing examples"
+        initiallyEnabled = "true"
+        requires = "IPv4 IPv6 EIGRP Ethernet"
+        labels = "routing"
+        nedPackages = "
+                       inet.examples.eigrp
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="GPSR"
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
@@ -747,10 +776,49 @@
         linkerFlags = ""
         />
     <feature
+        id="physicallayer"
+        name="Physical layer Base"
+        description = "Physical layer Base"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.common
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PHYSICALLAYER"
+        linkerFlags = ""
+        />
+    <feature
+        id="phywired"
+        name="Wired Physical layer"
+        description = "Wired Physical layer"
+        requires = "physicallayer"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.wired.common
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PHY_WIRED"
+        linkerFlags = ""
+        />
+    <feature
+        id="phywireless"
+        name="Wireless Physical layer"
+        description = "Wireless Physical layer"
+        requires = "physicallayer"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.wireless.common.signal
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PHY_WIRELESS"
+        linkerFlags = ""
+        />
+    <feature
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"
-        requires = ""
+        requires = "phywireless"
         labels = ""
         nedPackages = "
                        inet.physicallayer.wireless.common.analogmodel
@@ -773,11 +841,25 @@
         linkerFlags = ""
         />
     <feature
+        id="Ieee8021ae"
+        name="IEEE 802.1ae"
+        description = "Provides IEEE 802.1ae"
+        initiallyEnabled = "true"
+        requires = "queueing"
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.linklayer.ieee8021ae
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_IEEE8021AE"
+        linkerFlags = ""
+        />
+    <feature
         id="Ieee80211"
         name="IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio ackingwireless"
+        requires = "mobility radio ackingwireless Ieee8022"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
@@ -814,6 +896,19 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_APSKRADIO"
+        linkerFlags = ""
+        />
+    <feature
+        id="phynoise"
+        name="Physical layer noise"
+        description = "Physical layer noise"
+        requires = "phywireless radio"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.wireless.noise
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PHYNOISE"
         linkerFlags = ""
         />
     <feature
@@ -873,7 +968,7 @@
                        data link layer and network layer communications, and more.
                        Supports both canvas (2D) and OSG (3D) graphics."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing"
         labels = ""
         nedPackages = "
                        inet.visualizer.base
@@ -1000,7 +1095,7 @@
         name="DiffServ"
         description = "Components for implementing Differentiated Services"
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing"
         labels = ""
         nedPackages = "
                        inet.networklayer.diffserv
@@ -1086,7 +1181,7 @@
         name="IEEE 802.2"
         description = ""
         initiallyEnabled = "true"
-        requires = ""
+        requires = "queueing"
         labels = ""
         nedPackages = "
                        inet.linklayer.ieee8022
@@ -1189,7 +1284,24 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.queueing
+                       inet.queueing.base
+                       inet.queueing.buffer
+                       inet.queueing.classifier
+                       inet.queueing.common
+                       inet.queueing.compat
+                       inet.queueing.filter
+                       inet.queueing.flow
+                       inet.queueing.function
+                       inet.queueing.gate
+                       inet.queueing.marker
+                       inet.queueing.meter
+                       inet.queueing.queue
+                       inet.queueing.scheduler
+                       inet.queueing.server
+                       inet.queueing.shaper
+                       inet.queueing.sink
+                       inet.queueing.source
+                       inet.queueing.tokengenerator
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_QUEUEING"
@@ -1200,7 +1312,7 @@
         name="Protocol support"
         description = "Aggregation, fragmentation, etc."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "physicallayer queueing"
         labels = ""
         nedPackages = "
                        inet.protocolelement

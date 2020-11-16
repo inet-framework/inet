@@ -1612,7 +1612,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
         //TODO: for now we leave the newly formed address as not tentative,
         //according to Greg, we have to always perform DAD for a newly formed address.
         EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
-        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(newAddr, false, simTime() + validLifetime,
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(newAddr, false, simTime() + validLifetime,
                 simTime() + preferredLifetime);
     }
 
