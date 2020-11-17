@@ -42,7 +42,7 @@ simple Ieee80211MgmtAp like IIeee80211Mgmt
         string ssid = default("SSID");
         double beaconInterval @unit(s) = default(100ms);
         int numAuthSteps = default(4); // use 2 for Open System auth, 4 for WEP
-        //dataRate: numeric; TODO TBD
+        //dataRate: numeric; TODO
         string interfaceTableModule;
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
         string mibModule;

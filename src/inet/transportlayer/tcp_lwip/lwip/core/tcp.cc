@@ -1315,7 +1315,7 @@ u32_t
 LwipTcpLayer::
 tcp_next_iss(void)
 {
-  iss += tcp_ticks;       /* XXX */
+  iss += tcp_ticks;       /* TODO */
   return iss;
 }
 

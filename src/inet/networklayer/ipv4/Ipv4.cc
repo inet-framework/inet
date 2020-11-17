@@ -458,7 +458,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
 
         if (destIE) {
             numMulticast++;
-            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // FIXME KLUDGE is it needed?
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // KLUDGE is it needed?
             packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
             fragmentPostRouting(packet);
         }
@@ -599,7 +599,7 @@ void Ipv4::routeLocalBroadcastPacket(Packet *packet)
     // We always use 255.255.255.255 as nextHopAddress, because it is recognized by ARP,
     // and mapped to the broadcast MAC address.
     if (destIE != nullptr) {
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // FIXME KLUDGE is it needed?
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // KLUDGE is it needed?
         packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
         fragmentPostRouting(packet);
     }

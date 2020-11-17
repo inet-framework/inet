@@ -42,7 +42,7 @@ namespace inet {
 // base header: version, length, LSR ID, Label space
 const B LDP_BASEHEADER_BYTES = B(10);
 
-// FIXME the length below is just a guess. TBD find lengths for individual TLVs
+// FIXME the length below is just a guess. TODO find lengths for individual TLVs
 // making up different LDP packet types, and determine length for each packet type
 const B LDP_HEADER_BYTES = LDP_BASEHEADER_BYTES + B(20);
 

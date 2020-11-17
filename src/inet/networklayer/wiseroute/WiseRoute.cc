@@ -147,7 +147,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
     const L3Address& finalDestAddr = wiseRouteHeader->getFinalDestAddr();
     const L3Address& initialSrcAddr = wiseRouteHeader->getInitialSrcAddr();
     const L3Address& srcAddr = wiseRouteHeader->getSourceAddress();
-    // KLUDGE TODO get rssi and ber
+    // KLUDGE get rssi and ber
     EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
     double rssi = 1; // TODO ctrlInfo->getRSSI();
     double ber = 0; // TODO ctrlInfo->getBitErrorRate();

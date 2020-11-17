@@ -234,7 +234,7 @@ void Ipv6RoutingTable::configureInterfaceForIpv6(NetworkInterface *ie)
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
     //d->setMetric((int)ceil(2e9/ie->getDatarate())); // use OSPF cost as default
-    // FIXME TBD fill in the rest
+    // FIXME TODO fill in the rest
 
     assignRequiredNodeAddresses(ie);
 
@@ -636,7 +636,7 @@ void Ipv6RoutingTable::addStaticRoute(const Ipv6Address& destPrefix, int prefixL
     route->setInterface(ift->getInterfaceById(interfaceId));
     route->setNextHop(nextHop);
     if (metric == 0)
-        metric = 10; // TBD should be filled from interface metric
+        metric = 10; // TODO should be filled from interface metric
     route->setMetric(metric);
     route->setAdminDist(Ipv6Route::dStatic);
 

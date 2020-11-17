@@ -250,7 +250,7 @@ void NextHopForwarding::handlePacketFromHL(Packet *packet)
 
 void NextHopForwarding::routePacket(Packet *datagram, const NetworkInterface *destIE, const L3Address& requestedNextHop, bool fromHL)
 {
-    // TBD add option handling code here
+    // TODO add option handling code here
 
     auto header = datagram->peekAtFront<NextHopForwardingHeader>();
     L3Address destAddr = header->getDestinationAddress();

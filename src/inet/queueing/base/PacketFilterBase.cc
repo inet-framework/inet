@@ -185,7 +185,7 @@ bool PacketFilterBase::canPullSomePacket(cGate *gate) const
             packet = provider->pullPacket(providerGate);
             nonConstThisPtr->take(packet);
             EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
-            // TODO KLUDGE
+            // KLUDGE
             nonConstThisPtr->dropPacket(packet);
             nonConstThisPtr->handlePacketProcessed(packet);
             updateDisplayString();

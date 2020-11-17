@@ -932,7 +932,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
     Ipv4Address srcAddr = packet->getSenderAddress();
     int status = packet->getStatus();
 
-    // TODO FIXME NO_ROUTE processing should probably be split into two functions,
+    // FIXME NO_ROUTE processing should probably be split into two functions,
     // this is not the cleanest thing I ever wrote :)   --Vojta
 
     if (rescheduled) {
@@ -954,7 +954,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
                     if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
                         auto pk = new Packet(0, ldpPacket);
-                        scheduleAfter(1.0 /* TODO FIXME */, pk);
+                        scheduleAfter(1.0 /* FIXME */, pk);
                         return;
                     }
                     else {

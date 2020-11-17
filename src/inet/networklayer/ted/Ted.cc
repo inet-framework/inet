@@ -295,7 +295,7 @@ void Ted::rebuildRoutingTable()
         entry->setSourceType(IRoute::OSPF);
 
         entry->setNetmask(Ipv4Address::ALLONES_ADDRESS);
-        entry->setMetric(0); // TODO FIXME what's that?
+        entry->setMetric(0); // FIXME what's that?
 
         EV_DETAIL << "  inserting route: local=" << elem << " peer=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << "\n";
 

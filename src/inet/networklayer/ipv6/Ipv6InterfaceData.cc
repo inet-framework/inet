@@ -236,7 +236,7 @@ std::string Ipv6InterfaceData::str() const
 
 std::string Ipv6InterfaceData::detailedInfo() const
 {
-    return str(); // TBD this could be improved: multi-line text, etc
+    return str(); // TODO this could be improved: multi-line text, etc
 }
 
 #ifndef WITH_xMIPv6
@@ -410,7 +410,7 @@ void Ipv6InterfaceData::choosePreferredAddress()
     // FIXME shouldn't we stick to the current preferredAddress if its prefLifetime
     // hasn't expired yet?
 
-    // FIXME TBD throw out expired addresses! 0 should be treated as infinity
+    // FIXME TODO throw out expired addresses! 0 should be treated as infinity
 
     // sort addresses by scope and expiry time, then pick the first one
     std::stable_sort(addresses.begin(), addresses.end(), addrLess);

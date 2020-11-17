@@ -259,7 +259,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 #endif /* WITH_xMIPv6 */
     };
     typedef std::vector<AddressData> AddressDataVector;
-    // TBD should be std::map, so that isLocalAddress() is faster?
+    // TODO should be std::map, so that isLocalAddress() is faster?
 
     AddressDataVector addresses; // interface addresses
     Ipv6Address preferredAddr; // cached result of preferred address selection
@@ -568,7 +568,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      *
      * FIXME turn into preferredGLOBALAddress()!
      */
-    const Ipv6Address& getPreferredAddress() const { return preferredAddr; } // FIXME TBD check expiry time!
+    const Ipv6Address& getPreferredAddress() const { return preferredAddr; } // FIXME TODO check expiry time!
 
     /**
      * Returns the first valid link-local address of the interface,

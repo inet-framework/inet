@@ -48,14 +48,14 @@ void PppTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 {
     const auto& pppTrailer = staticPtrCast<const PppTrailer>(chunk);
     stream.writeUint16Be(pppTrailer->getFcs());
-//    stream.writeUint8(pppTrailer->getFlag()); //FIXME KLUDGE length is currently 2 bytes instead of 3 bytes
+//    stream.writeUint8(pppTrailer->getFlag()); //KLUDGE length is currently 2 bytes instead of 3 bytes
 }
 
 const Ptr<Chunk> PppTrailerSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto pppTrailer = makeShared<PppTrailer>();
     pppTrailer->setFcs(stream.readUint16Be());
-//    pppTrailer->setFlag(stream.readUint8()); //FIXME KLUDGE length is currently 2 bytes instead of 3 bytes
+//    pppTrailer->setFlag(stream.readUint8()); //KLUDGE length is currently 2 bytes instead of 3 bytes
     return pppTrailer;
 }
 

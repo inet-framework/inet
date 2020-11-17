@@ -594,7 +594,7 @@ void Rstp::sendTCNtoRoot()
 
                 packet->insertAtBack(frame);
 
-                if (packet->getDataLength() < MIN_ETHERNET_FRAME_BYTES) { // FIXME KLUDGE, unnecessary padding
+                if (packet->getDataLength() < MIN_ETHERNET_FRAME_BYTES) { // KLUDGE, unnecessary padding
                     const auto& padding = makeShared<ByteCountChunk>(MIN_ETHERNET_FRAME_BYTES - packet->getDataLength());
                     packet->insertAtBack(padding);
                 }
@@ -664,7 +664,7 @@ void Rstp::sendBPDU(int interfaceId)
 
         packet->insertAtBack(frame);
 
-        if (packet->getDataLength() < MIN_ETHERNET_FRAME_BYTES) { // FIXME KLUDGE, unnecessary padding
+        if (packet->getDataLength() < MIN_ETHERNET_FRAME_BYTES) { // KLUDGE, unnecessary padding
             const auto& padding = makeShared<ByteCountChunk>(MIN_ETHERNET_FRAME_BYTES - packet->getDataLength());
             packet->insertAtBack(padding);
         }

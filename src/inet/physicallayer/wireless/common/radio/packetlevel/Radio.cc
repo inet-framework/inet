@@ -453,7 +453,7 @@ void Radio::continueReception(cMessage *timer)
         EV_INFO << "Reception started: " << (isReceptionAttempted ? "\x1b[1mattempting\x1b[0m" : "\x1b[1mnot attempting\x1b[0m") << " " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
         if (!isReceptionAttempted)
             receptionTimer = nullptr;
-        // TODO FIXME see handling packets with incorrect PHY headers in the TODO file
+        // FIXME see handling packets with incorrect PHY headers in the TODO file
     }
     else {
         EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
@@ -478,7 +478,7 @@ void Radio::endReception(cMessage *timer)
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
         take(macFrame);
-        // TODO FIXME see handling packets with incorrect PHY headers in the TODO file
+        // FIXME see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;

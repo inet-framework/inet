@@ -113,7 +113,7 @@ void ApskRadio::decapsulate(Packet *packet) const
             packet->setBitError(true);
     }
 
-    // FIXME KLUDGE? higher layers accepts only byte length packets started on byte position
+    // KLUDGE? higher layers accepts only byte length packets started on byte position
     if (packet->getBitLength() % 8 != 0 || headerLength.get() % 8 != 0)
         packet->setBitError(true);
 

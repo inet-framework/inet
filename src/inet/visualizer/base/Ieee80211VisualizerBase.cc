@@ -155,7 +155,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
     else if (signal == l2ApAssociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            // TODO KLUDGE this is the wrong way to lookup the interface and the ssid
+            // KLUDGE this is the wrong way to lookup the interface and the ssid
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
             auto networkInterface = getContainingNicModule(mgmt);
             auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);
@@ -168,7 +168,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
     else if (signal == l2ApDisassociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            // TODO KLUDGE this is the wrong way to lookup the interface
+            // KLUDGE this is the wrong way to lookup the interface
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
             auto networkInterface = getContainingNicModule(mgmt);
             auto ieee80211Visualization = getIeee80211Visualization(networkNode, networkInterface);

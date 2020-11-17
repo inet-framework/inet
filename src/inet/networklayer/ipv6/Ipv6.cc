@@ -207,7 +207,7 @@ void Ipv6::handleMessage(cMessage *msg)
         if (sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
 //            queue.insert(sDgram);
-            scheduleAfter(1.0, sDgram); // FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
+            scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
         }
         else {
             // address is not tentative anymore - send out datagram
@@ -379,7 +379,7 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
 void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
-    // TBD add option handling code here
+    // TODO add option handling code here
     Ipv6Address destAddress = ipv6Header->getDestAddress();
 
     EV_INFO << "Routing datagram `" << ipv6Header->getName() << "' with dest=" << destAddress << ", requested nexthop is " << requestedNextHopAddress << " on " << (destIE ? destIE->getFullName() : "unspec") << " interface: \n";
@@ -418,7 +418,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
         // hop counter decrement: only if datagram arrived from network, and will be
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
-        // TBD: in Ipv4, arrange TTL check like this
+        // TODO: in Ipv4, arrange TTL check like this
         packet->trim();
         ipv6Header = nullptr;
         const auto& newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
@@ -893,7 +893,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
 //            queue.insert(sDgram);
-            scheduleAfter(1.0, sDgram); // FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
+            scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
             return;
         }
     #endif /* WITH_xMIPv6 */
@@ -943,7 +943,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         fh->setFragmentOffset(offset.get());
         fh->setMoreFragments(!lastFragment);
         fragHdr->addExtensionHeader(fh);
-        fragHdr->setChunkLength(headerLength + fh->getByteLength()); // FIXME KLUDGE
+        fragHdr->setChunkLength(headerLength + fh->getByteLength()); // KLUDGE
         fragPk->insertAtFront(fragHdr);
         fragPk->insertAtBack(packet->peekDataAt(offset, thisFragmentLength));
 

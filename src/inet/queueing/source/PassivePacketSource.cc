@@ -61,7 +61,7 @@ Packet *PassivePacketSource::canPullPacket(cGate *gate) const
         return nullptr;
     else {
         if (nextPacket == nullptr)
-            // TODO KLUDGE
+            // KLUDGE
             nextPacket = const_cast<PassivePacketSource *>(this)->createPacket();
         return nextPacket;
     }

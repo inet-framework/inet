@@ -1428,7 +1428,7 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value
 
 inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::s>& value)
 {
-    // TODO KLUDGE there's no direct infinity support in simtime_t
+    // KLUDGE there's no direct infinity support in simtime_t
     static auto positiveInfinity = SimTime::getMaxTime() / 2;
     static auto negativeInfinity = -SimTime::getMaxTime() / 2;
     if (value == values::s(0))

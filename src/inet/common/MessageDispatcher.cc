@@ -145,7 +145,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
     if (dispatchProtocolReq != nullptr) {
         const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1)) {
             if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
                 servicePrimitive = SP_INDICATION;
@@ -215,7 +215,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
     const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1))
             servicePrimitive = SP_REQUEST;
         auto protocol = dispatchProtocolReq->getProtocol();

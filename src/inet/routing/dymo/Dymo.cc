@@ -551,7 +551,7 @@ void Dymo::processRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     // TODO why is this here and how could we halt here?
     // 4. HandlingRtr MUST decrement RteMsg.<msg-hop-limit>.  If
     //    RteMsg.<msg-hop-limit> is then zero (0), no further action is taken.
-    // KLUDGE TODO constPtrCast<RteMsg>(rteMsg)
+    // KLUDGE constPtrCast<RteMsg>(rteMsg)
     constPtrCast<RteMsg>(rteMsg)->setHopLimit(rteMsg->getHopLimit() - 1);
     // 5. HandlingRtr MUST increment RteMsg.<msg-hop-count>.
     constPtrCast<RteMsg>(rteMsg)->setHopCount(rteMsg->getHopCount() + 1);
