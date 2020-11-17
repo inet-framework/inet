@@ -56,9 +56,9 @@ void H_NET_SCHED_FIFO::schedulingNET(Packet *pktSm) {
     Packet *smNet = nullptr;
     if (sm_net)
         smNet = pktSm;
-    Packet *smIo = nullptr;
-    if (sm_io)
-        smIo = pktSm;
+//    Packet *smIo = nullptr;
+//    if (sm_io)
+//        smIo = pktSm;
     Packet *smMpi = nullptr;
     if (sm_mpi)
         smMpi = pktSm;

@@ -69,7 +69,7 @@ cDynamicExpression *RandomWaypointMobilityAttractor::getValue(cXMLElement *state
         cDynamicExpression *expr = new cDynamicExpression();
         expr->parse(s);
         // check
-        double val = expr->doubleValue(this);
+ //       double val = expr->doubleValue(this);
         return expr;
     }
     catch (std::exception& e) {
@@ -242,9 +242,9 @@ Coord RandomWaypointMobilityAttractor::getNewCoord()
         }
         position.push_back(total+1); // rest landscape
         int val = intuniform(0,total+1);
-        int i;
+        unsigned int i;
 
-        for (i = 0; i < position.size();i++){
+        for (i = 0; i < position.size(); i++){
             if (position[i] > val)
                 break;
         }
