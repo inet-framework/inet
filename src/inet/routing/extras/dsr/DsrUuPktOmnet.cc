@@ -229,7 +229,9 @@ void DSRPktExt::copy(const DSRPktExt& msg)
         return;
     }
     extension = new EtxList[size];
-    memcpy(extension, msg.extension, size*sizeof(EtxList));
+    for (int i = 0; i < size; i++)
+        extension[i] = msg.extension[i];
+    //memcpy(extension, msg.extension, size*sizeof(EtxList));
 }
 
 void DSRPktExt:: clearExtension()
@@ -257,7 +259,9 @@ EtxList * DSRPktExt::addExtension(int len)
         return nullptr;
     }
     extension_aux = new EtxList [size+len];
-    memcpy(extension_aux, extension, size*sizeof(EtxList));
+    for (int i = 0; i < size; i++)
+        extension_aux[i] = extension[i];
+    //memcpy(extension_aux, extension, size*sizeof(EtxList));
     delete [] extension;
     extension = extension_aux;
     size += len;
@@ -282,7 +286,9 @@ EtxList * DSRPktExt::delExtension(int len)
     }
 
     extension_aux = new EtxList [size-len];
-    memcpy(extension_aux, extension, (size-len)*sizeof(EtxList));
+    for (int i = 0; i < size-len; i++)
+        extension_aux[i] = extension[i];
+    //memcpy(extension_aux, extension, (size-len)*sizeof(EtxList));
     delete [] extension;
     extension = extension_aux;
 

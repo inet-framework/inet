@@ -120,7 +120,7 @@ void PacketForwarder::processLoraMACPacket(Packet *pk)
     frame->setSNIR(snirInd->getMinimumSnir());
     pk->insertAtFront(frame);
 
-    bool exist = false;
+    //bool exist = false;
     EV << frame->getTransmitterAddress() << endl;
     //for (std::vector<nodeEntry>::iterator it = knownNodes.begin() ; it != knownNodes.end(); ++it)
 

@@ -91,7 +91,7 @@ W LoRaAnalogModel::computeReceptionPower(const IRadio *receiverRadio, const ITra
    // const IRadio *transmitterRadio = transmission->getTransmitter();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
-    const Coord receptionEndPosition = arrival->getEndPosition();
+    //const Coord receptionEndPosition = arrival->getEndPosition();
     const Coord receptionStartPosition = arrival->getStartPosition();
     // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());

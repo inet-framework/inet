@@ -718,9 +718,9 @@ void AbstractCloudUser::deleteAllVMs(){
     int size = wastedVMs.size();
 
     while(size != 0){
-        VM* vm;
-        vm = (*(wastedVMs.begin()));
-        //delete(vm);
+       // VM* vm;
+       // vm = (*(wastedVMs.begin()));
+       // delete(vm);
         size --;
     }
 }

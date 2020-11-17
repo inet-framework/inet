@@ -208,7 +208,7 @@ void H_MEM_SCHED_FIFO::printCells(string methodName){
     for (int i = 0; (i < (int)memoryCells.size()); i++){
         cell = (*(memoryCells.begin() + i));
 
-        printf("H_MEM_SCHED_FIFO::printCells [%s] -->cell[%i] - uId-%i pId-%i gate-%i TotalBlocks-%li remainingBlocks-%li\n",methodName.c_str(), i, cell->uId, cell->pId, cell->vmGate, cell->vmTotalBlocks_KB, cell->remainingBlocks_KB);
+        printf("H_MEM_SCHED_FIFO::printCells [%s] -->cell[%i] - uId-%i pId-%i gate-%i TotalBlocks-%lli remainingBlocks-%lli\n",methodName.c_str(), i, cell->uId, cell->pId, cell->vmGate, cell->vmTotalBlocks_KB, cell->remainingBlocks_KB);
 
     }
 }

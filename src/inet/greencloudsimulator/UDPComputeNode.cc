@@ -449,7 +449,7 @@ void UDPComputeNode::socketDataArrived(UdpSocket *socket, Packet *packet)
    //   return;
 
       /* BELOW CODE NOT IN USE */
-      /*
+
       cMessage *pqt = PK(msg);
       UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pqt->getControlInfo());
       L3Address srcAddr = ctrl->getSrcAddr();
@@ -474,30 +474,30 @@ void UDPComputeNode::socketDataArrived(UdpSocket *socket, Packet *packet)
       bool energyModule = true;
       if(energyModule)
       {
-          cloudTask *tpk = new cloudTask();
-          tpk->setMIPS(tlk->getMpis_());
-          tpk->setID(tlk->getPacketId());
-          tpk->setSize(tlk->getSize_());
-          tpk->setIntercom(tlk->getIntercom_());
-
-          tpk->setExecTime(tlk->getExecutedSince_());
-          simtime_t d = simTime();
-          tpk->setComputingRate(tlk->getCurrProcRate_(),d.dbl());
-          tpk->setDeadline(tlk->getDeadline_());
-
-          ntasks_++;
-          tasks_list_.push_back(tpk);  // add to the active tasks links
-          tlk->setExecutedSince_(simTime().dbl());
-                /* error if I uncomment this function I guess it is when to remove
-                 * from the task list ------ > */
-     //     std::cout<<"Before updateTskList completed "<<endl;
-    /*
-          updateTskList();
-   //       std::cout<<"updateTskList completed "<<endl;
-          /* update energy */
-      /*    updateTskComputingRates();
-          eUpdate(); /* update energy for the last interval */
-    /*      setCurrentConsumption(); *//* update current energy consumption */
+//          cloudTask *tpk = new cloudTask();
+//          tpk->setMIPS(tlk->getMpis_());
+//          tpk->setID(tlk->getPacketId());
+//          tpk->setSize(tlk->getSize_());
+//          tpk->setIntercom(tlk->getIntercom_());
+//
+//          tpk->setExecTime(tlk->getExecutedSince_());
+//          simtime_t d = simTime();
+//          tpk->setComputingRate(tlk->getCurrProcRate_(),d.dbl());
+//          tpk->setDeadline(tlk->getDeadline_());
+//
+//          ntasks_++;
+//          tasks_list_.push_back(tpk);  // add to the active tasks links
+//          tlk->setExecutedSince_(simTime().dbl());
+//                /* error if I uncomment this function I guess it is when to remove
+//                 * from the task list ------ > */
+//     //     std::cout<<"Before updateTskList completed "<<endl;
+//
+//          updateTskList();
+//   //       std::cout<<"updateTskList completed "<<endl;
+//          /* update energy */
+//          updateTskComputingRates();
+//          eUpdate(); */* update energy for the last interval */
+//          setCurrentConsumption(); /* update current energy consumption */
 
     totalEnergy+=eConsumed_;
     //  }

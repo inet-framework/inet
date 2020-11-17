@@ -91,7 +91,7 @@ void CfgCloud::printVms(){
 
 	for (vmIt = vms.begin(); vmIt < vms.end(); vmIt++){
 		printf ("Virtual Machine Type:\t %s\n", (*vmIt) ->vmtype.c_str());
-		printf ("Num. cores: %i, memory Size(MB):%lu, storageSize(GB):%lu \n", (*vmIt)->numCores,(*vmIt)->memorySize_MB, (*vmIt)->storageSize_GB);
+		printf ("Num. cores: %i, memory Size(MB):%llu, storageSize(GB):%llu \n", (*vmIt)->numCores,(*vmIt)->memorySize_MB, (*vmIt)->storageSize_GB);
 	}
 }
 
