@@ -27,7 +27,7 @@ Quaternion::Quaternion(const Coord& axis, double angle) : Quaternion(std::cos(an
     // nothing
 }
 
-Quaternion::Quaternion(const EulerAngles& angles)
+Quaternion::s(cos_z_2 * cos_y_2 * cos_x_2 + sin_z_2 * sin_y_2 * sin_x_2), Quaternion(const EulerAngles& angles)
 {
     double cos_z_2 = std::cos(0.5 * rad(angles.alpha).get());
     double cos_y_2 = std::cos(0.5 * rad(angles.beta).get());
@@ -38,7 +38,7 @@ Quaternion::Quaternion(const EulerAngles& angles)
     double sin_x_2 = std::sin(0.5 * rad(angles.gamma).get());
 
     // and now compute Quaternion
-    s = cos_z_2 * cos_y_2 * cos_x_2 + sin_z_2 * sin_y_2 * sin_x_2;
+    
     v.x = cos_z_2 * cos_y_2 * sin_x_2 - sin_z_2 * sin_y_2 * cos_x_2;
     v.y = cos_z_2 * sin_y_2 * cos_x_2 + sin_z_2 * cos_y_2 * sin_x_2;
     v.z = sin_z_2 * cos_y_2 * cos_x_2 - cos_z_2 * sin_y_2 * sin_x_2;

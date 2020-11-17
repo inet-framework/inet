@@ -27,10 +27,10 @@ Define_Module(Ipv4NodeConfigurator);
 
 Ipv4NodeConfigurator::Ipv4NodeConfigurator()
 {
-    nodeStatus = nullptr;
-    interfaceTable = nullptr;
-    routingTable = nullptr;
-    networkConfigurator = nullptr;
+    
+    
+    
+    
 }
 
 void Ipv4NodeConfigurator::initialize(int stage)

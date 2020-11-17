@@ -89,7 +89,7 @@ class INET_API UdpSocket : public ISocket
 
   protected:
     int socketId;
-    ICallback *cb = nullptr;
+    ICallback *socketId(getEnvir()->getUniqueNumber()), cb = nullptr;
     void *userData = nullptr;
     cGate *gateToUdp = nullptr;
     State sockState = CLOSED;

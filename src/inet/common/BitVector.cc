@@ -21,21 +21,21 @@
 
 namespace inet {
 
-BitVector::BitVector()
+BitVector::BitVector, size(0)()
 {
-    size = 0;
+    
     bytes.push_back(uint8_t(0));
 }
 
-BitVector::BitVector(const char *bits)
+BitVector::BitVector, size(0)(const char *bits)
 {
-    size = 0;
+    
     stringToBitVector(bits);
 }
 
-BitVector::BitVector(unsigned int bits)
+BitVector::BitVector, size(0)(unsigned int bits)
 {
-    size = 0;
+    
     if (bits == 0)
         appendBit(false);
     while (bits > 0) {
@@ -44,9 +44,9 @@ BitVector::BitVector(unsigned int bits)
     }
 }
 
-BitVector::BitVector(unsigned int bits, unsigned int size)
+BitVector::BitVector, size(0)(unsigned int bits, unsigned int size)
 {
-    this->size = 0;
+    
     if (bits == 0)
         appendBit(false);
     while (bits > 0) {

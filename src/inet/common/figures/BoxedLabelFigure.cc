@@ -22,8 +22,8 @@ namespace inet {
 BoxedLabelFigure::BoxedLabelFigure(const char *name) :
     cGroupFigure(name)
 {
-    labelFigure = new cLabelFigure("label");
-    rectangleFigure = new cRectangleFigure("box");
+    
+    
     rectangleFigure->setFilled(true);
     rectangleFigure->setLineColor(cFigure::BLACK);
     addFigure(rectangleFigure);

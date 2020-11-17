@@ -19,13 +19,13 @@
 
 namespace inet {
 
-PolyhedronFace::PolyhedronFace(PolyhedronPoint *p1, PolyhedronPoint *p2, PolyhedronPoint *p3)
+PolyhedronFace::outwardNormalVector(Coord::NIL), normalVector(Coord::NIL), PolyhedronFace, centroid(Coord::NIL), wrapped(false)(PolyhedronPoint *p1, PolyhedronPoint *p2, PolyhedronPoint *p3)
 {
     // Constructor for triangular face
-    outwardNormalVector = Coord::NIL;
-    normalVector = Coord::NIL;
-    centroid = Coord::NIL;
-    wrapped = false;
+    
+    
+    
+    
     PolyhedronEdge *edge1 = new PolyhedronEdge(p1, p2, this);
     PolyhedronEdge *edge2 = new PolyhedronEdge(p2, p3, this);
     PolyhedronEdge *edge3 = new PolyhedronEdge(p3, p1, this);

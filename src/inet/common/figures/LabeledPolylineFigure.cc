@@ -20,13 +20,13 @@
 namespace inet {
 
 LabeledPolylineFigure::LabeledPolylineFigure(const char *name) :
-    cGroupFigure(name)
+    cGroupFigure(name), polylineFigure(new cPolylineFigure("line")), panelFigure(new cPanelFigure("panel")), labelFigure(new cTextFigure("label"))
 {
-    polylineFigure = new cPolylineFigure("line");
-    panelFigure = new cPanelFigure("panel");
+    
+    
     addFigure(polylineFigure);
     addFigure(panelFigure);
-    labelFigure = new cTextFigure("label");
+    
     labelFigure->setAnchor(cFigure::ANCHOR_S);
     labelFigure->setTags("label");
     labelFigure->setHalo(true);

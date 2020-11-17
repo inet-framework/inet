@@ -52,14 +52,14 @@ void SpatialGrid::computeBoundingVoxels(const Coord& pos, const Triplet<double>&
     }
 }
 
-SpatialGrid::SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin, const Coord& constraintAreaMax)
+SpatialGrid::constraintAreaMin(constraintAreaMin), constraintAreaMax(constraintAreaMax), gridVectorLength(computeGridVectorLength()), SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin, const Coord& constraintAreaMax)
 {
     this->voxelSizes = Triplet<double>(voxelSizes.x, voxelSizes.y, voxelSizes.z);
-    this->constraintAreaMin = constraintAreaMin;
-    this->constraintAreaMax = constraintAreaMax;
+    
+    
     constraintAreaSideLengths = computeConstraintAreaSideLengths();
     numVoxels = computeNumberOfVoxels();
-    gridVectorLength = computeGridVectorLength();
+    
     if (gridVectorLength <= 0)
         throw cRuntimeError("Invalid gridVectorLength = %d", gridVectorLength);
     grid.resize(gridVectorLength);
@@ -189,9 +189,9 @@ SpatialGrid::Triplet<int> SpatialGrid::coordToMatrixIndices(const Coord& pos) co
     return Triplet<int>(xCoord, yCoord, zCoord);
 }
 
-SpatialGrid::LineSegmentIterator::LineSegmentIterator(const SpatialGrid *spatialGrid, const LineSegment& lineSegment, const Triplet<double>& voxelSizes, const Triplet<int>& numVoxels)
+SpatialGrid::LineSegmentIterator::LineSegmentIterator, reachedEnd(false)(const SpatialGrid *spatialGrid, const LineSegment& lineSegment, const Triplet<double>& voxelSizes, const Triplet<int>& numVoxels)
 {
-    reachedEnd = false;
+    
     Coord p0 = lineSegment.getPoint1();
     Coord p1 = lineSegment.getPoint2();
     Coord segmentDirection = p1 - p0;

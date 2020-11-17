@@ -35,7 +35,7 @@ Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENA
 
 RoutingTableRecorder::RoutingTableRecorder()
 {
-    routingLogFile = nullptr;
+    
 }
 
 RoutingTableRecorder::~RoutingTableRecorder()

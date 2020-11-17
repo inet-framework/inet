@@ -23,10 +23,10 @@ namespace inet {
 
 namespace tcp {
 
-TcpSackRexmitQueue::TcpSackRexmitQueue()
+TcpSackRexmitQueue::conn(nullptr), TcpSackRexmitQueue, begin(end = 0)()
 {
-    conn = nullptr;
-    begin = end = 0;
+    
+    
 }
 
 TcpSackRexmitQueue::~TcpSackRexmitQueue()

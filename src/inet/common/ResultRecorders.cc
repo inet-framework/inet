@@ -77,7 +77,7 @@ Register_ResultRecorder("elapsedTime", ElapsedTimeRecorder);
 
 ElapsedTimeRecorder::ElapsedTimeRecorder()
 {
-    startTime = clock();
+    
 }
 
 void ElapsedTimeRecorder::finish(cResultFilter *prev)

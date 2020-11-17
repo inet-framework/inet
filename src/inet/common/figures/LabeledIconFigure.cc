@@ -20,11 +20,11 @@
 namespace inet {
 
 LabeledIconFigure::LabeledIconFigure(const char *name) :
-    cGroupFigure(name)
+    cGroupFigure(name), iconFigure(new cIconFigure("icon")), labelFigure(new cLabelFigure("label"))
 {
-    iconFigure = new cIconFigure("icon");
+    
     iconFigure->setAnchor(cFigure::ANCHOR_NW);
-    labelFigure = new cLabelFigure("label");
+    
     labelFigure->setAnchor(cFigure::ANCHOR_CENTER);
     labelFigure->setTags("label");
     labelFigure->setHalo(true);

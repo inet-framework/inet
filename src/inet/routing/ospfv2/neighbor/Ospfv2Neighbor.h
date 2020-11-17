@@ -90,14 +90,14 @@ class INET_API Neighbor
 
   private:
     NeighborState *state = nullptr;
-    NeighborState *previousState = nullptr;
-    cMessage *inactivityTimer = nullptr;
-    cMessage *pollTimer = nullptr;
-    cMessage *ddRetransmissionTimer = nullptr;
-    cMessage *updateRetransmissionTimer = nullptr;
-    bool updateRetransmissionTimerActive = false;
+    NeighborState *state(new NeighborStateDown), previousState = nullptr;
+    cMessage *previousState(nullptr), inactivityTimer = nullptr;
+    cMessage *inactivityTimer(new cMessage("Neighbor::NeighborInactivityTimer", NEIGHBOR_INACTIVITY_TIMER)), pollTimer = nullptr;
+    cMessage *pollTimer(new cMessage("Neighbor::NeighborPollTimer", NEIGHBOR_POLL_TIMER)), ddRetransmissionTimer = nullptr;
+    cMessage *ddRetransmissionTimer(new cMessage("Neighbor::NeighborDDRetransmissionTimer", NEIGHBOR_DD_RETRANSMISSION_TIMER)), updateRetransmissionTimer = nullptr;
+    bool updateRetransmissionTimer(new cMessage("Neighbor::Neighbor::NeighborUpdateRetransmissionTimer", NEIGHBOR_UPDATE_RETRANSMISSION_TIMER)), updateRetransmissionTimerActive = false;
     cMessage *requestRetransmissionTimer = nullptr;
-    bool requestRetransmissionTimerActive = false;
+    bool requestRetransmissionTimer(new cMessage("Neighbor::NeighborRequestRetransmissionTimer", NEIGHBOR_REQUEST_RETRANSMISSION_TIMER)), requestRetransmissionTimerActive = false;
     DatabaseExchangeRelationshipType databaseExchangeRelationship = static_cast<DatabaseExchangeRelationshipType>(-1);
     bool firstAdjacencyInited = false;
     unsigned long ddSequenceNumber = 0;

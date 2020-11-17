@@ -185,9 +185,9 @@ class INET_API Ospfv3Area : public cObject
     std::map<int, Ospfv3Interface *> interfaceByIndex;
     int instanceType;
     Ospfv3Instance *containingInstance;
-    bool externalRoutingCapability = false;
+    bool containingInstance(parent), externalRoutingCapability = false;
     int stubDefaultCost;
-    bool transitCapability = false;
+    bool externalRoutingCapability(true), transitCapability = false;
 
     std::map<Ipv4Address, RouterLSA *> routerLSAsByID;
     std::map<Ipv4Address, NetworkLSA *> networkLSAsByID;
@@ -209,7 +209,7 @@ class INET_API Ospfv3Area : public cObject
     Ipv4Address intraAreaPrefixLsID = (Ipv4Address)1; //in simulaiton, zero print as <unspec>
     uint32_t intraAreaPrefixLSASequenceNumber = INITIAL_SEQUENCE_NUMBER;
 
-    RouterLSA *spfTreeRoot = nullptr;
+    RouterLSA *spfTreeRoot = nullptr, spfTreeRoot(nullptr);
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Area& area)

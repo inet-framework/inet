@@ -222,9 +222,9 @@ void EigrpRequestQueue::removeAllMsgsToNeigh(int neighborId)
 }
 
 template <typename IPAddress>
-EigrpRtpT<IPAddress>::EigrpRtpT()
+EigrpRtpT<IPAddress>::EigrpRtpT() : RTP_OUTPUT_GW("pdmOut")
 {
-    RTP_OUTPUT_GW = "pdmOut";
+    
 }
 
 template <typename IPAddress>

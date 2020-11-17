@@ -53,11 +53,11 @@ std::ostream& operator<<(std::ostream& os, const NetworkInterface& e)
     return os;
 };
 
-InterfaceTable::InterfaceTable()
+InterfaceTable::host(nullptr), InterfaceTable, tmpNumInterfaces(-1), tmpInterfaceList(nullptr)()
 {
-    host = nullptr;
-    tmpNumInterfaces = -1;
-    tmpInterfaceList = nullptr;
+    
+    
+    
 }
 
 InterfaceTable::~InterfaceTable()

@@ -31,9 +31,9 @@ namespace inet {
 inline bool isEmpty(const char *s) { return !s || !s[0]; }
 inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
-InterfaceMatcher::Matcher::Matcher(const char *pattern)
+InterfaceMatcher::Matcher::matchesany(isEmpty(pattern)), Matcher(const char *pattern)
 {
-    matchesany = isEmpty(pattern);
+    
     if (matchesany)
         return;
     cStringTokenizer tokenizer(pattern);

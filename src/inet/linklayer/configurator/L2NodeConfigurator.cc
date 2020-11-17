@@ -27,9 +27,9 @@ Define_Module(L2NodeConfigurator);
 
 L2NodeConfigurator::L2NodeConfigurator()
 {
-    nodeStatus = nullptr;
-    interfaceTable = nullptr;
-    networkConfigurator = nullptr;
+    
+    
+    
 }
 
 void L2NodeConfigurator::initialize(int stage)

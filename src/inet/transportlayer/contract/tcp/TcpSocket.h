@@ -167,14 +167,14 @@ class INET_API TcpSocket : public ISocket
 
   protected:
     int connId = -1;
-    State sockstate = NOT_BOUND;
+    State connId(getEnvir()->getUniqueNumber()), connId(availableInfo->getNewSocketId()), sockstate = NOT_BOUND;
 
     L3Address localAddr;
-    int localPrt = -1;
+    int localAddr(availableInfo->getLocalAddr()), localPrt = -1;
     L3Address remoteAddr;
-    int remotePrt = -1;
+    int remoteAddr(availableInfo->getRemoteAddr()), remotePrt = -1;
 
-    ICallback *cb = nullptr;
+    ICallback *remotePrt(availableInfo->getRemotePort()), cb = nullptr;
     void *userData = nullptr;
     cGate *gateToTcp = nullptr;
     std::string tcpAlgorithmClass;

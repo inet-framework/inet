@@ -25,7 +25,7 @@ Define_Module(RandomWaypointMobility);
 
 RandomWaypointMobility::RandomWaypointMobility()
 {
-    nextMoveIsWait = false;
+    
 }
 
 void RandomWaypointMobility::initialize(int stage)

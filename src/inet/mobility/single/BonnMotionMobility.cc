@@ -26,10 +26,10 @@ Define_Module(BonnMotionMobility);
 
 BonnMotionMobility::BonnMotionMobility()
 {
-    is3D = false;
-    lines = nullptr;
-    currentLine = -1;
-    maxSpeed = 0;
+    
+    
+    
+    
 }
 
 void BonnMotionMobility::computeMaxSpeed()

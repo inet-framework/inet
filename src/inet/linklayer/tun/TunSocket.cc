@@ -26,7 +26,7 @@ namespace inet {
 
 TunSocket::TunSocket()
 {
-    socketId = getEnvir()->getUniqueNumber();
+    
 }
 
 void TunSocket::setCallback(ICallback *callback)

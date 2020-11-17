@@ -44,11 +44,11 @@ std::string rdObject::typeStr()
 rdNormal::rdNormal(double mean, double sd, bool nonNegative)
 {
     m_type = dt_normal;
-    m_mean = mean;
-    m_sd = sd;
-    m_nonNegative = nonNegative;
-    m_min = 0.0;
-    m_bMinLimit = false;
+    
+    
+    
+    
+    
 }
 
 rdNormal::rdNormal(cXMLAttributeMap attributes)
@@ -85,8 +85,8 @@ double rdNormal::draw()
 rdUniform::rdUniform(double beginning, double end)
 {
     m_type = dt_uniform;
-    m_beginning = beginning;
-    m_end = end;
+    
+    
 }
 
 rdUniform::rdUniform(cXMLAttributeMap attributes)
@@ -108,11 +108,11 @@ double rdUniform::draw()
 rdExponential::rdExponential(double mean)
 {
     m_type = dt_exponential;
-    m_mean = mean;
-    m_min = 0.0;
-    m_max = 0.0;
-    m_bMinLimit = false;
-    m_bMaxLimit = false;
+    
+    
+    
+    
+    
 }
 
 rdExponential::rdExponential(cXMLAttributeMap attributes)
@@ -144,7 +144,7 @@ double rdExponential::draw()
 
 rdHistogram::rdHistogram(rdHistogramBins bins, bool zeroBased)
 {
-    m_zeroBased = zeroBased;
+    
     m_bins = rdHistogramBins(bins);
     __normalizeBins();
 }
@@ -223,7 +223,7 @@ void rdHistogram::__normalizeBins()
 rdConstant::rdConstant(double value)
 {
     m_type = dt_constant;
-    m_value = value;
+    
 }
 
 rdConstant::rdConstant(cXMLAttributeMap attributes)

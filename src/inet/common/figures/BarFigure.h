@@ -29,7 +29,7 @@ class INET_API BarFigure : public cRectangleFigure
     double minValue = NaN;
     double maxValue = NaN;
     double spacing = 2;
-    cRectangleFigure *valueFigure = nullptr;
+    cRectangleFigure *valueFigure = nullptr, valueFigure(new cRectangleFigure());
 
   protected:
     virtual void refreshDisplay();

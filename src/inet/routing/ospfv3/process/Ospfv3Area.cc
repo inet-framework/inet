@@ -10,13 +10,13 @@ namespace ospfv3 {
 
 using namespace std;
 
-Ospfv3Area::Ospfv3Area(Ipv4Address areaID, Ospfv3Instance *parent, Ospfv3AreaType type)
+Ospfv3Area::areaID(areaID), areaType(type), Ospfv3Area(Ipv4Address areaID, Ospfv3Instance *parent, Ospfv3AreaType type)
 {
-    this->areaID = areaID;
-    this->containingInstance = parent;
-    this->externalRoutingCapability = true;
-    this->areaType = type;
-    this->spfTreeRoot = nullptr;
+    
+    
+    
+    
+    
 
     WATCH_PTRVECTOR(this->interfaceList);
 }

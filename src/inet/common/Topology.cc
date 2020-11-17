@@ -49,9 +49,9 @@ Topology::LinkOut *Topology::Node::getLinkOut(int i)
 
 // ----
 
-Topology::Topology(const char *name) : cOwnedObject(name)
+Topology::Topology, target(nullptr)(const char *name) : cOwnedObject(name)
 {
-    target = nullptr;
+    
 }
 
 Topology::Topology(const Topology& topo) : cOwnedObject(topo)

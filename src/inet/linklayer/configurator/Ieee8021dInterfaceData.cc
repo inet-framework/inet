@@ -19,24 +19,24 @@
 
 namespace inet {
 
-Ieee8021dInterfaceData::PortInfo::PortInfo()
+Ieee8021dInterfaceData::PortInfo::priority(0), linkCost(1), edge(false), state(FORWARDING), role(NOTASSIGNED), rootPriority(0), rootPathCost(0), bridgePriority(0), portPriority(0), portNum(-1), lostBPDU(0), PortInfo()
 {
-    priority = 0;
-    linkCost = 1;
-    edge = false;
+    
+    
+    
 
     // If there is no STP module then all ports
     // must be in forwarding state.
-    state = FORWARDING;
-    role = NOTASSIGNED;
+    
+    
 
-    rootPriority = 0;
-    rootPathCost = 0;
-    bridgePriority = 0;
-    portPriority = 0;
-    portNum = -1;
+    
+    
+    
+    
+    
 
-    lostBPDU = 0;
+    
 }
 
 Ieee8021dInterfaceData::Ieee8021dInterfaceData()

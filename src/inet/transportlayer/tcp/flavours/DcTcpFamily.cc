@@ -25,12 +25,12 @@ namespace tcp {
 
 DcTcpFamilyStateVariables::DcTcpFamilyStateVariables()
 {
-    dctcp_ce = false;
-    dctcp_alpha = 0;
-    dctcp_windEnd = snd_una;
-    dctcp_bytesAcked = 0;
-    dctcp_bytesMarked = 0;
-    dctcp_gamma = 0.0625;   // 1/16 (backup 0.16) TODO make it NED parameter;
+    
+    
+    
+    
+    
+      // 1/16 (backup 0.16) TODO make it NED parameter;
 }
 
 std::string DcTcpFamilyStateVariables::str() const

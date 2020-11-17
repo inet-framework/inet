@@ -94,7 +94,7 @@ class INET_API EthernetMacBase : public MacProtocolBase
     const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
-    bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
+    bool curEtherDescr(&nullEtherDescr), connected = false;    // true if connected to a network, set automatically by exploring the network configuration
     bool promiscuous = false;    // if true, passes up all received frames
     bool duplexMode = false;    // true if operating in full-duplex mode
     bool frameBursting = false;    // frame bursting on/off (Gigabit Ethernet)
@@ -109,7 +109,7 @@ class INET_API EthernetMacBase : public MacProtocolBase
     MacTransmitState transmitState = static_cast<MacTransmitState>(-1);    // "transmit state" of the MAC
     MacReceiveState receiveState = static_cast<MacReceiveState>(-1);    // "receive state" of the MAC
     simtime_t lastTxFinishTime;    // time of finishing the last transmission
-    int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
+    int lastTxFinishTime(-1.0), pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
 
     // self messages
     cMessage *endTxTimer = nullptr;

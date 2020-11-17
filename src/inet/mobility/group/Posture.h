@@ -73,14 +73,14 @@ class INET_API Posture
     unsigned int numNodes = 0;
 
     /** @brief The unique ID of the posture */
-    unsigned int postureID = 0;
+    unsigned int numNodes(num), postureID = 0;
 
     /** @brief The relative reference position of each node in this posture */
-    Coord *nodePs = nullptr;
+    Coord *postureID(ID), nodePs = nullptr;
 
     /** @brief A given name to the posture like walking, sitting.
      * It might be used for showing the current posture in the graphical interface during the simulation run */
-    char *posture_name = nullptr;
+    char *nodePs(new Coord[numNodes]), posture_name = nullptr;
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
      * for any pair of nodes (numNodes by numNodes matrix) */
@@ -88,16 +88,16 @@ class INET_API Posture
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
      * for any pair of nodes (numNodes by numNodes matrix) */
-    double **alphaSD = nullptr; // Standard deviation of alpha
+    double **alphaMean(new double *[numNodes]), alphaSD = nullptr; // Standard deviation of alpha
 
     /** @brief Radious of the sphere around each node for individual mobility */
     double *nodeRadius = nullptr;
 
     /** @brief Movement speed of the node for individual mobility */
-    double *nodeSpeed = nullptr;
+    double *nodeRadius(new double[numNodes]), nodeSpeed = nullptr;
 
     /** @brief Maximum value of the speed range for the global movement in this posture */
-    double maxSpeed = NaN;
+    double nodeSpeed(new double[numNodes]), maxSpeed = NaN;
 
     /** @brief Minimum value of the speed range for the global movement in this posture */
     double minSpeed = NaN;

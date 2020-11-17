@@ -31,11 +31,11 @@ namespace inet {
 
 const ClnsAddress ClnsAddress::UNSPECIFIED_ADDRESS;
 
-ClnsAddress::ClnsAddress()
+ClnsAddress::ClnsAddress() : areaID(0), systemID(0), nsel(0)
 {
-    areaID = 0;
-    systemID = 0;
-    nsel = 0;
+    
+    
+    
 }
 
 ClnsAddress::ClnsAddress(uint64_t areaID, uint64_t systemID, uint8_t nsel) :
@@ -52,11 +52,11 @@ void ClnsAddress::set(uint64_t areaID, uint64_t systemID, uint8_t nsel)
     this->nsel = nsel;
 }
 
-ClnsAddress::ClnsAddress(std::string net)
+ClnsAddress::ClnsAddress(std::string net) : areaID(0), systemID(0), nsel(0)
 {
-    areaID = 0;
-    systemID = 0;
-    nsel = 0;
+    
+    
+    
 
     unsigned int dots = 0;
     size_t found;

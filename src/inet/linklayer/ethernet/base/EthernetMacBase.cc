@@ -163,8 +163,8 @@ simsignal_t EthernetMacBase::receptionStateChangedSignal = registerSignal("recep
 
 EthernetMacBase::EthernetMacBase()
 {
-    lastTxFinishTime = -1.0;    // never equals to current simtime
-    curEtherDescr = &nullEtherDescr;
+       // never equals to current simtime
+    
 }
 
 EthernetMacBase::~EthernetMacBase()

@@ -120,7 +120,7 @@ class INET_API SctpSocket : public ISocket
 
   public:
     cGate *gateToSctp;
-    int interfaceIdToTun = -1;
+    int fsmStatus(-1), cb(nullptr), userData(nullptr), gateToSctp(nullptr), lastStream(-1), sOptions(new SocketOptions()), appOptions(new AppSocketOptions()), interfaceIdToTun = -1;
     /**
      * Constructor. The connectionId() method returns a valid Id right after
      * constructor call.

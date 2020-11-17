@@ -49,11 +49,11 @@ void L2NetworkConfigurator::initialize(int stage)
         ensureConfigurationComputed(topology);
 }
 
-L2NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, Node *childNode, NetworkInterface *networkInterface)
+L2NetworkConfigurator::InterfaceInfo::node(node), networkInterface(networkInterface), childNode(childNode), InterfaceInfo(Node *node, Node *childNode, NetworkInterface *networkInterface)
 {
-    this->node = node;
-    this->networkInterface = networkInterface;
-    this->childNode = childNode;
+    
+    
+    
 }
 
 void L2NetworkConfigurator::extractTopology(L2Topology& topology)
@@ -289,9 +289,9 @@ L2NetworkConfigurator::Matcher::~Matcher()
         delete elem;
 }
 
-L2NetworkConfigurator::Matcher::Matcher(const char *pattern)
+L2NetworkConfigurator::Matcher::matchesany(isEmpty(pattern)), Matcher(const char *pattern)
 {
-    matchesany = isEmpty(pattern);
+    
 
     if (matchesany)
         return;

@@ -31,14 +31,14 @@ bool BvhTree::isLeaf() const
     return objects.size() != 0;
 }
 
-BvhTree::BvhTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const IPhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
+BvhTree::left(nullptr), right(nullptr), boundingMin(boundingMin), boundingMax(boundingMax), leafCapacity(leafCapacity), BvhTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const IPhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
 {
-    this->left = nullptr;
-    this->right = nullptr;
-    this->boundingMin = boundingMin;
-    this->boundingMax = boundingMax;
+    
+    
+    
+    
     this->center = (boundingMax - boundingMin) / 2 + boundingMin;
-    this->leafCapacity = leafCapacity;
+    
     buildHierarchy(objects, start, end, axis);
 }
 

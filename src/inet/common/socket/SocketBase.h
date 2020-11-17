@@ -26,8 +26,8 @@ class INET_API SocketBase : public ISocket
 {
   protected:
     cGate *outputGate = nullptr;
-    int socketId = -1;
-    bool isOpen_ = false;
+    int outputGate(nullptr), socketId = -1;
+    bool socketId(getEnvir()->getUniqueNumber()), isOpen_ = false;
     void *userData = nullptr;
 
   protected:

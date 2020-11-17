@@ -21,13 +21,13 @@ namespace inet {
 
 namespace dymo {
 
-DymoRouteData::DymoRouteData()
+DymoRouteData::isBroken(false), sequenceNumber(0), lastUsed(0), DymoRouteData, expirationTime(0), metricType(HOP_COUNT)()
 {
-    isBroken = false;
-    sequenceNumber = 0;
-    lastUsed = 0;
-    expirationTime = 0;
-    metricType = HOP_COUNT;
+    
+    
+    
+    
+    
 }
 
 std::string DymoRouteData::str() const

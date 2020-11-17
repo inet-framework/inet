@@ -33,7 +33,7 @@ Register_Class(RtpParticipantInfo);
 
 RtpParticipantInfo::RtpParticipantInfo(uint32_t ssrc) :
     RtpParticipantInfo_Base(),
-    _sdesChunk("SdesChunk", ssrc)
+    _sdesChunk("SdesChunk", ssrc), _silentIntervals(3)
 {
     setName(ssrcToName(ssrc).c_str());
     // because there haven't been sent any RTP packets
@@ -41,7 +41,7 @@ RtpParticipantInfo::RtpParticipantInfo(uint32_t ssrc) :
     // intervals would be undefined; to calculate with
     // it but not to regard this endsystem as a sender
     // it is set to 3; see isSender() for details
-    _silentIntervals = 3;
+    
 }
 
 RtpParticipantInfo::RtpParticipantInfo(const RtpParticipantInfo& other) : RtpParticipantInfo_Base(other)

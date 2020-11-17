@@ -52,9 +52,9 @@ bool getBoolAttribute(const cXMLElement& element, const char *name, const bool *
 } // namespace {
 
 //FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
-MatrixCloudDelayer::Matcher::Matcher(const char *pattern)
+MatrixCloudDelayer::Matcher::matchesany(isEmpty(pattern)), Matcher(const char *pattern)
 {
-    matchesany = isEmpty(pattern);
+    
     if (matchesany)
         return;
     cStringTokenizer tokenizer(pattern);
@@ -87,13 +87,13 @@ bool MatrixCloudDelayer::Matcher::matches(const char *s)
     return false;
 }
 
-MatrixCloudDelayer::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric) :
+MatrixCloudDelayer::MatrixEntry::symmetric(getBoolAttribute(*trafficEntity, "symmetric", &defaultSymmetric)), MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric) :
     srcMatcher(trafficEntity->getAttribute("src")), destMatcher(trafficEntity->getAttribute("dest"))
 {
     const char *delayAttr = trafficEntity->getAttribute("delay");
     const char *datarateAttr = trafficEntity->getAttribute("datarate");
     const char *dropAttr = trafficEntity->getAttribute("drop");
-    symmetric = getBoolAttribute(*trafficEntity, "symmetric", &defaultSymmetric);
+    
     try {
         delayPar.parse(delayAttr);
     }

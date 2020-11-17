@@ -27,14 +27,14 @@ namespace inet {
 
 namespace ospfv2 {
 
-Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
+Router::ageTimer(new cMessage("Router::DatabaseAgeTimer", DATABASE_AGE_TIMER)), Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
     ift(ift),
     rt(rt),
     routerID(rt->getRouterId()),
-    rfc1583Compatibility(false)
+    messageHandler(new MessageHandler(this, containingModule)), rfc1583Compatibility(false)
 {
-    messageHandler = new MessageHandler(this, containingModule);
-    ageTimer = new cMessage("Router::DatabaseAgeTimer", DATABASE_AGE_TIMER);
+    
+    
     ageTimer->setContextPointer(this);
     messageHandler->startTimer(ageTimer, 1.0);
 }

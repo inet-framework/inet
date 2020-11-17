@@ -495,12 +495,12 @@ std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBi
     return result;
 }
 
-ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode *convolutionalCode) : convolutionalCode(convolutionalCode)
+ConvolutionalCoder::mode(convolutionalCode->getMode()), ConvolutionalCoder(const ConvolutionalCode *convolutionalCode) : convolutionalCode(convolutionalCode)
 {
     const char *strTransferFunctionMatrix = convolutionalCode->getTransferFunctionMatrix();
     const char *strPuncturingMatrix = convolutionalCode->getPuncturingMatrix();
     const char *strConstraintLengthVector = convolutionalCode->getConstraintLengthVector();
-    mode = convolutionalCode->getMode();
+    
     if (strcmp(mode, "terminated") && strcmp(mode, "truncated"))
         throw cRuntimeError("Unknown (= %s ) coding mode", mode);
     codeRatePuncturingK = convolutionalCode->getCodeRatePuncturingK();

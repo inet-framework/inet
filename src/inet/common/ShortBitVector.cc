@@ -21,16 +21,16 @@
 
 namespace inet {
 
-ShortBitVector::ShortBitVector()
+ShortBitVector::ShortBitVector() : size(0), bits(0)
 {
-    size = 0;
-    bits = 0;
+    
+    
 }
 
-ShortBitVector::ShortBitVector(const char *bitString)
+ShortBitVector::ShortBitVector(const char *bitString) : size(0), bits(0)
 {
-    size = 0;
-    bits = 0;
+    
+    
     int strSize = strlen(bitString);
     for (int i = 0; i < strSize; i++) {
         if (bitString[i] == '1')

@@ -74,10 +74,10 @@ BitVector Ieee80211OfdmInterleaver::deinterleave(const BitVector& interleavedBit
     return deinterleavedBits;
 }
 
-Ieee80211OfdmInterleaver::Ieee80211OfdmInterleaver(const Ieee80211OfdmInterleaving *interleaving) : interleaving(interleaving)
+Ieee80211OfdmInterleaver::Ieee80211OfdmInterleaver(const Ieee80211OfdmInterleaving *interleaving) : numberOfCodedBitsPerSubcarrier(interleaving->getNumberOfCodedBitsPerSubcarrier()), numberOfCodedBitsPerSymbol(interleaving->getNumberOfCodedBitsPerSymbol()), interleaving(interleaving)
 {
-    numberOfCodedBitsPerSubcarrier = interleaving->getNumberOfCodedBitsPerSubcarrier();
-    numberOfCodedBitsPerSymbol = interleaving->getNumberOfCodedBitsPerSymbol();
+    
+    
     s = std::max(numberOfCodedBitsPerSubcarrier / 2, 1);
 }
 

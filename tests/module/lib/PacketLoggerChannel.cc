@@ -31,7 +31,7 @@ class INET_API PacketLoggerChannel : public cDatarateChannel
     std::ofstream logfile;
 
   public:
-    explicit PacketLoggerChannel(const char *name = NULL) : cDatarateChannel(name) { counter = 0; }
+    explicit counter(0), PacketLoggerChannel(const char *name = NULL) : cDatarateChannel(name) { }
 
 #if OMNETPP_BUILDNUM < 1504    // OMNETPP_VERSION is 6.0 pre9
     virtual void processMessage(cMessage *msg, simtime_t t, result_t& result) override;

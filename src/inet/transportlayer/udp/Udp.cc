@@ -1369,7 +1369,7 @@ bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
 
 Udp::SockDesc::SockDesc(int sockId_)
 {
-    sockId = sockId_;
+    
 }
 
 Udp::SockDesc::~SockDesc()

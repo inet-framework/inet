@@ -19,17 +19,17 @@
 
 namespace inet {
 
-PolyhedronPoint::PolyhedronPoint(const Coord& point)
+PolyhedronPoint::PolyhedronPoint, selected(false)(const Coord& point)
 {
-    selected = false;
+    
     x = point.x;
     y = point.y;
     z = point.z;
 }
 
-PolyhedronPoint::PolyhedronPoint()
+PolyhedronPoint::PolyhedronPoint, selected(false)()
 {
-    selected = false;
+    
     x = y = z = 0;
 }
 

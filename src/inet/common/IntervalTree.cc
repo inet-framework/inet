@@ -57,22 +57,22 @@ IntervalTree::Node::~Node()
 
 IntervalTree::IntervalTree()
 {
-    nil = new Node;
+    
     nil->left = nil->right = nil->parent = nil;
     nil->red = false;
     nil->key = nil->high = nil->max_high = -SimTime::getMaxTime(); //-std::numeric_limits<double>::max();
     nil->stored_interval = nullptr;
 
-    root = new Node;
+    
     root->parent = root->left = root->right = nil;
     root->key = root->high = root->max_high = SimTime::getMaxTime(); // std::numeric_limits<double>::max();
     root->red = false;
     root->stored_interval = nullptr;
 
     /// the following are used for the query function
-    recursion_node_stack_size = 128;
-    recursion_node_stack = (it_recursion_node *)malloc(recursion_node_stack_size * sizeof(it_recursion_node));
-    recursion_node_stack_top = 1;
+    
+    
+    
     recursion_node_stack[0].start_node = nullptr;
 }
 

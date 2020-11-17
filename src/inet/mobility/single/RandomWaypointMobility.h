@@ -34,7 +34,7 @@ class INET_API RandomWaypointMobility : public LineSegmentsMobilityBase
 {
   protected:
     bool nextMoveIsWait;
-    cPar *speedParameter = nullptr;
+    cPar *nextMoveIsWait(false), speedParameter = nullptr;
     cPar *waitTimeParameter = nullptr;
     bool hasWaitTime;
 

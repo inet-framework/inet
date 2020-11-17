@@ -76,9 +76,9 @@ void AnsimMobility::computeMaxSpeed()
 
 AnsimMobility::AnsimMobility()
 {
-    maxSpeed = 0;
-    nodeId = -1;
-    nextPositionChange = nullptr;
+    
+    
+    
 }
 
 void AnsimMobility::initialize(int stage)

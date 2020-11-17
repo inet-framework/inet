@@ -28,14 +28,14 @@ namespace tcp {
 
 Register_Class(TcpWestwood);
 
-TcpWestwoodStateVariables::TcpWestwoodStateVariables()
+TcpWestwoodStateVariables::ssthresh(65535), w_a(1), w_lastAckTime(0), w_bwe(0), w_sample_bwe(0), TcpWestwoodStateVariables()
 {
-    ssthresh = 65535;
+    
     w_RTTmin = SIMTIME_MAX;
-    w_a = 1;
-    w_lastAckTime = 0;
-    w_bwe = 0;
-    w_sample_bwe = 0;
+    
+    
+    
+    
 }
 
 TcpWestwoodStateVariables::~TcpWestwoodStateVariables()

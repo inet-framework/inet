@@ -23,12 +23,12 @@ namespace inet {
 namespace ieee80211 {
 
 RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, simtime_t lastUsedTime) :
-    startingSequenceNumber(startingSequenceNumber),
+    blockAckRecord(new BlockAckRecord(originatorAddress, tid)), startingSequenceNumber(startingSequenceNumber),
     bufferSize(bufferSize),
     blockAckTimeoutValue(lastUsedTime)
 {
     calculateExpirationTime();
-    blockAckRecord = new BlockAckRecord(originatorAddress, tid);
+    
 }
 
 void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)

@@ -122,7 +122,7 @@ class INET_API OpenStreetMap
     std::vector<const Node *> nodes;
     std::vector<const Way *> ways;
     std::vector<const Relation *> relations;
-    std::set<std::string> *strings = new std::set<std::string>();
+    std::set<std::string> *relations(std::move(other.relations)), strings = new std::set<std::string>(), strings(other.strings);
     const char *getPooled(const char *s);
     void releaseAllocations();
     void parseTags(cXMLElement *parent, Tags& intoTags);

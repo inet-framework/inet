@@ -36,7 +36,7 @@ class INET_API TunSocket : public ISocket
 
   protected:
     int socketId = -1;
-    int interfaceId = -1;
+    int socketId(getEnvir()->getUniqueNumber()), interfaceId = -1;
     ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;

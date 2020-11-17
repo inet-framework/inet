@@ -31,11 +31,11 @@ namespace rtp {
 
 Register_Class(SdesItem);
 
-SdesItem::SdesItem() : cObject()
+SdesItem::_type(SDES_UNDEF), _length(0), SdesItem, _content("")() : cObject()
 {
-    _type = SDES_UNDEF;
-    _length = 0;
-    _content = "";
+    
+    
+    
 }
 
 SdesItem::SdesItem(SdesItemType type, const char *content) : cObject()
@@ -126,10 +126,10 @@ int SdesItem::getSdesTotalLength() const
 
 Register_Class(SdesChunk);
 
-SdesChunk::SdesChunk(const char *name, uint32_t ssrc) : cArray(name)
+SdesChunk::SdesChunk(const char *name, uint32_t ssrc) : cArray(name), _ssrc(ssrc), _length(4)
 {
-    _ssrc = ssrc;
-    _length = 4;
+    
+    
 }
 
 SdesChunk::SdesChunk(const SdesChunk& sdesChunk) : cArray(sdesChunk)

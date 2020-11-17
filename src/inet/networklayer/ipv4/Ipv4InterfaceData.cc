@@ -153,13 +153,13 @@ std::string Ipv4InterfaceData::RouterMulticastData::detailedInfo()
     return out.str();
 }
 
-Ipv4InterfaceData::Ipv4InterfaceData()
+Ipv4InterfaceData::Ipv4InterfaceData, netmask(Ipv4Address::ALLONES_ADDRESS), metric(0), hostData(nullptr), routerData(nullptr)()
     : InterfaceProtocolData(NetworkInterface::F_IPV4_DATA)
 {
-    netmask = Ipv4Address::ALLONES_ADDRESS;
-    metric = 0;
-    hostData = nullptr;
-    routerData = nullptr;
+    
+    
+    
+    
 }
 
 Ipv4InterfaceData::~Ipv4InterfaceData()

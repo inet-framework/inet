@@ -23,9 +23,9 @@ namespace inet {
 
 Define_Module(PolyhedronTest);
 
-PolyhedronTest::PolyhedronTest()
+PolyhedronTest::polyhedron(NULL), PolyhedronTest()
 {
-    polyhedron = NULL;
+    
 }
 
 void PolyhedronTest::parsePoints(const char* strPoints)

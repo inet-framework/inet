@@ -34,13 +34,13 @@ OpenStreetMap::~OpenStreetMap()
     releaseAllocations();
 }
 
-OpenStreetMap::OpenStreetMap(OpenStreetMap&& other)
+OpenStreetMap::bounds(other.bounds), nodes(std::move(other.nodes)), ways(std::move(other.ways)), OpenStreetMap(OpenStreetMap&& other)
 {
-    bounds = other.bounds;
-    nodes = std::move(other.nodes);
-    ways = std::move(other.ways);
-    relations = std::move(other.relations);
-    strings = other.strings;
+    
+    
+    
+    
+    
     other.strings = nullptr;
 }
 

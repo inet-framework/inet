@@ -25,9 +25,9 @@ Define_Module(RectangleMobility);
 
 RectangleMobility::RectangleMobility()
 {
-    speed = 0;
-    d = 0;
-    corner1 = corner2 = corner3 = corner4 = 0;
+    
+    
+    
 }
 
 void RectangleMobility::initialize(int stage)

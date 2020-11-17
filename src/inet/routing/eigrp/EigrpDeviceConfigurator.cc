@@ -37,7 +37,7 @@ using namespace std;
 EigrpDeviceConfigurator::EigrpDeviceConfigurator() {
     //deviceId = NULL;
     //deviceType = NULL;
-    configFile = NULL;
+    
 }
 
 EigrpDeviceConfigurator::EigrpDeviceConfigurator(cXMLElement *confFile, IInterfaceTable *intf)

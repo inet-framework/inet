@@ -19,13 +19,13 @@
 
 namespace inet {
 
-RotatingMobilityBase::RotatingMobilityBase()
+RotatingMobilityBase::rotateTimer(nullptr), updateInterval(0), stationary(false), lastUpdate(0), RotatingMobilityBase, nextChange(-1)()
 {
-    rotateTimer = nullptr;
-    updateInterval = 0;
-    stationary = false;
-    lastUpdate = 0;
-    nextChange = -1;
+    
+    
+    
+    
+    
 }
 
 RotatingMobilityBase::~RotatingMobilityBase()

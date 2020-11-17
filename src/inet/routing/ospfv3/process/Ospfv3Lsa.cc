@@ -3,11 +3,11 @@
 namespace inet {
 namespace ospfv3 {
 
-Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa *asocLSA, int distance)
+Ospfv3SpfVertex::Ospfv3SpfVertex, distance(distance), asocLSA(asocLSA), type(asocLSA->getHeader().getLsaType())(Ospfv3Lsa *asocLSA, int distance)
 {
-    this->distance = distance;
-    this->asocLSA = asocLSA;
-    this->type = asocLSA->getHeader().getLsaType();
+    
+    
+    
     this->vertexID.routerID = asocLSA->getHeader().getLinkStateID();
 
     if (type == NETWORK_LSA) {

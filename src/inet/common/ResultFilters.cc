@@ -270,7 +270,7 @@ Register_ResultFilter("elapsedTime", ElapsedTimeFilter);
 
 ElapsedTimeFilter::ElapsedTimeFilter()
 {
-    startTime = time(nullptr);
+    
 }
 
 double ElapsedTimeFilter::getElapsedTime()

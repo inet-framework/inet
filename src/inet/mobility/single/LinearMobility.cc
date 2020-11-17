@@ -28,7 +28,7 @@ Define_Module(LinearMobility);
 
 LinearMobility::LinearMobility()
 {
-    speed = 0;
+    
 }
 
 void LinearMobility::initialize(int stage)

@@ -5,13 +5,13 @@
 namespace inet {
 namespace ospfv3 {
 
-Ospfv3Instance::Ospfv3Instance(int instanceId, Ospfv3Process *parentProcess, int addressFamily)
+Ospfv3Instance::instanceID(instanceId), containingProcess(parentProcess), addressFamily(addressFamily), containingModule(findContainingNode(this->containingProcess)), ift(check_and_cast<IInterfaceTable *>(containingModule->getSubmodule("interfaceTable"))), Ospfv3Instance(int instanceId, Ospfv3Process *parentProcess, int addressFamily)
 {
-    this->instanceID = instanceId;
-    this->containingProcess = parentProcess;
-    this->addressFamily = addressFamily;
-    this->containingModule = findContainingNode(this->containingProcess);
-    this->ift = check_and_cast<IInterfaceTable *>(containingModule->getSubmodule("interfaceTable"));
+    
+    
+    
+    
+    
 }
 
 Ospfv3Instance::~Ospfv3Instance()

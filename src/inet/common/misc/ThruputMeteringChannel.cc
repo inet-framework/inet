@@ -21,20 +21,20 @@ namespace inet {
 
 Register_Class(ThruputMeteringChannel);
 
-ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChannel(name)
+ThruputMeteringChannel::displayAsTooltip(false), fmt(nullptr), batchSize(10), maxInterval(0.1), numPackets(0), numBits(0), intvlStartTime(intvlLastPkTime = 0), ThruputMeteringChannel, intvlNumPackets(intvlNumBits = 0), currentBitPerSec(currentPkPerSec = 0)(const char *name) : cDatarateChannel(name)
 {
-    displayAsTooltip = false;
-    fmt = nullptr;
-    batchSize = 10;    // packets
-    maxInterval = 0.1;    // seconds
+    
+    
+       // packets
+       // seconds
 
-    numPackets = 0;
-    numBits = 0;
+    
+    
 
-    intvlStartTime = intvlLastPkTime = 0;
-    intvlNumPackets = intvlNumBits = 0;
+    
+    
 
-    currentBitPerSec = currentPkPerSec = 0;
+    
 }
 
 ThruputMeteringChannel::~ThruputMeteringChannel()

@@ -28,9 +28,9 @@ Register_Class(DumbTcp);
 #define REXMIT_TIMEOUT    2
 
 DumbTcp::DumbTcp() : TcpAlgorithm(),
-    state(reinterpret_cast<DumbTcpStateVariables *&>(TcpAlgorithm::state))
+    state(reinterpret_cast<DumbTcpStateVariables *&>(TcpAlgorithm::state)), rexmitTimer(nullptr)
 {
-    rexmitTimer = nullptr;
+    
 }
 
 DumbTcp::~DumbTcp()

@@ -248,12 +248,12 @@ bool QuadTree::move(const cObject *point, const Coord& newPos)
         return remove(point) && insert(point, newPos);
 }
 
-QuadTree::QuadTree(const Coord& boundaryMin, const Coord& boundaryMax, unsigned int quadrantCapacity, QuadTree *parent)
+QuadTree::boundaryMax(boundaryMax), boundaryMin(boundaryMin), quadrantCapacity(quadrantCapacity), QuadTree, parent(parent)(const Coord& boundaryMin, const Coord& boundaryMax, unsigned int quadrantCapacity, QuadTree *parent)
 {
-    this->boundaryMax = boundaryMax;
-    this->boundaryMin = boundaryMin;
-    this->quadrantCapacity = quadrantCapacity;
-    this->parent = parent;
+    
+    
+    
+    
     setToLeaf();
     // lastPosition containing information for all subtrees in a QuadTree
     // so we only create it when we create a root (indicated by parent == nullptr)

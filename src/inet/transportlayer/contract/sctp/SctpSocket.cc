@@ -29,24 +29,24 @@ namespace inet {
 
 int32_t SctpSocket::nextAssocId = 0;
 
-SctpSocket::SctpSocket(bool type)
+SctpSocket::sockstate(NOT_BOUND), localPrt(remotePrt = 0), oneToOne(type), appLimited(false), assocId(getNewAssocId()), SctpSocket(bool type)
 {
-    sockstate = NOT_BOUND;
-    localPrt = remotePrt = 0;
-    fsmStatus = -1;
-    cb = nullptr;
-    userData = nullptr;
-    gateToSctp = nullptr;
-    lastStream = -1;
-    oneToOne = type;
-    sOptions = new SocketOptions();
-    appOptions = new AppSocketOptions();
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     appOptions->inboundStreams = -1;
     appOptions->outboundStreams = -1;
     appOptions->streamReset = 0;
-    appLimited = false;
+    
    // if (oneToOne)
-        assocId = getNewAssocId();
+        
   /*  else
         assocId = 0;*/
     EV_INFO << "sockstate=" << stateName(sockstate) << "  assocId=" << assocId << "\n";

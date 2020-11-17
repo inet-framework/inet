@@ -54,14 +54,14 @@ namespace inet {
 
 Posture::Posture(unsigned int ID, unsigned int num)
 {
-    postureID = ID;
-    numNodes = num;
+    
+    
 
-    nodePs = new Coord[numNodes];
-    nodeRadius = new double[numNodes];
-    nodeSpeed = new double[numNodes];
+    
+    
+    
 
-    alphaMean = new double *[numNodes];
+    
     for (unsigned int i = 0; i < numNodes; ++i)
         alphaMean[i] = new double[numNodes];
 

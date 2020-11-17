@@ -22,11 +22,11 @@ namespace inet {
 
 Define_Module(StaticLinearMobility);
 
-StaticLinearMobility::StaticLinearMobility()
+StaticLinearMobility::initialX(0), initialY(0), separation(0), StaticLinearMobility()
 {
-    initialX = 0;
-    initialY = 0;
-    separation = 0;
+    
+    
+    
     orientation = deg(0);
 }
 

@@ -39,11 +39,11 @@ namespace ospfv2 {
 
 using namespace ospf;
 
-Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
+Ospfv2Interface::helloTimer(new cMessage("Interface::InterfaceHelloTimer", INTERFACE_HELLO_TIMER)), waitTimer(new cMessage("Interface::InterfaceWaitTimer", INTERFACE_WAIT_TIMER)), acknowledgementTimer(new cMessage("Interface::InterfaceAcknowledgementTimer", INTERFACE_ACKNOWLEDGEMENT_TIMER)), Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
     interfaceType(ifType),
     interfaceMode(ACTIVE),
     crcMode(CRC_MODE_UNDEFINED),
-    interfaceName(""),
+    state(new InterfaceStateDown), previousState(nullptr), interfaceName(""),
     ifIndex(0),
     mtu(0),
     interfaceAddressRange(NULL_IPV4ADDRESSRANGE),
@@ -62,13 +62,13 @@ Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
     authenticationType(NULL_TYPE),
     parentArea(nullptr)
 {
-    state = new InterfaceStateDown;
-    previousState = nullptr;
-    helloTimer = new cMessage("Interface::InterfaceHelloTimer", INTERFACE_HELLO_TIMER);
+    
+    
+    
     helloTimer->setContextPointer(this);
-    waitTimer = new cMessage("Interface::InterfaceWaitTimer", INTERFACE_WAIT_TIMER);
+    
     waitTimer->setContextPointer(this);
-    acknowledgementTimer = new cMessage("Interface::InterfaceAcknowledgementTimer", INTERFACE_ACKNOWLEDGEMENT_TIMER);
+    
     acknowledgementTimer->setContextPointer(this);
     memset(authenticationKey.bytes, 0, sizeof(authenticationKey.bytes));
 }

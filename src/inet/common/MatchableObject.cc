@@ -19,11 +19,11 @@
 
 namespace inet {
 
-MatchableObject::MatchableObject(Attribute defaultAttribute, const cObject *object)
+MatchableObject::defaultAttribute(defaultAttribute), object(object), classDescriptor(nullptr), MatchableObject(Attribute defaultAttribute, const cObject *object)
 {
-    this->defaultAttribute = defaultAttribute;
-    this->object = object;
-    classDescriptor = nullptr;
+    
+    
+    
 }
 
 void MatchableObject::setObject(const cObject *object)

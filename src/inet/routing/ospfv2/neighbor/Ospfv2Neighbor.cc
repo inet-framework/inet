@@ -37,29 +37,29 @@ using namespace ospf;
 unsigned long Neighbor::ddSequenceNumberInitSeed = 0;
 
 Neighbor::Neighbor(RouterId neighbor) :
-    neighborID(neighbor),
+    lastReceivedDDPacket(emptyDD), neighborID(neighbor),
     neighborIPAddress(NULL_IPV4ADDRESS),
     neighborsDesignatedRouter(NULL_DESIGNATEDROUTERID),
     neighborsBackupDesignatedRouter(NULL_DESIGNATEDROUTERID),
     neighborsRouterDeadInterval(40)
 {
     Neighbor::DdPacketId emptyDD;
-    lastReceivedDDPacket = emptyDD;
+    
     // setting only I and M bits is invalid -> good initializer
     lastReceivedDDPacket.ddOptions.I_Init = true;
     lastReceivedDDPacket.ddOptions.M_More = true;
-    inactivityTimer = new cMessage("Neighbor::NeighborInactivityTimer", NEIGHBOR_INACTIVITY_TIMER);
+    
     inactivityTimer->setContextPointer(this);
-    pollTimer = new cMessage("Neighbor::NeighborPollTimer", NEIGHBOR_POLL_TIMER);
+    
     pollTimer->setContextPointer(this);
-    ddRetransmissionTimer = new cMessage("Neighbor::NeighborDDRetransmissionTimer", NEIGHBOR_DD_RETRANSMISSION_TIMER);
+    
     ddRetransmissionTimer->setContextPointer(this);
-    updateRetransmissionTimer = new cMessage("Neighbor::Neighbor::NeighborUpdateRetransmissionTimer", NEIGHBOR_UPDATE_RETRANSMISSION_TIMER);
+    
     updateRetransmissionTimer->setContextPointer(this);
-    requestRetransmissionTimer = new cMessage("Neighbor::NeighborRequestRetransmissionTimer", NEIGHBOR_REQUEST_RETRANSMISSION_TIMER);
+    
     requestRetransmissionTimer->setContextPointer(this);
-    state = new NeighborStateDown;
-    previousState = nullptr;
+    
+    
 }
 
 Neighbor::~Neighbor()

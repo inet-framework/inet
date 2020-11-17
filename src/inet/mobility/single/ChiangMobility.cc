@@ -32,10 +32,10 @@ static const double stateMatrix[3][3] = {
 
 ChiangMobility::ChiangMobility()
 {
-    speed = 0;
-    stateTransitionUpdateInterval = 0;
-    xState = 0;
-    yState = 0;
+    
+    
+    
+    
 }
 
 void ChiangMobility::initialize(int stage)

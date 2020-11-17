@@ -22,7 +22,7 @@ namespace inet {
 BarFigure::BarFigure(const char *name) :
     cRectangleFigure(name)
 {
-    valueFigure = new cRectangleFigure();
+    
     valueFigure->setFilled(true);
     addFigure(valueFigure);
 }

@@ -28,7 +28,7 @@ Define_Module(CloudDelayerBase);
 
 CloudDelayerBase::CloudDelayerBase()
 {
-    networkProtocol = nullptr;
+    
 }
 
 CloudDelayerBase::~CloudDelayerBase()

@@ -29,7 +29,7 @@ namespace inet {
 
 Ipv6FragBuf::Ipv6FragBuf()
 {
-    icmpModule = nullptr;
+    
 }
 
 Ipv6FragBuf::~Ipv6FragBuf()

@@ -28,25 +28,25 @@ namespace tcp {
 
 Register_Class(TcpVegas);
 
-TcpVegasStateVariables::TcpVegasStateVariables()
+TcpVegasStateVariables::v_recoverypoint(0), v_cwnd_changed(0), v_begseq(0), v_begtime(0), v_cntRTT(0), v_sumRTT(0.0), v_rtt_timeout(1000.0), TcpVegasStateVariables, ssthresh(65535), v_inc_flag(true), v_incr_ss(false), v_incr(0), v_worried(0)()
 {
-    ssthresh = 65535;
-    v_recoverypoint = 0;
-    v_cwnd_changed = 0;
+    
+    
+    
 
     v_baseRTT = SIMTIME_MAX;
 
-    v_inc_flag = true;
-    v_incr_ss = false;
-    v_incr = 0;
+    
+    
+    
 
-    v_worried = 0;
+    
 
-    v_begseq = 0;
-    v_begtime = 0;
-    v_cntRTT = 0;
-    v_sumRTT = 0.0;
-    v_rtt_timeout = 1000.0;
+    
+    
+    
+    
+    
 }
 
 TcpVegasStateVariables::~TcpVegasStateVariables()

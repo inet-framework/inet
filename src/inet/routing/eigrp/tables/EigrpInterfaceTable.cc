@@ -58,20 +58,20 @@ EigrpInterface::~EigrpInterface()
 }
 
 EigrpInterface::EigrpInterface(NetworkInterface *iface, int networkId, bool enabled) :
-               interfaceId(iface->getInterfaceId()), networkId(networkId), enabled(enabled)
+               interfaceId(iface->getInterfaceId()), interfaceName(iface->getInterfaceName()), networkId(networkId), hellot(NULL), enabled(enabled), neighborCount(0), stubCount(0), splitHorizon(true), passive(false), mtu(iface->getMtu()), load(1), reliability(255), relMsgs(0), pendingMsgs(0)
 {
-    hellot = NULL;
-    neighborCount = 0;
-    stubCount = 0;
-    splitHorizon = true;
-    passive = false;
-    mtu = iface->getMtu();
+    
+    
+    
+    
+    
+    
     this->setInterfaceDatarate(iface->getDatarate());
-    load = 1;
-    reliability = 255;
-    interfaceName = iface->getInterfaceName();
-    relMsgs = 0;
-    pendingMsgs = 0;
+    
+    
+    
+    
+    
 
     if (!iface->isMulticast() && bandwidth <= 1544) { // Non-broadcast Multi Access interface (no multicast) with bandwidth equal or lower than T1 link
         helloInt = 60;

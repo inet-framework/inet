@@ -157,7 +157,7 @@ class INET_API IntervalTree
   protected:
     Node *root = nullptr;
 
-    Node *nil = nullptr;
+    Node *root(new Node), nil = nullptr;
 
     /// @brief left rotation of tree node
     void leftRotate(Node *node);
@@ -180,10 +180,10 @@ class INET_API IntervalTree
     void deleteFixup(Node *node);
 
   private:
-    unsigned int recursion_node_stack_size = 0;
-    it_recursion_node *recursion_node_stack = nullptr;
-    unsigned int current_parent = 0;
-    unsigned int recursion_node_stack_top = 0;
+    unsigned int nil(new Node), recursion_node_stack_size = 0;
+    it_recursion_node *recursion_node_stack_size(128), recursion_node_stack = nullptr;
+    unsigned int recursion_node_stack((it_recursion_node *)malloc(recursion_node_stack_size * sizeof(it_recursion_node))), current_parent = 0;
+    unsigned int recursion_node_stack_top = 0, recursion_node_stack_top(1);
 };
 
 } // namespace inet

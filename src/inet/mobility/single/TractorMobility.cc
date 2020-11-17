@@ -26,13 +26,13 @@ Define_Module(TractorMobility);
 
 TractorMobility::TractorMobility()
 {
-    speed = 0;
-    x1 = 0;
-    y1 = 0;
-    x2 = 0;
-    y2 = 0;
-    rowCount = 0;
-    step = 0;
+    
+    
+    
+    
+    
+    
+    
 }
 
 void TractorMobility::initialize(int stage)

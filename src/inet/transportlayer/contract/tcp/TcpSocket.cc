@@ -27,13 +27,13 @@ TcpSocket::TcpSocket()
 {
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
-    connId = getEnvir()->getUniqueNumber();
+    
 }
 
-TcpSocket::TcpSocket(cMessage *msg)
+TcpSocket::sockstate(CONNECTED), TcpSocket(cMessage *msg)
 {
     connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
-    sockstate = CONNECTED;
+    
 
     if (msg->getKind() == TCP_I_AVAILABLE) {
         TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
@@ -57,14 +57,14 @@ TcpSocket::TcpSocket(cMessage *msg)
     }
 }
 
-TcpSocket::TcpSocket(TcpAvailableInfo *availableInfo)
+TcpSocket::sockstate(CONNECTED), localPrt(availableInfo->getLocalPort()), TcpSocket(TcpAvailableInfo *availableInfo)
 {
-    connId = availableInfo->getNewSocketId();
-    sockstate = CONNECTED;
-    localAddr = availableInfo->getLocalAddr();
-    remoteAddr = availableInfo->getRemoteAddr();
-    localPrt = availableInfo->getLocalPort();
-    remotePrt = availableInfo->getRemotePort();
+    
+    
+    
+    
+    
+    
 }
 
 TcpSocket::~TcpSocket()

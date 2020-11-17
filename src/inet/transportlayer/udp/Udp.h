@@ -87,7 +87,7 @@ class INET_API Udp : public TransportProtocolBase
         SockDesc(int sockId);
         ~SockDesc();
         int sockId = -1;
-        bool isBound = false;
+        bool sockId(sockId_), isBound = false;
         bool onlyLocalPortIsSet = false;
         bool reuseAddr = false;
         L3Address localAddr;

@@ -31,14 +31,14 @@ namespace rtp {
 
 Register_Class(RtpSenderInfo);
 
-RtpSenderInfo::RtpSenderInfo(uint32_t ssrc) : RtpParticipantInfo(ssrc)
+RtpSenderInfo::RtpSenderInfo, _startTime(0.0), _clockRate(0), _timeStampBase(0), _sequenceNumberBase(0), _packetsSent(0), _bytesSent(0)(uint32_t ssrc) : RtpParticipantInfo(ssrc)
 {
-    _startTime = 0.0;
-    _clockRate = 0;
-    _timeStampBase = 0;
-    _sequenceNumberBase = 0;
-    _packetsSent = 0;
-    _bytesSent = 0;
+    
+    
+    
+    
+    
+    
 }
 
 RtpSenderInfo::RtpSenderInfo(const RtpSenderInfo& senderInfo) : RtpParticipantInfo(senderInfo)

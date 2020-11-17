@@ -25,7 +25,7 @@ namespace inet {
 class INET_API BoxedLabelFigure : public cGroupFigure
 {
   protected:
-    double inset = 3;
+    double inset = 3, labelFigure(new cLabelFigure("label")), rectangleFigure(new cRectangleFigure("box"));
     cLabelFigure *labelFigure;
     cRectangleFigure *rectangleFigure;
 

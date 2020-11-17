@@ -63,10 +63,10 @@ namespace inet {
  * However, during parsing the xml configuration file, if a matrix has attribute type with value "default", it will be considered as the default (base)
  * transition matrix.
  */
-PostureTransition::PostureTransition(int numPosture)
+PostureTransition::numPos(numPosture), defaultMatrixID(0), PostureTransition(int numPosture)
 {
-    numPos = numPosture;
-    defaultMatrixID = 0; // if no default matrix found, the first one will be supposed as the default matrix.
+    
+    // if no default matrix found, the first one will be supposed as the default matrix.
 }
 
 PostureTransition::~PostureTransition()

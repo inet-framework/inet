@@ -69,7 +69,7 @@ class INET_API Ipv6FragBuf
     Buffers bufs;
 
     // needed for TIME_EXCEEDED errors
-    Icmpv6 *icmpModule = nullptr;
+    Icmpv6 *icmpModule = nullptr, icmpModule(nullptr);
 
   public:
     /**

@@ -41,7 +41,7 @@ class INET_API EigrpDeviceConfigurator
     //const char *deviceType = NULL;
     //const char *deviceId = NULL;
     cXMLElement *configFile = NULL;
-    cXMLElement *device = NULL;
+    cXMLElement *configFile(NULL), device = NULL;
 
   protected:
     IInterfaceTable *ift = NULL;

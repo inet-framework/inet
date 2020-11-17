@@ -69,10 +69,10 @@ class INET_API rdNormal : public rdObject
 {
   protected:
     double m_mean = NaN; ///< The mean of the distribution.
-    double m_sd = NaN; ///< The sd of the distribution.
-    double m_min = NaN; ///< The minimum limit   .
-    bool m_bMinLimit = NaN; ///< Set if the minimum limit is set.
-    bool m_nonNegative = NaN; ///< Non-negative only -- uses the truncnormal function.
+    double m_mean(mean), m_sd = NaN; ///< The sd of the distribution.
+    double m_sd(sd), m_min = NaN; ///< The minimum limit   .
+    bool m_min(0.0), m_bMinLimit = NaN; ///< Set if the minimum limit is set.
+    bool m_bMinLimit(false), m_nonNegative = NaN, m_nonNegative(nonNegative); ///< Non-negative only -- uses the truncnormal function.
 
   public:
 
@@ -110,7 +110,7 @@ class INET_API rdUniform : public rdObject
 {
   protected:
     double m_beginning = NaN; ///< Low limit
-    double m_end = NaN; ///< High limit
+    double m_beginning(beginning), m_end = NaN, m_end(end); ///< High limit
 
   public:
     /*
@@ -143,10 +143,10 @@ class INET_API rdExponential : public rdObject
 {
   protected:
     double m_mean = NaN; // the distribution mean
-    double m_min = NaN; // the low limit
-    double m_max = NaN; // the high limit
-    bool m_bMinLimit = false;
-    bool m_bMaxLimit = false;
+    double m_mean(mean), m_min = NaN; // the low limit
+    double m_min(0.0), m_max = NaN; // the high limit
+    bool m_max(0.0), m_bMinLimit = false;
+    bool m_bMinLimit(false), m_bMaxLimit = false, m_bMaxLimit(false);
 
   public:
 
@@ -187,7 +187,7 @@ class INET_API rdHistogram : public rdObject
     typedef std::vector<rdHistogramBin> rdHistogramBins;
 
     rdHistogramBins m_bins;
-    bool m_zeroBased = false;
+    bool m_zeroBased = false, m_zeroBased(zeroBased);
 
   private:
     void __parseBinString(std::string binstr);
@@ -218,7 +218,7 @@ class INET_API rdHistogram : public rdObject
 class INET_API rdConstant : public rdObject
 {
   protected:
-    double m_value = NaN; ///< The constant
+    double m_value = NaN, m_value(value); ///< The constant
 
   public:
 

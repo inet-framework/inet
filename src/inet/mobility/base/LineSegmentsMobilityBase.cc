@@ -21,9 +21,9 @@
 
 namespace inet {
 
-LineSegmentsMobilityBase::LineSegmentsMobilityBase()
+LineSegmentsMobilityBase::LineSegmentsMobilityBase, targetPosition(Coord::ZERO)()
 {
-    targetPosition = Coord::ZERO;
+    
 }
 
 void LineSegmentsMobilityBase::initializePosition()

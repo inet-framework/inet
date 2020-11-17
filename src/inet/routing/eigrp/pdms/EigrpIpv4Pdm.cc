@@ -45,24 +45,24 @@ namespace eigrp {
 
 Define_Module(EigrpIpv4Pdm);
 
-EigrpIpv4Pdm::EigrpIpv4Pdm() : EIGRP_IPV4_MULT(Ipv4Address(224, 0, 0, 10))
+EigrpIpv4Pdm::asNum(-1), maximumPath(4), variance(1), adminDistInt(90), useClassicMetric(true), ribScale(128), eigrpStubEnabled(false), EigrpIpv4Pdm() : SPLITTER_OUTGW("splitterOut"), RTP_OUTGW("rtpOut"), EIGRP_IPV4_MULT(Ipv4Address(224, 0, 0, 10))
 {
-    SPLITTER_OUTGW = "splitterOut";
-    RTP_OUTGW = "rtpOut";
+    
+    
 
     KVALUES_MAX.K1 = KVALUES_MAX.K2 = KVALUES_MAX.K3 = KVALUES_MAX.K4 = KVALUES_MAX.K5 = KVALUES_MAX.K6 = 255;
 
-    asNum = -1;
-    maximumPath = 4;
-    variance = 1;
-    adminDistInt = 90;
-    useClassicMetric = true;
-    ribScale = 128;
+    
+    
+    
+    
+    
+    
 
     kValues.K1 = kValues.K3 = 1;
     kValues.K2 = kValues.K4 = kValues.K5 = kValues.K6 = 0;
 
-    eigrpStubEnabled = false;
+    
 }
 
 EigrpIpv4Pdm::~EigrpIpv4Pdm()
