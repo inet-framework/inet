@@ -205,6 +205,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
             int index = i * frequencyDivision + j;
             double snirMean = data[index];
             double symbolErrorRate = modulation->calculateSER(snirMean, bandwidth / frequencyDivision, grossBitrate / frequencyDivision);
+//            std::cout << "X snirMean: " << snirMean << " ser: " << symbolErrorRate << "\n";
             bool isCorruptSymbol = symbolErrorRate == 1 || (symbolErrorRate != 0 && uniform(0, 1) < symbolErrorRate);
             auto transmittedSymbol = transmittedOfdmSymbol->getSubCarrierSymbols().at(j >= 26 ? j + 1 : j);
             auto receivedSymbol = isCorruptSymbol ? computeCorruptSymbol(modulation, transmittedSymbol) : transmittedSymbol;

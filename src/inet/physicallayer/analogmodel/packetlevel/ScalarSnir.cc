@@ -43,6 +43,7 @@ double ScalarSnir::computeMin() const
 {
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(reception->getAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
+    std::cout << "computeMin(): " << scalarSignalAnalogModel->getPower() << " " << scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime()).get() << "\n";
     return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
