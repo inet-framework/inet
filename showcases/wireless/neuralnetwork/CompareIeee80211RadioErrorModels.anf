@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils, plot, vectorops as ops
 from matplotlib.widgets import Slider
 import mpld3
+import re
 
 # get chart properties
 props = chart.get_properties()
@@ -69,6 +70,9 @@ df2 = df1[df1['power'] == power]
 dff = pd.pivot_table(df2, values="value", columns=iso_itervar, index=xaxis_itervar)
 #print(dff)
 legend_cols, _ = utils.extract_label_columns(dff)
+
+print("legend_cols", legend_cols)
+
 y = 0
 for i, c in enumerate(dff.columns):
     style = utils._make_line_args(props, c, dff)
@@ -96,7 +100,23 @@ plt.ylim(0, 100)
 utils.set_plot_title("Received Packets vs Number of Noise Sources")
 utils.postconfigure_plot(props)
 
-plt.legend(loc='best')
+legend = plt.legend(loc='best')
+
+print("legend", legend)
+current_handles, current_labels = plt.gca().get_legend_handles_labels()
+
+print("handles", current_handles)
+print("labels", current_labels)
+
+new_labels = []
+for i in current_labels:
+     print("label:", i)
+     new_labels.append(re.sub(r'configname=Dimensional','',i))
+     
+print("new labels:", new_labels)
+
+plt.legend(current_handles, new_labels)
+
 
 fig = plt.gcf()
 fig.figsize=(4,4)
