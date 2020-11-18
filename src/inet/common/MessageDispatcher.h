@@ -22,11 +22,11 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
 
 namespace inet {
 
@@ -34,11 +34,11 @@ namespace inet {
  * This class implements the corresponding module. See module documentation for more details.
  */
 class INET_API MessageDispatcher :
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
     public queueing::PacketProcessorBase, public queueing::IActivePacketSource, public queueing::IPassivePacketSink,
 #else
     public cSimpleModule,
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
     public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   public:
@@ -75,7 +75,7 @@ class INET_API MessageDispatcher :
     virtual cGate *handleMessage(Message *request, cGate *inGate);
 
   public:
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
     virtual bool supportsPacketSending(cGate *gate) const override { return true; }
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
@@ -94,7 +94,7 @@ class INET_API MessageDispatcher :
 
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
 
     virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in) override;
 

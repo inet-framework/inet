@@ -24,11 +24,11 @@
 #include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/PortFilter.h"
 
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #else
 namespace inet { namespace tcp { class TcpConnection; } }
-#endif // WITH_TCP_INET
+#endif // INET_WITH_TCP_INET
 
 namespace inet {
 

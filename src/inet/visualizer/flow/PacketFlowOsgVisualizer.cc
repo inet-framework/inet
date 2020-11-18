@@ -17,11 +17,11 @@
 
 #include "inet/common/INETDefs.h"
 
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/MacRelayUnit.h"
 #endif
 
-#ifdef WITH_IEEE8021D
+#ifdef INET_WITH_IEEE8021D
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #endif
 
@@ -45,12 +45,12 @@ bool PacketFlowOsgVisualizer::isPathEnd(cModule *module) const
 
 bool PacketFlowOsgVisualizer::isPathElement(cModule *module) const
 {
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
     if (dynamic_cast<MacRelayUnit *>(module) != nullptr)
         return true;
 #endif
 
-#ifdef WITH_IEEE8021D
+#ifdef INET_WITH_IEEE8021D
     if (dynamic_cast<Ieee8021dRelay *>(module) != nullptr)
         return true;
 #endif

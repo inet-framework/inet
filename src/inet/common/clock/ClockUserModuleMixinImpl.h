@@ -24,7 +24,7 @@
 
 namespace inet {
 
-#ifdef WITH_CLOCK_SUPPORT
+#ifdef INET_WITH_CLOCK
 
 template<typename T>
 IClock *ClockUserModuleMixin<T>::findClockModule() const {
@@ -144,7 +144,7 @@ void ClockUserModuleMixin<T>::receiveSignal(cComponent *source, simsignal_t sign
     }
 }
 
-#endif // #ifdef WITH_CLOCK_SUPPORT
+#endif // #ifdef INET_WITH_CLOCK
 
 } // namespace inet
 

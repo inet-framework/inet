@@ -29,17 +29,17 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
-#endif // ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_NEXTHOP
 
 namespace inet {
 
@@ -126,27 +126,27 @@ NetworkInterface *InterfaceTable::findInterfaceByAddress(const L3Address& addres
         for (auto& elem : idToInterface) {
             NetworkInterface *ie = elem;
             if (ie) {
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
                 if (auto nextHopData = ie->findProtocolData<NextHopInterfaceData>())
                     if (nextHopData->getAddress() == address)
                         return ie;
-#endif // ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_NEXTHOP
                 switch (addrType) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                     case L3Address::IPv4:
                         if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>())
                             if (ipv4Data->getIPAddress() == address.toIpv4())
                                 return ie;
                         break;
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
                     case L3Address::IPv6:
                         if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>())
                             if (ipv6Data->hasAddress(address.toIpv6()))
                                 return ie;
                         break;
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
                     case L3Address::MAC:
                         if (ie->getMacAddress() == address.toMac())
@@ -179,7 +179,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
         return false;
 
     switch (address.getType()) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         case L3Address::IPv4:
             for (auto& elem : idToInterface) {
                 NetworkInterface *ie = elem;
@@ -194,8 +194,8 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
             }
             break;
 
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
         case L3Address::IPv6:
             for (auto& elem : idToInterface) {
                 NetworkInterface *ie = elem;
@@ -211,7 +211,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
             }
             break;
 
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
         case L3Address::MAC:
         case L3Address::MODULEPATH:
         case L3Address::MODULEID:
@@ -396,13 +396,13 @@ void InterfaceTable::updateLinkDisplayString(NetworkInterface *entry) const
         cDisplayString& displayString = outputGate->getDisplayString();
         std::stringstream buf;
         buf << entry->getFullName() << "\n";
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         auto ipv4Data = entry->findProtocolData<Ipv4InterfaceData>();
         if (ipv4Data && !(ipv4Data->getIPAddress().isUnspecified())) {
             buf << ipv4Data->getIPAddress().str() << "/" << ipv4Data->getNetmask().getNetmaskLength() << "\n";
         }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
         auto ipv6Data = entry->findProtocolData<Ipv6InterfaceData>();
         if (ipv6Data && ipv6Data->getNumAddresses() > 0) {
             for (int i = 0; i < ipv6Data->getNumAddresses(); i++) {
@@ -412,7 +412,7 @@ void InterfaceTable::updateLinkDisplayString(NetworkInterface *entry) const
                 buf << ipv6Data->getAddress(i).str() << "/64" << "\n";
             }
         }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
         displayString.setTagArg("t", 0, buf.str().c_str());
         displayString.setTagArg("t", 1, "l");
     }
@@ -547,7 +547,7 @@ MulticastGroupList InterfaceTable::collectMulticastGroups() const
 {
     MulticastGroupList mglist;
     for (int i = 0; i < getNumInterfaces(); ++i) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         NetworkInterface *ie = getInterface(i);
         int interfaceId = ie->getInterfaceId();
         auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
@@ -557,10 +557,10 @@ MulticastGroupList InterfaceTable::collectMulticastGroups() const
                 mglist.push_back(MulticastGroup(ipv4Data->getJoinedMulticastGroup(j), interfaceId));
             }
         }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
         // TODO
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
     }
     return mglist;
 }

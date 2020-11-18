@@ -92,7 +92,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     int numUnroutable = 0;
     int numForwarded = 0;
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // 28.9.07 - CB
     // datagrams that are supposed to be sent with a tentative Ipv6 address
     // are rescheduled for later resubmission.
@@ -113,7 +113,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
         bool getFromHL() { return fromHL; }
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }
     };
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // netfilter hook variables
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
@@ -244,7 +244,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     bool determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop, int& interfaceId,
             Packet *packet, bool fromHL);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     /**
      * Process the extension headers of the datagram.
      * Returns true if all have been processed successfully and false if errors occured
@@ -252,7 +252,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      * module for further processing.
      */
     bool processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 };
 
 } // namespace inet

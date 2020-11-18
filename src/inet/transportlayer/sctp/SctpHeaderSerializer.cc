@@ -153,7 +153,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 }
                 int32_t numaddr = initChunk->getAddressesArraySize();
                 for (int32_t i = 0; i < numaddr; i++) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                     if (initChunk->getAddresses(i).getType() == L3Address::IPv4) {
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)ic) + sizeof(struct init_chunk) + parPtr);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
@@ -161,8 +161,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         ipv4addr->address = htonl(initChunk->getAddresses(i).toIpv4().getInt());
                         parPtr += sizeof(struct init_ipv4_address_parameter);
                     }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
                     if (initChunk->getAddresses(i).getType() == L3Address::IPv6) {
                         struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)ic) + sizeof(struct init_chunk) + parPtr);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
@@ -172,7 +172,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         }
                         parPtr += sizeof(struct init_ipv6_address_parameter);
                     }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
                 }
                 int chunkcount = initChunk->getSepChunksArraySize();
                 if (chunkcount > 0) {
@@ -288,7 +288,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
                 int32_t numaddr = initAckChunk->getAddressesArraySize();
                 for (int32_t i = 0; i < numaddr; i++) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                     if (initAckChunk->getAddresses(i).getType() == L3Address::IPv4) {
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parPtr);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
@@ -296,8 +296,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         ipv4addr->address = htonl(initAckChunk->getAddresses(i).toIpv4().getInt());
                         parPtr += sizeof(struct init_ipv4_address_parameter);
                     }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
                     if (initAckChunk->getAddresses(i).getType() == L3Address::IPv6) {
                         struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parPtr);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
@@ -307,7 +307,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         }
                         parPtr += sizeof(struct init_ipv6_address_parameter);
                     }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
                 }
                 int chunkcount = initAckChunk->getSepChunksArraySize();
                 if (chunkcount > 0) {
@@ -508,7 +508,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 L3Address addr = heartbeatChunk->getRemoteAddr();
                 simtime_t time = heartbeatChunk->getTimeField();
                 int32_t infolen = 0;
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                 if (addr.getType() == L3Address::IPv4) {
                     infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32_t);
                     hbi->type = htons(1); // mandatory
@@ -519,8 +519,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     ipv4addr->address = htonl(addr.toIpv4().getInt());
                     HBI_ADDR(hbi).v4addr = *ipv4addr;
                 }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
                 if (addr.getType() == L3Address::IPv6) {
                     infolen = 20 + sizeof(uint32_t);
                     hbi->type = htons(1); // mandatory
@@ -533,7 +533,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     }
                     HBI_ADDR(hbi).v6addr = *ipv6addr;
                 }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
                 ASSERT(infolen != 0);
                 HBI_TIME(hbi) = htonl((uint32_t)time.dbl());
                 hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
@@ -565,7 +565,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     L3Address addr = heartbeatAckChunk->getRemoteAddr();
                     simtime_t time = heartbeatAckChunk->getTimeField();
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                     if (addr.getType() == L3Address::IPv4) {
                         infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32_t);
                         hbi->type = htons(1); // mandatory
@@ -576,8 +576,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         ipv4addr->address = htonl(addr.toIpv4().getInt());
                         HBI_ADDR(hbi).v4addr = *ipv4addr;
                     }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
                     if (addr.getType() == L3Address::IPv6) {
                         infolen = 20 + sizeof(uint32_t);
                         hbi->type = htons(1); // mandatory
@@ -590,7 +590,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         }
                         HBI_ADDR(hbi).v6addr = *ipv6addr;
                     }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
                     HBI_TIME(hbi) = htonl((uint32_t)time.dbl());
                 }
                 hbac->length = htons(sizeof(struct heartbeat_ack_chunk) + infolen + 4);

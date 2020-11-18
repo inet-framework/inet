@@ -17,15 +17,15 @@
 
 #include "inet/transportlayer/common/L4Tools.h"
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
 
-#ifdef WITH_SCTP
+#ifdef INET_WITH_SCTP
 // TODO
 #endif
 
@@ -70,11 +70,11 @@ bool isTransportProtocol(const Protocol& protocol)
 
 const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol, int flags)
 {
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
     if (protocol == Protocol::tcp)
         return packet->peekAtFront<tcp::TcpHeader>(b(-1), flags);
 #endif
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
     if (protocol == Protocol::udp)
         return packet->peekAtFront<UdpHeader>(b(-1), flags);
 #endif
@@ -94,11 +94,11 @@ void insertTransportProtocolHeader(Packet *packet, const Protocol& protocol, con
 
 const Ptr<TransportHeaderBase> removeTransportProtocolHeader(Packet *packet, const Protocol& protocol)
 {
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
     if (protocol == Protocol::tcp)
         return removeTransportProtocolHeader<tcp::TcpHeader>(packet);
 #endif
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
     if (protocol == Protocol::udp)
         return removeTransportProtocolHeader<UdpHeader>(packet);
 #endif

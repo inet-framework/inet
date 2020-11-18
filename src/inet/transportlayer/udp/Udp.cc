@@ -40,20 +40,20 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
@@ -110,12 +110,12 @@ void Udp::initialize(int stage)
             // FFFF for placement in the UDP header.  IPv6 receivers must
             // discard UDP packets containing a zero checksum, and should log
             // the error.
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
                 ipv4->registerHook(0, &crcInsertion);
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
                 ipv6->registerHook(0, &crcInsertion);
@@ -495,14 +495,14 @@ void Udp::addMulticastAddressToInterface(NetworkInterface *ie, const L3Address& 
     ASSERT(multicastAddr.isMulticast());
 
     if (multicastAddr.getType() == L3Address::IPv4) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(multicastAddr.toIpv4());
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
     }
     else if (multicastAddr.getType() == L3Address::IPv6) {
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
         ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
     }
     else
         ie->joinMulticastGroup(multicastAddr);
@@ -1109,24 +1109,24 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     auto inIe = udpPacket->getTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         if (!icmp)
             // TODO move to initialize?
             icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
         icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
-#else // ifdef WITH_IPv4
+#else // ifdef INET_WITH_IPv4
         delete udpPacket;
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
     }
     else if (protocol->getId() == Protocol::ipv6.getId()) {
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
         if (!icmpv6)
             // TODO move to initialize?
             icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
         icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-#else // ifdef WITH_IPv6
+#else // ifdef INET_WITH_IPv6
         delete udpPacket;
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
     }
     else if (protocol->getId() == Protocol::nextHopForwarding.getId()) {
         delete udpPacket;
@@ -1158,7 +1158,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 
 void Udp::processICMPv4Error(Packet *packet)
 {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     // extract details from the error message, then try to notify socket that sent bogus packet
 
     if (!icmp)
@@ -1208,14 +1208,14 @@ void Udp::processICMPv4Error(Packet *packet)
     }
     else
         EV_WARN << "Udp header not available, ignoring ICMP error\n";
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
     delete packet;
 }
 
 void Udp::processICMPv6Error(Packet *packet)
 {
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     if (!icmpv6)
         // TODO move to initialize?
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
@@ -1270,7 +1270,7 @@ void Udp::processICMPv6Error(Packet *packet)
     else
         EV_WARN << "Udp header not available, ignoring ICMPv6 error\n";
 
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
     delete packet;
 }

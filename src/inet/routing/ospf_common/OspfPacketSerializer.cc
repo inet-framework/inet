@@ -19,9 +19,9 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/ospf_common/OspfPacketBase_m.h"
-#ifdef WITH_OSPFv2
+#ifdef INET_WITH_OSPFv2
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
-#endif // #ifdef WITH_OSPFv2
+#endif // #ifdef INET_WITH_OSPFv2
 
 namespace inet {
 namespace ospf {
@@ -40,17 +40,17 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
 
     // TODO should register Ospfv<version>Serializer classes to OspfSerializer and deserializer choose a serializer class based on version field
     switch (ospfVer) {
-#ifdef WITH_OSPFv2
+#ifdef INET_WITH_OSPFv2
         case 2:
             stream.seek(startPos);
             return ospfv2::Ospfv2PacketSerializer().deserialize(stream);
             break;
-#endif // #ifdef WITH_OSPFv2
-#ifdef WITH_OSPFv3
+#endif // #ifdef INET_WITH_OSPFv2
+#ifdef INET_WITH_OSPFv3
         case 3:
             // TODO stream.seek(startPos);
             // TODO return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
-#endif // #ifdef WITH_OSPFv3
+#endif // #ifdef INET_WITH_OSPFv3
         default: {
             auto ospfPacket = makeShared<OspfPacketBase>();
             ospfPacket->markIncorrect();

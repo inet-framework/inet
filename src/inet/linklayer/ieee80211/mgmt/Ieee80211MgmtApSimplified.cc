@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/EthernetMacHeader_m.h"
-#endif // ifdef WITH_ETHERNET
+#endif // ifdef INET_WITH_ETHERNET
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApSimplified.h"
 

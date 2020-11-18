@@ -55,11 +55,11 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     bool multicastForward = false; // If node is forwarding multicast info
     bool useAdminDist = false; // Use Cisco like administrative distances
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     bool ishome_agent = false; // added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
     bool ismobile_node = false; // added by Zarrar Yousaf @ CNI, UniDortmund on 25.02.07
     bool mipv6Support = false; // 4.9.07 - CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // Destination Cache maps dest address to next hop and interfaceId.
     // NOTE: nextHop might be a link-local address from which interfaceId cannot be deduced
@@ -162,7 +162,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      */
     virtual void routeChanged(Ipv6Route *entry, int fieldCode);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     /**
      * Determine whether normal Router or Home Agent
      */
@@ -184,7 +184,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * MN if TRUE or else a CN
      */
     void setIsMobileNode(bool value) { ismobile_node = value; }
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     /** @name Routing functions */
     //@{
@@ -329,7 +329,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual Ipv6Route *getRoute(int i) const override;
     //@}
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     //================Added by Zarrar Yousaf ===================================
 
     //void updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
@@ -374,7 +374,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * with respect to the prefix advertisement list.
      */
     bool isOnLinkAddress(const Ipv6Address& address); // update 11.9.07 - CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     /**
      * ILifecycle method

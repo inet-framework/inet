@@ -42,9 +42,9 @@
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 namespace inet {
 
@@ -63,7 +63,7 @@ Ipv6::~Ipv6()
         delete it.second;
 }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 Ipv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const NetworkInterface *ie, MacAddress macAddr, bool fromHL) :
     packet(packet),
     ipv6Header(ipv6Header),
@@ -78,7 +78,7 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
     delete packet;
 }
 
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 void Ipv6::initialize(int stage)
 {
@@ -196,7 +196,7 @@ void Ipv6::handleMessage(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // 28.09.07 - CB
     // support for rescheduling datagrams which are supposed to be sent over
     // a tentative address.
@@ -217,16 +217,16 @@ void Ipv6::handleMessage(cMessage *msg)
         }
     }
     else
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     if (auto request = dynamic_cast<Request *>(msg))
         handleRequest(request);
     else if (msg->getArrivalGate()->isName("transportIn")
              || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
              || (msg->arrivedOn("upperTunnelingIn")) // for tunneling support-CB
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
              || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
              )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
@@ -318,17 +318,17 @@ void Ipv6::handleMessageFromHL(Packet *msg)
     if (!src.isUnspecified()) {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src) == nullptr) {
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
             EV_WARN << "Encapsulation failed - dropping packet." << endl;
             PacketDropDetails details;
             details.setReason(NO_INTERFACE_FOUND);
             emit(packetDroppedSignal, packet, &details);
             delete packet;
             return;
-#else /* WITH_xMIPv6 */
+#else /* INET_WITH_xMIPv6 */
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), packet->getClassName(), packet->getFullName());
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
         }
     }
 
@@ -431,7 +431,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     int interfaceId = -1;
     Ipv6Address nextHop(requestedNextHopAddress);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // tunneling support - CB
     // check if destination is covered by tunnel lists
     if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
@@ -449,11 +449,11 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
             // otherwise we can search for everything
             interfaceId = tunneling->getVIfIndexForDest(destAddress);
     }
-#else // ifdef WITH_xMIPv6
-    // FIXME this is not the same as the code above (when WITH_xMIPv6 is defined),
+#else // ifdef INET_WITH_xMIPv6
+    // FIXME this is not the same as the code above (when INET_WITH_xMIPv6 is defined),
     // so tunneling examples could not work with xMIPv6
     interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     if (interfaceId == -1 && destIE != nullptr)
         interfaceId = destIE->getInterfaceId(); // set interfaceId to destIE when not tunneling
@@ -484,7 +484,7 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     Ipv6Address destAddress = ipv6Header->getDestAddress();
     EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getInterfaceName() << "\n";
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     if (rt->isMobileNode()) {
         // if the source address is the HoA and we have a CoA then drop the packet
         // (address is topologically incorrect!)
@@ -497,7 +497,7 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
             return;
         }
     }
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     MacAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId); // might initiate NUD
     if (macAddr.isUnspecified()) {
@@ -670,7 +670,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         EV_DETAIL << "This fragment completes the datagram.\n";
     }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // #### 29.08.07 - CB
     // check for extension headers
     if (!processExtensionHeaders(packet, ipv6Header.get())) {
@@ -680,7 +680,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         return;
     }
     // #### end CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     auto origPacket = packet->dup();
     const Protocol *protocol = ipv6Header->getProtocol();
@@ -706,7 +706,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     if (protocol == &Protocol::icmpv6) {
         handleReceivedIcmp(packet);
     } // Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     else if (protocol == &Protocol::mobileipv6) {
         // added check for MIPv6 support to prevent nodes w/o the
         // xMIP module from processing related messages, 4.9.07 - CB
@@ -723,7 +723,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
             sendIcmpError(packet, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
         }
     }
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
     else if (protocol == &Protocol::ipv4 || protocol == &Protocol::ipv6) {
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
@@ -886,7 +886,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         packet->insertAtFront(ipv6HeaderCopy);
         ipv6Header = ipv6HeaderCopy;
 
-    #ifdef WITH_xMIPv6
+    #ifdef INET_WITH_xMIPv6
         // if the datagram has a tentative address as source we have to reschedule it
         // as it can not be sent before the address' tentative status is cleared - CB
         if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
@@ -896,7 +896,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
             scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
             return;
         }
-    #endif /* WITH_xMIPv6 */
+    #endif /* INET_WITH_xMIPv6 */
     }
 
     int mtu = ie->getMtu();
@@ -1005,7 +1005,7 @@ bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address&
     return true;
 }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 {
     int noExtHeaders = ipv6Header->getExtensionHeaderArraySize();
@@ -1057,7 +1057,7 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
     return true;
 }
 
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 // NetFilter:
 void Ipv6::registerHook(int priority, INetfilter::IHook *hook)

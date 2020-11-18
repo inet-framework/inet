@@ -939,7 +939,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             if (false) {
             }
             // ====== SCTP =====================================================
-#ifdef WITH_SCTP
+#ifdef INET_WITH_SCTP
             else if (TransportProtocol == SCTP) {
                 const bool sendUnordered = (UnorderedMode > 0.0) ? (uniform(0.0, 1.0) < UnorderedMode) : false;
                 const bool sendUnreliable = (UnreliableMode > 0.0) ? (uniform(0.0, 1.0) < UnreliableMode) : false;

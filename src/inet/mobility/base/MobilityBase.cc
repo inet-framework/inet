@@ -19,7 +19,7 @@
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#ifdef WITH_VISUALIZERS
+#ifdef INET_WITH_VISUALIZERS
 #include "inet/visualizer/mobility/MobilityCanvasVisualizer.h"
 #endif
 

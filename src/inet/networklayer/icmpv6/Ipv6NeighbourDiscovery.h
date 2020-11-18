@@ -40,9 +40,9 @@ class NetworkInterface;
 class Ipv6Header;
 class Ipv6RoutingTable;
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 class xMIPv6;
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
@@ -102,9 +102,9 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     Icmpv6 *icmpv6 = nullptr;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     xMIPv6 *mipv6 = nullptr; // in case the node has MIP support
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     Ipv6NeighbourCache neighbourCache;
     typedef std::set<cMessage *> RaTimerList; // FIXME add comparator for stable fingerprints!
@@ -148,7 +148,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     // List of Advertising Interfaces
     AdvIfList advIfList;
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // An entry that stores information for configuring the global unicast
     // address, after DAD was succesfully performed
     struct DadGlobalEntry {
@@ -162,7 +162,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     };
     typedef std::map<NetworkInterface *, DadGlobalEntry> DadGlobalList; // FIXME add comparator for stable fingerprints!
     DadGlobalList dadGlobalList;
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
   protected:
     /************************Miscellaneous Stuff***************************/
@@ -310,13 +310,13 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
        operate independently on the prefixes that have the appropriate flag set.*/
     virtual void processRaPrefixInfo(const Ipv6RouterAdvertisement *ra, NetworkInterface *ie);
 
-#ifndef WITH_xMIPv6
+#ifndef INET_WITH_xMIPv6
     virtual void processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo,
             NetworkInterface *ie);
-#else /* WITH_xMIPv6 */
+#else /* INET_WITH_xMIPv6 */
     virtual void processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo,
             NetworkInterface *ie, bool hFlag = false); // overloaded method - 3.9.07 CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     /**
      *  Create a timer for the given interface entry that sends periodic
@@ -350,16 +350,16 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
 
     virtual void sendSolicitedNa(Packet *packet, const Ipv6NeighbourSolicitation *ns, NetworkInterface *ie);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 
   public: // update 12.9.07 - CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
     virtual void sendUnsolicitedNa(NetworkInterface *ie);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 
   protected: // update 12.9.07 - CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     virtual void processNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
     virtual bool validateNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
@@ -372,7 +372,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     virtual void processRedirectPacket(const Ipv6Redirect *redirect);
     /************End Of Redirect Message Stuff*****************************/
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     /* Determine that this router can communicate with wireless nodes
      * on the LAN connected to the given interface.
      * The result is true if the interface is a wireless interface
@@ -391,7 +391,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     void routersUnreachabilityDetection(const NetworkInterface *ie); // 3.9.07 - CB
     bool isWirelessInterface(const NetworkInterface *ie);
     bool isWirelessAccessPoint(cModule *module);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 };
 
 } // namespace inet

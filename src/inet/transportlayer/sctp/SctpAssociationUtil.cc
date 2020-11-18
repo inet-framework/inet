@@ -34,13 +34,13 @@
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
@@ -596,25 +596,25 @@ void SctpAssociation::sendInit()
     state->asconfSn = 1000;
 
     initTsn = initChunk->getInitTsn();
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     initChunk->setIpv4Supported(true);
 #else
     initChunk->setIpv4Supported(false);
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     initChunk->setIpv6Supported(true);
 #else
     initChunk->setIpv6Supported(false);
 #endif
     if (localAddressList.front().isUnspecified()) {
         for (int32_t i = 0; i < ift->getNumInterfaces(); ++i) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
                 adv.push_back(ipv4Data->getIPAddress());
             }
             else
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
             if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
                 for (int32_t j = 0; j < ipv6Data->getNumAddresses(); j++) {
                     EV_DETAIL << "add address " << ipv6Data->getAddress(j) << "\n";
@@ -622,7 +622,7 @@ void SctpAssociation::sendInit()
                 }
             }
             else
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
             ;
         }
     }
@@ -863,12 +863,12 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     initAckChunk->setNoOutStreams((unsigned int)min(outboundStreams, initChunk->getNoInStreams()));
     initAckChunk->setNoInStreams((unsigned int)min(inboundStreams, initChunk->getNoOutStreams()));
     initTsn = initAckChunk->getInitTsn();
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     initAckChunk->setIpv4Supported(true);
 #else
     initAckChunk->setIpv4Supported(false);
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     initAckChunk->setIpv6Supported(true);
 #else
     initAckChunk->setIpv6Supported(false);

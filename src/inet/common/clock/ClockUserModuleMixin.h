@@ -26,7 +26,7 @@ namespace inet {
 template<typename T>
 class INET_API ClockUserModuleMixin : public T, public cListener
 {
-#ifdef WITH_CLOCK_SUPPORT
+#ifdef INET_WITH_CLOCK
 
   protected:
     IClock *clock = nullptr;
@@ -62,8 +62,7 @@ class INET_API ClockUserModuleMixin : public T, public cListener
     virtual ClockTime truncnormal(ClockTime mean, ClockTime stddev, int rng = 0) const { return truncnormal(mean.dbl(), stddev.dbl(), rng); }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
-#else // #ifdef WITH_CLOCK_SUPPORT
-
+#else // #ifdef INET_WITH_CLOCK
   public:
     virtual void scheduleClockEventAt(clocktime_t time, ClockEvent *msg) { T::scheduleAt(time, msg); }
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *msg) { T::scheduleAfter(delay, msg); }
@@ -71,7 +70,7 @@ class INET_API ClockUserModuleMixin : public T, public cListener
     virtual void cancelAndDeleteClockEvent(ClockEvent *msg) { T::cancelAndDelete(msg); }
     virtual clocktime_t getClockTime() const { return simTime(); }
     virtual clocktime_t getArrivalClockTime(ClockEvent *msg) const { return msg->getArrivalTime(); }
-#endif // #ifdef WITH_CLOCK_SUPPORT
+#endif // #ifdef INET_WITH_CLOCK
 };
 
 } // namespace inet

@@ -28,17 +28,17 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
-#endif // ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_NEXTHOP
 
 namespace inet {
 
@@ -322,18 +322,18 @@ bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 
 const L3Address NetworkInterface::getNetworkAddress() const
 {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     if (auto ipv4data = findProtocolData<Ipv4InterfaceData>())
         return ipv4data->getIPAddress();
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
     if (auto ipv6data = findProtocolData<Ipv6InterfaceData>())
         return ipv6data->getPreferredAddress();
-#endif // ifdef WITH_IPv6
-#ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_IPv6
+#ifdef INET_WITH_NEXTHOP
     if (auto nextHopData = findProtocolData<NextHopInterfaceData>())
         return nextHopData->getAddress();
-#endif // ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_NEXTHOP
     return getModulePathAddress();
 }
 
@@ -344,32 +344,32 @@ bool NetworkInterface::hasNetworkAddress(const L3Address& address) const
         return false;
 
     case L3Address::IPv4: {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         auto ipv4data = findProtocolData<Ipv4InterfaceData>();
         return ipv4data != nullptr && ipv4data->getIPAddress() == address.toIpv4();
 #else
         return false;
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
     }
     case L3Address::IPv6: {
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
         auto ipv6data = findProtocolData<Ipv6InterfaceData>();
         return ipv6data != nullptr && ipv6data->hasAddress(address.toIpv6());
 #else
         return false;
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
     }
     case L3Address::MAC: {
         return getMacAddress() == address.toMac();
     }
     case L3Address::MODULEID:
     case L3Address::MODULEPATH: {
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
         auto nextHopData = findProtocolData<NextHopInterfaceData>();
         return nextHopData != nullptr && nextHopData->getAddress() == address;
 #else
         return false;
-#endif // ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_NEXTHOP
     }
     default:
         break;
@@ -401,26 +401,26 @@ MacEstimateCostProcess *NetworkInterface::getEstimateCostProcess(int position)
 void NetworkInterface::joinMulticastGroup(const L3Address& address)
 {
     switch (address.getType()) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         case L3Address::IPv4:
             getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(address.toIpv4());
             break;
 
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
         case L3Address::IPv6:
             getProtocolDataForUpdate<Ipv6InterfaceData>()->joinMulticastGroup(address.toIpv6());
             break;
 
-#endif // ifdef WITH_IPv6
-#ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_IPv6
+#ifdef INET_WITH_NEXTHOP
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
             getProtocolDataForUpdate<NextHopInterfaceData>()->joinMulticastGroup(address);
             break;
 
-#endif // ifdef WITH_NEXTHOP
+#endif // ifdef INET_WITH_NEXTHOP
         default:
             throw cRuntimeError("Unknown address type");
     }
@@ -438,7 +438,7 @@ void NetworkInterface::changeMulticastGroupMembership(const L3Address& multicast
         McastSourceFilterMode newFilterMode, const std::vector<L3Address>& newSourceList)
 {
     switch (multicastAddress.getType()) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         case L3Address::IPv4: {
             std::vector<Ipv4Address> oldIPv4SourceList, newIPv4SourceList;
             toIpv4AddressVector(oldSourceList, oldIPv4SourceList);
@@ -448,14 +448,14 @@ void NetworkInterface::changeMulticastGroupMembership(const L3Address& multicast
             break;
         }
 
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
         case L3Address::IPv6:
             // TODO
             throw cRuntimeError("changeMulticastGroupMembership() not implemented for type %s", L3Address::getTypeName(multicastAddress.getType()));
             break;
 
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
@@ -469,21 +469,21 @@ void NetworkInterface::changeMulticastGroupMembership(const L3Address& multicast
 }
 
 Ipv4Address NetworkInterface::getIpv4Address() const {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
 #else
     return Ipv4Address::UNSPECIFIED_ADDRESS;
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 }
 
 Ipv4Address NetworkInterface::getIpv4Netmask() const {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getNetmask();
 #else
     return Ipv4Address::UNSPECIFIED_ADDRESS;
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 }
 
 void NetworkInterface::setState(State s)

@@ -73,7 +73,7 @@ void Ipv6RoutingTable::initialize(int stage)
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
         // the following MIPv6 related flags will be overridden by the MIPv6 module (if existing)
         ishome_agent = false;
         WATCH(ishome_agent);
@@ -82,7 +82,7 @@ void Ipv6RoutingTable::initialize(int stage)
         WATCH(ismobile_node);
 
         mipv6Support = false; // 4.9.07 - CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
         cModule *host = getContainingNode(this);
 
@@ -263,13 +263,13 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(NetworkInterface *ie)
     }
     // o  Its required Link-Local Address for each interface.
 
-#ifndef WITH_xMIPv6
+#ifndef INET_WITH_xMIPv6
 //    Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
 //    ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, 0, 0);
-#else /* WITH_xMIPv6 */
+#else /* INET_WITH_xMIPv6 */
     Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     /*o  Any additional Unicast and Anycast Addresses that have been configured
        for the node's interfaces (manually or automatically).*/
@@ -654,9 +654,9 @@ void Ipv6RoutingTable::addDefaultRoute(const Ipv6Address& nextHop, unsigned int 
     route->setMetric(10); // FIXMEshould be filled from interface metric
     route->setAdminDist(Ipv6Route::dStatic);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     route->setExpiryTime(routerLifetime); // lifetime useful after transitioning to new AR // 27.07.08 - CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // then add it
     addRoute(route);
@@ -762,7 +762,7 @@ Ipv6Route *Ipv6RoutingTable::getRoute(int i) const
     return routeList[i];
 }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 //#####Added by Zarrar Yousaf##################################################################
 
 const Ipv6Address& Ipv6RoutingTable::getHomeAddress()
@@ -850,7 +850,7 @@ bool Ipv6RoutingTable::isOnLinkAddress(const Ipv6Address& address)
     return false;
 }
 
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 void Ipv6RoutingTable::deleteInterfaceRoutes(const NetworkInterface *entry)
 {

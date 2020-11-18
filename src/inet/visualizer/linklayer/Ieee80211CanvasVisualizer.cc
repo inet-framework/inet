@@ -17,7 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #endif
 
@@ -54,7 +54,7 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
 
 void Ieee80211CanvasVisualizer::refreshDisplay() const
 {
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
     auto simulation = getSimulation();
     for (auto& entry : ieee80211Visualizations) {
         auto networkNode = simulation->getModule(entry.second->networkNodeId);

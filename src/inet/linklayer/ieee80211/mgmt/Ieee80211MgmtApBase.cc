@@ -21,9 +21,9 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#endif // ifdef WITH_ETHERNET
+#endif // ifdef INET_WITH_ETHERNET
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 

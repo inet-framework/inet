@@ -24,18 +24,18 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
 
@@ -59,12 +59,12 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 {
     int ipProtocol = -1;
 
-#if defined(WITH_IPv4) || defined(WITH_IPv6) || defined(WITH_UDP) || defined(WITH_TCP_COMMON)
+#if defined(INET_WITH_IPv4) || defined(INET_WITH_IPv6) || defined(INET_WITH_UDP) || defined(INET_WITH_TCP_COMMON)
     auto packet = check_and_cast<Packet *>(msg);
     b ipHeaderLength = b(-1);
 #endif
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
         const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
         if (ipv4Header->getProtocolId() == IP_PROT_ICMP)
@@ -74,7 +74,7 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     }
 #endif
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP)
@@ -87,7 +87,7 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     if (ipProtocol == -1)
         return UP_BE;
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
     if (ipProtocol == IP_PROT_UDP) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipHeaderLength);
         unsigned int srcPort = udpHeader->getSourcePort();
@@ -105,7 +105,7 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     }
 #endif
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
     if (ipProtocol == IP_PROT_TCP) {
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipHeaderLength);
         unsigned int srcPort = tcpHeader->getSourcePort();

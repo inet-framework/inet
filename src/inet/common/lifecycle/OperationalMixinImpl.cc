@@ -24,9 +24,9 @@ namespace inet {
 
 template class OperationalMixin<cSimpleModule>;
 
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
 template class OperationalMixin<PacketProcessorBase>;
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
 
 } // namespace inet
 

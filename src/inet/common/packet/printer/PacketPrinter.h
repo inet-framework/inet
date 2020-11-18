@@ -22,9 +22,9 @@
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/common/Signal.h"
-#endif // WITH_RADIO
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
 
@@ -62,9 +62,9 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual bool isEnabledInfo(const Options *options, const Protocol *protocol) const;
     virtual const ProtocolPrinter& getProtocolPrinter(const Protocol *protocol) const;
     virtual void printContext(std::ostream& stream, const Options *options, Context& context) const;
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
     virtual void printSignal(physicallayer::Signal *signal, const Options *options, Context& context) const;
-#endif // WITH_RADIO
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
     virtual void printPacket(Packet *packet, const Options *options, Context& context) const;
     virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
     virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
@@ -83,10 +83,10 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printMessage(std::ostream& stream, cMessage *message) const;
     virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
 
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
     virtual void printSignal(std::ostream& stream, physicallayer::Signal *signal) const;
     virtual void printSignal(std::ostream& stream, physicallayer::Signal *signal, const Options *options) const;
-#endif // WITH_RADIO
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
     virtual void printPacket(std::ostream& stream, Packet *packet, const char *format = nullptr) const;
     virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options, const char *format = nullptr) const;

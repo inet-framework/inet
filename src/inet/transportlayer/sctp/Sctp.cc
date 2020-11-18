@@ -35,9 +35,9 @@
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
 namespace inet {
 
@@ -119,13 +119,13 @@ void Sctp::initialize(int stage)
         registerService(Protocol::sctp, gate("appIn"), gate("appOut"));
         registerProtocol(Protocol::sctp, gate("ipOut"), gate("ipIn"));
         if (crcMode == CRC_COMPUTED) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr) {
                 ipv4->registerHook(0, &crcInsertion);
             }
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
                 ipv6->registerHook(0, &crcInsertion);
@@ -133,12 +133,12 @@ void Sctp::initialize(int stage)
         }
         if (par("udpEncapsEnabled")) {
             EV_INFO << "udpEncapsEnabled" << endl;
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
                 ipv4->registerHook(0, &udpHook);
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
                 ipv6->registerHook(0, &udpHook);

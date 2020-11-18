@@ -24,7 +24,7 @@ namespace utils {
 
 cNEDValue nedf_hasVisualizer(cComponent *context, cNEDValue argv[], int argc)
 {
-#ifdef WITH_VISUALIZERS
+#ifdef INET_WITH_VISUALIZERS
     return true;
 #else
     return false;

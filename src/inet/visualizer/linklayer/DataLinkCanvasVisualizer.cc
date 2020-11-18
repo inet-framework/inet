@@ -19,9 +19,9 @@
 
 #include "inet/linklayer/base/MacProtocolBase.h"
 
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
-#endif // WITH_IEEE80211
+#endif // INET_WITH_IEEE80211
 
 namespace inet {
 
@@ -32,18 +32,18 @@ Define_Module(DataLinkCanvasVisualizer);
 bool DataLinkCanvasVisualizer::isLinkStart(cModule *module) const
 {
     return dynamic_cast<MacProtocolBase *>(module) != nullptr
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
            || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
-#endif // WITH_IEEE80211
+#endif // INET_WITH_IEEE80211
         ;
 }
 
 bool DataLinkCanvasVisualizer::isLinkEnd(cModule *module) const
 {
     return dynamic_cast<MacProtocolBase *>(module) != nullptr
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
            || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
-#endif // WITH_IEEE80211
+#endif // INET_WITH_IEEE80211
         ;
 }
 

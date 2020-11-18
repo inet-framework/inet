@@ -58,7 +58,7 @@ std::string cPacketQueue::str() const
 
 void cPacketQueue::parsimPack(cCommBuffer *buffer) const
 {
-#ifndef WITH_PARSIM
+#ifndef INET_WITH_PARSIM
     throw cRuntimeError(this, E_NOPARSIM);
 #else
     cQueue::parsimPack(buffer);
@@ -68,7 +68,7 @@ void cPacketQueue::parsimPack(cCommBuffer *buffer) const
 
 void cPacketQueue::parsimUnpack(cCommBuffer *buffer)
 {
-#ifndef WITH_PARSIM
+#ifndef INET_WITH_PARSIM
     throw cRuntimeError(this, E_NOPARSIM);
 #else
     cQueue::parsimUnpack(buffer);

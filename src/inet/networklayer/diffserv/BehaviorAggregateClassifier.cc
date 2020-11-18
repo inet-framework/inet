@@ -23,21 +23,21 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#endif // ifdef WITH_TCP_COMMON
+#endif // ifdef INET_WITH_TCP_COMMON
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#endif // ifdef WITH_UDP
+#endif // ifdef INET_WITH_UDP
 
 namespace inet {
 
@@ -66,23 +66,23 @@ void BehaviorAggregateClassifier::PacketDissectorCallback::visitChunk(const Ptr<
         return;
     if (*protocol == Protocol::ipv4) {
         dissect = false;
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         const auto& ipv4Header = dynamicPtrCast<const Ipv4Header>(chunk);
         if (!ipv4Header)
             return;
         dscp = ipv4Header->getDscp();
         matches_ = true;
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
     }
     else if (*protocol == Protocol::ipv6) {
         dissect = false;
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
         const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
         if (!ipv6Header)
             return;
         dscp = ipv6Header->getDscp();
         matches_ = true;
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
     }
 }
 

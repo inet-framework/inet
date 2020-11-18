@@ -19,20 +19,20 @@
 #define __INET_CLOCKTIME_H
 
 #include "inet/common/INETDefs.h"
-#ifdef WITH_CLOCK_SUPPORT
+#ifdef INET_WITH_CLOCK
 #include "inet/clock/common/ClockTime.h"
-#endif // WITH_CLOCK_SUPPORT
+#endif // INET_WITH_CLOCK
 
 namespace inet {
 
-#ifdef WITH_CLOCK_SUPPORT
+#ifdef INET_WITH_CLOCK
 #define CLOCKTIME_AS_SIMTIME(x)    (x).asSimTime()
 #define SIMTIME_AS_CLOCKTIME(x)    ClockTime::from(x)
 #else
 #define ClockTime                  SimTime
 #define CLOCKTIME_AS_SIMTIME(x)    (x)
 #define SIMTIME_AS_CLOCKTIME(x)    (x)
-#endif // WITH_CLOCK_SUPPORT
+#endif // INET_WITH_CLOCK
 
 typedef ClockTime clocktime_t;
 
