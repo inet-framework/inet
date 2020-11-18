@@ -59,7 +59,9 @@ void VirtualTunnel::initialize(int stage)
         // KLUDGE depends on other interface
         if (!strcmp(par("address"), "copy"))
             networkInterface->setMacAddress(realNetworkInterface->getMacAddress());
-        if (protocol == &Protocol::ethernetMac) {
+        if (false) {}
+#ifdef INET_WITH_ETHERNET
+        else if (protocol == &Protocol::ethernetMac) {
             auto ethernetSocket = new EthernetSocket();
             ethernetSocket->setCallback(this);
             ethernetSocket->setOutputGate(gate("upperLayerOut"));
@@ -67,6 +69,8 @@ void VirtualTunnel::initialize(int stage)
             ethernetSocket->bind(networkInterface->getMacAddress(), MacAddress(), nullptr, par("steal"));
             socket = ethernetSocket;
         }
+#endif
+#ifdef INET_WITH_IEEE8021Q
         else if (protocol == &Protocol::ieee8021qCTag || protocol == &Protocol::ieee8021qSTag) {
             auto ieee8021qSocket = new Ieee8021qSocket();
             ieee8021qSocket->setCallback(this);
@@ -76,6 +80,7 @@ void VirtualTunnel::initialize(int stage)
             ieee8021qSocket->bind(nullptr, vlanId, par("steal"));
             socket = ieee8021qSocket;
         }
+#endif
         else
             throw cRuntimeError("Unknown protocol");
     }
@@ -94,19 +99,23 @@ void VirtualTunnel::handleMessage(cMessage *message)
     }
 }
 
+#ifdef INET_WITH_ETHERNET
 void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     send(packet, "upperLayerOut");
 }
+#endif
 
+#ifdef INET_WITH_IEEE8021Q
 void VirtualTunnel::socketDataArrived(Ieee8021qSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     send(packet, "upperLayerOut");
 }
+#endif
 
 } // namespace inet
 
