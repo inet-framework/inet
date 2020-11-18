@@ -202,7 +202,7 @@ class INET_API Combined2DFunction : public FunctionBase<R, Domain<X, Y>>
   protected:
     const Ptr<const IFunction<R, Domain<X>>> functionX;
     const Ptr<const IFunction<double, Domain<Y>>> functionY;
-    // TODO: std::binary_function<X, Y> operation;
+    // TODO std::binary_function<X, Y> operation;
 
   public:
     Combined2DFunction(const Ptr<const IFunction<R, Domain<X>>>& functionX, const Ptr<const IFunction<double, Domain<Y>>>& functionY) :
@@ -279,7 +279,7 @@ class INET_API DomainModulated2DFunction : public FunctionBase<R, Domain<X, Y>>
   protected:
     const Ptr<const IFunction<R, Domain<X, Y>>> function;
     const Ptr<const IFunction<Y, Domain<X>>> modulator;
-    // TODO: std::binary_function<Y, Y> operation;
+    // TODO std::binary_function<Y, Y> operation;
 
   public:
     DomainModulated2DFunction(const Ptr<const IFunction<R, Domain<X, Y>>>& function, const Ptr<const IFunction<Y, Domain<X>>>& modulator) :
@@ -320,7 +320,7 @@ template<typename R, typename D, int DIMENSION, typename X>
 class INET_API ApproximatedFunction : public FunctionBase<R, D>
 {
   protected:
-    // TODO: add an ISampler (e.g lower ... upper by step) interface and refactor to be based on that
+    // TODO add an ISampler (e.g lower ... upper by step) interface and refactor to be based on that
     const X lower;
     const X upper;
     const X step;

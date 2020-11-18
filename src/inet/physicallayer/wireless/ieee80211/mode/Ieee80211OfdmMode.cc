@@ -142,7 +142,7 @@ const simtime_t Ieee80211OfdmMode::getRifsTime() const
 
 const simtime_t Ieee80211OfdmMode::getRxTxTurnaroundTime() const
 {
-    // TODO: < 2;
+    // TODO < 2;
     return -1;
 }
 

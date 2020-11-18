@@ -220,12 +220,12 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
             Neighbour *nce);
     /**
      *  Resends a NS packet to the address intended for address resolution.
-     *  TODO: Not implemented yet!
+     *  TODO Not implemented yet!
      */
     virtual void processArTimeout(cMessage *arTimeoutMsg);
     /**
      *  Drops specific queued packets for a specific NCE AR-timeout.
-     *  TODO: Not implemented yet!
+     *  TODO Not implemented yet!
      */
     virtual void dropQueuedPacketsAwaitingAr(Neighbour *nce);
     /**

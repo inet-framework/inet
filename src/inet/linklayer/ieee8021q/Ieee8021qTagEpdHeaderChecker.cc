@@ -71,7 +71,7 @@ void Ieee8021qTagEpdHeaderChecker::dropPacket(Packet *packet)
 {
     EV_WARN << "Received packet " << packet->getName() << " is not accepted, dropping packet.\n";
     PacketFilterBase::dropPacket(packet, OTHER_PACKET_DROP);
-    // TODO: or PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
+    // TODO or PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
 }
 
 bool Ieee8021qTagEpdHeaderChecker::matchesPacket(const Packet *packet) const

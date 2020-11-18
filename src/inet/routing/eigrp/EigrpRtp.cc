@@ -39,7 +39,7 @@ Define_Module(EigrpRtp6);
 #endif /* DISABLE_EIGRP_IPV6 */
 
 /*
- * TODO: resit pad rozhrani -> smazani zprav pres dane rozhrani (bud receive notification (asi lepsi) nebo kontrolovat existenci rozhrani)
+ * TODO resit pad rozhrani -> smazani zprav pres dane rozhrani (bud receive notification (asi lepsi) nebo kontrolovat existenci rozhrani)
  *  - pad souseda se ale musi kontrolovat!
  */
 

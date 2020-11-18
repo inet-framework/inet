@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-// TODO: remove isForUs checks it's already done in framesequencehandler
+// TODO remove isForUs checks it's already done in framesequencehandler
 
 void SelfCtsFs::startSequence(FrameSequenceContext *context, int firstStep)
 {
@@ -30,13 +30,13 @@ void SelfCtsFs::startSequence(FrameSequenceContext *context, int firstStep)
 
 IFrameSequenceStep *SelfCtsFs::prepareStep(FrameSequenceContext *context)
 {
-    // TODO: Implement
+    // TODO Implement
     return nullptr;
 }
 
 bool SelfCtsFs::completeStep(FrameSequenceContext *context)
 {
-    // TODO: Implement
+    // TODO Implement
     return false;
 }
 

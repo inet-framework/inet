@@ -30,7 +30,7 @@ class INET_API ScalarDigitalAnalogConverter : public IDigitalAnalogConverter
 {
   protected:
     W power;
-    // TODO: why centerFrequency and bandwidth here? why not in the shaper
+    // TODO why centerFrequency and bandwidth here? why not in the shaper
     Hz centerFrequency;
     Hz bandwidth;
     double sampleRate;

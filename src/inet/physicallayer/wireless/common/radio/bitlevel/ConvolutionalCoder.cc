@@ -521,7 +521,7 @@ ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode *convolutionalCod
                 throw cRuntimeError("Code size is greater then constraint length");
         }
     }
-    // TODO: check whether it is less than..
+    // TODO check whether it is less than..
     for (unsigned int i = 0; i < codeRateParamaterK; i++)
         if (transferFMatrix.at(i).size() != codeRateParamaterN)
             throw cRuntimeError("Transfer function matrix must be a k-by-n matrix of octal numbers");

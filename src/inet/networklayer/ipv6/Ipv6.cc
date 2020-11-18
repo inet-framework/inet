@@ -435,7 +435,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     // tunneling support - CB
     // check if destination is covered by tunnel lists
     if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
-        (ipv6Header->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers - FIXME: check for RH2 existence
+        (ipv6Header->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers - FIXME check for RH2 existence
         ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
          rt->isHomeAgent() || // but always check for tunnel if node is a HA
          !rt->isMobileNode())) // or if it is a correspondent or non-MIP node
@@ -787,7 +787,7 @@ void Ipv6::decapsulate(Packet *packet)
 
 void Ipv6::encapsulate(Packet *transportPacket)
 {
-    auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
+    auto ipv6Header = makeShared<Ipv6Header>(); // TODO transportPacket->getName());
 
     auto& addresses = transportPacket->removeTag<L3AddressReq>();
     Ipv6Address src = addresses->getSrcAddress().toIpv6();
@@ -845,7 +845,7 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
 
-        // TODO: factor out
+        // TODO factor out
         ipv6Header = nullptr;
         auto newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
         newIpv6Header->setSrcAddress(srcAddr);
@@ -878,10 +878,10 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
 
-        // TODO: factor out
+        // TODO factor out
         packet->eraseAtFront(ipv6Header->getChunkLength());
         auto ipv6HeaderCopy = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
-        // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
+        // TODO dup or mark ipv4Header->markMutableIfExclusivelyOwned();
         ipv6HeaderCopy->setSrcAddress(srcAddr);
         packet->insertAtFront(ipv6HeaderCopy);
         ipv6Header = ipv6HeaderCopy;

@@ -30,7 +30,7 @@ class RecipientBlockAckAgreement;
  * This class implements 9.21.3 Data and acknowledgment transfer using
  * immediate Block Ack policy and delayed Block Ack policy
  *
- * TODO: RecipientBlockAckAgreementProcedure ?
+ * TODO RecipientBlockAckAgreementProcedure ?
  */
 class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgreementHandler
 {

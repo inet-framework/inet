@@ -38,7 +38,7 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         frame->setName(tokenizer.nextToken());
         frame->insertAtBack(mpdu);
         EV_TRACE << "Created " << *frame << " from A-MPDU.\n";
-        // TODO: check CRC?
+        // TODO check CRC?
         frames->push_back(frame);
     }
     delete aggregatedFrame;

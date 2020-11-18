@@ -362,7 +362,7 @@ void HttpBrowserBase::handleDataMessage(Ptr<const HttpReplyMessage> appmsg)
                          << ", delay: " << delay << ", bad: " << bad << ", ref.size: " << refSize << endl;
 
                 // Generate a request message and push on queue for the intended recipient
-                Packet *reqmsg = generateResourceRequest(providerName, resourceName, serial++, bad, refSize); // TODO: KVJ: CHECK HERE FOR XSITE
+                Packet *reqmsg = generateResourceRequest(providerName, resourceName, serial++, bad, refSize); // TODO KVJ: CHECK HERE FOR XSITE
                 if (delay == 0.0) {
                     requestQueues[providerName].push_front(reqmsg);
                 }

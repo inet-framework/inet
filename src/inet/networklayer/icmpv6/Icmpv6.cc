@@ -205,7 +205,7 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
 
     if (type == ICMPv6_DESTINATION_UNREACHABLE)
         errorMsg = createDestUnreachableMsg(static_cast<Icmpv6DestUnav>(code));
-    // TODO: implement MTU support.
+    // TODO implement MTU support.
     else if (type == ICMPv6_PACKET_TOO_BIG)
         errorMsg = createPacketTooBigMsg(0);
     else if (type == ICMPv6_TIME_EXCEEDED)
@@ -299,7 +299,7 @@ Packet *Icmpv6::createParamProblemMsg(Icmpv6ParameterProblem code)
     auto errorMsg = makeShared<Icmpv6ParamProblemMsg>();
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
     errorMsg->setCode(code);
-    // TODO: What Pointer? section 3.4
+    // TODO What Pointer? section 3.4
     auto packet = new Packet("Parameter Problem");
     packet->insertAtBack(errorMsg);
     return packet;
@@ -388,7 +388,7 @@ bool Icmpv6::verifyCrc(const Packet *packet)
             // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
             uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
-            // TODO: delete these isCorrect calls, rely on CRC only
+            // TODO delete these isCorrect calls, rely on CRC only
             return crc == 0 && icmpHeader->isCorrect();
         }
         default:

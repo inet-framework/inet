@@ -208,7 +208,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 
     if (extractServerName(request->getTargetUrl()) != hostName) {
         // This should never happen but lets check
-        throw cRuntimeError("Received message intended for '%s'", request->getTargetUrl()); // TODO: DEBUG HERE
+        throw cRuntimeError("Received message intended for '%s'", request->getTargetUrl()); // TODO DEBUG HERE
         return nullptr;
     }
 

@@ -174,7 +174,7 @@ void Ns2MotionMobility::setTargetPosition()
     const Ns2MotionFile::Line& vec = ns2File->lines[vecpos];
     double time = vec[0];
     simtime_t now = simTime();
-    // TODO: this code is dubious at best
+    // TODO this code is dubious at best
     if (now < time) {
         nextChange = time;
         targetPosition = lastPosition;

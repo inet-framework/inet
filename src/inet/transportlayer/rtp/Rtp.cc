@@ -365,7 +365,7 @@ int Rtp::resolveMTU()
 {
     // it returns MTU bytelength (ethernet) minus ip
     // and udp headers
-    // TODO: How to do get the valid length of IP and ETHERNET header?
+    // TODO How to do get the valid length of IP and ETHERNET header?
     IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
     const NetworkInterface *rtie = rt->getInterfaceForDestAddr(_destinationAddress);
 

@@ -164,7 +164,7 @@ void ExtLowerUdp::handleMessage(cMessage *message)
 
 bool ExtLowerUdp::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    // TODO:
+    // TODO
     return true;
 }
 

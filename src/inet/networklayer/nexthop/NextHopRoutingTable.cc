@@ -87,7 +87,7 @@ void NextHopRoutingTable::initialize(int stage)
         host->subscribe(interfaceConfigChangedSignal, this);
         host->subscribe(interfaceIpv4ConfigChangedSignal, this);
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
         // At this point, all L2 modules have registered themselves (added their
         // interface entries). Create the per-interface Ipv4 data structures.
@@ -126,7 +126,7 @@ void NextHopRoutingTable::handleMessage(cMessage *msg)
 
 void NextHopRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    // TODO:
+    // TODO
 }
 
 void NextHopRoutingTable::routeChanged(NextHopRoute *entry, int fieldCode)
@@ -239,7 +239,7 @@ L3Address NextHopRoutingTable::getRouterIdAsGeneric() const
 
 bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
 {
-    // TODO: Enter_Method("isLocalAddress(%s)", dest.str().c_str());
+    // TODO Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {

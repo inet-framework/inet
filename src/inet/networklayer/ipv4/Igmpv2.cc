@@ -179,7 +179,7 @@ void Igmpv2::initialize(int stage)
 
         addWatches();
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
         registerProtocol(Protocol::igmp, gate("ipOut"), gate("ipIn"));
@@ -1008,7 +1008,7 @@ bool Igmpv2::verifyCrc(const Packet *packet)
             // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
             uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
-            // TODO: delete these isCorrect calls, rely on CRC only
+            // TODO delete these isCorrect calls, rely on CRC only
             return crc == 0 && igmpMsg->isCorrect();
         }
         default:

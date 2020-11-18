@@ -73,7 +73,7 @@ RsvpTe::~RsvpTe()
 void RsvpTe::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
         tedmod = getModuleFromPar<Ted>(par("tedModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);

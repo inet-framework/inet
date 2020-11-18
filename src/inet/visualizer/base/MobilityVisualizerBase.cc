@@ -80,7 +80,7 @@ void MobilityVisualizerBase::handleParameterChange(const char *name)
     if (name != nullptr) {
         if (!strcmp(name, "moduleFilter"))
             moduleFilter.setPattern(par("moduleFilter"));
-        // TODO:
+        // TODO
     }
 }
 

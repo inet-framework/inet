@@ -896,7 +896,7 @@ void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, intv
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
-            // KLUDGE: we used to get a cMessage from the radio (the identity was not important)
+            // KLUDGE we used to get a cMessage from the radio (the identity was not important)
             executeMac(EV_FRAME_TRANSMITTED, new cMessage("Transmission over"));
         }
         transmissionState = newRadioTransmissionState;
@@ -926,7 +926,7 @@ void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation)
 
 void Ieee802154Mac::handleStopOperation(LifecycleOperation *operation)
 {
-    // TODO: More gracefully allow current Tx to end (delay operation)
+    // TODO More gracefully allow current Tx to end (delay operation)
     // Cancel all self message timers
     cancelEvent(backoffTimer);
     cancelEvent(ccaTimer);

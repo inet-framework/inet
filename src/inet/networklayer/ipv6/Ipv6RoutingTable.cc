@@ -92,7 +92,7 @@ void Ipv6RoutingTable::initialize(int stage)
         host->subscribe(interfaceConfigChangedSignal, this);
         host->subscribe(interfaceIpv6ConfigChangedSignal, this);
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
         // add Ipv6InterfaceData to interfaces
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
@@ -100,7 +100,7 @@ void Ipv6RoutingTable::initialize(int stage)
             configureInterfaceForIpv6(ie);
         }
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         parseXmlConfigFile();
 
@@ -227,7 +227,7 @@ void Ipv6RoutingTable::configureInterfaceForIpv6(NetworkInterface *ie)
     auto ipv6IfData = ie->addProtocolData<Ipv6InterfaceData>();
 
     // for routers, turn on advertisements by default
-    // FIXME: we will use this isRouter flag for now. what if future implementations
+    // FIXME we will use this isRouter flag for now. what if future implementations
     // have 2 interfaces where one interface is configured as a router and the other
     // as a host?
     ipv6IfData->setAdvSendAdvertisements(isrouter); // Added by WEI
@@ -324,9 +324,9 @@ void Ipv6RoutingTable::configureInterfaceFromXml(NetworkInterface *ie, cXMLEleme
 
     // parse basic config (attributes)
     d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));
-    // TODO: leave this off first!! They overwrite stuff!
+    // TODO leave this off first!! They overwrite stuff!
 
-    /* TODO: Wei commented out the stuff below. To be checked why (Andras).
+    /* TODO Wei commented out the stuff below. To be checked why (Andras).
        d->setMaxRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
        d->setMinRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
        d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));
@@ -651,7 +651,7 @@ void Ipv6RoutingTable::addDefaultRoute(const Ipv6Address& nextHop, unsigned int 
     Ipv6Route *route = createNewRoute(Ipv6Address(), 0, IRoute::ROUTER_ADVERTISEMENT);
     route->setInterface(ift->getInterfaceById(ifID));
     route->setNextHop(nextHop);
-    route->setMetric(10); // FIXME:should be filled from interface metric
+    route->setMetric(10); // FIXMEshould be filled from interface metric
     route->setAdminDist(Ipv6Route::dStatic);
 
 #ifdef WITH_xMIPv6
@@ -688,7 +688,7 @@ void Ipv6RoutingTable::addRoute(Ipv6Route *route)
 {
     internalAddRoute(route);
 
-    /*TODO: this deletes some cache entries we want to keep, but the node MUST update
+    /*TODO this deletes some cache entries we want to keep, but the node MUST update
        the Destination Cache in such a way that the latest route information are used.*/
     purgeDestCache();
 
@@ -882,7 +882,7 @@ bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, IDone
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
-            ; // TODO:
+            ; // TODO
     }
     else if (dynamic_cast<ModuleStopOperation *>(operation)) {
         if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER)

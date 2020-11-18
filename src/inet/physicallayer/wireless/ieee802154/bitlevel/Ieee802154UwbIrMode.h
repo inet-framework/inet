@@ -50,7 +50,7 @@ class INET_API Ieee802154UwbIrMode
     static const short shortSFD[8];
     /**@brief Maximum size of message that is accepted by the Phy layer (in bytes). */
     static const int MaxPSDULength = 128;
-    // TODO: change to non-static, because it depends on the mode
+    // TODO change to non-static, because it depends on the mode
     static const int maxS = 20000;
     static short s_array[maxS];
     static int last_s;

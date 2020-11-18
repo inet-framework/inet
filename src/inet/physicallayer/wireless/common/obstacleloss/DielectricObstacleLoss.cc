@@ -114,7 +114,7 @@ double DielectricObstacleLoss::computeObjectLoss(const IPhysicalObject *object, 
             if (!std::isnan(angle1))
                 totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
         }
-        // TODO: this returns NaN because n1 > n2
+        // TODO this returns NaN because n1 > n2
 //        if (enableReflectionLoss && !normal2.isUnspecified()) {
 //            double angle2 = (intersection2 - intersection1).angle(normal2);
 //            if (!std::isnan(angle2))

@@ -59,7 +59,7 @@ void MobilityOsgVisualizer::refreshDisplay() const
         if (displayMovementTrails)
             extendMovementTrail(mobilityVisualization->trail, position);
     }
-    // TODO: switch to osg canvas when API is extended
+    // TODO switch to osg canvas when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
 }
 
@@ -109,7 +109,7 @@ void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& 
         auto dx = lastPosition.x() - position.x;
         auto dy = lastPosition.y() - position.y;
         auto dz = lastPosition.z() - position.z;
-        // TODO: 1?
+        // TODO 1?
         if (dx * dx + dy * dy + dz * dz > 1) {
             vertices->push_back(osg::Vec3d(position.x, position.y, position.z));
             if ((int)vertices->size() > trailLength)

@@ -52,7 +52,7 @@ class INET_API cPacketChunk : public Chunk
 
     /** @name Field accessor functions */
     //@{
-    // TODO: it should return a const cPacket *
+    // TODO it should return a const cPacket *
     virtual cPacket *getPacket() const { return packet; }
     //@}
 

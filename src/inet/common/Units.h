@@ -1371,7 +1371,7 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
     return os;
 }
 
-// TODO: extract these SI prefix printing fallback mechanisms
+// TODO extract these SI prefix printing fallback mechanisms
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
 {
@@ -1392,7 +1392,7 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
     return os;
 }
 
-// TODO: extract these SI prefix printing fallback mechanisms
+// TODO extract these SI prefix printing fallback mechanisms
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
 {
@@ -1409,7 +1409,7 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
     return os;
 }
 
-// TODO: extract these SI prefix printing fallback mechanisms
+// TODO extract these SI prefix printing fallback mechanisms
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value)
 {
@@ -1428,7 +1428,7 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value
 
 inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::s>& value)
 {
-    // TODO: KLUDGE: there's no direct infinity support in simtime_t
+    // TODO KLUDGE there's no direct infinity support in simtime_t
     static auto positiveInfinity = SimTime::getMaxTime() / 2;
     static auto negativeInfinity = -SimTime::getMaxTime() / 2;
     if (value == values::s(0))

@@ -76,12 +76,12 @@ class INET_API MediumLimitCache : public cModule, public IMediumLimitCache
      * The minimum overlapping in time needed to consider two transmissions
      * interfering.
      */
-    // TODO: compute from longest frame duration, maximum mobility speed and signal propagation time?
+    // TODO compute from longest frame duration, maximum mobility speed and signal propagation time?
     simtime_t minInterferenceTime;
     /**
      * The maximum transmission duration of a radio signal.
      */
-    // TODO: compute from maximum bit length and minimum bitrate?
+    // TODO compute from maximum bit length and minimum bitrate?
     simtime_t maxTransmissionDuration;
     /**
      * The maximum communication range where a transmission can still be

@@ -275,7 +275,7 @@ void HttpBrowser::socketDeleted(TcpSocket *socket)
         throw cRuntimeError("Model error: socketDelete failure. yourPtr is null pointer");
     }
 
-    // TODO: socket is already deleted, no?
+    // TODO socket is already deleted, no?
     ASSERT(socket == sockdata->socket);
     HttpRequestQueue& queue = sockdata->messageQueue;
     while (!queue.empty()) {

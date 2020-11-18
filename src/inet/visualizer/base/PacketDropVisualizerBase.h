@@ -87,14 +87,14 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
     /** @name Parameters */
     //@{
     bool displayPacketDrops = false;
-    NetworkNodeFilter nodeFilter; // TODO:
-    InterfaceFilter interfaceFilter; // TODO:
+    NetworkNodeFilter nodeFilter; // TODO
+    InterfaceFilter interfaceFilter; // TODO
     PacketFilter packetFilter;
     DetailsFilter detailsFilter;
     const char *icon = nullptr;
     ColorSet iconTintColorSet;
     double iconTintAmount = NaN;
-    StringFormat labelFormat; // TODO:
+    StringFormat labelFormat; // TODO
     cFigure::Font labelFont;
     cFigure::Color labelColor;
     const char *fadeOutMode = nullptr;

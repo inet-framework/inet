@@ -513,7 +513,7 @@ bool Dymo::permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     // 7. If MAX_METRIC[RteMsg.MetricType] <= (RteMsg_Gen.Metric +
     //    Cost(L)), where 'L' is the incoming link, the RteMsg is
     //    disregarded.
-    // TODO: implement
+    // TODO implement
     return true;
 }
 
@@ -548,10 +548,10 @@ void Dymo::processRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     //      for sending protocol messages or packet forwarding
     //    Unless HandlingRtr is prepared to send an updated RteMsg, it
     //    halts processing.  Otherwise, processing continues as follows.
-    // TODO: why is this here and how could we halt here?
+    // TODO why is this here and how could we halt here?
     // 4. HandlingRtr MUST decrement RteMsg.<msg-hop-limit>.  If
     //    RteMsg.<msg-hop-limit> is then zero (0), no further action is taken.
-    // KLUDGE: TODO: constPtrCast<RteMsg>(rteMsg)
+    // KLUDGE TODO constPtrCast<RteMsg>(rteMsg)
     constPtrCast<RteMsg>(rteMsg)->setHopLimit(rteMsg->getHopLimit() - 1);
     // 5. HandlingRtr MUST increment RteMsg.<msg-hop-count>.
     constPtrCast<RteMsg>(rteMsg)->setHopCount(rteMsg->getHopCount() + 1);
@@ -559,7 +559,7 @@ void Dymo::processRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
 
 b Dymo::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
 {
-    // TODO: validityTime, metric, metricType, TLVs
+    // TODO validityTime, metric, metricType, TLVs
     // 1. <address-block> := <num-addr> <addr-flags> (<head-length><head>?)? (<tail-length><tail>?)? <mid>* <prefix-length>*
     int addressBlock = 8 + 8;
     // head-length and head are not used
@@ -609,7 +609,7 @@ b Dymo::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
 
 const Ptr<Rreq> Dymo::createRreq(const L3Address& target, int retryCount)
 {
-    auto rreq = makeShared<Rreq>(); // TODO: "RREQ");
+    auto rreq = makeShared<Rreq>(); // TODO "RREQ");
     AddressBlock& originatorNode = rreq->getOriginatorNodeForUpdate();
     AddressBlock& targetNode = rreq->getTargetNodeForUpdate();
     // 7.3. RREQ Generation
@@ -683,11 +683,11 @@ void Dymo::processRreq(Packet *packet, const Ptr<const Rreq>& rreqIncoming)
         // o If the upstream router is in the Blacklist, and Current_Time <
         //   BlacklistRmTime, then HandlingRtr MUST NOT transmit any outgoing
         //   RREQ, and processing is complete.
-        // TODO: implement
+        // TODO implement
         // o Otherwise, if the upstream router is in the Blacklist, and
         //   Current_Time >= BlacklistRmTime, then the upstream router SHOULD
         //   be removed from the Blacklist, and message processing continued.
-        // TODO: implement
+        // TODO implement
         if (isClientAddress(target)) {
             // o If TargNode is a client of HandlingRtr, then a RREP is generated
             //   by the HandlingRtr (i.e., TargRtr) and unicast to the upstream
@@ -735,7 +735,7 @@ const Ptr<Rrep> Dymo::createRrep(const Ptr<const RteMsg>& rteMsg)
 const Ptr<Rrep> Dymo::createRrep(const Ptr<const RteMsg>& rteMsg, IRoute *route)
 {
     DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
-    auto rrep = makeShared<Rrep>(); // TODO: "RREP");
+    auto rrep = makeShared<Rrep>(); // TODO "RREP");
     AddressBlock& originatorNode = rrep->getOriginatorNodeForUpdate();
     AddressBlock& targetNode = rrep->getTargetNodeForUpdate();
     // 1. RREP_Gen first uses the routing information to update its route
@@ -759,7 +759,7 @@ const Ptr<Rrep> Dymo::createRrep(const Ptr<const RteMsg>& rteMsg, IRoute *route)
     //    <prefix-length> is included with the iRREP.  Otherwise,
     //    RREP.PfxLen[TargNode] := RREQ.PfxLen[TargNode] according to the
     //    rules of RFC 5444 AddrBlk encoding.
-    // TODO: implement
+    // TODO implement
     // 8. RREP.MetricType[TargNode] := Route[TargNode].MetricType
     targetNode.setHasMetricType(true);
     targetNode.setMetricType(routeData->getMetricType());
@@ -847,7 +847,7 @@ b Dymo::computeRrepLength(const Ptr<Rrep>& rrep)
 
 const Ptr<Rerr> Dymo::createRerr(std::vector<L3Address>& unreachableAddresses)
 {
-    auto rerr = makeShared<Rerr>(); // TODO: "RERR");
+    auto rerr = makeShared<Rerr>(); // TODO "RERR");
     for (auto& unreachableAddresse : unreachableAddresses) {
         const L3Address& unreachableAddress = unreachableAddresse;
         AddressBlock *addressBlock = new AddressBlock();
@@ -1031,7 +1031,7 @@ void Dymo::processRerr(Packet *packet, const Ptr<const Rerr>& rerrIncoming)
 
 b Dymo::computeRerrLength(const Ptr<Rerr>& rerr)
 {
-    // TODO: validityTime, metric, metricType, TLVs
+    // TODO validityTime, metric, metricType, TLVs
     // 1. <address-block> := <num-addr> <addr-flags> (<head-length><head>?)? (<tail-length><tail>?)? <mid>* <prefix-length>*
     int addressBlock = 8 + 8;
     // head-length and head are not used
@@ -1122,7 +1122,7 @@ void Dymo::updateRoutes(Packet *packet, const Ptr<const RteMsg>& rteMsg, const A
                 (routeData->getBroken() && isLoopFree(rteMsg, route)))
             {
                 // it's more recent, or it's not stale and is shorter, or it can safely repair a broken route
-                // TODO: should we simply update the route instead? only if the route change notification is sent exactly once
+                // TODO should we simply update the route instead? only if the route change notification is sent exactly once
                 routingTable->removeRoute(route);
                 EV_DETAIL << "Updating existing route: " << route << endl;
                 updateRoute(packet, rteMsg, addressBlock, route);
@@ -1184,7 +1184,7 @@ void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const Ad
     scheduleExpungeTimer();
 }
 
-// TODO: use
+// TODO use
 int Dymo::getLinkCost(const NetworkInterface *networkInterface, DymoMetricType metricType)
 {
     switch (metricType) {
@@ -1198,7 +1198,7 @@ int Dymo::getLinkCost(const NetworkInterface *networkInterface, DymoMetricType m
 
 bool Dymo::isLoopFree(const Ptr<const RteMsg>& rteMsg, IRoute *route)
 {
-    // TODO: implement
+    // TODO implement
     return true;
 }
 
@@ -1327,7 +1327,7 @@ bool Dymo::isClientAddress(const L3Address& address)
         return true;
     else {
         for (auto& elem : clientAddressAndPrefixLengthPairs)
-            // TODO: check for prefix length too
+            // TODO check for prefix length too
             if (elem.first == address)
                 return true;
 
@@ -1429,7 +1429,7 @@ void Dymo::handleStartOperation(LifecycleOperation *operation)
 
 void Dymo::handleStopOperation(LifecycleOperation *operation)
 {
-    // TODO: send a RERR to notify peers about broken routes
+    // TODO send a RERR to notify peers about broken routes
     for (auto& elem : targetAddressToRREQTimer) {
         cancelRouteDiscovery(elem.first);
         cancelAndDelete(elem.second);

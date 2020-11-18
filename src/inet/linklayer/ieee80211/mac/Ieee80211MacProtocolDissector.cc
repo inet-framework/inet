@@ -54,7 +54,7 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
     const auto& trailer = packet->popAtBack<inet::ieee80211::Ieee80211MacTrailer>(B(4));
     callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
     callback.visitChunk(header, &Protocol::ieee80211Mac);
-    // TODO: fragmentation & aggregation
+    // TODO fragmentation & aggregation
     if (auto dataHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211DataHeader>(header)) {
         if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
             callback.dissectPacket(packet, nullptr);
@@ -79,7 +79,7 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         ASSERT(packet->getDataLength() == b(0));
     else if (dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header))
         callback.dissectPacket(packet, &Protocol::ieee80211Mgmt);
-    // TODO: else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
+    // TODO else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
     else
         ASSERT(packet->getDataLength() == b(0));
     callback.visitChunk(trailer, &Protocol::ieee80211Mac);

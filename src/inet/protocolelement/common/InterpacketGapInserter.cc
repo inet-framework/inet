@@ -24,7 +24,7 @@ namespace inet {
 
 Define_Module(InterpacketGapInserter);
 
-// TODO: review streaming operation with respect to holding back packet push until the packet gap elapses
+// TODO review streaming operation with respect to holding back packet push until the packet gap elapses
 
 InterpacketGapInserter::~InterpacketGapInserter()
 {
@@ -109,14 +109,14 @@ void InterpacketGapInserter::receivePacketEnd(cPacket *cpacket, cGate *gate, dou
 
 bool InterpacketGapInserter::canPushSomePacket(cGate *gate) const
 {
-    // TODO: getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
+    // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()));
 }
 
 bool InterpacketGapInserter::canPushPacket(Packet *packet, cGate *gate) const
 {
-    // TODO: getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
+    // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()));
 }

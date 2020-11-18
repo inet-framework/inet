@@ -42,7 +42,7 @@ bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211Dat
         auto it = buffer.find(sequenceNumber);
         if (it != buffer.end()) {
             auto& fragments = it->second;
-            // TODO: efficiency
+            // TODO efficiency
             for (auto fragment : fragments) {
                 const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
                 if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)

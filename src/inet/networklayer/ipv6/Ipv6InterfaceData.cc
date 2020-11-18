@@ -164,7 +164,7 @@ std::string Ipv6InterfaceData::str() const
            << (isTentativeAddress(i) ? " tent" : "") << ") "
 
 #ifdef WITH_xMIPv6
-// TODO: revise, routing table is not that simple to access
+// TODO revise, routing table is not that simple to access
 //           << ((rt6->isMobileNode() && getAddress(i).isGlobal())
 //               ? (addresses[i].addrType==HoA ? "HoA" : "CoA") : "")
 #endif /* WITH_xMIPv6 */
@@ -211,7 +211,7 @@ std::string Ipv6InterfaceData::str() const
 #ifdef WITH_xMIPv6
     // the following is for MIPv6 support
     // 4.9.07 - Zarrar, CB
-// TODO: revise, routing table is not that simple to access
+// TODO revise, routing table is not that simple to access
 //    if ( rt6->isMobileNode() )
 //        os << "\tHome Network Info: " << " HoA="<< homeInfo.HoA << ", HA=" << homeInfo.homeAgentAddr
 //           << ", home prefix=" << homeInfo.prefix/*.prefix()*/ << "\n";

@@ -738,8 +738,8 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     }
 
     // then re-add them, according to actual interface configuration
-    // TODO: say there's a node somewhere in the network that belongs to the interface's subnet
-    // TODO: and it is not on the same link, and the gateway does not use proxy ARP, how will packets reach that node?
+    // TODO say there's a node somewhere in the network that belongs to the interface's subnet
+    // TODO and it is not on the same link, and the gateway does not use proxy ARP, how will packets reach that node?
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);

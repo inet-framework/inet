@@ -22,7 +22,7 @@ namespace ieee80211 {
 
 const Ptr<Ieee80211RtsFrame> RtsProcedure::buildRtsFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    auto rtsFrame = makeShared<Ieee80211RtsFrame>(); // TODO: "RTS");
+    auto rtsFrame = makeShared<Ieee80211RtsFrame>(); // TODO "RTS");
     rtsFrame->setReceiverAddress(dataOrMgmtHeader->getReceiverAddress());
     return rtsFrame;
 }

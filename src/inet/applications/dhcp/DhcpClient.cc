@@ -735,7 +735,7 @@ void DhcpClient::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(startTimer);
     ie = nullptr;
 
-    // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
+    // TODO Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
 
     socket.close();

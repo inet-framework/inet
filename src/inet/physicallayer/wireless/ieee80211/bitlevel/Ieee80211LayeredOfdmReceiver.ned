@@ -38,8 +38,8 @@ module Ieee80211LayeredOfdmReceiver extends SnirReceiverBase like IReceiver
     parameters:
         bool isCompliant = default(true);
         string levelOfDetail @enum("packet", "bit","symbol","sample") = default("symbol");
-        double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double energyDetection @unit(dBm); // TODO @unit(W) + dBm/dBW <--> W
+        double sensitivity @unit(dBm); // TODO @unit(W) + dBm/dBW <--> W
         double centerFrequency @unit(Hz);
         double bandwidth @unit(Hz);
         double channelSpacing @unit(Hz);

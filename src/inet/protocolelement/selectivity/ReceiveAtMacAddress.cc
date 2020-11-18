@@ -43,7 +43,7 @@ void ReceiveAtMacAddress::initialize(int stage)
 void ReceiveAtMacAddress::processPacket(Packet *packet)
 {
     packet->popAtFront<DestinationMacAddressHeader>();
-    // TODO: KLUDGE:
+    // TODO KLUDGE
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::sequenceNumber);
 }
 

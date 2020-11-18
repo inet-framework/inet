@@ -44,7 +44,7 @@ void AggregatorBase::startAggregation(Packet *packet)
     ASSERT(aggregatedPacket == nullptr);
     ASSERT(aggregatedSubpackets.size() == 0);
     aggregatedPacket = new Packet("");
-    aggregatedPacket->copyTags(*packet); // TODO: more complicated?
+    aggregatedPacket->copyTags(*packet); // TODO more complicated?
 }
 
 void AggregatorBase::continueAggregation(Packet *packet)

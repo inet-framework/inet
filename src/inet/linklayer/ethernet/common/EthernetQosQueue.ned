@@ -27,7 +27,7 @@ import inet.queueing.queue.DropTailQueue;
 //
 // Queue module that gives the PAUSE frames a higher priority.
 //
-//# TODO: rename to EthernetQosQueue or keep name as it is?
+//# TODO rename to EthernetQosQueue or keep name as it is?
 module EthernetQueue extends DropTailQueue
 {
     parameters:
@@ -39,7 +39,7 @@ module EthernetQueue extends DropTailQueue
 // and can be parametrized with an ~IPacketQueue for serving the
 // data frames.
 //
-//# TODO: rename to CompoundEtherQueue? or CompoundEtherQosQueue?
+//# TODO rename to CompoundEtherQueue? or CompoundEtherQosQueue?
 module EthernetQosQueue extends CompoundPacketQueueBase like IPacketQueue
 {
     parameters:

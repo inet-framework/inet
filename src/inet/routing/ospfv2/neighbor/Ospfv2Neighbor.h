@@ -116,7 +116,7 @@ class INET_API Neighbor
 
     Ospfv2Interface *parentInterface = nullptr;
 
-    // TODO: Should come from a global unique number generator module.
+    // TODO Should come from a global unique number generator module.
     static unsigned long ddSequenceNumberInitSeed;
 
   private:

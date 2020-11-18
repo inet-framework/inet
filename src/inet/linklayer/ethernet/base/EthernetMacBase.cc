@@ -300,7 +300,7 @@ void EthernetMacBase::handleCrashOperation(LifecycleOperation *operation)
     networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
-// TODO: this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
+// TODO this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
 void EthernetMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
@@ -694,7 +694,7 @@ void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t
     signal->setDuration(duration);
     int64_t newBitLength = duration.dbl() * signal->getBitrate();
     if (auto packet = check_and_cast_nullable<Packet *>(signal->decapsulate())) {
-        // TODO: removed length calculation based on the PHY layer (parallel bits, bit order, etc.)
+        // TODO removed length calculation based on the PHY layer (parallel bits, bit order, etc.)
         if (newBitLength < packet->getBitLength()) {
             packet->trimFront();
             packet->setBackOffset(b(newBitLength));

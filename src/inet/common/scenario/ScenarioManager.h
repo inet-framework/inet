@@ -23,14 +23,14 @@
 
 namespace inet {
 
-// TODO: replace these with standard omnet notifications when they become available
+// TODO replace these with standard omnet notifications when they become available
 class INET_API cPreModuleInitNotification : public cModelChangeNotification
 {
   public:
     cModule *module;
 };
 
-// TODO: replace these with standard omnet notifications when they become available
+// TODO replace these with standard omnet notifications when they become available
 class INET_API cPostModuleInitNotification : public cModelChangeNotification
 {
   public:

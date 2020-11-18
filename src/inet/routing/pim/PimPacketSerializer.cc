@@ -34,7 +34,7 @@ Register_Serializer(PimRegisterStop, PimPacketSerializer);
 
 namespace {
 
-// TODO: EncodedAddress serializers/deserializers currently allow only IPv4 addresses with native encoding
+// TODO EncodedAddress serializers/deserializers currently allow only IPv4 addresses with native encoding
 
 void serializeEncodedUnicastAddress(MemoryOutputStream& stream, const EncodedUnicastAddress& addr)
 {
@@ -50,7 +50,7 @@ void serializeEncodedGroupAddress(MemoryOutputStream& stream, const EncodedGroup
     stream.writeByte(0); // Encoding Type: '0' represents the native encoding of the Address Family.
     stream.writeBit(addr.B);
     stream.writeNBitsOfUint64Be(addr.reserved, 6); // Reserved
-    stream.writeBit(addr.Z); // FIXME: Admin Scope [Z]one: indicates the group range is an admin scope zone.
+    stream.writeBit(addr.Z); // FIXME Admin Scope [Z]one: indicates the group range is an admin scope zone.
     stream.writeByte(addr.maskLength); // Mask Length: 32 for IPv4 native encoding
     stream.writeIpv4Address(addr.groupAddress.toIpv4());
 }
@@ -84,7 +84,7 @@ void deserializeEncodedGroupAddress(MemoryInputStream& stream, const Ptr<PimPack
     uint8_t encodingType = stream.readByte(); // Encoding Type: '0' represents the native encoding of the Address Family.
     addr.B = stream.readBit();
     addr.reserved = stream.readNBitsToUint64Be(6); // Reserved
-    addr.Z = stream.readBit(); // FIXME: Admin Scope [Z]one: indicates the group range is an admin scope zone.
+    addr.Z = stream.readBit(); // FIXME Admin Scope [Z]one: indicates the group range is an admin scope zone.
     addr.maskLength = stream.readByte(); // Mask Length: 32 for IPv4 native encoding
     if (addressFamily != 1 || encodingType != 0 || addr.maskLength != 32)
         pimPacket->markIncorrect();
@@ -132,7 +132,7 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                     case LANPruneDelay: {
                         const LanPruneDelayOption *lanPruneDelayOption = static_cast<const LanPruneDelayOption *>(pimHello->getOptions(i));
                         stream.writeUint16Be(4); // length
-                        stream.writeBit(0); // FIXME: T bit missing
+                        stream.writeBit(0); // FIXME T bit missing
                         stream.writeNBitsOfUint64Be(lanPruneDelayOption->getPropagationDelay(), 15);
                         stream.writeUint16Be(lanPruneDelayOption->getOverrideInterval());
                         break;

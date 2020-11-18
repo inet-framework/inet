@@ -141,7 +141,7 @@ void Ieee802154UwbIrTransmitter::generatePulse(std::map<simsec, WpHz>& data, sim
     data[simsec(time)] = WpHz(0);
     time += chip / 2;
     // Maximum point at symbol half (triangular pulse)
-    // TODO: polarity doesn't really make sense this way!?
+    // TODO polarity doesn't really make sense this way!?
     data[simsec(time)] = W(peak * polarity) / GHz(10.6 - 3.1);
     time += chip / 2;
     data[simsec(time)] = WpHz(0);
@@ -193,14 +193,14 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> Ieee802154UwbIrTransmitter::gener
 const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     int bitLength = packet->getBitLength();
-    // KLUDGE: generate random bits until serializer is implemented
+    // KLUDGE generate random bits until serializer is implemented
     std::vector<bool> *bits = new std::vector<bool>();
     for (int i = 0; i < bitLength; i++) {
         bool bitValue = intuniform(0, 1, 0);
         EV_INFO << "Transmitted bit at " << i << " is " << (int)bitValue << endl;
         bits->push_back(bitValue);
     }
-    // KLUDGE: add a fake CRC
+    // KLUDGE add a fake CRC
     for (int i = 0; i < 8; i++) {
         bits->push_back(0);
         for (int j = 0; j + i < bitLength; j += 8)

@@ -887,7 +887,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * parameters. The flags parameter is a combination of Chunk::PeekFlag
      * enumeration members.
      *
-     * TODO: current limitation: the new chunk must be the same size as the old one
+     * TODO current limitation: the new chunk must be the same size as the old one
      */
     template<typename T>
     const Ptr<T> replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
@@ -1066,7 +1066,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * updated according to the offset and length parameters. The flags parameter
      * is a combination of Chunk::PeekFlag enumeration members.
      *
-     * TODO: current limitation: the chunk size cannot be changed
+     * TODO current limitation: the chunk size cannot be changed
      */
     template<typename T>
     void updateAt(std::function<void(const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {

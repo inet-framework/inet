@@ -65,7 +65,7 @@ QueueVisualizerBase::QueueVisualization *QueueOsgVisualizer::createQueueVisualiz
 
 void QueueOsgVisualizer::refreshQueueVisualization(const QueueVisualization *queueVisualization) const
 {
-    // TODO:
+    // TODO
 //    auto infoOsgVisualization = static_cast<const QueueOsgVisualization *>(queueVisualization);
 //    auto node = infoOsgVisualization->node;
 }

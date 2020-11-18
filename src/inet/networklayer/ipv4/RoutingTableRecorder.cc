@@ -165,7 +165,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
     fflush(routingLogFile);
 }
 
-//TODO: routerID change
+//TODO routerID change
 //    // time, moduleId, routerID
 //    ensureRoutingLogFileOpen();
 //    fprintf(routingLogFile, "ID  %s  %d  %s\n",

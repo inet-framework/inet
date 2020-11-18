@@ -1063,7 +1063,7 @@ void Rip::addRipInterface(const NetworkInterface *ie, cXMLElement *config)
             strcmp(ripModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
             strcmp(ripModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
             strcmp(ripModeAttr, "SplitHorizonPoisonReverse") == 0 ? SPLIT_HORIZON_POISON_REVERSE :
-            strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISON_REVERSE : // TODO: left here for backward compatibility, delete this line eventually
+            strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISON_REVERSE : // TODO left here for backward compatibility, delete this line eventually
                     static_cast<RipMode>(-1);
 
         if (mode == static_cast<RipMode>(-1))

@@ -103,7 +103,7 @@ void Gpsr::initialize(int stage)
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");
         // packet size
         positionByteLength = par("positionByteLength");
-        // KLUDGE: implement position registry protocol
+        // KLUDGE implement position registry protocol
         globalPositionTable.clear();
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
@@ -298,18 +298,18 @@ void Gpsr::configureInterfaces()
 // position
 //
 
-// KLUDGE: implement position registry protocol
+// KLUDGE implement position registry protocol
 PositionTable Gpsr::globalPositionTable;
 
 Coord Gpsr::lookupPositionInGlobalRegistry(const L3Address& address) const
 {
-    // KLUDGE: implement position registry protocol
+    // KLUDGE implement position registry protocol
     return globalPositionTable.getPosition(address);
 }
 
 void Gpsr::storePositionInGlobalRegistry(const L3Address& address, const Coord& position) const
 {
-    // KLUDGE: implement position registry protocol
+    // KLUDGE implement position registry protocol
     globalPositionTable.setPosition(address, position);
 }
 
@@ -761,7 +761,7 @@ INetfilter::IHook::Result Gpsr::datagramPreRoutingHook(Packet *datagram)
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else {
-        // KLUDGE: this allows overwriting the GPSR option inside
+        // KLUDGE this allows overwriting the GPSR option inside
         auto gpsrOption = const_cast<GpsrOption *>(getGpsrOptionFromNetworkDatagram(networkHeader));
         return routeDatagram(datagram, gpsrOption);
     }
@@ -794,7 +794,7 @@ void Gpsr::handleStartOperation(LifecycleOperation *operation)
 
 void Gpsr::handleStopOperation(LifecycleOperation *operation)
 {
-    // TODO: send a beacon to remove ourself from peers neighbor position table
+    // TODO send a beacon to remove ourself from peers neighbor position table
     neighborPositionTable.clear();
     cancelEvent(beaconTimer);
     cancelEvent(purgeNeighborsTimer);
@@ -816,7 +816,7 @@ void Gpsr::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     Enter_Method("receiveChangeNotification");
     if (signalID == linkBrokenSignal) {
         EV_WARN << "Received link break" << endl;
-        // TODO: remove the neighbor
+        // TODO remove the neighbor
     }
 }
 

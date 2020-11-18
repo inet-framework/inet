@@ -374,7 +374,7 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie, cons
     Key key(buDest, ie->getInterfaceId(), KEY_BU);
     // fetch a valid TimerIfEntry obect
     BuTransmitIfEntry *buIfEntry = check_and_cast<BuTransmitIfEntry *>(getTimerIfEntry(key, TRANSMIT_TYPE_BU));
-    // TODO: Investigate problem witht he following line. : runtime error because of attempted message rescheduling
+    // TODO Investigate problem witht he following line. : runtime error because of attempted message rescheduling
 //    cancelAndDelete(buIfEntry->timer);
 
     buIfEntry->dest = buDest;

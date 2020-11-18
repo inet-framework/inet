@@ -35,7 +35,7 @@ class INET_API RecipientMacDataService : public cSimpleModule, public IRecipient
     typedef std::vector<Ieee80211DataOrMgmtHeader *> Fragments;
 
   protected:
-    IReassembly *basicReassembly = nullptr; // FIXME: use Defragmentation
+    IReassembly *basicReassembly = nullptr; // FIXME use Defragmentation
 
 //    MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;
 //    Address1Filtering *address1Filtering = nullptr;

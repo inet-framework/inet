@@ -27,7 +27,7 @@ namespace inet {
 
 Define_Module(MacRelayUnit);
 
-// FIXME: should handle multicast mac addresses correctly
+// FIXME should handle multicast mac addresses correctly
 void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
 {
     auto protocol = incomingPacket->getTag<PacketProtocolTag>()->getProtocol();

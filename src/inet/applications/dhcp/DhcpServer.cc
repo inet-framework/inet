@@ -189,7 +189,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
 //                    std::cout << "MAC: " << packet->getChaddr() << " ----> IP: " << lease->ip << endl;
                     lease->mac = dhcpMsg->getChaddr();
                     lease->xid = dhcpMsg->getXid();
-//                    lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO: !!
+//                    lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO !!
                     lease->leased = true; // TODO
                     sendOffer(lease, dhcpMsg);
                 }
@@ -199,7 +199,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
             else {
                 // MAC already exist, offering the same lease
                 lease->xid = dhcpMsg->getXid();
-//                lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO: !!
+//                lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO !!
                 sendOffer(lease, dhcpMsg);
             }
         }
@@ -223,10 +223,10 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                         lease->leaseTime = leaseTime;
                         lease->leased = true;
 
-                        // TODO: final check before ACK (it is not necessary but recommended)
+                        // TODO final check before ACK (it is not necessary but recommended)
                         sendAck(lease, dhcpMsg);
 
-                        // TODO: update the display string to inform how many clients are assigned
+                        // TODO update the display string to inform how many clients are assigned
                     }
                 }
                 else {
@@ -251,7 +251,7 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                         lease->leaseTime = leaseTime;
                         lease->leased = true;
 
-                        // TODO: final check before ACK (it is not necessary but recommended)
+                        // TODO final check before ACK (it is not necessary but recommended)
                         sendAck(lease, dhcpMsg);
                     }
                     else {

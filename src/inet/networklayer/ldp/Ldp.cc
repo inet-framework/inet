@@ -203,11 +203,11 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
             throw cRuntimeError("model error: no socket found for msg '%s' with socketId %d", msg->getName(), socketId);
         }
     }
-    // TODO: move to separate function and reuse from socketClosed
+    // TODO move to separate function and reuse from socketClosed
     if (operationalState == State::STOPPING_OPERATION) {
         if (udpSocket.isOpen() || serverSocket.isOpen())
             return;
-        // TODO: check for empty sockets?
+        // TODO check for empty sockets?
         for (auto& s: udpSockets)
             if (s.isOpen())
                 return;

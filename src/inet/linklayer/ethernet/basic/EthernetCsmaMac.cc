@@ -33,9 +33,9 @@
 
 namespace inet {
 
-// TODO: there is some code that is pretty much the same as the one found in EthernetMac.cc (e.g. EthernetCsmaMac::beginSendFrames)
-// TODO: refactor using a statemachine that is present in a single function
-// TODO: this helps understanding what interactions are there and how they affect the state
+// TODO there is some code that is pretty much the same as the one found in EthernetMac.cc (e.g. EthernetCsmaMac::beginSendFrames)
+// TODO refactor using a statemachine that is present in a single function
+// TODO this helps understanding what interactions are there and how they affect the state
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {

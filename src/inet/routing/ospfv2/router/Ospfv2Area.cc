@@ -2114,7 +2114,7 @@ std::vector<NextHop> *Ospfv2Area::calculateNextHops(const Ospfv2Link& destinatio
                         // The link contains the router's own interface address and a full mask,
                         // so we insert a next hop pointing to the interface itself. Kind of pointless, but
                         // not much else we could do...
-                        // TODO: check what other OSPF implementations do in this situation
+                        // TODO check what other OSPF implementations do in this situation
                         NextHop nextHop;
                         nextHop.ifIndex = interface->getIfIndex();
                         nextHop.hopAddress = interface->getAddressRange().address;

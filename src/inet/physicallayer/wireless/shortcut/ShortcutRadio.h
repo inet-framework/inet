@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-// TODO: emit signals required by IRadio interface
+// TODO emit signals required by IRadio interface
 class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
 {
   protected:

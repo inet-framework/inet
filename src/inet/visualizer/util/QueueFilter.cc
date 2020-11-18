@@ -29,7 +29,7 @@ void QueueFilter::setPattern(const char *pattern)
 bool QueueFilter::matches(const queueing::IPacketQueue *queue) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLPATH, check_and_cast<const cObject *>(queue));
-    // TODO: eliminate const_cast when cMatchExpression::matches becomes const
+    // TODO eliminate const_cast when cMatchExpression::matches becomes const
     return const_cast<QueueFilter *>(this)->matchExpression.matches(&matchableObject);
 }
 

@@ -40,9 +40,9 @@ namespace inet;
 class EthernetMacAddressFields extends FieldsChunk
 {
     chunkLength = B(12); // B(6) + B(6)
-    // TODO: rename to destinationAddress
+    // TODO rename to destinationAddress
     MacAddress dest; // The Destination Address field specifies the station(s) for which the MAC frame is intended. It may be an individual or multicast (including broadcast) address.
-    // TODO: rename to sourceAddress
+    // TODO rename to sourceAddress
     MacAddress src; // The Source Address field specifies the station sending the MAC frame.
 }
 

@@ -155,7 +155,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     Enter_Method("processLowerFrame(%s)", packet->getName());
     EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     if (frameSequenceHandler->isSequenceRunning()) {
-        // TODO: always call processResponses
+        // TODO always call processResponses
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
             frameSequenceHandler->processResponse(packet);
             updateDisplayString();
@@ -198,7 +198,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 }
 
 /*
- * TODO:  If a PHY-RXSTART.indication primitive does not occur during the ACKTimeout interval,
+ * TODO  If a PHY-RXSTART.indication primitive does not occur during the ACKTimeout interval,
  * the STA concludes that the transmission of the MPDU has failed, and this STA shall invoke its
  * backoff procedure **upon expiration of the ACKTimeout interval**.
  */
@@ -210,7 +210,7 @@ void Dcf::frameSequenceFinished()
     channelAccess->releaseChannel(this);
     if (hasFrameToTransmit())
         channelAccess->requestChannel(this);
-    mac->sendDownPendingRadioConfigMsg(); // TODO: review
+    mac->sendDownPendingRadioConfigMsg(); // TODO review
 }
 
 bool Dcf::isReceptionInProgress()
@@ -228,7 +228,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader));
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
-    else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
+    else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header));
         recipientProcessReceivedControlFrame(packet, header);
         delete packet;
@@ -309,7 +309,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
         }
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(transmittedHeader)) {
-        auto protectedFrame = channelAccess->getInProgressFrames()->getFrameToTransmit(); // KLUDGE:
+        auto protectedFrame = channelAccess->getInProgressFrames()->getFrameToTransmit(); // KLUDGE
         auto protectedHeader = protectedFrame->peekAtFront<Ieee80211DataOrMgmtHeader>();
         EV_INFO << "For the current frame exchange, we have CW = " << channelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         rtsProcedure->processTransmittedRts(rtsFrame);
@@ -363,7 +363,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         EV_INFO << "Dropping frame " << failedPacket->getName() << ", because retry limit is reached.\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
-        details.setLimit(-1); // TODO:
+        details.setLimit(-1); // TODO
         emit(packetDroppedSignal, failedPacket, &details);
         emit(linkBrokenSignal, failedPacket);
     }
@@ -382,7 +382,7 @@ bool Dcf::isForUs(const Ptr<const Ieee80211MacHeader>& header) const
 
 bool Dcf::isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const
 {
-    // FIXME:
+    // FIXME
     // Check the roles of the Addr3 field when aggregation is applied
     // Table 8-19—Address field contents
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))

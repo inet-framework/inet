@@ -53,7 +53,7 @@ namespace physicallayer {
  * changes its receiver state to the appropriate value, and emits a receiver
  * state changed signal.
  */
-// TODO: support capturing a stronger transmission
+// TODO support capturing a stronger transmission
 class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
   protected:

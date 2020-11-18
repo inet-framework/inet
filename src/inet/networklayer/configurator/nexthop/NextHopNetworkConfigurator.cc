@@ -54,7 +54,7 @@ IRoutingTable *NextHopNetworkConfigurator::findRoutingTable(Node *node)
 
 void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
 {
-    // TODO: it should be configurable (via xml?) which nodes need static routes filled in automatically
+    // TODO it should be configurable (via xml?) which nodes need static routes filled in automatically
     // add static routes for all routing tables
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *sourceNode = (Node *)topology.getNode(i);
@@ -128,7 +128,7 @@ void NextHopNetworkConfigurator::dumpRoutes(Topology& topology)
             EV_INFO << "Node " << node->module->getFullPath() << endl;
             node->routingTable->printRoutingTable();
             if (node->routingTable->getNumMulticastRoutes() > 0)
-                ; // TODO: node->routingTable->printMulticastRoutingTable();
+                ; // TODO node->routingTable->printMulticastRoutingTable();
         }
     }
 }

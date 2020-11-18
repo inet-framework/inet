@@ -32,7 +32,7 @@ bool operator<(const Ospfv2LsaHeader& leftLSA, const Ospfv2LsaHeader& rightLSA)
     else if (leftSequenceNumber < rightSequenceNumber)
         return true;
     else {
-        // TODO: checksum comparison should be added here
+        // TODO checksum comparison should be added here
 
         unsigned short leftAge = leftLSA.getLsAge();
         unsigned short rightAge = rightLSA.getLsAge();

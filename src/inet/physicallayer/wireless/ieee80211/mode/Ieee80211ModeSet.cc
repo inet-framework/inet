@@ -51,7 +51,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
     }),
-    // TODO: slotTime, cwMin, cwMax must be identical in all modes
+    // TODO slotTime, cwMin, cwMax must be identical in all modes
     Ieee80211ModeSet("g(mixed)", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
@@ -64,7 +64,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
-        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps }, // TODO: ERP-CCK, ERP-PBCC, DSSS-OFDM
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps }, // TODO ERP-CCK, ERP-PBCC, DSSS-OFDM
     }),
     Ieee80211ModeSet("g(erp)", {
         { true, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps },
@@ -478,7 +478,7 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
             mode->getSlotTime() != referenceMode->getSlotTime() ||
             mode->getPhyRxStartDelay() != referenceMode->getPhyRxStartDelay())
         {
-            // FIXME: throw cRuntimeError("Sifs, slot and phyRxStartDelay time must be identical within a ModeSet");
+            // FIXME throw cRuntimeError("Sifs, slot and phyRxStartDelay time must be identical within a ModeSet");
         }
     }
 }

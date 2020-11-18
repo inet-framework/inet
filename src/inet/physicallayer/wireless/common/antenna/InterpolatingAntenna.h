@@ -25,7 +25,7 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * TODO: refactor to use Delaunay triangulation on unit sphere, i.e. triangulate
+ * TODO refactor to use Delaunay triangulation on unit sphere, i.e. triangulate
  * result from enclosing spherical triangle as seen from the center
  */
 class INET_API InterpolatingAntenna : public AntennaBase

@@ -26,7 +26,7 @@ bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>
 {
     SequenceControlField seqVal(header);
     bool isManagementFrame = dynamicPtrCast<const Ieee80211MgmtHeader>(header) != nullptr;
-    bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
+    bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO hack
     if (isTimePriorityManagementFrame || isManagementFrame) {
         MacAddress transmitterAddr = header->getTransmitterAddress();
         Mac2SeqValMap& cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;

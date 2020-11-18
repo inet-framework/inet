@@ -289,7 +289,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const NetworkInterface *de
     }
 
     // if output port was explicitly requested, use that, otherwise use NextHopForwarding routing
-    // TODO: see Ipv4, using destIE here leaves nextHope unspecified
+    // TODO see Ipv4, using destIE here leaves nextHope unspecified
     L3Address nextHop;
     if (destIE && !requestedNextHop.isUnspecified()) {
         EV_DETAIL << "using manually specified output interface " << destIE->getInterfaceName() << "\n";
@@ -346,7 +346,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const NetworkInte
     L3Address destAddr = header->getDestinationAddress();
     // if received from the network...
     if (fromIE != nullptr) {
-        //TODO: decrement hopLimit before forward frame to another host
+        //TODO decrement hopLimit before forward frame to another host
 
         // check for local delivery
         if (routingTable->isLocalMulticastAddress(destAddr))
@@ -537,7 +537,7 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const NetworkInterf
     if (ttl != -1) {
         ASSERT(ttl > 0);
     }
-    else if (false) // TODO: datagram->getDestinationAddress().isLinkLocalMulticast())
+    else if (false) // TODO datagram->getDestinationAddress().isLinkLocalMulticast())
         ttl = 1;
     else
         ttl = defaultHopLimit;

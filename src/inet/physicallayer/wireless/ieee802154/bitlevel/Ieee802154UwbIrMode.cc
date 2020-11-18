@@ -102,7 +102,7 @@ const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_16M = {
     MHz(499.2)    // bandwidth
 };
 
-// TODO: do this in a static initializer once (even better: simply create a function from symbol index to hopping position)
+// TODO do this in a static initializer once (even better: simply create a function from symbol index to hopping position)
 int Ieee802154UwbIrMode::s(int n) const
 {
     ASSERT(n < maxS);
@@ -134,7 +134,7 @@ int Ieee802154UwbIrMode::getHoppingPos(int sym) const
             ASSERT(0 == 1); // unimplemented or invalid PRF value
             break;
     }
-    // ASSERT(pos > -1 && pos < 8); // TODO: update to reflect number of hopping pos for current config
+    // ASSERT(pos > -1 && pos < 8); // TODO update to reflect number of hopping pos for current config
     return pos;
 }
 

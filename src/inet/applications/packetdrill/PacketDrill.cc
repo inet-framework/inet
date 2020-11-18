@@ -543,7 +543,7 @@ PacketDrillSctpChunk *PacketDrill::buildDataChunk(int64_t flgs, int64_t len, int
     else {
         datachunk->setPpid((uint32_t)ppid);
     }
-    // TODO: Padding
+    // TODO Padding
     if (len != -1) {
         datachunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
         SctpSimpleMessage *msg = new SctpSimpleMessage("payload");

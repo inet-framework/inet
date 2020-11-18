@@ -38,7 +38,7 @@ class INET_API SingleProtectionMechanism : public ModeSetListener
 {
   protected:
     IQosRateSelection *rateSelection = nullptr;
-//    TODO: IRateSelection *nonQoSrateSelection = nullptr;
+//    TODO IRateSelection *nonQoSrateSelection = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -53,7 +53,7 @@ class INET_API SingleProtectionMechanism : public ModeSetListener
   public:
     virtual ~SingleProtectionMechanism() {}
 
-    // TODO: QoSAckPolicy, IQosRateSelection may give wrong answers when communicating with a Non-QoS STA.
+    // TODO QoSAckPolicy, IQosRateSelection may give wrong answers when communicating with a Non-QoS STA.
     virtual simtime_t computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader, TxopProcedure *txop, IRecipientQosAckPolicy *ackPolicy);
 };
 

@@ -257,7 +257,7 @@ int Ieee80211HtModeBase::getNumberOfPilotSubcarriers() const
 
 b Ieee80211HtDataMode::getCompleteLength(b dataLength) const
 {
-    return getServiceFieldLength() + getTailFieldLength() + dataLength; // TODO: padding?
+    return getServiceFieldLength() + getTailFieldLength() + dataLength; // TODO padding?
 }
 
 unsigned int Ieee80211HtDataMode::computeNumberOfSpatialStreams(const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation) const
@@ -287,7 +287,7 @@ const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
     unsigned int numberOfCodedBitsPerSymbol = numberOfCodedBitsPerSubcarrierSum * getNumberOfDataSubcarriers();
     const IForwardErrorCorrection *forwardErrorCorrection = getCode() ? getCode()->getForwardErrorCorrection() : nullptr;
     unsigned int dataBitsPerSymbol = forwardErrorCorrection ? forwardErrorCorrection->getDecodedLength(numberOfCodedBitsPerSymbol) : numberOfCodedBitsPerSymbol;
-    int numberOfSymbols = lrint(ceil((double)getCompleteLength(dataLength).get() / dataBitsPerSymbol)); // TODO: getBitLength(dataLength) should be divisible by dataBitsPerSymbol
+    int numberOfSymbols = lrint(ceil((double)getCompleteLength(dataLength).get() / dataBitsPerSymbol)); // TODO getBitLength(dataLength) should be divisible by dataBitsPerSymbol
     return numberOfSymbols * getSymbolInterval();
 }
 

@@ -103,7 +103,7 @@ class INET_API Ieee80211FhssMode : public Ieee80211ModeBase
 
     virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
 
-    // TODO: fill in
+    // TODO fill in
     virtual inline const simtime_t getSlotTime() const override { return 50E-6; }
     virtual inline const simtime_t getSifsTime() const override { return 28E-6; }
     virtual const simtime_t getRifsTime() const override;

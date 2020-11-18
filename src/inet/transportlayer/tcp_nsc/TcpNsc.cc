@@ -543,7 +543,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
        NSC: process segment (data,len); should call removeConnection() if socket has
        closed and completely done
 
-       TODO: probably need to poll sockets to see if they are closed.
+       TODO probably need to poll sockets to see if they are closed.
        ...
      */
 
@@ -780,7 +780,7 @@ void TcpNsc::send_callback(const void *dataP, int datalenP)
     // we don't know whether that is the case from here, so we just
     // call it immediately for now. **THIS IS INCORRECT**. It should
     // only be called when a space becomes free in the nic queue.
-    pStackM->if_send_finish(0); // TODO: hardcoded inerface id
+    pStackM->if_send_finish(0); // TODO hardcoded inerface id
 }
 
 /*

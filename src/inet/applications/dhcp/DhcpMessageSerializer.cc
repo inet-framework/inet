@@ -41,7 +41,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeNBitsOfUint64Be(dhcpMessage->getReserved(), 15);
     stream.writeIpv4Address(dhcpMessage->getCiaddr());
     stream.writeIpv4Address(dhcpMessage->getYiaddr());
-    // FIXME: siaddr is missing from the packet representation
+    // FIXME siaddr is missing from the packet representation
     stream.writeUint32Be(0);
     stream.writeIpv4Address(dhcpMessage->getGiaddr());
     stream.writeMacAddress(dhcpMessage->getChaddr());
@@ -105,7 +105,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 
     // Host Name Option
     const char *hostName = options.getHostName();
-    // FIXME: nullptr and strcmp does not seem to work
+    // FIXME nullptr and strcmp does not seem to work
     if (hostName != nullptr && false) {
         stream.writeByte(HOSTNAME);
         uint16_t size = strlen(hostName);
@@ -132,7 +132,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(CLIENT_ID);
         uint8_t size = 1 + 6;
         stream.writeByte(size);
-        // TODO: arp hardware type?
+        // TODO arp hardware type?
         stream.writeByte(1);
         stream.writeMacAddress(options.getClientIdentifier());
         length += (2 + size);
@@ -242,7 +242,7 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
     dhcpMessage->setReserved(stream.readNBitsToUint64Be(15));
     dhcpMessage->setCiaddr(stream.readIpv4Address());
     dhcpMessage->setYiaddr(stream.readIpv4Address());
-    // FIXME: siaddr is missing from the packet representation
+    // FIXME siaddr is missing from the packet representation
     stream.readUint32Be();
     dhcpMessage->setGiaddr(stream.readIpv4Address());
     dhcpMessage->setChaddr(stream.readMacAddress());

@@ -53,7 +53,7 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 'm':
             result = networkInterface->getMacAddress().str();
             break;
-        case 'l': // TODO: Ipv4 or Ipv6
+        case 'l': // TODO Ipv4 or Ipv6
 #ifdef WITH_IPv4
             if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
                 result = std::to_string(ipv4Data->getNetmask().getNetmaskLength());

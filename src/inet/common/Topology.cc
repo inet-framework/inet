@@ -368,7 +368,7 @@ Topology::Node *Topology::getNodeFor(cModule *mod)
     // binary search because nodes[] is ordered by module ID
     Node tmpNode(mod->getId());
     auto it = std::lower_bound(nodes.begin(), nodes.end(), &tmpNode, lessByModuleId);
-    // TODO: this does not compile with VC9 (VC10 is OK): auto it = std::lower_bound(nodes.begin(), nodes.end(), mod->getId(), isModuleIdLess);
+    // TODO this does not compile with VC9 (VC10 is OK): auto it = std::lower_bound(nodes.begin(), nodes.end(), mod->getId(), isModuleIdLess);
     return it == nodes.end() || (*it)->moduleId != mod->getId() ? nullptr : *it;
 }
 

@@ -198,7 +198,7 @@ Message *SctpServer::makeAbortNotification(const SctpCommandReq *msg)
 
 void SctpServer::handleMessage(cMessage *msg)
 {
-    // TODO: there is another memory leak somewhere...
+    // TODO there is another memory leak somewhere...
     int id = 0;
     EV_INFO << "SctpServer::handleMessage\n";
     if (msg->isSelfMessage())

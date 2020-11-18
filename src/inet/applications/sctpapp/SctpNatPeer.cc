@@ -428,7 +428,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                             cmd->setSid(lastStream);
                             cmd->setLast(true);
                             cmsg->encapsulate(smsg);
-                            cmsg->setControlInfo(cmd.get()); // KLUDGE:
+                            cmsg->setControlInfo(cmd.get()); // KLUDGE
                             packetsSent++;
                             delete msg;
                             sendOrSchedule(cmsg);
@@ -519,7 +519,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
             auto& cmd = cmsg->addTag<SctpCommandReq>();
             id = atoi(msg->getName());
             cmd->setSocketId(id);
-            cmsg->setControlInfo(cmd.get()); // KLUDGE:
+            cmsg->setControlInfo(cmd.get()); // KLUDGE
             sendOrSchedule(cmsg);
             break;
         }

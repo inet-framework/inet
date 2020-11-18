@@ -43,7 +43,7 @@ bool BlockAckRecord::getAckState(SequenceNumber sequenceNumber, FragmentNumber f
         return true;
     }
     else if (acknowledgmentState.size() == 0) {
-        return true; // TODO: old?
+        return true; // TODO old?
     }
     else {
         auto earliest = acknowledgmentState.begin();

@@ -363,7 +363,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     if (isCompliant) {
         const auto& signalFieldBytesChunk = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket()->peekAllAsBytes() : packetModel->getPacket()->peekAllAsBytes();
         uint8_t rate = signalFieldBytesChunk->getByte(0) >> 4;
-        // TODO: handle erroneous rate field
+        // TODO handle erroneous rate field
         mode = &Ieee80211OfdmCompliantModes::getCompliantMode(rate, channelSpacing);
     }
     else if (!mode)
@@ -414,7 +414,7 @@ const IListening *Ieee80211LayeredOfdmReceiver::createListening(const IRadio *ra
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, isCompliant ? Hz(20000000) : bandwidth);
 }
 
-// TODO: copy
+// TODO copy
 const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
     const IRadio *receiver = listening->getReceiver();
@@ -429,13 +429,13 @@ const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-// TODO: this is not purely functional, see interface comment
-// TODO: copy
+// TODO this is not purely functional, see interface comment
+// TODO copy
 bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
-    // TODO: scalar
+    // TODO scalar
     const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
     if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;

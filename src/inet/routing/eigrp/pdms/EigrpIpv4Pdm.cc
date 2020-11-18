@@ -1337,7 +1337,7 @@ bool EigrpIpv4Pdm::applyStubToUpdate(EigrpRouteSource<Ipv4Address> *src)
     else if (this->eigrpStub.staticRt && src->isRedistributed())
         return false;
 
-    // TODO: leakMapRt
+    // TODO leakMapRt
 
     return true;
 }

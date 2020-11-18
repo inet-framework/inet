@@ -53,7 +53,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
     if (physicalEnvironment != nullptr && getSimulation()->getEventNumber() == 0 && displayObjects) {
         while (objectsLayer->getNumFigures())
             delete objectsLayer->removeFigure(0);
-        // KLUDGE: sorting objects with their rotated position's z coordinate to draw them in a "better" order
+        // KLUDGE sorting objects with their rotated position's z coordinate to draw them in a "better" order
         std::vector<const IPhysicalObject *> objectsCopy;
         for (int i = 0; i < physicalEnvironment->getNumObjects(); i++)
             objectsCopy.push_back(physicalEnvironment->getObject(i));

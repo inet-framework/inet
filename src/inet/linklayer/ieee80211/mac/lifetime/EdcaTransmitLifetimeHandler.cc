@@ -49,7 +49,7 @@ bool EdcaTransmitLifetimeHandler::isLifetimeExpired(const Ptr<const Ieee80211Dat
     return (simTime() - it->second) >= msduLifetime[ac];
 }
 
-// TODO: Copy!!!!!!
+// TODO Copy!!!!!!
 AccessCategory EdcaTransmitLifetimeHandler::mapTidToAc(int tid)
 {
     // standard static mapping (see "UP-to-AC mappings" table in the 802.11 spec.)

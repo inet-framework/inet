@@ -37,7 +37,7 @@ static bool isBpdu(Packet *packet)
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::ieee8022llc) {
         auto sapInd = packet->findTag<Ieee802SapInd>();
-        return sapInd != nullptr && sapInd->getSsap() == 0x42 && sapInd->getDsap() == 0x42; // TODO: && sapInd->getControl() == 3;
+        return sapInd != nullptr && sapInd->getSsap() == 0x42 && sapInd->getDsap() == 0x42; // TODO && sapInd->getControl() == 3;
     }
     else if (protocol == &Protocol::ethernetMac) {
         const auto& ethernetHeader = packet->peekAtFront<EthernetMacHeader>();
@@ -230,7 +230,7 @@ void Ieee8021dRelay::handleCrashOperation(LifecycleOperation *operation)
 
 NetworkInterface *Ieee8021dRelay::chooseBridgeInterface()
 {
-    // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
+    // TODO Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since relays work on EtherSwitches.
     //       NOTE that, we don't check if the returning interface is an Ethernet interface!
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {

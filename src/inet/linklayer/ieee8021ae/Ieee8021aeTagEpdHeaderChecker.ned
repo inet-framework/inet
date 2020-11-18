@@ -20,7 +20,7 @@ package inet.linklayer.ieee8021ae;
 import inet.queueing.base.PacketFilterBase;
 
 //
-// TODO: this module is incomplete
+// TODO this module is incomplete
 //
 simple Ieee8021aeTagEpdHeaderChecker extends PacketFilterBase like IIeee8021aeTagEpdHeaderChecker
 {

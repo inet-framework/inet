@@ -85,7 +85,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase
 
     /** lifecycle support */
     //@{
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION; } // TODO: INITSTAGE
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION; } // TODO INITSTAGE
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_PHYSICAL_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_PHYSICAL_LAYER; }
 

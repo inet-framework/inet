@@ -54,7 +54,7 @@ void PacketClassifierBase::handleMessage(cMessage *message)
 
 int PacketClassifierBase::callClassifyPacket(Packet *packet) const
 {
-    // KLUDGE:
+    // KLUDGE
     int index = const_cast<PacketClassifierBase *>(this)->classifyPacket(packet);
     if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
         throw cRuntimeError("Classified packet to invalid output gate: %d", index);

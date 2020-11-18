@@ -77,7 +77,7 @@ const IReceptionBitModel *Ieee80211OfdmDemodulator::demodulate(const IReceptionS
         for (unsigned int j = 0; j < bits.getSize(); j++)
             bitRepresentation->appendBit(bits.getBit(j));
     }
-    return createBitModel(bitRepresentation, -1, bps(NaN), -1, bps(NaN)); // TODO:
+    return createBitModel(bitRepresentation, -1, bps(NaN), -1, bps(NaN)); // TODO
 }
 
 } // namespace physicallayer

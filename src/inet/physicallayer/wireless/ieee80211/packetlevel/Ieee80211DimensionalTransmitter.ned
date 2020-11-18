@@ -35,11 +35,11 @@ import inet.physicallayer.wireless.common.base.packetlevel.DimensionalTransmitte
 module Ieee80211DimensionalTransmitter extends DimensionalTransmitterBase
 {
     parameters:
-        // TODO: remove parameters when base module is changed
+        // TODO remove parameters when base module is changed
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac");
         string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz");
         int channelNumber;
-        modulation = default("BPSK"); // TODO: this is simply wrong
+        modulation = default("BPSK"); // TODO this is simply wrong
         @class(Ieee80211DimensionalTransmitter);
 }
 

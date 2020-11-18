@@ -57,7 +57,7 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
             where = ' ';
             end = token;
         }
-        // TODO: replace this BS with the expression evaluator when it supports simtime_t and bindings
+        // TODO replace this BS with the expression evaluator when it supports simtime_t and bindings
         // Allowed syntax:
         // +-quantity
         // s|c|e

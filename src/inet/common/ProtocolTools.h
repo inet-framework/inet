@@ -33,7 +33,7 @@ template<typename T>
 const Ptr<T> removeProtocolHeader(Packet *packet)
 {
     packet->removeTagIfPresent<PacketProtocolTag>();
-    packet->trim(); // TODO: breaks fingerprints, but why not? packet->trimHeaders();
+    packet->trim(); // TODO breaks fingerprints, but why not? packet->trimHeaders();
     return packet->removeAtFront<T>();
 }
 

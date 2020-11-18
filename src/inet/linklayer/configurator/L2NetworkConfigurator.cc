@@ -260,7 +260,7 @@ void L2NetworkConfigurator::configureInterface(NetworkInterface *networkInterfac
 {
     ensureConfigurationComputed(topology);
     cModule *networkNodeModule = findContainingNode(networkInterface);
-    // TODO: avoid linear search
+    // TODO avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->module == networkNodeModule) {

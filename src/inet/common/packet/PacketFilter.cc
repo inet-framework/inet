@@ -32,7 +32,7 @@ void PacketFilter::setPattern(const char *packetPattern, const char *chunkPatter
 bool PacketFilter::matches(const cPacket *cpacket) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, cpacket);
-    // TODO: eliminate const_cast when cMatchExpression::matches becomes const
+    // TODO eliminate const_cast when cMatchExpression::matches becomes const
     if (!const_cast<PacketFilter *>(this)->packetMatchExpression.matches(&matchableObject))
         return false;
     else if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
@@ -75,7 +75,7 @@ void PacketFilter::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& c
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_CLASSNAME, chunk.get());
     if (!matches_)
-        // TODO: eliminate const_cast when cMatchExpression::matches becomes const
+        // TODO eliminate const_cast when cMatchExpression::matches becomes const
         matches_ = const_cast<PacketFilter *>(&this->packetFilter)->chunkMatchExpression.matches(&matchableObject);
 }
 

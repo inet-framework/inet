@@ -61,7 +61,7 @@ struct dhcp
   u8_t autoip_coop_state;
 #endif
 /** Patch #1308
- *  TODO: See dhcp.c "TODO"s
+ *  TODO See dhcp.c "TODO"s
  */
 #if 0
   struct ip_addr offered_si_addr;

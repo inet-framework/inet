@@ -150,7 +150,7 @@ void OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<cons
         scheduleInactivityTimer(callback);
     }
     else {
-        // TODO: send a new one?
+        // TODO send a new one?
     }
 }
 

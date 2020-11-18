@@ -188,7 +188,7 @@ void Ipv6NeighbourDiscovery::handleMessage(cMessage *msg)
         if (protocol == &Protocol::icmpv6) {
             // This information will serve as input parameters to various processors.
             const auto& ndMsg = packet->peekAtFront<Icmpv6Header>();
-            processNDMessage(packet, ndMsg.get()); // KLUDGE: remove get()
+            processNDMessage(packet, ndMsg.get()); // KLUDGE remove get()
         }
         else { // not ND message
             processIpv6Datagram(packet);
@@ -616,7 +616,7 @@ void Ipv6NeighbourDiscovery::timeoutPrefixEntry(const Ipv6Address& destPrefix, i
        entry is discarded.*/
     rt6->deleteOnLinkPrefix(destPrefix, prefixLength);
     // hmmm... should the unicast address associated with this prefix be deleted
-    // as well?-TODO: The address should be timeout/deleted as well!!
+    // as well?-TODO The address should be timeout/deleted as well!!
 
     /*No existing Destination Cache entries need be updated, however. Should a
        reachability problem arise with an existing Neighbor Cache entry, Neighbor
@@ -943,7 +943,7 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
        MAX_RTR_SOLICITATION_DELAY.  This serves to alleviate congestion when
        many hosts start up on a link at the same time, such as might happen
        after recovery from a power failure.*/
-    // TODO: Placing these operations here means fast router solicitation is
+    // TODO Placing these operations here means fast router solicitation is
     // not adopted. Will relocate.
     if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements() == false) {
         EV_INFO << "creating router discovery message timer\n";
@@ -998,7 +998,7 @@ void Ipv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
        next unsolicited Router Advertisement to locate default routers or learn
        prefixes.  To obtain Router Advertisements quickly, a host SHOULD transmit up
        to MAX_RTR_SOLICITATIONS Router Solicitation messages each separated by at
-       least RTR_SOLICITATION_INTERVAL seconds.(FIXME:Therefore this should be invoked
+       least RTR_SOLICITATION_INTERVAL seconds.(FIXMETherefore this should be invoked
        at the beginning of the simulation-WEI)*/
     RdEntry *rdEntry = new RdEntry();
     rdEntry->interfaceId = ie->getInterfaceId();
@@ -1479,7 +1479,7 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
        LinkMTU so long as the value is greater than or equal to the minimum link MTU
        [Ipv6] and does not exceed the default LinkMTU value specified in the link
        type specific document (e.g., [Ipv6-ETHER]).*/
-    // TODO: not done yet
+    // TODO not done yet
 
     processRaPrefixInfo(ra, ie);
 }
@@ -1608,14 +1608,14 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
         Ipv6Address linkLocalAddress = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
         ASSERT(linkLocalAddress.isUnspecified() == false);
         Ipv6Address newAddr = linkLocalAddress.setPrefix(prefix, prefixLength);
-        // TODO: for now we leave the newly formed address as not tentative,
+        // TODO for now we leave the newly formed address as not tentative,
         // according to Greg, we have to always perform DAD for a newly formed address.
         EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
         ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(newAddr, false, simTime() + validLifetime,
                 simTime() + preferredLifetime);
     }
 
-    // TODO: this is the simplified version.
+    // TODO this is the simplified version.
     /*e) If the advertised prefix matches the prefix of an autoconfigured
        address (i.e., one obtained via stateless or stateful address
        autoconfiguration) in the list of addresses associated with the
@@ -1940,7 +1940,7 @@ void Ipv6NeighbourDiscovery::processNsForTentativeAddress(Packet *packet, const 
         EV_INFO << "Source Address is UNSPECIFIED. Sender is performing DAD\n";
 
         // Sender performing Duplicate Address Detection
-        if (rt6->isLocalAddress(nsSrcAddr)) // FIXME: isLocalAddress(UNSPECIFIED) is always false!!! Must write another check for detecting source is myself/foreign node!!!
+        if (rt6->isLocalAddress(nsSrcAddr)) // FIXME isLocalAddress(UNSPECIFIED) is always false!!! Must write another check for detecting source is myself/foreign node!!!
             EV_INFO << "NS comes from myself. Ignoring NS\n";
         else {
             EV_INFO << "NS comes from another node. Address is duplicate!\n";
@@ -2039,7 +2039,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     /*If the (NS)Target Address is either an anycast address or a unicast
        address for which the node is providing proxy service, or the Target
        Link-Layer Address option is not included,*/
-    // TODO:ANYCAST will not be implemented here!
+    // TODOANYCAST will not be implemented here!
 
     MacAddress sourceLinkLayerAddress;
     if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress *>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
@@ -2073,7 +2073,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
 
     /*If the Target Address is an anycast address the sender SHOULD delay sending
        a response for a random time between 0 and MAX_ANYCAST_DELAY_TIME seconds.*/
-    /*TODO: More associated complexity for this one. We will have to delay
+    /*TODO More associated complexity for this one. We will have to delay
        sending off the solicitation. Perhaps the self message could have a context
        pointer pointing to a struct with enough info to create and send a NA packet.*/
 
@@ -2084,7 +2084,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
        situations, a node will first have to use Neighbor Discovery to
        determine the link-layer address of its neighbor (i.e, send out a
        multicast Neighbor Solicitation).*/
-    // TODO: if above mentioned happens, can addr resolution be performed for ND messages?
+    // TODO if above mentioned happens, can addr resolution be performed for ND messages?
     // if no link-layer addr exists for unicast addr when sending solicited NA, we should
     // add the NA to the list of queued packets. What if we have a list of queued
     // packets for different unicast solicitations? each time addr resolution is
@@ -2408,14 +2408,14 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
         if (nce->isDefaultRouter() && !nce->isRouter)
             neighbourCache.getDefaultRouterList().remove(*nce);
 
-        // TODO: remove destination cache entries
+        // TODO remove destination cache entries
     }
 }
 
 void Ipv6NeighbourDiscovery::createAndSendRedirectPacket(NetworkInterface *ie)
 {
     // Construct a Redirect message
-    auto redirect = makeShared<Ipv6Redirect>(); // TODO: "redirectMsg");
+    auto redirect = makeShared<Ipv6Redirect>(); // TODO "redirectMsg");
 
     // FIXME incomplete code
 #if 0
@@ -2517,7 +2517,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
         ASSERT(linkLocalAddress.isUnspecified() == false);
         Ipv6Address newAddr = linkLocalAddress.setPrefix(prefix, prefixLength);
         Ipv6Address CoA;
-        // TODO: for now we leave the newly formed address as not tentative,
+        // TODO for now we leave the newly formed address as not tentative,
         // according to Greg, we have to always perform DAD for a newly formed address.
         EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
 

@@ -50,7 +50,7 @@ class INET_API AckHandler : public cSimpleModule, public IAckHandler
 
     virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
 
-    virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override; // TODO: rename
+    virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override; // TODO rename
     virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
     virtual Status getAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);

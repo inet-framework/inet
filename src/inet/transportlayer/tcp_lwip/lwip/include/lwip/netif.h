@@ -65,7 +65,7 @@ extern "C" {
     across all types of interfaces in use */
 #define NETIF_MAX_HWADDR_LEN 6U
 
-/** TODO: define the use (where, when, whom) of netif flags */
+/** TODO define the use (where, when, whom) of netif flags */
 
 /** whether the network interface is 'up'. this is
  * a software flag used to control whether this network

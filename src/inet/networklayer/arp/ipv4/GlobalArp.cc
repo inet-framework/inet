@@ -212,7 +212,7 @@ MacAddress GlobalArp::mapMulticastAddress(L3Address address)
     macAddress.setAddressByte(0, 0x01);
     macAddress.setAddressByte(1, 0x00);
     macAddress.setAddressByte(2, 0x5e);
-    // TODO:
+    // TODO
 //    macAddress.setAddressByte(3, addr.getDByte(1) & 0x7f);
 //    macAddress.setAddressByte(4, addr.getDByte(2));
 //    macAddress.setAddressByte(5, addr.getDByte(3));

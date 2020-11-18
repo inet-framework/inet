@@ -71,7 +71,7 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-// TODO: this is not purely functional, see interface comment
+// TODO this is not purely functional, see interface comment
 bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     if (!NarrowbandReceiverBase::computeIsReceptionPossible(listening, reception, part))

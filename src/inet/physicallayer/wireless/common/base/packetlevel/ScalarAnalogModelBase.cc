@@ -47,7 +47,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
     const Coord& receptionStartPosition = arrival->getStartPosition();
-    // TODO: could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
+    // TODO could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);

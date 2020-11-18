@@ -115,7 +115,7 @@ void VoipStreamSender::initialize(int stage)
         // say HELLO to the world
         EV_TRACE << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
 
-        // KLUDGE: TODO: hack to create results folder (doesn't work when record-scalars = false)
+        // KLUDGE TODO hack to create results folder (doesn't work when record-scalars = false)
         recordScalar("hackForCreateResultsFolder", 0);
 
         destAddress = L3AddressResolver().resolve(par("destAddress"));

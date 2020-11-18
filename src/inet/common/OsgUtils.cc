@@ -364,7 +364,7 @@ void LineNode::setStart(const Coord& start)
     line->dirtyBound();
     line->dirtyDisplayList();
     if (startArrowhead) {
-        // TODO: suboptimal
+        // TODO suboptimal
         removeChild(1);
         auto end = inet::osg::toCoord(vertices->at(1));
         addChild(createArrowhead(end, start, 10 + 2 * lineWidth, 20 + 2 * lineWidth));
@@ -379,7 +379,7 @@ void LineNode::setEnd(const Coord& end)
     line->dirtyBound();
     line->dirtyDisplayList();
     if (endArrowhead) {
-        // TODO: suboptimal
+        // TODO suboptimal
         removeChild(startArrowhead ? 2 : 1);
         auto start = inet::osg::toCoord(vertices->at(0));
         addChild(createArrowhead(start, end, 10 + 2 * lineWidth, 20 + 2 * lineWidth));

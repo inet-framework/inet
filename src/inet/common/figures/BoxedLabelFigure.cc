@@ -29,7 +29,7 @@ BoxedLabelFigure::BoxedLabelFigure(const char *name) :
     addFigure(rectangleFigure);
     addFigure(labelFigure);
     setInset(inset);
-    setText(" "); // TODO: empty string causes negative width/height in Tkenv
+    setText(" "); // TODO empty string causes negative width/height in Tkenv
 }
 
 void BoxedLabelFigure::setInset(double inset)

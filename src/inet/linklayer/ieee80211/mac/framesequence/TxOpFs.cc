@@ -23,7 +23,7 @@ namespace inet {
 namespace ieee80211 {
 
 /*
- * TODO: add [ RTS CTS ] (txop-part-requiring-ack txop-part-providing-ack )|
+ * TODO add [ RTS CTS ] (txop-part-requiring-ack txop-part-providing-ack )|
  */
 TxOpFs::TxOpFs() :
     // Excerpt from G.3 EDCA and HCCA sequences
@@ -37,12 +37,12 @@ TxOpFs::TxOpFs() :
                                       new DataFs()}),
                     new SequentialFs({new OptionalFs(new RtsCtsFs(), OPTIONALFS_PREDICATE(isRtsCtsNeeded)),
                                       new DataFs(),
-                                      new AckFs()}), // TODO: should be in txop-part-requiring-ack
+                                      new AckFs()}), // TODO should be in txop-part-requiring-ack
                     new SequentialFs({new OptionalFs(new RtsCtsFs(), OPTIONALFS_PREDICATE(isBlockAckReqRtsCtsNeeded)),
                                       new BlockAckReqBlockAckFs()}),
                     new SequentialFs({new OptionalFs(new RtsCtsFs(), OPTIONALFS_PREDICATE(isRtsCtsNeeded)),
                                       new AlternativesFs({new ManagementAckFs(),
-                                                          /* TODO: DATA + QAP*/},
+                                                          /* TODO DATA + QAP*/},
                                                          ALTERNATIVESFS_SELECTOR(selectMgmtOrDataQap))})},
                    ALTERNATIVESFS_SELECTOR(selectTxOpSequence))
 {
@@ -84,7 +84,7 @@ bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 
 bool TxOpFs::isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
-    return false; // FIXME: QosRtsPolicy should handle this case
+    return false; // FIXME QosRtsPolicy should handle this case
 }
 
 } // namespace ieee80211

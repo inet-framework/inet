@@ -177,7 +177,7 @@ void Ipv4NetworkConfigurator::configureAllRoutingTables()
 void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTable)
 {
     ensureConfigurationComputed(topology);
-    // TODO: avoid linear search
+    // TODO avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->routingTable == routingTable)
@@ -188,7 +188,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTa
 void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface)
 {
     ensureConfigurationComputed(topology);
-    // TODO: avoid linear search
+    // TODO avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->routingTable == routingTable)
@@ -209,7 +209,7 @@ void Ipv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
         interfaceData->setIPAddress(Ipv4Address(interfaceInfo->address));
         interfaceData->setNetmask(Ipv4Address(interfaceInfo->netmask));
     }
-    // TODO: should we leave joined multicast groups first?
+    // TODO should we leave joined multicast groups first?
     for (auto& multicastGroup : interfaceInfo->multicastGroups)
         interfaceData->joinMulticastGroup(multicastGroup);
 }
@@ -637,7 +637,7 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
         const char *hostAttr = interfaceElement->getAttribute("hosts"); // "host* router[0..3]"
         const char *interfaceAttr = interfaceElement->getAttribute("names"); // i.e. interface names, like "eth* ppp0"
 
-        // TODO: "switch" egyebkent sztem nem muxik most, de kellene!
+        // TODO "switch" egyebkent sztem nem muxik most, de kellene!
         const char *towardsAttr = interfaceElement->getAttribute("towards"); // neighbor host names, like "ap switch"
         const char *amongAttr = interfaceElement->getAttribute("among"); // neighbor host names, like "host[*] router1"
         const char *addressAttr = interfaceElement->getAttribute("address"); // "10.0.x.x"
@@ -1151,7 +1151,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                             if (isNotEmpty(metricAttr))
                                 route->setMetric(atoi(metricAttr));
                             for (auto& child : children)
-                                route->addOutInterface(new Ipv4MulticastRoute::OutInterface(child, false /*TODO:isLeaf*/));
+                                route->addOutInterface(new Ipv4MulticastRoute::OutInterface(child, false /*TODOisLeaf*/));
                             node->staticMulticastRoutes.push_back(route);
                         }
                     }

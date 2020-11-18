@@ -193,7 +193,7 @@ void MediumVisualizerBase::handleParameterChange(const char *name)
             powerDensityMapCenterFrequency = Hz(par("powerDensityMapCenterFrequency"));
         else if (!strcmp(name, "powerDensityMapBandwidth"))
             powerDensityMapBandwidth = Hz(par("powerDensityMapBandwidth"));
-        // TODO:
+        // TODO
     }
 }
 

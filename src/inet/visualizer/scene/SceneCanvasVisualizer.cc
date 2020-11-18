@@ -115,15 +115,15 @@ void SceneCanvasVisualizer::handleParameterChange(const char *name)
         bool invertY;
         canvasProjection->setRotation(parseViewAngle(par("viewAngle"), invertY));
         canvasProjection->setScale(parse2D(par("viewScale"), invertY));
-        // TODO: update all visualizers
+        // TODO update all visualizers
     }
     else if (name && !strcmp(name, "viewScale")) {
         canvasProjection->setScale(parse2D(par("viewScale")));
-        // TODO: update all visualizers
+        // TODO update all visualizers
     }
     else if (name && !strcmp(name, "viewTranslation")) {
         canvasProjection->setTranslation(parse2D(par("viewTranslation")));
-        // TODO: update all visualizers
+        // TODO update all visualizers
     }
     double axisLength = par("axisLength");
     if (!std::isnan(axisLength))

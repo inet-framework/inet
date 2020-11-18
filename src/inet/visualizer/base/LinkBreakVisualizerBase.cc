@@ -125,7 +125,7 @@ void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
     if (signal == linkBrokenSignal) {
         MacAddress transmitterAddress;
         MacAddress receiverAddress;
-        // TODO: revive
+        // TODO revive
 //        if (auto frame = dynamic_cast<IMACFrame *>(object)) {
 //            transmitterAddress = frame->getTransmitterAddress();
 //            receiverAddress = frame->getReceiverAddress();
@@ -166,7 +166,7 @@ void LinkBreakVisualizerBase::removeLinkBreakVisualization(const LinkBreakVisual
     linkBreakVisualizations.erase(it);
 }
 
-// TODO: inefficient, create L2AddressResolver?
+// TODO inefficient, create L2AddressResolver?
 cModule *LinkBreakVisualizerBase::findNode(MacAddress address)
 {
     L3AddressResolver addressResolver;

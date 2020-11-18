@@ -45,7 +45,7 @@ void RecipientBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreeme
 //
 void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback)
 {
-    if (qosHeader->getAckPolicy() == AckPolicy::BLOCK_ACK) { // TODO: + Implicit Block Ack
+    if (qosHeader->getAckPolicy() == AckPolicy::BLOCK_ACK) { // TODO + Implicit Block Ack
         Tid tid = qosHeader->getTid();
         MacAddress originatorAddr = qosHeader->getTransmitterAddress();
         auto agreement = getAgreement(tid, originatorAddr);
@@ -93,7 +93,7 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(cons
         return agreement;
     }
     else
-        // TODO: update?
+        // TODO update?
         return it->second;
 }
 

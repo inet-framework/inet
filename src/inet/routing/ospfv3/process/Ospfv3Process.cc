@@ -429,7 +429,7 @@ void Ospfv3Process::parseConfig(cXMLElement *interfaceConfig)
                             ipv6addRange.prefix = address6; // add only network prefix
                             ipv6addRange.prefixLength = prefLength;
                             area->addAddressRange(ipv6addRange, true);
-                            // TODO:  Address added into Adressrange have Advertise always set to true. Exclude link-local (?)
+                            // TODO  Address added into Adressrange have Advertise always set to true. Exclude link-local (?)
                         }
                         cXMLElementList ipv4AddrList = (*interfaceIt)->getElementsByTagName("IPAddress");
                         if (ipv4AddrList.size() == 1) {

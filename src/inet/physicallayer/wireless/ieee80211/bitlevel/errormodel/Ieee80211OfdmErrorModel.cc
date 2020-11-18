@@ -137,7 +137,7 @@ Ieee80211OfdmSymbol *Ieee80211OfdmErrorModel::corruptOFDMSymbol(const Ieee80211O
     for (int j = 0; j < symbol->symbolSize(); j++) {
         double p = uniform(0, 1);
         if (p <= ser) {
-            int corruptedSubcarrierSymbolIndex = intuniform(0, constellationSize - 1); // TODO: it can be equal to the current symbol
+            int corruptedSubcarrierSymbolIndex = intuniform(0, constellationSize - 1); // TODO it can be equal to the current symbol
             const ApskSymbol *corruptedSubcarrierSymbol = &constellation->at(corruptedSubcarrierSymbolIndex);
             subcarrierSymbols[j] = corruptedSubcarrierSymbol;
         }
@@ -148,12 +148,12 @@ Ieee80211OfdmSymbol *Ieee80211OfdmErrorModel::corruptOFDMSymbol(const Ieee80211O
 const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     throw cRuntimeError("Unimplemented!");
-    // TODO: implement sample error model
+    // TODO implement sample error model
     const ITransmissionSampleModel *transmissionSampleModel = transmission->getSampleModel();
     int sampleLength = transmissionSampleModel->getSampleLength();
     double sampleRate = transmissionSampleModel->getSampleRate();
     const std::vector<W> *samples = transmissionSampleModel->getSamples();
-    W rssi = W(0); // TODO: error model
+    W rssi = W(0); // TODO error model
     return new ReceptionSampleModel(sampleLength, sampleRate, samples, rssi);
 }
 

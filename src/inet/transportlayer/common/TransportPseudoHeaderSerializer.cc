@@ -27,7 +27,7 @@ Register_Serializer(TransportPseudoHeader, TransportPseudoHeaderSerializer);
 
 void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    // FIXME: ipv6, generic ????
+    // FIXME ipv6, generic ????
     const auto& transportPseudoHeader = staticPtrCast<const TransportPseudoHeader>(chunk);
     auto nwProtId = transportPseudoHeader->getNetworkProtocolId();
     if (nwProtId == Protocol::ipv4.getId()) {

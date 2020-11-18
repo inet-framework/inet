@@ -54,7 +54,7 @@ void Polyhedron::buildConvexHull()
                 // Coplanar faces have to be merged together since they define a bigger face
                 // Due to these merges the computeIntersection() algorithm will have to visit fewer faces
                 // It is clear that conflict list and outward normals are same as that of neighborFace
-                connectFaces(newFace); // TODO: optimize
+                connectFaces(newFace); // TODO optimize
                 if (areCoplanar(newFace, neighborFace)) {
                     mergeFaces(newFace, neighborFace, currentPoint);
                     connectFaces(neighborFace);
@@ -203,7 +203,7 @@ void Polyhedron::mergeFaces(PolyhedronFace *newFace, PolyhedronFace *neighborFac
     Edges& edges = neighborFace->getEdges();
     auto eit = edges.begin();
     PolyhedronEdge *edge = *eit;
-    // TODO: optimize
+    // TODO optimize
     while (edge->getJointFace() != newFace) {
         eit++;
         if (eit == edges.end())

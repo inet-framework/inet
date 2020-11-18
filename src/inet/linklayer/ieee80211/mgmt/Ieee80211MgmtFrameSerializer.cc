@@ -267,7 +267,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
 
 const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream) const
 {
-    switch (0) { // TODO: receive and dispatch on type_info parameter
+    switch (0) { // TODO receive and dispatch on type_info parameter
         case 0xB0: // ST_AUTHENTICATION
         {
             auto frame = makeShared<Ieee80211AuthenticationFrame>();
@@ -392,7 +392,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             auto frame = makeShared<Ieee80211BeaconFrame>();
 
             simtime_t timetstamp;
-            timetstamp.setRaw(stream.readUint64Be()); // TODO: store timestamp
+            timetstamp.setRaw(stream.readUint64Be()); // TODO store timestamp
 
             frame->setBeaconInterval(SimTime((int64_t)stream.readUint16Be() * 1024, SIMTIME_US));
             stream.readUint16Be(); // Capability
@@ -418,7 +418,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             auto frame = makeShared<Ieee80211ProbeResponseFrame>();
 
             simtime_t timestamp;
-            timestamp.setRaw(stream.readUint64Be()); // TODO: store timestamp
+            timestamp.setRaw(stream.readUint64Be()); // TODO store timestamp
 
             frame->setBeaconInterval(SimTime((int64_t)stream.readUint16Be() * 1024, SIMTIME_US));
             stream.readUint16Be();

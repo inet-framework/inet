@@ -255,7 +255,7 @@ void Ppp::handleUpperPacket(Packet *packet)
 
 void Ppp::handleLowerPacket(Packet *packet)
 {
-    // TODO: if incoming gate is not connected now, then the link has been deleted
+    // TODO if incoming gate is not connected now, then the link has been deleted
     // during packet transmission --> discard incomplete packet.
     EV_INFO << "Received " << packet << " from network.\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);

@@ -178,7 +178,7 @@ class INET_API Coord
      * math::close function.
      */
     friend bool operator==(const Coord& a, const Coord& b) {
-        // FIXME: this implementation is not transitive
+        // FIXME this implementation is not transitive
         return math::close(a.x, b.x) && math::close(a.y, b.y) && math::close(a.z, b.z);
     }
 

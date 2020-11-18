@@ -58,7 +58,7 @@ void Ospfv2RoutingTableEntry::addNextHop(NextHop hop)
         NetworkInterface *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
-        // TODO: this used to be commented out, but it seems we need it
+        // TODO this used to be commented out, but it seems we need it
         // otherwise gateways will never be filled in and gateway is needed for broadcast networks
         setGateway(hop.hopAddress);
     }

@@ -32,7 +32,7 @@ enum IpProtocolId
     //  IP_PROT_HOPOPT    = 0;
     IP_PROT_ICMP = 1;
     IP_PROT_IGMP = 2;
-    IP_PROT_IP = 4; // used for IP tunneling. FIXME: RFC1700 specifies =3 (old IPSuite) ???
+    IP_PROT_IP = 4; // used for IP tunneling. FIXME RFC1700 specifies =3 (old IPSuite) ???
     IP_PROT_TCP = 6;
     IP_PROT_EGP = 8;
     IP_PROT_IGP = 9;

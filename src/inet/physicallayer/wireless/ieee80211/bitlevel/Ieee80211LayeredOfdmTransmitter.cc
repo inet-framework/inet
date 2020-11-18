@@ -59,7 +59,7 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
         centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
         if (isCompliant && (dataEncoder || signalEncoder || dataModulator || signalModulator
-                            || pulseShaper || digitalAnalogConverter || !std::isnan(channelSpacing.get()))) // TODO: check modulations
+                            || pulseShaper || digitalAnalogConverter || !std::isnan(channelSpacing.get()))) // TODO check modulations
         {
             throw cRuntimeError("In compliant mode it is forbidden to set the following parameters: dataEncoder, signalEncoder, modulator, signalModulator, pulseShaper, digitalAnalogConverter, bandwidth, channelSpacing");
         }
@@ -241,7 +241,7 @@ const ITransmissionBitModel *Ieee80211LayeredOfdmTransmitter::createBitModel(con
 b Ieee80211LayeredOfdmTransmitter::getPaddingLength(const Ieee80211OfdmMode *mode, b length) const
 {
     // 18.3.5.4 Pad bits (PAD), 1597p.
-    // TODO: in non-compliant mode: header padding.
+    // TODO in non-compliant mode: header padding.
     unsigned int codedBitsPerOFDMSymbol = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     const Ieee80211OfdmCode *code = mode->getDataMode()->getCode();
     unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
@@ -284,7 +284,7 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createAnalogMod
         else
             throw cRuntimeError("Digital/analog converter needs sample representation");
     }
-    else // TODO: Analog model is obligatory, currently we use scalar analog model as default analog model
+    else // TODO Analog model is obligatory, currently we use scalar analog model as default analog model
         analogModel = createScalarAnalogModel(packetModel, bitModel);
     return analogModel;
 }
@@ -334,7 +334,7 @@ const ITransmission *Ieee80211LayeredOfdmTransmitter::createTransmission(const I
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    // TODO: compute channel
+    // TODO compute channel
     return new Ieee80211LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, mode, nullptr);
 }
 

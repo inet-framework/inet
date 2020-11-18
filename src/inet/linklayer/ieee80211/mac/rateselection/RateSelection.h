@@ -33,7 +33,7 @@ namespace ieee80211 {
  *      9.7.5.6 Rate selection for other data and management frames
  *
  * 9.7.6 Rate selection for control frames
- *      TODO: Control frames carried in an A-MPDU shall be sent at a rate selected from the rules defined in 9.7.5.6.
+ *      TODO Control frames carried in an A-MPDU shall be sent at a rate selected from the rules defined in 9.7.5.6.
  *      9.7.6.2 Rate selection for control frames that initiate a TXOP
  *      9.7.6.4 Rate selection for control frames that are not control response frames
  *      9.7.6.5 Rate selection for control response frames

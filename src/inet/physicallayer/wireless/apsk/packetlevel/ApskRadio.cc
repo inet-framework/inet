@@ -49,12 +49,12 @@ const ApskModulationBase *ApskRadio::getModulation() const
     auto phyHeader = makeShared<ApskPhyHeader>();
     b headerLength = phyHeader->getChunkLength();
 
-    // KLUDGE:
+    // KLUDGE
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();
         modulation = check_and_cast<const ApskModulationBase *>(flatTransmitter->getModulation());
     }
-    // KLUDGE:
+    // KLUDGE
     else if (auto layeredTransmitter = dynamic_cast<const ApskLayeredTransmitter *>(transmitter)) {
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {

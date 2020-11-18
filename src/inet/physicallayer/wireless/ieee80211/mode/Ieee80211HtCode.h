@@ -47,7 +47,7 @@ class INET_API Ieee80211HtCode : public ICode
 class INET_API Ieee80211HtCompliantCodes
 {
   public:
-    // Convolutional codes (TODO: LDPC codes).
+    // Convolutional codes (TODO LDPC codes).
     // Note: 1/2, 2/3, 3/4 rates are defined in Ieee80211OfdmCompliantCodes.
     static const Ieee80211ConvolutionalCode htConvolutionalCode5_6;
 

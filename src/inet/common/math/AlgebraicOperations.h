@@ -54,7 +54,7 @@ class INET_API AddedFunction : public FunctionBase<R, D>
                 }
             }
             function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
-                // TODO: use template specialization for compile time optimization
+                // TODO use template specialization for compile time optimization
                 if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
                     if (auto f2c = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                         ConstantFunction<R, D> g(f1c->getConstantValue() + f2c->getConstantValue());

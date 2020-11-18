@@ -33,7 +33,7 @@ class INET_API EdcaTransmitLifetimeHandler : public ITransmitLifetimeHandler
     std::map<SequenceNumber, simtime_t> lifetimes;
 
   protected:
-    AccessCategory mapTidToAc(int tid); // TODO: copy
+    AccessCategory mapTidToAc(int tid); // TODO copy
 
   public:
     EdcaTransmitLifetimeHandler(simtime_t bkLifetime, simtime_t beLifetime, simtime_t viLifetime, simtime_t voLifetime);

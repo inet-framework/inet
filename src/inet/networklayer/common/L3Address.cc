@@ -178,13 +178,13 @@ bool L3Address::isUnicast() const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::IPv4:
-            return !toIpv4().isMulticast() && !toIpv4().isLimitedBroadcastAddress(); // TODO: move to Ipv4Address
+            return !toIpv4().isMulticast() && !toIpv4().isLimitedBroadcastAddress(); // TODO move to Ipv4Address
 
         case L3Address::IPv6:
             return toIpv6().isUnicast();
 
         case L3Address::MAC:
-            return !toMac().isBroadcast() && !toMac().isMulticast(); // TODO: move to MacAddress
+            return !toMac().isBroadcast() && !toMac().isMulticast(); // TODO move to MacAddress
 
         case L3Address::MODULEID:
             return toModuleId().isUnicast();

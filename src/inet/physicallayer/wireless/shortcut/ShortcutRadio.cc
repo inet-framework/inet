@@ -44,7 +44,7 @@ void ShortcutRadio::initialize(int stage)
         packetLoss = &par("packetLoss");
         gate("radioIn")->setDeliverImmediately(true);
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         auto networkInterface = CHK(interfaceTable->findInterfaceByInterfaceModule(this));

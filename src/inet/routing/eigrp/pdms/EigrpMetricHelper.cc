@@ -109,8 +109,8 @@ uint64_t EigrpMetricHelper::computeWideMetric(const EigrpWideMetricPar& par, con
     if (isParamMaximal(par))
         return METRIC_INF;
 
-    // TODO: compute delay from bandwidth if bandwidth is greater than 1 Gb/s
-    // TODO: include also additional parameters associated with K6
+    // TODO compute delay from bandwidth if bandwidth is greater than 1 Gb/s
+    // TODO include also additional parameters associated with K6
 
     throughput = (BANDWIDTH * WIDE_SCALE) / par.bandwidth;
     latency = (par.delay * WIDE_SCALE) / DELAY_PICO;

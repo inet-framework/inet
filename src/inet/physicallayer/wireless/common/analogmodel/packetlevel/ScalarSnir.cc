@@ -56,7 +56,7 @@ double ScalarSnir::computeMax() const
 
 double ScalarSnir::computeMean() const
 {
-    // TODO:
+    // TODO
     return NaN;
 }
 

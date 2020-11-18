@@ -32,9 +32,9 @@ using namespace units::values;
  * provides a set of read functions that read data at the current position of
  * the stream. Most functions are implemented in the header to allow inlining.
  */
-// TODO: allow arbitrary mixed bit/byte reads
-// TODO: add parameter checks
-// TODO: review efficiency
+// TODO allow arbitrary mixed bit/byte reads
+// TODO add parameter checks
+// TODO review efficiency
 class INET_API MemoryInputStream
 {
   protected:

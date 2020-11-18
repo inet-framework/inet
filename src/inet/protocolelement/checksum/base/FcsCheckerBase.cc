@@ -45,7 +45,7 @@ bool FcsCheckerBase::checkDeclaredIncorrectFcs(const Packet *packet, uint32_t fc
 
 bool FcsCheckerBase::checkComputedFcs(const Packet *packet, uint32_t receivedFcs) const
 {
-    // TODO: if (receivedFcs == 0x00000000L) -> disabled
+    // TODO if (receivedFcs == 0x00000000L) -> disabled
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
     uint32_t computedFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4);

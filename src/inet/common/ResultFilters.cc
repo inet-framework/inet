@@ -285,7 +285,7 @@ void PacketDropReasonFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t
         fire(this, t, object, details);
 }
 
-// TODO: replace these filters with a single filter that supports parameters when it becomes available in omnetpp
+// TODO replace these filters with a single filter that supports parameters when it becomes available in omnetpp
 #define Register_PacketDropReason_ResultFilter(NAME, CLASS, REASON)    class CLASS : public PacketDropReasonFilter { public: CLASS() { reason = REASON; } }; Register_ResultFilter(NAME, CLASS);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsUndefined", UndefinedPacketDropReasonFilter, -1);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsAddressResolutionFailed", AddressResolutionFailedPacketDropReasonFilter, ADDRESS_RESOLUTION_FAILED);

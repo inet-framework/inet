@@ -74,7 +74,7 @@ Texture2D *createTextureFromResource(const char *imageName, bool repeat);
 StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullBackFace = true);
 StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineStyle& style, double width, bool overlay = false);
 
-// TODO: move to separate file, recreate node similar to omnetpp figures as a set of basic building blocks
+// TODO move to separate file, recreate node similar to omnetpp figures as a set of basic building blocks
 class INET_API LineNode : public Group
 {
   protected:

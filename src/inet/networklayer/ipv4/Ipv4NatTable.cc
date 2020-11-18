@@ -115,7 +115,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
     for (; lt != ut; lt++) {
         const auto& packetFilter = lt->second.first;
         const auto& natEntry = lt->second.second;
-        // TODO: this might be slow for too many filters
+        // TODO this might be slow for too many filters
         if (packetFilter->matches(packet)) {
             auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
             if (!natEntry.getDestAddress().isUnspecified())
@@ -126,7 +126,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
 #ifdef WITH_UDP
             if (transportProtocol == &Protocol::udp) {
                 auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
-                // TODO: if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
+                // TODO if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
                 auto udpData = packet->peekData();
                 if (natEntry.getDestPort() != -1)
                     udpHeader->setDestPort(natEntry.getDestPort());
@@ -140,7 +140,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
 #ifdef WITH_TCP_COMMON
             if (transportProtocol == &Protocol::tcp) {
                 auto& tcpHeader = removeTransportProtocolHeader<tcp::TcpHeader>(packet);
-                // TODO: if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))
+                // TODO if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))
                 auto tcpData = packet->peekData();
                 if (natEntry.getDestPort() != -1)
                     tcpHeader->setDestPort(natEntry.getDestPort());

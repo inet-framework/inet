@@ -107,7 +107,7 @@ void TcpNscConnection::connect(INetStack& stackP, SockPair& inetSockPairP, SockP
     nscSockPairP.localM.ipAddrM.set(Ipv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
 /*
-    // TODO: getpeername generate an assert!!!
+    // TODO getpeername generate an assert!!!
     pNscSocketM->getpeername((sockaddr*)&sockAddr, &sockAddrLen);
     nscSockPairP.remoteM.ipAddrM.set(sockAddr.sin_addr.s_addr);
     nscSockPairP.remoteM.portM = ntohs(sockAddr.sin_port);

@@ -27,9 +27,9 @@ namespace inet {
 namespace ieee80211 {
 
 /*
- * TODO: processFailedFrame
+ * TODO processFailedFrame
  */
-// TODO: this class seems to be able to handle all ACs at once, so maybe it should be moved to Hcf
+// TODO this class seems to be able to handle all ACs at once, so maybe it should be moved to Hcf
 class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
 {
   public:

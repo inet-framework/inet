@@ -48,7 +48,7 @@ Coord OsgEarthGround::computeGroundProjection(const Coord& position) const
     if (success)
         geoCoord.altitude = m(elevation);
     else {
-        // TODO: throw cRuntimeError ?
+        // TODO throw cRuntimeError ?
     }
     return coordinateSystem->computeSceneCoordinate(geoCoord);
 }

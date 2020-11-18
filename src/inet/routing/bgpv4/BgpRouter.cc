@@ -992,7 +992,7 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
 
 void BgpRouter::printKeepAliveMessage(const BgpKeepAliveMessage& keepAliveMsg)
 {
-    // TODO: add code once implemented
+    // TODO add code once implemented
 }
 
 bool BgpRouter::isRouteExcluded(const Ipv4Route& rtEntry)

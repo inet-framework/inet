@@ -64,12 +64,12 @@ const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, c
 
 bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
-    // TODO: check if modulation matches?
+    // TODO check if modulation matches?
     const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
     return centerFrequency == narrowbandTransmission->getCenterFrequency() && bandwidth >= narrowbandTransmission->getBandwidth();
 }
 
-// TODO: this is not purely functional, see interface comment
+// TODO this is not purely functional, see interface comment
 bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);

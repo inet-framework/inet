@@ -64,7 +64,7 @@ bool GridObjectCache::insertObject(const IPhysicalObject *object)
 {
     Coord pos = object->getPosition();
     Coord boundingBoxSize = object->getShape()->computeBoundingBoxSize();
-    // TODO: avoid dynamic cast
+    // TODO avoid dynamic cast
     grid->insertObject(dynamic_cast<const cObject *>(object), pos, boundingBoxSize);
     return true;
 }

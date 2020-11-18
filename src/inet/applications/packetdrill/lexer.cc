@@ -94,7 +94,7 @@ typedef unsigned int flex_uint32_t;
 
 /* begin standard C++ headers. */
 
-/* TODO: this is always defined, so inline it */
+/* TODO this is always defined, so inline it */
 #define yyconst const
 
 #if defined(__GNUC__) && __GNUC__ >= 3
@@ -1271,7 +1271,7 @@ char *yytext;
  * yylval.fooval field, where fooval is a field in the %union in the
  * .y file.
  *
- * TODO: detect overflow in numeric literals.
+ * TODO detect overflow in numeric literals.
  */
 
 

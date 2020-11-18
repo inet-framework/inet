@@ -403,7 +403,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual int getNumMulticastRoutes() const override { return 0; /*TODO getNumMulticastRoutes();*/ }
     virtual void addMulticastRoute(IMulticastRoute *entry) override { /*TODO addMulticastRoute(entry);*/ }
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) override { /*TODO removeMulticastRoute(entry);*/ return entry; }
-    virtual bool deleteMulticastRoute(IMulticastRoute *entry) override { return false; /*TODO: deleteMulticastRoute(entry);*/ }
+    virtual bool deleteMulticastRoute(IMulticastRoute *entry) override { return false; /*TODO deleteMulticastRoute(entry);*/ }
     virtual IRoute *createRoute() override { return new Ipv6Route(Ipv6Address(), 0, IRoute::MANUAL); }
 
     /**

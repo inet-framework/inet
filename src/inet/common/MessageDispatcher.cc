@@ -26,8 +26,8 @@ namespace inet {
 
 Define_Module(MessageDispatcher);
 
-// TODO: optimize gate access throughout this class
-// TODO: factoring out some methods could also help
+// TODO optimize gate access throughout this class
+// TODO factoring out some methods could also help
 
 void MessageDispatcher::initialize(int stage)
 {
@@ -145,7 +145,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
     if (dispatchProtocolReq != nullptr) {
         const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        // TODO KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1)) {
             if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
                 servicePrimitive = SP_INDICATION;
@@ -215,7 +215,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
     const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        // TODO KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1))
             servicePrimitive = SP_REQUEST;
         auto protocol = dispatchProtocolReq->getProtocol();

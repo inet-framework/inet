@@ -84,7 +84,7 @@ const Coord& AttachedMobility::getCurrentAcceleration()
     if (isZeroOffset)
         return mobility->getCurrentAcceleration();
     else {
-        // TODO:
+        // TODO
         return Coord::NIL;
     }
 }

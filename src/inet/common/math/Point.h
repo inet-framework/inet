@@ -73,7 +73,7 @@ template<>
 struct bits_to_indices_sequence<0b0, 1>{ typedef std::integer_sequence<size_t> type; };
 
 template<>
-struct bits_to_indices_sequence<0b00, 2>{ typedef std::integer_sequence<size_t, 0> type; }; // TODO: shouldn't be empty set?
+struct bits_to_indices_sequence<0b00, 2>{ typedef std::integer_sequence<size_t, 0> type; }; // TODO shouldn't be empty set?
 template<>
 struct bits_to_indices_sequence<0b01, 2>{ typedef std::integer_sequence<size_t, 1> type; };
 template<>

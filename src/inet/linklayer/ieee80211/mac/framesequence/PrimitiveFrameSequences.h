@@ -107,7 +107,7 @@ class INET_API RtsCtsFs : public IFrameSequence
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
 
-    virtual std::string getHistory() const override { return std::string("RTS") + (step == 2 ? " CTS" : ""); } // TODO: completeStep = true?
+    virtual std::string getHistory() const override { return std::string("RTS") + (step == 2 ? " CTS" : ""); } // TODO completeStep = true?
 };
 
 class INET_API RtsFs : public IFrameSequence
@@ -121,7 +121,7 @@ class INET_API RtsFs : public IFrameSequence
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
 
-    virtual std::string getHistory() const override { return "RTS"; } // TODO: completeStep = true?
+    virtual std::string getHistory() const override { return "RTS"; } // TODO completeStep = true?
 };
 
 class INET_API CtsFs : public IFrameSequence
@@ -135,7 +135,7 @@ class INET_API CtsFs : public IFrameSequence
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
 
-    virtual std::string getHistory() const override { return "CTS"; } // TODO: completeStep = true?
+    virtual std::string getHistory() const override { return "CTS"; } // TODO completeStep = true?
 };
 
 class INET_API FragFrameAckFs : public IFrameSequence
@@ -149,7 +149,7 @@ class INET_API FragFrameAckFs : public IFrameSequence
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
 
-    virtual std::string getHistory() const override { return std::string("FRAG-FRAME") + (step == 2 ? " ACK" : ""); } // TODO: completeStep = true?
+    virtual std::string getHistory() const override { return std::string("FRAG-FRAME") + (step == 2 ? " ACK" : ""); } // TODO completeStep = true?
 };
 
 class INET_API LastFrameAckFs : public IFrameSequence
@@ -163,7 +163,7 @@ class INET_API LastFrameAckFs : public IFrameSequence
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
 
-    virtual std::string getHistory() const override { return std::string("LAST-FRAME") + (step == 2 ? " ACK" : ""); } // TODO: completeStep = true?
+    virtual std::string getHistory() const override { return std::string("LAST-FRAME") + (step == 2 ? " ACK" : ""); } // TODO completeStep = true?
 };
 
 class INET_API BlockAckReqBlockAckFs : public IFrameSequence
@@ -177,7 +177,7 @@ class INET_API BlockAckReqBlockAckFs : public IFrameSequence
     virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
     virtual bool completeStep(FrameSequenceContext *context) override;
 
-    virtual std::string getHistory() const override { return std::string("BLOCKACKREQ") + (step == 2 ? " BLOCKACK" : ""); } // TODO: completeStep = true?
+    virtual std::string getHistory() const override { return std::string("BLOCKACKREQ") + (step == 2 ? " BLOCKACK" : ""); } // TODO completeStep = true?
 };
 
 } // namespace ieee80211

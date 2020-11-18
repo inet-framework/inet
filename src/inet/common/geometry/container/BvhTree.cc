@@ -102,7 +102,7 @@ bool BvhTree::intersectWithLineSegment(const LineSegment& lineSegment) const
     Coord p1 = lineSegment.getPoint2() - center;
     Cuboid cuboid(size);
     LineSegment translatedLineSegment(p0, p1);
-    Coord intersection1, intersection2, normal1, normal2; // TODO: implement a bool computeIntersection(lineSegment) function
+    Coord intersection1, intersection2, normal1, normal2; // TODO implement a bool computeIntersection(lineSegment) function
     return cuboid.computeIntersection(translatedLineSegment, intersection1, intersection2, normal1, normal2);
 }
 
@@ -110,7 +110,7 @@ void BvhTree::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *v
 {
     if (isLeaf()) {
         for (auto& elem : objects)
-            // TODO: avoid dynamic_cast
+            // TODO avoid dynamic_cast
             visitor->visit(dynamic_cast<const cObject *>(elem));
     }
     else if (intersectWithLineSegment(lineSegment)) {

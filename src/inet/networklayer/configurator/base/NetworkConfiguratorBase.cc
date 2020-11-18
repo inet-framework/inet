@@ -273,8 +273,8 @@ void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *n
     }
 }
 
-// TODO: replace isBridgeNode with isBridgedInterfaces(NetworkInterface *entry1, NetworkInterface *entry2)
-// TODO: where the two interfaces must be in the same node (meaning they are on the same link)
+// TODO replace isBridgeNode with isBridgedInterfaces(NetworkInterface *entry1, NetworkInterface *entry2)
+// TODO where the two interfaces must be in the same node (meaning they are on the same link)
 bool NetworkConfiguratorBase::isBridgeNode(Node *node)
 {
     return !node->routingTable || !node->interfaceTable;
@@ -423,7 +423,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->networkInterface->getMtu()));
             transmittedFrame->insertAtBack(byteCountChunk);
 
-            // KLUDGE:
+            // KLUDGE
             transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(nullptr);
             check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
 

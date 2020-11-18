@@ -245,7 +245,7 @@ using namespace units::values;
  * d) Inserting a ByteCountChunk into a ByteCountChunk merges them
  * e) Inserting a connecting SliceChunk into a SliceChunk merges them
  */
-// TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
+// TODO performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
 class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject, public IRegionTaggedObject
 {
     friend class SliceChunk;

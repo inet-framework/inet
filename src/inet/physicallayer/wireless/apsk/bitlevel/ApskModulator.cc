@@ -60,7 +60,7 @@ const ITransmissionSymbolModel *ApskModulator::modulate(const ITransmissionBitMo
         if (i % codeWordSize == codeWordSize - 1)
             symbols->push_back(modulation->mapToConstellationDiagram(symbolBits));
     }
-    // TODO: double symbolRate = bitModel->getBitRate() / modulation->getCodeWordSize();
+    // TODO double symbolRate = bitModel->getBitRate() / modulation->getCodeWordSize();
     return new TransmissionSymbolModel(symbols->size(), NaN, symbols->size(), NaN, symbols, modulation, modulation);
 }
 

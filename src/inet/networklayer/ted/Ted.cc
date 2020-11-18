@@ -46,7 +46,7 @@ Ted::~Ted()
 void Ted::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
         maxMessageId = 0;
 

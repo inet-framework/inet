@@ -136,7 +136,7 @@ class INET_API IRoute
     static const char *sourceTypeName(SourceType sourceType);
 };
 
-// TODO: move into info()?
+// TODO move into info()?
 inline std::ostream& operator<<(std::ostream& out, const IRoute *route)
 {
     out << "destination = " << route->getDestinationAsGeneric();

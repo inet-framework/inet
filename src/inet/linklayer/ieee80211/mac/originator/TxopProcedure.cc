@@ -116,19 +116,19 @@ simtime_t TxopProcedure::getDuration() const
     return simTime() - start;
 }
 
-// FIXME: implement!
+// FIXME implement!
 bool TxopProcedure::isFinalFragment(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
 }
 
-// FIXME: implement!
+// FIXME implement!
 bool TxopProcedure::isTxopInitiator(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
 }
 
-// FIXME: implement!
+// FIXME implement!
 bool TxopProcedure::isTxopTerminator(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;

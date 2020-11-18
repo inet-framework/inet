@@ -142,7 +142,7 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
         auto startingSeqNum = basicBlockAck->getStartingSequenceNumber();
         for (int seqNum = 0; seqNum < 64; seqNum++) {
             BitVector bitmap = basicBlockAck->getBlockAckBitmap(seqNum);
-            for (int fragNum = 0; fragNum < 16; fragNum++) { // TODO: declare these const values
+            for (int fragNum = 0; fragNum < 16; fragNum++) { // TODO declare these const values
                 auto id = std::make_pair(receiverAddr, std::make_pair(basicBlockAck->getTidInfo(), SequenceControlField(startingSeqNum + seqNum, fragNum)));
                 auto status = getQoSDataAckStatus(id);
                 if (status == Status::WAITING_FOR_BLOCK_ACK) {
@@ -150,7 +150,7 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
                     if (acked) ackedFrames.insert(id);
                     ackStatuses[id] = acked ? Status::BLOCK_ACK_ARRIVED_ACKED : Status::BLOCK_ACK_ARRIVED_UNACKED;
                 }
-                else ; // TODO: erroneous BlockAck
+                else ; // TODO erroneous BlockAck
             }
         }
     }
@@ -165,7 +165,7 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
                 ackStatuses[id] = acked ? Status::BLOCK_ACK_ARRIVED_ACKED : Status::BLOCK_ACK_ARRIVED_UNACKED;
                 if (acked) ackedFrames.insert(id);
             }
-            else ; // TODO: erroneous BlockAck
+            else ; // TODO erroneous BlockAck
         }
     }
     else {
@@ -179,7 +179,7 @@ void QosAckHandler::processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckRe
     if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         auto startingSeqNum = basicBlockAckReq->getStartingSequenceNumber();
         for (int seqNum = 0; seqNum < 64; seqNum++) {
-            for (int fragNum = 0; fragNum < 16; fragNum++) { // TODO: declare these const values
+            for (int fragNum = 0; fragNum < 16; fragNum++) { // TODO declare these const values
                 MacAddress receiverAddr = blockAckReq->getReceiverAddress();
                 auto id = std::make_pair(receiverAddr, std::make_pair(basicBlockAckReq->getTidInfo(), SequenceControlField(startingSeqNum + seqNum, fragNum)));
                 auto status = getQoSDataAckStatus(id);
@@ -211,7 +211,7 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
             case NORMAL_ACK : ackStatuses[id] = Status::WAITING_FOR_NORMAL_ACK; break;
             case BLOCK_ACK : ackStatuses[id] = Status::BLOCK_ACK_NOT_YET_REQUESTED; break;
             case NO_ACK : ackStatuses[id] = Status::NO_ACK_REQUIRED; break;
-            case NO_EXPLICIT_ACK : throw cRuntimeError("Unimplemented"); /* TODO: ACKED by default? */ break;
+            case NO_EXPLICIT_ACK : throw cRuntimeError("Unimplemented"); /* TODO ACKED by default? */ break;
             default: throw cRuntimeError("Unknown Ack Policy = %d", dataHeader->getAckPolicy());
         }
     }
@@ -235,7 +235,7 @@ void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211Block
         else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
             if (compressedBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && seqCtrlField.getSequenceNumber() >= startingSeqNum && seqCtrlField.getFragmentNumber() == 0) // TODO: ASSERT(seqCtrlField.second == 0)?
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && seqCtrlField.getSequenceNumber() >= startingSeqNum && seqCtrlField.getFragmentNumber() == 0) // TODO ASSERT(seqCtrlField.second == 0)?
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }

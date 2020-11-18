@@ -673,7 +673,7 @@ void Ospfv3Area::ageDatabase()
     if (shouldRebuildRoutingTable) {
         getInstance()->getProcess()->rebuildRoutingTable();
     }
-    // TODO: Protocol creates only some LSA. After new LSA will be added, aging for them need to be also added.
+    // TODO Protocol creates only some LSA. After new LSA will be added, aging for them need to be also added.
 }
 
 ////------------------------------------- Router LSA --------------------------------------//
@@ -1703,7 +1703,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
                         short netPrefixLen = prefLSA->getPrefixes(prefN).prefixLen;
                         if (routerPref.getPrefix(routerPrefixLen) == netPref.getPrefix(netPrefixLen)) {
                             EV_DEBUG << "Came LSA type 9 with referenced prefix of LSType 1, have one with LSType 2, doing nothing\n";
-                            // TODO:This become relevant when there will be support for active changing of type of link
+                            // TODOThis become relevant when there will be support for active changing of type of link
                         }
                     }
                 }
@@ -2646,7 +2646,7 @@ Ospfv3RoutingTableEntry *Ospfv3Area::createRoutingTableEntryFromInterAreaPrefixL
 
     destination.prefix = interAreaPrefixLSA.getPrefix().addressPrefix.toIpv6();
     destination.prefixLength = interAreaPrefixLSA.getPrefix().prefixLen;
-    // TODO: AS boundary is not implemented
+    // TODO AS boundary is not implemented
     Ospfv3RoutingTableEntry *newEntry = new Ospfv3RoutingTableEntry(this->getInstance()->ift, destination.prefix, destination.prefixLength, IRoute::OSPF);
 
     if (interAreaPrefixLSA.getHeader().getLsaType() == INTER_AREA_PREFIX_LSA) {

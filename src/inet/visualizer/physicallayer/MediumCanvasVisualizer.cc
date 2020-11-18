@@ -136,7 +136,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     powerDensityMapFigure->setYValueFormat("%.3g");
                     powerDensityMapFigure->invertYAxis();
                     powerDensityMapFigure->setPlotSize(cFigure::Point(powerDensityMapFigureWidth, powerDensityMapFigureHeight), cFigure::Point(powerDensityMapPixmapWidth, powerDensityMapPixmapHeight));
-                    // TODO: center on node to align in space coordinates
+                    // TODO center on node to align in space coordinates
                     powerDensityMapFigure->refreshDisplay();
                     networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getPlotSize(), PLACEMENT_CENTER_CENTER, -1);
                     powerDensityMapFigures[networkNode] = powerDensityMapFigure;
@@ -298,7 +298,7 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
         throw cRuntimeError("TODO");
     }
     else {
-        // TODO:
+        // TODO
 //        auto bandpassFilterFunction = makeShared<Boxcar1DFunction<double, Hz>>(powerDensityMapCenterFrequency - powerDensityMapBandwidth / 2, powerDensityMapCenterFrequency + powerDensityMapBandwidth / 2, 1);
 //        powerFunction = integrate<WpHz, Domain<m, m, m, simsec, Hz>, 0b11110, W, Domain<m, m, m, simsec>>(powerDensityFunction->multiply(bandpassFilter));
         figure->setMinValue(mW2dBmW(mW(signalMinPower).get()));
@@ -461,8 +461,8 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
         WpHz power1;
         WpHz power2;
         std::tie(power1, power2) = computePowerForPartitionBounds(powerFunction, lower, upper, partitonPowerFunction, antenna, position);
-        // TODO: the function f is assumed to be constant or linear between l1 and u1 but on a logarithmic axis the plot is non-linear
-        // TODO: the following interpolation should be part of the PlotFigure along with logarithmic axis support
+        // TODO the function f is assumed to be constant or linear between l1 and u1 but on a logarithmic axis the plot is non-linear
+        // TODO the following interpolation should be part of the PlotFigure along with logarithmic axis support
         auto x1 = GHz(std::get<4>(lower)).get();
         auto x2 = GHz(std::get<4>(upper)).get();
         for (double x = x1; x < x2; x += dx) {
@@ -694,7 +694,7 @@ void MediumCanvasVisualizer::refreshSpectrogramFigurePowerFunction(const Ptr<con
 
 std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobility *> MediumCanvasVisualizer::extractSpectrumFigureParameters(const cModule *networkNode) const
 {
-    // TODO: what about multiple radios? what if it's not called wlan, this is quite accidental, etc.?
+    // TODO what about multiple radios? what if it's not called wlan, this is quite accidental, etc.?
     const IRadio *radio = dynamic_cast<const IRadio *>(networkNode);
     if (radio == nullptr) {
         auto wlan0 = networkNode->getSubmodule("wlan", 0);
@@ -727,7 +727,7 @@ void MediumCanvasVisualizer::setAnimationSpeed()
             if (isSignalTransmissionInProgress(transmission)) {
                 if (newSignalInProgress == SIP_NONE)
                     newSignalInProgress = SIP_TRANSMISSION;
-                // TODO: overwrite only...
+                // TODO overwrite only...
                 if (std::isnan(signalTransmissionAnimationSpeed))
                     newSignalTransmissionAnimationSpeed = std::min(newSignalTransmissionAnimationSpeed, transmission->getDuration().dbl() / signalTransmissionAnimationTime);
             }
@@ -893,7 +893,7 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
         double phi = transmission->getId();
         labelFigure->setTransform(cFigure::Transform().translate(endRadius * sin(phi), endRadius * cos(phi)));
         const Coord& transmissionStart = transmission->getStartPosition();
-        // KLUDGE: to workaround overflow bugs in drawing, Tkenv?
+        // KLUDGE to workaround overflow bugs in drawing, Tkenv?
         double offset = std::fmod(startRadius, signalFigure->getWaveLength());
 //        if (startRadius > 10000)
 //            startRadius = 10000;

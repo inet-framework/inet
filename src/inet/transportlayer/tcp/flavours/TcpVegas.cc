@@ -129,7 +129,7 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
         simtime_t tSent = found->getFirstSentTime();
         int num_transmits = found->getTransmitCount();
 
-        // TODO: When should do it: when received first ACK, or when received ACK of 1st sent packet???
+        // TODO When should do it: when received first ACK, or when received ACK of 1st sent packet???
         if (firstSeqAcked == state->iss + 1) { // Initialization
             state->v_baseRTT = currentTime - tSent;
             state->v_sa = state->v_baseRTT * 8;

@@ -44,7 +44,7 @@ void FrameSequenceHandler::processResponse(Packet *frame)
     auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
         case IFrameSequenceStep::Type::RECEIVE: {
-            // TODO: check if not for us and abort
+            // TODO check if not for us and abort
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getLastStep());
             receiveStep->setFrameToReceive(frame);
             finishFrameSequenceStep();
@@ -96,7 +96,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
                 auto transmitStep = static_cast<TransmitStep *>(nextStep);
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << ".\n";
                 callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
-                // TODO: lifetime
+                // TODO lifetime
 //                if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
 //                    transmitLifetimeHandler->frameTransmitted(dataFrame);
                 break;

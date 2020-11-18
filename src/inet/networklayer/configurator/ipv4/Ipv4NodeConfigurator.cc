@@ -128,7 +128,7 @@ void Ipv4NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
     }
     else {
         auto datarate = networkInterface->getDatarate();
-        // TODO: KLUDGE: how do we set the metric correctly for both wired and wireless interfaces even if datarate is unknown
+        // TODO KLUDGE how do we set the metric correctly for both wired and wireless interfaces even if datarate is unknown
         if (datarate == 0)
             interfaceData->setMetric(1);
         else

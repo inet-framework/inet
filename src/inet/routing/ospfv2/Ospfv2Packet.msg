@@ -183,7 +183,7 @@ class Ospfv2SummaryLsa extends Ospfv2Lsa
 
 struct Ospfv2ExternalTosInfo
 {
-    // TODO: tosData (?)
+    // TODO tosData (?)
     unsigned short tos;
     bool E_ExternalMetricType = false;
     unsigned long routeCost = 1;

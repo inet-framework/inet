@@ -34,7 +34,7 @@ Ospfv3RoutingTableEntry::Ospfv3RoutingTableEntry(const Ospfv3RoutingTableEntry& 
 void Ospfv3RoutingTableEntry::setPathType(RoutingPathType type)
 {
     pathType = type;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
+    // FIXME this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == Ospfv3RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     }
@@ -46,7 +46,7 @@ void Ospfv3RoutingTableEntry::setPathType(RoutingPathType type)
 void Ospfv3RoutingTableEntry::setCost(Metric pathCost)
 {
     cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
+    // FIXME this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == Ospfv3RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     }
@@ -58,7 +58,7 @@ void Ospfv3RoutingTableEntry::setCost(Metric pathCost)
 void Ospfv3RoutingTableEntry::setType2Cost(Metric pathCost)
 {
     type2Cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
+    // FIXME this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == Ospfv3RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     }
@@ -73,7 +73,7 @@ void Ospfv3RoutingTableEntry::addNextHop(NextHop hop)
         NetworkInterface *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
-        // TODO: this used to be commented out, but it seems we need it
+        // TODO this used to be commented out, but it seems we need it
         // otherwise gateways will never be filled in and gateway is needed for broadcast networks
 //        setGateway(hop.hopAddress);
     }
@@ -227,7 +227,7 @@ Ospfv3Ipv4RoutingTableEntry::Ospfv3Ipv4RoutingTableEntry(const Ospfv3Ipv4Routing
 void Ospfv3Ipv4RoutingTableEntry::setPathType(RoutingPathType type)
 {
     pathType = type;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
+    // FIXME this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == Ospfv3Ipv4RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     }
@@ -239,7 +239,7 @@ void Ospfv3Ipv4RoutingTableEntry::setPathType(RoutingPathType type)
 void Ospfv3Ipv4RoutingTableEntry::setCost(Metric pathCost)
 {
     cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
+    // FIXME this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == Ospfv3Ipv4RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     }
@@ -251,7 +251,7 @@ void Ospfv3Ipv4RoutingTableEntry::setCost(Metric pathCost)
 void Ospfv3Ipv4RoutingTableEntry::setType2Cost(Metric pathCost)
 {
     type2Cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
+    // FIXME this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == Ospfv3Ipv4RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     }
@@ -266,7 +266,7 @@ void Ospfv3Ipv4RoutingTableEntry::addNextHop(NextHop hop)
         NetworkInterface *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
-        // TODO: this used to be commented out, but it seems we need it
+        // TODO this used to be commented out, but it seems we need it
         // otherwise gateways will never be filled in and gateway is needed for broadcast networks
 //        setGateway(hop.hopAddress);
     }

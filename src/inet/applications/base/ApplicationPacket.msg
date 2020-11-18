@@ -23,7 +23,7 @@ namespace inet;
 //
 // Generic application packet
 //
-// TODO: rename to ApplicationHeader and remove ByteCountChunk from ApplicationHeaderSerializer
+// TODO rename to ApplicationHeader and remove ByteCountChunk from ApplicationHeaderSerializer
 class ApplicationPacket extends FieldsChunk
 {
     uint32_t sequenceNumber;

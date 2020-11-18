@@ -45,11 +45,11 @@ void TcpServerListener::handleCrashOperation(LifecycleOperation *operation)
 {
     while (!connectionSet.empty()) {
         auto connection = *connectionSet.begin();
-        // TODO: destroy!!!
+        // TODO destroy!!!
         connection->getSocket()->close();
         removeConnection(connection);
     }
-    // TODO: always?
+    // TODO always?
     if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
 }

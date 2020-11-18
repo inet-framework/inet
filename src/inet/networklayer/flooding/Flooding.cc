@@ -295,7 +295,7 @@ void Flooding::encapsulate(Packet *appPkt)
     EV << "in encaps...\n";
 
     auto cInfo = appPkt->removeControlInfo();
-    auto pkt = makeShared<FloodingHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
+    auto pkt = makeShared<FloodingHeader>(); // TODO appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(b(headerLength));
 
     auto& hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();

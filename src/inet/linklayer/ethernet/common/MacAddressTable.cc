@@ -247,7 +247,7 @@ void MacAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
     AddressTable *table = getTableForVid(vid);
     if (table == nullptr)
         return;
-    // TODO: this part could be factored out
+    // TODO this part could be factored out
     for (auto iter = table->begin(); iter != table->end();) {
         auto cur = iter++; // iter will get invalidated after erase()
         AddressEntry& entry = cur->second;
@@ -263,7 +263,7 @@ void MacAddressTable::removeAgedEntriesFromAllVlans()
 {
     for (auto& elem : vlanAddressTable) {
         AddressTable *table = elem.second;
-        // TODO: this part could be factored out
+        // TODO this part could be factored out
         for (auto j = table->begin(); j != table->end();) {
             auto cur = j++; // iter will get invalidated after erase()
             AddressEntry& entry = cur->second;

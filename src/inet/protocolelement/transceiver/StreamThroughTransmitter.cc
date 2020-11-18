@@ -143,7 +143,7 @@ void StreamThroughTransmitter::abortTx()
     ASSERT(isTransmitting());
     // 2. create new truncated signal
     auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
-    // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
+    // TODO we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
     simtime_t timePosition = simTime() - txStartTime;
     b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
     packet->eraseAtBack(packet->getTotalLength() - dataPosition);

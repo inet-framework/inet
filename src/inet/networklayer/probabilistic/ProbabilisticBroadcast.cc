@@ -104,7 +104,7 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
 
         // until a subscription mechanism is implemented, duplicate and pass all received packets
         // to the application layer who will be able to compute statistics.
-        // TODO: implement an application subscription mechanism.
+        // TODO implement an application subscription mechanism.
         if (true) {
             auto mCopy = packet->dup();
             decapsulate(mCopy);
@@ -280,7 +280,7 @@ ProbabilisticBroadcast::tMsgDesc *ProbabilisticBroadcast::popFirstMessageUpdateQ
 
 void ProbabilisticBroadcast::encapsulate(Packet *packet)
 {
-    auto pkt = makeShared<ProbabilisticBroadcastHeader>(); // TODO: msg->getName());
+    auto pkt = makeShared<ProbabilisticBroadcastHeader>(); // TODO msg->getName());
     cObject *controlInfo = packet->removeControlInfo();
     L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
 

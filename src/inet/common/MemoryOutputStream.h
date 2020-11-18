@@ -32,9 +32,9 @@ using namespace units::values;
  * provides a set of write functions that write data to the end of the stream.
  * Most functions are implemented in the header to allow inlining.
  */
-// TODO: allow arbitrary mixed bit/byte writes
-// TODO: add parameter checks
-// TODO: review efficiency
+// TODO allow arbitrary mixed bit/byte writes
+// TODO add parameter checks
+// TODO review efficiency
 class INET_API MemoryOutputStream
 {
   protected:

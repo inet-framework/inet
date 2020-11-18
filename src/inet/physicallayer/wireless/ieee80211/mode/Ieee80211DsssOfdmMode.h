@@ -52,10 +52,10 @@ class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return nullptr; }
     virtual const IIeee80211DataMode *getDataMode() const override { return ofdmDataMode; }
 
-    // TODO: fill in
+    // TODO fill in
     virtual inline const simtime_t getDuration(b dataLength) const override { return 0; }
 
-    // TODO: fill in
+    // TODO fill in
     virtual inline const simtime_t getSlotTime() const override { return 0; }
     virtual inline const simtime_t getSifsTime() const override { return 0; }
     virtual const simtime_t getRifsTime() const override;

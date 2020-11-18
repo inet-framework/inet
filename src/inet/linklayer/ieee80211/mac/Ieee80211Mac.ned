@@ -71,7 +71,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
 
         @display("i=block/layer");
         @class(Ieee80211Mac);
-        @signal[linkBroken](type=inet::Packet); // TODO: this signal is only present for the statistic to pass the signal check, to be removed
+        @signal[linkBroken](type=inet::Packet); // TODO this signal is only present for the statistic to pass the signal check, to be removed
         @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
         @statistic[packetSentToUpper](title="packets sent to upper layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToLower](title="packets sent to lower layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

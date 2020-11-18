@@ -181,7 +181,7 @@ bool Router::installASExternalLSA(const Ospfv2AsExternalLsa *lsa)
      *    the Router ID as their Destination ID). However these entries are only inserted into
      *    the routing table for intra-area routers...
      */
-    // TODO: how to solve this problem?
+    // TODO how to solve this problem?
 
     RouterId advertisingRouter = lsa->getHeader().getAdvertisingRouter();
 
@@ -513,7 +513,7 @@ bool Router::isDestinationUnreachable(Ospfv2Lsa *lsa) const
     Ipv4Address destination = Ipv4Address(lsa->getHeader().getLinkStateID());
 
     Ospfv2RouterLsa *routerLSA = dynamic_cast<Ospfv2RouterLsa *>(lsa);
-    // TODO: verify
+    // TODO verify
     if (routerLSA) {
         RoutingInfo *routingInfo = check_and_cast<RoutingInfo *>(routerLSA);
         if (routerLSA->getHeader().getLinkStateID() == routerID) // this is spfTreeRoot
@@ -1065,7 +1065,7 @@ void Router::calculateASExternalRoutes(std::vector<Ospfv2RoutingTableEntry *>& n
                  (destinationPreferredEntry->getCost() == preferredCost))) // equal cost
             {
                 for (unsigned int j = 0; j < nextHopCount; j++) {
-                    // TODO: merge next hops, not add
+                    // TODO merge next hops, not add
                     NextHop nextHop = preferredEntry->getNextHop(j);
                     if (!nextHop.hopAddress.isUnspecified()) {
                         nextHop.advertisingRouter = originatingRouter;
@@ -1159,7 +1159,7 @@ LinkStateId Router::getUniqueLinkStateID(const Ipv4AddressRange& destination,
     }
 }
 
-// TODO: review this algorithm + add virtual link changes(RFC2328 Section 16.7.).
+// TODO review this algorithm + add virtual link changes(RFC2328 Section 16.7.).
 void Router::notifyAboutRoutingTableChanges(std::vector<Ospfv2RoutingTableEntry *>& oldRoutingTable)
 {
     // return if this router is not an ABR
@@ -1420,7 +1420,7 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const Ospfv2AsExter
     lsaOptions.E_ExternalRoutingCapability = true;
     lsaHeader.setLsOptions(lsaOptions);
     lsaHeader.setLsType(AS_EXTERNAL_LSA_TYPE);
-    lsaHeader.setLinkStateID(networkAddress); // TODO: get unique LinkStateId
+    lsaHeader.setLinkStateID(networkAddress); // TODO get unique LinkStateId
     lsaHeader.setAdvertisingRouter(Ipv4Address(routerID));
     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 

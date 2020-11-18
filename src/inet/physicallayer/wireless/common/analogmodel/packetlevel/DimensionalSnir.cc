@@ -39,7 +39,7 @@ std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level, in
 
 double DimensionalSnir::computeMin() const
 {
-    // TODO: factor out common part
+    // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_TRACE << "Reception power begin " << endl;
@@ -64,7 +64,7 @@ double DimensionalSnir::computeMin() const
 
 double DimensionalSnir::computeMax() const
 {
-    // TODO: factor out common part
+    // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_DEBUG << "Reception power begin " << endl;
@@ -89,7 +89,7 @@ double DimensionalSnir::computeMax() const
 
 double DimensionalSnir::computeMean() const
 {
-    // TODO: factor out common part
+    // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_TRACE << "Reception power begin " << endl;

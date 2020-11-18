@@ -418,7 +418,7 @@ void Ipv4::handlePacketFromHL(Packet *packet)
     // encapsulate
     encapsulate(packet);
 
-    // TODO:
+    // TODO
     L3Address nextHopAddr(Ipv4Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet);
@@ -651,7 +651,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
     const Ipv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
     if (!route) {
         EV_WARN << "Multicast route does not exist, try to add.\n";
-        // TODO: no need to emit fromIE when tags will be used in place of control infos
+        // TODO no need to emit fromIE when tags will be used in place of control infos
         emit(ipv4NewMulticastSignal, ipv4Header.get(), const_cast<NetworkInterface *>(fromIE));
 
         // read new record
@@ -670,7 +670,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
 
     if (route->getInInterface() && fromIE != route->getInInterface()->getInterface()) {
         EV_ERROR << "Did not arrive on input interface, packet dropped.\n";
-        // TODO: no need to emit fromIE when tags will be used in place of control infos
+        // TODO no need to emit fromIE when tags will be used in place of control infos
         emit(ipv4DataOnNonrpfSignal, ipv4Header.get(), const_cast<NetworkInterface *>(fromIE));
         numDropped++;
         PacketDropDetails details;
@@ -686,7 +686,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         delete packet;
     }
     else {
-        // TODO: no need to emit fromIE when tags will be used in place of control infos
+        // TODO no need to emit fromIE when tags will be used in place of control infos
         emit(ipv4DataOnRpfSignal, ipv4Header.get(), const_cast<NetworkInterface *>(fromIE)); // forwarding hook
 
         numForwarded++;
@@ -710,7 +710,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
             }
         }
 
-        // TODO: no need to emit fromIE when tags will be use, d in place of control infos
+        // TODO no need to emit fromIE when tags will be use, d in place of control infos
         emit(ipv4MdataRegisterSignal, packet, const_cast<NetworkInterface *>(fromIE)); // postRouting hook
 
         // only copies sent, delete original packet
@@ -1307,7 +1307,7 @@ void Ipv4::handleStartOperation(LifecycleOperation *operation)
 
 void Ipv4::handleStopOperation(LifecycleOperation *operation)
 {
-    // TODO: stop should send and wait pending packets
+    // TODO stop should send and wait pending packets
     stop();
 }
 

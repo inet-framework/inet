@@ -79,7 +79,7 @@ class INET_API Int128
 
     Int128(const char *sz) { set(sz); }
 
-    // TODO: Consider creation of operator= to eliminate
+    // TODO Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
 
     Int128& operator=(const Int128& other) { lo = other.lo; hi = other.hi; return *this; }

@@ -93,7 +93,7 @@ std::string NextHopMulticastRoute::detailedInfo() const
 
 bool NextHopMulticastRoute::addChild(NetworkInterface *ie, bool isLeaf)
 {
-    // TODO:
+    // TODO
     children.push_back(Child());
     Child& child = children.back();
     child.ie = ie;
@@ -102,7 +102,7 @@ bool NextHopMulticastRoute::addChild(NetworkInterface *ie, bool isLeaf)
 
 bool NextHopMulticastRoute::removeChild(NetworkInterface *ie)
 {
-    // TODO:
+    // TODO
 }
 
 #endif /*0*/

@@ -64,7 +64,7 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
     virtual Packet *createDestUnreachableMsg(Icmpv6DestUnav code);
     virtual Packet *createPacketTooBigMsg(int mtu);
     virtual Packet *createTimeExceededMsg(Icmpv6TimeEx code);
-    virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code); // TODO:Section 3.4 describes a pointer. What is it?
+    virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code); // TODOSection 3.4 describes a pointer. What is it?
 
   protected:
     /**

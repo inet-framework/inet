@@ -325,8 +325,8 @@ void PingApp::handleStopOperation(LifecycleOperation *operation)
     destAddrIdx = -1;
     cancelNextPingRequest();
     currentSocket = nullptr;
-    // TODO: close sockets
-    // TODO: remove getMap()
+    // TODO close sockets
+    // TODO remove getMap()
     if (socketMap.size() > 0) {
         for (auto socket: socketMap.getMap())
             socket.second->close();
@@ -344,9 +344,9 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
     destAddrIdx = -1;
     cancelNextPingRequest();
     currentSocket = nullptr;
-    // TODO: remove check?
+    // TODO remove check?
     if (operation->getRootModule() != getContainingNode(this)) {
-        // TODO: destroy sockets
+        // TODO destroy sockets
         for (auto socket: socketMap.getMap())
             socket.second->destroy();
         socketMap.deleteSockets();

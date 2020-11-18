@@ -66,7 +66,7 @@ EnergyStorageVisualizerBase::EnergyStorageVisualization *EnergyStorageOsgVisuali
 
 void EnergyStorageOsgVisualizer::refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const
 {
-    // TODO:
+    // TODO
 //    auto infoOsgVisualization = static_cast<const EnergyStorageOsgVisualization *>(energyStorageVisualization);
 //    auto node = infoOsgVisualization->node;
 }

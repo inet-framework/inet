@@ -25,7 +25,7 @@ namespace ieee80211 {
 
 /*
  * This class implements...
- * TODO: OriginatorBlockAckAgreementProcedure?
+ * TODO OriginatorBlockAckAgreementProcedure?
  */
 class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAgreementHandler
 {

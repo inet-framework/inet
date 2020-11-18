@@ -66,7 +66,7 @@ RadioVisualizerBase::RadioVisualization *RadioOsgVisualizer::createRadioVisualiz
 
 void RadioOsgVisualizer::refreshRadioVisualization(const RadioVisualization *radioVisualization) const
 {
-    // TODO:
+    // TODO
 //    auto infoOsgVisualization = static_cast<const RadioOsgVisualization *>(radioVisualization);
 //    auto node = infoOsgVisualization->node;
 }

@@ -79,7 +79,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=750,676,row,150");
         }
-        // TODO: move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
+        // TODO move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             parameters:
                 @display("p=375,766,row,150;q=queue");

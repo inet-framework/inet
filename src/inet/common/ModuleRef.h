@@ -29,7 +29,7 @@ namespace inet {
  * similarly to simple a C++ pointer. The pointer is automatically set to nullptr
  * when the referenced module is deleted.
  *
- * TODO: follow connection
+ * TODO follow connection
  */
 template<typename T>
 class INET_API ModuleRef

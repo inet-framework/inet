@@ -40,7 +40,7 @@ class INET_API IL3AddressType
     virtual L3Address getBroadcastAddress() const = 0;
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const = 0;
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
-    virtual const Protocol *getNetworkProtocol() const = 0; // TODO: move, where?
+    virtual const Protocol *getNetworkProtocol() const = 0; // TODO move, where?
 
     /**
      * Returns the first valid link-local address of the interface, or UNSPECIFIED_ADDRESS if there's none.

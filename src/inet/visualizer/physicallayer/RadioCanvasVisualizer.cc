@@ -59,7 +59,7 @@ void RadioCanvasVisualizer::initialize(int stage)
 RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisualization(const IRadio *radio) const
 {
     auto module = check_and_cast<const cModule *>(radio);
-    // TODO: use RadioFigure?
+    // TODO use RadioFigure?
     IndexedImageFigure *radioModeFigure = nullptr;
     if (displayRadioMode) {
         radioModeFigure = new IndexedImageFigure("radioMode");

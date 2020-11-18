@@ -97,7 +97,7 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     /**
      *  @brief Clears interfaceId cache
      */
-    // TODO: find a better name
+    // TODO find a better name
     virtual void flush(int interfaceId) override;
 
     /**

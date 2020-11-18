@@ -92,7 +92,7 @@ const Ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, const P
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
     MemoryOutputStream outputStream(chunkLength);
     Chunk::serialize(outputStream, chunk, offset, resultLength);
-    // TODO: optimize
+    // TODO optimize
     std::vector<bool> bits;
     outputStream.copyData(bits);
     return makeShared<BitsChunk>(bits);

@@ -129,7 +129,7 @@ class INET_API ChunkBuffer : public cNamedObject
      * chunk. Already existing data gets overwritten, and connecting data gets
      * merged with the provided chunk.
      */
-    // TODO: add flag to decide between keeping or overwriting old data when replacing with new data
+    // TODO add flag to decide between keeping or overwriting old data when replacing with new data
     void replace(b offset, const Ptr<const Chunk>& chunk);
 
     /**

@@ -54,7 +54,7 @@ std::vector<Packet *> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *p
         return std::vector<Packet *>();
     }
     Packet *defragmentedFrame = nullptr;
-    if (basicReassembly) { // FIXME: defragmentation
+    if (basicReassembly) { // FIXME defragmentation
         defragmentedFrame = defragment(packet);
     }
     return defragmentedFrame != nullptr ? std::vector<Packet *>({ defragmentedFrame }) : std::vector<Packet *>();

@@ -31,7 +31,7 @@ namespace physicallayer {
 class INET_API LayeredReception : public ReceptionBase
 {
   protected:
-    // TODO: where are the other models?
+    // TODO where are the other models?
 //    const IReceptionPacketModel *packetModel;
 //    const IReceptionBitModel    *bitModel;
 //    const IReceptionSymbolModel *symbolModel;

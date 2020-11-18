@@ -449,7 +449,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // signal the user again.
         //"
 
-        // TODO: URG currently not supported
+        // TODO URG currently not supported
     }
 
     //
@@ -1382,7 +1382,7 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
 }
 
 //
-// TODO:
+// TODO
 //"
 // USER TIMEOUT
 //

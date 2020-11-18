@@ -59,10 +59,10 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
             if (payloadProtocol == &Protocol::ipv4) {
                 auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
                 ipv4Header->setEcn(ecn);
-                // TODO: recalculate IP header checksum
+                // TODO recalculate IP header checksum
                 insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
                 packet->insertAtFront(ethHeader);
-                // TODO: recalculate ethernet CRC
+                // TODO recalculate ethernet CRC
                 ethFcs->setFcs(0);
                 packet->insertAtBack(ethFcs);
                 packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);

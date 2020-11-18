@@ -36,7 +36,7 @@ void Ieee8021aeTagEpdHeaderInserter::initialize(int stage)
 
 void Ieee8021aeTagEpdHeaderInserter::processPacket(Packet *packet)
 {
-    // TODO: this code is incomplete
+    // TODO this code is incomplete
     auto data = packet->removeData();
     data->markImmutable();
     auto encryptedData = makeShared<EncryptedChunk>(data, data->getChunkLength());

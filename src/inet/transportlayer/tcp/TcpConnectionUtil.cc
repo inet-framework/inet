@@ -619,7 +619,7 @@ void TcpConnection::sendSynAck()
         state->ect = true;
         EV << "both end-points are willing to use ECN... ECN is enabled\n";
     }
-    else { // TODO: not sure if we have to.
+    else { // TODO not sure if we have to.
            // rfc-3168, page 16:
            // A host that is not willing to use ECN on a TCP connection SHOULD
            // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or

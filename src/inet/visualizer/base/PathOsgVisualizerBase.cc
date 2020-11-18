@@ -41,7 +41,7 @@ PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const char *la
 
 PathOsgVisualizerBase::PathOsgVisualization::~PathOsgVisualization()
 {
-    // TODO: delete node;
+    // TODO delete node;
 }
 
 void PathOsgVisualizerBase::initialize(int stage)
@@ -57,7 +57,7 @@ void PathOsgVisualizerBase::initialize(int stage)
 void PathOsgVisualizerBase::refreshDisplay() const
 {
     PathVisualizerBase::refreshDisplay();
-    // TODO: switch to osg canvas when API is extended
+    // TODO switch to osg canvas when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 

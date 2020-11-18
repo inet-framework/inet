@@ -64,7 +64,7 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
     virtual void subscribe();
     virtual void unsubscribe();
 
-    // TODO: use ITransmission for identification?
+    // TODO use ITransmission for identification?
     virtual const ObstacleLossVisualization *createObstacleLossVisualization(const physicallayer::ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const = 0;
     virtual void addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);

@@ -219,7 +219,7 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
             pendingRadioConfigMsg = nullptr;
         }
 
-        if (rx->isMediumFree()) { // TODO: this should be just the physical channel sense!!!!
+        if (rx->isMediumFree()) { // TODO this should be just the physical channel sense!!!!
             EV_DEBUG << "Sending it down immediately\n";
 //            PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
 //            if (phyControlInfo)
@@ -228,7 +228,7 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
             sendDown(msg);
         }
         else {
-            // TODO: waiting potentially indefinitely?! wtf?!
+            // TODO waiting potentially indefinitely?! wtf?!
             EV_DEBUG << "Delaying " << msg->getName() << " until next IDLE or DEFER state\n";
             pendingRadioConfigMsg = msg;
         }
@@ -324,7 +324,7 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
             EV_DEBUG << "changing radio to receiver mode\n";
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME: this is in a very wrong place!!! should be done explicitly from coordination function!
+            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME this is in a very wrong place!!! should be done explicitly from coordination function!
         }
         rx->transmissionStateChanged(transmissionState);
     }
@@ -398,7 +398,7 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211Ma
     if (mib->qos)
         hcf->processLowerFrame(packet, header);
     else
-        // TODO: what if the received frame is ST_DATA_WITH_QOS? drop?
+        // TODO what if the received frame is ST_DATA_WITH_QOS? drop?
         dcf->processLowerFrame(packet, header);
 }
 

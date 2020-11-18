@@ -147,10 +147,10 @@ void WiseRoute::handleLowerPacket(Packet *packet)
     const L3Address& finalDestAddr = wiseRouteHeader->getFinalDestAddr();
     const L3Address& initialSrcAddr = wiseRouteHeader->getInitialSrcAddr();
     const L3Address& srcAddr = wiseRouteHeader->getSourceAddress();
-    // KLUDGE: TODO: get rssi and ber
+    // KLUDGE TODO get rssi and ber
     EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
-    double rssi = 1; // TODO: ctrlInfo->getRSSI();
-    double ber = 0; // TODO: ctrlInfo->getBitErrorRate();
+    double rssi = 1; // TODO ctrlInfo->getRSSI();
+    double ber = 0; // TODO ctrlInfo->getBitErrorRate();
     // Check whether the message is a flood and if it has to be forwarded.
     floodTypes floodType = updateFloodTable(wiseRouteHeader->getIsFlood(), initialSrcAddr, finalDestAddr,
                 wiseRouteHeader->getSeqNum());
@@ -342,7 +342,7 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
             routeTable.insert(make_pair(origin, newEntry));
             nbRoutesRecorded++;
             if (origin.isUnspecified()) {
-                // TODO: nextHopSelectionForSink.record(static_cast<double>(lastHop));
+                // TODO nextHopSelectionForSink.record(static_cast<double>(lastHop));
             }
         }
     }

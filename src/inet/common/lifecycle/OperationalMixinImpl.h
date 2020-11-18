@@ -135,7 +135,7 @@ void OperationalMixin<T>::scheduleOperationTimeout(simtime_t timeout)
     ASSERT(!activeOperationTimeout->isScheduled());
     activeOperationTimeout->setContextPointer(activeOperation.operation);
     T::scheduleAt(simTime() + timeout, activeOperationTimeout);
-    // TODO: schedule timer and use module parameter
+    // TODO schedule timer and use module parameter
 }
 
 template<typename T>

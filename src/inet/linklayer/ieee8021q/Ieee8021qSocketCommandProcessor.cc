@@ -62,7 +62,7 @@ void Ieee8021qSocketCommandProcessor::handleCommand(Request *request)
         int socketId = request->getTag<SocketReq>()->getSocketId();
         socketTable->removeSocket(socketId);
         delete request;
-        // TODO: move to Ieee8021qSocketPacketProcessor module into a listener on the Ieee8021qSocketTable
+        // TODO move to Ieee8021qSocketPacketProcessor module into a listener on the Ieee8021qSocketTable
 //        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
 //        auto ctrl = new Ieee8021qSocketClosedIndication();
 //        indication->setControlInfo(ctrl);

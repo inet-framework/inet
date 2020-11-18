@@ -200,7 +200,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns the combined state of the carrier and the interface requested state.
      */
-    // TODO: remove hasCarrier from this function and update all call sites accordingly
+    // TODO remove hasCarrier from this function and update all call sites accordingly
     bool isUp() const { return getState() == UP && hasCarrier(); }
     bool isDown() const { return getState() != UP; }
 

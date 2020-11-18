@@ -1098,7 +1098,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
 
             default:
-                throw cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
+                throw cRuntimeError("TODO unknown chunktype in outgoing packet on external interface! Implement it!");
         }
     }
     // calculate the HMAC if required
@@ -1755,7 +1755,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 chunk->setSctpChunkType(chunkType);
                 chunk->setT_Bit(ac->flags & T_BIT);
                 if (cLen > (int)sizeof(struct abort_chunk)) {
-                    // TODO: handle attached error causes
+                    // TODO handle attached error causes
                 }
                 chunk->setBitLength(cLen * 8);
                 dest->insertSctpChunks(chunk);
@@ -1982,7 +1982,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
 
                             default:
                                 EV << "Unknown Sctp parameter type " << paramType;
-                                /*throw cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
+                                /*throw cRuntimeError("TODO unknown parametertype in incoming packet from external interface! Implement it!");*/
                                 break;
                         }
                         parptr += ADD_PADDING(paramLength);

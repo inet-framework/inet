@@ -33,7 +33,7 @@ namespace physicallayer {
 
 class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
 {
-    // TODO: copy
+    // TODO copy
 
   public:
     enum LevelOfDetail {

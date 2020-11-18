@@ -31,7 +31,7 @@ QbpskModulation::QbpskModulation() : MqamModulationBase(&constellation)
 {
 }
 
-double QbpskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const // TODO: Review
+double QbpskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const // TODO Review
 {
     double ser = 0.5 * erfc(sqrt(snir * bandwidth.get() / bitrate.get()));
     ASSERT(0.0 <= ser && ser <= 1.0);

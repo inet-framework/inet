@@ -409,7 +409,7 @@ bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, NetworkInterface
     }
     else {
         // find address in the configurator's notebook
-        // TODO: how do we know where is the configurator? get the path from a NED parameter?
+        // TODO how do we know where is the configurator? get the path from a NED parameter?
         L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(getSimulation()->findModuleByPath("configurator"));
         if (configurator)
             return configurator->getInterfaceIpv4Address(ret, ie, netmask);

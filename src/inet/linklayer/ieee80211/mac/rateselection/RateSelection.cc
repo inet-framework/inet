@@ -94,7 +94,7 @@ const IIeee80211Mode *RateSelection::computeResponseAckFrameMode(Packet *packet,
     else {
         auto mode = getMode(packet, dataOrMgmtHeader);
         ASSERT(modeSet->containsMode(mode));
-        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO: BSSBasicRateSet
+        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
     }
 }
 
@@ -105,7 +105,7 @@ const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet,
     else {
         auto mode = getMode(packet, rtsFrame);
         ASSERT(modeSet->containsMode(mode));
-        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO: BSSBasicRateSet
+        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
     }
 }
 
@@ -114,7 +114,7 @@ const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet,
 // All frames with multicast and broadcast RA shall be transmitted at one of the rates included in the
 // BSSBasicRateSet, regardless of their type.
 //
-// TODO: Data and/or management MPDUs with a unicast immediate address shall be sent on any supported data rate
+// TODO Data and/or management MPDUs with a unicast immediate address shall be sent on any supported data rate
 // selected by the rate switching mechanism (whose output is an internal MAC variable called MACCurrentRate,
 // defined in units of 500 kbit/s, which is used for calculating the Duration/ID field of each frame). A STA shall
 // not transmit at a rate that is known not to be supported by the destination STA, as reported in the supported
@@ -144,7 +144,7 @@ const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const 
 //
 const IIeee80211Mode *RateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header)
 {
-    // TODO: BSSBasicRateSet
+    // TODO BSSBasicRateSet
     return fastestMandatoryMode;
 }
 

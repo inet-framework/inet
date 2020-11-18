@@ -35,7 +35,7 @@ FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet 
 
 simtime_t FrameSequenceContext::getIfs() const
 {
-    return getNumSteps() == 0 ? 0 : modeSet->getSifsTime(); // TODO: pifs
+    return getNumSteps() == 0 ? 0 : modeSet->getSifsTime(); // TODO pifs
 }
 
 simtime_t FrameSequenceContext::getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const
@@ -55,7 +55,7 @@ bool FrameSequenceContext::isForUs(const Ptr<const Ieee80211MacHeader>& header) 
 
 bool FrameSequenceContext::isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const
 {
-    // FIXME:
+    // FIXME
     // Check the roles of the Addr3 field when aggregation is applied
     // Table 8-19—Address field contents
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))

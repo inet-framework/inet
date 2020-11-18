@@ -70,7 +70,7 @@ bool Ieee802154UwbIrReceiver::computeIsReceptionSuccessful(const IListening *lis
         bool bitValue = bits->at(i);
         EV_INFO << "Received bit at " << i << " is " << (int)bitValue << endl;
     }
-    // KLUDGE: check fake CRC
+    // KLUDGE check fake CRC
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j + i < bitLength; j += 8)
             bits->at(bitLength + i) = bits->at(bitLength + i) ^ bits->at(j + i);
@@ -121,10 +121,10 @@ std::vector<bool> *Ieee802154UwbIrReceiver::decode(const IReception *reception, 
         bits->push_back(decodedBit);
         now = offset + (symbol + 1) * aSymbol + cfg.pulse_duration / 2;
     }
-    // TODO: review this whole SNR computation, seems to be wrong (from MiXiM)
+    // TODO review this whole SNR computation, seems to be wrong (from MiXiM)
     packetSNIR = packetSNIR / (symbol + 1);
-    // TODO: double snirLastPacket = 10 * log10(packetSNIR);  // convert to dB
-    // TODO: return SNIR?
+    // TODO double snirLastPacket = 10 * log10(packetSNIR);  // convert to dB
+    // TODO return SNIR?
     return bits;
 }
 
@@ -133,7 +133,7 @@ std::vector<bool> *Ieee802154UwbIrReceiver::decode(const IReception *reception, 
  * and as second value a "score" associated to this window. This score equals to the sum for all
  * 16 pulse peak positions of the voltage measured by the receiver ADC.
  */
-// TODO: review this code regarding the dimensional API, could it be done simply by simply adding the signal, the interference and the noise and integrating that?
+// TODO review this code regarding the dimensional API, could it be done simply by simply adding the signal, the interference and the noise and integrating that?
 std::pair<double, double> Ieee802154UwbIrReceiver::integrateWindow(simtime_t_cref pNow, simtime_t_cref burst, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
 {
     std::pair<double, double> energy = std::make_pair(0.0, 0.0); // first: stores SNIR, second: stores total captured window energy
@@ -157,14 +157,14 @@ std::pair<double, double> Ieee802154UwbIrReceiver::integrateWindow(simtime_t_cre
         const DimensionalReception *dimensionalSignalReception = check_and_cast<const DimensionalReception *>(reception);
         const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& signalPower = dimensionalSignalReception->getPower();
         Interval<simsec, Hz> interval(Point<simsec, Hz>(simsec(now), Hz(3.1)), Point<simsec, Hz>(simsec(now), Hz(10.6)), 0b10, 0b10, 0b10);
-        double measure = signalPower->getMean(interval).get() * peakPulsePower; // TODO: de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
+        double measure = signalPower->getMean(interval).get() * peakPulsePower; // TODO de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
         signalValue = measure * 0.5; // we capture half of the maximum possible pulse energy to account for self  interference
         resPower = resPower + signalValue;
         // consider all interferers at this point in time
         for (const auto& interferingReception : *interferingReceptions) {
             const DimensionalReception *dimensionalInterferingReception = check_and_cast<const DimensionalReception *>(interferingReception);
             const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& interferingPower = dimensionalInterferingReception->getPower();
-            double measure = interferingPower->getMean(interval).get() * peakPulsePower; // TODO: de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
+            double measure = interferingPower->getMean(interval).get() * peakPulsePower; // TODO de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
             // measure = measure * uniform(0, +1); // random point of Efield at sampling (due to pulse waveform and self interference)
             // take a random point within pulse envelope for interferer
             resPower = resPower + measure * uniform(-1, +1);
@@ -180,7 +180,7 @@ std::pair<double, double> Ieee802154UwbIrReceiver::integrateWindow(simtime_t_cre
         energy.second = energy.second + vmeasured_square; // collect this contribution
         // Now evaluates signal to noise ratio
         // signal converted to antenna voltage squared
-        // TODO: review this SNIR computation
+        // TODO review this SNIR computation
         snir = signalValue / 2.0217E-12;
         energy.first = energy.first + snir;
 

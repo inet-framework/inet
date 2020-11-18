@@ -148,7 +148,7 @@ bool ExtIpv4TunDevice::notify(int fd)
     }
     else if (nread > 0) {
         Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer, nread));
-        // KLUDGE:
+        // KLUDGE
         packet->addTag<InterfaceReq>()->setInterfaceId(101);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());

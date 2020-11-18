@@ -316,7 +316,7 @@ void NetworkInterface::resetInterface()
 
 bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 {
-    // TODO: add real support for multicast MAC addresses
+    // TODO add real support for multicast MAC addresses
     return address.isBroadcast() || address.isMulticast() || macAddr == address;
 }
 
@@ -490,7 +490,7 @@ void NetworkInterface::setState(State s)
 {
     if (state != s) {
         state = s;
-        // TODO: carrier and UP/DOWN state is independent
+        // TODO carrier and UP/DOWN state is independent
         if (state == DOWN)
             setCarrier(false);
         stateChanged(F_STATE);
@@ -536,21 +536,21 @@ bool NetworkInterface::handleOperationStage(LifecycleOperation *operation, IDone
 void NetworkInterface::handleStartOperation(LifecycleOperation *operation)
 {
     setState(State::UP);
-    // TODO: carrier and UP/DOWN state is independent
+    // TODO carrier and UP/DOWN state is independent
     setCarrier(true);
 }
 
 void NetworkInterface::handleStopOperation(LifecycleOperation *operation)
 {
     setState(State::DOWN);
-    // TODO: carrier and UP/DOWN state is independent
+    // TODO carrier and UP/DOWN state is independent
     setCarrier(false);
 }
 
 void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
 {
     setState(State::DOWN);
-    // TODO: carrier and UP/DOWN state is independent
+    // TODO carrier and UP/DOWN state is independent
     setCarrier(false);
 }
 
