@@ -55,7 +55,7 @@ class INET_API Contention : public cSimpleModule, public IContention
     simtime_t backoffOptimizationDelta = SIMTIME_ZERO;
     bool mediumFree = true;
     bool backoffOptimization = true;
-    simtime_t startTime = SIMTIME_ZERO; // XXX: for debugging
+    simtime_t startTime = SIMTIME_ZERO; // TODO: for debugging
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

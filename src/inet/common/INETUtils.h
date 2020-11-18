@@ -29,7 +29,7 @@ namespace utils {
 /**
  *  Converts an integer to string.
  */
-INET_API std::string ltostr(long i); // XXX make an ultostr as well, to be consistent with atoul
+INET_API std::string ltostr(long i); // TODO make an ultostr as well, to be consistent with atoul
 
 /**
  *  Converts a double to string

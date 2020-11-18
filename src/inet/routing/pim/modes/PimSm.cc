@@ -49,7 +49,7 @@ PimSm::~PimSm()
         delete elem.second;
     for (auto& elem : sgRoutes)
         delete elem.second;
-    // XXX rt contains references to the deleted route entries
+    // TODO rt contains references to the deleted route entries
 }
 
 void PimSm::initialize(int stage)
@@ -397,7 +397,7 @@ void PimSm::processJoinG(Ipv4Address group, Ipv4Address rp, Ipv4Address upstream
         }
     }
 
-    // XXX Join(*,G) messages can affect (S,G,rpt) downstream state machines too
+    // TODO Join(*,G) messages can affect (S,G,rpt) downstream state machines too
 
     // check upstream state transition
     updateJoinDesired(routeG);
@@ -578,7 +578,7 @@ void PimSm::processRegisterPacket(Packet *pk)
 
             if (!routeSG->isFlagSet(Route::SPT_BIT)) { // only if isn't build SPT between RP and registering DR
                 // decapsulate and forward the inner packet to inherited_olist(S,G,rpt)
-                // XXX we are forwarding on inherited_olist(*,G)
+                // TODO we are forwarding on inherited_olist(*,G)
                 for (auto& elem : routeG->downstreamInterfaces) {
                     DownstreamInterface *downstream = elem;
                     if (downstream->isInInheritedOlist())
@@ -683,7 +683,7 @@ void PimSm::processAssertPacket(Packet *pk)
 void PimSm::processAssertSG(PimsmInterface *interface, const AssertMetric& receivedMetric)
 {
     Route *routeSG = interface->route();
-    AssertMetric myMetric = interface->couldAssert() ? // XXX check routeG metric too
+    AssertMetric myMetric = interface->couldAssert() ? // TODO check routeG metric too
         routeSG->metric.setAddress(interface->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) :
         AssertMetric::PIM_INFINITE;
 
@@ -1559,7 +1559,7 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     addrTag->setSrcAddress(ipv4Header->getSrcAddress());
     addrTag->setNonLocalSrcAddress(true);
     addrTag->setDestAddress(ipv4Header->getDestAddress());
-    data->addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2); // one minus for source DR router and one for RP router // XXX specification???
+    data->addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2); // one minus for source DR router and one for RP router // TODO specification???
     data->trim();
     send(data, "ipOut");
 }

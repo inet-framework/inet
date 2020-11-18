@@ -28,7 +28,7 @@ namespace inet;
 // This class adds convenience get() and set() methods to the generated
 // base class, but no extra data.
 //
-// XXX FIXME all RSVP message have kind=RSVP_TRAFFIC
+// TODO FIXME all RSVP message have kind=RSVP_TRAFFIC
 // to distinguish them:
 // if they are RsvpPacket: use packet->getRsvpKind()
 // if they are RsvpHelloMsg: only one type exists

@@ -243,7 +243,7 @@ void Ipv6RoutingTable::configureInterfaceForIpv6(NetworkInterface *ie)
         addStaticRoute(Ipv6Address::LINKLOCAL_PREFIX, 10, ie->getInterfaceId(), Ipv6Address::UNSPECIFIED_ADDRESS);
 
     if (ie->isMulticast()) {
-        // XXX join other ALL_NODES_x and ALL_ROUTERS_x addresses too?
+        // TODO join other ALL_NODES_x and ALL_ROUTERS_x addresses too?
         ipv6IfData->joinMulticastGroup(Ipv6Address::ALL_NODES_2);
         if (isrouter)
             ipv6IfData->joinMulticastGroup(Ipv6Address::ALL_ROUTERS_2);
@@ -688,7 +688,7 @@ void Ipv6RoutingTable::addRoute(Ipv6Route *route)
 {
     internalAddRoute(route);
 
-    /*XXX: this deletes some cache entries we want to keep, but the node MUST update
+    /*TODO: this deletes some cache entries we want to keep, but the node MUST update
        the Destination Cache in such a way that the latest route information are used.*/
     purgeDestCache();
 

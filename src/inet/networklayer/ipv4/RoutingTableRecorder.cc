@@ -170,7 +170,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 //    ensureRoutingLogFileOpen();
 //    fprintf(routingLogFile, "ID  %s  %d  %s\n",
 //            SIMTIME_STR(simTime()),
-//            getParentModule()->getId(), //XXX we assume routing table is direct child of the node compound module
+//            getParentModule()->getId(), //TODO we assume routing table is direct child of the node compound module
 //            a.str().c_str());
 //    fflush(routingLogFile);
 //}

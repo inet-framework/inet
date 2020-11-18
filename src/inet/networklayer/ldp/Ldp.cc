@@ -399,7 +399,7 @@ void Ldp::rebuildFecList()
         }
     }
 
-    // our own addresses (XXX is it needed?)
+    // our own addresses (TODO is it needed?)
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         NetworkInterface *ie = ift->getInterface(i);
@@ -531,7 +531,7 @@ void Ldp::processHelloTimeout(cMessage *msg)
         // send release message just in case (?)
         // what happens if peer is not really down and
         // hello messages just disappeared?
-        // does the protocol recover on its own (XXX check this)
+        // does the protocol recover on its own (TODO check this)
 
         dit = fecDown.erase(dit);
     }
@@ -932,7 +932,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
     Ipv4Address srcAddr = packet->getSenderAddress();
     int status = packet->getStatus();
 
-    // XXX FIXME NO_ROUTE processing should probably be split into two functions,
+    // TODO FIXME NO_ROUTE processing should probably be split into two functions,
     // this is not the cleanest thing I ever wrote :)   --Vojta
 
     if (rescheduled) {
@@ -954,7 +954,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
                     if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
                         auto pk = new Packet(0, ldpPacket);
-                        scheduleAfter(1.0 /* XXX FIXME */, pk);
+                        scheduleAfter(1.0 /* TODO FIXME */, pk);
                         return;
                     }
                     else {
@@ -997,7 +997,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
     // do we already have mapping for this fec from our downstream peer?
 
     //
-    // XXX this code duplicates rebuildFecList
+    // TODO this code duplicates rebuildFecList
     //
 
     // does upstream have mapping from us?

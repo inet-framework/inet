@@ -539,7 +539,7 @@ void Ipv4RoutingTable::internalAddRoute(Ipv4Route *entry)
     // The 'routes' vector may contain multiple routes with the same destination/netmask.
     // Routes are stored in descending netmask length and ascending administrative_distance/metric order,
     // so the first matching is the best one.
-    // XXX Should only the route with the best metic be stored? Then the worse route should be deleted and
+    // TODO Should only the route with the best metic be stored? Then the worse route should be deleted and
     //     internalAddRoute() should return a bool indicating if it was successful.
 
     // add to tables

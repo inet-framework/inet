@@ -96,7 +96,7 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 
 #define CHK(x)                               __checknull((x), #x, __FILE__, __LINE__)
 
-#define PK(msg)                              check_and_cast<cPacket *>(msg)    /*XXX temp def*/
+#define PK(msg)                              check_and_cast<cPacket *>(msg)    /*TODO temp def*/
 
 inline void printElapsedTime(const char *name, long startTime)
 {

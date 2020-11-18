@@ -81,7 +81,7 @@ class TcpStatusInfo;
  *
  * void MyModule::handleMessage(cMessage *msg) {
  *     if (socket.belongsToSocket(msg))
- *         socket.processMessage(msg); // dispatch to socketXXXX() methods
+ *         socket.processMessage(msg); // dispatch to socketTODOX() methods
  *     else
  *         ...
  * }

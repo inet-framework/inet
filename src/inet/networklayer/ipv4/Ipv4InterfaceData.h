@@ -80,7 +80,7 @@ struct INET_API Ipv4MulticastGroupSourceInfo : public Ipv4MulticastGroupInfo
  *
  * @see NetworkInterface
  */
-// XXX pass Ipv4Address parameters as values
+// TODO pass Ipv4Address parameters as values
 class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 {
   public:

@@ -38,8 +38,8 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
     struct StaInfo {
         MacAddress address;
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
-//        int consecFailedTrans; // XXX
-//        double expiry; // XXX association should expire after a while if STA is silent?
+//        int consecFailedTrans; // TODO
+//        double expiry; // TODO association should expire after a while if STA is silent?
     };
 
     class NotificationInfoSta : public cObject {

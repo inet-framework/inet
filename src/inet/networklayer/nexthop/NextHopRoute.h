@@ -116,7 +116,7 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     NetworkInterface *parent;
     std::vector<Child> children;
     cObject *source;
-    // XXX cObject *protocolData;
+    // TODO cObject *protocolData;
     int metric;
 
   public:
@@ -143,7 +143,7 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     virtual bool isEnabled() const { return enabled; }
 
     /** Expired entries are ignored by routing, and may be periodically purged. */
-    virtual bool isExpired() const { return false; } // XXX
+    virtual bool isExpired() const { return false; } // TODO
 
     /** Source address prefix to match */
     virtual L3Address getOrigin() const { return origin; }

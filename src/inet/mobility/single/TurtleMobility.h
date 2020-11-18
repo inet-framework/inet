@@ -72,7 +72,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     /** @brief Advance nextStatement pointer */
     virtual void gotoNextStatement();
 
-    // XXX: In turtleScript xml config files, speed attributes may contain expressions (like uniform(10,30)),
+    // TODO: In turtleScript xml config files, speed attributes may contain expressions (like uniform(10,30)),
     // in this case, we can't compute the maxSpeed
     virtual void computeMaxSpeed(cXMLElement *nodes);
 

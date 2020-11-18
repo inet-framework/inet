@@ -57,7 +57,7 @@ void append(std::vector<int>& dest, const std::vector<int>& src);
 int find(const EroVector& ERO, Ipv4Address node);
 
 /**
- * XXX function appears to be unused
+ * TODO function appears to be unused
  */
 cModule *getPayloadOwner(cPacket *msg);
 

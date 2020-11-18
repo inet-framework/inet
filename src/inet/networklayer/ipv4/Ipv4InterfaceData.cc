@@ -202,14 +202,14 @@ bool Ipv4InterfaceData::isMemberOfMulticastGroup(const Ipv4Address& multicastAdd
     return false;
 }
 
-// XXX deprecated
+// TODO deprecated
 void Ipv4InterfaceData::joinMulticastGroup(const Ipv4Address& multicastAddress)
 {
     Ipv4AddressVector empty;
     changeMulticastGroupMembership(multicastAddress, MCAST_INCLUDE_SOURCES, empty, MCAST_EXCLUDE_SOURCES, empty);
 }
 
-// XXX deprecated
+// TODO deprecated
 void Ipv4InterfaceData::leaveMulticastGroup(const Ipv4Address& multicastAddress)
 {
     Ipv4AddressVector empty;

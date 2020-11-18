@@ -151,7 +151,7 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         delete msg;
         sendProbeRequest();
         cMessage *timerMsg = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
-        scheduleAfter(scanning.minChannelTime, timerMsg); // XXX actually, we should start waiting after ProbeReq actually got transmitted
+        scheduleAfter(scanning.minChannelTime, timerMsg); // TODO actually, we should start waiting after ProbeReq actually got transmitted
     }
     else if (msg->getKind() == MK_SCAN_MINCHANNELTIME) {
         // Active Scan: after minChannelTime, possibly listen for the remaining time until maxChannelTime
@@ -256,7 +256,7 @@ void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
     // create and send first authentication frame
     const auto& body = makeShared<Ieee80211AuthenticationFrame>();
     body->setSequenceNumber(1);
-    // XXX frame length could be increased to account for challenge text length etc.
+    // TODO frame length could be increased to account for challenge text length etc.
     sendManagementFrame("Auth", body, ST_AUTHENTICATION, ap->address);
 
     ap->authSeqExpected = 2;
@@ -281,7 +281,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     // create and send association request
     const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
 
-    // XXX set the following too?
+    // TODO set the following too?
     // string SSID
 //    Ieee80211SupportedRatesElement supportedRates;
 
@@ -400,7 +400,7 @@ void Ieee80211MgmtSta::sendScanConfirm()
     Ieee80211Prim_ScanConfirm *confirm = new Ieee80211Prim_ScanConfirm();
     confirm->setBssListArraySize(n);
     auto it = apList.begin();
-    // XXX filter for req'd bssid and ssid
+    // TODO filter for req'd bssid and ssid
     for (int i = 0; i < n; i++, it++) {
         ApInfo *ap = &(*it);
         Ieee80211Prim_BssDescription& bss = confirm->getBssListForUpdate(i);
@@ -460,7 +460,7 @@ void Ieee80211MgmtSta::processAssociateCommand(Ieee80211Prim_AssociateRequest *c
 void Ieee80211MgmtSta::processReassociateCommand(Ieee80211Prim_ReassociateRequest *ctrl)
 {
     // treat the same way as association
-    // XXX refine
+    // TODO refine
     processAssociateCommand(ctrl);
 }
 
@@ -558,7 +558,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
         // cancel timeout, send error to agent
         cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
-        sendAuthenticationConfirm(ap, PRC_REFUSED); // XXX or what resultCode?
+        sendAuthenticationConfirm(ap, PRC_REFUSED); // TODO or what resultCode?
         return;
     }
 
@@ -572,7 +572,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
         const auto& body = makeShared<Ieee80211AuthenticationFrame>();
         body->setSequenceNumber(frameAuthSeq + 1);
         body->setStatusCode(SC_SUCCESSFUL);
-        // XXX frame length could be increased to account for challenge text length etc.
+        // TODO frame length could be increased to account for challenge text length etc.
         sendManagementFrame("Auth", body, ST_AUTHENTICATION, address);
         ap->authSeqExpected += 2;
     }
@@ -634,8 +634,8 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
     const auto& responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
     MacAddress address = header->getTransmitterAddress();
     int statusCode = responseBody->getStatusCode();
-    // XXX short aid;
-    // XXX Ieee80211SupportedRatesElement supportedRates;
+    // TODO short aid;
+    // TODO Ieee80211SupportedRatesElement supportedRates;
     delete packet;
 
     // look up AP data structure

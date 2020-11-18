@@ -148,7 +148,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
         FilterMode filter;
         RouterGroupState state;
         cMessage *timer;
-        SourceToSourceRecordMap sources; // XXX should map source addresses to source timers
+        SourceToSourceRecordMap sources; // TODO should map source addresses to source timers
                                          // i.e. map<Ipv4Address,cMessage*>
 
         RouterGroupData(RouterInterfaceData *parent, Ipv4Address group);

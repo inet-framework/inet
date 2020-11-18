@@ -156,7 +156,7 @@ class INET_API PimSm : public PimBase, protected cListener
         // Originated from destination.Ensures loop freeness.
         unsigned int sequencenumber;
         // Time of routing table entry creation
-        simtime_t installtime; // XXX not used
+        simtime_t installtime; // TODO not used
 
         cMessage *keepAliveTimer; // only for (S,G) routes
         cMessage *joinTimer;

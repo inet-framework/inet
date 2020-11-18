@@ -360,7 +360,7 @@ void PimDm::processPrunePendingTimer(cMessage *timer)
     //
     // go to pruned state
     downstream->pruneState = DownstreamInterface::PRUNED;
-    double holdTime = pruneInterval - overrideInterval - propagationDelay; // XXX should be received HoldTime - computed override interval;
+    double holdTime = pruneInterval - overrideInterval - propagationDelay; // TODO should be received HoldTime - computed override interval;
     downstream->startPruneTimer(holdTime);
 
     // TODO optionally send PruneEcho
@@ -663,7 +663,7 @@ void PimDm::processAssertPacket(Packet *pk)
     Ipv4Address group = pkt->getGroupAddress().groupAddress.toIpv4();
     AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
     Route *route = findRoute(source, group);
-    ASSERT(route); // XXX create S,G state?
+    ASSERT(route); // TODO create S,G state?
     Interface *incomingInterface = route->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
         static_cast<Interface *>(route->upstreamInterface) :
         static_cast<Interface *>(route->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
@@ -1103,7 +1103,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
         PimInterface *pimInterface = pimIft->getInterface(i);
 
         // check if PIM-DM interface and it is not RPF interface
-        if (pimInterface == rpfInterface || pimInterface->getMode() != PimInterface::DenseMode) // XXX original code added downstream if data for PIM-SM interfaces too
+        if (pimInterface == rpfInterface || pimInterface->getMode() != PimInterface::DenseMode) // TODO original code added downstream if data for PIM-SM interfaces too
             continue;
 
         bool hasPIMNeighbors = pimNbt->getNumNeighbors(pimInterface->getInterfaceId()) > 0;
@@ -1368,7 +1368,7 @@ void PimDm::multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address gr
  * interfaces. If route was not pruned, the router has to join to the multicast tree again
  * (by different path).
  */
-// XXX Assert state causes RPF'(S) to change
+// TODO Assert state causes RPF'(S) to change
 void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *routeToSource)
 {
     NetworkInterface *newRpf = routeToSource->getInterface();
@@ -1390,14 +1390,14 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
 
     // set new upstream interface data
     bool isSourceDirectlyConnected = routeToSource->getSourceType() == Ipv4Route::IFACENETMASK;
-    Ipv4Address newRpfNeighbor = pimNbt->getNeighbor(rpfId, 0)->getAddress(); // XXX what happens if no neighbors?
+    Ipv4Address newRpfNeighbor = pimNbt->getNeighbor(rpfId, 0)->getAddress(); // TODO what happens if no neighbors?
     UpstreamInterface *upstream = route->upstreamInterface = new UpstreamInterface(route, newRpf, newRpfNeighbor, isSourceDirectlyConnected);
     ipv4Route->setInInterface(new IMulticastRoute::InInterface(newRpf));
 
     // delete rpf interface from the downstream interfaces
     DownstreamInterface *oldDownstreamInterface = route->removeDownstreamInterface(newRpf->getInterfaceId());
     if (oldDownstreamInterface) {
-        ipv4Route->removeOutInterface(newRpf); // will delete downstream data, XXX method should be called deleteOutInterface()
+        ipv4Route->removeOutInterface(newRpf); // will delete downstream data, TODO method should be called deleteOutInterface()
         delete oldDownstreamInterface;
     }
 

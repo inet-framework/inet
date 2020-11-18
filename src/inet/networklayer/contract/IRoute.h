@@ -106,7 +106,7 @@ class INET_API IRoute
     virtual void setInterface(NetworkInterface *ie) = 0;
     virtual void setSource(cObject *source) = 0;
     virtual void setSourceType(SourceType type) = 0;
-    virtual void setMetric(int metric) = 0; // XXX double?
+    virtual void setMetric(int metric) = 0; // TODO double?
     virtual void setAdminDist(unsigned int adminDist) = 0;
 
     /** Destination address prefix to match */

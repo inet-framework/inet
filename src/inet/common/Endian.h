@@ -30,7 +30,7 @@
 #include <ws2tcpip.h>
 #define LITTLE_ENDIAN    1
 #define BIG_ENDIAN       2
-#define BYTE_ORDER       LITTLE_ENDIAN   /* XXX at least on x86 */
+#define BYTE_ORDER       LITTLE_ENDIAN   /* TODO at least on x86 */
 #elif defined(linux) || defined(__linux)
 #include <endian.h>
 #include <netinet/in.h>
@@ -41,7 +41,7 @@
 #include <machine/endian.h>
 #include <netinet/in.h>
 #else /* fallback, including cases __FreeBSD__, __NetBSD__ and __OpenBSD__ */
-// XXX this causes problems in FreeBSD, and probably not needed anyway: #define __BSD_VISIBLE
+// TODO this causes problems in FreeBSD, and probably not needed anyway: #define __BSD_VISIBLE
 #include <machine/endian.h>
 
 #endif // if defined(_WIN32)

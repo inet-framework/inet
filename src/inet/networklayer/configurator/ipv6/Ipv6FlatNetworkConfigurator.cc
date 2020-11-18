@@ -169,7 +169,7 @@ void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
     }
 }
 
-// XXX !isRouter nodes are not used as source/destination of routes
+// TODO !isRouter nodes are not used as source/destination of routes
 //     but can be internal nodes of the generated shortest paths.
 //     the same problem with non-ipv6 nodes
 void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)

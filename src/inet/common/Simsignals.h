@@ -28,7 +28,7 @@ namespace inet {
 // TODO document associated signals detail structs
 extern INET_API simsignal_t // admin
 // - layer 2 (data-link)
-// XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
+// TODO generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
 // they generally carry TxNotifDetails as "details" to identify the interface and the frame
     l2BeaconLostSignal, // missed several consecutive beacons (currently Ieee80211)
     l2AssociatedSignal, // successfully associated with an AP (currently Ieee80211)

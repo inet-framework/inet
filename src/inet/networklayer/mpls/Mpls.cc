@@ -82,7 +82,7 @@ void Mpls::processPacketFromL3(Packet *msg)
 
     const auto& ipHeader = msg->peekAtFront<Ipv4Header>();
 
-    // XXX temporary solution, until TcpSocket and Ipv4 are extended to support nam tracing
+    // TODO temporary solution, until TcpSocket and Ipv4 are extended to support nam tracing
     if (ipHeader->getProtocolId() == IP_PROT_TCP) {
         const auto& seg = msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength());
         if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT) {
@@ -91,11 +91,11 @@ void Mpls::processPacketFromL3(Packet *msg)
         }
     }
     else if (ipHeader->getProtocolId() == IP_PROT_ICMP) {
-//        ASSERT(!msg->hasPar("color")); XXX this did not hold sometimes...
+//        ASSERT(!msg->hasPar("color")); TODO this did not hold sometimes...
         if (!msg->hasPar("color"))
             msg->addPar("color") = ICMP_TRAFFIC;
     }
-    // XXX end of temporary area
+    // TODO end of temporary area
 
     labelAndForwardIpv4Datagram(msg);
 }

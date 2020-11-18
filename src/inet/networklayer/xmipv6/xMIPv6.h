@@ -442,7 +442,7 @@ class INET_API xMIPv6 : public cSimpleModule
 
     /**
      * Checks whether there exists an TransmitIfEntry for the specified values.
-     * In case a new XXXTimerIfEntry is added, this method has to be appropriately extended in order
+     * In case a new TODOTimerIfEntry is added, this method has to be appropriately extended in order
      * to cover the new data structure.
      * Returns true on success and false otherwise.
      */

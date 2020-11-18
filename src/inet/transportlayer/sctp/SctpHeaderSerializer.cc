@@ -1123,7 +1123,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
 void SctpHeaderSerializer::hmacSha1(const uint8_t *buf, uint32_t buflen, const uint8_t *key, uint32_t keylen, uint8_t *digest)
 {
-    /* XXX needs to be implemented */
+    /* TODO needs to be implemented */
     for (uint16_t i = 0; i < SHA_LENGTH; i++) {
         digest[i] = 0;
     }
