@@ -53,7 +53,7 @@ PaparazziMobility::Mode PaparazziMobility::getNextState() {
         }
         else
             latestSeq++;
-        if (latestSeq >= sequenceModels.size())
+        if (latestSeq >= (int)sequenceModels.size())
             latestSeq = 0;
         return sequenceModels[latestSeq];
     }

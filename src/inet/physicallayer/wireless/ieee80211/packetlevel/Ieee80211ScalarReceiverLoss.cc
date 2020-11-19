@@ -154,8 +154,8 @@ const IReceptionResult *Ieee80211ScalarReceiverLoss::computeReceptionResult(cons
     int txId = txNode->getId();
     int rxId = rxNode->getId();
 
-    auto cord1 = reception->getTransmission()->getStartPosition();
-    auto cord2 = reception->getStartPosition();
+    //auto cord1 = reception->getTransmission()->getStartPosition();
+    //auto cord2 = reception->getStartPosition();
     //double dist = cord1.distance(cord2);
 
 

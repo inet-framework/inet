@@ -22,7 +22,7 @@ namespace physicallayer {
 using std::cout;
 
 
-static double overall_sum(EulerAngles direction);
+//static double overall_sum(EulerAngles direction);
 
 Define_Module(MassiveMIMOUHPA);
 

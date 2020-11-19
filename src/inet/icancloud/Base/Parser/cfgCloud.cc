@@ -87,11 +87,14 @@ uint64_t CfgCloud::getStorageSize (int index){
 void CfgCloud::printVms(){
 
 	vector<vmStructure*>::iterator vmIt;
-	printf ("------------------- SET OF VMs ---------------------\n");
+	std::cout << "------------------- SET OF VMs ---------------------\n";
+	//printf ("------------------- SET OF VMs ---------------------\n");
 
 	for (vmIt = vms.begin(); vmIt < vms.end(); vmIt++){
-		printf ("Virtual Machine Type:\t %s\n", (*vmIt) ->vmtype.c_str());
-		printf ("Num. cores: %i, memory Size(MB):%llu, storageSize(GB):%llu \n", (*vmIt)->numCores,(*vmIt)->memorySize_MB, (*vmIt)->storageSize_GB);
+	    std::cout << "Virtual Machine Type: " <<  (*vmIt) ->vmtype.c_str() <<endl;
+	    std::cout << "Num. cores: " << (*vmIt)->numCores << " memory Size(MB): " << (*vmIt)->memorySize_MB << " storageSize(GB): " << (*vmIt)->storageSize_GB  << endl;
+//		printf ("Virtual Machine Type:\t %s\n", (*vmIt) ->vmtype.c_str());
+//		printf ("Num. cores: %i, memory Size(MB):%llu, storageSize(GB):%llu \n", (*vmIt)->numCores,(*vmIt)->memorySize_MB, (*vmIt)->storageSize_GB);
 	}
 }
 
