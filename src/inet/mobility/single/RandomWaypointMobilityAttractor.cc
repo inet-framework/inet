@@ -371,6 +371,8 @@ RandomWaypointMobilityAttractor::RandomWaypointMobilityAttractor()
     nextMoveIsWait = false;
 }
 
+bool sortFun (RandomWaypointMobilityAttractor::AttractorData i,RandomWaypointMobilityAttractor::AttractorData j) { return (i.distance < j.distance); }
+
 void RandomWaypointMobilityAttractor::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
@@ -386,7 +388,7 @@ void RandomWaypointMobilityAttractor::initialize(int stage)
 
         // Order the distances ring
         for (auto elem : attractorConf) {
-            std::sort(elem.second.attractorData.begin(), elem.second.attractorData.end());
+            std::sort(elem.second.attractorData.begin(), elem.second.attractorData.end(), sortFun);
         }
     }
 }

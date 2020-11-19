@@ -70,6 +70,8 @@ class INET_API RandomWaypointMobilityAttractor : public LineSegmentsMobilityBase
         }
     };
 
+    friend bool sortFun (RandomWaypointMobilityAttractor::AttractorData i,RandomWaypointMobilityAttractor::AttractorData j);
+
     struct AttractorConf {
         TypeAttractor type;
         std::string behavior = std::string("nearest");
