@@ -160,43 +160,9 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    Ipv4Address origSrcAddr = ipv4Header->getSrcAddress();
-    Ipv4Address origDestAddr = ipv4Header->getDestAddress();
-
-    // don't send ICMP error messages in response to broadcast or multicast messages
-    if (origDestAddr.isMulticast() || origDestAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origDestAddr, inputInterfaceId)) {
-        EV_DETAIL << "won't send ICMP error messages for broadcast/multicast message " << ipv4Header << endl;
+    if (!doSendErrorMessage(packet, -1)) {
         delete packet;
         return;
-    }
-
-    // don't send ICMP error messages response to unspecified, broadcast or multicast addresses
-    if ((inputInterfaceId != -1 && origSrcAddr.isUnspecified())
-        || origSrcAddr.isMulticast()
-        || origSrcAddr.isLimitedBroadcastAddress()
-        || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId))
-    {
-        EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << ipv4Header << endl;
-        delete packet;
-        return;
-    }
-
-    // ICMP messages are only sent about errors in handling fragment zero of fragmented datagrams
-    if (ipv4Header->getFragmentOffset() != 0) {
-        EV_DETAIL << "won't send ICMP error messages about errors in non-first fragments" << endl;
-        delete packet;
-        return;
-    }
-
-    // do not reply with error message to error message
-    if (ipv4Header->getProtocolId() == IP_PROT_ICMP) {
-        const auto& recICMPMsg = packet->peekDataAt<IcmpHeader>(B(ipv4Header->getHeaderLength()));
-        if (!isIcmpInfoType(recICMPMsg->getType())) {
-            EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
-            delete packet;
-            return;
-        }
     }
 
     // assemble a message name
@@ -215,24 +181,12 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     icmpHeader->setCode(code);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     errorPacket->insertAtBack(packet->peekDataAt(B(0), ipv4Header->getHeaderLength() + B(8)));
     insertCrc(icmpHeader, errorPacket);
     errorPacket->insertAtFront(icmpHeader);
 
-    errorPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
-
-    // if srcAddr is not filled in, we're still in the src node, so we just
-    // process the ICMP message locally, right away
-    if (origSrcAddr.isUnspecified()) {
-        // pretend it came from the Ipv4 layer
-        errorPacket->addTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS); // FIXME maybe use configured loopback address
-
-        // then process it locally
-        processICMPMessage(errorPacket);
-    }
-    else {
-        sendToIP(errorPacket, ipv4Header->getSrcAddress());
-    }
+    sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     delete packet;
 }
 
