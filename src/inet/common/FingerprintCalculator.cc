@@ -52,17 +52,33 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
             case NETWORK_NODE_PATH:
                 if (auto cpacket = dynamic_cast<cPacket *>(event)) {
                     if (auto senderNode = findContainingNode(cpacket->getSenderModule()))
+#if OMNETPP_BUILDNUM <= 1506
                         hasher->add(senderNode->getFullPath().c_str());
+#else
+                        hasher << senderNode->getFullPath();
+#endif
                     if (auto arrivalNode = findContainingNode(cpacket->getArrivalModule()))
+#if OMNETPP_BUILDNUM <= 1506
                         hasher->add(arrivalNode->getFullPath().c_str());
+#else
+                        hasher << arrivalNode->getFullPath();
+#endif
                 }
                 break;
             case NETWORK_INTERFACE_PATH:
                 if (auto cpacket = dynamic_cast<cPacket *>(event)) {
                     if (auto senderInterface = findContainingNicModule(cpacket->getSenderModule()))
+#if OMNETPP_BUILDNUM <= 1506
                         hasher->add(senderInterface->getInterfaceFullPath().c_str());
+#else
+                        hasher << senderInterface->getInterfaceFullPath();
+#endif
                     if (auto arrivalInterface = findContainingNicModule(cpacket->getArrivalModule()))
+#if OMNETPP_BUILDNUM <= 1506
                         hasher->add(arrivalInterface->getInterfaceFullPath().c_str());
+#else
+                        hasher << arrivalInterface->getInterfaceFullPath();
+#endif
                 }
                 break;
             case PACKET_DATA: {
@@ -74,12 +90,20 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
                         if (packet->getTotalLength().get() % 8 == 0) {
                             const auto& content = packet->peekAllAsBytes();
                             for (auto byte : content->getBytes())
+#if OMNETPP_BUILDNUM <= 1506
                                 hasher->add(byte);
+#else
+                                hasher << byte;
+#endif
                         }
                         else {
                             const auto& content = packet->peekAllAsBits();
                             for (auto bit : content->getBits())
+#if OMNETPP_BUILDNUM <= 1506
                                 hasher->add(bit);
+#else
+                                hasher << bit;
+#endif
                         }
                     }
                 }
