@@ -27,6 +27,7 @@ module NoiseSource like IRadio
     parameters:
         string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
         volatile double sleepInterval @unit(s);
+        double startTime @unit(s) = default(0s);
         *.mobilityModule = default(absPath(".mobility"));
         @networkNode;
         @class(NoiseSource);

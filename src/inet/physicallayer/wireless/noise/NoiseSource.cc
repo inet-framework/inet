@@ -49,7 +49,16 @@ void NoiseSource::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
-        scheduleSleepTimer();
+        if(par("startTime").doubleValue() == 0)
+        {
+            std::cout << "startTime is 0 " << std::endl;
+            scheduleSleepTimer();
+        }
+        else
+        {
+            std::cout << "startTime is NOT 0 " << std::endl;
+            scheduleStartTimer();
+        }
     }
 }
 
@@ -79,6 +88,12 @@ void NoiseSource::endTransmission()
 void NoiseSource::scheduleSleepTimer()
 {
     scheduleAfter(par("sleepInterval"), sleepTimer);
+}
+
+void NoiseSource::scheduleStartTimer()
+{
+    scheduleAt(simTime() + par("startTime"), sleepTimer);
+//    std::cout << "scheduling StartTimer" << std::endl;
 }
 
 void NoiseSource::scheduleTransmissionTimer(const ITransmission *transmission)
