@@ -907,8 +907,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         PacketDropDetails details;
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-        sendIcmpError(packet, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
-                ICMP_DU_FRAGMENTATION_NEEDED);
+        icmp->sendPtbMessage(packet, mtu);
         numDropped++;
         return;
     }
